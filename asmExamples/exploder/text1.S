@@ -26,6 +26,17 @@ loop1:
         mov lr, r1
         add lr, pc
         bx r0
+   
+        ldr r0, =lcdVideoBuffer2
+        ldr r1, =sprite
+        ldr r2, =(320*240)
+lcop:   ldr r3, [r1]
+        str r3, [r0]
+        add r1, #4
+        add r0, #4
+        sub r2, #1
+        bne lcop     
+        
         
         mov r0, #4
         mov r1, #0
@@ -317,3 +328,5 @@ intaddrp:   .word intaddrs
 .include "../includes/buttons.S"
 .include "../includes/lcd.S"
 
+sprite:
+.include "sprite.inc"

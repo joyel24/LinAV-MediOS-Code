@@ -1,0 +1,96 @@
+30680   0-7 Border color
+        9 - funny coloured bars
+        14 - duplicates scanlines every 15?
+        15 - swaps red and blue components  (RGB vs BGR)
+
+        control regs
+        0 - enable
+        1 - Makes it half height?
+        8-9 - Pixel height
+        10-11 - Pixel width
+        12 - combine with bg?
+        13 - ?
+        
+        
+        11011001 normal, see thru
+        11110001
+        11110101
+        11111001 normal, solid
+        
+30682   BACK/BACK2 control reg
+30684   MAIN control reg
+30686   MAIN2 control reg
+30688   CURSOR control reg      (HI = color)  border hight / border width
+3068a   CURSOR2 control reg     flashing, long, etc
+
+3068c   *Controls back width setting something? (14)
+3068e   *Controls back2 width setting something?
+30690   *Controls main width setting something?
+30692   *Controls main2 width setting something?
+
+30694   back2 off HI | back off HI
+30696   back off LO
+30698   back2 off LO
+3069a   main2 off HI | main off HI
+3069c   main off LO
+3069e   main2 off LO
+
+306a0   Horizontal shift everything
+306a2   Vertical shift everything
+
+306a4   X offset of back
+306a6   Y offset of back
+306a8   Width of back
+306aa   Height of back
+
+306ac   X offset of back2
+306ae   Y offset of back2
+306b0   Width of back2
+306b2   Height of back2
+
+306b4   X offset of main
+306b6   Y offset of main
+306b8   Width of main
+306ba   Height of main
+
+306bc   X offset of main2
+306be   Y offset of main2
+306c0   Width of main2
+306c2   Height of main2
+
+306c4   X offset of cursor
+306c6   Y offset of cursor
+306c8   Width of cursor
+306ca   Height of cursor
+
+306cc   X offset of cursor2
+306ce   Y offset of cursor2
+
+306d0   Cursor colors
+306d2   "
+306d4   "
+306d6   "
+306d8   "
+306da   "
+306dc   "
+306de   "
+
+306e0   Cursor color1, 2
+306e2   Cursor color3, 4
+306e4   Cursor color5, 6
+306e6   7,8
+306e8   9,10
+306ea   11,12
+306ec   13,14
+306ee   15,16
+
+306f0
+306f2
+306f4   *Messes with back
+306f6
+306f8
+306fa
+306fc
+306fe
+
+30800
