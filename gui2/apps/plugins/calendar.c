@@ -26,18 +26,13 @@
 #include "events.h"
 #include "cops.h"
 #include "avevents.h"
+#include "colordef.h"
 
 #define DaySpace  23
 #define WeekSpace 15
 #define MonthHeaderHeight 15
 #define XCALENDARPOS 5
 #define YCALENDARPOS 30
-
-#define BLACK 1
-#define WHITE 16
-#define GREY  8
-#define BLUE  10
-#define RED   13
 
 struct client_operations * cops;
 
@@ -201,7 +196,7 @@ static void draw_headers(void)
 
     for (i = 0; i < 8;)
     {
-        cops->putS(BLACK, WHITE, ws+2, YCALENDARPOS+MonthHeaderHeight, Dayname[i++]);
+        cops->putS(COLOR_BLACK, COLOR_WHITE, ws+2, YCALENDARPOS+MonthHeaderHeight, Dayname[i++]);
         ws += DaySpace;
     }
 }
@@ -229,10 +224,10 @@ static void calendar_draw()
                         };
     ClearCalendar();
 
-	 cops->fillRect(WHITE,XCALENDARPOS, YCALENDARPOS, 170, 2*WeekSpace);
+	 cops->fillRect(COLOR_WHITE,XCALENDARPOS, YCALENDARPOS, 170, 2*WeekSpace);
 
     snprintf(buffer,9,"%s %04d",Monthname[shown.mon-1],shown.year);
-	 cops->putS(BLACK, WHITE, XCALENDARPOS+2, YCALENDARPOS+1,buffer);
+	 cops->putS(COLOR_BLACK, COLOR_WHITE, XCALENDARPOS+2, YCALENDARPOS+1,buffer);
 
     draw_headers();
 
@@ -251,25 +246,25 @@ static void calendar_draw()
 		  if( (pos == 5) || (pos == 6) )
 		  {
 		      // Wochenende --> Tage in rot schreiben
-				color = RED;
+				color = COLOR_RED;
 		  }
 		  else
 		  {
-		      color = BLACK;
+		      color = COLOR_BLACK;
 		  }
 
 		  if(j == shown.mday)
 		  {
 		     // Den selektierten Tag besonders farblich markieren --> höchste Prio der Farben
-			  color = GREY;
+			  color = COLOR_GREY;
 		  }
 
 		  if((j == today.mday) && (shown.mon == today.mon) && (shown.year == today.year))
 		  {
-		     color = BLUE;
+		     color = COLOR_BLUE;
 		  }
 
-        cops->putS(color, WHITE, ws+2, YCALENDARPOS + MonthHeaderHeight + 2 + row * WeekSpace,buffer);
+        cops->putS(color, COLOR_WHITE, ws+2, YCALENDARPOS + MonthHeaderHeight + 2 + row * WeekSpace,buffer);
 
         if (shown.mday == j)
         {
@@ -379,7 +374,7 @@ void printTime(char* buffer, int nr)
 
 void ClearCalendar()
 {
-	 cops->fillRect(WHITE,XCALENDARPOS, YCALENDARPOS-10, 170, 130);
+	 cops->fillRect(COLOR_WHITE,XCALENDARPOS, YCALENDARPOS-12, 170, 132);
 }
 
 int main(int argc,char * * argv)
