@@ -354,7 +354,7 @@ int check()
     {
         if(markSrc[i] == 0)
         {
-            for(j = i+1; j < 4; j++)
+            for(j = 0; j < 4; j++)
             {
                 if(markTrg[j] == 0)
                 {
