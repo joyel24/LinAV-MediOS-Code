@@ -190,6 +190,7 @@ startInit:
         if (mode==0) {
             graphicsBoxfA(&screenBitmap, 2, 2, 92, 128, 0xcece);    
 
+            debug("Listing contents of '%s'\n", nameCur);
             if((dir=opendir(nameCur))<0)
 			{
 				uartOutsA("dir not found trying root...\n");
@@ -216,7 +217,7 @@ startInit:
 			closedir(dir);
 			totalEntries=i;
 
-            debug("Entries = %d\n", i);
+            debug("dir entries = %d\n", i);
             
             cursorpos=0;
             dirpos=0;

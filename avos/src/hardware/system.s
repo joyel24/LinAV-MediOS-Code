@@ -54,7 +54,7 @@ mvStackA:
 .globl mvStack
 .thumb_func
 mvStack:
-		ldr r0, =0x03400000
+		ldr r0, =0x033ff800
 		sub r0, #4
 		mov sp, r0
 		bx lr
