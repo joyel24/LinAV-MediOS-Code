@@ -36,6 +36,8 @@
 @
 @ osdSetCursor2PositionT (r0=x, r1=y)
 @
+@ osdSetScreenPositionT (r0=x, r1=y)
+@ osdSetScreenConfigT (r0=config)
 
 .include "../includes/common.S"
 
@@ -45,6 +47,25 @@ osdInc = 1
 .text
         .thumb
 
+@ osdSetScreenConfigT r0=config
+@
+osdSetScreenConfigT:
+        push {r1}
+        ldr r1, =0x30680
+        strh r0, [r1]
+        pop {r1}
+        bx lr
+        
+@ osdSetScreenPositionT r0=x, r1=y
+@
+osdSetScreenPositionT:
+        push {r2}
+        ldr r2, =0x306a0
+        strh r0, [r2]
+        strh r1, [r2, #2]
+        pop {r2}
+        bx lr
+        
 @ osdSetMainConfigT r0=byte width, r1=config
 @
 osdSetMainConfigT:

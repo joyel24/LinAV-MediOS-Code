@@ -304,7 +304,6 @@ lcdLoop7:
 lcdInitT:
         push {lr}
         mov r2, #0
-
         ldr r0, =0x30800    
         ldr r1, =0x4071
         strh r1, [r0]
@@ -330,42 +329,30 @@ lcdInitT:
         strh r1, [r0, #0x1c]
         ldr r1, =0x0280             @ WIDTH in pixels (Number processed)
         strh r1, [r0, #0x1e]
-
         ldr r1, =0x0103
         strh r1, [r0, #0x20]
         ldr r1, =0x0013             @ Y offset for display
         strh r1, [r0, #0x22]
         ldr r1, =0x00f0             @ HEIGHT in pixels (number processed)
         strh r1, [r0, #0x24]
-
         strh r2, [r0, #0x26]
         strh r2, [r0, #0x28]
         strh r2, [r0, #0x2a]
-
         ldr r1, =0x8001
         strh r1, [r0, #0x2c]
         ldr r1, =0x0002
         strh r1, [r0, #0x2e]
         ldr r1, =0xff00             @ Brightness adder (lo)
         strh r1, [r0, #0x30]
-
         strh r2, [r0, #0x32]
         strh r2, [r0, #0x34]
         strh r2, [r0, #0x36]
-
         ldr r1, =0x0022
         strh r1, [r0, #0x38]
 
-        @ OSD...
-        
-        ldr r0, =0x30680
-        
-        ldr r1, =0x2000
-        strh r1, [r0, #0x00]        @ bit 1 enables border. Does other funny stuff
-        ldr r1, =0x0079
-        strh r1, [r0, #0x20]
-        strh r2, [r0, #0x22]
-
+        @ OSD Setup...        
+        callThumb1 r3, osdSetScreenConfigT, 0x2000
+        callThumb2 r3, osdSetScreenPositionT, 0x79, 0x00
         callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
         callThumb2 r3, osdSetMainConfigT, 0x14, 0xd9      
         callThumb2 r3, osdSetBack2ConfigT, 0x14, 0x00
