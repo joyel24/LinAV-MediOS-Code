@@ -1,2 +1,0 @@
-arm-elf-as -o libavos.o libavos.s
-
