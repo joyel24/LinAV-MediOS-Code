@@ -50,9 +50,11 @@ ataReadLBAT:
         mov r4, r1
         mov r6, r2
 
+        .ifdef hardwareAV300
         ldr r0, =0x02600300
         mov r1, #8
         strh r1, [r0]                        @ Spin up the HDD Please...        
+        .endif
 
         callThumb r1, ataWaitForRDYT        
 
@@ -102,10 +104,12 @@ ataIdentifyT:
         push {r1, r2, r3, r4, r5}
         mov r5, r0
 
+        .ifdef hardwareAV300
         ldr r0, =0x02600300
         mov r1, #8
         strh r1, [r0]                        @ Spin up the HDD Please...        
-
+        .endif
+        
         callThumb r1, ataWaitForRDYT
         mov r1, r0
         mov r0, #1
@@ -216,6 +220,7 @@ ataInitT:
         push {lr}
         push {r0, r1}
 
+        .ifdef hardwareAV300
         ldr r0, =0x02600000
         mov r1, #0
         strh r1, [r0]
@@ -235,6 +240,33 @@ ataInitT:
         ldr r0, =0x02600100
         mov r1, #0
         strh r1, [r0]                        @ ?        
+        .endif
+        
+        .ifdef hardwareJBMM
+        ldr r0, =0x02400300
+        mov r1, #0x01
+        strh r1, [r0]        
+
+        ldr r0, =0x02400000
+        mov r1, #0
+        strh r1, [r0]
+        strh r1, [r0]
+        strh r1, [r0]
+        strh r1, [r0]
+        strh r1, [r0]
+
+        ldr r0, =0x02400300
+        mov r1, #0x01
+        strh r1, [r0]        
+
+        ldr r0, =0x02400200
+        mov r1, #0x05
+        strh r1, [r0]        
+        mov r1, #0x04
+        strh r1, [r0]        
+        
+        .endif
+        
         
         pop {r0, r1}
         pop {r0}

@@ -30,10 +30,8 @@ lcdInc = 1
 .text
         .thumb
 
-lcdVideoBuffer  = 0x3fc0000
-lcdVideoBuffer2 = 0x3c00000
-lcdWidth        = 320
-lcdHeight       = 240
+lcdVideoBuffer  = ramStart + 0xfc0000
+lcdVideoBuffer2 = ramStart + 0xc00000
 
 
 @ lcdScrollUpT r0=lines, r1=color
@@ -259,55 +257,9 @@ lcdLoop7:
 @
 lcdInitT:
         push {lr}
-
-        mov r2, #0
-        ldr r0, =0x30800    
-        ldr r1, =0x4071
-        strh r1, [r0]
-        ldr r1, =0x0f40
-        strh r1, [r0, #0x2]
-        ldr r1, =0x8100
-        strh r1, [r0, #0x4]
-        ldr r1, =0x4c0f
-        strh r1, [r0, #0x6]
-        ldr r1, =0xaaaa
-        strh r1, [r0, #0x8]
-        strh r2, [r0, #0xa]
-        strh r2, [r0, #0xc]
-        strh r2, [r0, #0xe]
-        strh r2, [r0, #0x10]
-        strh r2, [r0, #0x12]
-        strh r2, [r0, #0x14]
-        strh r2, [r0, #0x16]
-        strh r2, [r0, #0x18]
-        ldr r1, =0x02e0
-        strh r1, [r0, #0x1a]
-        ldr r1, =0x0085             @ X offset for display
-        strh r1, [r0, #0x1c]
-        ldr r1, =0x0280             @ WIDTH in pixels (Number processed)
-        strh r1, [r0, #0x1e]
-        ldr r1, =0x0103
-        strh r1, [r0, #0x20]
-        ldr r1, =0x0013             @ Y offset for display
-        strh r1, [r0, #0x22]
-        ldr r1, =0x00f0             @ HEIGHT in pixels (number processed)
-        strh r1, [r0, #0x24]
-        strh r2, [r0, #0x26]
-        strh r2, [r0, #0x28]
-        strh r2, [r0, #0x2a]
-        ldr r1, =0x8001
-        strh r1, [r0, #0x2c]
-        ldr r1, =0x0002
-        strh r1, [r0, #0x2e]
-        ldr r1, =0xff00             @ Brightness adder (lo)
-        strh r1, [r0, #0x30]
-        strh r2, [r0, #0x32]
-        strh r2, [r0, #0x34]
-        strh r2, [r0, #0x36]
-        ldr r1, =0x0022
-        strh r1, [r0, #0x38]
-
-        @ OSD Setup...        
+        callThumb r0, osdInitT
+        
+        .ifdef hardwareAV300
         callThumb1 r3, osdSetScreenConfigT, 0x2000
         callThumb2 r3, osdSetScreenPositionT, 0x79, 0x00
         callThumb2 r3, osdSetBackConfigT, 0x14, 0x02
@@ -320,19 +272,8 @@ lcdInitT:
         callThumb2 r3, osdSetMainSizeT, 0x280, 0xf0
         callThumb1 r1, osdSetMainOffsetT, lcdVideoBuffer
         callThumb1 r1, osdSetBackOffsetT, lcdVideoBuffer2
-    
-        ldr r0, =lcdRegBacklight
-        ldr r1, =0x4
-        strh r1, [r0]
-        
-        ldr r0, =0x30804
-        ldr r1, =0x8100
-        strh r1, [r0]
-        
-        ldr r0, =lcdRegBacklight
-        ldr r1, =0x4
-        strh r1, [r0]
-        
+        .endif
+
         ldr r0, =lcdVideoBuffer
         ldr r1, =(lcdWidth*lcdHeight*2)
         ldr r2, =0x0000

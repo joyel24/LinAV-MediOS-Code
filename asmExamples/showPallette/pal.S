@@ -15,6 +15,7 @@
 
 .text
         .include "../includes/common.S"
+        .include "../includes/jbmm.S"
 loop1:
 
         add r0, pc, #1

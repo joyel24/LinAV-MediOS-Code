@@ -12,7 +12,13 @@
 @ Author:   By DoggerMoore
 @
 
+hardwareJBMM                =   1
+
+ramStart                    =   0x08000000
+
 lcdRegBacklight             =   0x02400200
+lcdWidth                    =   336
+lcdHeight                   =   240
 
 ataRegData                  =   0x04000800
 ataRegError                 =   0x04000900
@@ -21,6 +27,6 @@ ataRegSector                =   0x04000b00
 ataRegLCyl                  =   0x04000c00
 ataRegHCyl                  =   0x04000d00
 ataRegSelect                =   0x04000e00
-ataRegStatus                =   0x04000e80
+ataRegStatus                =   0x04000f00
 ataRegCommand               =   0x04000f00
 

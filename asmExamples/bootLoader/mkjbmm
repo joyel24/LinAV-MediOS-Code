@@ -1,0 +1,4 @@
+arm-elf-as -o $1.o $1.S
+arm-elf-ld -Ttext 0x8400000 -o $1.elf $1.o
+arm-elf-objcopy -O binary $1.elf $1.bin
+

@@ -12,7 +12,13 @@
 @ Author:   By DoggerMoore
 @
 
+hardwareAV300               =   1
+
+ramStart                    =   0x03000000
+
 lcdRegBacklight             =   0x02600200
+lcdWidth                    =   320
+lcdHeight                   =   240
 
 ataRegData                  =   0x02400000
 ataRegError                 =   0x02400080

@@ -13,9 +13,10 @@
 @
 @
         .include "../includes/common.S"
+        @.include "../includes/jbmm.S"
         .include "../includes/av300.S"
-
-        @doimage = 1
+        
+        doimage = 1
         
 .text
 
@@ -29,14 +30,21 @@
         .asciz "CJBMVERSION2000"    @ So we can update firmware to this...
         .space 0x20, 0
 overb:
-
+        .ifdef hardwareAV300
         mov r0, #0x30
+        .endif
+        
+        .ifdef hardwareJBMM
+        mov r0, #0x80
+        .endif
+        
+        mov r2, r0
         lsl r0, #20     @ 03000000
 
         mov r1, #0x40
         lsl r1, #12     @ 40000
 
-        mov r2, #0x34
+        add r2, #4
         lsl r2, #20     @ 03400000
 
 lrel:   ldr r3, [r0]
