@@ -401,26 +401,26 @@ void iniComponent(struct graphicsBuffer * buff,unsigned int offset)
 #endif
 
 /* drawing functions */
-void clearScreen(int color)
+void clearScreen(unsigned int color)
 {
     default_gc->gops->fillRect(color,0,0,SCREEN_WIDTH,SCREEN_HEIGHT,default_gc->buffer);
     LCD_UPDATE(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
 }
 
-void drawPixel(int color,int x, int y)
+void drawPixel(unsigned int color,int x, int y)
 {
     tstXY(x,y);
     default_gc->gops->drawPixel(color, x, y,default_gc->buffer);
     LCD_UPDATE(x,y,1,1)
 }
 
-int readPixel(int x, int y)
+unsigned int readPixel(int x, int y)
 {
     tstXY(x,y);
     return default_gc->gops->readPixel(x,y,default_gc->buffer);
 }
 
-void drawRect(int color, int x, int y, int width, int height)
+void drawRect(unsigned int color, int x, int y, int width, int height)
 {
     tstXY(x,y);
     tstWH(x,y,width,height);
@@ -428,7 +428,7 @@ void drawRect(int color, int x, int y, int width, int height)
     LCD_UPDATE(x,y,width,height)
 }
 
-void fillRect(int color, int x, int y, int width, int height)
+void fillRect(unsigned int color, int x, int y, int width, int height)
 {
     tstXY(x,y);
     tstWH(x,y,width,height);
@@ -436,7 +436,7 @@ void fillRect(int color, int x, int y, int width, int height)
     LCD_UPDATE(x,y,width,height)
 }
 
-void drawLine(int color, int x1, int y1, int x2, int y2)
+void drawLine(unsigned int color, int x1, int y1, int x2, int y2)
 {
     int numpixels;
     int i;
@@ -561,12 +561,12 @@ void drawLine(int color, int x1, int y1, int x2, int y2)
 #endif    
 }
 
-void putS(int color, int bg_color, int x, int y, char *s)
+void putS(unsigned int color, unsigned int bg_color, int x, int y, unsigned char *s)
 {
     FONT_ID font=default_font;
     int len=strlen(s);
     int h=0,w=0;
-    char c;
+    unsigned char c;
 
     tstXY(x,y);
 
@@ -590,14 +590,19 @@ void putS(int color, int bg_color, int x, int y, char *s)
     LCD_UPDATE(x,y,w,h)
 }
 
-int getStringS(const unsigned char *str, int *w, int *h)
+void getStringS(unsigned char *str, int *w, int *h)
 {
     FONT_ID font=default_font;
-
-    return default_gc->gops->getStringSize(font,str,w,h);
+    
+    int width = 0;
+    if ( w )
+        while(*str++)
+            *w += font->width;
+    if ( h )
+        *h = font->height;
 }
 
-void putC(int color, int bg_color, int x, int y, char s)
+void putC(unsigned int color, unsigned int bg_color, int x, int y, unsigned char s)
 {
     FONT_ID font=default_font;
     int h,w;
@@ -625,7 +630,7 @@ void drawBITMAP(BITMAP * bitmap, int x, int y)
     LCD_UPDATE(x,y,bitmap->width,bitmap->height);
 }
 
-void scrollWindowVert(int bgColor, int x, int y, int width, int height, int scroll, int UP)
+void scrollWindowVert(unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP)
 {
     default_gc->gops->scrollWindowVert(bgColor,x,y,width,height,scroll,UP,default_gc->buffer);
 #ifndef AV_SCREEN
@@ -636,7 +641,7 @@ void scrollWindowVert(int bgColor, int x, int y, int width, int height, int scro
 #endif
 }
 
-void scrollWindowHoriz(int bgColor, int x, int y, int width, int height, int scroll, int RIGHT)
+void scrollWindowHoriz(unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT)
 {
     default_gc->gops->scrollWindowHoriz(bgColor,x,y,width,height,scroll,RIGHT,default_gc->buffer);
 #ifndef AV_SCREEN
@@ -655,7 +660,7 @@ void drawImage(char * filename)
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
     FILE * img_file;
-    char * offset;
+    unsigned char * offset;
     struct graphicsBuffer * buff=&VIDEO_1;
     JSAMPROW rowptr[1];
     int scale[]={2,4,8};

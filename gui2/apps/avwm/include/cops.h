@@ -31,25 +31,25 @@ struct client_operations {
    
     void (*closeScreen)       (void);
     int  (*openScreen)        (void);
-    void (*clearScreen)       (int color);
+    void (*clearScreen)       (unsigned int color);
 
-    void (*drawPixel)         (int color, int x, int y);
-    int  (*readPixel)         (int x, int y);
-    void (*drawRect)          (int color, int x, int y, int width, int height);
-    void (*fillRect)          (int color, int x, int y, int width, int height);
-    void (*drawLine)          (int color, int x1, int y1, int x2, int y2);
+    void (*drawPixel)         (unsigned int color, int x, int y);
+    unsigned int  (*readPixel)         (int x, int y);
+    void (*drawRect)          (unsigned int color, int x, int y, int width, int height);
+    void (*fillRect)          (unsigned int color, int x, int y, int width, int height);
+    void (*drawLine)          (unsigned int color, int x1, int y1, int x2, int y2);
     
-    void (*getStringS)        (const unsigned char *str, int *w, int *h);
-    void (*putS)              (int color, int bg_color,int x, int y, char *s);
-    void (*putC)              (int color, int bg_color,int x, int y, char s);
+    void (*getStringS)        (unsigned char *str, int *w, int *h);
+    void (*putS)              (unsigned int color, unsigned int bg_color,int x, int y, unsigned char *s);
+    void (*putC)              (unsigned int color, unsigned int bg_color,int x, int y, unsigned char s);
     void (*setFont)           (int font);
     
     void (*drawSprite)        (PALETTE * palette, SPRITE * sprite, int x, int y);
     void (*drawBITMAP)        (BITMAP * bitmap, int x, int y);
     void (*drawImage)         (char * filename);
     
-    void (*scrollWindowVert)  (int bgColor, int x, int y, int width, int height, int scroll, int UP);
-    void (*scrollWindowHoriz) (int bgColor, int x, int y, int width, int height, int scroll, int RIGHT);
+    void (*scrollWindowVert)  (unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP);
+    void (*scrollWindowHoriz) (unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT);
     
     
     int  (*clearEventQueue)   (void);    

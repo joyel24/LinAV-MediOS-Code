@@ -6,7 +6,8 @@ DEST=../lib
 
 LIB_CONTENT= \
 	graphics.o \
-        graphics_8.o	
+        graphics_8.o \
+        graphics_32.o
 
 ifeq ($(HAVE_JPEG),y)
 GCCFLAGS += -I../jpeg-6b
