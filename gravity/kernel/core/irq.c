@@ -26,17 +26,33 @@
 __IRAM_DATA int cli_var=0;
 __IRAM_DATA int clf_var=0;
 
+__IRAM_CODE void c54_dsp_interrupt (int irq)
+{
+	printk ("*** DSP HINT ***\n");
+}
+
+__IRAM_CODE void ata_interrupt (int irq)
+{
+	printk ("*** ATA INTR ***\n");
+}
+
 __IRAM_DATA struct irq_data_s irq_table[] = {
     {
         irq     : IRQ_MAS_DATA,
         action  : dsp_interrupt,
-        name    : "MAS",
+        name    : "MAS intr",
         nb_irq  : 0
     },
     {
         irq     : IRQ_TMR_0,
         action  : main_timer_action,
-        name    : "Tick_timer",
+        name    : "Tick timer intr",
+        nb_irq  : 0
+    },
+    {
+        irq     : IRQ_DSP,
+        action  : c54_dsp_interrupt,
+        name    : "DSP intr",
         nb_irq  : 0
     },
     {
@@ -49,6 +65,12 @@ __IRAM_DATA struct irq_data_s irq_table[] = {
         irq     : IRQ_UART1,
         action  : uart_intr_action,
         name    : "UART1 intr",
+        nb_irq  : 0
+    },
+    {
+        irq     : IRQ_ATA,
+        action  : ata_interrupt,
+        name    : "ATA intr",
         nb_irq  : 0
     },
     {
