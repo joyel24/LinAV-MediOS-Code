@@ -277,22 +277,20 @@ static int sec2cluster(unsigned int sec)
         return -1;
     }
 
-    //return ((sec - fat_bpb.firstdatasector) / fat_bpb.bpb_secperclus) + 2;
-    //TODO
-    return 0;
+    return ((sec - fat_bpb.firstdatasector) / fat_bpb.bpb_secperclus) + 2;
 }
 
 static int cluster2sec(int cluster)
 {
-//    int max_cluster = fat_bpb.totalsectors -
-//        fat_bpb.firstdatasector / fat_bpb.bpb_secperclus + 1;
+    int max_cluster = fat_bpb.totalsectors -
+        fat_bpb.firstdatasector / fat_bpb.bpb_secperclus + 1;
     
-//    if(cluster > max_cluster)
-//    {
-//        uartOuts("cluster2sec() - Bad cluster number\n");
+    if(cluster > max_cluster)
+    {
+        uartOuts("cluster2sec() - Bad cluster number\n");
         //DEBUGF( "cluster2sec() - Bad cluster number (%d)\n", cluster);
-//        return -1;
-//    }
+        return -1;
+    }
 
     return first_sector_of_cluster(cluster);
 }
@@ -373,9 +371,7 @@ int fat_mount(int startsector)
 
     /* Determine FAT type */
     datasec = fat_bpb.totalsectors - fat_bpb.firstdatasector;
-//    fat_bpb.dataclusters = datasec / fat_bpb.bpb_secperclus;
-//TODO
-    fat_bpb.dataclusters = 1000000;     // Dummy value...
+    fat_bpb.dataclusters = datasec / fat_bpb.bpb_secperclus;
 
 #ifdef TEST_FAT
     /*
@@ -505,16 +501,15 @@ static int bpb_is_sane(void)
         return -3;
     }
 
-//    if (fat_bpb.fsinfo.freecount >
-//        (fat_bpb.totalsectors - fat_bpb.firstdatasector)/
-//        fat_bpb.bpb_secperclus)
-//    {
+    if (fat_bpb.fsinfo.freecount >
+        (fat_bpb.totalsectors - fat_bpb.firstdatasector)/
+        fat_bpb.bpb_secperclus)
+    {
         uartOuts("bpb_is_sane() - Error: FSInfo.Freecount > disk size\n");
         //DEBUGF( "bpb_is_sane() - Error: FSInfo.Freecount > disk size "
         //         "(0x%04x)\n", fat_bpb.fsinfo.freecount);
-//        return -4;
-//    }
-//TODO
+        return -4;
+    }
 
     return 0;
 }
@@ -585,15 +580,14 @@ static unsigned int find_free_cluster(unsigned int startcluster)
     unsigned int offset;
     unsigned int i;
 
-//    sector = startcluster / CLUSTERS_PER_FAT_SECTOR;
-//    offset = startcluster % CLUSTERS_PER_FAT_SECTOR;
-//TODO  
+    sector = startcluster / CLUSTERS_PER_FAT_SECTOR;
+    offset = startcluster % CLUSTERS_PER_FAT_SECTOR;
 
     for (i = 0; i<fat_bpb.fatsize; i++) {
         unsigned int j;
         unsigned int nr;
-//        nr = (i + sector) % fat_bpb.fatsize;
-//TODO
+        nr = (i + sector) % fat_bpb.fatsize;
+
         unsigned int* fat = cache_fat_sector(nr);
         if ( !fat )
             break;
@@ -968,11 +962,10 @@ static int add_dir_entry(struct fat_dir* dir,
 
     /* one dir entry needed for every 13 bytes of filename,
        plus one entry for the short name */
-//    entries_needed = namelen / NAME_BYTES_PER_ENTRY + 1;
-//TODO
+    entries_needed = namelen / NAME_BYTES_PER_ENTRY + 1;
 
-//    if (namelen % NAME_BYTES_PER_ENTRY)
-//        entries_needed++;
+    if (namelen % NAME_BYTES_PER_ENTRY)
+        entries_needed++;
 
  restart:
     firstentry = 0;
@@ -1185,9 +1178,8 @@ static int create_dos_name(unsigned char *name, unsigned char *newname)
     for (i=0, j=0; name[i] && (j < 8); i++)
     {
         unsigned char c = char2dos(name[i]);
-//        if (c)
-//            newname[j++] = toupper(c);
-//TODO
+        if (c)
+            newname[j++] = toupper(c);
     }
     while (j < 8)
         newname[j++] = ' ';
@@ -1708,9 +1700,8 @@ int fat_seek(struct fat_file *file, unsigned int seeksector )
         /* we need to find the sector BEFORE the requested, since
            the file struct stores the last accessed sector */
         seeksector--;
-//        numclusters = clusternum = seeksector / fat_bpb.bpb_secperclus;
-//        sectornum = seeksector % fat_bpb.bpb_secperclus;
-//TODO
+        numclusters = clusternum = seeksector / fat_bpb.bpb_secperclus;
+        sectornum = seeksector % fat_bpb.bpb_secperclus;
 
         if (file->clusternum && clusternum >= file->clusternum)
         {
