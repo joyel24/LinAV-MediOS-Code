@@ -8,20 +8,20 @@ int main() {
     struct graphicsBuffer screenVideo2;
     int cbuffer=0;
     
-    osdInit();
+    osdInitA();
     
-    osdSetComponentConfig(OSD_VIDEO1, 0);
-    osdSetComponentConfig(OSD_VIDEO2, 0);
-    osdSetComponentConfig(OSD_BITMAP1, 0);
-    osdSetComponentConfig(OSD_BITMAP2, 0);
-    osdSetComponentConfig(OSD_CURSOR1, 0);
-    osdSetComponentConfig(OSD_CURSOR2, 0);
+    osdSetComponentConfigA(OSD_VIDEO1, 0);
+    osdSetComponentConfigA(OSD_VIDEO2, 0);
+    osdSetComponentConfigA(OSD_BITMAP1, 0);
+    osdSetComponentConfigA(OSD_BITMAP2, 0);
+    osdSetComponentConfigA(OSD_CURSOR1, 0);
+    osdSetComponentConfigA(OSD_CURSOR2, 0);
     
-    osdSetComponentSize(OSD_VIDEO1, 640, 240);
-    osdSetComponentPosition(OSD_VIDEO1, 0x14, 0x13);
-    osdSetComponentOffset(OSD_VIDEO1, 0x03c00000);
-    osdSetComponentSourceWidth(OSD_VIDEO1, 0x28);
-    osdSetComponentConfig(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
+    osdSetComponentSizeA(OSD_VIDEO1, 640, 240);
+    osdSetComponentPositionA(OSD_VIDEO1, 0x14, 0x13);
+    osdSetComponentOffsetA(OSD_VIDEO1, 0x03c00000);
+    osdSetComponentSourceWidthA(OSD_VIDEO1, 0x28);
+    osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
 
     screenVideo1.offset = 0x03c00000;
     screenVideo1.bytesPerLine = 320*4;
@@ -39,9 +39,9 @@ int main() {
     
     while(1) {
         if (cbuffer) {
-            osdSetComponentOffset(OSD_VIDEO1, screenVideo2.offset);    
+            osdSetComponentOffsetA(OSD_VIDEO1, screenVideo2.offset);    
         } else {
-            osdSetComponentOffset(OSD_VIDEO1, screenVideo1.offset);
+            osdSetComponentOffsetA(OSD_VIDEO1, screenVideo1.offset);
         }
         
     c=c*2;
@@ -49,9 +49,9 @@ int main() {
         for (x=0;x<320;x++) {
             b = (x-160)*(y-120)*c >> 4;
             if (cbuffer) {
-                graphicsSetPixel(&screenVideo1, x, y, b);
+                graphicsSetPixelA(&screenVideo1, x, y, b);
             } else {
-                graphicsSetPixel(&screenVideo2, x, y, b);                
+                graphicsSetPixelA(&screenVideo2, x, y, b);                
             }
         }
     }

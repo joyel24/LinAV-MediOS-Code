@@ -14,6 +14,13 @@
 @ mathDivLU (x, y, z)   -> r0=(x||y) % z, r1 = (x||y) / z
 @
 
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
+
 .ifndef mathInc
 mathInc = 1
 
@@ -25,6 +32,9 @@ mathInc = 1
 @       returns r0 = (x||y) % z
 @               r1 = (x||y) / z
 @
+.globl mathDivLUA
+mathDivLUA:
+        switchThumb
 .globl mathDivLU
 .thumb_func
 
@@ -53,6 +63,9 @@ mathL2: add r3, #1
 @       returns r0 = (x||y) % z
 @               r1 = (x||y) / z
 @
+.globl mathModLUA
+mathModLUA:
+        switchThumb
 .globl mathModLU
 .thumb_func
 

@@ -31,6 +31,13 @@
 @ u32 ataIndentifyDevice(r0->buffer)
 @
 
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
+
 .ifndef ataInc
 ataInc = 1
 
@@ -73,6 +80,9 @@ ataSectorHalfwordsShift     =   8           @ 256 halfwords
 @ ------------------------------------------------------------------------------
 @ ataReadSectors(r0=LBA, r1=number, r2->buffer)
 @
+.globl ataReadSectorsA
+ataReadSectorsA:
+        switchThumb
 .globl ataReadSectors
 .thumb_func
 
@@ -117,6 +127,9 @@ ataRSF: mov r0, #0
 @ ------------------------------------------------------------------------------
 @ ataWriteSectors(r0=LBA, r1=number, r2->buffer)
 @
+.globl ataWriteSectorsA
+ataWriteSectorsA:
+        switchThumb
 .globl ataWriteSectors
 .thumb_func
 
@@ -161,6 +174,9 @@ ataWSF: mov r0, #0
 @ ------------------------------------------------------------------------------
 @ ataIdentifyDevice(r0->buffer)
 @
+.globl ataIdentifyDeviceA
+ataIdentifyDeviceA:
+        switchThumb
 .globl ataIdentifyDevice
 .thumb_func
 
@@ -196,6 +212,9 @@ ataISF: mov r0, #0
 @ ------------------------------------------------------------------------------
 @ ataRead(r0=LBA, r1=number)
 @
+.globl ataReadA
+ataReadA:
+        switchThumb
 .globl ataRead
 .thumb_func
 
@@ -225,6 +244,9 @@ ataRead:
 @ ------------------------------------------------------------------------------
 @ ataWrite(r0=LBA, r1=number)
 @
+.globl ataWriteA
+ataWriteA:
+        switchThumb
 .globl ataWrite
 .thumb_func
 
@@ -255,6 +277,9 @@ ataWrite:
 @ ------------------------------------------------------------------------------
 @ ataIdentify()
 @
+.globl ataIdentifyA
+ataIdentifyA:
+        switchThumb
 .globl ataIdentify
 .thumb_func
 
@@ -273,6 +298,9 @@ ataIdentify:
 @ ------------------------------------------------------------------------------
 @ ataReadData(r0->buffer, r1=#halfwords)
 @
+.globl ataReadDataA
+ataReadDataA:
+        switchThumb
 .globl ataReadData
 .thumb_func
 
@@ -292,6 +320,9 @@ ataReadD:
 @ ------------------------------------------------------------------------------
 @ ataWriteData(r0->buffer, r1=#halfwords)
 @
+.globl ataWriteDataA
+ataWriteDataA:
+        switchThumb
 .globl ataWriteData
 .thumb_func
 
@@ -312,6 +343,9 @@ ataWriteD:
 @ ataWaitForXfer()
 @   Waits until xfer is ready...
 @   returns -1 = Timeout
+.globl ataWaitForXferA
+ataWaitForXferA:
+        switchThumb
 .globl ataWaitForXfer
 .thumb_func
 
@@ -342,6 +376,9 @@ ataTO2: mov r0, #0
 @ ataWaitForReady()
 @   Waits until Ready ATA is...
 @   returns -1 = Timeout
+.globl ataWaitForReadyA
+ataWaitForReadyA:
+        switchThumb
 .globl ataWaitForReady
 .thumb_func
 
@@ -371,6 +408,9 @@ ataTO1: mov r0, #0
 @ ------------------------------------------------------------------------------
 @ ataStatus()
 @   Reads the current ATA status
+.globl ataStatusA
+ataStatusA:
+        switchThumb
 .globl ataStatus
 .thumb_func
 
@@ -386,6 +426,9 @@ ataStatus:
 @ ------------------------------------------------------------------------------
 @ ataPowerUpHDD()
 @   Supplys power to the HDD
+.globl ataPowerUpHDDA
+ataPowerUpHDDA:
+        switchThumb
 .globl ataPowerUpHDD
 .thumb_func
 
@@ -401,6 +444,9 @@ ataPowerUpHDD:
 @ ------------------------------------------------------------------------------
 @ ataPowerDownHDD()
 @   Supplys no power to the HDD
+.globl ataPowerDownHDDA
+ataPowerDownHDDA:
+        switchThumb
 .globl ataPowerDownHDD
 .thumb_func
 
@@ -416,6 +462,9 @@ ataPowerDownHDD:
 @ ------------------------------------------------------------------------------
 @ ataSelectHDD()
 @   Selects the HDD for usage
+.globl ataSelectHDDA
+ataSelectHDDA:
+        switchThumb
 .globl ataSelectHDD
 .thumb_func
 
@@ -429,6 +478,9 @@ ataSelectHDD:
 @ ------------------------------------------------------------------------------
 @ ataSelect()
 @   Selects 
+.globl ataSelectA
+ataSelectA:
+        switchThumb
 .globl ataSelect
 .thumb_func
 
@@ -446,6 +498,9 @@ ataSelect:
 @ ------------------------------------------------------------------------------
 @ ataSelectMemoryCard()
 @   Selects the MemoryCard for usage
+.globl ataSelectMemoryCardA
+ataSelectMemoryCardA:
+        switchThumb
 .globl ataSelectMemoryCard
 .thumb_func
 

@@ -12,6 +12,13 @@
 @
 @
 
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
+
 .ifndef systemInc
 systemInc = 1
 
@@ -20,6 +27,9 @@ systemInc = 1
 @ ------------------------------------------------------------------------------
 @ systemRelocateMe()
 @
+.globl systemRelocateMeA
+systemRelocateMeA:
+        switchThumb
 .globl systemRelocateMe
 .thumb_func
 
@@ -37,32 +47,6 @@ srmc:   ldr r2, [r0]
         ldr r1, =0x00400000
         add r0, r1
         bx r0                   @ Jump back, but at higher address...
-
-        
-@ ------------------------------------------------------------------------------
-@ systemReboot()
-@
-.globl systemReboot
-.thumb_func
-
-systemReboot:
-        ldr r0, =0x034000a5     @ BOOTLOADER 0.4a Address...
-        bx r0
-        bx lr           @ Never get here
-
-@ ------------------------------------------------------------------------------
-@ systemReset()
-@
-.globl systemReset
-.thumb_func
-
-systemReset:
-        @ Looks like maybe we have to disable interrupts or some other stuff
-        @ here? as it is the unit turns off instead of resetting :(
-
-        mov r0, #0
-        bx r0
-        bx lr           @ Never get here
         
         .arm
         .ltorg

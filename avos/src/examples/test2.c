@@ -45,22 +45,22 @@ int main() {
         0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
         0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
     
-    osdInit();
+    osdInitA();
     
-    osdSetComponentConfig(OSD_VIDEO1, 0);
-    osdSetComponentConfig(OSD_VIDEO2, 0);
-    osdSetComponentConfig(OSD_BITMAP1, 0);
-    osdSetComponentConfig(OSD_BITMAP2, 0);
-    osdSetComponentConfig(OSD_CURSOR1, 0);
-    osdSetComponentConfig(OSD_CURSOR2, 0);
+    osdSetComponentConfigA(OSD_VIDEO1, 0);
+    osdSetComponentConfigA(OSD_VIDEO2, 0);
+    osdSetComponentConfigA(OSD_BITMAP1, 0);
+    osdSetComponentConfigA(OSD_BITMAP2, 0);
+    osdSetComponentConfigA(OSD_CURSOR1, 0);
+    osdSetComponentConfigA(OSD_CURSOR2, 0);
     
-    osdSetComponentSize(OSD_VIDEO1, 640, 240);
-    osdSetComponentPosition(OSD_VIDEO1, 0x14, 0x13);
-    osdSetComponentOffset(OSD_VIDEO1, 0x03c00000);
-    osdSetComponentSourceWidth(OSD_VIDEO1, 0x28);
-    osdSetComponentConfig(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
+    osdSetComponentSizeA(OSD_VIDEO1, 640, 240);
+    osdSetComponentPositionA(OSD_VIDEO1, 0x14, 0x13);
+    osdSetComponentOffsetA(OSD_VIDEO1, 0x03c00000);
+    osdSetComponentSourceWidthA(OSD_VIDEO1, 0x28);
+    osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
 
-    osdSetComponentConfig(OSD_CURSOR2, OSD_COMPONENT_ENABLE);
+    osdSetComponentConfigA(OSD_CURSOR2, OSD_COMPONENT_ENABLE);
 
     screenVideo.offset = 0x03c00000;
     screenVideo.bytesPerLine = 320*4;
@@ -72,23 +72,23 @@ int main() {
     for (py=0;py<240;py+=8) {
         for (px=0;px<320;px+=8) {
             c = (px-160)*(py-120);
-            graphicsBoxf(&screenVideo, px, py, 8, 8, c);
+            graphicsBoxfA(&screenVideo, px, py, 8, 8, c);
         }
     }
     
     for (c=0;c<16;c++) {
-        osdSet16CPallette(0, c, c);
+        osdSet16CPalletteA(0, c, c);
     }
     
     for (c=0;c<256;c++) {
-        osdSetCursor2Bitmap(c, cursor[c]);    
+        osdSetCursor2BitmapA(c, cursor[c]);    
     }
 
     while(1) {
     
         if (butslow==0) {
             butslow=butmax;
-            c = buttonsGetStatus();
+            c = buttonsGetStatusA();
             if (c & BUTTONS_AV300_UP) {
                 cursory--;
                 butmax-=2;
@@ -113,13 +113,13 @@ int main() {
         if (cursorx>(318)) cursorx=318;
         if (cursory>(238)) cursory=238;
 
-        osdSetComponentPosition(OSD_CURSOR2, (cursorx<<1)+0x18, cursory+0x13);
+        osdSetComponentPositionA(OSD_CURSOR2, (cursorx<<1)+0x18, cursory+0x13);
             
-        c = graphicsGetPixel(&screenVideo, x, y);
+        c = graphicsGetPixelA(&screenVideo, x, y);
         if ((c&1)==0) cdir++; else cdir--;
         cdir = cdir & 3;
         c=c + 0x010305;
-        graphicsSetPixel(&screenVideo, x, y, c);
+        graphicsSetPixelA(&screenVideo, x, y, c);
         
         if (cdir==0) x++;
         else if (cdir==1) y++;

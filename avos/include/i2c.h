@@ -26,3 +26,14 @@ extern void i2cStop();
 extern void i2cStart();
 extern void i2cAck();
 extern void i2cAckEnd();
+
+extern u32 i2cWriteA(u32 device, u32 address, void * buffer, u32 count);
+extern u32 i2cWriteRawA(u32 device, void * buffer, u32 count);
+extern u32 i2cReadA(u32 device, u32 address, void * buffer, u32 count);
+extern u32 i2cOutbA(u32 data);
+extern u32 i2cInbA();
+extern u32 i2cGetAckA();
+extern void i2cStopA();
+extern void i2cStartA();
+extern void i2cAckA();
+extern void i2cAckEndA();

@@ -13,6 +13,13 @@
 @ Author:   By DoggerMoore
 @
 
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
+
 .ifndef uartInc
 uartInc = 1
 
@@ -32,6 +39,9 @@ uartInc = 1
 @ ------------------------------------------------------------------------------
 @ uartGetch()
 @   Returns char in r0, or -1 if none to be read.
+.globl uartGetchA
+uartGetchA:
+        switchThumb
 .globl uartGetch
 .thumb_func
 
@@ -54,6 +64,9 @@ uartNon:pop {r1, r2, r3}
 @ ------------------------------------------------------------------------------
 @ uartOutch r0=chr to output to UART1
 @
+.globl uartOutchA
+uartOutchA:
+        switchThumb
 .globl uartOutch
 .thumb_func
 
@@ -71,6 +84,9 @@ uartWt1:ldrh r2, [r1, #uartRegSR]
 @ ------------------------------------------------------------------------------
 @ uartOuts r0->string to output to UART1
 @
+.globl uartOutsA
+uartOutsA:
+        switchThumb
 .globl uartOuts
 .thumb_func
 uartOuts:

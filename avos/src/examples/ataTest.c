@@ -33,14 +33,14 @@ int main() {
     int source=0;
     int usbs=0;
     
-    osdInit();
+    osdInitA();
 
-    osdSetComponentConfig(OSD_VIDEO1, 0);
-    osdSetComponentConfig(OSD_VIDEO2, 0);
-    osdSetComponentConfig(OSD_BITMAP1, 0);
-    osdSetComponentConfig(OSD_BITMAP2, 0);
-    osdSetComponentConfig(OSD_CURSOR1, 0);
-    osdSetComponentConfig(OSD_CURSOR2, 0);
+    osdSetComponentConfigA(OSD_VIDEO1, 0);
+    osdSetComponentConfigA(OSD_VIDEO2, 0);
+    osdSetComponentConfigA(OSD_BITMAP1, 0);
+    osdSetComponentConfigA(OSD_BITMAP2, 0);
+    osdSetComponentConfigA(OSD_CURSOR1, 0);
+    osdSetComponentConfigA(OSD_CURSOR2, 0);
 
     screenBitmap.offset = 0x03800000;
     screenBitmap.bytesPerLine = 320*2;
@@ -49,59 +49,59 @@ int main() {
     screenBitmap.bitsPerPixelShift = 4;
     screenBitmap.bitsPerPixel = 16;
 
-    graphicsBoxf(&screenBitmap, 0, 0, 320, 240, 0x0000);
+    graphicsBoxfA(&screenBitmap, 0, 0, 320, 240, 0x0000);
     
-    osdSetComponentSize(OSD_BITMAP1, 320*2, 240);
-    osdSetComponentPosition(OSD_BITMAP1, 0x14, 0x12);
-    osdSetComponentOffset(OSD_BITMAP1, 0x03800000);
-    osdSetComponentSourceWidth(OSD_BITMAP1, 0x14);
-    osdSetComponentConfig(OSD_BITMAP1, OSD_COMPONENT_ENABLE
+    osdSetComponentSizeA(OSD_BITMAP1, 320*2, 240);
+    osdSetComponentPositionA(OSD_BITMAP1, 0x14, 0x12);
+    osdSetComponentOffsetA(OSD_BITMAP1, 0x03800000);
+    osdSetComponentSourceWidthA(OSD_BITMAP1, 0x14);
+    osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT);
 
 
-    graphicsBoxf(&screenBitmap, 0, 0, 320, 240, 0x0000);    
+    graphicsBoxfA(&screenBitmap, 0, 0, 320, 240, 0x0000);    
 
     while(1) {
         pal16[1] = 0x0202;
-        graphicsString(&screenBitmap, 0, 0, &sprite4_6, std4x6_, 5, 0,
+        graphicsStringA(&screenBitmap, 0, 0, &sprite4_6, std4x6_, 5, 0,
                     "ATATest By DoGgEr");
 
         if (source==0) {
-            graphicsString(&screenBitmap, 212, 0, &sprite4_6, std4x6_, 5, 0,
+            graphicsStringA(&screenBitmap, 212, 0, &sprite4_6, std4x6_, 5, 0,
                     "F2[HDD]");
-            graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
+            graphicsStringA(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Power HDD...        ");
-            uartOuts("\nSelecting HDD...\n");
-            ataPowerUpHDD();
-            graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
+            uartOutsA("\nSelecting HDD...\n");
+            ataPowerUpHDDA();
+            graphicsStringA(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Selecting HDD...        ");
-            ataSelectHDD();
+            ataSelectHDDA();
         } else if (source==1) {
-            graphicsString(&screenBitmap, 212, 0, &sprite4_6, std4x6_, 5, 0,
+            graphicsStringA(&screenBitmap, 212, 0, &sprite4_6, std4x6_, 5, 0,
                     "F2[MemCard]");
-            graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
+            graphicsStringA(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Selecting MemCard...        ");
-            uartOuts("\nSelecting Memory card...\n");
-            ataPowerDownHDD();
-            ataSelect(source);
+            uartOutsA("\nSelecting Memory card...\n");
+            ataPowerDownHDDA();
+            ataSelectA(source);
         } else {
-            graphicsString(&screenBitmap, 212, 0, &sprite4_6, std4x6_, 5, 0,
+            graphicsStringA(&screenBitmap, 212, 0, &sprite4_6, std4x6_, 5, 0,
                     "F2[Other]");
-            graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
+            graphicsStringA(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Selecting Other...        ");
-            uartOuts("\nSelecting Other...\n");
-            ataPowerDownHDD();
-            ataSelect(source);
+            uartOutsA("\nSelecting Other...\n");
+            ataPowerDownHDDA();
+            ataSelectA(source);
         }
 
-        stringPutHex(showLba + 5, lba, 8);
-        graphicsString(&screenBitmap, 212, 8, &sprite4_6, std4x6_, 5, 0,
+        stringPutHexA(showLba + 5, lba, 8);
+        graphicsStringA(&screenBitmap, 212, 8, &sprite4_6, std4x6_, 5, 0,
                     showLba);
         
         docmd();
 
         do {
-            b =buttonsGetStatus();
+            b =buttonsGetStatusA();
         } while(!(b & BUTTONS_AV300_ANY));
 
         if (b & BUTTONS_AV300_MENU2) {
@@ -119,15 +119,15 @@ int main() {
         if (b & BUTTONS_AV300_MENU3) {
             usbs = !usbs;
             if (usbs) {
-                usbEnable();
+                usbEnableA();
             } else {
-                usbDisable();
+                usbDisableA();
             }
         }
         if (b & BUTTONS_AV300_OFF) return;
         
         do {
-            b =buttonsGetStatus();
+            b =buttonsGetStatusA();
         } while((b & BUTTONS_AV300_ANY));    
     }
 }
@@ -138,20 +138,20 @@ void docmd() {
 
     pal16[1] = 0x0101;
     if (mode==0) {
-        graphicsString(&screenBitmap, 108, 0, &sprite4_6, std4x6_, 5, 0,
+        graphicsStringA(&screenBitmap, 108, 0, &sprite4_6, std4x6_, 5, 0,
                     "F1[Identify]");
-        c = ataIdentifyDevice(data);
+        c = ataIdentifyDeviceA(data);
     } else {
-        graphicsString(&screenBitmap, 108, 0, &sprite4_6, std4x6_, 5, 0,
+        graphicsStringA(&screenBitmap, 108, 0, &sprite4_6, std4x6_, 5, 0,
                     "F1[Read MBR]");
-        c = ataReadSectors(lba, 1, data);    
+        c = ataReadSectorsA(lba, 1, data);    
     }
     
     if (c!=0) {
         pal16[1] = 0x0101;
-        graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
+        graphicsStringA(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                 "ATA Error!        ");            
-        uartOuts("ATA Error!\n");
+        uartOutsA("ATA Error!\n");
         for (delay=0;delay<0x1000;delay++) {}
         return;
     }
@@ -168,14 +168,14 @@ void showBuffer(char *source) {
     for (j=0;j<512;j+=16) {
         for (i=0;i<16;i++) {
             c = source[i+j];
-            stringPutHex(p+(i*2), c, 2);
+            stringPutHexA(p+(i*2), c, 2);
             if (c<32 || c>126) c='.';
             p[35+i] = c;
         }
-        uartOuts(p);
+        uartOutsA(p);
 
         pal16[1] = 0xffff;
-        graphicsString(&screenBitmap, 4, 16 + y*7, &sprite4_6, std4x6_, 6, 0,
+        graphicsStringA(&screenBitmap, 4, 16 + y*7, &sprite4_6, std4x6_, 6, 0,
                     p);
         y++;
     }

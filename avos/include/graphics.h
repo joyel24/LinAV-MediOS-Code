@@ -41,3 +41,11 @@ extern void graphicsString(struct graphicsBuffer *buffDest, u32 x, u32 y,
                            struct graphicsBuffer *font, char** fontlut, u32 dx, u32 dy,
                            char *s);
 
+extern void graphicsSetPixelA(struct graphicsBuffer *buffDef, u32 x, u32 y, u32 c);
+extern u32 graphicsGetPixelA(struct graphicsBuffer *buffDef, u32 x, u32 y);
+extern void graphicsBoxfA(struct graphicsBuffer *buffDef, u32 x, u32 y, u32 width, u32 height, u32 c);
+extern void graphicsSpriteA(struct graphicsBuffer *buffDest, u32 x, u32 y, struct graphicsBuffer *buffSrc);
+extern void graphicsStringA(struct graphicsBuffer *buffDest, u32 x, u32 y,
+                           struct graphicsBuffer *font, char** fontlut, u32 dx, u32 dy,
+                           char *s);
+                           

@@ -32,14 +32,14 @@ void docmd();
 int main() {
     int b;
 
-    osdInit();
+    osdInitA();
     
-    osdSetComponentConfig(OSD_VIDEO1, 0);
-    osdSetComponentConfig(OSD_VIDEO2, 0);
-    osdSetComponentConfig(OSD_BITMAP1, 0);
-    osdSetComponentConfig(OSD_BITMAP2, 0);
-    osdSetComponentConfig(OSD_CURSOR1, 0);
-    osdSetComponentConfig(OSD_CURSOR2, 0);
+    osdSetComponentConfigA(OSD_VIDEO1, 0);
+    osdSetComponentConfigA(OSD_VIDEO2, 0);
+    osdSetComponentConfigA(OSD_BITMAP1, 0);
+    osdSetComponentConfigA(OSD_BITMAP2, 0);
+    osdSetComponentConfigA(OSD_CURSOR1, 0);
+    osdSetComponentConfigA(OSD_CURSOR2, 0);
 
     screenBitmap.offset = 0x03800000;
     screenBitmap.bytesPerLine = 320*2;
@@ -48,38 +48,38 @@ int main() {
     screenBitmap.bitsPerPixelShift = 4;
     screenBitmap.bitsPerPixel = 16;
 
-    graphicsBoxf(&screenBitmap, 0, 0, 320, 240, 0x0000);    
+    graphicsBoxfA(&screenBitmap, 0, 0, 320, 240, 0x0000);    
     
-    osdSetComponentSize(OSD_BITMAP1, 320*2, 240);
-    osdSetComponentPosition(OSD_BITMAP1, 0x14, 0x12);
-    osdSetComponentOffset(OSD_BITMAP1, 0x03800000);
-    osdSetComponentSourceWidth(OSD_BITMAP1, 0x14);
-    osdSetComponentConfig(OSD_BITMAP1, OSD_COMPONENT_ENABLE
+    osdSetComponentSizeA(OSD_BITMAP1, 320*2, 240);
+    osdSetComponentPositionA(OSD_BITMAP1, 0x14, 0x12);
+    osdSetComponentOffsetA(OSD_BITMAP1, 0x03800000);
+    osdSetComponentSourceWidthA(OSD_BITMAP1, 0x14);
+    osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT);
 
     pal16[1] = 0x0202;
-    graphicsString(&screenBitmap, 0, 0, &sprite4_6, std4x6_, 5, 0,
+    graphicsStringA(&screenBitmap, 0, 0, &sprite4_6, std4x6_, 5, 0,
                 "I2CTest By DoGgEr");
     while(1) {
         pal16[1] = 0x0202;                    
-        stringPutHex(dispAddr, addr, 2);
+        stringPutHexA(dispAddr, addr, 2);
 
-        graphicsString(&screenBitmap, 160, 0, &sprite4_6, std4x6_, 5, 0,
+        graphicsStringA(&screenBitmap, 160, 0, &sprite4_6, std4x6_, 5, 0,
                     dispAddr);
 
         docmd();
         
-        b =buttonsGetStatus();
+        b =buttonsGetStatusA();
 
         if (b & BUTTONS_AV300_RIGHT) {
             addr+=2;
             do {
-                b = buttonsGetStatus();
+                b = buttonsGetStatusA();
             } while(b & BUTTONS_AV300_RIGHT);
         } else if (b & BUTTONS_AV300_LEFT) {
             addr-=2;
             do {
-                b = buttonsGetStatus();
+                b = buttonsGetStatusA();
             } while(b & BUTTONS_AV300_LEFT);
         } else if (b & BUTTONS_AV300_OFF) {
             return;
@@ -96,16 +96,16 @@ void docmd() {
     for (c=0;c<512;c++)
         data[c] = 0;
     
-    uartOuts("Getting data...\n");
+    uartOutsA("Getting data...\n");
 
-    c = i2cRead(addr, 0, data, 256);
+    c = i2cReadA(addr, 0, data, 256);
 
     if (addr==0xd0) {
         data[0x0c] &= ~0x40;
-        i2cWrite(addr, 0x0c, data+0x0c, 1);
+        i2cWriteA(addr, 0x0c, data+0x0c, 1);
     }
     
-    if (c==0) uartOuts("Returned 0\n");
+    if (c==0) uartOutsA("Returned 0\n");
 
     showBuffer(data);
 }
@@ -119,14 +119,14 @@ void showBuffer(char *source) {
     for (j=0;j<256;j+=16) {
         for (i=0;i<16;i++) {
             c = source[i+j];
-            stringPutHex(p+(i*2), c, 2);
+            stringPutHexA(p+(i*2), c, 2);
             if (c<32 || c>126) c='.';
             p[35+i] = c;
         }
 //        uartOuts(p);
 
         pal16[1] = 0xffff;
-        graphicsString(&screenBitmap, 4, 16 + y*7, &sprite4_6, std4x6_, 6, 0,
+        graphicsStringA(&screenBitmap, 4, 16 + y*7, &sprite4_6, std4x6_, 6, 0,
                     p);
         y++;
     }

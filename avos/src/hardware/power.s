@@ -11,6 +11,12 @@
 @ Date:     20/02/2004
 @ Author:   By DoggerMoore
 @
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
         
 .text
         .thumb
@@ -18,6 +24,9 @@
 @-------------------------------------------------------------------------------
 @ powerIsDCConnected()
 @
+.globl powerIsDCConnectedA
+powerIsDCConnectedA:
+        switchThumb
 .globl powerIsDCConnected
 .thumb_func
 
@@ -35,6 +44,9 @@ powerIsDCConnected:
 @-------------------------------------------------------------------------------
 @ powerGetStatus()
 @
+.globl powerGetStatusA
+powerGetStatusA:
+        switchThumb
 .globl powerGetStatus
 .thumb_func
 

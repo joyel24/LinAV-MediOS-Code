@@ -40,3 +40,5 @@ typedef unsigned long u32;
 
 extern u32 buttonsGetStatus();
 
+extern u32 buttonsGetStatusA();
+

@@ -16,6 +16,13 @@
 @ void usbDisable()
 @
 
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
+
 .ifndef usbInc
 usbInc = 1
 
@@ -26,6 +33,9 @@ usbInc = 1
 @ ------------------------------------------------------------------------------
 @ usbIsConnected
 @   returns 0/1 in r0
+.globl usbIsConnectedA
+usbIsConnectedA:
+        switchThumb
 .globl usbIsConnected
 .thumb_func
 
@@ -43,6 +53,9 @@ usbIsConnected:
 @ ------------------------------------------------------------------------------
 @ usbEnable
 @
+.globl usbEnableA
+usbEnableA:
+        switchThumb
 .globl usbEnable
 .thumb_func
 
@@ -58,6 +71,9 @@ usbEnable:
 @ ------------------------------------------------------------------------------
 @ usbDisable
 @
+.globl usbDisableA
+usbDisableA:
+        switchThumb
 .globl usbDisable
 .thumb_func
 
@@ -71,5 +87,5 @@ usbDisable:
 
         .arm
         .ltorg
-        
+
 .endif

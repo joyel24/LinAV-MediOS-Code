@@ -22,7 +22,7 @@ int fopen(const char* pathname)
     FILE * file = NULL;
 
     if ( pathname[0] != '/' ) {
-        uartOuts("Only absolute paths supported right now\n");
+        uartOutsA("Only absolute paths supported right now\n");
         return -1;
     }
 
@@ -31,7 +31,7 @@ int fopen(const char* pathname)
             break;
 
     if ( fd == MAX_OPEN_FILES ) {
-		uartOuts("Too many files open\n");
+		uartOutsA("Too many files open\n");
         return -2;
     }
 
@@ -55,7 +55,7 @@ int fopen(const char* pathname)
     }
 
     if (dir<0) {
-        uartOuts("Failed to open dir\n");
+        uartOutsA("Failed to open dir\n");
         file->busy = false;
         return -4;
     }
@@ -75,7 +75,7 @@ int fopen(const char* pathname)
 
     if ( entry ==NULL)
 	{
-		uartOuts("Failed to find file\n");
+		uartOutsA("Failed to find file\n");
 		file->busy = false;
 		return -5;
     }
@@ -165,7 +165,7 @@ int fread(int fd, void* buf, int count)
 	}
 	else
 	{
-		uartOuts("File not open yet\n");
+		uartOutsA("File not open yet\n");
 		return -1;
 	}
 

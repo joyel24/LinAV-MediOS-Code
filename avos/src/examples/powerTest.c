@@ -18,16 +18,16 @@ int main() {
     int c, v, b, x, y = 120;
     int slowdown=1;
 
-    ataPowerDownHDD();
+    ataPowerDownHDDA();
     
-    osdInit();
+    osdInitA();
 
-    osdSetComponentConfig(OSD_VIDEO1, 0);
-    osdSetComponentConfig(OSD_VIDEO2, 0);
-    osdSetComponentConfig(OSD_BITMAP1, 0);
-    osdSetComponentConfig(OSD_BITMAP2, 0);
-    osdSetComponentConfig(OSD_CURSOR1, 0);
-    osdSetComponentConfig(OSD_CURSOR2, 0);
+    osdSetComponentConfigA(OSD_VIDEO1, 0);
+    osdSetComponentConfigA(OSD_VIDEO2, 0);
+    osdSetComponentConfigA(OSD_BITMAP1, 0);
+    osdSetComponentConfigA(OSD_BITMAP2, 0);
+    osdSetComponentConfigA(OSD_CURSOR1, 0);
+    osdSetComponentConfigA(OSD_CURSOR2, 0);
 
     screenBitmap.offset = 0x03800000;
     screenBitmap.bytesPerLine = 320*2;
@@ -50,53 +50,53 @@ int main() {
     screenBitmap2.bitsPerPixelShift = 4;
     screenBitmap2.bitsPerPixel = 16;
     
-    graphicsBoxf(&screenBitmap, 0, 0, 320, 240, 0x0000);
-    graphicsBoxf(&screenTop, 0, 0, 320, 240, 0x0000);
+    graphicsBoxfA(&screenBitmap, 0, 0, 320, 240, 0x0000);
+    graphicsBoxfA(&screenTop, 0, 0, 320, 240, 0x0000);
 
-    osdSetComponentSize(OSD_BITMAP1, 320*2, 240);
-    osdSetComponentPosition(OSD_BITMAP1, 0x14, 0x12);
-    osdSetComponentOffset(OSD_BITMAP1, 0x03800000);
-    osdSetComponentSourceWidth(OSD_BITMAP1, 0x14);
-    osdSetComponentConfig(OSD_BITMAP1, OSD_COMPONENT_ENABLE
+    osdSetComponentSizeA(OSD_BITMAP1, 320*2, 240);
+    osdSetComponentPositionA(OSD_BITMAP1, 0x14, 0x12);
+    osdSetComponentOffsetA(OSD_BITMAP1, 0x03800000);
+    osdSetComponentSourceWidthA(OSD_BITMAP1, 0x14);
+    osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT);
 
-    osdSetComponentSize(OSD_BITMAP2, 320*2, 10);
-    osdSetComponentPosition(OSD_BITMAP2, 0x14, 0x12);
-    osdSetComponentOffset(OSD_BITMAP2, 0x03c00000);
-    osdSetComponentSourceWidth(OSD_BITMAP2, 0x14);
-    osdSetComponentConfig(OSD_BITMAP2, OSD_COMPONENT_ENABLE
+    osdSetComponentSizeA(OSD_BITMAP2, 320*2, 10);
+    osdSetComponentPositionA(OSD_BITMAP2, 0x14, 0x12);
+    osdSetComponentOffsetA(OSD_BITMAP2, 0x03c00000);
+    osdSetComponentSourceWidthA(OSD_BITMAP2, 0x14);
+    osdSetComponentConfigA(OSD_BITMAP2, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT);
 
-    graphicsString(&screenTop, 0, 0, &sprite4_6, std4x6_, 5, 0,
+    graphicsStringA(&screenTop, 0, 0, &sprite4_6, std4x6_, 5, 0,
                 "Battery meter v0.01 (c)DoGgEr");
 
     while(1) {
-        graphicsSprite(&screenBitmap, 0, 0, &screenBitmap2);
-        graphicsBoxf(&screenBitmap, 319, 0, 1, 240, 0x0000);
+        graphicsSpriteA(&screenBitmap, 0, 0, &screenBitmap2);
+        graphicsBoxfA(&screenBitmap, 319, 0, 1, 240, 0x0000);
         
-        v = powerGetStatus();
+        v = powerGetStatusA();
         y = v * 240 >> 14;
         
         if (y>239) y=239;
         if (y<0) y=0;
         c = 0xffff;
-        if (powerIsDCConnected()) c = 0x0404;
+        if (powerIsDCConnectedA()) c = 0x0404;
         
-        graphicsSetPixel(&screenBitmap, 319, y, c);
+        graphicsSetPixelA(&screenBitmap, 319, y, c);
 
-        stringPutHex(powerSt, v, 4);
+        stringPutHexA(powerSt, v, 4);
 
-        if (powerIsDCConnected()) {
+        if (powerIsDCConnectedA()) {
             powerSt[4] = '+';                
         } else {
             powerSt[4] = ' ';
         }
         pal16[1] = 0xffff;
-        graphicsString(&screenTop, 4 + 35*5, 2, &sprite4_6, std4x6_, 5, 0,
+        graphicsStringA(&screenTop, 4 + 35*5, 2, &sprite4_6, std4x6_, 5, 0,
                         powerSt);
         
         for (v=0;v<slowdown;v++) {
-            b = buttonsGetStatus();
+            b = buttonsGetStatusA();
             if (b & BUTTONS_AV300_OFF) return;
             if (b & BUTTONS_AV300_MENU1) {slowdown=1;break;}
             if (b & BUTTONS_AV300_MENU2) {slowdown=0x8000;break;}

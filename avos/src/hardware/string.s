@@ -15,6 +15,13 @@
 @ stringPutHex(r0->destnation, r1=value, r2=chars)
 @
 
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
+
 .ifndef stringInc
 stringInc = 1
 
@@ -24,6 +31,9 @@ stringInc = 1
 @ ------------------------------------------------------------------------------
 @ stringPutHex r0->string, r1=value, r2=#chars
 @
+.globl stringPutHexA
+stringPutHexA:
+        switchThumb
 .globl stringPutHex
 .thumb_func
 

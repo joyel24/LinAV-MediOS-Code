@@ -17,3 +17,5 @@ typedef unsigned long u32;
 #endif
 
 extern void stringPutHex(char *buffer, u32 value, u32 num);
+
+extern void stringPutHexA(char *buffer, u32 value, u32 num);

@@ -44,63 +44,63 @@ int fatInit(u32 lba) {
     
     fatCacheLBA=-1;
     
-    c=ataReadSectors(lba, 1, boot);      // Read the bootsector
+    c=ataReadSectorsA(lba, 1, boot);      // Read the bootsector
 
     if (c!=ATA_ERROR_NONE) {
-        uartOuts("ataReadSectors returned error!\n");
+        uartOutsA("ataReadSectors returned error!\n");
         return c;
     }
 
     fatSize = bootRead(36, 4);
-    stringPutHex(hex8, fatSize, 8);
-    uartOuts("[fat.c] FATSz32 = ");
-    uartOuts(hex8);
-    uartOuts("\n");
+    stringPutHexA(hex8, fatSize, 8);
+    uartOutsA("[fat.c] FATSz32 = ");
+    uartOutsA(hex8);
+    uartOutsA("\n");
 
     numFats = bootRead(16, 1);
-    stringPutHex(hex8, numFats, 8);
-    uartOuts("[fat.c] NumFATs = ");
-    uartOuts(hex8);
-    uartOuts("\n");
+    stringPutHexA(hex8, numFats, 8);
+    uartOutsA("[fat.c] NumFATs = ");
+    uartOutsA(hex8);
+    uartOutsA("\n");
 
     rsvdSecCnt = bootRead(14, 2);
-    stringPutHex(hex8, rsvdSecCnt, 8);
-    uartOuts("[fat.c] rsvdSecCnt = ");
-    uartOuts(hex8);
-    uartOuts("\n");
+    stringPutHexA(hex8, rsvdSecCnt, 8);
+    uartOutsA("[fat.c] rsvdSecCnt = ");
+    uartOutsA(hex8);
+    uartOutsA("\n");
 
     LBAFat1 = lba + rsvdSecCnt;
 
     rootClu = bootRead(44, 4);
-    stringPutHex(hex8, rootClu, 8);
-    uartOuts("[fat.c] rootClu = ");
-    uartOuts(hex8);
-    uartOuts("\n");
+    stringPutHexA(hex8, rootClu, 8);
+    uartOutsA("[fat.c] rootClu = ");
+    uartOutsA(hex8);
+    uartOutsA("\n");
 
     LBAData = LBAFat1 + (fatSize * numFats);
     
     secPerClu = bootRead(13, 1);
-    stringPutHex(hex8, secPerClu, 8);
-    uartOuts("[fat.c] secPerClu = ");
-    uartOuts(hex8);
-    uartOuts("\n");
+    stringPutHexA(hex8, secPerClu, 8);
+    uartOutsA("[fat.c] secPerClu = ");
+    uartOutsA(hex8);
+    uartOutsA("\n");
 
-    stringPutHex(hex8, LBAFat1, 8);
-    uartOuts("[fat.c] LBAFat1 = ");
-    uartOuts(hex8);
-    uartOuts("\n");
+    stringPutHexA(hex8, LBAFat1, 8);
+    uartOutsA("[fat.c] LBAFat1 = ");
+    uartOutsA(hex8);
+    uartOutsA("\n");
 
-    stringPutHex(hex8, LBAData, 8);
-    uartOuts("[fat.c] LBAData = ");
-    uartOuts(hex8);
-    uartOuts("\n");
+    stringPutHexA(hex8, LBAData, 8);
+    uartOutsA("[fat.c] LBAData = ");
+    uartOutsA(hex8);
+    uartOutsA("\n");
     
     return 0;
 }
 
 int fatReadCluster(int cluster, char* buffer) {
     int sec = LBAData + ((cluster - 2) * secPerClu);
-    return ataReadSectors(sec, secPerClu, buffer);
+    return ataReadSectorsA(sec, secPerClu, buffer);
     
     // Use safe sector by sector mode for now (SLOW....) eugh need to fix multi
     //int c,i;
@@ -122,7 +122,7 @@ int fatTrace(int cluster) {
     debug("[fat.c] fatTrace ini:lba = %x, cluster= %x\n",lba,cluster);
 
     if (fatCacheLBA != lba) {
-        c = ataReadSectors(lba, 1, (char*) fatCache);    
+        c = ataReadSectorsA(lba, 1, (char*) fatCache);    
         if (c!=ATA_ERROR_NONE) return c;    // Error!
         fatCacheLBA = lba;
     }
@@ -143,7 +143,7 @@ int fatNxtSector(struct fatent * fat_ent)
 	}
 
 
-	ataReadSectors(fat_ent->fatoffset+fat_ent->sectorNumber, 1, fat_ent->cache);
+	ataReadSectorsA(fat_ent->fatoffset+fat_ent->sectorNumber, 1, fat_ent->cache);
 
 	fat_ent->sectorNumber++;
 
@@ -256,10 +256,10 @@ void fatOpendir(struct fatent * fat_ent,int startCluster)
 int fatReadFile(int cluster, char* buffer) {
     int c;
     while(1) {
-        stringPutHex(hex8, cluster, 8);
-        uartOuts("[fat.c] reading cluster ");
-        uartOuts(hex8);
-        uartOuts("\n");
+        stringPutHexA(hex8, cluster, 8);
+        uartOutsA("[fat.c] reading cluster ");
+        uartOutsA(hex8);
+        uartOutsA("\n");
 
         c = fatReadCluster(cluster, buffer);        // Read data...
         if (c!=ATA_ERROR_NONE) return c;
@@ -292,7 +292,7 @@ int fatloadFile(char * fileN)
 	}
 	else
 	{
-		uartOuts("Error loading file\n");
+		uartOutsA("Error loading file\n");
 		return 0;
 	}
 }

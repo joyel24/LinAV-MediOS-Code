@@ -10,5 +10,5 @@ void debug(char *fmt, ...)
     va_start(ap, fmt);
     vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
     va_end(ap);
-    uartOuts(debugmembuf);
+    uartOutsA(debugmembuf);
 }

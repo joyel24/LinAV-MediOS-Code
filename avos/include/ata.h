@@ -38,7 +38,23 @@ extern void ataReadData(char *buffer, u32 numHalfWords);
 extern void ataWriteData(char *buffer, u32 numHalfWords);
 extern void ataRead(u32 lba, u32 count);
 extern void ataWrite(u32 lba, u32 count);
-
 extern u32 ataReadSectors(u32 lba, u32 count, char *buffer);
 extern u32 ataWriteSectors(u32 lba, u32 count, char *buffer);
 extern u32 ataIdentifyDevice(char *buffer);
+
+extern void ataSelectA(u32 val);
+extern void ataSelectHDDA();
+extern void ataSelectMemoryCardA();
+extern void ataPowerUpHDDA();
+extern void ataPowerDownHDDA();
+extern void ataIdentifyA();
+extern u32 ataStatusA();
+extern u32 ataWaitForReadyA();
+extern u32 ataWaitForXferA();
+extern void ataReadDataA(char *buffer, u32 numHalfWords);
+extern void ataWriteDataA(char *buffer, u32 numHalfWords);
+extern void ataReadA(u32 lba, u32 count);
+extern void ataWriteA(u32 lba, u32 count);
+extern u32 ataReadSectorsA(u32 lba, u32 count, char *buffer);
+extern u32 ataWriteSectorsA(u32 lba, u32 count, char *buffer);
+extern u32 ataIdentifyDeviceA(char *buffer);

@@ -14,6 +14,13 @@
 @ u32 buttonsGetStatus()
 @
 
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
+
 .ifndef buttonsInc
 buttonsInc = 1
 
@@ -46,6 +53,9 @@ buttonsInc = 1
 @ ------------------------------------------------------------------------------
 @ buttonsGetStatus()
 @   Returns button status in r0
+.globl buttonsGetStatusA
+buttonsGetStatusA:
+        switchThumb
 .globl buttonsGetStatus
 .thumb_func
 

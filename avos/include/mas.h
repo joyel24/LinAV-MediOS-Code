@@ -21,3 +21,9 @@ extern u32 masGetVersion();
 extern u32 masReadReg(u32 reg);
 extern u32 masReadCodecReg(u32 reg);
 extern u32 masWriteCodecReg(u32 reg, u32 val);
+
+extern void masResetA();
+extern u32 masGetVersionA();
+extern u32 masReadRegA(u32 reg);
+extern u32 masReadCodecRegA(u32 reg);
+extern u32 masWriteCodecRegA(u32 reg, u32 val);

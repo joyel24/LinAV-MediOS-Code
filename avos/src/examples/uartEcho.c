@@ -9,11 +9,11 @@ int main() {
     char p[] = "val = [xx] [x]\n";
 
     while(1) {
-        c = uartGetch();
+        c = uartGetchA();
         if (c!=-1) {
-            stringPutHex(p + 7, c, 2);
+            stringPutHexA(p + 7, c, 2);
             p[12] = (char) c;
-            uartOuts(p);
+            uartOutsA(p);
         }
     }
 }

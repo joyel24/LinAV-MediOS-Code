@@ -39,6 +39,13 @@
 @       306f8: {0-15}
 @
 
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
+        
 .ifndef osdInc
 osdInc = 1
 
@@ -151,6 +158,9 @@ osdLookupOffsetHI:  .word 0x30694
 @ ------------------------------------------------------------------------------
 @ osdSetCursor2Bitmap(r0=index, r1=data)
 @
+.globl osdSetCursor2BitmapA
+osdSetCursor2BitmapA:
+        switchThumb
 .globl osdSetCursor2Bitmap
 .thumb_func
 
@@ -174,6 +184,9 @@ osdSetCursor2Bitmap:
 @ ------------------------------------------------------------------------------
 @ osdSetBorderColor(r0=color)
 @
+.globl osdSetBorderColorA
+osdSetBorderColorA:
+        switchThumb
 .globl osdSetBorderColor
 .thumb_func
 
@@ -192,6 +205,9 @@ osdSetBorderColor:
 @ ------------------------------------------------------------------------------
 @ osdSetMainConfig(r0=config)
 @
+.globl osdSetMainConfigA
+osdSetMainConfigA:
+        switchThumb
 .globl osdSetMainConfig
 .thumb_func
 
@@ -211,6 +227,9 @@ osdSetMainConfig:
 @ ------------------------------------------------------------------------------
 @ osdSetMainShift(r0=horizontal, r1=vertical)
 @
+.globl osdSetMainShiftA
+osdSetMainShiftA:
+        switchThumb
 .globl osdSetMainShift
 .thumb_func
 
@@ -226,6 +245,9 @@ osdSetMainShift:
 @ ------------------------------------------------------------------------------
 @ osdSetPallette(r0=Y, r1=Cr, r2=Cb, r3=index)
 @
+.globl osdSetPalletteA
+osdSetPalletteA:
+        switchThumb
 .globl osdSetPallette
 .thumb_func
 
@@ -252,6 +274,9 @@ osdWaiu:ldrh r5, [r4]
 @ ------------------------------------------------------------------------------
 @ osdSet16cPallette(r0=bank0/1, r1=index, r2=value)
 @
+.globl osdSet16CPalletteA
+osdSet16CPalletteA:
+        switchThumb
 .globl osdSet16CPallette
 .thumb_func
 
@@ -280,6 +305,9 @@ osdSet16CPallette:
 @ ------------------------------------------------------------------------------
 @ osdSetAltOffset(r0=offset)
 @
+.globl osdSetAltOffsetA
+osdSetAltOffsetA:
+        switchThumb
 .globl osdSetAltOffset
 .thumb_func
 
@@ -300,6 +328,9 @@ osdSetAltOffset:
 @ osdSetComponentOffset(r0=component, r1=offset)
 @       VIDEO1,VIDEO2,BITMAP1,BITMAP1
 @
+.globl osdSetComponentOffsetA
+osdSetComponentOffsetA:
+        switchThumb
 .globl osdSetComponentOffset
 .thumb_func
 
@@ -339,6 +370,9 @@ osdSetComponentOffset:
 @   VIDEO1,VIDEO2,BITMAP1,BITMAP2,CURSOR1
 @   Note that width should be *2 usually
 @
+.globl osdSetComponentSizeA
+osdSetComponentSizeA:
+        switchThumb
 .globl osdSetComponentSize
 .thumb_func
 
@@ -358,6 +392,9 @@ osdSetComponentSize:
 @   VIDEO1,VIDEO2,BITMAP1,BITMAP2,CURSOR1,CURSOR2
 @   Note that x should be *2 usually
 @
+.globl osdSetComponentPositionA
+osdSetComponentPositionA:
+        switchThumb
 .globl osdSetComponentPosition
 .thumb_func
 
@@ -377,6 +414,9 @@ osdSetComponentPosition:
 @   VIDEO1,VIDEO2,BITMAP1,BITMAP2
 @   Note that width should be *2 usually
 @
+.globl osdSetComponentSourceWidthA
+osdSetComponentSourceWidthA:
+        switchThumb
 .globl osdSetComponentSourceWidth
 .thumb_func
 
@@ -393,6 +433,9 @@ osdSetComponentSourceWidth:
 @ osdSetComponentConfig r0=component, r1=config
 @   VIDEO1,VIDEO2,BITMAP1,BITMAP2,CURSOR1,CURSOR2
 @
+.globl osdSetComponentConfigA
+osdSetComponentConfigA:
+        switchThumb
 .globl osdSetComponentConfig
 .thumb_func
 
@@ -429,6 +472,9 @@ osdNV2: lsl r0, #1
 @ ------------------------------------------------------------------------------
 @ osdSetBrightness r0=(0-255)
 @
+.globl osdSetBrightnessA
+osdSetBrightnessA:
+        switchThumb
 .globl osdSetBrightness
 .thumb_func
 
@@ -447,6 +493,9 @@ osdSetBrightness:
 @ ------------------------------------------------------------------------------
 @ osdSetContrast r0=(0-255)
 @
+.globl osdSetContrastA
+osdSetContrastA:
+        switchThumb
 .globl osdSetContrast
 .thumb_func
 
@@ -469,6 +518,9 @@ osdSetContrast:
 
 @ osdInit
 @
+.globl osdInitA
+osdInitA:
+        switchThumb
 .globl osdInit
 .thumb_func
 osdInit:

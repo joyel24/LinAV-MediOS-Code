@@ -20,3 +20,7 @@ extern u32 usbIsConnected();
 extern void usbEnable();
 extern void usbDisable();
 
+extern u32 usbIsConnectedT();
+extern void usbEnableT();
+extern void usbDisableT();
+

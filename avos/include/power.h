@@ -18,3 +18,6 @@ typedef unsigned long u32;
 
 extern u32 powerGetStatus();
 extern u32 powerIsDCConnected();
+
+extern u32 powerGetStatusA();
+extern u32 powerIsDCConnectedA();

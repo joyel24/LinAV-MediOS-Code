@@ -17,6 +17,13 @@
 @ u32 masWriteCodecReg(u32 reg, u32 val)
 @
 
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
+
 .ifndef masInc
 masInc = 1
 
@@ -42,6 +49,9 @@ masInc = 1
 @ ------------------------------------------------------------------------------
 @ masReset()
 @   
+.globl masResetA
+masResetA:
+        switchThumb
 .globl masReset
 .thumb_func
 
@@ -68,6 +78,9 @@ masD2:  sub r0, #1
 @ ------------------------------------------------------------------------------
 @ masGetVersion()
 @   
+.globl masGetVersionA
+masGetVersionA:
+        switchThumb
 .globl masGetVersion
 .thumb_func
 
@@ -176,6 +189,9 @@ mgvE:
 @ ------------------------------------------------------------------------------
 @ masReadReg(u32 reg)
 @   
+.globl masReadRegA
+masReadRegA:
+        switchThumb
 .globl masReadReg
 .thumb_func
 
@@ -262,6 +278,9 @@ mrrE:
 @ ------------------------------------------------------------------------------
 @ masReadCodecReg(u32 reg)
 @   
+.globl masReadCodecRegA
+masReadCodecRegA:
+        switchThumb
 .globl masReadCodecReg
 .thumb_func
 
@@ -335,6 +354,9 @@ mrcE:
 @ ------------------------------------------------------------------------------
 @ masWriteCodecReg(u32 reg, u32 val)
 @   
+.globl masWriteCodecRegA
+masWriteCodecRegA:
+        switchThumb
 .globl masWriteCodecReg
 .thumb_func
 

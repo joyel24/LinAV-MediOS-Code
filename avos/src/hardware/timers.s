@@ -13,6 +13,13 @@
 @
 @
 
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
+
 .ifndef timersInc
 timersInc = 1
 
@@ -42,6 +49,9 @@ timersInc = 1
 @ ------------------------------------------------------------------------------
 @ timersConfig(r0=timer, r1=config, r2=clk, r3=divval, sp=max val)
 @
+.globl timersConfigA
+timersConfigA:
+        switchThumb
 .globl timersConfig
 .thumb_func
 
@@ -62,6 +72,9 @@ timersConfig:
 @ ------------------------------------------------------------------------------
 @ timersTrigger(r0=timer)
 @
+.globl timersTriggerA
+timersTriggerA:
+        switchThumb
 .globl timersTrigger
 .thumb_func
 
@@ -78,6 +91,9 @@ timersTrigger:
 @ ------------------------------------------------------------------------------
 @ timersGetValue(r0=timer)
 @
+.globl timersGetValueA
+timersGetValueA:
+        switchThumb
 .globl timersGetValue
 .thumb_func
 

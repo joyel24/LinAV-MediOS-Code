@@ -16,7 +16,6 @@
 typedef unsigned long u32;
 #endif
 
-extern void systemReset();
-extern void systemReboot();
 extern void systemRelocateMe();
+extern void systemRelocateMeA();
 

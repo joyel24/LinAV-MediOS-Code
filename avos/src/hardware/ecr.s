@@ -17,6 +17,13 @@
 @ u32 ecbSwapBitsBuffer(u32 offset, u32 count)
 @
 
+
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
 .ifndef ecrInc
 ecrInc = 1
 
@@ -25,6 +32,9 @@ ecrInc = 1
 @ ------------------------------------------------------------------------------
 @ ecrSwapBytes()
 @   fedcba98 76543210 ->    76543210 fedcba98
+.globl ecrSwapBytesA
+ecrSwapBytesA:
+        switchThumb
 .globl ecrSwapBytes
 .thumb_func
 
@@ -40,6 +50,9 @@ ecrSwapBytes:
 @ ------------------------------------------------------------------------------
 @ ecrSwapBytesBuffer(r0->buffer, r1->bufferOut, r2=count)
 @   fedcba98 76543210 ->    76543210 fedcba98
+.globl ecrSwapBytesBufferA
+ecrSwapBytesBufferA:
+        switchThumb
 .globl ecrSwapBytesBuffer
 .thumb_func
 
@@ -60,6 +73,9 @@ ecrl1:  ldrh r3, [r0, r2]
 @ ------------------------------------------------------------------------------
 @ ecrSwapBits()
 @   fedcba98 76543210 ->    01234567 89abcdef
+.globl ecrSwapBitsA
+ecrSwapBitsA:
+        switchThumb
 .globl ecrSwapBits
 .thumb_func
 
@@ -75,6 +91,9 @@ ecrSwapBits:
 @ ------------------------------------------------------------------------------
 @ ecrSwapBitsBuffer(r0->buffer, r1->bufferOut, r2=count)
 @   fedcba98 76543210 ->    01234567 89abcdef
+.globl ecrSwapBitsBufferA
+ecrSwapBitsBufferA:
+        switchThumb
 .globl ecrSwapBitsBuffer
 .thumb_func
 

@@ -20,21 +20,38 @@ LDFLAG=-L$(BUILDDIR)/arm-linux/lib
 ## or find a better way to do it ;)
 
 
-libavos:
+libavosold:
 	arm-linux-gcc -Wa,-R -c -mthumb-interwork -fno-zero-initialized-in-bss -Iinclude/ src/fonts/*.c
 	arm-linux-gcc -Wa,-R -c -mthumb-interwork -fno-zero-initialized-in-bss -Iinclude/ src/drivers/*.c
 	arm-linux-as -mfpu=softfpa -mthumb-interwork -o lib/libavos.o src/hardware/*.s
 	mv *.o lib
 
+libavos:
+	arm-linux-gcc -Wa,-R -c -fno-zero-initialized-in-bss -Iinclude/ src/fonts/*.c
+	arm-linux-gcc -Wa,-R -c -fno-zero-initialized-in-bss -Iinclude/ src/drivers/*.c
+	arm-linux-as -mfpu=softfpa -o lib/libavos.o src/hardware/*.s
+	mv *.o lib
+    
 .PHONY: clean
 clean:
 	rm -f *~ *.o *.elf *.bin
 	rm -f lib/*.o
 	rm -f dist/*.bin
 
-examples: src/examples/*.c
+examplesold: src/examples/*.c
 	@for i in src/examples/*.c;do\
 	arm-linux-gcc -mthumb-interwork -static-libgcc -c -Wa,-R\
+    -fno-zero-initialized-in-bss -Iinclude/ $$i;\
+	arm-linux-ld -N -Ttext 0x03000000 -e main -o `basename $$i .c`.elf `basename $$i .c`.o\
+    lib/*.o $(LDFLAG) -lc -lfloat -lgcc;\
+	arm-linux-objcopy -O binary `basename $$i .c`.elf `basename $$i .c`.bin;\
+    rm -f `basename $$i .c`.elf `basename $$i .c`.o;\
+    mv *.bin dist/;\
+    done
+    
+examples: src/examples/*.c
+	@for i in src/examples/*.c;do\
+	arm-linux-gcc -static-libgcc -c -Wa,-R\
     -fno-zero-initialized-in-bss -Iinclude/ $$i;\
 	arm-linux-ld -N -Ttext 0x03000000 -e main -o `basename $$i .c`.elf `basename $$i .c`.o\
     lib/*.o $(LDFLAG) -lc -lfloat -lgcc;\

@@ -72,56 +72,56 @@ int main() {
     
     int x=32, y=32, cdir=0;
     
-    osdInit();
+    osdInitA();
     
-    osdSetComponentConfig(OSD_VIDEO1, 0);
-    osdSetComponentConfig(OSD_VIDEO2, 0);
-    osdSetComponentConfig(OSD_BITMAP1, 0);
-    osdSetComponentConfig(OSD_BITMAP2, 0);
-    osdSetComponentConfig(OSD_CURSOR1, 0);
-    osdSetComponentConfig(OSD_CURSOR2, 0);
+    osdSetComponentConfigA(OSD_VIDEO1, 0);
+    osdSetComponentConfigA(OSD_VIDEO2, 0);
+    osdSetComponentConfigA(OSD_BITMAP1, 0);
+    osdSetComponentConfigA(OSD_BITMAP2, 0);
+    osdSetComponentConfigA(OSD_CURSOR1, 0);
+    osdSetComponentConfigA(OSD_CURSOR2, 0);
     
-    osdSetComponentSize(OSD_VIDEO1, 640, 240);
-    osdSetComponentPosition(OSD_VIDEO1, 0x14, 0x13);
-    osdSetComponentOffset(OSD_VIDEO1, 0x03c00000);
-    osdSetComponentSourceWidth(OSD_VIDEO1, 0x28);
-    osdSetComponentConfig(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
+    osdSetComponentSizeA(OSD_VIDEO1, 640, 240);
+    osdSetComponentPositionA(OSD_VIDEO1, 0x14, 0x13);
+    osdSetComponentOffsetA(OSD_VIDEO1, 0x03c00000);
+    osdSetComponentSourceWidthA(OSD_VIDEO1, 0x28);
+    osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
 
-    osdSetComponentSize(OSD_VIDEO2, 128, 64);
-    osdSetComponentPosition(OSD_VIDEO2, 0x14, 0x13);
-    osdSetComponentOffset(OSD_VIDEO2, 0x03e00000);
-    osdSetComponentSourceWidth(OSD_VIDEO2, 0x28);
-    osdSetComponentConfig(OSD_VIDEO2, OSD_COMPONENT_ENABLE);
+    osdSetComponentSizeA(OSD_VIDEO2, 128, 64);
+    osdSetComponentPositionA(OSD_VIDEO2, 0x14, 0x13);
+    osdSetComponentOffsetA(OSD_VIDEO2, 0x03e00000);
+    osdSetComponentSourceWidthA(OSD_VIDEO2, 0x28);
+    osdSetComponentConfigA(OSD_VIDEO2, OSD_COMPONENT_ENABLE);
 
-    osdSetComponentSize(OSD_BITMAP1, 300, 100);
-    osdSetComponentPosition(OSD_BITMAP1, 0x14, 0x13);
-    osdSetComponentOffset(OSD_BITMAP1, 0x03800000);
-    osdSetComponentSourceWidth(OSD_BITMAP1, 0x14);
-    osdSetComponentConfig(OSD_BITMAP1, OSD_COMPONENT_ENABLE
+    osdSetComponentSizeA(OSD_BITMAP1, 300, 100);
+    osdSetComponentPositionA(OSD_BITMAP1, 0x14, 0x13);
+    osdSetComponentOffsetA(OSD_BITMAP1, 0x03800000);
+    osdSetComponentSourceWidthA(OSD_BITMAP1, 0x14);
+    osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT
                                      | OSD_BITMAP_MERGEBACK
                                      | OSD_BITMAP_A4);
 
-    osdSetComponentSize(OSD_BITMAP2, 64, 32);
-    osdSetComponentPosition(OSD_BITMAP2, 0x14, 0x13);
-    osdSetComponentOffset(OSD_BITMAP2, 0x03700000);
-    osdSetComponentSourceWidth(OSD_BITMAP2, 0x3);
-    osdSetComponentConfig(OSD_BITMAP2, OSD_COMPONENT_ENABLE
+    osdSetComponentSizeA(OSD_BITMAP2, 64, 32);
+    osdSetComponentPositionA(OSD_BITMAP2, 0x14, 0x13);
+    osdSetComponentOffsetA(OSD_BITMAP2, 0x03700000);
+    osdSetComponentSourceWidthA(OSD_BITMAP2, 0x3);
+    osdSetComponentConfigA(OSD_BITMAP2, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT
                                      | OSD_BITMAP_MERGEBACK
                                      | OSD_BITMAP_A4);
 
-    osdSetComponentConfig(OSD_CURSOR2, OSD_COMPONENT_ENABLE
+    osdSetComponentConfigA(OSD_CURSOR2, OSD_COMPONENT_ENABLE
                                      | OSD_CURSOR2_A0
                                      );
 
                                      
     for (c=0;c<16;c++) {
-        osdSet16CPallette(0, c, c);
+        osdSet16CPalletteA(0, c, c);
     }
     
     for (c=0;c<256;c++) {
-        osdSetCursor2Bitmap(c, cursor[c]);    
+        osdSetCursor2BitmapA(c, cursor[c]);    
     }
     
     screenVideo.offset = 0x03c00000;
@@ -152,43 +152,43 @@ int main() {
     screenBitmap2.bitsPerPixelShift = 4;
     screenBitmap2.bitsPerPixel = 16;
     
-    graphicsBoxf(&screenVideo, 0, 0, 320, 240, 0x000000);
-    graphicsBoxf(&screenVideo, 0, 0, 160, 120, 0x80800000);
-    graphicsBoxf(&screenVideo, 20, 120, 200, 100, 0xc0c0c000);
+    graphicsBoxfA(&screenVideo, 0, 0, 320, 240, 0x000000);
+    graphicsBoxfA(&screenVideo, 0, 0, 160, 120, 0x80800000);
+    graphicsBoxfA(&screenVideo, 20, 120, 200, 100, 0xc0c0c000);
 
-    graphicsBoxf(&screenVideo2, 0, 0, 64, 64, 0xf0f0d0e0);
+    graphicsBoxfA(&screenVideo2, 0, 0, 64, 64, 0xf0f0d0e0);
 
-    graphicsBoxf(&screenBitmap, 0, 0, 160, 120, 0x0000);
-    graphicsBoxf(&screenBitmap, 20, 20, 120, 80, 0x0101);
-    graphicsBoxf(&screenBitmap2, 0, 0, 40, 32, 0x0404);
+    graphicsBoxfA(&screenBitmap, 0, 0, 160, 120, 0x0000);
+    graphicsBoxfA(&screenBitmap, 20, 20, 120, 80, 0x0101);
+    graphicsBoxfA(&screenBitmap2, 0, 0, 40, 32, 0x0404);
 
     
-    graphicsString(&screenBitmap, 2, 20, &sprite4_6, std4x6_, 5, 1, "abcdefghijklmnop");
+    graphicsStringA(&screenBitmap, 2, 20, &sprite4_6, std4x6_, 5, 1, "abcdefghijklmnop");
 
-    graphicsString(&screenBitmap2, 0, 0, &spriteShadow, shadow_, 12, 0, "DOG");
+    graphicsStringA(&screenBitmap2, 0, 0, &spriteShadow, shadow_, 12, 0, "DOG");
 
-    graphicsBoxf(&screenVideo, 80, 60, 100, 100, 0xc0c0c000);   //0x4040e050);
+    graphicsBoxfA(&screenVideo, 80, 60, 100, 100, 0xc0c0c000);   //0x4040e050);
     
     
-    graphicsString(&screenVideo, 2, 120, &spriteShadow, shadow_, 13, 0, "ABC DEF GHI JKL MNOPQ");
-    graphicsString(&screenVideo, 2, 48, &sprite5_8, std5x8_, 6, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
+    graphicsStringA(&screenVideo, 2, 120, &spriteShadow, shadow_, 13, 0, "ABC DEF GHI JKL MNOPQ");
+    graphicsStringA(&screenVideo, 2, 48, &sprite5_8, std5x8_, 6, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
 
     //sprite5_8.offset = std5x8_[54];
     //graphics32Sprite(&screenVideo, 2, 48, &sprite5_8);
 
-    graphicsString(&screenVideo, 2, 48, &sprite5_8, std5x8_, 6, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
+    graphicsStringA(&screenVideo, 2, 48, &sprite5_8, std5x8_, 6, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
     pal32[1] = 0x50503020;
-    graphicsString(&screenVideo, 100, 30, &sprite7_13, std7x13_, 0, 14, "Font drawing!");
+    graphicsStringA(&screenVideo, 100, 30, &sprite7_13, std7x13_, 0, 14, "Font drawing!");
     pal32[1] = 0x202090a0;
-    graphicsString(&screenVideo, 4, 200, &spriteCursive, cursive_, 10, 0, "BY DoggerMoore");
+    graphicsStringA(&screenVideo, 4, 200, &spriteCursive, cursive_, 10, 0, "BY DoggerMoore");
 
     while(1) {
         movec++;
         if (movec>0x800) {
             movec=0;
-            osdSetComponentPosition(OSD_BITMAP1, 0x14 + (bx*2), 0x13 + by);
-            osdSetComponentPosition(OSD_BITMAP2, 0x14 + (bx*2) + (bx2*2), 0x13 + by + by2);
-            osdSetComponentPosition(OSD_VIDEO2, 0x14 + (vx*2), 0x13 + vy);
+            osdSetComponentPositionA(OSD_BITMAP1, 0x14 + (bx*2), 0x13 + by);
+            osdSetComponentPositionA(OSD_BITMAP2, 0x14 + (bx*2) + (bx2*2), 0x13 + by + by2);
+            osdSetComponentPositionA(OSD_VIDEO2, 0x14 + (vx*2), 0x13 + vy);
             bx+=bdx;
             by+=bdy;
             if (bx<0) {bx=0;bdx=-bdx;}
@@ -217,7 +217,7 @@ int main() {
             bdf+=dbdf;
             if (bdf==8) {bdf=7;dbdf=-dbdf;}
             if (bdf<0) {bdf=0;dbdf=-dbdf;}
-            osdSetComponentConfig(OSD_BITMAP1, OSD_COMPONENT_ENABLE
+            osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT
                                      | OSD_BITMAP_MERGEBACK
                                      | (bdf << OSD_BITMAP_A_SHIFT));
@@ -225,7 +225,7 @@ int main() {
 
         if (butslow==0) {
             butslow=butmax;
-            c = buttonsGetStatus();
+            c = buttonsGetStatusA();
             if (c & BUTTONS_AV300_UP) {
                 cursory--;
                 butmax-=2;
@@ -243,42 +243,42 @@ int main() {
             }
 
             if (c & BUTTONS_AV300_MENU1) {
-                osdSetComponentConfig(OSD_CURSOR2, OSD_COMPONENT_ENABLE
+                osdSetComponentConfigA(OSD_CURSOR2, OSD_COMPONENT_ENABLE
                                      | OSD_CURSOR2_A0
                                      | OSD_CURSOR2_ZY1 | OSD_CURSOR2_ZX1);
-                osdSetComponentConfig(OSD_BITMAP2, OSD_COMPONENT_ENABLE
+                osdSetComponentConfigA(OSD_BITMAP2, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT
                                      | OSD_BITMAP_MERGEBACK
                                      | OSD_BITMAP_A4
                                      | OSD_BITMAP_ZY2 | OSD_BITMAP_ZX2);
-                osdSetComponentSize(OSD_BITMAP2, 128*2, 128);
+                osdSetComponentSizeA(OSD_BITMAP2, 128*2, 128);
             } else if (c & BUTTONS_AV300_MENU2) {
-                osdSetComponentConfig(OSD_CURSOR2, OSD_COMPONENT_ENABLE
+                osdSetComponentConfigA(OSD_CURSOR2, OSD_COMPONENT_ENABLE
                                      | OSD_CURSOR2_A0);
-                osdSetComponentConfig(OSD_BITMAP2, OSD_COMPONENT_ENABLE
+                osdSetComponentConfigA(OSD_BITMAP2, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT
                                      | OSD_BITMAP_MERGEBACK
                                      | OSD_BITMAP_A4);
-                osdSetComponentSize(OSD_BITMAP2, 32*2, 32);
+                osdSetComponentSizeA(OSD_BITMAP2, 32*2, 32);
             } else if (c & BUTTONS_AV300_MENU3) {
                 if (!mvlatched) {
                 mvlatched = 1;
                 mvzoom++;
                 if (mvzoom==3) mvzoom=0;
                 if (mvzoom==0) {
-                    osdSetComponentOffset(OSD_VIDEO1, 0x03c00000);
-                    osdSetComponentConfig(OSD_VIDEO1, OSD_COMPONENT_ENABLE);                    
+                    osdSetComponentOffsetA(OSD_VIDEO1, 0x03c00000);
+                    osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE);                    
                 } else if (mvzoom==1) {
-                    osdSetComponentOffset(OSD_VIDEO1, 0x03c00000
+                    osdSetComponentOffsetA(OSD_VIDEO1, 0x03c00000
                                                       + (80*4)
                                                       + (60*320*4));
-                    osdSetComponentConfig(OSD_VIDEO1, OSD_COMPONENT_ENABLE
+                    osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE
                                             | OSD_VIDEO_ZX1 | OSD_VIDEO_ZY1);                                        
                 } else if (mvzoom==2) {
-                    osdSetComponentOffset(OSD_VIDEO1, 0x03c00000
+                    osdSetComponentOffsetA(OSD_VIDEO1, 0x03c00000
                                                       + (120*4)
                                                       + (90*320*4));
-                    osdSetComponentConfig(OSD_VIDEO1, OSD_COMPONENT_ENABLE
+                    osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE
                                             | OSD_VIDEO_ZX2 | OSD_VIDEO_ZY2);                    
                 }
                 }
@@ -297,16 +297,16 @@ int main() {
         if (cursorx>(318)) cursorx=318;
         if (cursory>(238)) cursory=238;
 
-        osdSetComponentPosition(OSD_CURSOR2, (cursorx<<1)+0x18, cursory+0x13);
+        osdSetComponentPositionA(OSD_CURSOR2, (cursorx<<1)+0x18, cursory+0x13);
         
         cellc++;
         if (cellc==0x80) {
             cellc=0;
-            c = graphicsGetPixel(&screenVideo2, x, y);
+            c = graphicsGetPixelA(&screenVideo2, x, y);
             if ((c&1)==0) cdir++; else cdir--;
             cdir = cdir & 3;
             c=c + 0x010305;
-            graphicsSetPixel(&screenVideo2, x, y, c);
+            graphicsSetPixelA(&screenVideo2, x, y, c);
         
             if (cdir==0) x++;
             else if (cdir==1) y++;

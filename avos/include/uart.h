@@ -20,3 +20,7 @@ extern u32 uartGetch();
 extern void uartOutch(u32 data);
 extern void uartOuts(char* string);
 
+extern u32 uartGetchT();
+extern void uartOutchT(u32 data);
+extern void uartOutsT(char* string);
+

@@ -27,14 +27,14 @@ int opendir(char* name)
             break;
 
     if ( dd == MAX_OPEN_DIRS ) {
-		uartOuts("Too many dir open\n");
+		uartOutsA("Too many dir open\n");
         return -1;
     }
 
     opendirs[dd].busy = true;
 
     if ( name[0] != '/' ) {
-        uartOuts("Only absolute paths supported right now\n");
+        uartOutsA("Only absolute paths supported right now\n");
         opendirs[dd].busy = false;
         return -1;
     }
@@ -52,7 +52,7 @@ int opendir(char* name)
             if ((entry=readdir(dd))==0)
 			{
                 opendirs[dd].busy = false;
-				uartOuts("Can't find the dir\n");
+				uartOutsA("Can't find the dir\n");
                 return -1;
           	}
 
@@ -88,7 +88,7 @@ struct dirent* readdir(int dd)
 			memcpy(&entry,&fat_ent->cache[fat_ent->cacheoffset],BUFFER_SIZE-fat_ent->cacheoffset);
 			if(fat_ent->eof_disk)
 			{
-				uartOuts("End of cluster chain, before end of direntry\n");
+				uartOutsA("End of cluster chain, before end of direntry\n");
 				break;
 			}
 			pos=BUFFER_SIZE-fat_ent->cacheoffset;

@@ -26,3 +26,7 @@ typedef unsigned long u32;
 extern u32 timersGetValue(u32 timer);
 extern void timersTrigger(u32 timer);
 extern void timersConfig(u32 timer, u32 mode, u32 clockSelect, u32 divide, u32 maxVal);
+
+extern u32 timersGetValueA(u32 timer);
+extern void timersTriggerA(u32 timer);
+extern void timersConfigA(u32 timer, u32 mode, u32 clockSelect, u32 divide, u32 maxVal);

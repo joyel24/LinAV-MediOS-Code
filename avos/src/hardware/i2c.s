@@ -26,6 +26,13 @@
 @ i2cAckEnd()
 @ 
         
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
+
         i2cBaseAddress  =   0x30580
         
         i2cRegDR        =   0x02
@@ -48,6 +55,9 @@ i2cDE:  sub r0, #1
 @-------------------------------------------------------------------------------
 @
 @
+.globl i2cAckA
+i2cAckA:
+        switchThumb
 .globl i2cAck
 .thumb_func
 i2cAck:
@@ -112,6 +122,9 @@ i2cXA2:
 @-------------------------------------------------------------------------------
 @ i2cStop
 @
+.globl i2cStopA
+i2cStopA:
+        switchThumb
 .globl i2cStop
 .thumb_func
 
@@ -157,6 +170,9 @@ i2cStop:
 @-------------------------------------------------------------------------------
 @
 @
+.globl i2cAckEndA
+i2cAckEndA:
+        switchThumb
 .globl i2cAckEnd
 .thumb_func
 i2cAckEnd:
@@ -214,6 +230,9 @@ i2cVA2:
 @-------------------------------------------------------------------------------
 @
 @
+.globl i2cStartA
+i2cStartA:
+        switchThumb
 .globl i2cStart
 .thumb_func
 i2cStart:
@@ -251,6 +270,9 @@ i2cStart:
 @-------------------------------------------------------------------------------
 @ i2cGetAck
 @
+.globl i2cGetAckA
+i2cGetAckA:
+        switchThumb
 .globl i2cGetAck
 .thumb_func
 
@@ -316,6 +338,9 @@ i2cGA2:
 @-------------------------------------------------------------------------------
 @ i2cInb
 @
+.globl i2cInbA
+i2cInbA:
+        switchThumb
 .globl i2cInb
 .thumb_func
 
@@ -382,6 +407,9 @@ i2cW9:
 @-------------------------------------------------------------------------------
 @ i2cOutb (r0=data)
 @
+.globl i2cOutbA
+i2cOutbA:
+        switchThumb
 .globl i2cOutb
 .thumb_func
 
@@ -461,6 +489,9 @@ i2cW2:
 @-------------------------------------------------------------------------------
 @ i2cRead (r0=device, r1=addr, r2->buffer, r3=count)
 @
+.globl i2cReadA
+i2cReadA:
+        switchThumb
 .globl i2cRead
 .thumb_func
 
@@ -546,6 +577,9 @@ i2cRE:  mov r0, #0
 @-------------------------------------------------------------------------------
 @ i2cWrite (r0=device, r1=addr, r2->buffer, r3=count)
 @
+.globl i2cWriteA
+i2cWriteA:
+        switchThumb
 .globl i2cWrite
 .thumb_func
 
@@ -614,6 +648,9 @@ i2cWE:  mov r0, #0
 @-------------------------------------------------------------------------------
 @ i2cWriteRaw (r0=device, r1->buffer, r2=count)
 @
+.globl i2cWriteRawA
+i2cWriteRawA:
+        switchThumb
 .globl i2cWriteRaw
 .thumb_func
 

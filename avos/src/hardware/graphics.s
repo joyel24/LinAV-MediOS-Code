@@ -32,6 +32,14 @@
 @ Also, 32 bit is actually likewise 2 pixels. Y0 Cb Y1 Cr.
 @ This is again used for hardware zoom x2/x4.
 
+.macro switchThumb
+        .arm
+        add ip, pc, #1
+        bx ip
+        .thumb
+.endm
+
+
 .ifndef graphicsInc
 graphicsInc = 1
 
@@ -78,7 +86,6 @@ graphicsRoutines:
 @ graphicsGetOffset(r0->bufferDef, r1=x, r2=y)
 @       Returns offset of pixel in r0.
 @
-.globl graphicsGetOffset
 .thumb_func
 
 graphicsGetOffset:
@@ -97,9 +104,8 @@ graphicsGetOffset:
 
                     
 @ ------------------------------------------------------------------------------
-@ graphicsCallRoutine(r0->bufferDef, r7=routine)
+@ graphicsFindRoutine(r0->bufferDef, r7=routine)
 @
-.globl graphicsCallRoutine
 .thumb_func
 
 graphicsFindRoutine:
@@ -118,6 +124,9 @@ graphicsFindRoutine:
 @ ------------------------------------------------------------------------------
 @ graphicsSetPixel(r0->bufferDef, r1=x, r2=y, r3=c)
 @
+.globl graphicsSetPixelA
+graphicsSetPixelA:
+        switchThumb
 .globl graphicsSetPixel
 .thumb_func
 
@@ -136,6 +145,9 @@ graphicsSetPixel:
 @ graphicsGetPixel(r0->bufferDef, r1=x, r2=y)
 @       Returns the pixels color in r0
 @
+.globl graphicsGetPixelA
+graphicsGetPixelA:
+        switchThumb
 .globl graphicsGetPixel
 .thumb_func
 
@@ -153,6 +165,9 @@ graphicsGetPixel:
 @ ------------------------------------------------------------------------------
 @ graphicsBoxf(r0->bufferDef, r1=x, r2=y, r3=width, r4=height, r5=c)
 @
+.globl graphicsBoxfA
+graphicsBoxfA:
+        switchThumb
 .globl graphicsBoxf
 .thumb_func
 
@@ -172,6 +187,9 @@ graphicsBoxf:
 @ ------------------------------------------------------------------------------
 @ graphicsSprite(r0->bufferDefDest, r1=x, r2=y, r3=bufferDefSrc)
 @
+.globl graphicsSpriteA
+graphicsSpriteA:
+        switchThumb
 .globl graphicsSprite
 .thumb_func
 
@@ -190,6 +208,9 @@ graphicsSprite:
 @ graphicsString(r0->bufferDefDest, r1=x, r2=y, r3=bufferDefSrc,
 @                r4->fontLUT, r5=dx, r6=dy, r7->String)
 @
+.globl graphicsStringA
+graphicsStringA:
+        switchThumb
 .globl graphicsString
 .thumb_func
 
