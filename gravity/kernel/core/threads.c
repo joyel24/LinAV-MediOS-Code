@@ -36,14 +36,24 @@ __IRAM_CODE KERNEL_ERROR_CODE kinit_tcb ()
 
 __IRAM_CODE void kthread_final_trap (int nRetCode)
 {
-//   __cli();
-   printk("THREAD FINAL TRAP. RETCODE: %08x\n", nRetCode);
-//   __sti();
+	TASK_INFO* pTCB;
+	__cli ();
+	pTCB = g_pTaskRing;
+	__sti ();
 
-   //TODO: Here we should delete thread control block and free resources...
-   while (1);
+	__cli ();
+	printk("%s[%08x]: THREAD FINAL TRAP. RETCODE: %08x\n", pTCB->cName, pTCB, nRetCode);
+	__sti ();
 
-//   API_TASK_TERMINATE ();
+	register long _r12 asm("r12");
+	register long _r13 asm("r13");
+	register long _lr asm("lr");
+	__cli ();
+	printk("%s[%08x]: REGISTERS: r12=%08x r13=%08x lr=%08x\n", pTCB->cName, pTCB, _r12, _r13, _lr);
+	__sti ();
+
+	while (1);
+//API_TASK_TERMINATE ();
 }
 
 __IRAM_CODE void kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackSize, const char* pszTaskName)
@@ -69,22 +79,22 @@ __IRAM_CODE void kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackS
 
 __IRAM_CODE unsigned long* kInitialiseStack (unsigned long* pxTopOfStack, void* pvCode, void *pvParameters)
 {
-	unsigned long *pxOriginalTOS = pxTopOfStack;
+	printk ("TCB stack set to %08x\n", pxTopOfStack);
 
-   //TODO: Here we need to load "kthread_final_trap" address to enable thread safe termination...
-   *pxTopOfStack = (unsigned long)kthread_final_trap;
-   pxTopOfStack--;
-
-	*pxTopOfStack = (unsigned long)pvCode + 4;//portINSTRUCTION_SIZE;
+	// store [pc]
+	*pxTopOfStack = (unsigned long)pvCode + 4;
 	pxTopOfStack--;
-
-	*pxTopOfStack = (unsigned long) pxOriginalTOS; /* Stack used when task starts goes in R13. */
-	pxTopOfStack -= 13;
-	*pxTopOfStack = (unsigned long) pvParameters; // R0
+	// store [lr]
+	*pxTopOfStack = (unsigned long)kthread_final_trap;
+	pxTopOfStack --;
+	// store [r12]
+	*pxTopOfStack = (unsigned long)0x12121212;
+	pxTopOfStack -= 12;
+	// store [r0-r12]
+	*pxTopOfStack = (unsigned long)pvParameters; // R0
 	pxTopOfStack--;
-
-	*pxTopOfStack = (unsigned long) 0x1F; // System mode, ARM mode, interrupts enabled
-
+	// store [spsr]
+	*pxTopOfStack = (unsigned long)0x1F;
 	return pxTopOfStack;
 }
 

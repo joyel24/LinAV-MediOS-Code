@@ -57,16 +57,34 @@ extern int kmemory_manager (void* pvParameters);
 
 extern void API_BKT(void);
 
+#if 0
+void debug_thread (void)
+{
+	register long _r7 asm("r7");
+	register long _r8 asm("r8");
+	register long _r12 asm("r12");
+	register long _r13 asm("r13");
+	asm volatile ( "mrs r7, cpsr");
+	asm volatile ( "mov r8, lr");
+	__cli ();
+	printk("*** debug_thread *** [CPSR:%08x, R12:%08x, SP:%08x, LR:%08x]\n", _r7, _r12, _r13, _r8);
+	__sti ();
+
+    while(1);
+}
+#endif
+
+void kload_context();
 
 void kernel_start (void)
 {
     ini_graphics();
     ini_debugOnScreen();
-   
+
     /* malloc of max space in SDRAM */
     init_malloc((void*)MALLOC_START,MALLOC_SIZE);
-    
-    /* print banner on uart */ 
+
+    /* print banner on uart */
     printk("GRAVITY %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);
     printk("Initial SP: %08x, kernel end: %08x, size in IRAM: %08x  Malloc start: %08x, size: %08x\n",get_sp(),
         (unsigned int)&_end_kernel,
@@ -74,61 +92,71 @@ void kernel_start (void)
         (unsigned int)MALLOC_START,
         (unsigned int)MALLOC_SIZE);
 
-           
     /* initialize thread lists and setup first two threads */
     kinit_tcb ();
 
 ///////////////////////////////////////////////////
 /// TODO: This code gows to kinit_tcb ()...
-   g_pKernelCtrlPipe = kmalloc (sizeof(PIPE));
-   g_pKernelCtrlPipe->nReceiver = 0;
-   g_pKernelCtrlPipe->nSender = 0;
-
-   g_pSystemCtrlPipe = kmalloc (sizeof(PIPE));
-   g_pSystemCtrlPipe->nReceiver = 0;
-   g_pSystemCtrlPipe->nSender = 0;
-
+    kadd_tcb (&g_pTaskRing, kcreate_tcb (kmemory_manager, TASK_STACK_SIZE,   0, "MEMMGR"));
     kadd_tcb (&g_pTaskRing, kcreate_tcb (kernel_startup_thread, TASK_STACK_SIZE, 0, "USER"));
-    kadd_tcb (&g_pTaskRing, kcreate_tcb (kmemory_manager, TASK_STACK_SIZE,   0, "SYSTEM"));
+
+#if 0
+    kadd_tcb (&g_pTaskRing, kcreate_tcb (debug_thread, TASK_STACK_SIZE, 0, "DEBUG"));
+    kadd_tcb (&g_pTaskRing, kcreate_tcb (debug_thread, TASK_STACK_SIZE, 0, "DEBUG"));
+    kadd_tcb (&g_pTaskRing, kcreate_tcb (debug_thread, TASK_STACK_SIZE, 0, "DEBUG"));
+    kadd_tcb (&g_pTaskRing, kcreate_tcb (debug_thread, TASK_STACK_SIZE, 0, "DEBUG"));
+#endif
 ///////////////////////////////////////////////////
 
     /* init the irq */
-    init_irq(); 
+    init_irq();
 
     /* init the tick timer */
     init_timer();
 
     /* enable the IRQ */
-    __sti(); 
-    
+    __sti();
+
     /* switch to first task in list */
     kload_context();
 }
 
 void kernel_startup_thread (void)
 {
+/*
+	register long _r7 asm("r7");
+	register long _r8 asm("r8");
+	register long _r12 asm("r12");
+	register long _r13 asm("r13");
+	asm volatile ( "mrs r7, cpsr");
+	asm volatile ( "mov r8, lr");
+	__cli ();
+	printk("*** kernel_startup_thread *** [CPSR:%08x, R12:%08x, SP:%08x, LR:%08x]\n", _r7, _r12, _r13, _r8);
+	__sti ();
+*/
+
     /* driver init */
 
     init_cpld();
     init_HW_chk();
-    
+
     init_cmd_line();
 
     init_buttons();
     init_rtc();
     init_usb_fw();
-    
+
     init_power();
     init_disk();
 
     printk("[init] ------------ all drivers\n");
 
     print_boot_info();
-    
+
     //load_bflat("/test.grv");
-    
+
     printk("[init] END\n");
 
-    while(1) /*nothing*/;
-    //avwm();       
+    while(1);
+    //avwm();
 }

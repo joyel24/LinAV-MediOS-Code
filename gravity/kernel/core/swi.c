@@ -35,12 +35,12 @@ __IRAM_CODE int kcswi_handler (
 		if (!pTCB)
 			return ERR_NOMEMORY;
 
-		API_MALLOC (&pTCB->pStack, 16384 /*nStackSize*/ );
+		API_MALLOC (&pTCB->pStack, 16384);
 
-		kInitialiseTCBVariables (pTCB, 16384 /*nStackSize*/, "USER" /*pszTaskName*/);
+		kInitialiseTCBVariables (pTCB, 16384, "USER");
 		unsigned char* pTopOfStack = (unsigned char*)pTCB->pStack;
 		pTopOfStack += pTCB->nStackSize - 4;
-		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, nParam1 /*pvTaskCode*/, nParam2 /*pParams*/);
+		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, nParam1, nParam2);
 		API_MALLOC (&pTCB->pMessagePipe, sizeof(PIPE));
 		pTCB->pMessagePipe->nReceiver = 0;
 		pTCB->pMessagePipe->nSender = 0;
@@ -297,12 +297,12 @@ __IRAM_CODE int kcswi_handler (
 
 		ERROR_CODE code = load_bflat ((const char *)nParam1, pTCB);
 
-		API_MALLOC (&pTCB->pStack, 16384 /*nStackSize*/ );
+		API_MALLOC (&pTCB->pStack, 16384);//nStackSize
 
-		kInitialiseTCBVariables (pTCB, 16384 /*nStackSize*/, "USER" /*pszTaskName*/);
+		kInitialiseTCBVariables (pTCB, 16384 , "USER");
 		unsigned char* pTopOfStack = (unsigned char*)pTCB->pStack;
 		pTopOfStack += pTCB->nStackSize - 4;
-		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, pTCB->pEntry /*pvTaskCode*/, 0 /*pParams*/);
+		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, pTCB->pEntry, 0);
 		API_MALLOC (&pTCB->pMessagePipe, sizeof(PIPE));
 		pTCB->pMessagePipe->nReceiver = 0;
 		pTCB->pMessagePipe->nSender = 0;

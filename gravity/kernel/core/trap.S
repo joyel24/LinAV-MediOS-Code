@@ -160,6 +160,8 @@ trap_irq:
 	bl kset_next_ready_task
 	bl __irq_trap
 
+.global kload_context
+kload_context:
 	ldr r1, g_pTaskRing     @// r1 = address of new active TCB...
 	ldr r12, [r1]           @// Get user's top of stack from TCB...
 	ldmia r12!, {r4}        @// Get user SPSR...
@@ -167,7 +169,8 @@ trap_irq:
 	bic r4, r4, #0x20       @// We want ARM mode...
 	msr cpsr_cfsx, r4       @// switch to user's mode...
 	mov sp, r12
-	ldmia sp!, {r0-r12, lr, pc}^
+	ldmia sp!, {r0-r12, lr, pc}
+@	ldmia sp!, {r0-r12, lr, pc}^
 
 .align 5
 .global g_pTaskRing

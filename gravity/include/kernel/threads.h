@@ -64,25 +64,6 @@ typedef struct _SYSTEM_CTRL_COMMAND
 
 extern TASK_INFO* g_pTaskRing; // pointer to current element in ring list
 
-#define kload_context()													\
-{																		\
-	/* Set the LR to the task stack. */									\
-	asm volatile ( "LDR		R0, %0" : : "m" (g_pTaskRing) );			\
-	asm volatile ( "LDR		LR, [R0]" );								\
-																		\
-	/* Get the SPSR from the stack. */									\
-	asm volatile ( "LDMFD	LR!, {R0}" );								\
-	asm volatile ( "MSR		SPSR, R0" );								\
-																		\
-	/* Restore all system mode registers for the task. */				\
-	asm volatile ( "LDMFD	LR, {R0-R14}^" );							\
-	asm volatile ( "NOP" );												\
-																		\
-	/* And return - correcting the offset in the LR to obtain the */	\
-	/* correct address. */												\
-	asm volatile ( "SUBS	PC, LR, #4" );								\
-}
-
 extern KERNEL_ERROR_CODE kinit_tcb ();
 extern TASK_INFO* kcreate_tcb (void* pvTaskCode, unsigned long nStackSize, void* pParams, const char* pszTaskName);
 

@@ -41,6 +41,16 @@ __IRAM_CODE unsigned long kmemavail ()
 // Made from diffrent threads.
 __IRAM_CODE int kmemory_manager (void* pvParameters)
 {
+	register long _r7 asm("r7");
+	register long _r8 asm("r8");
+	register long _r12 asm("r12");
+	register long _r13 asm("r13");
+	asm volatile ( "mrs r7, cpsr");
+	asm volatile ( "mov r8, lr");
+	__cli ();
+	printk("*** kmemory_manager *** [CPSR:%08x, R12:%08x, SP:%08x, LR:%08x]\n", _r7, _r12, _r13, _r8);
+	__sti ();
+
    SYSTEM_CTRL_COMMAND* pSysCtrl = 0;
    TASK_INFO* pTCB = 0;
 
@@ -87,11 +97,11 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
 
                // Free task memory resources...
                if (pTCB->pTaskCode)
-                  kfree (/*code memory*/ pTCB->pTaskCode);
+                  kfree (pTCB->pTaskCode); //code memory
                if (pTCB->pMessagePipe)
-                  kfree (/*message pipe*/ pTCB->pMessagePipe);
-               kfree (/*stack*/ pTCB->pStack);
-               kfree (/*TCB record*/ pTCB);
+                  kfree (pTCB->pMessagePipe); //message pipe
+               kfree (pTCB->pStack); //stack
+               kfree (pTCB); //TCB record
                API_TASK_YIELD ();
 
                // We should never get here...
@@ -108,5 +118,8 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
       __sti ();
    };
 
-   return 0;
+	__cli ();
+	printk ("*** MEMORY MANAGER EXITED ***\n");
+	__sti ();
+	return 0;
 }
