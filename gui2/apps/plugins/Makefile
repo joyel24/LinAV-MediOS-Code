@@ -10,8 +10,6 @@ SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
 TARGET = $(SRC:%.c=%)
 
-
-
 force: clean all
 
 all: $(TARGET)
@@ -24,8 +22,8 @@ all: $(TARGET)
 	@$(MAKE) -C test/ all
 
 $(TARGET) : $(OBJS)
-	$(GCC) $@.o -o $@  $(LDFLAGS)
-
+	$(GCC) $@.o ../avwm/icons.o -o $@  $(LDFLAGS)   
+        
 clean:
 	@echo "**** Cleaning..."
 	@rm -f *.o *.bak *~ *.gdb $(TARGET)

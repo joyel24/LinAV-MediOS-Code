@@ -18,7 +18,7 @@ TARGET = $(SRC:%.c=%)
 
 force: clean all
 
-all:  plugDir avwmDir $(TARGET)
+all:   avwmDir $(TARGET) plugDir
 	@mkdir -p ../build/avwm/apps
 	@rm -f ../build/avwm/apps/*
 	@mv $(TARGET) ../build/avwm/apps

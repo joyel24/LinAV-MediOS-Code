@@ -157,8 +157,9 @@ void graphics32_DrawBITMAP(BITMAP * bitmap, unsigned int trsp, int x, int y, str
     {
         for(j=0;j<bitmap->height;j++)
         {
-            for(i=0;i<bitmap->width;i++)
-                OUTL(INL(src+i),dest+i);
+            /*for(i=0;i<bitmap->width;i++)
+                OUTL(INL(src+i),dest+i);*/
+            memcpy(dest,src,bitmap->width*4);
             dest+=buff->width;
             src+=bitmap->width;
         }
