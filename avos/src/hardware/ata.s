@@ -25,6 +25,10 @@
 @ void ataRead(r0=LBA, r1=number)
 @ void ataWrite(r0=LBA, r1=number)
 @
+@ u32 ataReadSectors(r0=LBA, r1=number, r2->buffer)
+@ u32 ataWriteSectors(r0=LBA, r1=number, r2->buffer)
+@ u32 ataIndentifyDevice(r0->buffer)
+@
 
 .ifndef ataInc
 ataInc = 1
@@ -60,8 +64,100 @@ ataStatus_ERR               =   0x01
 
 ataSelectLBA                =   0x40
 
+ataSectorHalfwords          =   256
+ataSectorHalfwordsShift     =   8           @ 256 halfwords
+
         .thumb
 
+@ ------------------------------------------------------------------------------
+@ ataReadSectors(r0=LBA, r1=number, r2->buffer)
+@
+.globl ataReadSectors
+.thumb_func
+
+ataReadSectors:
+        push {r1, r2, r3, lr}
+        mov r3, r0
+        bl ataWaitForReady
+        cmp r0, #0
+         bne ataRSE
+        mov r0, r3
+        bl ataRead
+        bl ataWaitForXfer
+        cmp r0, #0
+         bne ataRSF
+        mov r0, r2
+        lsl r1, #ataSectorHalfwordsShift
+        bl ataReadData
+        mov r0, #0
+        pop {r1, r2, r3, pc}
+ataRSE: mov r0, #0
+        sub r0, #1
+        pop {r1, r2, r3, pc}
+ataRSF: mov r0, #0
+        sub r0, #2
+        pop {r1, r2, r3, pc}
+
+        
+@ ------------------------------------------------------------------------------
+@ ataWriteSectors(r0=LBA, r1=number, r2->buffer)
+@
+.globl ataWriteSectors
+.thumb_func
+
+ataWriteSectors:
+        push {r1, r2, r3, lr}
+        mov r3, r0
+        bl ataWaitForReady
+        cmp r0, #0
+         bne ataWSE
+        mov r0, r3
+        bl ataWrite
+        bl ataWaitForXfer
+        cmp r0, #0
+         bne ataWSF
+        mov r0, r2
+        lsl r1, #ataSectorHalfwordsShift
+        bl ataWriteData
+        mov r0, #0
+        pop {r1, r2, r3, pc}
+ataWSE: mov r0, #0
+        sub r0, #1
+        pop {r1, r2, r3, pc}
+ataWSF: mov r0, #0
+        sub r0, #2
+        pop {r1, r2, r3, pc}
+
+
+@ ------------------------------------------------------------------------------
+@ ataIdentifyDevice(r0->buffer)
+@
+.globl ataIdentifyDevice
+.thumb_func
+
+ataIdentifyDevice:
+        push {r1, r2, r3, lr}
+        mov r3, r0
+        bl ataWaitForReady
+        cmp r0, #0
+         bne ataISE
+        bl ataIdentify
+        bl ataWaitForXfer
+        cmp r0, #0
+         bne ataISF
+        mov r0, r3
+        ldr r1, =ataSectorHalfwords
+        bl ataReadData
+        mov r0, #0
+        pop {r1, r2, r3, pc}
+ataISE: mov r0, #0
+        sub r0, #1
+        pop {r1, r2, r3, pc}
+ataISF: mov r0, #0
+        sub r0, #2
+        pop {r1, r2, r3, pc}
+        
+        
 @ ------------------------------------------------------------------------------
 @ ataRead(r0=LBA, r1=number)
 @
