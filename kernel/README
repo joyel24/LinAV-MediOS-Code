@@ -4,6 +4,7 @@ by Oxygen
 To patch the uclinux kernel, you need:
 - the right kernel version (download on files section of linav.sf.net)
 - the patch from cvs
+- the initial rom if you want to use blkmem instead of the harddisk. This file can be found in the file section of linav.sf.net.
 
 To apply the patch:
 - untar the kernel sources
@@ -24,9 +25,11 @@ make menuconfig (not xconfig)
 
 make dep
 make
-objcopy -O binary linux linux-exe.bin (where objcopy is the one from your toolchain)
-=> get the 'rom' file from linav.sf.net
-cat linux-exe.bin rom > linux.bin
+objcopy -O binary linux linux-exe.bin 
+objcopy -O binary arch/armnommu/boot.o boot.bin
+(where objcopy is the one from your toolchain)
+put rom.inc in arch/armnommu/mach-av3xx
+cat boot.bin linux-exe.bin > linux.bin
 
 you can then run linux.bin from the bootloader.
 
