@@ -32,6 +32,9 @@
 #define USE_GC    -1
 #define GC_FONT   NULL
 
+#define LCD_WIDTH  320
+#define LCD_HEIGHT 240
+
 // sprite buffer type
 #define S1bit      0
 #define S2bit      1
