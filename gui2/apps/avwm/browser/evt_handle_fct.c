@@ -19,16 +19,16 @@
 #include "browser.h"
 #include "msgBox.h"
 #include "helperMenu.h"
-
+#include "scrollbar.h"
 
 int browserEvt(int evt,struct browser_data * bdata)
 {
     int w = 0;
     int h = 10;
     getStringS("M", &w, &h);
-    
+
     //fprintf(stderr,"[browserEvt] get:%x\n",evt);
-    
+
     switch(evt)
     {
         case BTN_UP:
@@ -56,24 +56,29 @@ int browserEvt(int evt,struct browser_data * bdata)
                 }
                 else // not going up, scrolling
                 {
-                    scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW, 
-                                320, (h+1)*bdata->nb_disp_entry, h+1,0);
+                    scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW,
+                                bdata->width-10, (h+1)*bdata->nb_disp_entry, h+1,0);
                     printAName(bdata,bdata->pos+bdata->nselect+1,bdata->nselect+1,1,0);
                     printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);
                 }
+
+                scrollbar(COLOR_BLACK, COLOR_WHITE, bdata->x_start+bdata->width, bdata->y_start,
+                        8, bdata->height-bdata->y_start, bdata->listused, bdata->pos,
+                        bdata->nb_disp_entry+bdata->pos, VERTICAL);
             }
             else // just going up
             {
                 printAName(bdata,bdata->pos+bdata->nselect+1,bdata->nselect+1,0,0);
                 printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,0,1);
             }
-    
+
             evt=NO_EVENT; /* clear this event */
-            
+
             break;
 
         case BTN_DOWN:
             bdata->nselect++;
+
             if(bdata->nselect+bdata->pos>=bdata->listused)       // jump to beginning
             {
                 if(bdata->listused<=bdata->nb_disp_entry)
@@ -89,6 +94,10 @@ int browserEvt(int evt,struct browser_data * bdata)
                     bdata->nselect=0;
                     printAllName(bdata);
                 }
+
+                scrollbar(COLOR_BLACK, COLOR_WHITE, bdata->x_start+bdata->width, bdata->y_start,
+                        8, bdata->height-bdata->y_start, bdata->listused, bdata->pos,
+                        bdata->nb_disp_entry+bdata->pos, VERTICAL);
             }
             else
             {
@@ -104,11 +113,15 @@ int browserEvt(int evt,struct browser_data * bdata)
                     }
                     else // not going down, scrolling
                     {
-                        scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW, 
-                                320, (h+1)*bdata->nb_disp_entry, h+1,1);
+                        scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW,
+                                bdata->width-10, (h+1)*bdata->nb_disp_entry, h+1,1);
                         printAName(bdata,bdata->pos+bdata->nselect-1,bdata->nselect-1,1,0);
                         printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);
                     }
+
+                    scrollbar(COLOR_BLACK, COLOR_WHITE, bdata->x_start+bdata->width, bdata->y_start,
+                            8, bdata->height-bdata->y_start, bdata->listused, bdata->pos,
+                            bdata->nb_disp_entry+bdata->pos, VERTICAL);
                 }
                 else
                 {
@@ -116,9 +129,9 @@ int browserEvt(int evt,struct browser_data * bdata)
                     printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,0,1);
                 }
             }
-            
-            evt=NO_EVENT; /* clear this event */    
-            
+
+            evt=NO_EVENT; /* clear this event */
+
             break;
 
         case BTN_RIGHT:
@@ -131,17 +144,17 @@ int browserEvt(int evt,struct browser_data * bdata)
                 case TYPE_DIR:
                     viewNewDir(bdata,bdata->list[bdata->pos+bdata->nselect].name);
                     evt=NO_EVENT; /* clear this event */
-                    break;                    
+                    break;
             }
             break;
         case BTN_LEFT:
             viewNewDir(bdata,"../");
             evt=NO_EVENT; /* clear this event */
-            break;            
+            break;
         case EVT_REDRAW:
             printAllName(bdata);
-            break;            
+            break;
     }
-    
+
     return evt;
 }
