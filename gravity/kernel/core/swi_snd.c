@@ -32,6 +32,5 @@ __IRAM_CODE int swi_snd_handler (
             dsp_ctl((int)nParam1,(void *)nParam2);
             return 0;
     }
-
     return 0;
 }
