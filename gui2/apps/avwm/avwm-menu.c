@@ -19,6 +19,7 @@
 #include "parse_cfg.h"
 #include "menu.h"
 #include "avwm-menu.h"
+#include "avwm.h"
 #include "avevents.h"
 #include "colordef.h"
 
@@ -34,6 +35,7 @@ struct cfg_menu * current_item=NULL;
 
 struct menu_data menu_cfg = {
     useOwnDisp     : 0,
+    x:0,y:0,width:320,height:240,
     root           : NULL,
     right_action   : do_right,
     on_action      : do_on,
@@ -147,7 +149,7 @@ void avwm_menuEvtHandler(int evt)
 int ini_menu(char * path,struct plugin * plug)
 {
     char * tmpC;
-    int i;
+    int i,h,w;
     
     menu_plug=plug;
         
@@ -165,7 +167,10 @@ int ini_menu(char * path,struct plugin * plug)
         return 0;
     }
     
+    getStringS("M", &w, &h);
     menu_cfg.root=rootMenu;
+    menu_cfg.dx=5;
+    menu_cfg.dy=h+6+MENU_SHADOW;
         
 #ifdef DO_DEBUG
     printMenu();

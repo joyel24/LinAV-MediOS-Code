@@ -430,7 +430,6 @@ void setSize(int vplane,int width,int height,int bitsPerPixel)
 #ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
-        printf("processing setsize: %d,%d,%d for %d\n",width,height,bitsPerPixel,vplane);
         buffers[vplane]->width=width;
         buffers[vplane]->height=height;
         buffers[vplane]->bitsPerPixel=bitsPerPixel;

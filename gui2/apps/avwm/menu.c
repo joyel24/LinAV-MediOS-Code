@@ -74,7 +74,7 @@ void mprintAllName(struct menu_item * pos,int nselect)
     getStringS("M", &w, &h);
 
     for (i = pos; i !=NULL && nbAff < MAXPOS; i=i->nxt) {
-        mprintName(i,5,TITLE_OFFSET + nbAff*(h+1) + h+6+MENU_SHADOW,0,nbAff==nselect);
+        mprintName(i,current_menu->dx,TITLE_OFFSET + nbAff*(h+1) + current_menu->dy,0,nbAff==nselect);
         nbAff++;
     }
 }
@@ -83,16 +83,13 @@ void mprintAName(struct menu_item * pos, int posY, int clear, int selected)
 {
     int w=0,h=0;
     getStringS("M", &w, &h);
-    mprintName(pos,5,TITLE_OFFSET + posY*(h+1)+ h+6+MENU_SHADOW,clear,selected);
+    mprintName(pos,current_menu->dx,TITLE_OFFSET + posY*(h+1)+ current_menu->dy,clear,selected);
 }
 
 void start_menu(struct menu_data * client_menu)
 {    
     current_menu=client_menu;
-    if(current_menu->width==0)
-        current_menu->width=320;
-    if(current_menu->height==0)
-        current_menu->width=240;
+    
     if(current_menu->useOwnDisp)
     {
         setSize(BMAP2,current_menu->width,current_menu->height,8);
@@ -129,7 +126,8 @@ void menuEvtHandler(int evt)
                 pselect=pos;
 
                 CHG_PLANE
-                scrollWindowVert(COLOR_WHITE, 5, h+6+MENU_SHADOW, current_menu->width-5, (h+1)*MAXPOS, h+1,0);
+                scrollWindowVert(COLOR_WHITE,current_menu->dx, current_menu->dy,
+                                    current_menu->width-current_menu->dx, (h+1)*MAXPOS, h+1,0);
                 RESTORE_PLANE
             }
             else // just going up
@@ -152,7 +150,8 @@ void menuEvtHandler(int evt)
                 pos=pos->nxt;
                 pselect=pos;
                 CHG_PLANE
-                scrollWindowVert(COLOR_WHITE, 5, h+6+MENU_SHADOW, current_menu->width-5, (h+1)*MAXPOS, h+1,1);
+                scrollWindowVert(COLOR_WHITE, current_menu->dx, current_menu->dy,
+                                    current_menu->width-current_menu->dx, (h+1)*MAXPOS, h+1,1);
                 RESTORE_PLANE
             }
             else
@@ -170,7 +169,8 @@ void menuEvtHandler(int evt)
                 nselect=0;
                 pselect=pos;
                 CHG_PLANE
-                fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , current_menu->width-5,(h+1)*MAXPOS);
+                fillRect(COLOR_WHITE,current_menu->dx, current_menu->dy,
+                             current_menu->width-current_menu->dx,(h+1)*MAXPOS);
                 RESTORE_PLANE
                 mprintAllName(pos,nselect);
                 clearEventQueue();
@@ -192,16 +192,18 @@ void menuEvtHandler(int evt)
                     nselect=0;
                     pselect=pos;
                     CHG_PLANE
-                    fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , current_menu->width-5,(h+1)*MAXPOS);
+                    fillRect(COLOR_WHITE,current_menu->dx, current_menu->dy,
+                                current_menu->width-current_menu->dx,(h+1)*MAXPOS);
                     RESTORE_PLANE
                     mprintAllName(pos,nselect);
                     clearEventQueue();
                 }
             }
             break;
-        case EVT_REDRAW:
+        case EVT_REDRAW:        
             CHG_PLANE
-            fillRect(COLOR_WHITE,0 , h+6+MENU_SHADOW, current_menu->width-5, current_menu->height-h-6-MENU_SHADOW);
+            fillRect(COLOR_WHITE,0 , current_menu->dy,
+                        current_menu->width, current_menu->height-current_menu->dy);
             RESTORE_PLANE
             pos=current_menu->root;
             pselect=current_menu->root;

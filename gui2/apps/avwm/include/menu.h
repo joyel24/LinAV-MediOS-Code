@@ -26,6 +26,7 @@ struct menu_data {
 	struct menu_item * root;
         int  useOwnDisp;
         int width;int height;int x;int y;
+        int dx;int dy;
         void (*right_action) (void * data);
         void (*on_action)    (void * data);
         void (*off_action)   (void * data);
