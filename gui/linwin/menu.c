@@ -35,6 +35,8 @@ extern void new_record_window(void);
 extern void new_oth_window(void);
 extern void new_bluecube_window(void);
 extern void new_calendar_window(void);
+extern void set_keyrepeat(void);
+extern void set_keyfreq(void);
 //extern void new_clock_window(void);
 
 static GR_WINDOW_ID menu_wid;
@@ -113,7 +115,9 @@ static struct menu_item settings_menu[] = {
 	{"Volume", ACTION_MENU, set_volume, -1},
 	{"Repeat", ACTION_MENU_CHECK, toggle_mp3_repeat, REPEAT},
 	{"Contrast", ACTION_MENU, set_contrast, -1},
-	{"Button Debounce", ACTION_MENU, set_buttondebounce, -1},
+//	{"Button Debounce", ACTION_MENU, set_buttondebounce, -1},
+//	{"Key Freq", ACTION_MENU, set_keyfreq, -1},
+//	{"Key Repeat", ACTION_MENU, set_keyrepeat, -1},
 #if 0
 	{"Alarms", SUB_MENU_HEADER, 0, -1},
 	{"Contacts", SUB_MENU_HEADER, 0, -1},
@@ -248,10 +252,18 @@ static void menu_do_draw()
 
 static int menu_do_keystroke(GR_EVENT * event)
 {
+   char tmp[10];
+
    GR_EVENT nextevent;
 	static int rcount = 0;
 	static int lcount = 0;
 	int ret = 0;
+/*
+	GrSetGCForegroundPixelVal(menu_gc, AV3XX_COLOR_BLACK);
+   sprintf(tmp,"freq: %d repeat: %d", ipod_get_mouseParam_freq(), ipod_get_mouseParam_repeat());
+   GrText(menu_wid, menu_gc, 8, 220, tmp, -1, GR_TFASCII);
+	GrSetGCForegroundPixelVal(menu_gc, AV3XX_COLOR_WHITE);
+*/
 //	char tmp[100];
 //	int i = 0;
 //   int yPosDebug2 = 110;

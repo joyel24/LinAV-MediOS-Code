@@ -100,6 +100,16 @@ void set_buttondebounce(void)
 	new_slider_widget(ACTION_DEBOUNCE, "Action Debounce", 100, 500);
 }
 
+void set_keyrepeat(void)
+{
+	new_slider_widget(KEY_REPEAT, "Key Repeat", 0, 5);
+}
+
+void set_keyfreq(void)
+{
+	new_slider_widget(KEY_FREQ, "Key Freqt", 0, 100);
+}
+
 static void event_handler(GR_EVENT *event)
 {
 	int i;
@@ -150,6 +160,8 @@ static void event_handler(GR_EVENT *event)
 	case GR_EVENT_TYPE_KEY_DOWN:
 		wid = ((GR_EVENT_KEYSTROKE *)event)->wid;
 
+/*
+
 		// If backlight timer isn't off and backlight isn't on turn it on.
 
 		last_keypress_event = curtime;
@@ -164,7 +176,7 @@ static void event_handler(GR_EVENT *event)
 		case '3':
 		case 'f':
 		case 'l':
-		case 'r':
+   	case 'r':
 			if (curtime - last_button_event > ipod_get_setting(ACTION_DEBOUNCE)) {
 				last_button_event = curtime;
 			}
@@ -181,6 +193,7 @@ static void event_handler(GR_EVENT *event)
 			}
 			break;
 		}
+*/
 
 		key_pressed = event->keystroke.ch;
 		for (i = 0; i < n_opened; i++) {

@@ -45,6 +45,9 @@
 #define ACTION_DEBOUNCE 32
 #define KEY_DEBOUNCE 33
 
+#define KEY_FREQ   35
+#define KEY_REPEAT 36
+
 #define MIN_CONTRAST	0
 #define MAX_CONTRAST	128
 
@@ -53,6 +56,10 @@ int ipod_set_contrast(int contrast);
 
 int ipod_get_backlight(void);
 int ipod_set_backlight(int backlight);
+
+int ipod_get_mouseParam_freq(void);
+int ipod_get_mouseParam_repeat(void);
+int ipod_set_mouseParam(int freq, int repeat);
 
 int ipod_load_settings(void);
 int ipod_save_settings(void);
