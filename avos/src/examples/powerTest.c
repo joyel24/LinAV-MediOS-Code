@@ -10,8 +10,10 @@
     struct graphicsBuffer screenBitmap2;
     static int pal16[2] = {0x0000, 0xffff};
 
-    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, 0};
+    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, 0};
 
+char powerSt[] = "xxxx+";
+    
 int main() {
     int c, v, b, x, y = 120;
     int slowdown=1;
@@ -78,6 +80,17 @@ int main() {
         if (powerIsDCConnected()) c = 0x0404;
         
         graphicsSetPixel(&screenBitmap, 319, y, c);
+
+        stringPutHex(powerSt, v, 4);
+
+        if (powerIsDCConnected()) {
+            powerSt[4] = '+';                
+        } else {
+            powerSt[4] = ' ';
+        }
+        pal16[1] = 0xffff;
+        graphicsString(&screenTop, 4 + 35*5, 2, &sprite4_6, std4x6_, 5, 0,
+                        powerSt);
         
         for (v=0;v<slowdown;v++) {
             b = buttonsGetStatus();
