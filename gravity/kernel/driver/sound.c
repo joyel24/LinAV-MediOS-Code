@@ -31,12 +31,10 @@
 
 __IRAM_DATA int playing=0;   // 1 if we are sending data to MAS, 0 if no more data to send or Stop mode or Pause mode
 __IRAM_DATA int in_pause=0;     // 1 if in Pause mode
-__IRAM_DATA int nb_send;
-__IRAM_DATA int nb_loop;
 
 __IRAM_DATA struct mp3_play * data;
 
-#define SEND_TO_MAS(BUFFER,SIZE,LOOP)                              \
+#define SEND_TO_MAS(BUFFER,SIZE)                              \
  ({                                                           \
     int  __i;                                                 \
     int __data;                                              \
@@ -54,7 +52,7 @@ __IRAM_DATA struct mp3_play * data;
         outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);               \
         /* wait for RTR to be set */                          \
         while(!(inw(GIO_BITSET1) & (0x1<<(GIO_MAS_RTR-16))))  \
-            LOOP+;                                        \
+            /*nothing*/;                                        \
         /* clear latch (lower raise PR) */                    \
         outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);             \
     }                                                         \
@@ -73,9 +71,8 @@ __IRAM_CODE void dsp_interrupt(int irq)
        /* else
             toSend=data->buffer_write-data->buffer_read;*/
         buffer=data->buffer+data->buffer_read;    
-        send=SEND_TO_MAS(buffer,toSend,nb_loop);
-        if(send)
-            nb_send++;
+        send=SEND_TO_MAS(buffer,toSend);
+        
         data->buffer_read+=send;
         
         if(data->buffer_read>= data->buffer_len)
@@ -85,7 +82,7 @@ __IRAM_CODE void dsp_interrupt(int irq)
             buffer=data->buffer;
             data->buffer_read+=SEND_TO_MAS(buffer,toSend); */
             disable_irq(IRQ_MAS_DATA);
-            printk("end of playback send=%d loop=%d\n",nb_send,nb_loop);
+            printk("end of playback\n");
             playing=0;
         }
     }
@@ -102,8 +99,6 @@ __IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
             data=(struct mp3_play *)arg;    
             playing=1;
             in_pause=0;
-            nb_send=0;
-            nb_loop=0;
             break;
         case DSP_START_MP3:
             if(in_pause)
