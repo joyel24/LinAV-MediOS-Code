@@ -47,7 +47,7 @@ public class bdf2c {
                 } else if (s.startsWith("ENDCHAR")) {
                     inchar = false;
                     if (all || (encoding<256)) {
-                        chardata += "    char " + name + encoding + "["+datalen+"] = {" + data + "};\n";
+                        chardata += "    const char " + name + encoding + "["+datalen+"] = {" + data + "};\n";
                         defs[encoding] = name + encoding;
                     }
                 }
@@ -80,7 +80,7 @@ public class bdf2c {
         if (all) pp = 65536;
         
         System.out.println(chardata);
-        System.out.println("char (*" + name + "[]) [] = {");
+        System.out.println("const char (*" + name + "[]) [] = {");
             
         for (int i=0;i<pp;i++) {
             String def = defs[i];
