@@ -26,7 +26,7 @@ loop1:
         mov r1, #1
         mov lr, r1
         add lr, pc
-@        bx r0
+        bx r0
 
         
         mov r0, #0
