@@ -64,6 +64,7 @@ struct client_operations {
     void (*putS)              (unsigned int color, unsigned int bg_color,int x, int y, unsigned char *s);
     void (*putC)              (unsigned int color, unsigned int bg_color,int x, int y, unsigned char s);
     void (*setFont)           (int font);
+    void (*createSizeString)  (char * str,int Isize);
     
     void (*drawSprite)        (PALETTE * palette, SPRITE * sprite, int x, int y);
     void (*drawBITMAP)        (BITMAP * bitmap, int x, int y);
@@ -159,6 +160,7 @@ struct client_operations {
     int  (*browserEvt)          (int evt,struct browser_data * bdata);
     int  (*viewNewDir)          (struct browser_data *bdata,char *name);
     void (*cleanList)           (struct browser_data * bdata);
+    void (*chgSelect)           (struct browser_data *bdata,int num);
 };
 
 #endif

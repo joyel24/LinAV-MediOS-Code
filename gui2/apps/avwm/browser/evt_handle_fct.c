@@ -70,14 +70,14 @@ int browserEvt(int evt,struct browser_data * bdata)
 
             if( (bdata->listused>bdata->nb_disp_entry) &&
                 (bdata->pos+bdata->nb_disp_entry < bdata->listused) )
-                showArrow(DOWN_ARROW,bdata->nb_disp_entry);
+                showArrow(DOWN_ARROW,bdata);
             else
-                hideArrow(DOWN_ARROW,bdata->nb_disp_entry);
+                hideArrow(DOWN_ARROW,bdata);
 
             if(bdata->pos == 0)
-                hideArrow(UP_ARROW,bdata->nb_disp_entry);
+                hideArrow(UP_ARROW,bdata);
             else
-                showArrow(UP_ARROW,bdata->nb_disp_entry);
+                showArrow(UP_ARROW,bdata);
                 
             evt=NO_EVENT; /* clear this event */
             
@@ -128,15 +128,15 @@ int browserEvt(int evt,struct browser_data * bdata)
                 }
             }
             if(bdata->pos>0)
-                showArrow(UP_ARROW,bdata->nb_disp_entry);
+                showArrow(UP_ARROW,bdata);
             else
-                hideArrow(UP_ARROW,bdata->nb_disp_entry);
+                hideArrow(UP_ARROW,bdata);
 
             if( (bdata->listused>bdata->nb_disp_entry) &&
                 (bdata->pos+bdata->nb_disp_entry < bdata->listused) )
-                showArrow(DOWN_ARROW,bdata->nb_disp_entry);
+                showArrow(DOWN_ARROW,bdata);
             else
-                hideArrow(DOWN_ARROW,bdata->nb_disp_entry);
+                hideArrow(DOWN_ARROW,bdata);
 
             evt=NO_EVENT; /* clear this event */    
             

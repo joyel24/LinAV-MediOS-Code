@@ -91,6 +91,7 @@ int addEntry(struct browser_data * bdata,char * name,int type,int size)
     }
     bdata->list[bdata->listused].type=type;
     bdata->list[bdata->listused].size=size;
+    bdata->list[bdata->listused].selected=0;
     
     bdata->listused++;
     return 0;
@@ -173,4 +174,22 @@ int doLs(struct browser_data * bdata,char * name)
     qsort(bdata->list,bdata->listused,sizeof(struct dir_entry),qSortEntry);
     
    return 0;
+}
+
+void clearSelection(struct browser_data * bdata)
+{
+    int i;
+    for(i=0;i<bdata->listused;i++)
+        bdata->list[i].selected=0;
+}
+
+void chgSelect(struct browser_data *bdata,int num)
+{
+    if(bdata->list[num].type != TYPE_BACK)
+    {
+        bdata->list[num].selected = ~bdata->list[num].selected;
+        /* see if e need to redraw it */
+        if(num >= bdata->pos && num < bdata->pos+bdata->nb_disp_entry)
+            printName(&bdata->list[num],num-bdata->pos,1,num-bdata->pos==bdata->nselect,bdata);
+    }
 }

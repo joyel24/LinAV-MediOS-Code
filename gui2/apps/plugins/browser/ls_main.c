@@ -60,9 +60,13 @@ struct browser_data realData = {
     
     nb_disp_entry   : 20,
     x_start         : 0,
-    y_start         : 0,
+    y_start         : 18,
     
-    width           :0
+    width           : 310,
+    entry_height    : 10,
+    
+    draw_bottom_status : draw_bottom_status,
+    draw_file_size     : draw_file_size
 };
 
 struct browser_data * bdata;
@@ -115,6 +119,9 @@ int eventHandler(int evt)
                 hideHelper();
                 cops->start_menu(&menu_cfg);
                 cops->menuEvtHandler(EVT_REDRAW);
+                break;
+            case BTN_ON:
+                cops->chgSelect(bdata,bdata->pos+bdata->nselect);
                 break;
             case BTN_OFF:
             case EVT_QUIT:
@@ -177,4 +184,51 @@ int main(int argc,char * * argv)
     }
     STOPME(cops)
     return -1;
+}
+
+int x=320;
+
+void draw_file_size(struct dir_entry * entry)
+{
+    int h,w;
+    char tmpS[15];
+    
+    /* erase previsous drawing */
+
+    cops->fillRect(COLOR_WHITE,x, 230,320-x,10);
+    if(entry->type == TYPE_FILE)
+    {
+        cops->createSizeString(tmpS,entry->size);
+        cops->getStringS(tmpS,&w,&h);
+        x=320-w;
+        cops->putS(COLOR_BLUE, COLOR_WHITE,x, 230, tmpS);
+    }
+}
+
+void draw_bottom_status(struct browser_data *bdata)
+{
+    char tmp[100];
+    char tmpS[15];
+    char pwd[PATHLEN];
+    int len=0;   
+    
+    cops->createSizeString(tmpS,bdata->totSize);
+        
+    cops->fillRect(COLOR_WHITE,2, 220,316,20);
+        
+    if (!getcwd(pwd, PATHLEN))
+    {
+        fprintf(stderr, "Cannot get current directory\n");        
+    }
+    else
+    {
+        len=strlen(pwd);        
+        cops->putS(COLOR_BLUE, COLOR_WHITE,2, 220, pwd);  
+    }
+
+    snprintf(tmp,100,"%d %s, %d %s, %s",bdata->nbFile,bdata->nbFile>0?"files":"file",
+            bdata->nbDir,bdata->nbDir>0?"folders":"folders",tmpS);
+    fprintf(stderr,"%s\n",tmp);
+    
+    cops->putS(COLOR_BLUE, COLOR_WHITE,2, 230, tmp);    
 }

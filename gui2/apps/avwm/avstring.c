@@ -95,6 +95,33 @@ void strlwr(char *s)
     }
 }
 
+void createSizeString(char * str,int Isize)
+{
+    char * unit;
+    float size=Isize;
+    if(str!=NULL)
+    {
+        if(size/1024>1)
+        {
+            size/=1024;
+            unit="Kb";
+            if(size/1024>1)
+            {
+                size/=1024;
+                unit="Mb";
+                if(size/1024>1)
+                {
+                    size/=1024;
+                    unit="Gb";
+                }
+            }
+        }
+        else 
+            unit = "b";
+        sprintf(str,"%.02f %s",size,unit);
+    }
+}
+
 void wmgetStringS(unsigned char *str, int *w, int *h)
 {
     FONT_ID font=getFont();

@@ -22,6 +22,7 @@ struct dir_entry {
     char * name;
     int type;
     int size;
+    int selected;
 };
 
 struct browser_data {
@@ -42,9 +43,14 @@ struct browser_data {
     
     int width;
     
+    int entry_height;
+    
     struct dir_entry * list;
     int                listused;
     int                listsize;
+    
+    void (*draw_bottom_status)  (struct browser_data *bdata);
+    void (*draw_file_size)      (struct dir_entry * entry);
     
     
 };
@@ -67,15 +73,16 @@ void cleanList   (struct browser_data * bdata);
 int  ini_lists   (struct browser_data * bdata);
 int  addEntry    (struct browser_data * bdata,char * name,int type,int size);
 int  doLs        (struct browser_data * bdata,char * name);
+void chgSelect   (struct browser_data *bdata,int num);
 
 /*****    evt_handle_fct    *****/
 int  browserEvt         (int evt,struct browser_data * bdata);
 
 /*****    gui_fct    *****/
 int  viewNewDir         (struct browser_data *bdata,char *name);
-void showArrow          (int type,int max);
-void hideArrow          (int type,int max);
-int  printName          (struct dir_entry * dEntry,int x,int y,int clear,int selected);
+void showArrow          (int type,struct browser_data *bdata);
+void hideArrow          (int type,struct browser_data *bdata);
+int  printName          (struct dir_entry * dEntry,int pos,int clear,int selected,struct browser_data *bdata);
 void printAllName       (struct browser_data *bdata);
 void printAName         (struct browser_data *bdata,int pos, int nselect, int clear, int selected);
 void draw_bottom_status (struct browser_data *bdata);

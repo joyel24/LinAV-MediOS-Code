@@ -38,3 +38,7 @@ void do_F1            (void * data);
 void do_F2            (void * data);
 void do_F3            (void * data);
 void mk_item_str      (void * data,char * str);
+
+/**** drawings        ******/
+void draw_bottom_status  (struct browser_data *bdata);
+void draw_file_size      (struct dir_entry * entry);

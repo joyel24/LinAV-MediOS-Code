@@ -51,6 +51,7 @@ struct client_operations cops={
     drawImage          : drawImage,
     
     getStringS         : wmgetStringS,
+    createSizeString   : createSizeString,
     
     clearEventQueue    : clearEventQueue,
     registerPlugin     : registerPlugin,
@@ -137,7 +138,8 @@ struct client_operations cops={
     get_file_type      : get_file_type,
     handle_type_other  : handle_type_other,
     
-    browserEvt         :browserEvt,
-    viewNewDir         :viewNewDir,
-    cleanList          :cleanList
+    browserEvt         : browserEvt,
+    viewNewDir         : viewNewDir,
+    cleanList          : cleanList,
+    chgSelect          : chgSelect
 };
