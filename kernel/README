@@ -1,0 +1,24 @@
+README - porting uclinux on av3xx
+by Oxygen
+
+To patch the uclinux kernel, you need:
+- the right kernel version (download on files section of linav.sf.net)
+- the patch from cvs
+
+To apply the patch:
+- untar the kernel sources
+- apply the patch with zcat patch-xxxx | patch -p0 -E
+where patch-xxxx is the patch you are trying to apply
+
+To build the kernel:
+make mrpoper
+make menuconfig (not xconfig)
+	in system type choose av3xx architecture, kernel executes
+	from RAM and check 'Debug on serial low level' if you want to see debug
+	info other the serial line
+make dep
+make
+objcopy -O binary linux linux-bin (where objcopy is the one from your toolchain)
+you can then run linux.bin from the bootloader.
+
+	
