@@ -17,13 +17,13 @@ all: $(TARGET)
 force: clean $(TARGET)
 
 $(TARGET) : $(OBJS)
-	$(GCC) $(OBJS) -o $@  $(LDFLAGS)
+	$(GCC) $(OBJS) -o $@.plug  $(LDFLAGS)
 ifeq ($(HOST),CYGWIN)
 	@mv $@.elf.bflt $@
 endif
 	@rm -f *.gdb
 
 clean:
-	@rm -f *.o *.bak *~ *.gdb $(TARGET)
+	@rm -f *.o *.bak *~ *.gdb *.plug
 
 include ../../../default.rule

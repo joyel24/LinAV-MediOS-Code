@@ -16,25 +16,25 @@ SUBDIRS = bluecube test mp3_player clock browser
 all: subdirs $(TARGET)
 	@mkdir -p ../../build/avwm/plugins
 	@rm -f ../../build/avwm/plugins/*
-	@mv $(TARGET) ../../build/avwm/plugins/
+	@mv *.plug ../../build/avwm/plugins/
 	@rm -f *.gdb
-	@mv -f bluecube/tetris ../../build/avwm/plugins/
-	@mv -f mp3_player/mp3_play ../../build/avwm/plugins/play
-	@mv -f clock/clock ../../build/avwm/plugins/clock
-	@mv -f browser/ls-gui ../../build/avwm/plugins/ls-gui
+	@mv -f bluecube/tetris.plug ../../build/avwm/plugins/
+	@mv -f mp3_player/mp3_play.plug ../../build/avwm/plugins/play.plug
+	@mv -f clock/clock.plug ../../build/avwm/plugins/clock.plug
+	@mv -f browser/ls-gui.plug ../../build/avwm/plugins/ls-gui.plug
 
 $(TARGET) : $(OBJS)
-	@$(GCC) $@.o -o $@  $(LDFLAGS)   
+	@$(GCC) $@.o -o $@.plug  $(LDFLAGS)   
 ifeq ($(HOST),CYGWIN)
 	@mv $@.elf.bflt $@
 endif
-	@rm $@.gdb
+	@rm -f $@.gdb
 
 force: clean all
                 
 clean: clean-subdirs
 	@echo "----- plugins dir cleaned"
-	@rm -f *.o *.bak *~ *.gdb $(TARGET)
+	@rm -f *.o *.bak *~ *.gdb *.plug
 	@rm -Rf ../../build/avwm/plugins        
 
 include ../../default.rule

@@ -85,7 +85,7 @@ void procNxtEvent(int evt)
                 break;
             case APP_MP3:
                 fprintf(stderr,"[procNxtEvent] before launching\n");
-                loadPlugin("/mnt/avwm/plugins/play",nxt_action.arg);
+                loadPlugin("/mnt/avwm/plugins/play.plug",nxt_action.arg);
                 fprintf(stderr,"[procNxtEvent] after launching\n");
                 menu_plugin.handle_on=0;
                 break;

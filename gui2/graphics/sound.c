@@ -148,7 +148,7 @@ int execDSP_ioctl(int ioctl_call,unsigned int val)
         return 0;
     else
        return 1;*/
-    if(gen_ioctl("/dev/dsp",ioctl_call,val)<0)
+    if(gen_ioctl("/dev/dsp",ioctl_call,(void*)val)<0)
     {
         printf("DSP ioctl error\n");
         return 0;
@@ -162,7 +162,7 @@ int execMIX_ioctl(int ioctl_call,unsigned int val)
         return 0;
     else
        return 1;*/
-    if(gen_ioctl("/dev/mixer",ioctl_call,val)<0)
+    if(gen_ioctl("/dev/mixer",ioctl_call,(void*)val)<0)
     {
         printf("MIXER ioctl error\n");
         return 0;

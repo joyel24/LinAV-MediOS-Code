@@ -27,6 +27,7 @@
 #include "font.h"
 #include "misc.h"
 #include "avstring.h"
+#include "helperMenu.h"
 
 #define SETTING_FILE_NAME "avwm.cfg"
 
@@ -41,8 +42,9 @@ int stopSettingsLoop = 0; /* global variable used to stop the private evt loop*/
 int activeTab = 0;
 struct av_tm date_time_setting;
 
-void drawTabs();
-void drawParameter();
+void drawTabs(void);
+void drawParameter(void);
+void setNewActiveparam(void);
 
 struct SettingsDataT {
     int  tab;
@@ -334,7 +336,7 @@ void SetSettings(int saveInFile)
         SaveSettings();
 }
 
-int GetNextValidParameter()
+int GetNextValidParameter(void)
 {
     int active = 0;
     int oldActive = 0;
@@ -374,7 +376,7 @@ int GetNextValidParameter()
     return active;
 }
 
-int GetPrevValidParameter()
+int GetPrevValidParameter(void)
 {
     int active = 0;
     int oldActive = 0;
@@ -533,7 +535,7 @@ void drawSlider(int x, int y, char* text, int min, int max, int value, int activ
     setPlane(BMAP1);
 }
 
-void drawTabs()
+void drawTabs(void)
 {
     unsigned long i = 0;
 
@@ -558,7 +560,7 @@ void drawTabs()
     setFont(std6x9);
 }
 
-void setNewActiveparam()
+void setNewActiveparam(void)
 {
     unsigned long i = 0;
     int active = 0;
@@ -576,7 +578,7 @@ void setNewActiveparam()
     }
 }
 
-void drawParameter()
+void drawParameter(void)
 {
     int i = 0;
 

@@ -50,7 +50,7 @@ int old_sec=0;
 //void * drawPeak(void * arg)
 void drawPeak(int left,int right,int frame)
 {    
-    int sec;
+    //int sec;
     if(window == MAIN_WIN )/*&& cnt>10)*/
     {
         av_p.left=(left*200)/0x7FFF;

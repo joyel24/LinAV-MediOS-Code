@@ -95,8 +95,7 @@ int eventHandler(int evt)
 {
     int w = 0;
     int h = 10;
-    char pwd[10]; 
-    int savEvt=evt;   
+    char pwd[10];  
 
     cops->getStringS("M", &w, &h);
 

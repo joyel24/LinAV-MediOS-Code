@@ -113,7 +113,9 @@ void mainLoop(void)
 
 int main(int argc, char * * argv)
 {
+#ifdef PLAY_DIR
     int nbFile;
+#endif
     
     REGISTER(cops,eventHandler,0);
     
@@ -136,7 +138,7 @@ int main(int argc, char * * argv)
     fseek(fd,0,SEEK_END);
     file_size = ftell(fd);
     fseek(fd,0,SEEK_SET);*/
-#ifdef PLAY    _DIR
+#ifdef PLAY_DIR
     nbFile=addDir("./");
     fprintf(stderr,"found %d files in dir (nb in list:%d)\n",nbFile,nbEntryInList());
     showList();

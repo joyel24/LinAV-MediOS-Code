@@ -22,7 +22,6 @@
 #define RIGHT_SCROLL 1
 
 #define PATHLEN    256
-#define MAX_CHAR   100;
 
 #define BRW_MODE    0
 #define MENU_MODE   1

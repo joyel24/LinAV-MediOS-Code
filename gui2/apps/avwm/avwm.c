@@ -39,7 +39,6 @@
 #include "helperMenu.h"
 #include "bg_loader.h"
 #include "icons.h"
-#include "browser.h"
 
 #include "osd.h"
 

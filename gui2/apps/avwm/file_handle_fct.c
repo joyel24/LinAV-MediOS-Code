@@ -21,12 +21,12 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 
-#include "browser.h"
 #include "file_handle_fct.h"
 #include "graphics.h"
 #include "avevents.h"
 #include "events.h"
 
+#define PATHLEN    256
 
 #define MAXargs 31
 
