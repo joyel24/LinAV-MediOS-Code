@@ -93,9 +93,32 @@ void iniFont(void)
 	font_table[21]=shadowBold;
 }
 
+int set_mouseParam(int freq, int repeat)
+{
+   int fd = 0;
+	struct mouseParam param;
+	param.freq = freq;
+	param.repeated_press = repeat;
+
+   fd=open("/dev/mouse",O_RDONLY | O_NONBLOCK);
+   if (fd < 0)
+	{
+      printf("Can't open /dev/mouse\n");
+		return fd;
+   }
+
+	if(ioctl(fd,AV_SET_MOUSE_PARAM,&param)<0)
+	{
+      printf("Error setting mouse params\n");
+		return fd;
+   }
+   close(fd);
+
+	return fd;
+}
+
 void draw_batt_status()
 {
-   char tmp[10];
    int fd;
    int power = 0;
 	int color = 0;
@@ -113,18 +136,19 @@ void draw_batt_status()
    close(fd);
 
 	if(power < 1350)
-   	color = COLOR_DARK_RED;
-	else if(power < 1500)
+	   color = COLOR_DARK_RED;
+	else if(power < 1420)
+   	color = COLOR_RED;
+	else if(power < 1470)
    	color = COLOR_ORANGE2;
+	else if(power < 1520)
+   	color = COLOR_YELLOW;
    else
    	color = COLOR_GREEN;
 
-	sprintf(tmp, "%d", power);
-	putS(color,COLOR_LIGHT_BLUE,50,2,tmp);
-
-	fillRect(COLOR_BLACK,79,1,22,11);
-	fillRect(COLOR_BLACK,97,3,3,7);
-	fillRect(color,80,2,20,9);
+	fillRect(COLOR_BLACK,289,1,22,11);
+	fillRect(COLOR_BLACK,311,3,3,7);
+	fillRect(color,290,2,20,9);
 }
 
 
@@ -163,28 +187,32 @@ int launchPlugin(char * path,char * param)
 		_exit(1);
 	}
 	else {
-		if (pid < 0) {			
+		if (pid < 0) {
 			fprintf(stderr, "vfork failed %d\n", pid);
 			return -1;
 		}
 		plugin_pid=pid;
-	}	
+	}
 	return 0;
 
 }
 
 int timerOn=0;
 int stopWM;
+int batteryRefresh = 0;
 
 int main(int argc,char * * argv)
 {
 	int i;
-	ini_graphics();	
+	ini_graphics();
 	setFont(std6x9);
 	plugin_font=std6x9;
 	iniFont();
+
+	set_mouseParam(6, 3);
+
 	fillRect(COLOR_BLACK,0 , 0, 320, 240);
-	
+
 	putS(COLOR_WHITE,COLOR_BLACK,5,110,"Reading menu file ....");
 	if(loadMenu()<0)
 	{
@@ -197,8 +225,8 @@ int main(int argc,char * * argv)
 	fillRect(COLOR_BLACK,5 , 110, 315, 10);
 #ifdef DO_DEBUG
 	printMenu();
-#endif	
-	drawGui();	
+#endif
+	drawGui();
 	setTimerFreq(10);
 	startTimer();
 	timerOn=1;
@@ -223,7 +251,7 @@ void drawTime()
 {
 	char timeSt[50];
 	getTime(timeSt);
-	fillRect(COLOR_LIGHT_BLUE,150,2,170,11);	
+	fillRect(COLOR_LIGHT_BLUE,150,2,130,11);
 	putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,150,2,timeSt);
 }
 
@@ -244,7 +272,7 @@ void getTime(char * timeSt)
 		printf("Error getting time and date\n");
 		return;
 	}
-	
+
 	close(fd);   
 
 	sprintf(timeSt, "%02d:%02d:%02d %02d/%02d/%04d", date_time.tm_hour,date_time.tm_min,date_time.tm_sec,
@@ -318,6 +346,14 @@ void eventLoop()
 void processTimeOut()
 {
 	drawTime();
+
+	if(batteryRefresh >= 20)
+	{
+      draw_batt_status();
+		batteryRefresh = 0;
+	}
+	else
+      batteryRefresh++;
 }
 
 void wmPutS(int color, int bg_color,int x, int y, char *s)
