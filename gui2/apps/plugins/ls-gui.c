@@ -269,17 +269,17 @@ void launchSoundPlayer(char *name)
     sprintf(vol, "%d",70);
     sprintf(rep, "%d",0);
     
-    execBin("/mnt/play", "play", name, vol, rep, (char*)0);
+    execBin("/mnt/avwm/apps/play", "play", name, vol, rep, (char*)0);
 }
 
 void launchViewer(char *name)
 {
-    execBin("/mnt/viewer", "viewer", name, (char*)0);
+    execBin("/mnt/avwm/apps/viewer", "viewer", name, (char*)0);
 }
 
 void launchTxtView(char *name)
 {
-    execBin("/mnt/txtviewer", "txtviewer", name, (char*)0);
+    execBin("/mnt/avwm/apps/txtviewer", "txtviewer", name, (char*)0);
 }
 
 int launchScript(char * name)

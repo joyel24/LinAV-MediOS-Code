@@ -157,20 +157,41 @@ int evtOn=0;
 int stopWM;
 int batteryRefresh = 0;
 
+char * path;
+char menuFile[]="menu.cfg";
+
 int main(int argc,char * * argv)
 {
     int i;
+    char * tmpC;
+    int pos,size;
+    
+    fprintf(stderr,"Starting AvWm\n");
+    
+    tmpC=strrchr(argv[0],'/');
+    pos=tmpC-argv[0];
+    fprintf(stderr,"Pos: %d\n",pos);
+    path=(char*)malloc(sizeof(char)*(pos+1));
+    strncpy(path,argv[0],pos);
+    path[pos]='\0';
+    
+    fprintf(stderr,"Path: %s\n",path);
+    
     ini_graphics();
     setFont(std6x12);
     plugin_font=std6x12;
     iniFont();
-
+    
     set_mouseParam(6, 3);
 
     fillRect(COLOR_BLACK,0 , 0, 320, 240);
 
     putS(COLOR_WHITE,COLOR_BLACK,5,110,"Reading menu file ....");
-    if(loadMenu()<0)
+    
+    tmpC=(char*)malloc(sizeof(char)*(pos+1+strlen(menuFile)));
+    sprintf(tmpC,"%s/%s",path,menuFile);
+    
+    if(loadMenu(tmpC)<0)
     {
         putS(COLOR_RED,COLOR_BLACK,5,120,"Error reading menu => stoping");
         for(i=0;i<10000;i++) /* nothing */
@@ -191,6 +212,8 @@ int main(int argc,char * * argv)
     drawMenu();
     eventLoop();
     close_graphics();
+    free(path);
+    free(tmpC);
     return 0;
 }
 

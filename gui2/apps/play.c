@@ -3,7 +3,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include "av3xx_common.h"
-#define MWINCLUDECOLORS
 #include "graphics.h"
 #include "events.h"
 #include "alias.h"
@@ -12,11 +11,50 @@
  * Miscellaneous DEFINEs
  **********************/
 #define MP3_BUFF_SIZE (1020*1000)
-#define COLOR_WHITE    16
-#define COLOR_BLUE     86
-#define COLOR_DARKBLUE 55
-#define COLOR_BLACK    1
-#define COLOR_RED      13
+#define MWINCLUDECOLORS
+
+#define COLOR_WHITE     16
+#define COLOR_GRAY      20
+#define COLOR_BLACK     1
+#define COLOR_BLUE      86
+#define COLOR_DARKBLUE  55
+#define COLOR_RED       13
+#define COLOR_GREEN     195
+#define COLOR_DARKGREEN 159
+#define COLOR_YELLOW    15
+#define COLOR_ORANGE    42
+
+/******************************
+ * Color order for LCD printing
+ *****************************/
+const char *colortext[] = {
+"White     ",
+"Gray      ",
+"Black     ",
+"Blue      ",
+"Dark Blue ",
+"Red       ",
+"Green     ",
+"Dark Green",
+"Yellow    ",
+"Orange    "
+};
+
+/*******************************
+ * And their corresponing colors
+ ******************************/
+const char colortable[] = {
+COLOR_WHITE,
+COLOR_GRAY,
+COLOR_BLACK,
+COLOR_BLUE,
+COLOR_DARKBLUE,
+COLOR_RED,
+COLOR_GREEN,
+COLOR_DARKGREEN,
+COLOR_YELLOW,
+COLOR_ORANGE
+};
 
 /************
  * Fonts used
@@ -27,62 +65,74 @@ needFont(std7x13);
 /*************************
  * Ints for PLAYBACK/SOUND
  ************************/
-int vol, bass = 50, treb = 50; // sound settings
-int bal = 50, loud = 0;        // sound settings
-int oldvol;                    // used for pause/resume
-int wait, end;
-int fd_dsp, fd_file, fd_mix;
-int pause = 0;                 // 1 if paused
-int repeat;                    // repeat song?
-int settings_applied = 0;      // "1" if settings have been applied
-int frame_cnt;                 // frames elapsed so far
-int evt;                       // button reading
-int fade = 1;                  // fade on stop/pause
+/* sound settings */
+int vol, bass = 50, treb = 50, bal = 50, loud = 0;
+int oldvol;                  /* used for pause/resume */
+int wait, end;               /* used for playback */
+int fd_dsp, fd_file, fd_mix; /* used for playback */
+int pause = 0;               /* 1 if paused */
+int settings_applied = 0;    /* "1" if settings have been applied */
+int evt;                     /* button reading */
+int fade = 1;                /* fade on stop/pause */
 
 /*******************
  * Ints for GRAPHICS
  ******************/
-int visualization = 1; // "1" for peak meters, "2" for oscillograph
-int osci_x = 10;       // x position of oscillograph
+int peakmeters = 1;  /* "1" for peak meters, "0" for oscillograph */
+int scroll_osci = 1; /* "1" if scrolling instead of looping */
+int osci_x = 0;      /* used for looping mode */
+int lpos, rpos;      /* used to smoothen peak meters */
+int peak_decay = 3;  /* number of pixels to decrease for peak meter */
+
+/*****************
+ * Ints for COLORS
+ ****************/
+int peak_levelcolor = 3; /* color of peak meter bars 0-9 */
+int peak_bgcolor = 4;    /* bg color of peak meters  0-9 */
+int osci_levelcolor = 3; /* color of peaks for oscillograph 1-10 */
+int osci_bgcolor = 4;    /* color of bg for oscillograph    1-10 */
 
 /******************
  * Ints for WINDOWS
  *****************/
-int window = 1;                   // "1" = main, "2" = settings, "3" = sound
-int sound_cursor_position = 1;    // cursor position at sound settings
-int settings_cursor_position = 1; // cursor position at settings
-int main_drawn = 0;               // "1" if has been drawn
-int settings_drawn = 0;           // "1" if has been drawn
-int soundsettings_drawn = 0;      // "1" if has been drawn
+int window = 1;                   /* "1" = main, "2" = settings, "3" = sound */
+int sound_cursor_position = 1;    /* cursor position at sound settings */
+int settings_cursor_position = 1; /* cursor position at settings */
+int main_drawn = 0;               /* "1" if has been drawn */
+int settings_drawn = 0;           /* "1" if has been drawn */
+int soundsettings_drawn = 0;      /* "1" if has been drawn */
 
 /*********************
  * Miscellaneous CHARs
  ********************/
-char defFilename[]="/mnt/file.mp3"; // default file location
-char * filename;                    // current file location
-char tmp[100];                      // used for printing text
+char defFilename[]="/mnt/file.mp3"; /* default file location */
+char * filename;                    /* current file location */
+char tmp[60];                       /* used for printing text */
 
 /*******************
  * Other
  ******************/
-struct mp3_play data; // mp3 data
-struct av_peak av_p;  // left/right levels
-
-void usage(void)
-{
-    printf("MP3 player v0.1 by oxygen77\n");
-    printf("20/07/2004\n");
-    printf("usage: play file\n");
-}
+struct mp3_play data; /* mp3 data */
+struct av_peak av_p;  /* left/right levels */
 
 /***************************************
  * Draws a progress bar on a 0-100 scale
  **************************************/
 void draw_settings_progressbar(int x, int y, int value)
 {
+    int j;
+    /*
     lcd_drawrect(COLOR_WHITE, x, y, 104, 9);
-    lcd_fillrect(COLOR_BLACK, x+2+value, y+2, 100-value, 5);
-    lcd_fillrect(COLOR_BLUE, x+2, y+2, value, 5);
+    lcd_fillrect(COLOR_BLACK, x+value+2, y+2, 99-value, 5);
+    lcd_fillrect(COLOR_BLUE,  x+2, y+2, value, 5);*/
+
+    for(j=y+5; j<y+7; j++)
+    {
+        lcd_drawline(COLOR_BLACK, x+value, j, x+value+(100-value), j);
+        lcd_drawline(COLOR_BLUE, x, j, x+value, j);
+    }
+
+    lcd_drawrect(COLOR_WHITE, x, y+3, 101, 6);
 }
 
 /**************************
@@ -90,65 +140,122 @@ void draw_settings_progressbar(int x, int y, int value)
  *************************/
 void draw_soundsettings(void)
 {
-    sprintf(tmp,"Vol: %03d",vol);
+    sprintf(tmp,"Vol: %03d%%",vol);
     if(sound_cursor_position == 1)
         lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 100, tmp);
     else
         lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 100, tmp);
 
-    sprintf(tmp,"Bass: %03d",bass);
+    sprintf(tmp,"Bass: %03d%%",bass);
     if(sound_cursor_position == 2)
         lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 115, tmp);
     else
         lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 115, tmp);
 
-    sprintf(tmp,"Treble: %03d",treb);
+    sprintf(tmp,"Treble: %03d%%",treb);
     if(sound_cursor_position == 3)
         lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 130, tmp);
     else
         lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 130, tmp);
 
-    sprintf(tmp,"Balance: %03d",bal);
+    sprintf(tmp,"Balance: %03d%%",bal);
     if(sound_cursor_position == 4)
         lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 145, tmp);
     else
         lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 145, tmp);
 
-    sprintf(tmp,"Loudness: %03d",loud);
+    sprintf(tmp,"Loudness: %03d%%",loud);
     if(sound_cursor_position == 5)
         lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 160, tmp);
     else
         lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 160, tmp);
 
+    /*
     draw_settings_progressbar(100, 99, vol);
     draw_settings_progressbar(100, 114, bass);
     draw_settings_progressbar(100, 129, treb);
     draw_settings_progressbar(100, 144, bal);
     draw_settings_progressbar(100, 159, loud);
+    */
 }
 
-/**************************
- * Draw sound settings text
- *************************/
+/********************
+ * Draw settings text
+ *******************/
 void draw_settings(void)
 {
-    if(visualization == 1)
-        sprintf(tmp, "Visualization: Peak Meters ");
-    else
-        sprintf(tmp, "Visualization: Oscillograph");
-    if(settings_cursor_position == 1)
-        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 100, tmp);
-    else
-        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 100, tmp);
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 40, "--- GENERAL OPTIONS ---");
 
     if(fade == 1)
         sprintf(tmp, "Fade On Stop/Pause: Yes");
     else
         sprintf(tmp, "Fade On Stop/Pause: No ");
+    if(settings_cursor_position == 1)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 55, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 55, tmp);
+
+    /*
+     *VISUALIZATION CATEGORY
+     */
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 85, "--- VISUALIZATION OPTIONS ---");
+
+    if(peakmeters == 1)
+        sprintf(tmp, "Visualization: Peak Meters ");
+    else
+        sprintf(tmp, "Visualization: Oscillograph");
     if(settings_cursor_position == 2)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 100, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 100, tmp);
+
+    if(scroll_osci == 1)
+        sprintf(tmp, "Scrolling Oscillograph: Yes");
+    else
+        sprintf(tmp, "Scrolling Oscillograph: No ");
+    if(settings_cursor_position == 3)
         lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 115, tmp);
     else
         lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 115, tmp);
+
+    if(peak_decay > 0)
+        sprintf(tmp, "Peak Release (Peak Meter): %02d        ", peak_decay);
+    else
+        sprintf(tmp, "Peak Release (Peak Meter): [No Decay]");
+    if(settings_cursor_position == 4)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 130, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 130, tmp);
+
+    /*
+     * COLORS CATEGORY
+     */
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 160, "--- COLOR OPTIONS ---");
+
+    sprintf(tmp, "Peak Meter Color [Level]: %s", colortext[peak_levelcolor]);
+    if(settings_cursor_position == 5)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 175, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 175, tmp);
+
+    sprintf(tmp, "Peak Meter Color [Background]: %s", colortext[peak_bgcolor]);
+    if(settings_cursor_position == 6)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 190, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 190, tmp);
+
+    sprintf(tmp, "Oscillograph Color [Level]: %s", colortext[osci_levelcolor]);
+    if(settings_cursor_position == 7)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 205, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 205, tmp);
+
+    sprintf(tmp, "Oscillograph Color [Background]: %s", colortext[osci_bgcolor]);
+    if(settings_cursor_position == 8)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 220, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 220, tmp);
+
 }
 
 /********************
@@ -156,15 +263,10 @@ void draw_settings(void)
  *******************/
 void apply_settings(void)
 {
-    // apply volume
     ioctl(fd_mix,AV_SET_MIX_VOLUME,&vol);
-    // apply bass
     ioctl(fd_mix,AV_SET_MIX_BASS,&bass);
-    // apply treble
     ioctl(fd_mix,AV_SET_MIX_TREBLE,&treb);
-    // apply balance
     ioctl(fd_mix,AV_SET_MIX_BALANCE,&bal);
-    // apply loudness
     ioctl(fd_mix,AV_SET_MIX_LOUDNESS,&loud);
 }
 
@@ -185,7 +287,7 @@ void draw_main_help_text(void)
     sprintf(tmp,"Vol:%03d",vol);
     lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275,  96, tmp);
 
-    //lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275, 160, "Help");
+    /* lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275, 160, "Help"); */
     lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275, 181, "Options");
     lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275, 211, "Sound");
 
@@ -202,9 +304,9 @@ void draw_main_help_text(void)
  *************************/
 void draw_settings_help_text(void)
 {
-    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 10, "Use UP and DOWN to move the cursor.");
-    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 25, "Use LEFT and RIGHT to change the value.");
-    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 40, "Press OFF or F3 to exit.");
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 0, 0,
+               "UP/DOWN: Move cursor. LEFT/RIGHT: Change value.");
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 0, 10, "OFF/F2: Exit");
 
     lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275,  41, "Back");
     lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275, 181, "Back");
@@ -221,9 +323,9 @@ void draw_settings_help_text(void)
  *************************/
 void draw_soundsettings_help_text(void)
 {
-    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 10, "Use UP and DOWN to move the cursor.");
-    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 25, "Use LEFT and RIGHT to change the value.");
-    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 40, "Press OFF or F3 to exit.");
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 0, 0,
+               "UP/DOWN: Move cursor. LEFT/RIGHT: Change value.");
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 0, 10, "OFF/F3: Exit");
 
     lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275,  41, "Back");
     lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275, 211, "Back");
@@ -236,51 +338,113 @@ void draw_soundsettings_help_text(void)
 }
 
 /**********************
+ * Pause or resume song
+ *********************/
+void pause_resume(void)
+{
+    if(pause) /* let's resume */
+    {
+        ioctl(fd_dsp,AV_DSP_START_MP3,NULL);
+        pause=0;
+
+        if(fade) /* fade in */
+        {
+            oldvol = vol;
+            vol = 30;
+            while(vol < oldvol)
+            {
+                vol++;
+                apply_settings();
+            }
+        }
+    }
+    else /* let's pause */
+    {
+        if(fade) /* fade out */
+        {
+            oldvol = vol;
+            while(vol > 30)
+            {
+                vol--;
+                apply_settings();
+            }
+            vol = oldvol;
+        }
+
+        ioctl(fd_dsp,AV_DSP_PAUSE_MP3,NULL);
+        pause=1;
+    }
+    main_drawn = 0; /* update window */
+}
+
+/**********************
  * Draw an oscillograph
  *********************/
 void oscillograph(int l, int r)
 {
-    // lower the values
+    /* lower peak values */
     l = l/12;
     r = r/12;
 
-    // make sure the values aren't too high
+    /* make sure the values aren't too high */
     if(l > 16)
         l = 16;
     if(r > 16)
         r = 16;
 
-    // draw a "cursor"
-    lcd_drawline(COLOR_BLACK, osci_x+1, 208, osci_x+1, 240);
+    /* keep to the right if not scrolling */
+    if(scroll_osci == 1)
+        osci_x = 268;
 
-    // left
-    lcd_drawline(COLOR_DARKBLUE, osci_x, 224, osci_x, 208);
-    lcd_drawline(COLOR_BLUE, osci_x, 224, osci_x, 224-l);
+    /* draw a "cursor */
+    if(scroll_osci == 0)
+        lcd_drawline(COLOR_BLACK, osci_x+1, 208, osci_x+1, 240);
 
-    // right
-    lcd_drawline(COLOR_DARKBLUE, osci_x, 224, osci_x, 240);
-    lcd_drawline(COLOR_BLUE, osci_x, 224, osci_x, 224+r);
+    /* clear trails */
+    if(scroll_osci == 0)
+        lcd_drawline(colortable[osci_bgcolor], osci_x, 208, osci_x, 240);
 
-    // move down a pixel, or back to the start
-    if(osci_x < 270)
-        osci_x++;
-    else
-        osci_x = 10;
+    /* left */
+    lcd_drawline(colortable[osci_levelcolor], osci_x, 224, osci_x, 224-l);
+    /* right */
+    lcd_drawline(colortable[osci_levelcolor], osci_x, 224, osci_x, 224+r);
+
+    /* move down a pixel, or back to the start */
+    if(scroll_osci == 0)
+    {
+        if(osci_x < 270)
+            osci_x++;
+        else
+            osci_x = 0;
+    }
+    /* stay in one spot, and just scroll */
+    else if(scroll_osci == 1)
+        scrollWindowHoriz(colortable[osci_bgcolor], 1, 208, 269, 32, 1, 0);
+}
+
+/***************************
+ * Draw a set of peak meters
+ **************************/
+void peak_meters(int l, int r)
+{
+    /* left meter */
+    lcd_fillrect(colortable[peak_bgcolor], lpos, 208, 270-lpos, 15);
+    lcd_fillrect(colortable[peak_levelcolor], 0, 208, lpos, 10);
+
+    /* right meter */
+    lcd_fillrect(colortable[peak_bgcolor], rpos, 224, 270-rpos, 15);
+    lcd_fillrect(colortable[peak_levelcolor], 0, 224, rpos, 10);
 }
 
 int main(int argc, char * * argv)
 {
-    printf("[play] argc: %d\n", argc);
-
     if(argc<3)
-       return 0; // Quit
+       return 0; /* quit */
     else
     {
         filename=argv[1];
         vol=atoi(argv[2]);
-        repeat=atoi(argv[3]);
     }
-
     printf("In soundTest\n");
 
     fd_dsp=open("/dev/dsp",O_WRONLY);
@@ -304,33 +468,27 @@ int main(int argc, char * * argv)
 
     ioctl(fd_dsp,AV_DSP_INI_MP3,&data);
 
-    printf("Ready to play\n");
-
     wait=0;
     end=0;
-    frame_cnt=0;
 
-    if(ini_graphics()<0)
-    {
-        printf("Cannot open graphics\n");
-        exit(1);
-    }
-
-    // black out the display
+    /* initialize the graphics and clear the lcd */
+    ini_graphics();
     lcd_clear_display(COLOR_BLACK);
 
-    // set standard font
+    /* set standard font */
     lcd_setfont(std6x9);
 
+    /* start mp3 */
     ioctl(fd_dsp,AV_DSP_START_MP3,NULL);
 
     while(!data.finished)
     {
         while((evt=nxtEvent())>0)
         {
+            /* Read the buttons */
             switch(evt)
             {
-                case BUTTON_UP: // settings_cursor up
+                case BUTTON_UP: /* settings_cursor up */
                     if(window == 1)
                     {
                         if(vol < 100)
@@ -343,7 +501,7 @@ int main(int argc, char * * argv)
                         if(settings_cursor_position > 1)
                             settings_cursor_position--;
                         else
-                            settings_cursor_position = 2;
+                            settings_cursor_position = 8;
 
                         settings_drawn = 0;
                     }
@@ -358,7 +516,7 @@ int main(int argc, char * * argv)
                     }
                     break;
 
-                case BUTTON_DOWN: // settings_cursor down
+                case BUTTON_DOWN: /* settings_cursor down */
                     if(window == 1)
                     {
                         if(vol > 0)
@@ -368,7 +526,7 @@ int main(int argc, char * * argv)
                     }
                     else if(window == 2)
                     {
-                        if(settings_cursor_position < 2)
+                        if(settings_cursor_position < 8)
                             settings_cursor_position++;
                         else
                             settings_cursor_position = 1;
@@ -386,23 +544,47 @@ int main(int argc, char * * argv)
                     }
                     break;
 
-                case BUTTON_RIGHT: // adjust up
+                case BUTTON_RIGHT: /* adjust up */
                     if(window == 2)
                     {
                         switch(settings_cursor_position)
                         {
                             case 1:
-                                if(visualization == 1)
-                                    visualization = 2;
-                                else
-                                    visualization = 1;
+                                fade = !fade;
                                 break;
-
                             case 2:
-                                if(fade == 1)
-                                    fade = 0;
+                                peakmeters = !peakmeters;
+                                break;
+                            case 3:
+                                scroll_osci = !scroll_osci;
+                                break;
+                            case 4:
+                                if(peak_decay < 10)
+                                    peak_decay++;
+                                break;
+                            case 5:
+                                if(peak_levelcolor < 9)
+                                    peak_levelcolor++;
                                 else
-                                    fade = 1;
+                                    peak_levelcolor = 0;
+                                break;
+                            case 6:
+                                if(peak_bgcolor < 9)
+                                    peak_bgcolor++;
+                                else
+                                    peak_bgcolor = 0;
+                                break;
+                            case 7:
+                                if(osci_levelcolor < 9)
+                                    osci_levelcolor++;
+                                else
+                                    osci_levelcolor = 0;
+                                break;
+                            case 8:
+                                if(osci_bgcolor < 9)
+                                    osci_bgcolor++;
+                                else
+                                    osci_bgcolor = 0;
                                 break;
                         }
                         settings_drawn = 0;
@@ -422,23 +604,47 @@ int main(int argc, char * * argv)
                     }
                     break;
 
-                case BUTTON_LEFT: // adjust down
+                case BUTTON_LEFT: /* adjust down */
                     if(window == 2)
                     {
                         switch(settings_cursor_position)
                         {
                             case 1:
-                                if(visualization == 2)
-                                    visualization = 1;
-                                else
-                                    visualization = 2;
+                                fade = !fade;
                                 break;
-
                             case 2:
-                                if(fade == 1)
-                                    fade = 0;
+                                peakmeters = !peakmeters;
+                                break;
+                            case 3:
+                                scroll_osci = !scroll_osci;
+                                break;
+                            case 4:
+                                if(peak_decay > 0)
+                                    peak_decay--;
+                                break;
+                            case 5:
+                                if(peak_levelcolor > 0)
+                                    peak_levelcolor--;
                                 else
-                                    fade = 1;
+                                    peak_levelcolor = 9;
+                                break;
+                            case 6:
+                                if(peak_bgcolor > 0)
+                                    peak_bgcolor--;
+                                else
+                                    peak_bgcolor = 9;
+                                break;
+                            case 7:
+                                if(osci_levelcolor > 0)
+                                    osci_levelcolor--;
+                                else
+                                    osci_levelcolor = 9;
+                                break;
+                            case 8:
+                                if(osci_bgcolor > 0)
+                                    osci_bgcolor--;
+                                else
+                                    osci_bgcolor = 9;
                                 break;
                         }
                         settings_drawn = 0;
@@ -458,55 +664,12 @@ int main(int argc, char * * argv)
                     }
                     break;
 
-                case BUTTON_ON: // pause/resume
+                case BUTTON_ON: /* pause/resume */
                     if(window == 1)
-                    {
-                        if(pause) // resume
-                        {
-                            if(ioctl(fd_dsp,AV_DSP_START_MP3,NULL)<0)
-                            {
-                                printf("Error resuming\n");
-                                return -1;
-                            }
-                            pause=0;
-
-                            // fade in
-                            if(fade)
-                            {
-                                vol = 35;
-                                while(vol < oldvol)
-                                {
-                                    vol++;
-                                    apply_settings();
-                                }
-                            }
-                        }
-                        else // pause
-                        {
-                            // fade out
-                            if(fade)
-                            {
-                                oldvol = vol;
-                                while(vol > 35)
-                                {
-                                    vol--;
-                                    apply_settings();
-                                }
-                                vol = oldvol;
-                            }
-
-                            if(ioctl(fd_dsp,AV_DSP_PAUSE_MP3,NULL)<0)
-                            {
-                                printf("Error pausing\n");
-                                return -1;
-                            }
-                            pause=1;
-                        }
-                        main_drawn = 0; // update window
-                    }
+                        pause_resume();
                     break;
 
-                case BUTTON_OFF: // quit
+                case BUTTON_OFF: /* quit */
                     if(window == 1)
                     {
                         if(fade)
@@ -526,79 +689,55 @@ int main(int argc, char * * argv)
                     }
                     else if(window == 2 || window == 3)
                     {
-                        lcd_clear_display(COLOR_BLACK); // clear
-                        main_drawn = 0; // redraw
+                        lcd_clear_display(COLOR_BLACK); /* clear */
+                        main_drawn = 0; /* redraw */
                         window = 1;
                     }
                     break;
 
-                case BUTTON_F2: // settings
-                    if(window == 1) // switch to settings
+                case BUTTON_F2: /* settings */
+                    if(window == 1)
                     {
-                        lcd_clear_display(COLOR_BLACK); // clear
-                        settings_drawn = 0; // redraw
+                        lcd_clear_display(COLOR_BLACK); /* clear */
+                        settings_drawn = 0; /* redraw */
                         window = 2;
                     }
-                    else
+                    else if(window == 2)
                     {
-                        lcd_clear_display(COLOR_BLACK); // clear
-                        main_drawn = 0; // redraw
+                        lcd_clear_display(COLOR_BLACK); /* clear */
+                        main_drawn = 0; /* redraw */
                         window = 1;
                     }
                     break;
 
-                case BUTTON_F3: // sound settings
-                    if(window == 1) // switch to settings
+                case BUTTON_F3: /* sound settings */
+                    if(window == 1)
                     {
-                        lcd_clear_display(COLOR_BLACK); // clear
-                        soundsettings_drawn = 0; // redraw
+                        lcd_clear_display(COLOR_BLACK); /* clear */
+                        soundsettings_drawn = 0; /* redraw */
                         window = 3;
                     }
-                    else
+                    else if(window == 3)
                     {
-                        lcd_clear_display(COLOR_BLACK); // clear
-                        main_drawn = 0; // redraw
+                        lcd_clear_display(COLOR_BLACK); /* clear */
+                        main_drawn = 0; /* redraw */
                         window = 1;
                     }
                     break;
             }
         }
 
-        // main window
+        /* main window */
         if(window == 1)
         {
-            // read peaks
-            ioctl(fd_dsp,AV_DSP_OUT_PEAK_REAL,&av_p);
-
-            // get peak values
-            av_p.left=(av_p.left*200)/0x7FFF;
-            av_p.right=(av_p.right*200)/0x7FFF;
-
-            // draw a peak meter or an oscillograph
-            if(visualization == 1)
-            {
-                // left meter
-                lcd_fillrect(COLOR_DARKBLUE, av_p.left+10, 208, 270-(av_p.left+10), 15);
-                lcd_fillrect(COLOR_BLUE, 10, 208, av_p.left, 15);
-
-                // right meter
-                lcd_fillrect(COLOR_DARKBLUE, 10+av_p.right, 224, 270-(av_p.right+10), 15);
-                lcd_fillrect(COLOR_BLUE, 10, 224, av_p.right, 15);
-            }
-            else if(visualization == 2)
-            {
-                if(pause == 0)
-                    oscillograph(av_p.left, av_p.right);
-            }
-
-            // make sure the text is drawn
+            /* make sure the text is drawn */
             if(main_drawn == 0)
             {
-                // Print the version at the top
-                sprintf(tmp,"--= MP3 Player v0.40 =--");
+                /* Print the version at the top */
+                sprintf(tmp,"--= MP3 Player v1.10 =--");
                 lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 65, 10, tmp);
 
-                // "Now Playing: X.mp3"
+                /* What's playing? */
                 lcd_setfont(std7x13);
                 sprintf(tmp,"Now Playing:");
                 lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 40, tmp);
@@ -606,21 +745,63 @@ int main(int argc, char * * argv)
                 lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 55, tmp);
                 lcd_setfont(std6x9);
 
+                /* fill in the peak meter background */
+                if(peakmeters)
+                {
+                    lcd_fillrect(colortable[peak_bgcolor], 0, 208, 270-(av_p.left+10), 15);
+                    lcd_fillrect(colortable[peak_bgcolor], 0, 224, 270-(av_p.left+10), 15);
+                }
+
                 draw_main_help_text();
 
                 main_drawn = 1;
             }
 
-            // make sure the settings are applied
-            if(settings_applied == 0)
+            /* read peaks */
+            ioctl(fd_dsp,AV_DSP_OUT_PEAK_REAL,&av_p);
+
+            /* get peak values */
+            av_p.left=(av_p.left*200)/0x7FFF;
+            av_p.right=(av_p.right*200)/0x7FFF;
+
+            /* smoothen out if desired */
+            if(peak_decay > 0)
+            {
+                if(av_p.left < lpos)
+                    lpos -= peak_decay;
+                else
+                    lpos = av_p.left;
+
+                if(av_p.right < rpos)
+                    rpos -= peak_decay;
+                else
+                    rpos = av_p.right;
+            }
+            else
+            {
+                lpos = av_p.left;
+                rpos = av_p.right;
+            }
+
+            /* draw the peak meter, or the oscillograph */
+            if(peakmeters)
+                peak_meters(lpos, rpos);
+            else
+            {
+                if(pause == 0)
+                    oscillograph(av_p.left, av_p.right);
+            }
+
+            /* make sure the settings are applied */
+            if(!settings_applied)
             {
                 apply_settings();
                 settings_applied = 1;
             }
         }
-        else if(window == 2) // settings
+        else if(window == 2) /* settings */
         {
-            // make sure the text is drawn
+            /* make sure the text is drawn */
             if(settings_drawn == 0)
             {
                 draw_settings();
@@ -628,16 +809,16 @@ int main(int argc, char * * argv)
                 settings_drawn = 1;
             }
 
-            // make sure the settings are applied
+            /* make sure the settings are applied */
             if(settings_applied == 0)
             {
                 apply_settings();
                 settings_applied = 1;
             }
         }
-        else if(window == 3) // sound settings
+        else if(window == 3) /* sound settings */
         {
-            // make sure the text is drawn
+            /* make sure the text is drawn */
             if(soundsettings_drawn == 0)
             {
                 draw_soundsettings();
@@ -645,7 +826,7 @@ int main(int argc, char * * argv)
                 soundsettings_drawn = 1;
             }
 
-            // make sure the settings are applied
+            /* make sure the settings are applied */
             if(settings_applied == 0)
             {
                 apply_settings();
@@ -654,15 +835,13 @@ int main(int argc, char * * argv)
         }
     }
 
+    /* we're done */
     end:
 
+    /* shut down everything used */
     close(fd_dsp);
     close(fd_mix);
-    printf("mixer closed\n");
-
     close_graphics();
-
-    printf("I'm out \n");
 
     exit(0);
 }

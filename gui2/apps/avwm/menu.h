@@ -23,7 +23,7 @@ struct cfg_menu {
 };
 
 void doDraw(void);
-int  loadMenu(void);
+int  loadMenu(char * filename);
 void printMenu(void);
 int  do_parse(struct cfg_menu ** cfg,char * filename);
 void cfgCleanMenu(struct cfg_menu * cfg);

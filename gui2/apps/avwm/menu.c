@@ -191,15 +191,16 @@ int do_parse(struct cfg_menu ** cfg,char * filename)
     return 0;
 }
 
-int loadMenu(void)
+int loadMenu(char * filename)
 {
 	struct cfg_menu * data;
 	struct menu_item * new_item;
+        fprintf(stderr,"Reading: %s\n",filename);
 	cfgCleanMenu(cfgMenu);
 	cfgMenu=NULL;
 	cleanMenu(rootMenu);
 	rootMenu=NULL;
-	if(do_parse(&cfgMenu,"/mnt/menu.cfg")<0)
+	if(do_parse(&cfgMenu,filename)<0)
 		return -1;
 	data=cfgMenu;
 	while(data!=NULL)
