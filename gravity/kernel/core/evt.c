@@ -47,12 +47,16 @@ struct evt_pipes_s * get_evt_handling(void)
     ptr->nxt=head;
     head=ptr;
     
+    printk("[evt handling] register: %08x\n",ptr);
+    
     return ptr;
 }
 
 void rm_evt_handling(struct evt_pipes_s * evt_pipes)
 {
     struct evt_pipes_s * ptr=head;
+    
+    printk("[evt handling] UNregister: %08x",evt_pipes);
     
     if(evt_pipes==head)
     {
@@ -63,6 +67,7 @@ void rm_evt_handling(struct evt_pipes_s * evt_pipes)
         while(ptr!=NULL && ptr->nxt!=evt_pipes) ptr=ptr->nxt;
         ptr=ptr->nxt;
     }
+    printk(" done\n");
 }
 
 void send_evt(int evt)

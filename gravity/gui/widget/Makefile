@@ -7,14 +7,12 @@ SRC = $(wildcard *.c)
 SRC2 = $(wildcard *.S)
 OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 
-SUBDIRS = file_browser
-
-all: subdirs $(OBJS)
+all: $(OBJS)
 	@cp -f $(OBJS) ../build
 
 force: clean all        
 
-clean:  clean-subdirs
+clean:  
 	@rm -f *.o *.bak *~ $(TARGET)
 
 include ../../default.rule

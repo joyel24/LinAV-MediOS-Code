@@ -157,30 +157,6 @@ trap_irq:
     str r12, [r1]           @// User's top of stack stored in TCB...
 
     MSR CPSR_c, #0x92
-@    ldr     r0, =0x30506    
-@    ldrh    r0, [r0]
-@    mov     r0, r0, lsl  #16
-@    ldr     r6, =0x30504  @IRQ0_STATUS reg addr
-@    ldrh    r6, [r6]               @ get interrupts irq_0 and irq_1
-    
-@    orr     r6, r6, r0
-@    mvn     r6, r6
-@    mov     r0, #0
-@irqsearch1:
-@    tst     r6, #1                       @ Is IRQ set?
-@    bne     irqsearch2                   @ Yes... exit with NEQ
-@    add     r0, r0, #1
-@    mov     r6, r6, lsr #1
-@    cmp     r0, #32
-@    bcc     irqsearch1
-@irqsearch2:                                          @ EQ will be set if we reach 32                
-@    movne   r1, sp
-    @
-    @ routine called with r0 = irq number, r1 = struct pt_regs *
-    @
-
-@    blne     do_IRQ
-@    mov r0, r6
     bl do_IRQ
     bl kset_next_ready_task
 

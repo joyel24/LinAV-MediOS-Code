@@ -118,9 +118,19 @@ void unregister_evt(unsigned int arg)
     API_EVT(0x001,arg,NULL);
 }
 
-int wait_evt(unsigned int arg)
+int waitEvt(unsigned int arg)
 {
     int val=0;
     API_EVT(0x002,arg,&val);
     return val;
+}
+
+void sendEvt(int evt)
+{
+    API_EVT(0x003,&evt,NULL);
+}
+
+void flushEvt(unsigned int arg)
+{
+    API_EVT(0x004,arg,NULL);
 }

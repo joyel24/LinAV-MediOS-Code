@@ -6,6 +6,8 @@
 *
 */
 
+#include <sys_def/stddef.h>
+
 #include <kernel/kernel.h>
 #include <kernel/threads.h>
 #include <kernel/pipes.h>
@@ -327,8 +329,9 @@ __IRAM_CODE int kcswi_handler (
 		API_MALLOC (&pTCB->pMessagePipe, sizeof(PIPE));
 		pTCB->pMessagePipe->nReceiver = 0;
 		pTCB->pMessagePipe->nSender = 0;
-
-		*((TASK_INFO**)nParam2) = pTCB;
+                    
+                *((TASK_INFO**)nParam2) = pTCB;
+                
 
 		// Include new task in task ring...
 		__cli ();
@@ -338,6 +341,7 @@ __IRAM_CODE int kcswi_handler (
 		g_pTaskRing->pNextTask = pTCB;
 		__sti ();
 
+                
 		return code;
 	}
 	break;
@@ -371,6 +375,15 @@ __IRAM_CODE int kcswi_handler (
                     break;
                 case 0x002: /* wait evt */
                     API_PIPE_RECV(&((struct evt_pipes_s *)nParam2)->evt_pipe, nParam3 , 1);
+                    break;
+                case 0x003: /* send evt */
+                    send_evt(*(int*)nParam2);
+                    break;
+                case 0x004: /* send evt */
+                    __cli ();
+                    ((struct evt_pipes_s *)nParam2)->evt_pipe.nReceiver = 0;
+                    ((struct evt_pipes_s *)nParam2)->evt_pipe.nSender = 0;
+                    __sti ();
                     break;                    
             }
             return 0;

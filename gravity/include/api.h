@@ -78,7 +78,9 @@ void    free(void *buff);
 
 unsigned int register_evt(void);
 void unregister_evt(unsigned int arg);
-int wait_evt(unsigned int arg);
+int waitEvt(unsigned int arg);
+void sendEvt(int evt);
+void flushEvt(unsigned int arg);
 
 #define  getTime(time_data)     API_TIME(0x000,time_data)
 #define  setTime(time_data)     API_TIME(0x001,time_data)

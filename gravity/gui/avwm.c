@@ -17,28 +17,18 @@
 #include <sys_def/font.h>
 #include <api.h>
 #include <fs_io.h>
+#include <kernel/evt.h>
 
 #include <gui/icons.h>
-#include <sound.h>
-
-#include <kernel/io.h>
-#include <kernel/gio.h>
-#include <kernel/hardware.h>
-
-
-extern void ini_status_bar(void);
-extern void drawStatusLine(void);
-
-#define MP3_SIZE 1020*2000
-
+#include <gui/status_line.h>
 
 void avwm(void)
 {
-    /*DIR * dir;
-    struct dirent* entry;*/
+    unsigned int evt_buffer;
+    int evt;
     
-    int fd,size,cnt;
-    struct mp3_play data;
+     HTASK task;
+    
     
     printf("Starting AvWm\n");
     
@@ -48,62 +38,26 @@ void avwm(void)
     iniIcon();
     
     ini_status_bar();
-    drawStatusLine(); /* should be done via EVT_REDRAW */
-#if 0
-    fd=fopen("/file.mp3",O_RDONLY);
-    if(fd<0)
+    ini_file_browser();
+    
+    evt_buffer=register_evt();
+    if(!evt_buffer)
     {
-        printf("Can't open mp3 file\n");
-    }
-    else
-    {
-        size=filesize(fd);
-        if(size>MP3_SIZE)
-            size=MP3_SIZE;
-        data.buffer=malloc(size);
-        if(!data.buffer)
-        {
-            printf("can't allocate mp3 buffer\n");
-        }
-        else
-        {
-            cnt=fread(fd,data.buffer,size);
-            if(cnt<=0)
-            {
-                printf("Error reading file\n");
-            }
-            else
-            {
-                if(cnt<size)
-                {
-                    size=cnt;
-                    printf("only read: %x\n",cnt);
-                }                
-                else
-                    printf("read: %x\n",cnt);
-                data.buffer_len=size;
-                data.pos=0;
-                data.finished=0;
-                data.buffer_read=0;
-                data.buffer_write=size;
-                data.endOfFile=0;
-                data.freqPeakDraw=10;
-                data.peakDraw=NULL;//drawPeak;
-                
-                dsp_ini_mp3(&data);
-                
-                /*while(1)
-                {
-                    dsp_interrupt(0);
-                }*/
+        printf("[ini_status_bar] can't register to evt\n");
+        return;
+    } 
+    
+    //browse_root();
+    
+    printk("browser started\n");
+    
+    sendEvt(EVT_REDRAW);
 
-                dsp_start_mp3();
-                printf("out of play\n");
-            }
-        }
+    while(1)
+    {
+        evt=waitEvt(evt_buffer);
+        
+        bwseventHandler(evt);       
+        statusEvtHandler(evt);
     }
-#endif    
-    
-    
-    while(1) /*nothing*/;
 }

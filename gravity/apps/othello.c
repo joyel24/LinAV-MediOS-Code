@@ -94,6 +94,8 @@ unsigned char av3xx_bmap[12][12]= {
 BITMAP hBitmap = {(unsigned int) human_bmap, 12, 12, 0, 0};
 BITMAP aBitmap = {(unsigned int) av3xx_bmap, 12, 12, 0, 0};
 
+int stop_othello;
+
 /*
 struct helperMenu othelloMenu = {
     ON_txt        : "New Game",
@@ -114,13 +116,6 @@ struct helperMenu othelloMenu = {
 };
 */
 #define PIECE_OFFSET (CELL_SIZE-PIECE_SIZE)/2+1
-
-unsigned int evt_buffer;
-
-int computeAllowed(int allowed[NB_CELL][NB_CELL],int player);
-void redraw(void);
-void iniBoard(void);
-int eventHandler(int evt_buffer);
 
 
 void drawPiece(int x, int y, int player)
@@ -490,87 +485,85 @@ void redraw(void)
     drawNbPiece();
 }
 
-int eventHandler(int evt_buffer)
-{
-    int evt;
-    while(1)
+void eventHandler(int evt)
+{  
+    //cops->helperEvt(evt,BTN_JOY);
+    switch(evt)
     {
-        evt=wait_evt(evt_buffer);
-        //cops->helperEvt(evt,BTN_JOY);
-        switch(evt)
-        {
-            case BTN_UP:
-                if(cursorMoveMode==0)
-                    simpleMove(0,-1);
+        case BTN_UP:
+            if(cursorMoveMode==0)
+                simpleMove(0,-1);
+            break;
+
+        case BTN_LEFT:
+            if(cursorMoveMode==0)
+                simpleMove(-1,0);
+            else
+                nxtCursosPos(PREV_POS,DO_MOVE);
+            break;
+
+        case BTN_DOWN:
+            if(cursorMoveMode==0)
+                simpleMove(0,1);
+            break;
+
+        case BTN_RIGHT:
+            if(cursorMoveMode==0)
+                simpleMove(1,0);
+            else
+                nxtCursosPos(NXT_POS,DO_MOVE);
+            break;
+
+        case BTN_F1:
+            if(cursorMoveMode==0 && allowedHuman[cursor_pos.x][cursor_pos.y]!=1)
                 break;
-    
-            case BTN_LEFT:
-                if(cursorMoveMode==0)
-                    simpleMove(-1,0);
-                else
-                    nxtCursosPos(PREV_POS,DO_MOVE);
-                break;
-    
-            case BTN_DOWN:
-                if(cursorMoveMode==0)
-                    simpleMove(0,1);
-                break;
-    
-            case BTN_RIGHT:
-                if(cursorMoveMode==0)
-                    simpleMove(1,0);
-                else
-                    nxtCursosPos(NXT_POS,DO_MOVE);
-                break;
-    
-            case BTN_F1:
-                if(cursorMoveMode==0 && allowedHuman[cursor_pos.x][cursor_pos.y]!=1)
-                    break;
-    
-                doMove(cursor_pos.x,cursor_pos.y);
-                computerMove();
-                drawNbPiece();
-                while(!computeAllowed(allowedHuman,HUMAN))
+
+            doMove(cursor_pos.x,cursor_pos.y);
+            computerMove();
+            drawNbPiece();
+            while(!computeAllowed(allowedHuman,HUMAN))
+            {
+                if(!computerMove())
                 {
-                    if(!computerMove())
-                    {
-                        endOfGame=1;
-                        endGame();
-                        break;
-                    }
+                    endOfGame=1;
+                    endGame();
+                    break;
                 }
-                if(!endOfGame)
-                    iniCursorPos();
-                break;
-    
-            case BTN_F3:
-                cursorMoveMode = !cursorMoveMode;
-                drawMenu();
-                break;
-    
-            case BTN_OFF:
-            case EVT_QUIT:
-                //RELEASE(cops);
-                break;
-    
-            case BTN_ON:
-                iniBoard();
-                computeAllowed(allowedHuman,HUMAN);
-                break;
-    
-            case EVT_REDRAW:
-                redraw();
-                break;
-        }
+            }
+            if(!endOfGame)
+                iniCursorPos();
+            break;
+
+        case BTN_F3:
+            cursorMoveMode = !cursorMoveMode;
+            drawMenu();
+            break;
+
+        case BTN_OFF:
+        case EVT_QUIT:
+            stop_othello=1;
+            break;
+
+        case BTN_ON:
+            iniBoard();
+            computeAllowed(allowedHuman,HUMAN);
+            break;
+
+        case EVT_REDRAW:
+            redraw();
+            break;
     }
-    return 1;
 }
 
-int _start(int argc,char ** argv)
+void _start(void)
 {
     //REGISTER(eventHandler,0);
-
-    open_graphics();
+    int evt;
+    unsigned int evt_buffer;
+    
+    printf("In othello");
+    
+    //open_graphics();
     
     clearScreen(COLOR_WHITE);
     
@@ -584,14 +577,22 @@ int _start(int argc,char ** argv)
     if(!evt_buffer)
     {
         printf("[ini_status_bar] can't register to evt\n");
-        return 1;
+        return;
     }
-    API_TASK_CREATE (eventHandler, evt_buffer, NULL);
+    //API_TASK_CREATE (eventHandler, evt_buffer, NULL);
     
     computeAllowed(allowedHuman,HUMAN);
     redraw();
     
-    while(1) /*nothing*/;
-    return 1;
+    stop_othello=0;
+    
+    while(!stop_othello)
+    {
+        evt=waitEvt(evt_buffer);
+        eventHandler(evt);
+    }
+    
+    unregister_evt(evt_buffer);
+
 }
 

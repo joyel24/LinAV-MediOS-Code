@@ -55,7 +55,7 @@
 #define FLAT_FLAG_PIC       2
 
 #ifdef DEBUG_FLAT
-#define FLAT_PRINT(s...)   printk(a)
+#define FLAT_PRINT(s...)   printk(s)
 #else
 #define FLAT_PRINT(s...)
 #endif
@@ -219,14 +219,14 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
     }
        
     
-    run_flat=header.entry+text_pos;
-    FLAT_PRINT("[load_bflat] about to launch: %08x\n",run_flat);
-    run_flat(0,NULL);
+//    run_flat=header.entry+text_pos;
+//    FLAT_PRINT("[load_bflat] about to launch: %08x\n",run_flat);
+//    run_flat(0,NULL);
 
-//    pTCB->pTaskCode = text_pos;
-//    pTCB->pEntry    = text_pos + header.entry;
+    pTCB->pTaskCode = text_pos;
+    pTCB->pEntry    = text_pos + header.entry;
 
-    kfree((void*)text_pos);
+    //kfree((void*)text_pos);
     kfclose(fd_bflat);         
     return ERR_OK;
 }

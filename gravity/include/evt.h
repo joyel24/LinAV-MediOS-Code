@@ -33,8 +33,13 @@
 #define        EVT_CF_OUT    0x10
 #define        EVT_FW_EXT    0x11
 
-#define        EVT_REDRAW    0x51
-#define        EVT_QUIT      0x52
+#define        EVT_REDRAW      0x51
+#define        EVT_SUSPEND     0x52
+#define        EVT_RESUME      0x53
+#define        EVT_CF_REMOVED  0x54
+#define        EVT_CF_ADDED    0x55
+#define        EVT_MENU_UP_LVL 0x56
+#define        EVT_QUIT        0x57
 
       
 

@@ -23,7 +23,11 @@
 
 extern char * ___strtok;
 
-void    qsort(void* __base, size_t __nmemb, size_t __size, int(*_compar)(const void*, const void*));
+#define    toLower(chr)  ((chr>64 && chr<91)?chr+32:chr)
+
+void strlwr(char *s);
+
+void    qsort       (void* __base, size_t __nmemb, size_t __size, int(*_compar)(const void*, const void*));
 
 int     atoi        (const char *str);
 

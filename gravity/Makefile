@@ -14,7 +14,7 @@ LDFLAGS = -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lgcc
 
 TARGET = gravity
 
-SUBDIRS = kernel gui
+SUBDIRS = kernel gui apps
 #gui
 LIBS = kernel/build/*.o gui/build/*.o
 #gui/gui.a

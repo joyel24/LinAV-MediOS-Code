@@ -13,7 +13,7 @@
 #include <sys_def/ctype.h>
 #include <sys_def/string.h>
 
-//#include <sys_def/malloc.h>
+#include <api.h>
 
 #if 0
 #include <dma.h>
@@ -30,6 +30,14 @@ void * memcpy(void * dest,const void *src,size_t count)
 }
 #endif
 
+void strlwr(char *s)
+{
+    while (*s)
+    {
+        *s = toLower(*s);
+        s++;
+    }
+}
 
 int atoi (const char *str)
 {
@@ -65,7 +73,7 @@ int atoi (const char *str)
     return value * sign;
 }
 
-#if 0
+
 char * strdup(const char * s)
 {
     int len=strlen(s)+1;
@@ -74,7 +82,7 @@ char * strdup(const char * s)
         strncpy(s2,s,len);
     return s2;
 }
-#endif
+
 
 int strcasecmp(const char *s1, const char *s2)
 {
