@@ -1,0 +1,7 @@
+AVLO TODO list
+
+- delay before loading in s or ms
+- in failsafe mode, button to retry reading file
+- nice background
+- display error messages while reading the config file
+- error message if can't load default bin
