@@ -246,11 +246,11 @@ int main(int argc,char * * argv)
 	nselect=0;
 	stop=0;
 	
-	if(argc>1)
+	if(argc>0)
 	{
 		listused = 0;
 		
-		chdir(argv[2]);
+		chdir(argv[1]);
 		
 		if(doLs("./")<0)
 		{

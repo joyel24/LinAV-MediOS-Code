@@ -39,18 +39,19 @@ void (*tmpHandler)(int evt)=NULL;
 
 int plugin_pid=-1;
 
-int launchPlugin(char * name)
+int launchPlugin(char * name,char * param)
 {
 	int pid,err;
-	char tmp[15];
+	char cops_a[15];
 	
-	printf("in parent: %x\n",(int)&cops);
-	
-	sprintf(tmp, "%d",(int)&cops);
+	sprintf(cops_a, "%d",(int)&cops);
 	pid = vfork();
 	if (pid == 0)
-	{ // child       
-		err = execl(name, name,tmp,"/");
+	{ // child
+		if(param!=NULL)
+			err = execl(name, name,param,cops_a,(char *)0);
+		else
+			err = execl(name, name,cops_a,(char *)0);
 		fprintf(stderr, "exec failed!%s %d %ld\n", name, err, errno);
 		_exit(1);
 	}
@@ -66,6 +67,7 @@ int launchPlugin(char * name)
 }
 
 int timerOn=0;
+int stopWM;
 
 int main(int argc,char * * argv)
 {
@@ -79,6 +81,7 @@ int main(int argc,char * * argv)
 	setTimerFreq(10);
 	startTimer();
 	timerOn=1;
+	stopWM=0;
 	eventLoop();
 	close_graphics();
 	return 0;
@@ -149,7 +152,7 @@ void drawMenu(void)
 					plugin_pid=-1;
 				}
 				drawGui();
-				launchPlugin("/mnt/ls-gui");
+				launchPlugin("/mnt/ls-gui","/");
 				return;
 			case BTN_RIGHT:
 				if(currentHandler)
@@ -160,7 +163,7 @@ void drawMenu(void)
 					plugin_pid=-1;
 				}
 				drawGui();
-				launchPlugin("/mnt/snow");
+				launchPlugin("/mnt/snow",NULL);
 				return;
 			case BTN_LEFT:
 				if(currentHandler)
@@ -169,6 +172,8 @@ void drawMenu(void)
 					currentHandler(EVT_REDRAW);
 				}
 				return;
+			case BTN_OFF:
+				stopWM=1;;
 		}
 	}
 	
@@ -205,7 +210,7 @@ void eventLoop()
 	int ret;
 	int evt;
 		
-	while(1)
+	while(!stopWM)
 	{
 		//while((evt=nxtEvent())==NO_EVENT) /* wait */;
 		evt=waitEvent();

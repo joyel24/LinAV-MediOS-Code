@@ -19,7 +19,7 @@
 #define EVT_SUSPEND 0x0102
 #define EVT_RESUME  0x0103
 
-#define REGISTER(ops,event)    {ops=atoi(argv[1]);ops->addEventHandler(event);}
+#define REGISTER(ops,event)    {ops=atoi(argv[argc-1]);ops->addEventHandler(event);}
 #define PACK(ops)              {ops->pack();}
 
 struct client_operations {	
