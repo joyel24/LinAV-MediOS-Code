@@ -10,7 +10,7 @@ int main() {
     int cursorx=160, cursory=120;
     int butslow = 160;
     int butmax = 160;
-
+    
     static int cursor[256] = {
         0x0b00, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
         0x0b0b, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -82,8 +82,9 @@ int main() {
     for (c=0;c<256;c++) {
         osdSetCursor2Bitmap(c, cursor[c]);    
     }
-    
+
     while(1) {
+    
         if (butslow==0) {
             butslow=butmax;
             c = buttonsGetStatus();
