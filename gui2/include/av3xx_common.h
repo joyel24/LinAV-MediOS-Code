@@ -59,6 +59,18 @@ struct av_peak {
 	int right;
 };
 
+struct timer_val {
+    int num;
+    int val;
+};
+
+#define AV_TIMER_ON_BAT        0
+#define AV_TIMER_ON_DC         1
+
+#define CREATE_TIMER_VAR(var)                      struct timer_val var;
+#define SET_VAL_TIMER(timer,val,var)               var.num=timer;var.val=val;
+#define GET_VAL_TIMER(var)                         var.val;
+
 /* ioctl */
 
 #define AV_OP_IOC_MAGIC_USB    'a'
@@ -133,25 +145,25 @@ struct av_peak {
 
 #define AV_OP_IOC_MAGIC_STATE  'f'
 #define AV_OP_IOC_MAXNR_STATE  20
-#define AV_LCD_GET_TIMOUT      _IOR(AV_OP_IOC_MAGIC_STATE,1,int)
-#define AV_LCD_SET_TIMOUT      _IOW(AV_OP_IOC_MAGIC_STATE,2,int)
-#define AV_LCD_TIMOUT_OFF      _IO(AV_OP_IOC_MAGIC_STATE,3)
-#define AV_LCD_TIMOUT_ON       _IO(AV_OP_IOC_MAGIC_STATE,4)
-#define AV_LCD_TIMOUT_STATE    _IOR(AV_OP_IOC_MAGIC_STATE,5,int)
-#define AV_LCD_ON              _IO(AV_OP_IOC_MAGIC_STATE,6)
-#define AV_LCD_OFF             _IO(AV_OP_IOC_MAGIC_STATE,7)
+#define AV_LCD_GET_TIMOUT      _IOR(AV_OP_IOC_MAGIC_STATE,1,struct timer_val*)
+#define AV_LCD_SET_TIMOUT      _IOW(AV_OP_IOC_MAGIC_STATE,2,struct timer_val*)
+#define AV_LCD_TIMOUT_OFF      _IOW(AV_OP_IOC_MAGIC_STATE,3,struct timer_val*)
+#define AV_LCD_TIMOUT_ON       _IOW(AV_OP_IOC_MAGIC_STATE,4,struct timer_val*)
+#define AV_LCD_TIMOUT_STATE    _IOR(AV_OP_IOC_MAGIC_STATE,5,struct timer_val*)
+#define AV_LCD_ON              _IOW(AV_OP_IOC_MAGIC_STATE,6,struct timer_val*)
+#define AV_LCD_OFF             _IOW(AV_OP_IOC_MAGIC_STATE,7,struct timer_val*)
 #define AV_LCD_GET_STATE       _IOR(AV_OP_IOC_MAGIC_STATE,8,int)
-#define AV_HD_GET_TIMOUT       _IOR(AV_OP_IOC_MAGIC_STATE,9,int)
-#define AV_HD_SET_TIMOUT       _IOW(AV_OP_IOC_MAGIC_STATE,10,int)
+#define AV_HD_GET_TIMOUT       _IOR(AV_OP_IOC_MAGIC_STATE,9,struct timer_val*)
+#define AV_HD_SET_TIMOUT       _IOW(AV_OP_IOC_MAGIC_STATE,10,struct timer_val*)
 #define AV_HD_STOP             _IO(AV_OP_IOC_MAGIC_STATE,11)
-#define AV_HD_TIMOUT_OFF       _IO(AV_OP_IOC_MAGIC_STATE,12)
-#define AV_HD_TIMOUT_ON        _IO(AV_OP_IOC_MAGIC_STATE,13)
-#define AV_HD_TIMOUT_STATE     _IOR(AV_OP_IOC_MAGIC_STATE,14,int)
-#define AV_HALT_GET_TIMOUT     _IOR(AV_OP_IOC_MAGIC_STATE,15,int)
-#define AV_HALT_SET_TIMOUT     _IOW(AV_OP_IOC_MAGIC_STATE,16,int)
-#define AV_HALT_TIMOUT_OFF     _IO(AV_OP_IOC_MAGIC_STATE,17)
-#define AV_HALT_TIMOUT_ON      _IO(AV_OP_IOC_MAGIC_STATE,18)
-#define AV_HALT_TIMOUT_STATE   _IOR(AV_OP_IOC_MAGIC_STATE,19,int)
+#define AV_HD_TIMOUT_OFF       _IOW(AV_OP_IOC_MAGIC_STATE,12,struct timer_val*)
+#define AV_HD_TIMOUT_ON        _IOW(AV_OP_IOC_MAGIC_STATE,13,struct timer_val*)
+#define AV_HD_TIMOUT_STATE     _IOR(AV_OP_IOC_MAGIC_STATE,14,struct timer_val*)
+#define AV_HALT_GET_TIMOUT     _IOR(AV_OP_IOC_MAGIC_STATE,15,struct timer_val*)
+#define AV_HALT_SET_TIMOUT     _IOW(AV_OP_IOC_MAGIC_STATE,16,struct timer_val*)
+#define AV_HALT_TIMOUT_OFF     _IOW(AV_OP_IOC_MAGIC_STATE,17,struct timer_val*)
+#define AV_HALT_TIMOUT_ON      _IOW(AV_OP_IOC_MAGIC_STATE,18,struct timer_val*)
+#define AV_HALT_TIMOUT_STATE   _IOR(AV_OP_IOC_MAGIC_STATE,19,struct timer_val*)
 #define AV_HALT_DEVICE         _IO(AV_OP_IOC_MAGIC_STATE,20)
 
 #define AV_OP_IOC_MAGIC_FM     'f'
