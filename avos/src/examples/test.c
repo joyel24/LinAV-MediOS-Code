@@ -1,22 +1,27 @@
 #include <graphics.h>
 #include <osdDSC25.h>
 #include <buttons.h>
+#include <fonts.h>
 
-extern char (*std8x13_[]) [];
-
-    char tests[13] = {0xff, 0xff, 0x81, 0x42, 0x24, 0x18, 0xff, 0x18, 0x24, 0x42, 0x81, 0xff, 0xff};
-
-int main() {
-    struct graphicsBuffer screenVideo;
-    struct graphicsBuffer screenBitmap;
-    struct graphicsBuffer sprite1;
-    
     static int pal32[2] = {
         0x80c0e0, 0xffffff
     };
     static int pal16[2] = {
         0x0101, 0xffff
     };
+
+    struct graphicsBuffer screenVideo;
+    struct graphicsBuffer screenBitmap;
+
+    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
+    struct graphicsBuffer sprite5_8 = {0, 1, 5, 8, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
+    struct graphicsBuffer sprite7_13 = {0, 1, 7, 13, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
+    struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
+    
+//
+//
+//
+int main() {
         
     osdInit();
     
@@ -56,16 +61,6 @@ int main() {
     screenBitmap.bitsPerPixelShift = 4;
     screenBitmap.bitsPerPixel = 16;
 
-    sprite1.offset = &tests;
-    sprite1.bytesPerLine = 1;
-    sprite1.width = 8;
-    sprite1.height = 13;
-    sprite1.bitsPerPixelShift = 0;
-    sprite1.bitsPerPixel = 1;
-    sprite1.transparent = 0;
-    sprite1.pallette16 = &pal16;
-    sprite1.pallette32 = &pal32;
-
     graphicsBoxf(&screenVideo, 0, 0, 320, 240, 0x000000);
     graphicsBoxf(&screenVideo, 0, 0, 160, 120, 0x800000);
     graphicsBoxf(&screenVideo, 20, 120, 200, 100, 0xc0c000);
@@ -73,19 +68,17 @@ int main() {
     graphicsBoxf(&screenBitmap, 0, 0, 160, 120, 0x0000);
     graphicsBoxf(&screenBitmap, 20, 20, 120, 80, 0x0101);
     
-    graphicsSprite(&screenVideo, 20, 120, &sprite1);
-
-    graphicsString(&screenBitmap, 2, 20, &sprite1, &std8x13_, 9, 1, "abcdefghijklmnop");
+    graphicsString(&screenBitmap, 2, 20, &sprite4_6, &std4x6_, 5, 1, "abcdefghijklmnop");
     
     graphicsBoxf(&screenVideo, 80, 60, 100, 100, 0x40e050);
     
     
-    graphicsString(&screenVideo, 2, 34, &sprite1, &std8x13_, 9, 1, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-    graphicsString(&screenVideo, 2, 48, &sprite1, &std8x13_, 9, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
+    graphicsString(&screenVideo, 2, 34, &sprite8_13, &std8x13_, 9, 1, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    graphicsString(&screenVideo, 2, 48, &sprite5_8, &std5x8_, 6, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
     pal32[1] = 0x503020;
-    graphicsString(&screenVideo, 100, 30, &sprite1, &std8x13_, 0, 14, "Font drawing!");
+    graphicsString(&screenVideo, 100, 30, &sprite7_13, &std7x13_, 0, 14, "Font drawing!");
     pal32[1] = 0x2090a0;
-    graphicsString(&screenVideo, 4, 200, &sprite1, &std8x13_, 11, 0, "BY DoggerMoore");
+    graphicsString(&screenVideo, 4, 200, &sprite4_6, &std4x6_, 7, 0, "BY DoggerMoore");
     
     while(1) {}
 }

@@ -45,4 +45,6 @@ extern void graphics32SetPixel(struct graphicsBuffer *buffDef, u32 x, u32 y, u32
 extern u32 graphics32GetPixel(struct graphicsBuffer *buffDef, u32 x, u32 y);
 extern void graphics32Boxf(struct graphicsBuffer *buffDef, u32 x, u32 y, u32 width, u32 height, u32 c);
 
-
+extern void graphics16SetPixel(struct graphicsBuffer *buffDef, u32 x, u32 y, u32 c);
+extern u32 graphics16GetPixel(struct graphicsBuffer *buffDef, u32 x, u32 y);
+extern void graphics16Boxf(struct graphicsBuffer *buffDef, u32 x, u32 y, u32 width, u32 height, u32 c);
