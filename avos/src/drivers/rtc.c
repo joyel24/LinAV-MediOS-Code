@@ -14,18 +14,19 @@
 
 #define RTC_ADDR 0xd0
 
-static struct tm tmStatic;
+static struct tm tmStatic = {1,0,0,0,0,0,0,0,0};
+static unsigned char tmBuffer[100];
 
 struct tm rtcGetTime() {
-    int c = i2cRead(RTC_ADDR, &tmStatic, 9);
+    //int c = i2cRead(RTC_ADDR, 0, tmBuffer, 9);  //&tmStatic, 9);
     
     // TODO - Handle i2c errors...
     
-    return tmStatic
+    //return tmStatic;
 }
 
 void rtcSetTime(struct tm newTime) {
-    int c = i2cWrite(RTC_ADDR, &newTime, 9);
+    int c = i2cWrite(RTC_ADDR, 0, &newTime, 9);
     
     // TODO - Handle i2c errors...
 
