@@ -12,6 +12,8 @@
 #ifndef __SWI_H
 #define __SWI_H
 
+#include <kernel/errors.h>
+
 // swi numbers
 #define nAPI_TASK_YIELD       0
 #define nAPI_TASK_CREATE      1
@@ -42,5 +44,8 @@
 
 #define nAPI_GFX             100
 #define nAPI_PRINTF          101
+#define nAPI_FILE            102
+
+ERROR_CODE swi_call             (long swi_num,long param1,long param2,long param3) ;
 
 #endif

@@ -16,7 +16,8 @@
 #include <kernel/usb_fw.h>
 #include <kernel/bat_power.h>
 
-extern int gfw_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
+extern int gfx_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
+extern int fs_swi(int cmd,void * data1, void * data2);
 extern void user_printf(const char * fmt, va_list args);
 
 __IRAM_CODE int kcswi_handler (
@@ -224,10 +225,12 @@ __IRAM_CODE int kcswi_handler (
 	break;
 
         case nAPI_GFX:
-            return gfw_swi_handler((int)nParam1,(GFX_DATA *)nParam2, (void *)nParam3);
+            return gfx_swi_handler((int)nParam1,(GFX_DATA *)nParam2, (void *)nParam3);
         case nAPI_PRINTF:
             user_printf((const char *)nParam1, (va_list) nParam2);
             return 0;
+        case nAPI_FILE:
+            return fs_swi((int)nParam1,(void *)nParam2, (void *)nParam3);
       default:
          return 0;
    }

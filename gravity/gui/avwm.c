@@ -15,10 +15,13 @@
 #include <sys_def/time.h>
 #include <sys_def/font.h>
 #include <api.h>
+#include <fs_io.h>
 
 
 void avwm(void)
 {
+    DIR * dir;
+    struct dirent* entry;
     printf("Starting AvWm\n");
     
     open_graphics();
@@ -28,6 +31,12 @@ void avwm(void)
     
     ini_status_bar();
     drawStatusLine(); /* should be done via EVT_REDRAW */
+    
+    dir=opendir("/");
+    while(entry=readdir(dir))
+    {
+        printf("%s\n",entry->d_name);
+    }
     
     while(1) /*printk(" a ")*/;
 }

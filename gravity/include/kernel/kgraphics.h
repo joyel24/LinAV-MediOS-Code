@@ -63,7 +63,7 @@ void          (*drawHLine)        (unsigned int color, int x, int y, int width, 
 void          (*drawVLine)        (unsigned int color, int x, int y, int height, struct graphicsBuffer * buff);
 };
 
-int gfw_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
+int gfx_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
 
 /* general functions */
 void  ini_graphics        (void);

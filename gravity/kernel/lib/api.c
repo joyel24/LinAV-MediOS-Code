@@ -21,7 +21,7 @@
             "stmdb sp!, {r3-r12} \n"     \
             "swi %0\n"                   \
             "ldmia sp!, {r3-r12}"        \
-        :                      \
+        :                                \
         : "i"(SWI_NUM)                   \
         : "memory");                     \
         return (long) _r0;               \
@@ -58,6 +58,8 @@ ERROR_CODE API_PRINTF           (const char * fmt, va_list args)                
 ERROR_CODE API_TIME             (int cmd,struct av_tm * time_data)                              { swi_call(nAPI_TIME); }
 
 ERROR_CODE API_POWER            (int cmd,int * val)                                             { swi_call(nAPI_POWER); }
+
+ERROR_CODE API_FILE             (int cmd,void * data1,void * data2)                             { swi_call(nAPI_FILE); }
 
 void printf(char *fmt, ...)
 {

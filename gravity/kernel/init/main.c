@@ -28,6 +28,7 @@
 #include <kernel/usb_fw.h>
 #include <kernel/bat_power.h>
 #include <kernel/buttons.h>
+#include <kernel/disk.h>
 
 
 #include <kernel/threads.h>
@@ -44,8 +45,6 @@ void print_boot_info(void)
     printk("SP: %08x\n",get_sp());
     print_irq();
     print_timer();
-    /* int vector */
-    print_data(0x0,0x20);
 }
 
 extern void kernel_startup_thread (void);
@@ -130,6 +129,7 @@ void kernel_startup_thread (void)
     init_usb_fw();
     
     init_power();
+    init_disk();
 
     printk("[init] ------------ all drivers\n");
 

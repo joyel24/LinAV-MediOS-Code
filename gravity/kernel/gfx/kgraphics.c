@@ -364,7 +364,7 @@ void KdrawLine(unsigned int color, int x1, int y1, int x2, int y2,struct graphic
      
 }
 
-int gfw_swi_handler(int cmd,GFX_DATA * g_data, void * pvData)
+int gfx_swi_handler(int cmd,GFX_DATA * g_data, void * pvData)
 {
     int * int_data=(int*)pvData;
     unsigned char * str=(unsigned char*)pvData;

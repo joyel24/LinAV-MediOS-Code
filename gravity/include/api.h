@@ -38,6 +38,11 @@ typedef struct _PLANE_DATA
     int bpp;
 } PLANE_DATA;
 
+typedef struct _COUPLE_DATA
+{
+    void * a;
+    void * b;
+} COUPLE_DATA;
 
 typedef unsigned long HTASK;
 typedef unsigned long HPIPE;
@@ -77,6 +82,8 @@ ERROR_CODE API_PRINTF           (const char * fmt, va_list args);
 
 ERROR_CODE API_TIME             (int cmd,struct av_tm * time_data);
 
+ERROR_CODE API_FILE             (int cmd,void * data1,void * data2);
+
 ERROR_CODE API_POWER            (int cmd,int * val);
 int        do_api_power         (int cmd);
 
@@ -95,7 +102,5 @@ void    free(void *buff);
 
 //ERROR_CODE getTime              (struct av_tm * time_data);
 //ERROR_CODE setTime              (struct av_tm * time_data);
-
-ERROR_CODE swi_call             (long swi_num,long param1,long param2,long param3) ;
 
 #endif

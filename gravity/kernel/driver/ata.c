@@ -128,6 +128,8 @@ int ata_sleep(void)
     return 0;
 }
 
+extern int hd_sleep_state;
+
 void ata_stop_HD(void)
 {
     int j,status;
@@ -141,9 +143,10 @@ void ata_stop_HD(void)
             break;
     }    
     ata_powerDown_HD();    
-    //udelay(100);
-    printk("[ide sleep]\n");
+    //udelay(100);    
     stop_timer(&hd_timer);
+    hd_sleep_state=1;
+    printk("[ide sleep]\n");
 }
 
 int ata_waitForXfer(void)
