@@ -1,5 +1,4 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
+/* osdDSC25.h
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy
@@ -97,27 +96,6 @@ typedef unsigned long u32;
 #define        OSD_CURSOR2_FLASH_SPEED3        0x3000
 #define        OSD_CURSOR2_FLASH_ENABLE        0x4000   // enable flashing
 
-#define        OSD_VIDEOMODE_PAL               0x8000
-#define        OSD_VIDEOMODE_NTSC              0x0000
-               // Unknown flags - LCD = 4071
-               //                 VID = 407d
-
-extern void osdInit();
-extern void osdSetComponentOffset(u32 component, u32 offset);
-extern void osdSetComponentSize(u32 component, u32 width, u32 height);
-extern void osdSetComponentPosition(u32 component, u32 x, u32 y);
-extern void osdSetComponentConfig(u32 component, u32 config);
-extern void osdSetComponentSourceWidth(u32 component, u32 width);
-extern void osdSetCursor2Bitmap(u32 index, u32 data);
-extern void osdSetPallette(u32 y, u32 cr, u32 cb, u32 index);
-extern void osdSet16CPallette(u32 bank, u32 index, u32 value);
-extern void osdSetBrightness(u32 brightness);
-extern void osdSetContrast(u32 contrast);
-extern void osdSetMainShift(u32 horizontal, u32 vertical);
-extern void osdSetMainConfig(u32 config);
-extern void osdSetBorderColor(u32 color);
-extern void osdSetAltOffset(u32 offset);
-
 extern void osdInitA();
 extern void osdSetComponentOffsetA(u32 component, u32 offset);
 extern void osdSetComponentSizeA(u32 component, u32 width, u32 height);
@@ -127,11 +105,8 @@ extern void osdSetComponentSourceWidthA(u32 component, u32 width);
 extern void osdSetCursor2BitmapA(u32 index, u32 data);
 extern void osdSetPalletteA(u32 y, u32 cr, u32 cb, u32 index);
 extern void osdSet16CPalletteA(u32 bank, u32 index, u32 value);
-extern void osdSetBrightnessA(u32 brightness);
-extern void osdSetContrastA(u32 contrast);
 extern void osdSetMainShiftA(u32 horizontal, u32 vertical);
 extern void osdSetMainConfigA(u32 config);
 extern void osdSetBorderColorA(u32 color);
 extern void osdSetAltOffsetA(u32 offset);
-extern void osdSetVideoMode(u32 mode);
 
