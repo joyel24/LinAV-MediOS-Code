@@ -25,6 +25,9 @@ typedef unsigned long u32;
 #define CPLD_MODE_MULTIMEDIACARD        9       // Not tested yet
 
 extern void cpldSetModeA(u32 mode);
+extern u32 cpldGetVersionA();
+    // bit 15 - Some flag or other
+    // bits 14-0 - CPLD Version
 
 #endif
 

@@ -6,7 +6,9 @@
 #include <interrupts.h>
 #include <cpld.h>
 #include <gio.h>
+#include <ata.h>
 #include <uart.h>
+#include <debug.h>
 
     struct graphicsBuffer screenBitmap;
     struct graphicsBuffer screenTop;

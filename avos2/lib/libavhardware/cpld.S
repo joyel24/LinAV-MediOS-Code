@@ -12,7 +12,7 @@
 @ Author:   By DoggerMoore
 @
 @ void cpldSetModeA()
-@
+@ u32 cpldGetVersionA()
 
 .macro switchThumb
         .arm
@@ -46,6 +46,28 @@ cpldSetMode:
         strh r0, [r1]
         strh r0, [r1]
         pop {r1}
+        bx lr
+
+@ ------------------------------------------------------------------------------
+@ cpldGetVersionA()
+@
+.globl cpldGetVersionA
+cpldGetVersionA:
+        switchThumb
+.globl cpldGetVersion
+.thumb_func
+
+cpldGetVersion:
+        ldr r1, =0x02600200
+        ldrh r0, [r1]
+        lsl r0, #28
+        lsr r0, #28
+
+        ldr r1, =0x02600300
+        ldrh r2, [r1]
+        lsl r2, #28
+        lsr r2, #24
+        orr r0, r2
         bx lr
 
         .ltorg
