@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "graphics.h"
 #include "events.h"
 #include "cops.h"
@@ -87,6 +88,7 @@ FILE * fd;
  * Other
  ******************/
 struct mp3_play data; /* mp3 data */
+bool v1first = false;
 
 int eventHandler(int evt)
 {
@@ -119,8 +121,11 @@ void mainLoop(void)
     drawPeak();
 }
 
+struct id3tag fTag;
+
 int main(int argc, char * * argv)
 {
+    
     REGISTER(cops,eventHandler,0);
     
 #ifdef AV_SCREEN
@@ -148,6 +153,17 @@ int main(int argc, char * * argv)
     data.pos=0;
     data.finished=0;
 #else
+
+    /* getting id3info */
+    
+    if(mp3info(&(fTag.id3), filename, v1first))
+    {
+            printf("Bad mp3\n");
+    }
+    else
+        debug_info(filename,&(fTag.id3));
+    fseek(fd,fTag.id3.first_frame_offset,SEEK_SET);
+    
     data.buffer_len=MP3_BUFF_SIZE;
     data.pos=0;
     data.finished=0;
@@ -191,4 +207,43 @@ int main(int argc, char * * argv)
 #endif
     
     return 1;
+}
+
+char *secs2str(int ms)
+{
+    static char buffer[32];
+    int secs = ms/1000;
+    ms %= 1000;
+    snprintf(buffer, sizeof(buffer), "%d:%02d.%d", secs/60, secs%60, ms/100);
+    return buffer;
+}
+
+void debug_info(char * filename,struct mp3entry * mp3)
+{
+    printf("****** File: %s\n"
+               "      Title: %s\n"
+               "     Artist: %s\n"
+               "      Album: %s\n"
+               "      Genre: %s (%d) \n" 
+               "   Composer: %s\n"        
+               "       Year: %s (%d)\n"
+               "      Track: %s (%d)\n"        
+               "     Length: %s / %d s\n"
+               "    Bitrate: %d\n"
+               "  Frequency: %d\n",
+               filename,
+               mp3->title?mp3->title:"<blank>",
+               mp3->artist?mp3->artist:"<blank>",
+               mp3->album?mp3->album:"<blank>",
+               mp3->genre_string?mp3->genre_string:"<blank>",
+                    mp3->genre,
+               mp3->composer?mp3->composer:"<blank>",
+               mp3->year_string?mp3->year_string:"<blank>",
+                    mp3->year,
+               mp3->track_string?mp3->track_string:"<blank>",
+                    mp3->tracknum,
+               secs2str(mp3->length),
+               mp3->length/1000,
+               mp3->bitrate,
+               mp3->frequency);
 }

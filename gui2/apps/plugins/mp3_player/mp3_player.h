@@ -19,6 +19,19 @@
 #define SETTINGS_WIN  2
 #define SOUND_WIN     3
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include "mp3_data.h"
+#include "id3.h"
+
+struct id3tag
+{
+    struct mp3entry id3;
+    int mempos;
+    bool used;
+};
+
 /* refresh.c */
 void apply_settings(void);
 void refreshScreen(int window);
@@ -50,6 +63,8 @@ void mp3_read_more(int size);
 int  read_from_HD(int size);
 int  mp3_need_more(void);
 
+
+void debug_info(char * filename,struct mp3entry * mp3);
 #endif
 
 

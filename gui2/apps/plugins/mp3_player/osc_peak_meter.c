@@ -11,10 +11,10 @@
 * KIND, either express of implied.
 *
 */
-
+#include "mp3_player.h"
 #include "cops.h"
 #include "colordef.h"
-#include "mp3_player.h"
+
 
 /* client graphical ops */
 extern struct client_operations * cops;

@@ -84,6 +84,9 @@ void mp3_read_more(int size)
         if(size<=0)
             size+=data.buffer_len;
     }*/
+    
+    printf("File pos:%x\n",ftell(fd));
+    
     if(!data.endOfFile)
     {
         printf("size=%d\n",size);
