@@ -59,5 +59,24 @@ void masConfigAudioCodec(int adcGainLeft, int adcGainRight, int micGain, int con
 #define MAS_CONFIGINPUT_DEEMPHASIS_75us     2
 void masConfigInput(int config);
 
+#define MAS_CONFIGOUTPUT_MONOMATRIX         0x8000
+#define MAS_CONFIGOUTPUT_INVERTRIGHT        0x4000
 // 0x40 = 100%, 0x7f=200% clipping occurs if sum>100%
-void masSetDACMix(int mixadc, int mixdsp);
+void masConfigOutput(int mixadc, int mixdsp, int config);
+
+#define MAS_AVC_OFF         0
+#define MAS_AVC_ON          0x8000
+#define MAS_AVC_DECAY_8S    0x0800
+#define MAS_AVC_DECAY_4S    0x0400
+#define MAS_AVC_DECAY_2S    0x0200
+#define MAS_AVC_DECAY_20MS  0x0100
+void masConfigAVC(int config);
+
+// effectStrength 0x00-0x7f
+// harmonics      0x00-0x7f
+// centerFreq       2-30    = 20Hz - 300Hz
+// shape            5-30    = 50Hz - 300Hz
+// onoff            1 = on, 0 = off
+void masConfigMDB(int effectStrength, int harmonics,
+        int centerFreq, int shape, int onoff);
+

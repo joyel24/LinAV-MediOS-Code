@@ -71,7 +71,22 @@ void masConfigInput(int config) {
 }
 
 //
-void masSetDACMix(int mixadc, int mixdsp) {
+void masConfigOutput(int mixadc, int mixdsp, int config) {
     masWriteCodecRegA(0x0006, mixadc << 8);
     masWriteCodecRegA(0x0007, mixdsp << 8);
+    masWriteCodecRegA(0x000e, config);
+}
+
+//
+void masConfigAVC(int config) {
+    masWriteCodecRegA(0x0012, config);    
+}
+
+//
+void masConfigMDB(int effectStrength, int harmonics,
+        int centerFreq, int shape, int onoff) {
+    masWriteCodecRegA(0x0022, effectStrength << 8);
+    masWriteCodecRegA(0x0023, harmonics << 8);
+    masWriteCodecRegA(0x0024, centerFreq << 8);
+    masWriteCodecRegA(0x0021, (shape<<8) | (onoff<<1));
 }
