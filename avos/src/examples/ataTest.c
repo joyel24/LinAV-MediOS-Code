@@ -6,6 +6,7 @@
 #include <buttons.h>
 #include <fonts.h>
 #include <usb.h>
+#include <system.h>
 
 void showBuffer(char *source);
 void docmd();
@@ -31,7 +32,7 @@ int main() {
     int b;
     int source=0;
     int usbs=0;
-
+    
     osdInit();
 
     osdSetComponentConfig(OSD_VIDEO1, 0);
@@ -97,6 +98,8 @@ int main() {
 
         if (b & BUTTONS_AV300_MENU2) source=!source;
         if (b & BUTTONS_AV300_MENU1) mode=!mode;
+        if (b & BUTTONS_AV300_MENU3) systemReboot();
+
         if (b & BUTTONS_AV300_RIGHT) lba++;
         if (b & BUTTONS_AV300_LEFT) lba--;
         if (b & BUTTONS_AV300_DOWN) lba+=0x100;
