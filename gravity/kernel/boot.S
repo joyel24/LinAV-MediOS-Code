@@ -1,5 +1,5 @@
 /* 
-*   kernel/0boot.S
+*   kernel/boot.S
 *
 *   AMOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)

@@ -9,21 +9,21 @@ SRC2 = $(wildcard *.S)
 OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 
 
-SUBDIRS = init core lib driver gfx
+SUBDIRS = 
 
-TARGET = kernel.a
+TARGET = gui.a
 
 all: builddir subdirs $(TARGET) 
 
 force: clean all        
 
 $(TARGET) : $(OBJS)
-	@echo '-----   building kernel'
 	@cp -f $(OBJS) build/
+	@echo '-----   building gui'
 #	@$(AR) -rc $(TARGET) build/*.o
 #	@$(RANLIB) $(TARGET)
 clean:  clean-subdirs
-	@echo '-----   cleaining kernel'
+	@echo '-----   cleaning gui'
 	@rm -f *.o *.bak *~ build/*.o $(TARGET)
 
 builddir:

@@ -1,4 +1,4 @@
-include ../Makefile.conf
+include ../../Makefile.conf
 
 ASFLAGS  += -I../../include
 GCCFLAGS += -I../../include
@@ -14,7 +14,7 @@ all: subdirs $(OBJS)
 
 force: clean all        
 
-clean:  clean-subdirs
+clean: clean-subdirs 
 	@rm -f *.o *.bak *~ $(TARGET)
 
-include ../default.rule
+include ../../default.rule

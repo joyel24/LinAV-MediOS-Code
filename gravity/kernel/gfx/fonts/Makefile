@@ -1,4 +1,4 @@
-include ../../Makefile.conf
+include ../../../Makefile.conf
 
 GCCFLAGS=-I../../../include -I../../../include/kernel
 
@@ -13,4 +13,5 @@ clean:
 	@rm -f *.o *.bak *~ *.gdb
 
 .c.o:
+	@echo "[$@]"
 	$(GCC) $(GCCFLAGS) -c -o $@ $<
