@@ -66,16 +66,16 @@ startInit:
     mode = 0;
     cursorMoved = 1;
 
-    osdInit();
+    osdInitA();
 
     rtcInit();
     
-    osdSetComponentConfig(OSD_VIDEO1, 0);
-    osdSetComponentConfig(OSD_VIDEO2, 0);
-    osdSetComponentConfig(OSD_BITMAP1, 0);
-    osdSetComponentConfig(OSD_BITMAP2, 0);
-    osdSetComponentConfig(OSD_CURSOR1, 0);
-    osdSetComponentConfig(OSD_CURSOR2, 0);
+    osdSetComponentConfigA(OSD_VIDEO1, 0);
+    osdSetComponentConfigA(OSD_VIDEO2, 0);
+    osdSetComponentConfigA(OSD_BITMAP1, 0);
+    osdSetComponentConfigA(OSD_BITMAP2, 0);
+    osdSetComponentConfigA(OSD_CURSOR1, 0);
+    osdSetComponentConfigA(OSD_CURSOR2, 0);
 
     screenBitmap.offset = 0x03e00000;
     screenBitmap.bytesPerLine = 96*2;
@@ -84,8 +84,8 @@ startInit:
     screenBitmap.bitsPerPixelShift = 4;
     screenBitmap.bitsPerPixel = 16;
 
-    graphicsBoxf(&screenBitmap, 0, 0, 96, 132, 0xd5d5);    
-    graphicsBoxf(&screenBitmap, 1, 1, 94, 130, 0x1414);    
+    graphicsBoxfA(&screenBitmap, 0, 0, 96, 132, 0xd5d5);    
+    graphicsBoxfA(&screenBitmap, 1, 1, 94, 130, 0x1414);    
 
     screenBitmap2.offset = 0x03b00000;
     screenBitmap2.bytesPerLine = 320*2;
@@ -94,86 +94,86 @@ startInit:
     screenBitmap2.bitsPerPixelShift = 4;
     screenBitmap2.bitsPerPixel = 16;
 
-    graphicsBoxf(&screenBitmap2, 0, 0, 320, 240, 0x0000);
-    graphicsBoxf(&screenBitmap2, 0, 0, 320, 10, 0xd5d5);
-    graphicsBoxf(&screenBitmap2, 0, 11, 320, 1, 0x1717);
-    graphicsBoxf(&screenBitmap2, 0, 228, 320, 1, 0x1717);
-    graphicsBoxf(&screenBitmap2, 0, 229, 320, 10, 0xd5d5);
+    graphicsBoxfA(&screenBitmap2, 0, 0, 320, 240, 0x0000);
+    graphicsBoxfA(&screenBitmap2, 0, 0, 320, 10, 0xd5d5);
+    graphicsBoxfA(&screenBitmap2, 0, 11, 320, 1, 0x1717);
+    graphicsBoxfA(&screenBitmap2, 0, 228, 320, 1, 0x1717);
+    graphicsBoxfA(&screenBitmap2, 0, 229, 320, 10, 0xd5d5);
     pal16[0] = 0xd5d5;
     pal16[1] = 0xffff;    
-    graphicsString(&screenBitmap2, 4, 231, &sprite5_7, std5x7_, 6, 0,
+    graphicsStringA(&screenBitmap2, 4, 231, &sprite5_7, std5x7_, 6, 0,
                         "[Menu2] HDD/Memcard   [Menu3] UsbMode   [ON] Click");
 
-    osdSetComponentSize(OSD_BITMAP1, 320*2, 240);
-    osdSetComponentPosition(OSD_BITMAP1, 0x14, 0x12);
-    osdSetComponentOffset(OSD_BITMAP1, 0x03b00000);
-    osdSetComponentSourceWidth(OSD_BITMAP1, 0x14);
-    osdSetComponentConfig(OSD_BITMAP1, OSD_COMPONENT_ENABLE
+    osdSetComponentSizeA(OSD_BITMAP1, 320*2, 240);
+    osdSetComponentPositionA(OSD_BITMAP1, 0x14, 0x12);
+    osdSetComponentOffsetA(OSD_BITMAP1, 0x03b00000);
+    osdSetComponentSourceWidthA(OSD_BITMAP1, 0x14);
+    osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT);
-    osdSetComponentSize(OSD_BITMAP2, 96*2, 132);
-    osdSetComponentPosition(OSD_BITMAP2, 0x14 + (2*16), 0x12 + 32);
-    osdSetComponentOffset(OSD_BITMAP2, 0x03e00000);
-    osdSetComponentSourceWidth(OSD_BITMAP2, 6);
-    osdSetComponentConfig(OSD_BITMAP2, OSD_COMPONENT_ENABLE
+    osdSetComponentSizeA(OSD_BITMAP2, 96*2, 132);
+    osdSetComponentPositionA(OSD_BITMAP2, 0x14 + (2*16), 0x12 + 32);
+    osdSetComponentOffsetA(OSD_BITMAP2, 0x03e00000);
+    osdSetComponentSourceWidthA(OSD_BITMAP2, 6);
+    osdSetComponentConfigA(OSD_BITMAP2, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_MERGEBACK
                                      | OSD_BITMAP_A6
                                      | OSD_BITMAP_8BIT);
 
 
     // EUGH: TODO - Clean this rubbish up!
-    usbDisable();
+    usbDisableA();
     for (c=0;c<0x14000;c++) {}
 //    ataPowerDownHDD();
     for (c=0;c<0x14000;c++) {}
-    ataSelectMemoryCard();
+    ataSelectMemoryCardA();
 
     for (c=0;c<0x14000;c++) {}
-    ataSelectHDD();
+    ataSelectHDDA();
     for (c=0;c<0x14000;c++) {}
-    usbEnable();
+    usbEnableA();
     for (c=0;c<0x14000;c++) {}
-    ataPowerUpHDD();
+    ataPowerUpHDDA();
     for (c=0;c<0x14000;c++) {}
-    usbDisable();
+    usbDisableA();
     for (c=0;c<0x24000;c++) {}
 
-    c = ataReadSectors(0, 1, mbr);
-    stringPutHex(hex82, c, 8);
-    uartOuts("[fatTest.c] MBR read returned = ");
-    uartOuts(hex82);
-    uartOuts("\n");
+    c = ataReadSectorsA(0, 1, mbr);
+    stringPutHexA(hex82, c, 8);
+    uartOutsA("[fatTest.c] MBR read returned = ");
+    uartOutsA(hex82);
+    uartOutsA("\n");
 
     showBuffer(mbr);
 
     part = mbr[0x1c6] | (mbr[0x1c7]<<8) | (mbr[0x1c8]<<16) | (mbr[0x1c9]<<24);
-    stringPutHex(hex82, part, 8);
-    uartOuts("[fatTest.c] Partition1 = ");
-    uartOuts(hex82);
-    uartOuts("\n");
+    stringPutHexA(hex82, part, 8);
+    uartOutsA("[fatTest.c] Partition1 = ");
+    uartOutsA(hex82);
+    uartOutsA("\n");
     if (part==0) part=0x3f;
     
     c = fatInit(part);
-    stringPutHex(hex82, c, 8);
-    uartOuts("[fatTest.c] fatInit returned = ");
-    uartOuts(hex82);
-    uartOuts("\n");
+    stringPutHexA(hex82, c, 8);
+    uartOutsA("[fatTest.c] fatInit returned = ");
+    uartOutsA(hex82);
+    uartOutsA("\n");
     
     cluster = getRootClu();
 
     while(1) {
 
         if (mode==0) {
-            graphicsBoxf(&screenBitmap, 1, 1, 94, 130, 0x1414);    
+            graphicsBoxfA(&screenBitmap, 1, 1, 94, 130, 0x1414);    
 
             for (c=0;c<1000;c++) {
                 dirBuffer[c].name[0] = 0;    
             }
 
             c = fatReadFile(cluster, (char*) dirBuffer);
-            stringPutHex(hex82, c, 8);
-            uartOuts("[fatTest.c] fatReadFile returned = ");
-            uartOuts(hex82);
-            uartOuts("\n");
+            stringPutHexA(hex82, c, 8);
+            uartOutsA("[fatTest.c] fatReadFile returned = ");
+            uartOutsA(hex82);
+            uartOutsA("\n");
 
             totalEntries = fatDirFilter(dirBuffer, dirBuffer2, 1000);
         
@@ -200,65 +200,65 @@ startInit:
         
             cursorpos=0;
             dirpos=0;
-            osdSetComponentConfig(OSD_BITMAP2, OSD_COMPONENT_ENABLE
+            osdSetComponentConfigA(OSD_BITMAP2, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_MERGEBACK
                                      | OSD_BITMAP_A6
                                      | OSD_BITMAP_8BIT);
         } else {
-            osdSetComponentConfig(OSD_BITMAP2, 0);
+            osdSetComponentConfigA(OSD_BITMAP2, 0);
         }
             
         while(1) {
 
-            c = usbIsConnected();
+            c = usbIsConnectedA();
             pal16[0] = 0xd5d5;            
             pal16[1] = 0xffff;
             if (c) {
-                graphicsString(&screenBitmap2, 4, 2, &sprite5_7, std5x7_, 6, 0,
+                graphicsStringA(&screenBitmap2, 4, 2, &sprite5_7, std5x7_, 6, 0,
                     "[USB Lead in]");
                 
             } else {
-                graphicsString(&screenBitmap2, 4, 2, &sprite5_7, std5x7_, 6, 0,
+                graphicsStringA(&screenBitmap2, 4, 2, &sprite5_7, std5x7_, 6, 0,
                     "             ");
             }
 
             if (mode!=0) {
-                graphicsString(&screenBitmap2, 4 + 14*6, 2, &sprite5_7, std5x7_, 6, 0,
+                graphicsStringA(&screenBitmap2, 4 + 14*6, 2, &sprite5_7, std5x7_, 6, 0,
                     "[USB mode]");
                 
             } else {
-                graphicsString(&screenBitmap2, 4 + 14*6, 2, &sprite5_7, std5x7_, 6, 0,
+                graphicsStringA(&screenBitmap2, 4 + 14*6, 2, &sprite5_7, std5x7_, 6, 0,
                     "          ");
             }
 
             if (source==0) {
-                graphicsString(&screenBitmap2, 4 + 25*6, 2, &sprite5_7, std5x7_, 6, 0,
+                graphicsStringA(&screenBitmap2, 4 + 25*6, 2, &sprite5_7, std5x7_, 6, 0,
                     "[HDD]    ");
                 
             } else {
-                graphicsString(&screenBitmap2, 4 + 25*6, 2, &sprite5_7, std5x7_, 6, 0,
+                graphicsStringA(&screenBitmap2, 4 + 25*6, 2, &sprite5_7, std5x7_, 6, 0,
                     "[MemCard]");
             }
             
             ourTime = rtcGetTime();
-            stringPutHex(timeSt+9, ourTime->tm_ms, 2);
-            stringPutHex(timeSt+6, ourTime->tm_sec, 2);
-            stringPutHex(timeSt+3, ourTime->tm_min, 2);
-            stringPutHex(timeSt, ourTime->tm_hour, 2);
+            stringPutHexA(timeSt+9, ourTime->tm_ms, 2);
+            stringPutHexA(timeSt+6, ourTime->tm_sec, 2);
+            stringPutHexA(timeSt+3, ourTime->tm_min, 2);
+            stringPutHexA(timeSt, ourTime->tm_hour, 2);
             pal16[1] = 0xffff;
-            graphicsString(&screenBitmap2, 4 + 41*6, 2, &sprite5_7, std5x7_, 6, 0,
+            graphicsStringA(&screenBitmap2, 4 + 41*6, 2, &sprite5_7, std5x7_, 6, 0,
                         timeSt);
 
-            b = powerGetStatus();
-            stringPutHex(powerSt, b, 4);
+            b = powerGetStatusA();
+            stringPutHexA(powerSt, b, 4);
 
-            if (powerIsDCConnected()) {
+            if (powerIsDCConnectedA()) {
                 powerSt[4] = '+';                
             } else {
                 powerSt[4] = ' ';
             }
             pal16[1] = 0xffff;
-            graphicsString(&screenBitmap2, 4 + 35*6, 2, &sprite5_7, std5x7_, 6, 0,
+            graphicsStringA(&screenBitmap2, 4 + 35*6, 2, &sprite5_7, std5x7_, 6, 0,
                         powerSt);
                        
             // Update file display window if needed,
@@ -280,14 +280,14 @@ startInit:
                         pal16[0] = 0x1414;            
                     }
     
-                    graphicsString(&screenBitmap, 3, 3 + c*8, &sprite5_7, std5x7_, 5, 0,
+                    graphicsStringA(&screenBitmap, 3, 3 + c*8, &sprite5_7, std5x7_, 5, 0,
                         dirLine);
                 }
                 cursorMoved=0;
             }
                 
                 
-            c =buttonsGetStatus();
+            c =buttonsGetStatusA();
             if (!(c & BUTTONS_AV300_ANY)) loopDelay = 0xc000;
 
             if (mode==0) {
@@ -312,7 +312,7 @@ startInit:
                         cluster = parent;
                         cursorMoved=1;
                         do {
-                            c =buttonsGetStatus();
+                            c =buttonsGetStatusA();
                         } while(c & BUTTONS_AV300_ANY);                    
                         break;
                     }
@@ -323,7 +323,7 @@ startInit:
                         if (cluster==0) cluster=getRootClu();
                         cursorMoved=1;
                         do {
-                            c =buttonsGetStatus();
+                            c =buttonsGetStatusA();
                         } while(c & BUTTONS_AV300_ANY);                    
                         break;
                     }
@@ -334,7 +334,7 @@ startInit:
                         if (cluster==0) cluster=getRootClu();
                         cursorMoved=1;
                         do {
-                            c =buttonsGetStatus();
+                            c =buttonsGetStatusA();
                         } while(c & BUTTONS_AV300_ANY);                    
                         break;
                     } else {
@@ -359,10 +359,10 @@ startInit:
                         if (i==1) {
                             
                             c = fatReadFile(pcluster, (char*) 0x03000000);
-                            stringPutHex(hex82, c, 8);
-                            uartOuts("[fatTest.c] fatReadFile returned = ");
-                            uartOuts(hex82);
-                            uartOuts("\n");
+                            stringPutHexA(hex82, c, 8);
+                            uartOutsA("[fatTest.c] fatReadFile returned = ");
+                            uartOutsA(hex82);
+                            uartOutsA("\n");
                             
                             // Now CALL IT!
                             
@@ -375,7 +375,7 @@ startInit:
                         }
                     }
                     do {
-                        c =buttonsGetStatus();
+                        c =buttonsGetStatusA();
                     } while(c & BUTTONS_AV300_ANY);
                 }
             }
@@ -385,21 +385,21 @@ startInit:
             if (c & BUTTONS_AV300_MENU3) {
                 mode ^= 1;
                 do {
-                    c =buttonsGetStatus();
+                    c =buttonsGetStatusA();
                 } while(c & BUTTONS_AV300_ANY);
                 cursorMoved=1;
                 if (mode==0) {
-                    usbDisable();
+                    usbDisableA();
                 } else {
-                    usbEnable();    
+                    usbEnableA();    
                 }
 
                 if (source==0) {
-                    ataPowerUpHDD();
-                    ataSelectHDD();
+                    ataPowerUpHDDA();
+                    ataSelectHDDA();
                 } else {
-                    ataPowerDownHDD();
-                    ataSelectMemoryCard();
+                    ataPowerDownHDDA();
+                    ataSelectMemoryCardA();
                 }
                 
                 // TODO - reinit? USB could have modified disk...
@@ -408,31 +408,31 @@ startInit:
             } else if (c & BUTTONS_AV300_MENU2) {
                 source ^= 1;    
                 if (source==0) {
-                    ataPowerUpHDD();
-                    ataSelectHDD();
+                    ataPowerUpHDDA();
+                    ataSelectHDDA();
                 } else {
-                    ataPowerDownHDD();
-                    ataSelectMemoryCard();
+                    ataPowerDownHDDA();
+                    ataSelectMemoryCardA();
                 }
 
-                ataReadSectors(0, 1, mbr);
+                ataReadSectorsA(0, 1, mbr);
                 part = mbr[0x1c6] | (mbr[0x1c7]<<8) | (mbr[0x1c8]<<16) | (mbr[0x1c9]<<24);
-                stringPutHex(hex82, part, 8);
-                uartOuts("[fatTest.c] Partition1 = ");
-                uartOuts(hex82);
-                uartOuts("\n");
+                stringPutHexA(hex82, part, 8);
+                uartOutsA("[fatTest.c] Partition1 = ");
+                uartOutsA(hex82);
+                uartOutsA("\n");
                 if (part==0) part=0x3f;
 
                 c = fatInit(part);
-                stringPutHex(hex82, c, 8);
-                uartOuts("[fatTest.c] fatInit returned = ");
-                uartOuts(hex82);
-                uartOuts("\n");
+                stringPutHexA(hex82, c, 8);
+                uartOutsA("[fatTest.c] fatInit returned = ");
+                uartOutsA(hex82);
+                uartOutsA("\n");
     
                 cluster = getRootClu();
                 
                 do {
-                    c =buttonsGetStatus();
+                    c =buttonsGetStatusA();
                 } while(c & BUTTONS_AV300_ANY);
                 cursorMoved=1;
                 break;
@@ -442,7 +442,7 @@ startInit:
         }
     }
     
-    uartOuts("All done!");
+    uartOutsA("All done!");
     
     while(1) {}
 }
@@ -456,10 +456,10 @@ void showBuffer(char *source) {
     for (j=0;j<512;j+=16) {
         for (i=0;i<16;i++) {
             c = source[i+j];
-            stringPutHex(p+(i*2), c, 2);
+            stringPutHexA(p+(i*2), c, 2);
             if (c<32 || c>126) c='.';
             p[35+i] = c;
         }
-        uartOuts(p);
+        uartOutsA(p);
     }
 }

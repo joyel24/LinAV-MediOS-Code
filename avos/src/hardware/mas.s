@@ -13,6 +13,7 @@
 @ void masReset()
 @ u32 masGetVersion()
 @ u32 masReadReg(u32 reg)
+@ u32 masWriteReg(u32 reg, u32 val)
 @ u32 masReadCodecReg(u32 reg)
 @ u32 masWriteCodecReg(u32 reg, u32 val)
 @
@@ -35,7 +36,7 @@ masInc = 1
         MAS_CONTROL         =   0x6a
         MAS_CODEC_WRITE     =   0x6c
         MAS_CODEC_READ      =   0x6d
-        
+
         MAS_CMD_READ_IC_VER =   0x70
         MAS_CMD_READ_REG    =   0xa0
         MAS_CMD_WRITE_REG   =   0xb0
@@ -270,6 +271,74 @@ masReadReg:
         pop {r1}
         bx r1
 mrrE:
+        mov r0, #0
+        sub r0, #1
+        pop {r1}
+        bx r1
+
+@ ------------------------------------------------------------------------------
+@ masWriteReg(u32 reg, u32 data)
+@   
+.globl masWriteRegA
+masWriteRegA:
+        switchThumb
+.globl masWriteReg
+.thumb_func
+
+masWriteReg:
+        push {lr}
+        mov r3, r0
+        mov r2, r1
+        bl i2cStart
+    
+        mov r0, #MAS_DEV_WRITE
+        bl i2cOutb
+        cmp r0, #0
+         bne mwrE
+
+        mov r0, #MAS_DATA_WRITE               @ 68
+        bl i2cOutb
+        cmp r0, #0
+         bne mwrE
+        
+        mov r1, r3
+        lsr r1, #4
+        mov r0, #MAS_CMD_WRITE_REG
+        orr r0, r1
+        bl i2cOutb
+        cmp r0, #0
+         bne mwrE
+
+        mov r0, r3
+        lsl r0, #28
+        lsr r0, #24
+        mov r1, r2
+        lsr r1, #16
+        orr r0, r1
+        bl i2cOutb
+        cmp r0, #0
+         bne mwrE
+  
+        mov r0, r2
+        lsl r0, #16
+        lsr r0, #24
+        bl i2cOutb
+        cmp r0, #0
+         bne mwrE
+
+        mov r0, r2
+        lsl r0, #24
+        lsr r0, #24
+        bl i2cOutb
+        cmp r0, #0
+         bne mwrE
+
+        bl i2cStop
+    
+        mov r0, #0
+        pop {r1}
+        bx r1
+mwrE:
         mov r0, #0
         sub r0, #1
         pop {r1}

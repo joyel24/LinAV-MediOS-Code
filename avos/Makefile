@@ -70,8 +70,8 @@ debug: src/examples/*.c
     done
 
 boot: src/boot/boot.c
-	arm-linux-as -mfpu=softfpa -mthumb-interwork -o bootstart.o src/boot/bootstart.s
-	arm-linux-gcc -mthumb-interwork -static-libgcc -c -Wa,-R\
+	arm-linux-as -mfpu=softfpa -o bootstart.o src/boot/bootstart.s
+	arm-linux-gcc -static-libgcc -c -Wa,-R\
     -fno-zero-initialized-in-bss -Iinclude/ src/boot/boot.c
 	arm-linux-ld -N -Ttext 0x03400000 -e main2 -o boot.elf bootstart.o boot.o\
     lib/*.o $(LDFLAG) -lc -lfloat -lgcc
