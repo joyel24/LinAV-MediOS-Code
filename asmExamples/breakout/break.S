@@ -22,6 +22,10 @@
         .thumb
 
         callThumb r1, lcdInitT
+
+        ldr r0, =0x3058a
+        ldr r1, =0x2000
+        strh r1, [r0]
         
         ldr r3, =lcdVideoBuffer2
         ldr r4, =sprite
@@ -90,8 +94,22 @@ initGame:
         ldr r0, =delayVal
         str r1, [r0]
 
+        mov r1, #0
+        ldr r0, =score
+        str r1, [r0]
+
         callThumb r1, lcdClsT
 
+        ldr r0, =scoMsgH
+        mov r1, #0
+        callThumb r2, hex4T
+        
+        mov r0, #4
+        mov r1, #234
+        ldr r2, =botMsg
+        ldr r3, =0xffff
+        callThumb r4, lcdPutsT
+        
 @ Init the brickmap, then draw the bricks...
         ldr r5, =brickMap
         ldr r6, =(10*12)
@@ -119,7 +137,7 @@ lbmx:   mov r2, #1
         ldr r0, =paddlePos
         ldr r0, [r0]
         lsl r0, #1
-        mov r1, #230
+        mov r1, #224
         add r0, #0x14
         add r1, #0x12
         callThumb r3, osdSetCursorPositionT
@@ -182,7 +200,7 @@ okSave: ldr r2, [r3]
 
         mov r0, r4
         lsl r0, #1
-        mov r1, #230
+        mov r1, #224
         add r0, #0x14
         add r1, #0x12
         callThumb r3, osdSetCursorPositionT
@@ -221,8 +239,8 @@ noov1:
         add r0, r0, r1
         cmp r0, #0
          blt oov3
-        cmp r0, #223
-        bge oov2
+        cmp r0, #(224-8)
+         bge oov2
         ldr r1, =posy
         str r0, [r1, #0]
         b noov2
@@ -294,6 +312,7 @@ noov2:
 lostBall:
         b initGame
 
+        .align 4
 delayVal:   .word 0x6000
 
 @ ------------------------------------------------------------------------------
@@ -322,6 +341,20 @@ checkBrick:
         mov r1, r5
         callThumb r4, drawBrick
 
+        ldr r0, =score
+        ldr r1, [r0]
+        add r1, #1
+        str r1, [r0]
+
+        ldr r0, =scoMsgH
+        callThumb r2, hex4T
+
+        ldr r0, =(4+(6*48))
+        mov r1, #234
+        ldr r2, =scoMsgH
+        ldr r3, =0xffff
+        callThumb r4, lcdPutsT
+        
         @ Make it rebound off brick as well...
         
         @ Work out delta x and delta y in the brick map plane...
@@ -398,14 +431,17 @@ nob:
 
         .ltorg      
 
-oposx:  .word 160
-oposy:  .word 160
-posx:   .word 160
-posy:   .word 120
-posdx:  .word 1
-posdy:  .word 1
-
+oposx:      .word 160
+oposy:      .word 160
+posx:       .word 160
+posy:       .word 120
+posdx:      .word 1
+posdy:      .word 1
 paddlePos:  .word 146
+score:      .word 0
+botMsg:     .ascii "Breakout 0.02 (c)2004 DoGgEr              Score:"
+scoMsgH:    .asciz "0000"
+
 
         .align 4
 theBall:
@@ -428,6 +464,7 @@ brickMap:
 .include "../includes/lcd.S"
 .include "../includes/buttons.S"
 .include "../includes/color.S"
+.include "../includes/hex.S"
 
 sprite:
 .incbin     "image.rgb"

@@ -1,12 +1,33 @@
-The dsc series of DSPs include an OSD (On screen display).
-the dsc25 is as follows.
+The av300 OSD                                         (c)2004 Jimmy Moore/DoGgEr
+=============                                         --------------------------
 
-MAIN and MAIN2 are 256 color bitmaps,
-BACK and BACK2 are YCbCr color video planes.
+The dsc25 has an integrated on screen display system (OSD). This document shows
+how to make the most of it...
+
+Overview
+--------
+    The dsc25 has the following segments:
+    * background color
+    * 2 video planes. These carry YCbCr data - 32 bit per pixel.
+    * 2 bitmap planes. These carry CLUT indexes (16 bit per pixel).
+    * 2 cursors.
+
+The dsc25 can blend these segments together, or can say 'it's color 0 so I'll
+show whats behind it'. The order is not changable. They display in the order
+given above.
+All SDRAM offsets are given relative to 0x3000000, and shifted right 5 places.
+That means your video buffers must be aligned to a 32 byte boundary.
+
+See breakout game... The background image is on video plane 1. The bricks and
+text is on bitmap 1, the ball is on bitmap 2, and the paddle is a cursor.
+This means the ball and paddle are just moved by setting the position!
+
+
+Reg     Info
 
 30680   0-7 Border color
         9 - funny coloured bars
-        14 - duplicates scanlines every 15?
+        14 - scales image y
         15 - swaps red and blue components  (RGB vs BGR)
 
         control regs
@@ -16,12 +37,7 @@ BACK and BACK2 are YCbCr color video planes.
         10-11 - Pixel width
         12 - ROM/RAM CLUT
         13 - ?
-        
-        11011001 normal, see thru
-        11110001
-        11110101
-        11111001 normal, solid
-        
+
 30682   BACK/BACK2 control reg
 30684   MAIN control reg
 30686   MAIN2 control reg
@@ -36,9 +52,9 @@ BACK and BACK2 are YCbCr color video planes.
                                 12-13 flash speed
                                 14-flashing enable
                                 15-makes it long and moves it?
-flashing, long, etc
+                                flashing, long, etc
 
-3068c   *Controls back width <<4 = #pixels / line
+3068c   *Controls back width <<4 = #pixels / line (0x14 = 320pixels)
 3068e   *Controls back2 width
 30690   *Controls main width
 30692   *Controls main2 width
