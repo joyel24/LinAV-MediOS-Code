@@ -22,15 +22,15 @@ int             listsize;
 int             listused;
 
 int doLs(char * name)
-{	
+{
 	DIR             *dirp;
 	struct dirent   *dp;
 	char            fullname[PATHLEN];
 	int             endslash;
-	char            **newlist;	
+	char            **newlist;
 	int             i;
 	char            *cp;
-	
+
 	endslash = (*name && (name[strlen(name) - 1] == '/'));
 
 	if (listsize == 0) {
@@ -42,15 +42,15 @@ int doLs(char * name)
 		listsize = LISTSIZE;
 	}
 	listused = 0;
-	
+
 	dirp = opendir(name);
 	if (dirp == NULL) {
 		perror(name);
 		return -1;
 	}
-	
-	
-	
+
+
+
 	while ((dp = readdir(dirp)) != NULL) {
 		if ((dp->d_name[0] == '.') && !SHOW_ALL)
 			continue;
@@ -123,10 +123,10 @@ int printName(char * name,int x,int y,int clear,int selected)
 		color=RED;
 	else
 		color=GRAY;
-		
+
 	if(clear)
 		fillRect(BLACK,x, y , 320, 10);
-		
+
 	if(selected)
 		putS(color, BLUE,x, y, name);
 	else
@@ -161,7 +161,7 @@ int main(int argc,char * * argv)
 	int select=0;
 	int evt;
 	int stop=0;
-	
+
 	if(argc>1)
 	{
 		listused = 0;
@@ -183,7 +183,7 @@ int main(int argc,char * * argv)
 		while(!stop)
 		{
 			while((evt=nxtEvent())==NO_EVENT) /* nothing */;
-			
+
 			switch(evt) {
 				case BTN_UP:
 					select--;

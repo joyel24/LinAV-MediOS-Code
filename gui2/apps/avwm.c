@@ -165,6 +165,17 @@ void drawMenu(void)
 				drawGui();
 				launchPlugin("/mnt/snow",NULL);
 				return;
+			case BTN_DOWN:
+				if(currentHandler)
+				{
+					currentHandler(EVT_QUIT);
+					currentHandler=NULL;
+					waitpid(plugin_pid, &status, 0);
+					plugin_pid=-1;
+				}
+				drawGui();
+				launchPlugin("/mnt/calendar", NULL);
+				return;
 			case BTN_LEFT:
 				if(currentHandler)
 				{
@@ -250,6 +261,6 @@ void debug(char *fmt, ...)
 	vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
 	putS(COLOR_BLACK,COLOR_WHITE,0,230,debugmembuf);
 	va_end(ap);
-	
+
 #endif
 }
