@@ -31,8 +31,6 @@ uartWait1:
         ldrh r2, [r1, #0xc]
         lsr r2, r2, #11
          bcc uartWait1
-@        tst r2, #0x400
-@         beq uartWait1
 
         strh r0, [r1, #0x0]
         pop {r1, r2}

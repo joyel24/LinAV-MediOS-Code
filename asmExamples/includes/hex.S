@@ -20,102 +20,102 @@
 
 @ hex2T  r0->dest, r1=value
 @
-    .thumb
+        .thumb
 hex2T:
-    push {r2, r3, r4}
-    ldr r4, =hextable
-    mov r2, #0x0f
-    mov r3, r1              @ save for later
-    lsr r1, r3, #4
-    and r1, r2
-    ldrb r1, [r4, r1]       @ get 1st byte
-    strb r1, [r0, #0]       @ store it
-    and r2, r3              @ r1 = LO
-    ldrb r1, [r4, r2]       @ get 2nd byte
-    strb r1, [r0, #1]       @ store it
-    pop {r2, r3, r4}
-    bx lr
+        push {r2, r3, r4}
+        ldr r4, =hextable
+        mov r2, #0x0f
+        mov r3, r1              @ save for later
+        lsr r1, r3, #4
+        and r1, r2
+        ldrb r1, [r4, r1]       @ get 1st byte
+        strb r1, [r0, #0]       @ store it
+        and r2, r3              @ r1 = LO
+        ldrb r1, [r4, r2]       @ get 2nd byte
+        strb r1, [r0, #1]       @ store it
+        pop {r2, r3, r4}
+        bx lr
 
 @ hex4T  r0->dest, r1=value (A.B.C.D)
 @
 hex4T:
-    push {r2, r3, r4}
-    ldr r4, =hextable
-    mov r2, #0x0f
-    mov r3, r1              @ save for later
-    lsr r1, r3, #12         @ r1 = A
-    and r1, r2
-    ldrb r1, [r4, r1]       @ get 1st byte
-    strb r1, [r0, #0]       @ store it
+        push {r2, r3, r4}
+        ldr r4, =hextable
+        mov r2, #0x0f
+        mov r3, r1              @ save for later
+        lsr r1, r3, #12         @ r1 = A
+        and r1, r2
+        ldrb r1, [r4, r1]       @ get 1st byte
+        strb r1, [r0, #0]       @ store it
 
-    lsr r1, r3, #8          @ r1 = B
-    and r1, r2
-    ldrb r1, [r4, r1]       @ get 2nd byte
-    strb r1, [r0, #1]       @ store it
+        lsr r1, r3, #8          @ r1 = B
+        and r1, r2
+        ldrb r1, [r4, r1]       @ get 2nd byte
+        strb r1, [r0, #1]       @ store it
     
-    lsr r1, r3, #4          @ r1 = C
-    and r1, r2
-    ldrb r1, [r4, r1]       @ get 3rd byte
-    strb r1, [r0, #2]       @ store it
+        lsr r1, r3, #4          @ r1 = C
+        and r1, r2
+        ldrb r1, [r4, r1]       @ get 3rd byte
+        strb r1, [r0, #2]       @ store it
 
-    and r2, r3              @ r1 = D
-    ldrb r1, [r4, r2]       @ get 4th byte
-    strb r1, [r0, #3]       @ store it
-    pop {r2, r3, r4}
-    bx lr
+        and r2, r3              @ r1 = D
+        ldrb r1, [r4, r2]       @ get 4th byte
+        strb r1, [r0, #3]       @ store it
+        pop {r2, r3, r4}
+        bx lr
 
 @ hex8T  r0->dest, r1=value (A.B.C.D.E.F.G.H)
 @
 hex8T:
-    push {r2, r3, r4}
-    ldr r4, =hextable
-    mov r2, #0x0f
+        push {r2, r3, r4}
+        ldr r4, =hextable
+        mov r2, #0x0f
     
-    mov r3, r1              @ save for later
+        mov r3, r1              @ save for later
     
-    lsr r1, r3, #28         @ r1 = A
-    and r1, r2
-    ldrb r1, [r4, r1]       @ get 1st byte
-    strb r1, [r0, #0]       @ store it
+        lsr r1, r3, #28         @ r1 = A
+        and r1, r2
+        ldrb r1, [r4, r1]       @ get 1st byte
+        strb r1, [r0, #0]       @ store it
     
-    lsr r1, r3, #24          @ r1 = B
-    and r1, r2
-    ldrb r1, [r4, r1]       @ get 2nd byte
-    strb r1, [r0, #1]       @ store it
+        lsr r1, r3, #24          @ r1 = B
+        and r1, r2
+        ldrb r1, [r4, r1]       @ get 2nd byte
+        strb r1, [r0, #1]       @ store it
 
-    lsr r1, r3, #20         @ r1 = C
-    and r1, r2
-    ldrb r1, [r4, r1]       @ get 3rd byte
-    strb r1, [r0, #2]       @ store it
+        lsr r1, r3, #20         @ r1 = C
+        and r1, r2
+        ldrb r1, [r4, r1]       @ get 3rd byte
+        strb r1, [r0, #2]       @ store it
 
-    lsr r1, r3, #16         @ r1 = D
-    and r1, r2
-    ldrb r1, [r4, r1]       @ get 4th byte
-    strb r1, [r0, #3]       @ store it
+        lsr r1, r3, #16         @ r1 = D
+        and r1, r2
+        ldrb r1, [r4, r1]       @ get 4th byte
+        strb r1, [r0, #3]       @ store it
 
-    lsr r1, r3, #12         @ r1 = E
-    and r1, r2
-    ldrb r1, [r4, r1]       @ get 5th byte
-    strb r1, [r0, #4]       @ store it
+        lsr r1, r3, #12         @ r1 = E
+        and r1, r2
+        ldrb r1, [r4, r1]       @ get 5th byte
+        strb r1, [r0, #4]       @ store it
 
-    lsr r1, r3, #8          @ r1 = F
-    and r1, r2
-    ldrb r1, [r4, r1]       @ get 6th byte
-    strb r1, [r0, #5]       @ store it
+        lsr r1, r3, #8          @ r1 = F
+        and r1, r2
+        ldrb r1, [r4, r1]       @ get 6th byte
+        strb r1, [r0, #5]       @ store it
 
-    lsr r1, r3, #4          @ r1 = G
-    and r1, r2
-    ldrb r1, [r4, r1]       @ get 7th byte
-    strb r1, [r0, #6]       @ store it
+        lsr r1, r3, #4          @ r1 = G
+        and r1, r2
+        ldrb r1, [r4, r1]       @ get 7th byte
+        strb r1, [r0, #6]       @ store it
     
-    and r2, r3              @ r1 = H
-    ldrb r1, [r4, r2]       @ get 8th byte
-    strb r1, [r0, #7]       @ store it
-    pop {r2, r3, r4}
-    bx lr
+        and r2, r3              @ r1 = H
+        ldrb r1, [r4, r2]       @ get 8th byte
+        strb r1, [r0, #7]       @ store it
+        pop {r2, r3, r4}
+        bx lr
 
-    .align 4
+        .align 4
 
 hextable:   .ascii "0123456789ABCDEF"
-    .ltorg
-    .arm
+        .ltorg
+        .arm

@@ -53,5 +53,6 @@ buttonsGetStatusT:
         lsl r1, r1, #8
         orr r0, r1
         bx lr                   @ incase its comming from arm code.
+
         .arm
         .ltorg
