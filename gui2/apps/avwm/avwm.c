@@ -40,13 +40,19 @@ struct client_operations cops={
     stopEvt            : stopEvt,
     startEvt           : startEvt,
     stopTimout         : stopTimer,
-    startTimout        : startTimer
+    startTimout        : startTimer,
+    showTime           : showTime,
+    hideTime           : hideTime,
+    showBat            : showBat,
+    hideBat            : hideBat
 };
 
 void (*currentHandler)(int evt)=NULL;
 void (*tmpHandler)(int evt)=NULL;
 
 #include "font.hx"
+
+int showTimeS=1,showBatS=1;
 
 int set_mouseParam(int freq, int repeat)
 {
@@ -78,32 +84,35 @@ void draw_batt_status()
    int power = 0;
    int color = 0;
 
-   fd=open("/dev/avtsc",O_RDONLY | O_NONBLOCK);
-   if (fd < 0)
-    {
-      printf("Can't open /dev/avtsc\n");
-   }
-
-    if(ioctl(fd,AV_LEVEL_BAT0_IOC,&power)<0)
-    {
-      printf("Error getting power value\n");
-   }
-   close(fd);
-
-    if(power < 1320)
-       color = COLOR_DARK_RED;
-    else if(power < 1380)
-       color = COLOR_RED;
-    else if(power < 1440)
-       color = COLOR_ORANGE2;
-    else if(power < 1500)
-       color = COLOR_LIGHT_YELLOW;
-   else
-       color = COLOR_GREEN;
-
-    fillRect(COLOR_BLACK,289,2,22,11);
-    fillRect(COLOR_BLACK,311,4,3,7);
-    fillRect(color,290,3,20,9);
+   if(showBatS)
+   {
+        fd=open("/dev/avtsc",O_RDONLY | O_NONBLOCK);
+        if (fd < 0)
+            {
+            printf("Can't open /dev/avtsc\n");
+        }
+        
+            if(ioctl(fd,AV_LEVEL_BAT0_IOC,&power)<0)
+            {
+            printf("Error getting power value\n");
+        }
+        close(fd);
+    
+        if(power < 1320)
+        color = COLOR_DARK_RED;
+        else if(power < 1380)
+        color = COLOR_RED;
+        else if(power < 1440)
+        color = COLOR_ORANGE2;
+        else if(power < 1500)
+        color = COLOR_LIGHT_YELLOW;
+    	else
+        color = COLOR_GREEN;
+    
+        fillRect(COLOR_BLACK,289,2,22,11);
+        fillRect(COLOR_BLACK,311,4,3,7);
+        fillRect(color,290,3,20,9);
+    }
 }
 
 
@@ -241,9 +250,12 @@ void drawGui(void)
 void drawTime()
 {
     char timeSt[50];
-    getTime(timeSt);
-    fillRect(COLOR_LIGHT_BLUE,150,2,130,11);
-    putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,150,2,timeSt);
+    if(showTimeS)
+    {
+        getTime(timeSt);
+        fillRect(COLOR_LIGHT_BLUE,150,2,130,11);
+        putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,150,2,timeSt);
+    }
 }
 
 void getTime(char * timeSt)
@@ -398,6 +410,11 @@ void wmSetFont(int font)
 {
     plugin_font=font_table[font];
 }
+
+void showTime(void) { showTimeS=1; drawTime(); }
+void hideTime(void) { showTimeS=0; }
+void showBat(void)  { showBatS=1; draw_batt_status(); }
+void hideBat(void)  { showBatS=0; }
 
 static char debugmembuf[200];
 

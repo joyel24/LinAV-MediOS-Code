@@ -48,10 +48,14 @@ struct client_operations {
     void (*openScreen)        (void);
     void (*setFont)           (int font);
     int  (*getStringS)        (const unsigned char *str, int *w, int *h);
-    void (*stopEvt)           ();
-    void (*startEvt)          ();
-    void (*stopTimout)        ();
-    void (*startTimout)       ();
+    void (*stopEvt)           (void);
+    void (*startEvt)          (void);
+    void (*stopTimout)        (void);
+    void (*startTimout)       (void);
+    void (*showTime)          (void);
+    void (*hideTime)          (void);
+    void (*showBat)           (void);
+    void (*hideBat)           (void);
 };
 
 struct menu_item {
@@ -83,5 +87,11 @@ void   stopEvt          ();
 void   startEvt         ();
 void   stopTimout       ();
 void   startTimout      ();
+
+void   showTime         (void);
+void   hideTime         (void);
+void   showBat          (void);
+void   hideBat          (void);
+
 
 #endif
