@@ -89,8 +89,8 @@ int main(int argc,char * * argv)
     int i, cnt1;
     int wait,end;
     int fd_dsp,fd_file;
-    char *buff0,*buff1;
-    int size=sizeof(char)*MP3_BUFF_SIZE;
+    
+
     char defFilename[]="/mnt/file.mp3";
     char * filename;
     int frame_cnt; // total frames so far
@@ -101,10 +101,59 @@ int main(int argc,char * * argv)
     int time_cnt, last_time_cnt; // elapsed time in seconds
     int settings_applied = 0; // "1" if settings have been applied
     int count = 0;
+    int pause=0;
 
     GR_WM_PROPERTIES wmprops;
     GR_EVENT event;
 
+    
+
+    printf("argc: %d\n", argc);
+
+    if(argc<3)
+    {
+       return 0; // Quit
+    }
+    else
+    {
+        filename=argv[1];
+        vol=atoi(argv[2]);
+    }
+
+   
+
+    printf("In soundTest\n");
+
+    fd_dsp=open("/dev/dsp",O_WRONLY);
+    if (fd_dsp < 0) {
+        printf("Can't open /dev/dsp\n");
+        return -1;
+    }
+
+    fd_mix=open("/dev/mixer",O_WRONLY);
+    if (fd_mix < 0) {
+        printf("Can't open /dev/mixer\n");
+        return -1;
+    }    
+
+    data.size=MP3_BUFF_SIZE;
+    data.filename=filename;
+    data.pos=0;  
+    data.finished=0;
+
+    if(ioctl(fd_dsp,AV_DSP_INI_MP3,&data)<0)
+    {
+        printf("Error sending data struct\n");
+        return -1;
+    }
+
+    printf("Ready to play\n");
+
+    
+    wait=0;
+    end=0;
+    frame_cnt=0;
+    
     if (GrOpen() < 0) {
         fprintf(stderr, "Cannot open graphics\n");
         exit(1);
@@ -139,73 +188,6 @@ int main(int argc,char * * argv)
     GrSetGCForegroundPixelVal(g_gcRed, AV3XX_COLOR_RED);
     GrSetGCBackgroundPixelVal(g_gcRed, AV3XX_COLOR_BLACK);
 
-    printf("size=%d %d\n",size,MP3_BUFF_SIZE);
-
-    buff0=(char*)malloc(size);
-    buff1=(char*)malloc(size);
-
-    printf("argc: %d\n", argc);
-
-    if(argc<3)
-    {
-       return 0; // Quit
-    }
-    else
-    {
-        filename=argv[1];
-        vol=atoi(argv[2]);
-    }
-
-    if(!buff0 || !buff1)
-    {
-        printf("Error allocating buffer\n");
-        return -1;
-    }
-
-    printf("In soundTest\n");
-
-    fd_dsp=open("/dev/dsp",O_WRONLY);
-    if (fd_dsp < 0) {
-        printf("Can't open /dev/dsp\n");
-        return -1;
-    }
-
-    fd_mix=open("/dev/mixer",O_WRONLY);
-    if (fd_mix < 0) {
-        printf("Can't open /dev/mixer\n");
-        return -1;
-    }
-
-    fd_file=open(filename,O_RDONLY);
-    if (fd_file < 0 ) {
-        printf("Can't open file %s\n",filename);
-        return -1;
-    }
-
-    data.size=MP3_BUFF_SIZE;
-    data.cur=buff0;
-    data.tmp=buff1;
-    data.needData=1;
-    data.decRunning=0;
-    data.finished=0;
-    data.nxt=NULL;
-
-    if(ioctl(fd_dsp,AV_DSP_INI_MP3,&data)<0)
-    {
-        printf("Error sending data struct\n");
-        return -1;
-    }
-
-    printf("data send successfuly\n");
-
-    printf("volume: %d\n", vol);
-
-//    vol=0;
-//    inc=1;
-    wait=0;
-    end=0;
-    frame_cnt=0;
-
     GrMapWindow(g_main);
     GrClearWindow(g_main,0);
 
@@ -218,42 +200,16 @@ int main(int argc,char * * argv)
 
     draw_text();
     apply_settings();
+    
+	if(ioctl(fd_dsp,AV_DSP_START_MP3,NULL)<0)
+	{
+		printf("Error starting\n");
+		return -1;
+	}
 
     while(!data.finished)
     {
-        if(data.needData & !end)
-        {
-            cnt1=read(fd_file,data.tmp,MP3_BUFF_SIZE);
-            if(cnt1<=0)
-            {    -
-                printf("End of file\n");
-                if(ioctl(fd_dsp,AV_DSP_STOP_MP3,NULL)<0)
-                {
-                    printf("Error Stoping MP3 playback\n");
-                    return -1;
-                }
-                end=1;
-            }
-
-            if(!data.decRunning)
-            {
-                data.nxt=data.tmp;
-                data.tmp=data.cur;
-                data.cur=data.nxt;
-                data.nxt=NULL;
-                data.decRunning=1;
-                if(ioctl(fd_dsp,AV_DSP_START_MP3,NULL)<0)
-                {
-                    printf("Error sync\n");
-                    return -1;
-                }
-            }
-            else
-            {
-                data.nxt=data.tmp;
-                data.needData=0;
-            }
-        }
+        
 
 
         while(GrCheckNextEvent(&event),event.type!=GR_EVENT_TYPE_NONE)
@@ -303,6 +259,35 @@ int main(int argc,char * * argv)
                         draw_text();
                         apply_settings();
                         break;
+		    case 'o': // pause/resume
+		    	if(pause)
+			{
+				if(ioctl(fd_dsp,AV_DSP_START_MP3,NULL)<0)
+				{
+					printf("Error resuming\n");
+					return -1;
+				}				
+				pause=0;
+			}
+			else
+			{
+				if(ioctl(fd_dsp,AV_DSP_PAUSE_MP3,NULL)<0)
+				{
+					printf("Error pausing\n");
+					return -1;
+				}
+				pause=1;
+			}
+			
+		   	break;
+		    case 'f': // pause/resume
+		    	if(ioctl(fd_dsp,AV_DSP_STOP_MP3,NULL)<0)
+			{
+				printf("error stoping\n");
+				return -1;
+			}
+			goto end;
+		   	break;
                 }
             }
         }
@@ -352,6 +337,8 @@ int main(int argc,char * * argv)
             settings_applied = 1;
         }
     }
+    
+ end:   
     GrDestroyGC(g_gcWhite);
     GrDestroyGC(g_gcBlack);
 
