@@ -305,8 +305,6 @@ int add_dir(char * name)
 {
     char            **newlist;
     
-    fprintf(stderr,"adding dir: %s\n",name);
-
     if (dir_listused >= dir_listsize)
     {
         newlist = malloc((sizeof(char **)) * (dir_listsize + LISTSIZE));
@@ -335,8 +333,6 @@ int add_file(char * name)
 {
     char            **newlist;
 
-    fprintf(stderr,"adding file: %s\n",name);
-    
     if (file_listused >= file_listsize)
     {
         newlist = malloc((sizeof(char **)) * (file_listsize + LISTSIZE));
@@ -375,8 +371,6 @@ int doLs(char * name)
     if(ini_lists()<0)
         return -1;
 
-       // fprintf(stderr, "[dols] input: %s\n",name);
-        
     dirp = opendir(name);
     if (dirp == NULL) {
         fprintf(stderr, "[dols] error\n");
@@ -390,25 +384,29 @@ int doLs(char * name)
     {
         /*if(dp->d_name[0]='\0')
             continue;*/
+        int pos=0;
+        
+        /*if(dp->d_name[0] == '.' && dp->d_name[1] =='/')
+            pos+=2;*/
+            
         if ((dp->d_name[0] == '.') && !SHOW_ALL)
             continue;
          
 
         fullname[0] = '\0';
 
-        if ((*name != '.') || (name[1] != '\0'))
+        /*if ((*name != '.') || (name != '\0'))
         {
             strcpy(fullname, name);
             if (!endslash)
                 strcat(fullname, "/");
-        }
+        }*/
 
         strcat(fullname, dp->d_name);
 
-        fprintf(stderr, "[dols] %d processing |%s| (full:%s)\n",i, dp->d_name,fullname);
-        
         if (stat(dp->d_name, &statbuf) < 0)
         {
+            fprintf(stderr, "[dols] error in stat\n");
             perror(dp->d_name);
             return;
         }
@@ -427,7 +425,7 @@ int doLs(char * name)
     }
 
     closedir(dirp);
-
+    
     qsort((char *) dir_list, dir_listused, sizeof(char *), namesort);
     qsort((char *) file_list, file_listused, sizeof(char *), namesort);
 
@@ -454,8 +452,10 @@ int doLs(char * name)
     }
 
     free(dir_list);
+    dir_listsize=0;
     free(file_list);
-
+    file_listsize=0;   
+    
     return 0;
 }
 
@@ -777,7 +777,6 @@ int eventHandler(int evt)
                     handle_type_other(list[pos+nselect].name);
                 else
                 {
-                    fprintf(stderr,"chdir: %s\n",list[pos+nselect].name);
                     if(chdir(list[pos+nselect].name)<0)
                     {
                         fprintf(stderr,"Error going in: %s\n",list[pos+nselect].name);

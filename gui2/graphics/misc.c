@@ -176,7 +176,8 @@ int set_lcd_TimeOutParam(int state, int value)
     struct timer_val param;
     param.num = state;
     param.val = value;    
-    doGenIoctl("/dev/avstate",AV_LCD_SET_TIMOUT,&param,"Error setting lcd timeout\n");    
+    doGenIoctl("/dev/avstate",AV_LCD_SET_TIMOUT,&param,"Error setting lcd timeout\n");  
+    //printf("SET lcd timeout : %d\n", param.val);  
     return 1;
 }
 
@@ -185,7 +186,8 @@ int get_lcd_TimeOutParam(int state)
     struct timer_val param;
     param.num = state;
     param.val = 0;    
-    doGenIoctl("/dev/avstate",AV_LCD_GET_TIMOUT,&param,"Error getting lcd timeout\n");    
+    doGenIoctl("/dev/avstate",AV_LCD_GET_TIMOUT,&param,"Error getting lcd timeout\n");   
+    //printf("GET lcd timeout : %d\n", param.val);
     return param.val;
 }
 

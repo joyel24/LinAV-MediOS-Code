@@ -38,16 +38,18 @@ struct SettingsDataT {
     char* text;
     int  min;
     int  max;
+    int  inc;
     int  value;
     int  active;
     int  changed;
 };
 
 #define CNT_SETTINGS_ENTRIES 4
-struct SettingsDataT sData[CNT_SETTINGS_ENTRIES] = { {0, 5, 30, "Key Repeat",         1, 10, 5, 1, 0},
-                                                     {0, 5, 44, "Key Freq",           0,  6, 5, 0, 0},
-                                                     {0, 5, 58, "LCD Bat Timeout",    1, 10, 1, 0, 0},
-                                                     {0, 5, 72, "LCD DC Timeout",     1, 10, 1, 0, 0} };
+/*                                                    tab, x,  y, label string,       min,max,inc,val,act,changed */
+struct SettingsDataT sData[CNT_SETTINGS_ENTRIES] = { {  0, 5, 30, "Key Repeat",         1, 10,  1,  5,  1, 0},
+                                                     {  0, 5, 44, "Key Freq",           0,  6,  1,  5,  0, 0},
+                                                     {  0, 5, 58, "LCD Bat Timeout",    1,180, 10,  1,  0, 0},
+                                                     {  0, 5, 72, "LCD DC Timeout",     1,180, 10,  1,  0, 0} };
 
 
 unsigned char SettingsSlider[13][2] =
@@ -187,11 +189,10 @@ int settingsEvtHandler(int evt)
 
         case BTN_LEFT:
             active = GetActiveSetting();
-            if(sData[active].value-1 < sData[active].min)
-                sData[active].value = sData[active].value;
-            else
-                sData[active].value--;
-
+            sData[active].value-=sData[active].inc;
+            if(sData[active].value < sData[active].min)
+                sData[active].value = sData[active].min;
+            
             drawSlider(sData[active].x,
                        sData[active].y,
                        sData[active].text,
@@ -205,10 +206,9 @@ int settingsEvtHandler(int evt)
 
         case BTN_RIGHT:
             active = GetActiveSetting();
-            if(sData[active].value+1 > sData[active].max)
-                sData[active].value = sData[active].value;
-            else
-                sData[active].value++;
+            sData[active].value+=sData[active].inc;
+            if(sData[active].value > sData[active].max)
+                sData[active].value = sData[active].max;            
 
             drawSlider(sData[active].x,
                        sData[active].y,

@@ -103,8 +103,8 @@ void mp3_read_more(int size)
         
         printf("trying to read: %d left:%d\n",part1_size,size);
         
-        nb_read=read_from_HD(part1_size);
-        //nb_read=fread(data.buffer+data.buffer_write,1,part1_size,fd);
+        //nb_read=read_from_HD(part1_size);
+        nb_read=fread(data.buffer+data.buffer_write,1,part1_size,fd);
         
         printf("read: %d\n",nb_read);
         
@@ -113,7 +113,7 @@ void mp3_read_more(int size)
             fprintf(stderr,"ERROR reading file\n");
             return;
         }
-        //data.buffer_write+=nb_read;        
+        data.buffer_write+=nb_read;        
         if(nb_read<part1_size)
         {
             data.endOfFile=1;
@@ -122,14 +122,14 @@ void mp3_read_more(int size)
         if(size>0)
         {
             data.buffer_write=0;
-            nb_read=read_from_HD(size);
-            //nb_read=fread(data.buffer+data.buffer_write,1,size,fd);
+            //nb_read=read_from_HD(size);
+            nb_read=fread(data.buffer+data.buffer_write,1,size,fd);
             if(nb_read<0)
             {
                 fprintf(stderr,"ERROR reading file\n");
                 return;
             }
-            //data.buffer_write+=nb_read;       
+            data.buffer_write+=nb_read;       
             if(nb_read<size)
             {
                 data.endOfFile=1;                
