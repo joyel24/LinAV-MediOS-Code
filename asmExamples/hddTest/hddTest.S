@@ -66,7 +66,7 @@ loop1:
         bx r4
 
         ldr r0, =ataRegSelect
-        ldr r1, =0x10
+        ldr r1, =0x1
         strh r1, [r0]                   @ select 0
         
         ldr r4, =(ataWaitForRDYT+1)
@@ -83,7 +83,7 @@ loop1:
         mov r5, #1
         mov lr, r5
         add lr, pc
-        bx r4
+@        bx r4
         
         ldr r0, =256
         ldr r1, =bufferx

@@ -26,15 +26,14 @@ ataStatus_DF    =       0x20
 ataStatus_DRQ   =       0x08
 ataStatus_ERR   =       0x01
 
+ataRegData      =       0x02400000
 ataRegNSector   =       0x02400080
 ataRegSector    =       0x02400100
 ataRegLCyl      =       0x02400180
 ataRegHCyl      =       0x02400200
 ataRegSelect    =       0x02400280
-ataRegCommand   =       0x02400380
-ataRegStatus    =       0x02400380
-
-ataRegData      =       0x02400000
+ataRegCommand   =       0x02400300
+ataRegStatus    =       0x02400340
 
 
         .thumb

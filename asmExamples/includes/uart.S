@@ -14,6 +14,7 @@
 @
 @ uartOutchT (r0=character)
 @ uartOutsT (r0->string)
+@ uartGetchT    returns a char in r0, or -1 if none waiting.
 @
 @ NOTE: at the moment only supports UART1, but then thats the only
 @       useful one as yet...
@@ -22,6 +23,22 @@
 
         .thumb
 
+@ uartGetchT returns r0=chr or -1 if none
+@
+uartGetchT:
+        push {r1, r2}
+        ldr r0, =(-1)           @ assume failure...
+        ldr r2, =0x30300
+        ldrh r1, [r2, #6]
+        lsl r1, #26
+        beq uartNon
+        mov r0, #0
+        ldrh r0, [r2, #0]
+uartNon:
+        pop {r1, r2}
+        bx lr
+
+        
 @ uartOutchT r0=chr to output to UART1
 @
 uartOutchT:
