@@ -30,10 +30,12 @@ char hex82[] = "xxxxxxxx";
 char dirLine[] = "xxxxxxxx.xxx\n";
 
 struct tm* ourTime;
-    char timeSt[] = "xx:xx:xx.xx";
+char timeSt[] = "xx:xx:xx.xx";
     
-    char parentName[] = "..         ";
-    char ext_bin[] = "BIN";
+char parentName[] = "..         ";
+char ext_bin[] = "BIN";
+
+
 
 int main() {
     int c, b, i, totalEntries;
@@ -81,7 +83,7 @@ startInit:
     screenBitmap.bitsPerPixelShift = 4;
     screenBitmap.bitsPerPixel = 16;
 
-    graphicsBoxf(&screenBitmap, 0, 0, 96, 132, 0x0202);    
+    graphicsBoxf(&screenBitmap, 0, 0, 96, 132, 0xd5d5);    
     graphicsBoxf(&screenBitmap, 1, 1, 94, 130, 0x1414);    
 
     screenBitmap2.offset = 0x03b00000;
@@ -92,9 +94,13 @@ startInit:
     screenBitmap2.bitsPerPixel = 16;
 
     graphicsBoxf(&screenBitmap2, 0, 0, 320, 240, 0x0000);
-    pal16[0] = 0x0000;
+    graphicsBoxf(&screenBitmap2, 0, 0, 320, 10, 0xd5d5);
+    graphicsBoxf(&screenBitmap2, 0, 11, 320, 1, 0x1717);
+    graphicsBoxf(&screenBitmap2, 0, 228, 320, 1, 0x1717);
+    graphicsBoxf(&screenBitmap2, 0, 229, 320, 10, 0xd5d5);
+    pal16[0] = 0xd5d5;
     pal16[1] = 0xffff;    
-    graphicsString(&screenBitmap2, 2, 231, &sprite4_6, std4x6_, 5, 0,
+    graphicsString(&screenBitmap2, 4, 231, &sprite5_7, std5x7_, 6, 0,
                         "[Menu2] HDD/Memcard   [Menu3] UsbMode   [ON] Click");
 
     osdSetComponentSize(OSD_BITMAP1, 320*2, 240);
@@ -113,6 +119,7 @@ startInit:
                                      | OSD_BITMAP_8BIT);
 
 
+    // EUGH: TODO - Clean this rubbish up!
     usbDisable();
     for (c=0;c<0x14000;c++) {}
 //    ataPowerDownHDD();
@@ -203,32 +210,32 @@ startInit:
         while(1) {
 
             c = usbIsConnected();
-            pal16[0] = 0x0000;            
-            pal16[1] = 0x4e4e;
+            pal16[0] = 0xd5d5;            
+            pal16[1] = 0xffff;
             if (c) {
-                graphicsString(&screenBitmap2, 2, 2, &sprite4_6, std4x6_, 5, 0,
+                graphicsString(&screenBitmap2, 4, 2, &sprite5_7, std5x7_, 6, 0,
                     "[USB Lead in]");
                 
             } else {
-                graphicsString(&screenBitmap2, 2, 2, &sprite4_6, std4x6_, 5, 0,
+                graphicsString(&screenBitmap2, 4, 2, &sprite5_7, std5x7_, 6, 0,
                     "             ");
             }
 
             if (mode!=0) {
-                graphicsString(&screenBitmap2, 2 + 14*5, 2, &sprite4_6, std4x6_, 5, 0,
+                graphicsString(&screenBitmap2, 4 + 14*6, 2, &sprite5_7, std5x7_, 6, 0,
                     "[USB mode]");
                 
             } else {
-                graphicsString(&screenBitmap2, 2 + 14*5, 2, &sprite4_6, std4x6_, 5, 0,
+                graphicsString(&screenBitmap2, 4 + 14*6, 2, &sprite5_7, std5x7_, 6, 0,
                     "          ");
             }
 
             if (source==0) {
-                graphicsString(&screenBitmap2, 2 + 25*5, 2, &sprite4_6, std4x6_, 5, 0,
+                graphicsString(&screenBitmap2, 4 + 25*6, 2, &sprite5_7, std5x7_, 6, 0,
                     "[HDD]    ");
                 
             } else {
-                graphicsString(&screenBitmap2, 2 + 25*5, 2, &sprite4_6, std4x6_, 5, 0,
+                graphicsString(&screenBitmap2, 4 + 25*6, 2, &sprite5_7, std5x7_, 6, 0,
                     "[MemCard]");
             }
             
@@ -238,7 +245,7 @@ startInit:
             stringPutHex(timeSt+3, ourTime->tm_min, 2);
             stringPutHex(timeSt, ourTime->tm_hour, 2);
             pal16[1] = 0xffff;
-            graphicsString(&screenBitmap2, 2 + 35*5, 2, &sprite4_6, std4x6_, 5, 0,
+            graphicsString(&screenBitmap2, 4 + 41*6, 2, &sprite5_7, std5x7_, 6, 0,
                         timeSt);
 
             // Update file display window if needed,
