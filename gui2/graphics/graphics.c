@@ -34,6 +34,7 @@ int colorTab[256];
 #include <graphics.h>
 #include "events.h"
 #include "gui_pal.h"
+#include "colordef.h"
 
 #ifdef HAVE_JPEG
 #include "jpeglib.h"
@@ -62,9 +63,9 @@ struct graphicsBuffer BITMAP_1 = {
     state              : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
                     AV3XX_OSD_BITMAP_8BIT ,
 #else
-    offset_sav         : 0,
-    enable             : 0,
+    offset_sav         : 0,    
 #endif
+    enable             : 0,
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
     x                  : 0x14,
@@ -79,8 +80,8 @@ struct graphicsBuffer BITMAP_2 = {
                     AV3XX_OSD_BITMAP_8BIT ,
 #else
     offset_sav         : 0,
-    enable             : 0,
 #endif
+    enable             : 0,
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
     x                  : 0x14,
@@ -94,8 +95,8 @@ struct graphicsBuffer VIDEO_1 = {
     state              : 0,
 #else
     offset_sav         : 0,
-    enable             : 0,
 #endif
+    enable             : 0,
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
     x                  : 0x14,
@@ -109,8 +110,8 @@ struct graphicsBuffer VIDEO_2 = {
     state              : 0,
 #else
     offset_sav         : 0,
-    enable             : 0,
 #endif
+    enable             : 0,
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
     x                  : 0x14,
@@ -308,7 +309,7 @@ int tstGc(GC_ID Dgc,GC_ID Dgc2,int X,int Y) // get color in Dgc2 using coordinat
             }
             else
             {
-                if(((char*)Dgc->buffer->offset)[Y*Dgc->buffer->width+X]==0)
+                if(((char*)Dgc->buffer->offset)[Y*Dgc->buffer->width+X]!=COLOR_WHITE)
                     return 1;
             }
         }
@@ -442,7 +443,7 @@ void lcd_update(int type, int x_ini, int y_ini, int w, int h)
                                 XSetForeground(display, gc, colorTab[color]);
                                 break;
                         }
-                        XDrawPoint(display, window, gc, default_gc->buffer->x+x-0x14, default_gc->buffer->y+y-0x12);
+                        XDrawPoint(display, window, gc, default_gc->buffer->x+x-0x14, default_gc->buffer->y+y-0x12); 
                 }                
                 setSav(default_gc,x,y,color);
             }
@@ -559,10 +560,10 @@ void hidePlane(int vplane)
 {
     if(vplane>=0 && vplane < NB_BUFFER)
     {
+        buffers[vplane]->enable=0;
 #ifdef AV_SCREEN
         osdSetComponentConfig(buffers_comp[vplane],0);
-#else
-        buffers[vplane]->enable=0;
+#else        
 #warning add redraw here
 #endif
     }
@@ -576,10 +577,10 @@ void showPlane(int vplane)
 {
     if(vplane>=0 && vplane < NB_BUFFER)
     {
+        buffers[vplane]->enable=1;
 #ifdef AV_SCREEN
         osdSetComponentConfig(buffers_comp[vplane],buffers[vplane]->state|AV3XX_OSD_COMPONENT_ENABLE);
 #else
-        buffers[vplane]->enable=1;
 #warning add redraw here
 #endif
     }
@@ -587,6 +588,11 @@ void showPlane(int vplane)
     {
         fprintf(stderr,"wrong plane %d\n",vplane);
     }          
+}
+
+int isShown(int vplane)
+{
+    return buffers[vplane]->enable;
 }
 
 void setState(int vplane,int state)

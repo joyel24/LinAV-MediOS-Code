@@ -59,6 +59,7 @@ struct client_operations cops={
     getPlane           : wmGetPlane,
     hidePlane          : hidePlane,
     showPlane          : showPlane,
+    cfgPlane           : cfgPlane,
     
     showSBar           : showSBar,
     hideSBar           : hideSBar,

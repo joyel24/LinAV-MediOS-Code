@@ -82,9 +82,9 @@ typedef struct graphicsFont *     FONT_ID;
 struct graphicsBuffer {
     unsigned int  offset;                 // ->The data
 #ifndef AV_SCREEN
-    unsigned int offset_sav;
-    int          enable;
+    unsigned int  offset_sav;
 #endif
+    int           enable;
     int           component;
     int           width;
     int           height;
@@ -167,6 +167,7 @@ void  setPlane        (int vplane);
 int   getPlane        (void);
 void  hidePlane       (int vplane);
 void  showPlane       (int vplane);
+int   isShown         (int vplane);
 void  setSate         (int vplane,int state);
 int   getSate         (int vplane);
 void  setSize         (int vplane,int width,int height,int bitsPerPixel);

@@ -12,6 +12,7 @@
 */
 #include "graphics.h"
 #include "colordef.h"
+#include "osd.h"
 
 #define CHK_PLANE     int savPlane=getPlane(); if(savPlane!=plugPlane) setPlane(plugPlane);
 #define RESTORE_PLANE if(savPlane!=plugPlane) setPlane(savPlane);
@@ -116,6 +117,16 @@ int wmGetPlane(void)
 void defaultPlane(void)
 {
     plugPlane=getPlane();
+}
+
+void cfgPlane(int vplane,int state)
+{
+    if(vplane == VID1 || vplane == VID2)
+        return;
+    setState(vplane,state|AV3XX_OSD_BITMAP_8BIT|AV3XX_OSD_BITMAP_ZX1|AV3XX_OSD_BITMAP_RAMCLUT);
+    if(isShown(vplane))
+        showPlane(vplane);
+
 }
 
 

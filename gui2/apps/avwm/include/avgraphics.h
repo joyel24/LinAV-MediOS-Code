@@ -32,5 +32,6 @@ void          wmClearScreen       (unsigned int color);
 void          wmSetPlane          (int vplane);
 int           wmGetPlane          (void);
 void          defaultPlane        (void);
+void          cfgPlane            (int vplane,int state);
 
 #endif

@@ -19,6 +19,19 @@
 #include "misc.h"
 #include "sound.h"
 #include "menu.h"
+#include "osd.h"
+
+#define     MERGE_BACK              0x0000
+#define     BMAP_0TRANS             0x0004
+#define     BMAP_A_SHIFT            3
+#define     BMAP_A0                 0x0000
+#define     BMAP_A1                 0x0008
+#define     BMAP_A2                 0x0010
+#define     BMAP_A3                 0x0018
+#define     BMAP_A4                 0x0020
+#define     BMAP_A5                 0x0028
+#define     BMAP_A6                 0x0030
+#define     BMAP_A7                 0x0038
 
 #define REGISTER(ops,event,flag)    {ops=(struct client_operations*)atoi(argv[argc-1]);ops->registerPlugin(event,flag);}
 #define PACK(ops,loop)              {ops->pack(loop);}
@@ -76,6 +89,7 @@ struct client_operations {
     int  (*getPlane)          (void);
     void (*hidePlane)         (int vplane);
     void (*showPlane)         (int vplane);
+    void (*cfgPlane)          (int vplane,int state);
     
     int  (*ini_mp3_playback)    (struct mp3_play * mp3_p_data);
     void (*close_mp3_playback)  (void);
