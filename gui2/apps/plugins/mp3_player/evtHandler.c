@@ -32,7 +32,7 @@ extern int settings_cursor_position;
 extern int vol,bass,treb,bal,loud;
 extern int fade,peakmeters,scroll_osci,peak_decay,peak_levelcolor,peak_bgcolor,osci_levelcolor,osci_bgcolor;
 extern int stopThread;
-//extern pthread_t read_thread;
+extern pthread_t read_thread;
 //extern pthread_t draw_thread;
 extern struct mp3_play data;
 /*******************/
@@ -41,8 +41,16 @@ int eventHandler(int evt)
 {
     if(evt==EVT_TIMER && data.finished)
     {
+        fprintf(stderr,"file finished\n");
+        stopThread=1;
+        fprintf(stderr,"topThread=1\n");
         cops->close_mp3_playback();
+        fprintf(stderr,"close mp3 ioctl\n");
+        pthread_join(read_thread, NULL);
+        fprintf(stderr,"thread join\n");
         RELEASE(cops);
+        fprintf(stderr,"release\n");
+        return 1;
     }
     
     if(evt==EVT_TIMER)
@@ -84,7 +92,7 @@ void handleMainWin(int evt)
             break;
         case BTN_OFF: /* Exit player */
         case EVT_QUIT:
-            //stopThread=1;            
+            stopThread=1;            
             if(fade)
                 while(vol > 35)
                 {
@@ -94,7 +102,7 @@ void handleMainWin(int evt)
             
             if(!cops->stop_playback()) fprintf(stderr,"error stopping\n");
             cops->close_mp3_playback();
-            //pthread_join(read_thread, NULL);
+            pthread_join(read_thread, NULL);
             //pthread_join(draw_thread, NULL);
             RELEASE(cops);          
             break;

@@ -52,7 +52,7 @@ void handleSoundWin(int evt);
 
 /* osc_peak_meter.c */
 //void * drawPeak(void * arg);
-void drawPeak(int left,int right);
+void drawPeak(int left,int right,int frame);
 void oscillograph(int l, int r);
 void peak_meters(int l, int r);
 void erase_peak(void);

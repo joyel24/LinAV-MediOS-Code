@@ -23,7 +23,7 @@ extern struct client_operations * cops;
 extern int vol,oldvol;
 /*******************/
 
-int fade=1;
+int fade=0;    /* not using fade by default */
 int pause=0;
 
 /**********************

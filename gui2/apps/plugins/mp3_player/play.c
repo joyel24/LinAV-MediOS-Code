@@ -205,8 +205,10 @@ int main(int argc, char * * argv)
     cops->start_playback();
     
     PACK(cops,NULL);
+    fprintf(stderr,"I've been released\n");
     fclose(fd);
-    
+    free(data.buffer);
+    fprintf(stderr,"file closed and buffer freed\n");
     return 1;
 }
 

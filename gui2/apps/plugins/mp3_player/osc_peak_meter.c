@@ -45,66 +45,53 @@ int osci_bgcolor = 4;    /* color of bg for oscillograph    1-10 */
 
 struct av_peak av_p;  /* left/right levels */
 
+int old_sec=0;
+
 //void * drawPeak(void * arg)
-void drawPeak(int left,int right)
-{
-    //int cnt=0;
-    //int sec=0,old_sec=0;
-    /*while(!stopThread)
-    {*/
-        //cnt++;
-        //fprintf(stderr,"in draw peek\n");
-        if(window == MAIN_WIN )/*&& cnt>10)*/
+void drawPeak(int left,int right,int frame)
+{    
+    int sec;
+    if(window == MAIN_WIN )/*&& cnt>10)*/
+    {
+        av_p.left=(left*200)/0x7FFF;
+        av_p.right=(right*200)/0x7FFF;
+
+        /*sec=(frame*26)/1000;
+        printf("sec=%d\n",sec);
+        if(sec!=old_sec)
         {
-            //cnt=0;
-            /* read peaks */
-            //cops->readPeak(&av_p);            
+            old_sec=sec;
+            drawTime(sec);
+        }*/
         
-            /* get peak values */
-            /*av_p.left=(av_p.left*200)/0x7FFF;
-            av_p.right=(av_p.right*200)/0x7FFF;*/
-            
-            av_p.left=(left*200)/0x7FFF;
-            av_p.right=(right*200)/0x7FFF;
-    
-           /* sec=(cops->readFrame()*26)/1000;
-            printf("sec=%d\n",sec);
-            if(sec!=old_sec)
-            {
-                old_sec=sec;
-                drawTime(sec);
-            }*/
-            
-            /* smoothen out if desired */
-            if(peak_decay > 0)
-            {
-                if(av_p.left < lpos)
-                    lpos -= peak_decay;
-                else
-                    lpos = av_p.left;
-    
-                if(av_p.right < rpos)
-                    rpos -= peak_decay;
-                else
-                    rpos = av_p.right;
-            }
+        /* smoothen out if desired */
+        if(peak_decay > 0)
+        {
+            if(av_p.left < lpos)
+                lpos -= peak_decay;
             else
-            {
                 lpos = av_p.left;
-                rpos = av_p.right;
-            }
-    
-            /* draw the peak meter, or the oscillograph */
-            if(peakmeters)
-                peak_meters(lpos, rpos);
+
+            if(av_p.right < rpos)
+                rpos -= peak_decay;
             else
-            {
-                if(!pause)
-                    oscillograph(av_p.left, av_p.right);
-            }
+                rpos = av_p.right;
         }
-    /*}
-    return NULL;*/
+        else
+        {
+            lpos = av_p.left;
+            rpos = av_p.right;
+        }
+
+        /* draw the peak meter, or the oscillograph */
+        if(peakmeters)
+            peak_meters(lpos, rpos);
+        else
+        {
+            if(!pause)
+                oscillograph(av_p.left, av_p.right);
+        }
+    }
 }
 
 void drawTime(int sec)
