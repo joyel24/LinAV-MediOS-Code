@@ -11,6 +11,7 @@
 @ Date:     25/01/2004
 @ Author:   By DoggerMoore
 @
+@ mathDivLU (x, y, z)   -> r0=(x||y) % z, r1 = (x||y) / z
 @
 
 .ifndef mathInc
@@ -26,28 +27,23 @@ mathInc = 1
 .globl mathDivLU
 .thumb_func
 mathDivLU:
-        push {r2, r3, r4, r5}
+        push {r2, r3, r4, r5, lr}
         mov r3, #1
 mathL1: lsr r4, r0, #31
         lsl r0, #1
         lsr r5, r1, #31
         orr r0, r5
-
         lsl r1, #1
-
         orr r4, r0
         cmp r4, r2
          blt mathL2
         sub r0, r2
         add r1, #1
-mathL2:
-        add r3, #1
+mathL2: add r3, #1
         cmp r3, #33
          bne mathL1
-        pop {r2, r3, r4, r5}
-        bx lr
+        pop {r2, r3, r4, r5, pc}
 
         .arm
         .ltorg
-        
 .endif

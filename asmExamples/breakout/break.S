@@ -17,16 +17,13 @@
 
 .text
         add r0, pc, #1
-        bx r0               @ switch to thumb
+        bx r0                                    @ switch to thumb mode
 
         .thumb
 
-        callThumb r1, lcdInitT
+        callThumb r1, lcdInitT                   @ Initialise the LCD
 
-        ldr r0, =0x3058a
-        ldr r1, =0x2000
-        strh r1, [r0]
-        
+@ ---------------------------------------------- @ Copy background image
         ldr r3, =lcdVideoBuffer2
         ldr r4, =sprite
         ldr r5, =(320*240)
@@ -39,22 +36,20 @@ lcop:   mov r0, #0
         add r4, #3
         callThumb r6, colorRGB2YCbCrT
         callThumb r6, colorPackYCbCrT
-
         str r0, [r3]
-        
         add r3, #4
         sub r5, #1
         bne lcop   
-        
-        callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
-        callThumb2 r3, osdSetMainConfigT, 0x14, 0xd9      
 
+        callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
+        callThumb2 r3, osdSetMainConfigT, 0x14, 0xd9
+
+@ ---------------------------------------------- @ Setup Cursor to be paddle
         callThumb1 r3, osdSetCursorConfigT, 0x0201
         callThumb2 r3, osdSetCursorSizeT, 64, 8
         callThumb2 r3, osdSetCursorPositionT, 160, 100
         
-@ Initialise the ball on the 2nd bitmap plane...
-        
+@ ---------------------------------------------- @ Set ball to be on main2
         callThumb2 r4, osdSetMain2ConfigT, 1, 0xd9
         callThumb2 r4, osdSetMain2SizeT, 16, 8
         callThumb2 r4, osdSetMain2PositionT, 160, 120
@@ -70,11 +65,10 @@ lcpyx:  ldrh r4, [r0]
         add r1, #2
         sub r3, #1
          bne lcpyx
-        add r4, #1
         add r1, #16
         sub r2, #1
          bne lcpyy
-
+@ ---------------------------------------------- @
         
 initGame:       
         ldr r0, =oposx
@@ -427,6 +421,7 @@ nob:
         pop {r4}
         bx r4
 
+@ ------------------------------------------------------------------------------
         .align 4        
 
         .ltorg      
@@ -444,27 +439,22 @@ scoMsgH:    .asciz "00000"
 
 
         .align 4
-theBall:
-.hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 
-.hword 0x0000, 0x0000, 0x0404, 0x0404, 0x0404, 0x0404, 0x0000, 0x0000 
-.hword 0x0000, 0x0404, 0x0404, 0xffff, 0xffff, 0x0404, 0x0404, 0x0000 
-.hword 0x0000, 0x0404, 0xffff, 0xffff, 0xffff, 0xffff, 0x0404, 0x0000 
-.hword 0x0000, 0x0404, 0xffff, 0xffff, 0xffff, 0xffff, 0x0404, 0x0000 
-.hword 0x0000, 0x0404, 0x0404, 0xffff, 0xffff, 0x0404, 0x0404, 0x0000 
-.hword 0x0000, 0x0000, 0x0404, 0x0404, 0x0404, 0x0404, 0x0000, 0x0000 
-.hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+theBall:.hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 
+        .hword 0x0000, 0x0000, 0x0404, 0x0404, 0x0404, 0x0404, 0x0000, 0x0000 
+        .hword 0x0000, 0x0404, 0x0404, 0xffff, 0xffff, 0x0404, 0x0404, 0x0000 
+        .hword 0x0000, 0x0404, 0xffff, 0xffff, 0xffff, 0xffff, 0x0404, 0x0000 
+        .hword 0x0000, 0x0404, 0xffff, 0xffff, 0xffff, 0xffff, 0x0404, 0x0000 
+        .hword 0x0000, 0x0404, 0x0404, 0xffff, 0xffff, 0x0404, 0x0404, 0x0000 
+        .hword 0x0000, 0x0000, 0x0404, 0x0404, 0x0404, 0x0404, 0x0000, 0x0000 
+        .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
 
         .align 4
 brickMap:
 .space 80, 0
 
-@ This stores the status of bricks. Are they on or off?
-@ Used for colision detection etc...
-                
 .include "../includes/lcd.S"
 .include "../includes/buttons.S"
 .include "../includes/color.S"
-.include "../includes/hex.S"
 .include "../includes/decimal.S"
 
 sprite:
