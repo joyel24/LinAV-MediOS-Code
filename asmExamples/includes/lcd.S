@@ -416,7 +416,8 @@ lcdInitT:
         strh r1, [r0, #0x38]
 
         ldr r0, =0x30680
-        strh r2, [r0, #0x00]        @ bit 1 enables border. Does other funny stuff
+        ldr r1, =0x100
+        strh r1, [r0, #0x00]        @ bit 1 enables border. Does other funny stuff
     
         ldr r1, =0x0003
         strh r1, [r0, #0x02]
