@@ -26,6 +26,14 @@ uartInc = 1
 
         uartBase    =   0x30300     @ av300 UART1
 
+        @ 0 DTRR    Data xfer
+        @ 2 BRSR    Bitrate set
+        @ 4 MSR     Mode set
+        @ 6 RFCR    Recv FIFO
+        @ 8 TFCR    Trans FIFO
+        @ a LCR     Line control
+        @ c SR      Status reg
+        
         .thumb
 
 @ uartGetchT returns r0=chr or -1 if none
