@@ -108,7 +108,9 @@ int   ini_graphics   (void);
 void  close_graphics (void);
 void  iniComponent   (struct graphicsBuffer * buff);
 GC_ID createGC       (int vplane);
-void  destroyGC       (GC_ID gc);
+void  destroyGC      (GC_ID gc);
+
+void setPalette      (int palette[256][3],int size);
 
 
 /* drawings */

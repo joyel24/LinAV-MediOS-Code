@@ -10,17 +10,13 @@
 #define LCD_HOEHE   240
 #define LCD_BREITE  320
 
-#define AV3XX_COLOR_BLACK 0
-#define AV3XX_COLOR_WHITE 1
+#define BLACK 1
+#define WHITE 16
 
 static short particles[NUM_PARTICLES][2];
 
 int g_cntSnow = 0;
 int g_cntPartSnow = 0;
-
-GC_ID g_gcWhite;
-GC_ID g_gcBlack;
-
 
 void ClearScreen();
 int GetTime();
@@ -35,21 +31,7 @@ void snow_init(void);
 int main()
 {
 	ini_graphics();
-    
-    g_gcWhite = createGC(BMAP1);
-    g_gcBlack = createGC(BMAP1);
-
-    g_gcWhite->fg=16;
-    g_gcWhite->bg=1;
-
-    
-    g_gcBlack->fg=1;
-    g_gcBlack->bg=1;
-
-
-	//GrHideCursor();
-	//delay(100000);
-	//GrShowCursor();
+ 
    snow_init();
 
 	while (1)
@@ -67,7 +49,7 @@ void ClearScreen()
 	int i = 0;
 	int xPos = 0;
 	
-	fillRect(USE_GC,0, 0 , 320, 240, g_gcBlack); //clearScr();   
+	fillRect(BLACK,0, 0 , 320, 240); //clearScr();   
 
 	
 }
@@ -123,7 +105,7 @@ void snow_move(void)
 	 {
         if (particle_exists(i))
 		  {
-		  drawPixel(USE_GC,particles[i][0],particles[i][1], g_gcBlack);  // Pixel loeschen
+		  drawPixel(BLACK,particles[i][0],particles[i][1]);  // Pixel loeschen
             switch ((rand()%7)) {
                 case 0:
                     particles[i][0]++;
@@ -147,12 +129,12 @@ void snow_move(void)
             }
             if (particle_exists(i))
 				{
-               drawPixel(USE_GC,particles[i][0],particles[i][1], g_gcWhite); // Pixel setzen
+               drawPixel(WHITE,particles[i][0],particles[i][1]); // Pixel setzen
             }
 
             if(g_cntSnow > 300)
 				{
-				fillRect(USE_GC,0, LCD_HOEHE-g_cntPartSnow, LCD_BREITE, g_cntPartSnow, g_gcWhite);
+				fillRect(WHITE,0, LCD_HOEHE-g_cntPartSnow, LCD_BREITE, g_cntPartSnow);
   
 					g_cntSnow = 0;
 					g_cntPartSnow++;

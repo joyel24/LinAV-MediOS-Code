@@ -19,6 +19,7 @@
 #include <graphics.h>
 #include "events.h"
 #include "graphics_8.h"
+#include <gui_pal.h>
 
 #define FBIO_INIT               _IO ('F', 0x26)
 /* config functions */
@@ -61,6 +62,7 @@ int ini_graphics()
 	iniComponent(&BITMAP_1);
 	
 	gc_bmap1=createGC(BMAP1);
+	setPlane(BMAP1);
 	
 	BITMAP_2.offset            = (int)&screen2;
 	BITMAP_2.component         = AV3XX_OSD_BITMAP2;
@@ -85,7 +87,23 @@ int ini_graphics()
 
 	hidePlane(BMAP2);
 	
+	setPalette(gui_pal,256);
+	
 	return 0;
+}
+
+void setPalette(int palette[256][3],int size)
+{
+	int i=0;
+	int y,cr,cb;
+	for(i=0;i<size;i++)
+	{
+		y = (306*palette[i][0] + 601*palette[i][1] + 117*palette[i][2]) >> 10 ; 
+		cb = ((-173*palette[i][0] -339*palette[i][1] + 512*palette[i][2]) >> 10) + 128;
+		cr = ((512*palette[i][0] - 429*palette[i][1] - 83*palette[i][2]) >> 10) + 128;
+	
+		osdSetPallette (y, cr, cb, i);
+	}
 }
 
 void close_graphics()
