@@ -112,8 +112,10 @@ int main() {
                                      | OSD_BITMAP_MERGEBACK
                                      | OSD_BITMAP_A4);
 
-    osdSetComponentConfig(OSD_CURSOR2, OSD_COMPONENT_ENABLE);
+    osdSetComponentConfig(OSD_CURSOR2, OSD_COMPONENT_ENABLE
+                                     | OSD_CURSOR2_A0);
 
+                                     
     for (c=0;c<16;c++) {
         osdSet16CPallette(0, c, c);
     }

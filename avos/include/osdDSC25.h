@@ -76,6 +76,15 @@ typedef unsigned long u32;
 #define        OSD_CURSOR2_RAMCLUT             0x0004
 #define        OSD_CURSOR2_COLORBANK0          0x0000
 #define        OSD_CURSOR2_COLORBANK1          0x0008   
+#define        OSD_CURSOR2_A_SHIFT             4
+#define        OSD_CURSOR2_A0                  0x0000
+#define        OSD_CURSOR2_A1                  0x0010
+#define        OSD_CURSOR2_A2                  0x0020
+#define        OSD_CURSOR2_A3                  0x0030
+#define        OSD_CURSOR2_A4                  0x0040
+#define        OSD_CURSOR2_A5                  0x0050
+#define        OSD_CURSOR2_A6                  0x0060
+#define        OSD_CURSOR2_A7                  0x0070
 #define        OSD_CURSOR2_ZY0                 0x0000
 #define        OSD_CURSOR2_ZY1                 0x0100
 #define        OSD_CURSOR2_ZY2                 0x0200

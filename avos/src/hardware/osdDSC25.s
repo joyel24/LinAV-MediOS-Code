@@ -114,7 +114,15 @@ osdInc = 1
         
         OSD_CURSOR2_COLORBANK0          =   0x0000
         OSD_CURSOR2_COLORBANK1          =   0x0008   
-
+        OSD_CURSOR2_A_SHIFT             =   4
+        OSD_CURSOR2_A0                  =   0x0000
+        OSD_CURSOR2_A1                  =   0x0010
+        OSD_CURSOR2_A2                  =   0x0020
+        OSD_CURSOR2_A3                  =   0x0030
+        OSD_CURSOR2_A4                  =   0x0040
+        OSD_CURSOR2_A5                  =   0x0050
+        OSD_CURSOR2_A6                  =   0x0060
+        OSD_CURSOR2_A7                  =   0x0070
         OSD_CURSOR2_ZY0                 =   0x0000      @ 0000111100000000
         OSD_CURSOR2_ZY1                 =   0x0100
         OSD_CURSOR2_ZY2                 =   0x0200
@@ -147,7 +155,7 @@ osdLookupOffsetHI:  .word 0x30694
 .thumb_func
 
 osdSetCursor2Bitmap:
-        push {r1, r2, lr}
+        push {r1, r2, r3, lr}
         ldr r2, =0x306f2
         strh r1, [r2]           @ Setup data reg
         
@@ -159,7 +167,7 @@ osdSetCursor2Bitmap:
         mov r0, #0x80
         orr r1, r0
         strh r1, [r2, #2]       @ Set the data...
-        pop {r1, r2, pc}
+        pop {r1, r2, r3, pc}
 
                     
 @ ------------------------------------------------------------------------------
