@@ -15,7 +15,7 @@
         .include "../includes/common.S"
         .include "../includes/av300.S"
 
-@        doimage = 1
+        doimage = 1
         
 .text
 
@@ -53,8 +53,12 @@ lrel:   ldr r3, [r0]
         bx r2           @ *** *** JUMP UP TO HIGH RAM
         
         
+        callThumb r0, lcdInitT
+                
+        callThumb2 r5, terminalSetPosT, 0, 1
+        callThumb2 r5, terminalPutsCT, msg1, 0xfbfb
+
         @ Wait for USB disconnect, or menu1
-        mov r4, #0
 waitUsb:
         callThumb r1, buttonsGetStatusT
         ldr r1, =0x677                      @ menu1 to skip
@@ -62,45 +66,13 @@ waitUsb:
          beq overusbW
         callThumb r1, usbIsConnectedT
         cmp r0, #1
-         bne overusbW
-        mov r4, #1
+         bne overusbW 
         b waitUsb
 overusbW:
-
-                                @ r4 = 1 if USB
-
-        callThumb r0, lcdInitT
-                
-        callThumb2 r5, terminalSetPosT, 0, 1
-        callThumb2 r5, terminalPutsCT, msg1, 0xfbfb
-
-        cmp r4, #0
-         beq nowarn1
-        callThumb2 r5, terminalPutsCT, msgwarn, 0xffff
-nowarn1:
-      
-        ldr r0, =0x02600200
-        mov r1, #0
-        ldrh r1, [r0]
-        ldr r0, =debug1h
-        callThumb r2, hex4T
-        callThumb2 r5, terminalPutsCT, debug1, 0xffff
-
-        ldr r0, =0x02600300
-        mov r1, #0
-        ldrh r1, [r0]
-        ldr r0, =debug2h
-        callThumb r2, hex4T
-        callThumb2 r5, terminalPutsCT, debug2, 0xffff
-        
 
         callThumb2 r5, terminalPutsCT, msg2, 0xffff
         callThumb r5, ataInitT
         callThumb2 r5, terminalPutsCT, msgDONE, 0xfbfb
-
-        ldr r0, =0x100000
-waity:  sub r0, #1
-        bne waity
 
         callThumb2 r4, terminalPutsCT, msg3, 0xffff
         callThumb1 r4, ataIdentifyT, bufferx
@@ -424,6 +396,13 @@ notdn:
         ldr r4, =bufferx
         add r4, r0
                                     @ r4->file entry
+        
+wnkd1:                                      @ Wait for no key down...
+        callThumb r0, buttonsGetStatusT
+        ldr r1, =0x777
+        cmp r0, r1
+         bne wnkd1
+
         mov r0, r4
         add r0, #20
         callThumb r5, read2T
@@ -498,7 +477,7 @@ errt:   ldr r0, timeoutMax
 noovf:  sub r0, #1
         ldr r1, =timeoutC
         str r0, [r1]
-        
+
         b loopNV
 
         b alldo
@@ -606,13 +585,6 @@ loopLE:
         cmp r7, r0
         blt loopLE
 
-@        callThumb2 r4, terminalPutsCT, msg680, 0xffff
-        
-@lwaitk: callThumb r4, buttonsGetStatusT
-@        ldr r1, =0x100
-@        tst r0, r1
-@         bne lwaitk
-        
         callThumb2 r4, terminalPutsCT, msg700, 0xffff
 
         ldr r0, =0x03000000
@@ -671,7 +643,6 @@ read2T:
         .ltorg
         
 msg1:   .asciz " -- avOS BootLoader version 0.2a (c)2004 DoGgGeR -- \n\n"
-msgwarn:.asciz "Warning: USB was used! I may need a cold boot now\n"
 msg2:   .asciz "Initialising ATA...                        "
 msg3:   .asciz "Identifying hard drive...                  "
 msg4:   .asciz " Serial:    xxxxxxxxxxxxxxxxxxxx\n"
@@ -681,25 +652,17 @@ msg100: .asciz "Reading MBR...                             "
 msg101: .asciz " Partition: xx xx xxxxxxxx xxxxxxxx\n"
 msg200: .asciz "Reading BootSector (Partition 1)...        "
 msg201: .asciz " OEM:       xxxxxxxx\n"
-msg300: .asciz "Loading root directory entries...          \n"
-msg400: .asciz " xxxxxxxxxxx SIZE=xxxxxxxx ATTR=xx CLUST=xxxxxxxx\n"
 msg600: .asciz "Loading image...                           \n"
 msg601: .asciz "."
-msg680: .asciz "\nPress menu1 key to run image...            \n"
 msg700: .asciz "Running image...                           \n"
 msg780: .asciz "Timed out!                                 \n"
 msg900: .asciz "ALL DONE\n"
 msgDONE:  .asciz "[ DONE ]\n"
 
-msg_001:.asciz " -- avOs BootLoader Version 0.2a (c)2004 DoGgEr -- "
+msg_001:.asciz " -- avOs BootLoader Version 0.3a (c)2004 DoGgEr -- "
 
 dirLine:.asciz "xxxxxxxx.xxx"
 dirEmpt:.asciz "            "
-
-debug1: .ascii "02600200 = "
-debug1h:.asciz "xxxx\n"
-debug2: .ascii "02600200 = "
-debug2h:.asciz "xxxx\n"
 
         .align 4
 .include "../includes/hex.S"
