@@ -18,10 +18,12 @@
 typedef unsigned long u32;
 #endif
 
-#define VIDEO_MODE_PAL  0x8000
-#define VIDEO_MODE_NTSC 0x0000
-               // Unknown flags - LCD = 4071
-               //                 VID = 407d
+#define VIDEO_MODE_NONINTERLACED    0x4000
+#define VIDEO_MODE_INTERLACED       0x0000
+#define VIDEO_MODE_PAL              0x8000
+#define VIDEO_MODE_NTSC             0x0000
+               // Unknown flags - LCD = 71
+               //                 VID = 7d
 
 extern void videoLCDEnableA();
 extern void videoLCDDisableA();

@@ -246,10 +246,14 @@ OSD - On screen display                osdDSC25.h          Nearly all done
 30780   ? Unknown imaging?
 
 --------------------------------------------------------------------------------
-Video                                  osdDSC25.h          Lots to do
+Video                                  video.h, osdDSC25.h          Lots to do
 --------------------------------------------------------------------------------
 30800   Video mode config
-        4000 = 1=non interlaced,0=interlaced
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+        | |                  
+        | +----------------------------- 1 = Noninterlaced
+        +------------------------------- 1 = PAL, 0 = NTSC
+
 30804   Bit 15 - LCD enable
 
 30830   Low 8 bits = brightness, High 8 bits = contrast

@@ -72,7 +72,7 @@ int main(int argc, char * * argv) {
             if (vmode==0) {
                 gioSetBitA(GIO_LINE_EXT_VIDEO);
                 gioClearBitA(GIO_LINE_BACKLIGHT_POWER);
-                videoSetModeA(0x4071);
+                videoSetModeA(VIDEO_MODE_NONINTERLACED | 0x71);
                 videoLCDEnableA();
                 osdSetMainShiftA(0x79, 0x00);
                 osdSetComponentPositionA(OSD_VIDEO1, 0x14, 0x13);
@@ -80,7 +80,7 @@ int main(int argc, char * * argv) {
             } else if (vmode==1) {
                 gioClearBitA(GIO_LINE_EXT_VIDEO);
                 gioClearBitA(GIO_LINE_BACKLIGHT_POWER);
-                videoSetModeA(0x407d | VIDEO_MODE_NTSC);
+                videoSetModeA(VIDEO_MODE_NONINTERLACED | 0x7d | VIDEO_MODE_NTSC);
                 videoLCDDisableA();
                 osdSetMainShiftA(0x78, 0x12);
                 osdSetComponentPositionA(OSD_VIDEO1, 0x3a, 0x18);
@@ -88,7 +88,7 @@ int main(int argc, char * * argv) {
             } else if (vmode==2) {
                 gioClearBitA(GIO_LINE_EXT_VIDEO);
                 gioSetBitA(GIO_LINE_BACKLIGHT_POWER);
-                videoSetModeA(0x407d | VIDEO_MODE_PAL);
+                videoSetModeA(VIDEO_MODE_NONINTERLACED | 0x7d | VIDEO_MODE_PAL);
                 videoLCDDisableA();
                 osdSetMainShiftA(0xae, 0x2d);
                 osdSetComponentPositionA(OSD_VIDEO1, 0x14, 0x00);
