@@ -22,17 +22,23 @@ void enableUsb(void);
 void disableUsb(void);
 void forceDisableUsb(void);
 int av3xx_usb_state_read(char *buf, char **start, off_t offset,int len, int *eof, void *data);
+int av_usb_ioctl(struct inode *inode, struct file *filp,unsigned int cmd, unsigned long arg);
 
 /** power related functions **/
 int powerConnected(void);
 int av3xx_power_state_read(char *buf, char **start, off_t offset,int len, int *eof, void *data);
+int av_power_ioctl(struct inode *inode, struct file *filp,unsigned int cmd, unsigned long arg);
 
 /** time related functions **/
 int av3xx_time_read(char *buf, char **start, off_t offset,int len, int *eof, void *data);
+int av_rtc_ioctl(struct inode *inode, struct file *filp,unsigned int cmd, unsigned long arg);
 
 /** tsc2003 related functions **/
-int av3xx_tsc2003_read(char *buf, char **start, off_t offset,
-                   int len, int *eof, void *data);
+int av3xx_tsc2003_read(char *buf, char **start, off_t offset,int len, int *eof, void *data);
+int av_tsc_ioctl(struct inode *inode, struct file *filp,unsigned int cmd, unsigned long arg);
+
+/** mouse related functions **/
+int av_mouse_ioctl(struct inode *inode, struct file *filp,unsigned int cmd, unsigned long arg);
 
 /** general functions **/
 int av_state_open(struct inode *inode, struct file *filp);

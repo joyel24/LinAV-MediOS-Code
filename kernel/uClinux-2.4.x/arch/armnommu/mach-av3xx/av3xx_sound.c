@@ -215,13 +215,13 @@ int av3xx_dsp_ioctl(struct inode *inode, struct file *filp,unsigned int cmd, uns
 			break;
 		case AV_DSP_IN_PEAK:
 			av_p=(struct av_peak *)arg;
-			av_p->left=(av3xx_mas_read_codec(MAS_REG_INPEAK_LEFT)*100)/0x7FF;
-			av_p->right=(av3xx_mas_read_codec(MAS_REG_INPEAK_RIGHT)*100)/0x7FF;
+			av_p->left=(av3xx_mas_read_codec(MAS_REG_INPEAK_LEFT)*100)/0x7FFF;
+			av_p->right=(av3xx_mas_read_codec(MAS_REG_INPEAK_RIGHT)*100)/0x7FFF;
 			break;
 		case AV_DSP_OUT_PEAK:
 			av_p=(struct av_peak *)arg;
-			av_p->left=(av3xx_mas_read_codec(MAS_REG_OUTPEAK_LEFT)*100)/0x7FF;
-			av_p->right=(av3xx_mas_read_codec(MAS_REG_OUTPEAK_RIGHT)*100)/0x7FF;
+			av_p->left=(av3xx_mas_read_codec(MAS_REG_OUTPEAK_LEFT)*100)/0x7FFF;
+			av_p->right=(av3xx_mas_read_codec(MAS_REG_OUTPEAK_RIGHT)*100)/0x7FFF;
 			break;
 		case AV_DSP_IN_PEAK_REAL:
 			av_p=(struct av_peak *)arg;
@@ -371,6 +371,12 @@ int av3xx_mix_ioctl(struct inode *inode, struct file *filp,unsigned int cmd, uns
 		case AV_GET_MIX_VOLUME:
 			*val=av3xx_mas_control_config(MAS_GET,MAS_VOLUME,*val);
 			break;
+		case AV_SET_MIX_BALANCE:
+			av3xx_mas_control_config(MAS_SET,MAS_BALANCE,*val);
+			break;
+		case AV_GET_MIX_BALANCE:
+			*val=av3xx_mas_control_config(MAS_GET,MAS_BALANCE,*val);
+			break;	
 		case AV_SET_MIX_MUTE:
 			if(*val)
 				av3xx_mas_control_config(MAS_SET,MAS_VOLUME,0);

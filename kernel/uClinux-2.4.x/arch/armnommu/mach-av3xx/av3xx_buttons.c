@@ -19,6 +19,12 @@
 
 struct timer_list av3xx_button_timer;
 
+int freq_rep = AV_FREQ;
+int mx_press = MAX_PRESSED;
+
+extern void av_halt_system(void);
+/*DECLARE_TASKLET(av_halt,av_halt_system,0);*/
+
 #if 0 // this config is using escaped chars
 int keys_code[NB_BUTTONS] ={
 			KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN,       /* UP, LEFT, RIGHT, DOWN */
@@ -35,7 +41,7 @@ int keys_code[NB_BUTTONS] ={
 };
 #endif
 
-int av3xx_button_state(int * button_state)
+/*int av3xx_button_state(int * button_state)
 {
 	int val,i,pressed,dir;
 	pressed=0;
@@ -64,33 +70,63 @@ int av3xx_button_state(int * button_state)
 		button_state[BUTTONS_AV300_JOYPRESS]=0;
 
 	return pressed;
-}
+}*/
 
-int old_state[NB_BUTTONS];
-int key[NB_BUTTONS];
+int nb_pressed[NB_BUTTONS];
+int nb_off_press=0;
+
 
 int av3xx_chk_button(unsigned long ptr)
 {
-	int i;
-
-	int key[NB_BUTTONS];
-
-	int pressed = av3xx_button_state(&key);
-	if(pressed)
+	int i,val,fastDir;
+	
+	fastDir=0;
+	val=inw(0x2600680)&0x3;
+	val|=((inw(0x2600700)&0x7)<<2);
+	val|=((inw(0x2600780)&0x7)<<5);
+	val|=((inw(0x30588)&0x1)<<8);
+	val|=((inw(0x3058a)>>3)&0x200);
+	
+	for(i=0;i<NB_BUTTONS;i++)
 	{
-		for(i=0;i<NB_BUTTONS;i++)
+		if(keys_code[i]!=0)
 		{
-			if(keys_code[i]!=0 && key[i] /*&& !old_state[i]*/)
+			if(val&(0x1<<i))
 			{
-				handle_scancode(keys_code[i], 1);
-				av3xx_move_mouse(i);
+				if(nb_pressed[i]!=0)
+					nb_pressed[i]=0;
+				if(i==9)
+					nb_off_press=0;
 			}
-			/*if(keys_code[i]!=0 && !key[i] && old_state[i])
-				handle_scancode(keys_code[i], 0);*/
-			//old_state[i]=key[i];
+			else
+			{	
+				if(i==9)
+					nb_off_press++;
+				if(!(i==4 && fastDir))
+				{
+					if(nb_pressed[i]==0)
+					{
+						handle_scancode(keys_code[i], 1);
+						nb_pressed[i]=mx_press;
+					}
+					else
+						nb_pressed[i]--;
+					if(i<4)
+					{
+						fastDir=1;
+						av3xx_move_mouse(i);
+					}
+				}
+				
+			}
 		}
 	}
-	av3xx_button_timer.expires = jiffies + HZ/50; /* 1s timer */
+	
+	if(nb_off_press>MAX_OFF)
+		av_halt_system();
+		//tasklet_schedule(&av_halt);
+	
+	av3xx_button_timer.expires = jiffies + freq_rep; /* 1s timer */
 	add_timer(&av3xx_button_timer);
 	return 0;
 }
@@ -144,21 +180,35 @@ int av3xx_button_set_mouse(struct av3xx_pos * pos)
 	else	
 		return -1;
 }
+
+int av3xx_button_set_mouse_param(struct mouseParam * ptrParam)
+{
+	freq_rep = ptrParam->freq;
+	mx_press = ptrParam->repeated_press;
+}
+
+int av3xx_button_get_mouse_param(struct mouseParam * ptrParam)
+{
+	ptrParam->freq=freq_rep;
+	ptrParam->repeated_press=mx_press;
+}
+
 int av3xx_button_init(void)
 {
 	int i,result;
-	for(i=0;i<NB_BUTTONS;i++)
-		old_state[i]=0;
-		
+	
 	x=AV3XX_MAX_X/2;
 	y=AV3XX_MAX_Y/2;
 	
+	for(i=0;i<NB_BUTTONS;i++)
+		nb_pressed[i]=0;
+		
 	init_timer(&av3xx_button_timer);
 	av3xx_button_timer.function = av3xx_chk_button;
-	av3xx_button_timer.expires = jiffies + HZ/10; /* 1s timer */
+	av3xx_button_timer.expires = jiffies + freq_rep; /* 1s timer */
 	add_timer(&av3xx_button_timer);
 	
-	printk("[Av3xx init] buttons driver\n");
+	printk("[Av3xx init] buttons driver (freq=%d,rep=%d)\n",freq_rep,mx_press);
 
 	return 0;
 }

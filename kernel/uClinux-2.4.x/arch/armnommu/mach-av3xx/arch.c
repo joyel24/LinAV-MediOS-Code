@@ -15,11 +15,14 @@
 #include <linux/delay.h>
 #include <linux/pm.h>
 #include <linux/init.h>
+#include <linux/reboot.h>
 
+#include <asm/io.h>
 #include <asm/elf.h>
 #include <asm/setup.h>
 #include <asm/mach-types.h>
 #include <asm/mach/arch.h>
+
 
 extern void genarch_init_irq(void);
 
@@ -28,3 +31,17 @@ MACHINE_START(AV3XX, "AV3XX - TI TMS320DSC25")
 	BOOT_MEM(0x03000000, 0x03000000, 0x00000000)
 	INITIRQ(genarch_init_irq)
 MACHINE_END
+
+void av_halt_system(void)
+{
+	int ret;
+	printk("let's go to halt\n");
+	ret=sys_reboot(LINUX_REBOOT_MAGIC1,LINUX_REBOOT_MAGIC2,LINUX_REBOOT_CMD_RESTART,NULL);
+	//printk("sys_reboot returned: %d\n",ret);
+	/* wait for the drive to stop*/
+	//for(ret=0;ret<10000;ret++);
+	//while(1);
+	clf();
+	while(1)
+		outw(0,0x30a1a);
+}

@@ -35,6 +35,11 @@ struct av3xx_pos {
 	int y;
 };
 
+struct mouseParam {
+	int freq; // amount of time between each check of buttons state
+	int repeated_press; // repeate rate
+};
+
 /* mp3 player */
 
 struct mp3_play {
@@ -98,12 +103,15 @@ struct av_peak {
 #define AV_DSP_START_MP3       _IOW(AV_OP_IOC_MAGIC,34, int)
 #define AV_DSP_STOP_MP3        _IOW(AV_OP_IOC_MAGIC,35, int)
 #define AV_DSP_FRAME_CNT       _IOR(AV_OP_IOC_MAGIC,36, int)
-#define AV_DSP_IN_PEAK         _IOW(AV_OP_IOC_MAGIC,37, int) /* normalized version range=0->100 */
-#define AV_DSP_OUT_PEAK        _IOW(AV_OP_IOC_MAGIC,38, int) /* normalized version range=0->100 */
-#define AV_DSP_IN_PEAK_REAL    _IOW(AV_OP_IOC_MAGIC,39, int) /* direct read: range=0->0x7FFF    */
-#define AV_DSP_OUT_PEAK_REAL   _IOW(AV_OP_IOC_MAGIC,40, int) /* direct read: range=0->0x7FFF    */
+#define AV_DSP_IN_PEAK         _IOW(AV_OP_IOC_MAGIC,37, struct av_peak) /* normalized version range=0->100 */
+#define AV_DSP_OUT_PEAK        _IOW(AV_OP_IOC_MAGIC,38, struct av_peak) /* normalized version range=0->100 */
+#define AV_DSP_IN_PEAK_REAL    _IOW(AV_OP_IOC_MAGIC,39, struct av_peak) /* direct read: range=0->0x7FFF    */
+#define AV_DSP_OUT_PEAK_REAL   _IOW(AV_OP_IOC_MAGIC,40, struct av_peak) /* direct read: range=0->0x7FFF    */
 
-#define AV_OP_IOC_MAXNR     40
+#define AV_SET_MOUSE_PARAM     _IOW(AV_OP_IOC_MAGIC,41, struct mouseParam)
+#define AV_GET_MOUSE_PARAM     _IOR(AV_OP_IOC_MAGIC,42, struct mouseParam)
+
+#define AV_OP_IOC_MAXNR        42
 
 /* MAJOR / MINOR */
 
@@ -111,14 +119,14 @@ struct av_peak {
 
 #define AV_STATE_NR_MINOR       5
 
-#define AV_STATE_RTC_MINOR      0       /* time /dev/avrtc             */
-#define AV_STATE_POWER_MINOR    1       /* time /dev/avpower           */
-#define AV_STATE_TSC2003_MINOR  2       /* time /dev/avtsc             */
-#define AV_STATE_USB_MINOR      3       /* time /dev/avusb             */
-#define AV_STATE_MOUSE_MINOR    4       /* time /dev/mouse             */
+#define AV_STATE_RTC_MINOR      0       /* time        /dev/avrtc             */
+#define AV_STATE_POWER_MINOR    1       /* power       /dev/avpower           */
+#define AV_STATE_TSC2003_MINOR  2       /* battery     /dev/avtsc             */
+#define AV_STATE_USB_MINOR      3       /* usb         /dev/avusb             */
+#define AV_STATE_MOUSE_MINOR    4       /* mouse       /dev/mouse             */
 
-#define SND_DEV_CTL             0       /* Control port /dev/mixer     */
-#define SND_DEV_DSP             3       /* Digitized voice /dev/dsp    */
-#define SND_DEV_AUDIO           4       /* Sparc compatible /dev/audio */
+#define SND_DEV_CTL             0       /* Control port     /dev/mixer     */
+#define SND_DEV_DSP             3       /* Digitized voice  /dev/dsp       */
+#define SND_DEV_AUDIO           4       /* Sparc compatible /dev/audio     */
 
 #endif

@@ -320,7 +320,7 @@ asmlinkage long sys_reboot(int magic1, int magic2, unsigned int cmd, void * arg)
 	case LINUX_REBOOT_CMD_HALT:
 		notifier_call_chain(&reboot_notifier_list, SYS_HALT, NULL);
 		printk(KERN_EMERG "System halted.\n");
-		machine_halt();
+		//machine_halt();
 		do_exit(0);
 		break;
 

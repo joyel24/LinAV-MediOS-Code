@@ -37,6 +37,11 @@
 #define        BUTTONS_AV300_ON            0x0008
 #define        BUTTONS_AV300_OFF           0x0009
 
+#define        MAX_PRESSED                 4
+#define        AV_FREQ                     HZ/50
+
+#define        MAX_OFF                     20
+
 #define        STEP_SIZE                   1
 
 int av3xx_chk_button(unsigned long ptr);
@@ -45,5 +50,7 @@ int av3xx_button_init(void);
 void av3xx_move_mouse(int but);
 int av3xx_button_get_mouse(struct av3xx_pos * pos);
 int av3xx_button_set_mouse(struct av3xx_pos * pos);
+int av3xx_button_set_mouse_param(struct mouseParam * ptrParam);
+int av3xx_button_get_mouse_param(struct mouseParam * ptrParam);
 
 #endif

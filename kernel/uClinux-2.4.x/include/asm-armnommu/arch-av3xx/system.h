@@ -14,3 +14,5 @@ extern inline void arch_reset(char mode)
 	printk("let's go to reset\n");
 	cpu_reset(FLASH_MEM_BASE);
 }
+
+
