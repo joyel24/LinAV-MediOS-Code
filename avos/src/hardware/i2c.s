@@ -13,7 +13,17 @@
 @ Date:     13/01/2004
 @ Author:   By DoggerMoore
 @
-@
+@ 
+@ i2cWrite(device, addr, buffer, count)
+@ i2cRead(device, addr, buffer, count)
+@ i2cOutb(data)
+@ i2cInb()
+@ i2cGetAck()
+@ i2cStop()
+@ i2cStart()
+@ i2cAck()
+@ i2cAckEnd()
+@ 
         
         i2cBaseAddress  =   0x30580
         
@@ -38,7 +48,7 @@ i2cDE:  sub r0, #1
 @
 @
 .thumb_func
-i2c_fn1:
+i2cAck:
         push {r0, r1, r7, lr}
         ldr r7, =i2cBaseAddress
         
@@ -146,7 +156,7 @@ i2cStop:
 @
 @
 .thumb_func
-i2c_fn3:
+i2cAckEnd:
         push {r0, r1, r7, lr}
         ldr r7, =i2cBaseAddress
         
@@ -202,7 +212,7 @@ i2cVA2:
 @
 @
 .thumb_func
-i2c_fn4:
+i2cStart:
         push {r0, r1, r7, lr}
         ldr r7, =i2cBaseAddress
 
@@ -453,7 +463,7 @@ i2cW2:
 i2cRead:
         push {r1, r2, r3, r4, r5, r6, r7, lr}
         mov r4, r0
-        
+
         ldr r7, =i2cBaseAddress
         ldrh r6, [r7, #i2cRegDR]
         mov r5, #4
@@ -474,7 +484,7 @@ i2cRead:
          bcc i2cRE
       
         mov r5, r1
-        bl i2c_fn4
+        bl i2cStart
         
         lsl r0, #24
         lsr r0, #25
@@ -489,7 +499,7 @@ i2cRead:
         cmp r0, #0
          bne i2cRE
         
-        bl i2c_fn4
+        bl i2cStart
         
         lsl r0, r4, #24
         lsr r0, #24
@@ -506,14 +516,14 @@ i2cRL:  bl i2cInb
         strb r0, [r2]
         add r2, #1
         
-        bl i2c_fn1
+        bl i2cAck
         sub r3, #1
          bne i2cRL
 i2cRN:
         bl i2cInb
         strb r0, [r2]
         
-        bl i2c_fn3
+        bl i2cAckEnd
 
         bl i2cStop
 
@@ -559,8 +569,8 @@ i2cWrite:
          bcc i2cWE
 
         mov r5, r1
-        bl i2c_fn4
-        
+        bl i2cStart
+
         lsl r0, #24
         lsr r0, #25
         lsl r0, #1

@@ -9,6 +9,7 @@
 #include <usb.h>
 #include <rtc.h>
 #include <system.h>
+#include <power.h>
 
 void showBuffer(char *source);
 
@@ -35,7 +36,7 @@ char timeSt[] = "xx:xx:xx.xx";
 char parentName[] = "..         ";
 char ext_bin[] = "BIN";
 
-
+char powerSt[] = "xxxx+";
 
 int main() {
     int c, b, i, totalEntries;
@@ -248,6 +249,18 @@ startInit:
             graphicsString(&screenBitmap2, 4 + 41*6, 2, &sprite5_7, std5x7_, 6, 0,
                         timeSt);
 
+            b = powerGetStatus();
+            stringPutHex(powerSt, b, 4);
+
+            if (powerIsDCConnected()) {
+                powerSt[4] = '+';                
+            } else {
+                powerSt[4] = ' ';
+            }
+            pal16[1] = 0xffff;
+            graphicsString(&screenBitmap2, 4 + 35*6, 2, &sprite5_7, std5x7_, 6, 0,
+                        powerSt);
+                       
             // Update file display window if needed,
             
             if (mode==0 && cursorMoved==1) {
