@@ -305,12 +305,7 @@ lcdInitT:
         push {lr}
         mov r2, #0
 
-        ldr r1, =0xf912
-        ldr r0, =0x30680
-        strh r1, [r0, #8]
-
-        ldr r0, =0x30800
-    
+        ldr r0, =0x30800    
         ldr r1, =0x4071
         strh r1, [r0]
         ldr r1, =0x0f40
@@ -361,44 +356,26 @@ lcdInitT:
         ldr r1, =0x0022
         strh r1, [r0, #0x38]
 
-        
+        @ OSD...
         
         ldr r0, =0x30680
+        
         ldr r1, =0x2000
         strh r1, [r0, #0x00]        @ bit 1 enables border. Does other funny stuff
-    
-        ldr r1, =0x0014
-        strh r1, [r0, #0x0c]
-        ldr r1, =0x0014
-        strh r1, [r0, #0x10]
-
         ldr r1, =0x0079
         strh r1, [r0, #0x20]
         strh r2, [r0, #0x22]
 
-        mov r0, #0x14
-        mov r1, #0x12
-        callThumb r3, osdSetBackPositionT
-        mov r0, #0x14
-        mov r1, #0x12
-        callThumb r3, osdSetMainPositionT
-        ldr r0, =0x0280
-        ldr r1, =0x00f0
-        callThumb r3, osdSetBackSizeT
-        ldr r0, =0x0280
-        ldr r1, =0x00f0
-        callThumb r3, osdSetMainSizeT
-        ldr r0, =lcdVideoBuffer
-        callThumb r1, osdSetMainOffsetT
-        ldr r0, =lcdVideoBuffer2
-        callThumb r1, osdSetBackOffsetT
-
-        ldr r0, =0x30680
-        ldr r1, =0x0003
-        strh r1, [r0, #0x2]         @ 30682 = 03
-
-        ldr r1, =0x00d9
-        strh r1, [r0, #0x4]         @ 30684 = f9    // d5 for transparent cool
+        callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
+        callThumb2 r3, osdSetMainConfigT, 0x14, 0xd9      
+        callThumb2 r3, osdSetBack2ConfigT, 0x14, 0x00
+        callThumb2 r3, osdSetMain2ConfigT, 0x14, 0x00
+        callThumb2 r3, osdSetBackPositionT, 0x14, 0x12
+        callThumb2 r3, osdSetMainPositionT, 0x14, 0x12
+        callThumb2 r3, osdSetBackSizeT, 0x280, 0xf0
+        callThumb2 r3, osdSetMainSizeT, 0x280, 0xf0
+        callThumb1 r1, osdSetMainOffsetT, lcdVideoBuffer
+        callThumb1 r1, osdSetBackOffsetT, lcdVideoBuffer2
     
         ldr r0, =lcdVideoBuffer
         ldr r1, =(lcdWidth*lcdHeight*2)

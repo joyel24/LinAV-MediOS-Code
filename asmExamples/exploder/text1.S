@@ -12,6 +12,7 @@
 @ Author:   By DoggerMoore
 @
 @
+        .include "../includes/common.S"
 
 .text
 
@@ -27,15 +28,24 @@ loop1:
         add lr, pc
         bx r0
    
-        ldr r0, =lcdVideoBuffer2
-        ldr r1, =sprite
-        ldr r2, =(320*240)
-lcop:   ldr r3, [r1]
-        str r3, [r0]
-        add r1, #4
-        add r0, #4
-        sub r2, #1
-        bne lcop     
+        ldr r3, =lcdVideoBuffer2
+        ldr r4, =sprite
+        ldr r5, =(320*240)
+lcop:   mov r0, #0
+        mov r1, #0
+        mov r2, #0
+        ldrb r0, [r4]
+        ldrb r1, [r4, #1]
+        ldrb r2, [r4, #2]
+        add r4, #3
+        callThumb r6, colorRGB2YCbCrT
+        callThumb r6, colorPackYCbCrT
+
+        str r0, [r3]
+        
+        add r3, #4
+        sub r5, #1
+        bne lcop   
         
         
         mov r0, #4
@@ -314,7 +324,7 @@ message1c:  .asciz "++ -00--02--04--06--08--0A--0C--0E- 0123456789ABCDEF"
 message2a:  .ascii "     UP-00000010 DN+00000010 LT-00000002 RT+00000002"
             .ascii "F2+  UP-00100000 DN+00100000 LT-00001000 RT+00001000"
             .asciz "F1+  UP VAL-0001 DN VAL+0001 LT VAL-0100 RT VAL+0100"
-
+            
         .align 4
         
 intaddrs:   .word 0x00000000
@@ -327,6 +337,8 @@ intaddrp:   .word intaddrs
 .include "../includes/hex.S"
 .include "../includes/buttons.S"
 .include "../includes/lcd.S"
+.include "../includes/uart.S"
+.include "../includes/color.S"
 
 sprite:
-.include "sprite.inc"
+.incbin     "image.rgb"

@@ -20,3 +20,23 @@
     add lr, pc
     bx \tempReg
 .endm
+
+.macro callThumb1    tempReg, funName, arg0
+    ldr r0, =\arg0
+    mov \tempReg, #1
+    mov lr, \tempReg
+    ldr \tempReg, =(\funName+1)
+    add lr, pc
+    bx \tempReg
+.endm
+
+.macro callThumb2    tempReg, funName, arg0, arg1
+    ldr r0, =\arg0
+    ldr r1, =\arg1
+    mov \tempReg, #1
+    mov lr, \tempReg
+    ldr \tempReg, =(\funName+1)
+    add lr, pc
+    bx \tempReg
+.endm
+

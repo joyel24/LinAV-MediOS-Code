@@ -11,7 +11,6 @@
         12 - combine with bg?
         13 - ?
         
-        
         11011001 normal, see thru
         11110001
         11110101
@@ -20,10 +19,20 @@
 30682   BACK/BACK2 control reg
 30684   MAIN control reg
 30686   MAIN2 control reg
-30688   CURSOR control reg      (HI = color)  border hight / border width
-3068a   CURSOR2 control reg     flashing, long, etc
+30688   CURSOR control reg      0-enable
+                                1-3 height of border
+                                4-6 width of border
+                                7-ROM/RAM CLUT
+                                8-15 Color value
+3068a   CURSOR2 control reg     0-enable
+                                8-9 Height zoom
+                                10-11 Width zoom
+                                12-13 flash speed
+                                14-flashing enable
+                                15-makes it long and moves it?
+flashing, long, etc
 
-3068c   *Controls back width setting something? (14)
+3068c   *Controls back width setting something? (14)  <<4 = #pixels / line
 3068e   *Controls back2 width setting something?
 30690   *Controls main width setting something?
 30692   *Controls main2 width setting something?

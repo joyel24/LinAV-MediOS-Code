@@ -11,18 +11,22 @@
 @ Date:     15/01/2004
 @ Author:   By DoggerMoore
 @
+@ osdSetMainConfigT (r0=byte width setting, r1=controlReg) 
 @ osdSetMainOffsetT (r0->buffer)
 @ osdSetMainSizeT (r0=width, r1=height)
 @ osdSetMainPositionT (r0=x, r1=y)
 @
+@ osdSetMain2ConfigT (r0=byte width setting, r1=controlReg) 
 @ osdSetMain2OffsetT (r0->buffer)
 @ osdSetMain2SizeT (r0=width, r1=height)
 @ osdSetMain2PositionT (r0=x, r1=y)
 @
+@ osdSetBackConfigT (r0=byte width setting, r1=controlReg) 
 @ osdSetBackOffsetT (r0->buffer)
 @ osdSetBackSizeT (r0=width, r1=height)
 @ osdSetBackPositionT (r0=x, r1=y)
 @
+@ osdSetBack2ConfigT (r0=byte width setting, r1=controlReg) 
 @ osdSetBack2OffsetT (r0->buffer)
 @ osdSetBack2SizeT (r0=width, r1=height)
 @ osdSetBack2PositionT (r0=x, r1=y)
@@ -41,6 +45,57 @@ osdInc = 1
 .text
         .thumb
 
+@ osdSetMainConfigT r0=byte width, r1=config
+@
+osdSetMainConfigT:
+        push {r0, r1, r2}
+        ldr r2, =0x30684
+        strh r1, [r2]
+        strh r0, [r2, #0xc]
+        pop {r0, r1, r2}
+        bx lr
+
+@ osdSetMain2ConfigT r0=byte width, r1=config
+@
+osdSetMain2ConfigT:
+        push {r0, r1, r2}
+        ldr r2, =0x30686
+        strh r1, [r2]
+        strh r0, [r2, #0xc]
+        pop {r0, r1, r2}
+        bx lr
+
+@ osdSetBackConfigT r0=byte width, r1=config
+@
+osdSetBackConfigT:
+        push {r0, r1, r2, r3}
+        ldr r2, =0x30682
+        mov r3, #0
+        ldrh r3, [r2]
+        lsr r3, #8
+        lsl r3, #8
+        orr r1, r3
+        strh r1, [r2]
+        strh r0, [r2, #0xa]
+        pop {r0, r1, r2, r3}
+        bx lr
+
+@ osdSetBack2ConfigT r0=byte width, r1=config
+@
+osdSetBack2ConfigT:
+        push {r0, r1, r2, r3}
+        ldr r2, =0x30682
+        mov r3, #0
+        ldrh r3, [r2]
+        lsl r3, #24
+        lsr r3, #24
+        lsl r1, #8
+        orr r1, r3
+        strh r1, [r2]
+        strh r0, [r2, #0xc]
+        pop {r0, r1, r2, r3}
+        bx lr
+        
 @ osdSetMainOffsetT r0=offset
 @
 osdSetMainOffsetT:
