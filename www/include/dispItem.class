@@ -1,0 +1,51 @@
+<?
+	class dispItem {
+
+		var $opened,$affNews;
+
+		function dispItem($titre)
+		{
+			$this->affNews= new affBlock($titre);
+			$this->opened=true;
+			echo "<table border='0'>\n";
+		}
+
+		function addItem($txt1,$txt2=-1)
+		{
+			if($this->opened)
+			{
+				echo "<tr>\n";
+				echo "<td>\n";
+				if($txt1=='')
+					echo "<table border='0' width=100%><tr><td>";
+				else
+					echo "<table border='0' width=100%><tr><td>";
+				echo "<table border=0>\n";
+				echo "<tr>\n";
+				if($txt1=='')
+					echo "<td width=0>\n$txt1\n</td>\n";
+				else
+					echo "<td width=200>\n$txt1\n</td>\n";
+				if($txt2!=-1)				
+				{
+					echo "<td width='4'></td>\n";
+					echo "<td>\n$txt2\n</td>\n";
+				}
+				echo "</tr>\n";
+				echo "</table>\n";
+				
+				echo "</td></tr></table\n";
+				echo "</td></tr>\n";
+			}
+		}
+
+		function endDisp()
+		{
+			if($this->opened)
+			{
+				echo "</table>\n";
+				$this->affNews->fin();
+			}
+		}
+	}
+?>

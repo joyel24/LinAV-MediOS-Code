@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.0  (Linux)">
+	<META NAME="CREATED" CONTENT="20040505;18473000">
+	<META NAME="CHANGED" CONTENT="20040506;19504400">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P><BR><BR>
+</P>
+<P ALIGN=CENTER><FONT SIZE=4 STYLE="font-size: 16pt">HOW-TO build
+GARME (The AV3xx emulator) ?</FONT></P>
+<P>Answer: Try to follow the hereunder guide!</P>
+<P><BR><BR>
+</P>
+<P>These guide has been made for Linux users, but it should be usable
+in Cygwin with slight modification.</P>
+<P><BR><BR>
+</P>
+<DIV ID="Section1" DIR="LTR">
+	<OL>
+		<LI><P>Prerequisite: You need:</P>
+	</OL>
+	<UL>
+		<LI><P><FONT COLOR="#800000"><FONT FACE="Courier 10 Pitch">a jvm
+		(included in the jre or jdk)</FONT></FONT></P>
+		<LI><P><FONT COLOR="#800000"><FONT FACE="Courier 10 Pitch">ant</FONT></FONT></P>
+	</UL>
+	<OL START=2>
+		<LI><P STYLE="margin-bottom: 0in">We get the sources from CVS.</P>
+		<P><TT><FONT COLOR="#800000">cd ~/linav<BR>cvs
+		-d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/garme login<BR>cvs
+		-z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/garme co
+		garme</FONT></TT></P>
+		<P STYLE="margin-bottom: 0in">After the first line, you will be
+		prompted for a password. Simply press Return.</P>
+		<P STYLE="margin-bottom: 0in"></P>
+		<LI><P STYLE="margin-bottom: 0in">Let's compile !</P>
+		<P><FONT COLOR="#800000"><FONT FACE="Courier 10 Pitch">cd garme<BR>ant</FONT></FONT></P>
+		<LI><P STYLE="margin-bottom: 0in">We can test the emulator. Get
+		this <A HREF="hello.bin">file</A> and put it in your garme
+		directory.</P>
+		<P STYLE="margin-bottom: 0in"><BR><FONT FACE="Courier 10 Pitch"><FONT COLOR="#800000">./run
+		hello.bin</FONT></FONT></P>
+		<P STYLE="margin-bottom: 0in"></P>
+		<LI><P STYLE="margin-bottom: 0in">On the debug console, you should
+		see &ldquo;Hello world&rdquo; . Fine it's working well !</P>
+		<P STYLE="margin-bottom: 0in"></P>
+	</OL>
+	<P><BR><BR>
+	</P>
+</DIV>
+</BODY>
+</HTML>

@@ -1,0 +1,42 @@
+<STYLE TYPE="text/css">
+<!--
+BODY,TABLE,TH,TR,TD,UL,LI,DL,DT,DD,A {font-family: Arial, Helvetica, sans-serif; font-size: 12px; color:black;}
+P  {font-size: 12px; font-family: Arial; color:black;}
+H5 {font-size: 12px; font-family: Arial; color:white;}
+H4 {font-size: 14px; font-family: Arial; color:black;}
+H3 {font-size: 14px; font-family: Arial; color:orange;}
+H2 {font-size: 16px; font-family: Arial; color:blue;}
+H1 {font-size: 20px; font-family: Arial; color:blue;}
+
+A:link {color:blue;text-decoration: none}
+A:visited {color:blue;text-decoration: none}
+A:active {color:blue;text-decoration: none}
+A:hover {color:red;text-decoration: underline}
+
+div.blockTitle {
+	padding:6px 2px 2px;
+	color:  #FFFFFF;
+	font-weight: bold;
+	font-size: 12px;
+	background-image: url(/images/affBlock/title.gif);
+	background-repeat: repeat-x;
+	border-top: 1px solid #4C77B6;
+	border-right: 1px solid #4C77B6;
+	border-left: 1px solid #4C77B6;
+	background-color: #6899DB;
+}
+
+div.blockContent {
+	padding: 4px;
+	line-height: 120%;
+	border: 1px solid #4C77B6;
+	background: #FAFCFE;
+}
+
+div#menu a { padding: 2px 2px 2px  ; 	color:#3A4F6C;}
+div#menu a:hover { color : #3366CC;}
+div#menu a.menuAff {padding: 2px 2px 0px 10px;}
+
+
+//-->
+</STYLE>
