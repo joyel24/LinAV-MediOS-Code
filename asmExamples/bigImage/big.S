@@ -23,6 +23,12 @@
 
         callThumb r1, lcdInitT                   @ Initialise the LCD
 
+        mov r0, #4
+        mov r1, #12
+        ldr r2, =msgHello
+        ldr r3, =0x0404
+        callThumb r5, lcdPutsT
+        
 @ ---------------------------------------------- @ Copy background image
         ldr r3, =lcdVideoBuffer2
         ldr r4, =sprite
@@ -41,11 +47,14 @@ lcop:   mov r0, #0
         sub r5, #1
         bne lcop   
 
-        callThumb2 r3, osdSetMainConfigT, 0x14, 0x02
-        callThumb2 r3, osdSetBackConfigT, 0x28, 0x03
+        callThumb2 r3, osdSetMainConfigT, 0x14, 0xc1    @ 1100 
+        callThumb2 r3, osdSetBackConfigT, 0x28, 0x03    @ 0000 0011
         callThumb2 r4, osdSetBackSizeT, 640, 240
+        
+        bl fadeIn
+        
+iloop:
 
-iloop:  
         callThumb r1, buttonsGetStatusT
         
         ldr r2, =posy
@@ -82,6 +91,16 @@ nLT:    mov r1, #0x10
         add r3, #1
 nRT:    str r3, [r2]
         
+        ldr r1, =0x100
+        tst r0, r1
+         bne nM1
+        bl fadeIn     
+nM1:    ldr r1, =0x200
+        tst r0, r1
+         bne nM2
+        bl fadeOut
+nM2:
+
         ldr r0, posy
         ldr r1, =640
         mul r0, r1
@@ -96,17 +115,60 @@ nRT:    str r3, [r2]
         ldr r0, =0x400
 wait1:  sub r0, #1
         bne wait1
-        
-        
+
         b iloop
+@ ------------------------------------------------------------------------------
+        
+fadeIn: push {r0, lr}        
+        mov r6, #8               
+        mov r5, #0xf9                                   @ starts at f9
+fdloop:
+        mov r1, r5
+        callThumb1 r3, osdSetMainConfigT, 0x14 
+
+        ldr r0, =0x10000
+fwait:  sub r0, #1
+        cmp r0, #0
+         bne fwait
+        sub r5, #8
+         
+        sub r6, #1
+        cmp r6, #0
+         bne fdloop
+        pop {r0, pc}
+
+        
+fadeOut:push {r0, lr}        
+        mov r6, #8               
+        mov r5, #0xc1                                   @ starts at c1
+fdloop2:
+        mov r1, r5
+        callThumb1 r3, osdSetMainConfigT, 0x14 
+
+        ldr r0, =0x10000
+fwait2: sub r0, #1
+        cmp r0, #0
+         bne fwait2
+        add r5, #8
+         
+        sub r6, #1
+        cmp r6, #0
+         bne fdloop2
+        pop {r0, pc}
+        
 @ ------------------------------------------------------------------------------
         .align 4        
 
-        .ltorg      
+        .ltorg
 
+trVal:      .word 0
+        
 posx:       .word 0
 posy:       .word 0
 
+msgHello:   .ascii "bigImage (c)2004 DoGgEr. Loading... Get ready for   "
+            .asciz "the fade! Just demonstrates a bit more of the OSD..."
+        .align 4
 .include "../includes/lcd.S"
 .include "../includes/buttons.S"
 .include "../includes/color.S"

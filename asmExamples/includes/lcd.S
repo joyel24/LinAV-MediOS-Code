@@ -31,8 +31,8 @@ lcdInc = 1
         .thumb
 
 lcdVideoBuffer  = ramStart + 0xfc0000
-lcdVideoBuffer2 = ramStart + 0xc00000
-lcdVideoBuffer3 = ramStart + 0xa00000
+lcdVideoBuffer2 = ramStart + 0xa00000
+lcdVideoBuffer3 = ramStart + 0x800000
 
 @ lcdRectfST
 @

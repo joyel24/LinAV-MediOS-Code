@@ -33,6 +33,10 @@ Reg     Info
         control regs
         0 - enable
         1 - Makes it half height?
+        2 - 1=color0 is transparent, 0=merge with background
+        3-5 - Level of transparency
+        
+        6-7
         8-9 - Pixel height
         10-11 - Pixel width
         12 - ROM/RAM CLUT
