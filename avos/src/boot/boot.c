@@ -14,6 +14,8 @@
 #include <uart.h>
 #include <debug.h>
 #include <mathASM.h>
+#include <power.h>
+#include <gio.h>
 
 #include "bgimage.h"
 
@@ -23,13 +25,12 @@ int exeFile(char * fileN, char * arg);
 
 static int pal32[2] = {0x6c706c93, 0xffffffff};
 static int pal16[2] = {0x0000, 0xffff};
-static int pal16b[5] = {0x1717, 0x3131, 0x0000, 0x1414, 0xcece};
 
 static struct graphicsBuffer screenBitmap2;
-static struct graphicsBuffer sprite5_7 = {0, 1, 5, 7, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 static struct graphicsBuffer sprite6_9 = {0, 1, 6, 9, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 static struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 
+// TODO: Should have Y1 in top byte as well. (Can duplicate Y0)
 static unsigned int scrollbar[15][11] = {
  {0x800380,0x800980,0x800080,0x800a80,0x800380,0x800c80,0x800580,0x800080,0x800080,0x800a80,0x800080},
  {0x80dc80,0x80e380,0x80d980,0x7fe080,0x7fd580,0x80de80,0x80de80,0x80e380,0x80e080,0x80e580,0x80c280},
@@ -71,10 +72,10 @@ static struct dispDir dirBufferHDD[1000];
 
 static char nameCurHDD[MAX_PATH] = "/";
 
-static unsigned int * screenDirect = 0x03a00000;
+static unsigned int * screenDirect = (unsigned int*) 0x03a00000;
 
 int main() {
-    unsigned int a, a1, a2;
+    unsigned int a, a1;
     int c, b, i, totalEntries;
     int cursorposHDD=0;
     int dirposHDD=0;
