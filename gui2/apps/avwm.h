@@ -34,9 +34,10 @@ struct client_operations {
 	//void (*drawBITMAP)        (BITMAP * bitmap, int x, int y);
 	void (*scrollWindowVert)  (int bgColor, int x, int y, int width, int height, int scroll, int UP);
 	void (*scrollWindowHoriz) (int bgColor, int x, int y, int width, int height, int scroll, int RIGHT);
+	void (*drawImage)         (char * filename);
 	int  (*clearEventQueue)   (void);
-	int  (*nxtEvent)         (void);
-	void (*processEvent)     (int evt);
+	int  (*nxtEvent)          (void);
+	void (*processEvent)      (int evt);
 	void (*addEventHandler)   (void (*evtHandle));
 	void (*pack)              (void);
 };

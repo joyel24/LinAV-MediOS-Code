@@ -20,6 +20,7 @@
 #include "events.h"
 #include "graphics_8.h"
 #include <gui_pal.h>
+#include "jpeglib.h"
 
 #define STRING_MAXSIZE 200
 
@@ -30,13 +31,15 @@
 
 char screen1[320*240+40];
 char screen2[320*240+40];
+char screen3[320*240*4+40];
 struct graphicsBuffer BITMAP_1;
 struct graphicsBuffer BITMAP_2;
+struct graphicsBuffer VIDEO_1;
 
 GC_ID   default_gc=NULL;
 FONT_ID default_font=GC_FONT;
 
-GC_ID   gc_bmap1,gc_bmap2;
+GC_ID   gc_bmap1,gc_bmap2,gc_vid1;
 
 int ini_graphics()
 {
@@ -57,7 +60,9 @@ int ini_graphics()
 	BITMAP_1.x                 = 0x14;
 	BITMAP_1.y                 = 0x12;
 	BITMAP_1.bitsPerPixel      = 8;
-	BITMAP_1.bitsPerPixelShift = 3;
+	BITMAP_1.SWidth            = 0xa;
+	BITMAP_1.enable            = AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
+                                     AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE;
 	
 	diff=BITMAP_1.offset % 32;
 	if(diff)
@@ -77,6 +82,9 @@ int ini_graphics()
 	BITMAP_2.y                 = 0x12;
 	BITMAP_2.bitsPerPixel      = 8;
 	BITMAP_2.bitsPerPixelShift = 3;
+	BITMAP_2.SWidth            = 0xa;
+	BITMAP_2.enable            = AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
+                                     AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE;
 	
 	diff=BITMAP_2.offset % 32;
 	if(diff)
@@ -86,10 +94,31 @@ int ini_graphics()
 	
 	gc_bmap2=createGC(BMAP2);
 	
+	VIDEO_1.offset            = (int)&screen3;
+	VIDEO_1.component         = AV3XX_OSD_VIDEO1;
+	VIDEO_1.bytesPerLine      = 320*2;
+	VIDEO_1.width             = 320;
+	VIDEO_1.height            = 240;
+	VIDEO_1.x                 = 0x14;
+	VIDEO_1.y                 = 0x12;
+	VIDEO_1.bitsPerPixel      = 32;
+	VIDEO_1.bitsPerPixelShift = 5;
+	VIDEO_1.SWidth            = 0x28;
+	VIDEO_1.enable            = AV3XX_OSD_COMPONENT_ENABLE;
+	
+	diff=VIDEO_1.offset % 32;
+	if(diff)
+		VIDEO_1.offset+=(32-diff);	
+	
+	iniComponent(&VIDEO_1);
+	
+	gc_vid1=createGC(VID1);
+	
 	if(iniEvent()<0)
 		return -1;
 
 	hidePlane(BMAP2);
+	hidePlane(VID1);
 	
 	setPalette(gui_pal,256);
 	
@@ -141,6 +170,10 @@ GC_ID createGC(int vplane)
 			gc->gops=&g8ops;
 			gc->buffer=&BITMAP_2;
 			break;
+		case VID1:
+			gc->gops=NULL;
+			gc->buffer=&VIDEO_1;
+			break;
 		default:
 			printf("wrong plane\n");
 			return NULL;
@@ -164,6 +197,9 @@ void setPlane(int vplane)
 		case BMAP2:
 			default_gc=gc_bmap2;
 			break;
+		case VID1:
+			default_gc=gc_vid1;
+			break;
 		default:
 			printf("wrong plane\n");
 	}	
@@ -178,6 +214,9 @@ void hidePlane(int vplane)
 		case BMAP2:
 			osdSetComponentConfig(AV3XX_OSD_BITMAP2, 0);
 			break;
+		case VID1:
+			osdSetComponentConfig(AV3XX_OSD_VIDEO1, 0);
+			break;
 		default:
 			printf("wrong plane\n");
 	}			
@@ -187,12 +226,13 @@ void showPlane(int vplane)
 {
 	switch(vplane) {
 		case BMAP1:
-			osdSetComponentConfig(AV3XX_OSD_BITMAP1,  AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
-                                 AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE);
+			osdSetComponentConfig(AV3XX_OSD_BITMAP1,BITMAP_1.enable);
 			break;
 		case BMAP2:
-			osdSetComponentConfig(AV3XX_OSD_BITMAP2,  AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
-                                 AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE);
+			osdSetComponentConfig(AV3XX_OSD_BITMAP2,BITMAP_2.enable);
+			break;
+		case VID1:
+			osdSetComponentConfig(AV3XX_OSD_VIDEO1,VIDEO_1.enable);
 			break;
 		default:
 			printf("wrong plane\n");
@@ -204,9 +244,8 @@ void iniComponent(struct graphicsBuffer * buff)
 	osdSetComponentSize(buff->component, buff->bytesPerLine, buff->height);
 	osdSetComponentPosition(buff->component,buff->x, buff->y);
 	osdSetComponentOffset(buff->component, buff->offset);
-	osdSetComponentSourceWidth(buff->component, 0xa);
-	osdSetComponentConfig(buff->component, AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
-                                 AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE);
+	osdSetComponentSourceWidth(buff->component, buff->SWidth);
+	osdSetComponentConfig(buff->component, buff->enable);
 }
 
 /* drawing functions */
@@ -382,6 +421,83 @@ void scrollWindowHoriz(int bgColor, int x, int y, int width, int height, int scr
 		
 	}*/
 	default_gc->gops->scrollWindowHoriz(bgColor,x,y,width,height,scroll,RIGHT,default_gc->buffer);
+}
+
+/* images */
+
+void drawImage(char * filename)
+{
+	struct jpeg_decompress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+	FILE * img_file;
+	char * offset;
+	struct graphicsBuffer * buff=&VIDEO_1;
+	JSAMPROW rowptr[1];
+	int scale[]={2,4,8};
+	int i,j,x,y;
+	unsigned int * screenDirect;
+	
+	/* Initialize the JPEG decompression object with default error handling. */
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_decompress(&cinfo);
+	
+	if ((img_file = fopen(filename, "rb")) == NULL)
+	{
+		fprintf(stderr, "drawImage: can't open %s\n", filename);
+		exit(EXIT_FAILURE);
+	}
+	
+	jpeg_stdio_src(&cinfo, img_file);
+	
+	jpeg_read_header(&cinfo,TRUE);
+	
+	cinfo.out_color_space=JCS_CUST;
+	
+	if(cinfo.image_width > 320 || cinfo.image_height > 240)
+	{
+		for(i=0;i<3;i++)
+			if((cinfo.image_width/scale[i])<320 && (cinfo.image_height/scale[i])<240)
+				break;
+		if(i==3)
+		{
+			fprintf(stderr, "drawImage: image too big %s\n", filename);
+			exit(EXIT_FAILURE);
+		}
+		else
+			cinfo.scale_denom=scale[i];
+	}
+	
+	
+	jpeg_start_decompress(&cinfo);
+	
+	
+	
+	//cinfo.out_color_components=4;
+	
+	hidePlane(BMAP1);
+	hidePlane(BMAP2);
+	showPlane(VID1);
+	
+	screenDirect=(unsigned int *)buff->offset;
+	for (j=0;j<240;j++)
+        	for (i=0;i<320;i++)            
+            		screenDirect[j*320 + i] = 0x00800080;
+	
+	x=(320-cinfo.output_width)/2;
+	y=(240-cinfo.output_height)/2;
+	offset=buff->offset+x*4+y*buff->width*4;
+	
+	while(cinfo.output_scanline < cinfo.output_height)
+	{
+		rowptr[0] = (JSAMPROW)offset;
+		if(jpeg_read_scanlines(&cinfo, rowptr,1))
+			offset+=buff->width*4;
+	}
+	
+	
+	
+	jpeg_destroy_decompress(&cinfo);
+	
 }
 
 /* font */

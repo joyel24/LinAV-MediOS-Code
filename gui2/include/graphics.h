@@ -26,6 +26,7 @@
 // vplane constant
 #define BMAP1   1
 #define BMAP2   2
+#define VID1    3
 
 // general constants
 #define USE_GC    -1
@@ -77,6 +78,8 @@ struct graphicsBuffer {
     int           y;
     int           bitsPerPixel;           // eg 32 = YCbCr color
     int           bitsPerPixelShift;      // eg  5 = YCbCr color
+    int           SWidth;
+    int           enable;
 };
 
 struct graphics_operations {
@@ -129,6 +132,9 @@ void drawSprite       (PALETTE * palette, SPRITE * sprite, int x, int y);
 void drawBITMAP       (BITMAP * bitmap, int x, int y);
 void scrollWindowVert (int bgColor, int x, int y, int width, int height, int scroll, int UP);
 void scrollWindowHoriz(int bgColor, int x, int y, int width, int height, int scroll, int RIGHT);
+
+/* images */
+void drawImage        (char * filename);
 
 /* Font */
 #define needFont(name)	 FONT_ID name;

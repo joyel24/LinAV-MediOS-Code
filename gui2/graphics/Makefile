@@ -4,8 +4,8 @@ GCC=$(TOOL)-gcc
 AR=$(TOOL)-ar
 RANLIB=$(TOOL)-ranlib
 
-GCCFLAGS=-I../include
-LDFLAGS=-elf2flt 
+GCCFLAGS=-I../include -I../jpeg-6b
+LDFLAGS=-elf2flt
 
 DEST=../lib
 

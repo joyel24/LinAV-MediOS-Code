@@ -5,7 +5,7 @@ AR=$(TOOL)-ar
 RANLIB=$(TOOL)-ranlib
 
 GCCFLAGS=-I../include
-LDFLAGS=-elf2flt -L../lib -lGraphics
+LDFLAGS=-elf2flt -L../lib -lGraphics -ljpeg
 
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)

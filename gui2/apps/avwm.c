@@ -30,7 +30,8 @@ struct client_operations cops={
 	nxtEvent           : nxtEvent,
 	processEvent       : wmNxtEvent,
 	addEventHandler    : addEventHandler,
-	pack               : pack
+	pack               : pack,
+	drawImage          : drawImage
 };
 
 void (*currentHandler)(int evt)=NULL;
