@@ -298,7 +298,7 @@ int doLs(char * name)
 
 #define MAXPOS       22
 
-#define WHITE        0
+#define WHITE        16
 #define BLACK        1
 #define GRAY         21
 #define BLUE         32
@@ -350,8 +350,12 @@ void printAllName(int pos,int nselect)
 
     for (i = pos; i < listused && i < pos+MAXPOS; i++)
     {
+        cops->fillRect(WHITE,5, 2+(i-pos)*(h+1)+ h+6+MENU_SHADOW , 305,(h+1));
         printName(&list[i],5, 2 + (i-pos)*(h+1)+ h+6+MENU_SHADOW,0,(i-pos)==nselect);
     }
+    
+    for(;i<pos+MAXPOS;i++)
+        cops->fillRect(WHITE,5, (i-pos)*(h+1)+ h+6+MENU_SHADOW , 305,(h+1));
 }
 
 void printAName(int pos, int nselect, int clear, int selected)
@@ -540,9 +544,18 @@ int eventHandler(int evt)
             {
                 nselect=0;
                 pos--;                
-                if(pos<0) // we are at the beg => can't go up anymore
+                if(pos<0) // we are at the beg => do wrapping
                 {
-                    pos=0;
+                    pos=listused-MAXPOS-1;
+                    if(pos<0)
+                    {
+                        pos=0;
+                        nselect=listused-pos-1;
+                    }
+                    else
+                        nselect=listused-pos-2;
+                    printAllName(pos,nselect);
+                    //pos=0;
                 }
                 else // not going up, scrolling
                 {
@@ -566,28 +579,37 @@ int eventHandler(int evt)
                     showArrow(UP_ARROW);
             nselect++;
             if(nselect+pos>=listused)
-                nselect--;
-            if(nselect>=MAXPOS)
             {
-                nselect=MAXPOS-1;
-                pos++;
-                if(pos>=(listused-MAXPOS)) // we are at the end => can't go down anymore
-                {
-                    pos=listused-MAXPOS-1;
-                }
-                else // not going down, scrolling
-                {
-                    cops->scrollWindowVert(WHITE, 5, 1  + h+6+MENU_SHADOW, 305, (h+1)*MAXPOS, h+1,1);
-                    printAName(pos+nselect-1,nselect-1,1,0);
-                    printAName(pos+nselect,nselect,1,1);
-                }
+                pos=0;
+                nselect=0;
+                printAllName(pos,nselect);
             }
             else
             {
-                printAName(pos+nselect-1,nselect-1,0,0);
-                printAName(pos+nselect,nselect,0,1);
+                if(nselect>=MAXPOS)
+                {
+                    nselect=MAXPOS-1;
+                    pos++;
+                    if(pos>=(listused-MAXPOS)) // we are at the end => do wrapping
+                    {
+                        //pos=listused-MAXPOS-1;
+                        pos=0;
+                        nselect=0;
+                        printAllName(pos,nselect);
+                    }
+                    else // not going down, scrolling
+                    {
+                        cops->scrollWindowVert(WHITE, 5, 1  + h+6+MENU_SHADOW, 305, (h+1)*MAXPOS, h+1,1);
+                        printAName(pos+nselect-1,nselect-1,1,0);
+                        printAName(pos+nselect,nselect,1,1);
+                    }
+                }
+                else
+                {
+                    printAName(pos+nselect-1,nselect-1,0,0);
+                    printAName(pos+nselect,nselect,0,1);
+                }
             }
-            
             if(pos==(listused-MAXPOS-1) && nselect==(MAXPOS-1))
                 hideArrow(DOWN_ARROW);
             break;
@@ -608,7 +630,7 @@ int eventHandler(int evt)
                     showArrow(DOWN_ARROW);
                 pos=0;
                 nselect=0;
-                cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,(h+1)*MAXPOS);
+                //cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,(h+1)*MAXPOS);
                 printAllName(pos,nselect);
                 //cops->clearEventQueue();
             }
@@ -624,7 +646,7 @@ int eventHandler(int evt)
             }
             pos=0;
             nselect=0;
-            cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,(h+1)*MAXPOS);
+            //cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,(h+1)*MAXPOS);
             hideArrow(DOWN_ARROW);
             hideArrow(UP_ARROW);
             if(listused>MAXPOS)
@@ -637,7 +659,7 @@ int eventHandler(int evt)
             RELEASE(cops)
             break;
         case EVT_REDRAW:
-            cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,225);
+            //cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,225);
             printAllName(pos,nselect);
             break;
     }
@@ -667,7 +689,7 @@ int main(int argc,char * * argv)
         }
         
         cops->getStringS("M", &w, &h);
-        cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,240-h-6-MENU_SHADOW);
+        //cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,240-h-6-MENU_SHADOW);
         printAllName(pos,nselect);
         
         if(listused>MAXPOS)

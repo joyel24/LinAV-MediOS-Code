@@ -239,6 +239,7 @@ int main(int argc,char ** argv)
 {
     REGISTER(cops,eventHandler,0);
     cops->hideSBar();  
+    cops->disableMenu();
     iniBoard();
     eventHandler(EVT_REDRAW);
     PACK(cops,NULL);

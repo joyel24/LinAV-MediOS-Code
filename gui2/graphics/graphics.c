@@ -531,7 +531,14 @@ void drawImage(char * filename)
         else
             cinfo.scale_denom=scale[i];
     }
-    
+ 
+    /* changes proposed by tgb */       
+    cinfo.two_pass_quantize = FALSE;
+    cinfo.dither_mode = JDITHER_NONE;
+    cinfo.desired_number_of_colors = 256;
+    cinfo.dct_method = JDCT_FASTEST;
+    cinfo.do_fancy_upsampling = FALSE;
+    /**********************************/
     
     jpeg_start_decompress(&cinfo);
     
