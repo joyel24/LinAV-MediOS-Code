@@ -36,21 +36,30 @@
 #define        BUTTONS_AV300_JOYPRESS      0x0007
 #define        BUTTONS_AV300_ON            0x0008
 #define        BUTTONS_AV300_OFF           0x0009
+#define        EVT_AV300_TIMER             0x000a
 
-#define        MAX_PRESSED                 4
+#define        MAX_PRESSED                 3
 #define        AV_FREQ                     HZ/50
 
 #define        MAX_OFF                     20
 
 #define        STEP_SIZE                   1
 
-int av3xx_chk_button(unsigned long ptr);
-int av3xx_button_state();
-int av3xx_button_init(void);
+int  av3xx_chk_button(unsigned long ptr);
+int  av3xx_button_state();
+int  av3xx_button_init(void);
 void av3xx_move_mouse(int but);
-int av3xx_button_get_mouse(struct av3xx_pos * pos);
-int av3xx_button_set_mouse(struct av3xx_pos * pos);
-int av3xx_button_set_mouse_param(struct mouseParam * ptrParam);
-int av3xx_button_get_mouse_param(struct mouseParam * ptrParam);
+int  av3xx_button_get_mouse(struct av3xx_pos * pos);
+int  av3xx_button_set_mouse(struct av3xx_pos * pos);
+int  av3xx_button_set_mouse_param(struct mouseParam * ptrParam);
+int  av3xx_button_get_mouse_param(struct mouseParam * ptrParam);
+void av3xx_add_event(int evt);
+int  av3xx_get_event(void);
+void av3xx_clear_buffer(void);
+int  av3xx_wait_event(void);
+void av3xx_start_timer(void);
+void av3xx_stop_timer(void);
+int  av3xx_timer_state(void);
+void av3xx_set_timer_freq(int val);
 
 #endif

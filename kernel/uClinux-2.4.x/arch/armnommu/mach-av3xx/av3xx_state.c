@@ -374,7 +374,7 @@ int av_mouse_ioctl(struct inode *inode, struct file *filp,
 {
 	struct mouseParam * ptrParam=(struct mouseParam *)arg;
 	struct av3xx_pos * ptrPos=(struct av3xx_pos *)arg;
-	printk("in av_mouse_ioctl\n");
+	int * ptr=(int *)arg;
 	if (_IOC_TYPE(cmd) != AV_OP_IOC_MAGIC) return -ENOTTY;	 
 	
 	switch(cmd) {
@@ -386,6 +386,27 @@ int av_mouse_ioctl(struct inode *inode, struct file *filp,
 			return av3xx_button_set_mouse_param(ptrParam);
 		case AV_GET_MOUSE_PARAM:
 			return av3xx_button_get_mouse_param(ptrParam);
+		case AV_GET_EVENT:
+			*ptr=av3xx_get_event();
+			break;
+		case AV_CLEAR_EVENTS:
+			av3xx_clear_buffer();
+			break;
+		case AV_WAIT_EVENT:
+			*ptr=av3xx_wait_event();
+			break;
+		case AV_SET_TIMER_FREQ:
+			av3xx_set_timer_freq(*ptr);
+			break;
+		case AV_START_TIMER:
+			av3xx_start_timer();
+			break;
+		case AV_STOP_TIMER:
+			av3xx_stop_timer();
+			break;
+		case AV_TIMER_STATE :
+			*ptr=av3xx_timer_state();
+			break;
 		default:
 			return -ENOTTY;
 	}

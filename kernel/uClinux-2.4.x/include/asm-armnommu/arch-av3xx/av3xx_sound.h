@@ -22,8 +22,12 @@ int av3xx_dsp_write(struct file *filp, const char *buf, size_t count, loff_t *pp
 int av3xx_dsp_read(struct file *filp, const char *buf, size_t count, loff_t *ppos);
 int av3xx_dsp_ioctl(struct inode *inode, struct file *filp,unsigned int cmd, unsigned long arg);
 
-/* sound functions */
-int ini_mp3_dec(void);
+/* mp3 functions */
+void mp3_read_more(void);
+int start_mp3_playback(void);
+int stop_mp3_playback(void);
+int ini_mp3_playback(struct mp3_play * arg);
+int ini_mas_for_mp3(void);
 
 /********************* MIXER                  ***************************/
 int av3xx_mix_open(struct inode *inode, struct file *filp);

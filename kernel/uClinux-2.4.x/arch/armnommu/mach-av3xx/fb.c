@@ -514,6 +514,8 @@ static int av3xx_fp_open(const struct fb_info *info, int user)
 #define FBIOGET_BACKLIGHT	_IOR('F', 0x24, int)
 #define FBIOPUT_BACKLIGHT	_IOW('F', 0x25, int)
 
+#define FBIO_INIT               _IO ('F', 0x26)
+
 /*oxygen77 to be checked */
 #define AV3XX_MIN_CONTRAST 0
 #define AV3XX_MAX_CONTRAST 0x7f
@@ -547,6 +549,10 @@ static int av3xx_fb_ioctl(struct inode *inode, struct file *file, u_int cmd,
 	case FBIOPUT_BACKLIGHT:
 		val = (int)arg;
 		set_backlight(val);
+		break;
+		
+	case FBIO_INIT:
+		init_lcd();
 		break;
 
 	default:

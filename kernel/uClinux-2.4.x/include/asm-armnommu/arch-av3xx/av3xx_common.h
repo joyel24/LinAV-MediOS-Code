@@ -18,14 +18,14 @@
 
 /* rtc */
 struct tm {
-    unsigned char tm_ms;
-    unsigned char tm_sec;
-    unsigned char tm_min;
-    unsigned char tm_hour;
-    unsigned char tm_wday;
-    unsigned char tm_mday;
-    unsigned char tm_mon;
-    unsigned char tm_year;
+    int tm_ms;
+    int tm_sec;
+    int tm_min;
+    int tm_hour;
+    int tm_wday;
+    int tm_mday;
+    int tm_mon;
+    int tm_year;
 };
 
 /* buttons, joystick */
@@ -43,13 +43,15 @@ struct mouseParam {
 /* mp3 player */
 
 struct mp3_play {
-	char * nxt;
+/*	char * nxt;
 	char * cur;
 	char * tmp;
 	int needData;
-	int decRunning;
+	int decRunning;*/
 	int size;
 	int finished;
+	char * filename;
+	int pos;
 };
 
 struct av_peak {
@@ -111,7 +113,17 @@ struct av_peak {
 #define AV_SET_MOUSE_PARAM     _IOW(AV_OP_IOC_MAGIC,41, struct mouseParam)
 #define AV_GET_MOUSE_PARAM     _IOR(AV_OP_IOC_MAGIC,42, struct mouseParam)
 
-#define AV_OP_IOC_MAXNR        42
+#define AV_DSP_PAUSE_MP3       _IOW(AV_OP_IOC_MAGIC,43, int)
+
+#define AV_GET_EVENT           _IOR(AV_OP_IOC_MAGIC,44, int)
+#define AV_CLEAR_EVENTS        _IO(AV_OP_IOC_MAGIC,45)
+#define AV_WAIT_EVENT          _IOR(AV_OP_IOC_MAGIC,46,int)
+#define AV_SET_TIMER_FREQ      _IOW(AV_OP_IOC_MAGIC,47,int)
+#define AV_START_TIMER         _IO(AV_OP_IOC_MAGIC,48)
+#define AV_STOP_TIMER          _IO(AV_OP_IOC_MAGIC,49)
+#define AV_TIMER_STATE         _IOW(AV_OP_IOC_MAGIC,50,int) /* -1 => timer stop, >=0 => elapsed time */
+
+#define AV_OP_IOC_MAXNR        50
 
 /* MAJOR / MINOR */
 

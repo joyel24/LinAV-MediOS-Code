@@ -17,10 +17,25 @@
 #define AV3XX_MAX_X      320
 #define AV3XX_MAX_Y      240
 
+#define BUFFER_SIZE      50
+
+DECLARE_WAIT_QUEUE_HEAD(button_queue);
+
 struct timer_list av3xx_button_timer;
+
+struct event_q {
+	int evt;
+	struct event_q * nxt;
+};
+struct event_q * head;
+struct event_q * tail;
 
 int freq_rep = AV_FREQ;
 int mx_press = MAX_PRESSED;
+
+int timerState = 0;
+int timerMaxCnt=10;;
+int timerCnt=0;
 
 extern void av_halt_system(void);
 /*DECLARE_TASKLET(av_halt,av_halt_system,0);*/
@@ -79,6 +94,7 @@ int nb_off_press=0;
 int av3xx_chk_button(unsigned long ptr)
 {
 	int i,val,fastDir;
+	int pressed=0;
 	
 	fastDir=0;
 	val=inw(0x2600680)&0x3;
@@ -106,15 +122,17 @@ int av3xx_chk_button(unsigned long ptr)
 				{
 					if(nb_pressed[i]==0)
 					{
+						av3xx_add_event(i);
 						handle_scancode(keys_code[i], 1);
 						nb_pressed[i]=mx_press;
+						pressed=1;
 					}
 					else
 						nb_pressed[i]--;
 					if(i<4)
 					{
 						fastDir=1;
-						av3xx_move_mouse(i);
+						//av3xx_move_mouse(i);
 					}
 				}
 				
@@ -126,12 +144,72 @@ int av3xx_chk_button(unsigned long ptr)
 		av_halt_system();
 		//tasklet_schedule(&av_halt);
 	
+	if(pressed)
+		wake_up_interruptible(&button_queue);
+		
+	if(timerState)
+	{
+		timerCnt++;
+		if(timerCnt>timerMaxCnt)
+		{
+			av3xx_add_event(EVT_AV300_TIMER);
+			wake_up_interruptible(&button_queue);
+			timerCnt=0;
+		}
+	}
+	
 	av3xx_button_timer.expires = jiffies + freq_rep; /* 1s timer */
 	add_timer(&av3xx_button_timer);
 	return 0;
 }
 
 int x,y;
+
+void av3xx_add_event(int evt)
+{
+	if(head->evt!=-1)
+	{
+		tail=tail->nxt;
+	}
+	head->evt=evt;
+	head=head->nxt;
+}
+
+int av3xx_wait_event(void)
+{
+	if(tail->evt!=-1)
+		return av3xx_get_event();
+	else
+	{
+		while(tail->evt==-1)
+			interruptible_sleep_on(&button_queue);
+		return av3xx_get_event();
+	}
+}
+
+int av3xx_get_event(void)
+{
+	int val;
+	if(tail->evt!=-1)
+	{
+		val=tail->evt;
+		tail->evt=-1;
+		if(head!=tail)
+			tail=tail->nxt;
+		return val;
+	}
+	else
+		return -1;
+}
+
+void av3xx_clear_buffer(void)
+{
+	while(tail->evt!=-1)
+	{
+		tail->evt=-1;
+		tail=tail->nxt;
+	}
+}
 
 void av3xx_move_mouse(int but)
 {
@@ -185,23 +263,79 @@ int av3xx_button_set_mouse_param(struct mouseParam * ptrParam)
 {
 	freq_rep = ptrParam->freq;
 	mx_press = ptrParam->repeated_press;
+	return 0;
 }
 
 int av3xx_button_get_mouse_param(struct mouseParam * ptrParam)
 {
 	ptrParam->freq=freq_rep;
 	ptrParam->repeated_press=mx_press;
+	return 0;
+}
+
+void av3xx_start_timer(void)
+{
+	timerCnt=0;
+	timerState=1;
+}
+
+void av3xx_stop_timer(void)
+{
+	timerState=0;
+}
+
+int av3xx_timer_state(void)
+{
+	if(timerState)
+	{
+		return (timerCnt*freq_rep*10)/HZ;
+	}
+	else
+		return -1;
+}
+
+void av3xx_set_timer_freq(int val) // in 1/10 of s
+{
+	timerMaxCnt=(val*HZ)/(freq_rep*10);
+	timerCnt=0;
 }
 
 int av3xx_button_init(void)
 {
-	int i,result;
-	
+	int i;
+	struct event_q * evt;
 	x=AV3XX_MAX_X/2;
 	y=AV3XX_MAX_Y/2;
-	
+		
 	for(i=0;i<NB_BUTTONS;i++)
 		nb_pressed[i]=0;
+		
+	// init event's buffer
+	
+	if(!(head=(struct event_q*)kmalloc(sizeof(struct event_q),GFP_KERNEL)))
+	{
+		printk("[Av3xx init] buttons driver ====> error ini event buffer\n");
+		return -1;
+	}
+	head->evt=-1;
+	tail=head; // using tail as the previous evt to build the chain
+	for(i=1;i<BUFFER_SIZE;i++)
+	{
+		if(!(evt=(struct event_q*)kmalloc(sizeof(struct event_q),GFP_KERNEL)))
+		{
+			printk("[Av3xx init] buttons driver ====> error ini event buffer\n");
+			return -1;
+		}
+		evt->evt=-1;
+		tail->nxt=evt;
+		tail=evt;
+	}
+	tail->nxt=head;
+	tail=head;
+	
+	timerState = 0;
+	timerMaxCnt=10;;
+	timerCnt=0;
 		
 	init_timer(&av3xx_button_timer);
 	av3xx_button_timer.function = av3xx_chk_button;
