@@ -52,6 +52,7 @@ void pack(void (*loopFct)(void))
         if(loopFct)
             loopFct();
     }
+    clearEventQueue();
     stop_me();
 }
 
@@ -142,7 +143,7 @@ void eventLoop()
     while(!stopWM)
     {
        evt=waitEvent();
-       procNxtEvent(evt); 
+       procNxtEvent(evt);
     }
 }
 

@@ -133,10 +133,19 @@ int eventHandler(int evt)
                 break;
 
             case BTN_RIGHT:
-                if(list[pos+nselect].type!=TYPE_DIR)
-                    handle_type_other(list[pos+nselect].name);
-                else
-                    viewNewDir(list[pos+nselect].name);
+                switch(list[pos+nselect].type)
+                {
+                    case TYPE_BACK:
+                        viewNewDir("../");
+                        break;
+                    case TYPE_DIR:
+                        viewNewDir(list[pos+nselect].name);
+                        break;
+                    case TYPE_FILE:
+                        handle_type_other(list[pos+nselect].name);
+                        //viewNewDir("./");
+                        break;
+                }
                 break;
             case BTN_LEFT:
                 viewNewDir("../");

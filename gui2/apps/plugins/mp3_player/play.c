@@ -82,41 +82,20 @@ int window = MAIN_WIN;                   /* "1" = main, "2" = settings, "3" = so
  * Miscellaneous CHARs
  ********************/
 char * filename;                    /* current file location */
-#ifndef OLD_PLAYER
+
 FILE * fd;
 int file_size;
 pthread_t read_thread;
-pthread_t draw_thread;
+//pthread_t draw_thread;
 int stopThread=0;
-#endif
+
 /*******************
  * Other
  ******************/
 struct mp3_play data; /* mp3 data */
 bool v1first = false;
 
-int eventHandler(int evt)
-{
-    if(evt==EVT_TIMER && data.finished)
-    {
-        cops->close_mp3_playback();
-        RELEASE(cops);
-    }
-    
-    switch(window)
-    {
-        case MAIN_WIN:
-            handleMainWin(evt);
-            break;
-        case SETTINGS_WIN:
-            handleSettingsWin(evt);
-            break;
-        case SOUND_WIN:
-            handleSoundWin(evt);
-            break;
-    }
-    return 1;
-}
+
 
 void mainLoop(void)
 {
@@ -142,7 +121,7 @@ int main(int argc, char * * argv)
     {
         filename=argv[1];
     }
-#ifndef OLD_PLAYER
+    
     fd=fopen(filename,"ro");
     if(fd<0)
     {
@@ -155,17 +134,9 @@ int main(int argc, char * * argv)
     fseek(fd,0,SEEK_SET);
     
     printf ("File opened size=%d\n",file_size);
-#endif
     
 #endif
     
-#ifdef OLD_PLAYER
-    data.size=MP3_BUFF_SIZE;
-    data.filename=filename;
-    data.pos=0;
-    data.finished=0;
-#else
-
     /* getting id3info */
     
     if(mp3info(&(fTag.id3), filename, v1first))
@@ -182,6 +153,8 @@ int main(int argc, char * * argv)
     data.buffer_read=0;
     data.buffer_write=0;
     data.endOfFile=0;
+    data.freqPeakDraw=10;
+    data.peakDraw=drawPeak;
     
     data.buffer=(char*)malloc(data.buffer_len);
     if(!data.buffer)
@@ -191,31 +164,9 @@ int main(int argc, char * * argv)
             return -1;
     }
 
-    printf("buffer created %d\n",data.buffer_len);
-#endif
-    /* initialize mp3 playback */
-    if(!cops->ini_mp3_playback(&data))  
-    	return 0;    
-#ifndef OLD_PLAYER
-    printf("ini of mp3 driver done\n");
-    //mp3_read_more();
-    if (pthread_create(&read_thread, NULL, mp3_read_more, 0) != 0)
-    {
-        printf("Error, can't create read thread\n");
-        fclose(fd);
-        free(data.buffer);
-        return 0;         
-    }
-    
-    if (pthread_create(&draw_thread, NULL, drawPeak, 0) != 0)
-    {
-        printf("Error, can't create draw thread\n");
-        fclose(fd);
-        free(data.buffer);
-        return 0;         
-    }
-    //printf("First read finished\nout_buf:%d in_buff:%d\n",data.buffer_read,data.buffer_write);
-#endif
+    printf("buffer created %d\n",data.buffer_len);    
+ 
+
     /* initialize the graphics and clear the lcd */
     cops->hideSBar();
     cops->disableMenu();
@@ -224,15 +175,37 @@ int main(int argc, char * * argv)
     /* set standard font */
     cops->setFont(STD6X9);
     refreshScreen(MAIN_WIN);
+    
+    /* Launching read thread */
+    /*if (pthread_create(&read_thread, NULL, mp3_read_more, 0) != 0)
+    {
+        printf("Error, can't create read thread\n");
+        fclose(fd);
+        free(data.buffer);
+        return 0;         
+    }*/
+    mp3_read_more();
+    
+    /* initialize mp3 playback */
+    if(!cops->ini_mp3_playback(&data))  
+    	return 0;
+    printf("ini of mp3 driver done\n");  
+    
+    /* Launching draw thread */
+    /*if (pthread_create(&draw_thread, NULL, drawPeak, 0) != 0)
+    {
+        printf("Error, can't create draw thread\n");
+        fclose(fd);
+        free(data.buffer);
+        return 0;         
+    }*/
+    
     apply_settings();  
     /* start mp3 */
     cops->start_playback();
-#ifdef OLD_PLAYER        
-    PACK(cops,drawPeak);
-#else
+    
     PACK(cops,NULL);
     fclose(fd);
-#endif
     
     return 1;
 }

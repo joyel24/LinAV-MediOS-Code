@@ -92,7 +92,7 @@ void stop_me(void)
     showSBar();
     menu_plugin.handle_on=1;
     enableMenu();
-    sendEvt(&menu_plugin,EVT_REDRAW);       
+    sendEvt(&menu_plugin,EVT_REDRAW);
 }
 
 int loadPlugin(char * path, char * param)

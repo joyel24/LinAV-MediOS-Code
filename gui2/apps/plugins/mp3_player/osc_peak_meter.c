@@ -45,22 +45,27 @@ int osci_bgcolor = 4;    /* color of bg for oscillograph    1-10 */
 
 struct av_peak av_p;  /* left/right levels */
 
-void * drawPeak(void * arg)
+//void * drawPeak(void * arg)
+void drawPeak(int left,int right)
 {
-    int cnt=0;
+    //int cnt=0;
     //int sec=0,old_sec=0;
-    while(!stopThread)
-    {
-        cnt++;
-        if(window == MAIN_WIN && cnt>10)
+    /*while(!stopThread)
+    {*/
+        //cnt++;
+        //fprintf(stderr,"in draw peek\n");
+        if(window == MAIN_WIN )/*&& cnt>10)*/
         {
-            cnt=0;
+            //cnt=0;
             /* read peaks */
-            cops->readPeak(&av_p);            
+            //cops->readPeak(&av_p);            
         
             /* get peak values */
-            av_p.left=(av_p.left*200)/0x7FFF;
-            av_p.right=(av_p.right*200)/0x7FFF;
+            /*av_p.left=(av_p.left*200)/0x7FFF;
+            av_p.right=(av_p.right*200)/0x7FFF;*/
+            
+            av_p.left=(left*200)/0x7FFF;
+            av_p.right=(right*200)/0x7FFF;
     
            /* sec=(cops->readFrame()*26)/1000;
             printf("sec=%d\n",sec);
@@ -98,8 +103,8 @@ void * drawPeak(void * arg)
                     oscillograph(av_p.left, av_p.right);
             }
         }
-    }
-    return NULL;
+    /*}
+    return NULL;*/
 }
 
 void drawTime(int sec)

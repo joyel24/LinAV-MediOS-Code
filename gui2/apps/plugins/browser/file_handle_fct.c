@@ -105,7 +105,9 @@ int execBin(char * path, ...)
         {
             int status;
             cops->closeScreen();
+            fprintf(stderr, "vfork done now wainting for pid %d to stop\n", pid);
             waitpid(pid, &status, 0);
+            fprintf(stderr, "pid %d stoped, restoring avwm\n", pid);
             cops->openScreen();
         }
         else

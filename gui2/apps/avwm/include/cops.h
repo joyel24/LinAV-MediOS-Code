@@ -99,6 +99,8 @@ struct client_operations {
     int  (*start_playback)      (void);
     int  (*pause_playback)      (void);
     int  (*stop_playback)       (void);
+    int  (*start_peak)          (void);
+    int  (*stop_peak )          (void);
     
     int  (*readPeak)            (struct av_peak * peak);
     int  (*readFrame)           (void);
@@ -117,7 +119,7 @@ struct client_operations {
     
     void (*debug)               (char *fmt, ...);
     
-    int  (*playMp3)             (char * filename);
+    int  (*playMp3)             (char * filename);    
     
     int  (*openCfg)             (char * filename,int mode);
     void (*closeCfg)            (void);

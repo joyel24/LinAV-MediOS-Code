@@ -40,7 +40,11 @@ int  getTreble          (void);
 int  getLoudness        (void);
 int  getBalance         (void);
 
+int  start_peak         (void);
+int  stop_peak          (void);
+
 int  execDSP_ioctl      (int ioctl_call,unsigned int val);
 int  execMIX_ioctl      (int ioctl_call,unsigned int val);
+
 
 #endif

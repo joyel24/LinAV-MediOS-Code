@@ -17,13 +17,14 @@
 #include <sys/ioctl.h>
 
 #include "sound.h"
+#include "misc.h"
 
 int fd_dsp=-1;
 int fd_mix=-1;
 
 int ini_sound_connection(void)
 {
-    if(fd_dsp<0)
+    /*if(fd_dsp<0)
     {
         fd_dsp=open("/dev/dsp",O_WRONLY);
         if (fd_dsp < 0)
@@ -41,7 +42,7 @@ int ini_sound_connection(void)
             fprintf(stderr,"Can't open /dev/mixer\n");
             return 0;
         }
-    }
+    }*/
     return 1;
 }
 
@@ -72,6 +73,16 @@ int pause_playback(void)
 int stop_playback(void)
 {
     return execDSP_ioctl(AV_DSP_STOP_MP3,(unsigned int)NULL);
+}
+
+int start_peak(void)
+{
+    return execDSP_ioctl(AV_DSP_START_PEAK,(unsigned int)NULL);
+}
+
+int stop_peak(void)
+{
+    return execDSP_ioctl(AV_DSP_STOP_PEAK,(unsigned int)NULL);
 }
 
 int readPeak(struct av_peak * peak)
@@ -161,16 +172,28 @@ int getBalance(void)
 
 int execDSP_ioctl(int ioctl_call,unsigned int val)
 {
-    if(fd_dsp<0 || ioctl(fd_dsp,ioctl_call,val)<0)
+    /*if(fd_dsp<0 || ioctl(fd_dsp,ioctl_call,val)<0)
         return 0;
     else
-       return 1;
+       return 1;*/
+    if(gen_ioctl("/dev/dsp",ioctl_call,val)<0)
+    {
+        printf("DSP ioctl error\n");
+        return 0;
+    }
+    return 1;
 }
 
 int execMIX_ioctl(int ioctl_call,unsigned int val)
 {
-    if(fd_mix<0 || ioctl(fd_mix,ioctl_call,val)<0)
+    /*if(fd_mix<0 || ioctl(fd_mix,ioctl_call,val)<0)
         return 0;
     else
-       return 1;
+       return 1;*/
+    if(gen_ioctl("/dev/mixer",ioctl_call,val)<0)
+    {
+        printf("MIXER ioctl error\n");
+        return 0;
+    }
+    return 1;
 }

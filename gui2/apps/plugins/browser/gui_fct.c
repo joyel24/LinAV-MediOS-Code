@@ -92,6 +92,7 @@ void hideArrow(int type)
 int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
 {
     int             color;
+    int             select_color;
     char *          cp;
     int             w = 0;
     int             h = 10;
@@ -108,34 +109,40 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
     if(clear)
         cops->fillRect(COLOR_WHITE, 0, y , 320, h+1);
 
-    if(dEntry->type == TYPE_DIR)
+    switch(dEntry->type)
     {
-        color=COLOR_RED;
-        cops->drawBITMAP (&dirBitmap, 2, y);
-    }
-    else
-    {
-        color=COLOR_BLACK;
-
-        ext = strrchr(dEntry->name, '.');
-        if (ext == 0)
-        {
-            // no extension
-            cops->fillRect(COLOR_WHITE, 2, y, 8, 8);
-        }
-        else if (is_mp3_type(ext))
-            cops->drawBITMAP (&mp3Bitmap, 2, y);
-        else if(is_text_type(ext))
-            cops->drawBITMAP (&textBitmap, 2, y);
-        else if(is_image_type(ext))
-            cops->drawBITMAP (&imageBitmap, 2, y);
-        else
-            cops->fillRect(COLOR_WHITE, 2, y, 8, 8);
+        case TYPE_BACK:
+            color=COLOR_BLUE;
+            select_color=COLOR_RED;
+            break;
+        case TYPE_DIR:    
+            color=COLOR_RED;
+            select_color=COLOR_BLUE;
+            cops->drawBITMAP (&dirBitmap, 2, y);
+            break;
+        case TYPE_FILE:
+            color=COLOR_BLACK;
+            select_color=COLOR_BLUE;
+            ext = strrchr(dEntry->name, '.');
+            if (ext == 0)
+            {
+                // no extension
+                cops->fillRect(COLOR_WHITE, 2, y, 8, 8);
+            }
+            else if (is_mp3_type(ext))
+                cops->drawBITMAP (&mp3Bitmap, 2, y);
+            else if(is_text_type(ext))
+                cops->drawBITMAP (&textBitmap, 2, y);
+            else if(is_image_type(ext))
+                cops->drawBITMAP (&imageBitmap, 2, y);
+            else
+                cops->fillRect(COLOR_WHITE, 2, y, 8, 8);
+            break;
     }
 
     if(selected)
     {
-        cops->putS(color, COLOR_BLUE,x, y, dEntry->name);
+        cops->putS(color, select_color,x, y, dEntry->name);
         draw_file_size(dEntry);
     }
     else

@@ -37,6 +37,7 @@
 #include "CF_handler.h"
 #include "fm.h"
 #include "helperMenu.h"
+#include "bg_loader.h"
 
 #include "osd.h"
 
@@ -97,8 +98,11 @@ int main(int argc,char * * argv)
         free(path);
         return -1;
     }
+    
+    //load_bg("/mnt/avlo.img");
 
     clearScreen(COLOR_WHITE);
+    
 
     ini_status_bar(&status_bar_plugin);
 

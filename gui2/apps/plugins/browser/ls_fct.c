@@ -101,6 +101,8 @@ int doLs(char * name)
     struct dirent   *dp;
     struct stat     statbuf;
     char            fullname[PATHLEN];
+    char            tmpP[4];
+    int             isRoot=0;
     
     totSize=0;
     nbFile=0;nbDir=0;
@@ -114,6 +116,10 @@ int doLs(char * name)
         perror(name);
         return -1;
     }
+    
+    getcwd(tmpP, 4);
+    if(tmpP[0]=='/' && tmpP[1]=='\0')
+        isRoot=1;
     
 
     while ((dp = readdir(dirp)) != NULL)
@@ -136,9 +142,20 @@ int doLs(char * name)
 
         if(S_ISDIR(statbuf.st_mode))
         {
-            if(addEntry(fullname,TYPE_DIR,0)<0)
-                return -1;
-            nbDir++;
+            if(fullname[0]=='.' && fullname[1]=='\0')
+                continue;
+            if(fullname[0]=='.' && fullname[1]=='.' && fullname[2]=='\0')
+            {
+                if(!isRoot)
+                    if(addEntry("<-Back",TYPE_BACK,0)<0)
+                        return -1;
+            }
+            else
+            {
+                if(addEntry(fullname,TYPE_DIR,0)<0)
+                    return -1;
+                nbDir++;
+            }
         }
         else
         {
@@ -153,8 +170,5 @@ int doLs(char * name)
     
     qsort(list,listused,sizeof(struct dir_entry),qSortEntry);
     
-   /* removing the too dummy folders: . & .. */
-    nbDir-=2;
- 
-    return 0;
+   return 0;
 }

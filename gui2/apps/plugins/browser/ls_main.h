@@ -19,8 +19,10 @@
 #include "font.h"
 
 
-#define TYPE_DIR    0
-#define TYPE_FILE   1
+#define TYPE_DIR    1
+#define TYPE_FILE   2
+#define TYPE_BACK   0
+
 struct dir_entry {
     char * name;
     int type;

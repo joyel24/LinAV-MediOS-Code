@@ -57,6 +57,8 @@ struct mp3_play {
 	int finished;
 	char * filename;
 	int pos;
+        int freqPeakDraw;
+        void * (*peakDraw)(int left,int right);
 };
 
 struct av_peak {
@@ -120,7 +122,7 @@ struct timer_val {
 #define AV_RELEASE_APP         _IO(AV_OP_IOC_MAGIC_EVT,14)
 
 #define AV_OP_IOC_MAGIC_SOUND  'e'
-#define AV_OP_IOC_MAXNR_SOUND  27
+#define AV_OP_IOC_MAXNR_SOUND  29
 #define AV_GET_MIX_VOLUME      _IOR(AV_OP_IOC_MAGIC_SOUND,1, int)
 #define AV_SET_MIX_VOLUME      _IOW(AV_OP_IOC_MAGIC_SOUND,2, int)
 #define AV_GET_MIX_BALANCE     _IOR(AV_OP_IOC_MAGIC_SOUND,3, int)
@@ -148,6 +150,8 @@ struct timer_val {
 #define AV_DSP_IN_PEAK_REAL    _IOW(AV_OP_IOC_MAGIC_SOUND,25, struct av_peak) /* direct read: range=0->0x7FFF    */
 #define AV_DSP_OUT_PEAK_REAL   _IOW(AV_OP_IOC_MAGIC_SOUND,26, struct av_peak) /* direct read: range=0->0x7FFF    */
 #define AV_DSP_PAUSE_MP3       _IOW(AV_OP_IOC_MAGIC_SOUND,27, int)
+#define AV_DSP_START_PEAK      _IO(AV_OP_IOC_MAGIC_SOUND,28)
+#define AV_DSP_STOP_PEAK       _IO(AV_OP_IOC_MAGIC_SOUND,29)
 
 #define AV_OP_IOC_MAGIC_STATE  'f'
 #define AV_OP_IOC_MAXNR_STATE  24

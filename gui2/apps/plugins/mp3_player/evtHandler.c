@@ -32,9 +32,36 @@ extern int settings_cursor_position;
 extern int vol,bass,treb,bal,loud;
 extern int fade,peakmeters,scroll_osci,peak_decay,peak_levelcolor,peak_bgcolor,osci_levelcolor,osci_bgcolor;
 extern int stopThread;
-extern pthread_t read_thread;
-extern pthread_t draw_thread;
+//extern pthread_t read_thread;
+//extern pthread_t draw_thread;
+extern struct mp3_play data;
 /*******************/
+
+int eventHandler(int evt)
+{
+    if(evt==EVT_TIMER && data.finished)
+    {
+        cops->close_mp3_playback();
+        RELEASE(cops);
+    }
+    
+    if(evt==EVT_TIMER)
+        mp3_read_more();
+    
+    switch(window)
+    {
+        case MAIN_WIN:
+            handleMainWin(evt);
+            break;
+        case SETTINGS_WIN:
+            handleSettingsWin(evt);
+            break;
+        case SOUND_WIN:
+            handleSoundWin(evt);
+            break;
+    }
+    return 1;
+}
 
 void handleMainWin(int evt)
 {
@@ -57,7 +84,7 @@ void handleMainWin(int evt)
             break;
         case BTN_OFF: /* Exit player */
         case EVT_QUIT:
-            stopThread=1;            
+            //stopThread=1;            
             if(fade)
                 while(vol > 35)
                 {
@@ -67,18 +94,20 @@ void handleMainWin(int evt)
             
             if(!cops->stop_playback()) fprintf(stderr,"error stopping\n");
             cops->close_mp3_playback();
-            pthread_join(read_thread, NULL);
-            pthread_join(draw_thread, NULL);
+            //pthread_join(read_thread, NULL);
+            //pthread_join(draw_thread, NULL);
             RELEASE(cops);          
             break;
-        case BTN_F2: /* go settings */            
-            cops->clearScreen(COLOR_BLACK); 
+        case BTN_F2: /* go settings */             
             window = SETTINGS_WIN;
+            cops->stop_peak();
+            cops->clearScreen(COLOR_BLACK);
             refreshScreen(SETTINGS_WIN);
             break;
-        case BTN_F3: /* go sound settings */            
-            cops->clearScreen(COLOR_BLACK);
+        case BTN_F3: /* go sound settings */
             window = SOUND_WIN;
+            cops->stop_peak();
+            cops->clearScreen(COLOR_BLACK);            
             refreshScreen(SOUND_WIN);     
             break;
     }
@@ -135,6 +164,7 @@ void handleSettingsWin(int evt)
             cops->clearScreen(COLOR_BLACK);
             window = 1;
             refreshScreen(MAIN_WIN);
+            cops->start_peak();
             break;
     }
 }
@@ -185,7 +215,8 @@ void handleSoundWin(int evt)
         case BTN_F3: 
             cops->clearScreen(COLOR_BLACK);
             window = 1;  
-            refreshScreen(MAIN_WIN);                  
+            refreshScreen(MAIN_WIN);
+            cops->start_peak();
             break;
     }
 }

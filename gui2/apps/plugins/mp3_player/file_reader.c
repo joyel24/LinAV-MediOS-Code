@@ -24,23 +24,47 @@ extern FILE * fd;
 extern struct mp3_play data;
 extern int file_size;
 extern int stopThread;
+extern pthread_t read_thread;
 
 #define MIN(a, b) (((a)<(b))?(a):(b))
 
-void * mp3_read_more(void * arg)
+int threadActive=0;
+
+void mp3_read_more(void)
 {
-    int size,nb_read,pos,free_space; 
-    
-    stopThread=0;
-    
-    while(!data.endOfFile && !stopThread)
-    {
+    int free_space;
+    if(!threadActive)
+    {        
         free_space=data.buffer_read-data.buffer_write;
         if(free_space<=0)
             free_space+=data.buffer_len;
         if(free_space>((data.buffer_len*50)/100))
         {
-            size=free_space;
+            if (pthread_create(&read_thread, NULL, mp3_read_data,(void*) &free_space) != 0)
+                printf("Error, can't create read thread\n");         
+        }
+    }
+    /*else
+        fprintf(stderr,"thread already active\n");*/
+}
+
+void * mp3_read_data(void * arg)
+{
+    int size,nb_read,pos; 
+    
+    size=*(int*)arg;
+    threadActive=1;
+    fprintf(stderr,"in thread: %d\n",size);
+    //stopThread=0;
+    
+    /*while(!data.endOfFile && !stopThread)
+    {*/
+        /*free_space=data.buffer_read-data.buffer_write;
+        if(free_space<=0)
+            free_space+=data.buffer_len;
+        if(free_space>((data.buffer_len*50)/100))
+        {*/
+            //size=free_space;
         
             //printf("freespace:%d => size=%d\n",free_space,size);
             pos=ftell(fd);
@@ -69,8 +93,10 @@ void * mp3_read_more(void * arg)
                 data.endOfFile=1;
                 printf("EOF\n");
             }                       
-        }       
+        /*}       
         
-    } 
+    } */
+    fprintf(stderr,"out thread: %d\n",size);
+    threadActive=0;
     return NULL;   
 }
