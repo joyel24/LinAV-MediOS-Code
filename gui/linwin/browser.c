@@ -574,10 +574,10 @@ void new_exe_window(char *filename)
 
    pwd = get_current_dir_name();
 
-	GrClose();
+	//GrClose();
 
 	pid = vfork();
-	if (pid == 0) {
+	if (pid == 0) { // child side
       strcat(pwd, "//");
       strcat(pwd, filename);
 
@@ -590,19 +590,19 @@ void new_exe_window(char *filename)
 	}
 	else {
 		if (pid > 0) {
-			int status;
+			//int status;
 
-			waitpid(pid, &status, 0);
+			//waitpid(pid, &status, 0);
 		}
 		else {
 			fprintf(stderr, "vfork failed %d\n", pid);
 		}
 	}
 
-	sprintf(tmp, "%s/linwin",PATH);
+	/*sprintf(tmp, "%s/linwin",PATH);
 	execl(tmp, "linwin");
 	fprintf(stderr, "Cannot restart linwin!\n");
-	exit(1);
+	exit(1);*/
 }
 
 void delay(unsigned int time) {

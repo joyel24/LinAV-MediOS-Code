@@ -270,7 +270,7 @@ static void draw_date()
    }
    close(fd);
 
-	sprintf(timeSt, "%02d.%02d.20%02d", date_time.tm_mday,date_time.tm_mon,date_time.tm_year);
+	sprintf(timeSt, "%02x.%02x.20%02x", date_time.tm_mday,date_time.tm_mon,date_time.tm_year);
 
 	GrSetGCForegroundPixelVal(root_gc, AV3XX_COLOR_BLACK);
 	GrText(root_wid, root_gc, 5, HEADER_BASELINE, timeSt, -1, GR_TFASCII);
@@ -341,7 +341,7 @@ main(int argc, char **argv)
 	GrSetGCForegroundPixelVal(root_gc, AV3XX_COLOR_WHITE);
 	GrGetScreenInfo(&screen_info);
 
-   GrHideCursor();
+//   GrHideCursor();
 
 	root_wid = GrNewWindowEx(GR_WM_PROPS_APPFRAME |
 			    GR_WM_PROPS_CAPTION |
