@@ -14,6 +14,7 @@
 #define COLOR_DARK_RED     4
 #define COLOR_DARK_BROWN   6
 #define COLOR_GREY         7
+#define COLOR_GRAY         7
 #define COLOR_BLUE         9
 #define COLOR_LIGHT_GREEN  10
 #define COLOR_PURPLE       31
@@ -22,7 +23,9 @@
 #define COLOR_YELLOW       14
 #define COLOR_WHITE2       47
 #define COLOR_LIGHT_GREY   21
+#define COLOR_LIGHT_GRAY   21
 #define COLOR_DARK_GREY    8
+#define COLOR_DARK_GRAY    8
 #define COLOR_GREEN        2
 #define COLOR_BLUE3        51
 #define COLOR_LIGHT_BLUE   38
@@ -41,5 +44,6 @@
 #define COLOR_LIGHT_RED    77
 #define COLOR_ORANGE2      176
 #define COLOR_LIGHT_PURPLE 79
+#define COLOR_TURQUOISE    205
 
 #endif /* COLORDEF_H */
