@@ -57,16 +57,10 @@ void evtLoop(unsigned int evt_buffer)
     
     while(1)
     {
-        printk("before wait\n");
         evt=waitEvt(evt_buffer);
-        printk("get evt %d\n",evt);
         for(ptr=head_task_mgr;ptr!=NULL;ptr=ptr->nxt)
             if(ptr->state && ptr->evtHandler)
-            {
-                printk("send to task ");
-                ptr->evtHandler(evt);   
-                printk("done\n");     
-            }
+                ptr->evtHandler(evt);        
     }
 }
 

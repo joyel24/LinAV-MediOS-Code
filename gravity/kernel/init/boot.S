@@ -32,14 +32,14 @@ mv_iram_loop:
     subs    r2, r2, #4
     bne     mv_iram_loop
 /* clear bss */
-@    ldr     r1, __bss_start_ptr
-@    ldr     r2, __bss_end_ptr
-@    sub     r2, r2, r1
-@    mov     r3, #0
-@clr_bss_loop:
-@    str     r3,[r1],#4
-@    subs    r2, r2, #4
-@    bne     clr_bss_loop
+    ldr     r1, __bss_start_ptr
+    ldr     r2, __bss_end_ptr
+    sub     r2, r2, r1
+    mov     r3, #0
+clr_bss_loop:
+    str     r3,[r1],#4
+    subs    r2, r2, #4
+    bne     clr_bss_loop
 /* enable fiq for wdt */
     mrs      r0, cpsr
     bic      r0, r0, #0x40
