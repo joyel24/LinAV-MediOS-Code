@@ -14,40 +14,139 @@
 #define    LISTSIZE   256
 #define    PATHLEN    256
 
+#define    toLower(chr)  ((chr>64 && chr<91)?chr+32:chr)
+
 int namesort(s1,s2)
 char **s1;
-char ** s2;
-{
-    return strcmp(*s1, *s2);
+char **s2;
+{    
+    char * st1=*s1;
+    char * st2=*s2;
+    while(*st1!=0 && *st2!=0 && toLower(*st1) == toLower(*st2))
+    {
+        st1++;
+        st2++;
+    }
+    
+    return (toLower(*st1) - toLower(*st2));       
 }
 
-char            **list;
-int             listsize;
-int             listused;
+char            **dir_list;
+int             dir_listsize;
+int             dir_listused;
+
+char            **file_list;
+int             file_listsize;
+int             file_listused;
 
 struct client_operations * cops;
+
+#define TYPE_DIR    0
+#define TYPE_FILE   1
+
+struct dir_entry {
+    char *name;
+    int type;    
+};
+
+struct dir_entry * list;
+int                listused;
+
+
+int ini_lists(void)
+{
+    if (dir_listsize == 0) {
+        dir_list = (char **) malloc(LISTSIZE * sizeof(char *));
+        if (dir_list == NULL) {
+            fprintf(stderr, "No memory for ls buffer\n");
+            return -1;
+        }
+        dir_listsize = LISTSIZE;
+    }
+    dir_listused = 0;
+    
+    if (file_listsize == 0) {
+        file_list = (char **) malloc(LISTSIZE * sizeof(char *));
+        if (file_list == NULL) {
+            fprintf(stderr, "No memory for ls buffer\n");
+            return -1;
+        }
+        file_listsize = LISTSIZE;
+    }
+    file_listused = 0;
+    return 0;
+}
+
+int add_dir(char * name)
+{
+    char            **newlist;
+    
+    if (dir_listused >= dir_listsize)
+    {
+        newlist = malloc((sizeof(char **)) * (dir_listsize + LISTSIZE));
+        if (newlist == NULL)
+        {
+            fprintf(stderr, "No memory for ls buffer\n");
+            return -1;
+        }
+        memcpy(newlist, dir_list, sizeof(char**) * dir_listsize);
+        free(dir_list);
+        dir_list=newlist;
+        dir_listsize += LISTSIZE;
+    }
+
+    dir_list[dir_listused] = strdup(name);
+    if (dir_list[dir_listused] == NULL) {
+        fprintf(stderr, "No memory for filenames\n");
+        return -1;
+    }
+    dir_listused++;
+    return 0;
+    
+}
+
+int add_file(char * name)
+{
+    char            **newlist;
+    
+    if (file_listused >= file_listsize)
+    {
+        newlist = malloc((sizeof(char **)) * (file_listsize + LISTSIZE));
+        if (newlist == NULL)
+        {
+            fprintf(stderr, "No memory for ls buffer\n");
+            return -1;
+        }
+        memcpy(newlist, file_list, sizeof(char**) * file_listsize);
+        free(file_list);
+        file_list=newlist;
+        file_listsize += LISTSIZE;
+    }
+
+    file_list[file_listused] = strdup(name);
+    if (file_list[file_listused] == NULL) {
+        fprintf(stderr, "No memory for filenames\n");
+        return -1;
+    }
+    file_listused++;
+    return 0;
+    
+}
 
 int doLs(char * name)
 {
     DIR             *dirp;
     struct dirent   *dp;
+    struct stat     statbuf;
     char            fullname[PATHLEN];
     int             endslash;
-    char            **newlist;
     int             i;
-    char            *cp;
+
 
     endslash = (*name && (name[strlen(name) - 1] == '/'));
 
-    if (listsize == 0) {
-        list = (char **) malloc(LISTSIZE * sizeof(char *));
-        if (list == NULL) {
-            fprintf(stderr, "No memory for ls buffer\n");
-            return;
-        }
-        listsize = LISTSIZE;
-    }
-    listused = 0;
+    if(ini_lists()<0)
+        return -1;
 
     dirp = opendir(name);
     if (dirp == NULL) {
@@ -55,15 +154,15 @@ int doLs(char * name)
         return -1;
     }
 
-
-
-    while ((dp = readdir(dirp)) != NULL) {
+    while ((dp = readdir(dirp)) != NULL)
+    {
         if ((dp->d_name[0] == '.') && !SHOW_ALL)
             continue;
 
         fullname[0] = '\0';
 
-        if ((*name != '.') || (name[1] != '\0')) {
+        if ((*name != '.') || (name[1] != '\0'))
+        {
             strcpy(fullname, name);
             if (!endslash)
                 strcat(fullname, "/");
@@ -71,33 +170,58 @@ int doLs(char * name)
 
         strcat(fullname, dp->d_name);
 
-        if (listused >= listsize) {
-            newlist = malloc((sizeof(char **)) * (listsize + LISTSIZE));
-            if (newlist == NULL) {
-                fprintf(stderr, "No memory for ls buffer\n");
-                break;
-            }
-            memcpy(newlist, list, sizeof(char**) * listsize);
-            free(list);
-            listsize += LISTSIZE;
+        if (stat(dp->d_name, &statbuf) < 0)
+        {
+            perror(dp->d_name);
+            return;
         }
 
-        list[listused] = strdup(fullname);
-        if (list[listused] == NULL) {
-            fprintf(stderr, "No memory for filenames\n");
-            break;
+        if(S_ISDIR(statbuf.st_mode))
+        {
+            if(add_dir(fullname)<0)
+                return -1;
         }
-        listused++;
+        else
+        {
+            if(add_file(fullname)<0)
+                return -1;
+        }        
     }
 
     closedir(dirp);
 
-    qsort((char *) list, listused, sizeof(char *), namesort);
-
+    qsort((char *) dir_list, dir_listused, sizeof(char *), namesort);
+    qsort((char *) file_list, file_listused, sizeof(char *), namesort);
+    
+    listused=dir_listused+file_listused;
+    
+    list=(struct dir_entry*)malloc((sizeof(struct dir_entry))*listused);
+    
+    if (list == NULL)
+    {
+        fprintf(stderr, "No memory for ls buffer\n");
+        return -1;
+    }
+    
+    for(i=0;i<dir_listused;i++)
+    {
+        list[i].name=dir_list[i];
+        list[i].type=TYPE_DIR;
+    }
+    
+    for(i=0;i<file_listused;i++)
+    {
+        list[dir_listused+i].name=file_list[i];
+        list[dir_listused+i].type=TYPE_FILE;
+    }
+       
+    free(dir_list);
+    free(file_list);
+    
     return 0;
 }
 
-#define MAXPOS       10
+#define MAXPOS       22
 
 #define WHITE        0
 #define BLACK        1
@@ -105,30 +229,29 @@ int doLs(char * name)
 #define BLUE         32
 #define RED          77
 
-needFont(std6x9);
-
-int printName(char * name,int x,int y,int clear,int selected)
+int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
 {
-    struct stat     statbuf;
+    //struct stat     statbuf;
     int             color;
     char *          cp;
-   int w = 0;
-    int h = 10;
+    int             w = 0;
+    int             h = 10;
 
    cops->getStringS("M", &w, &h);
 
-    cp = strrchr(name,(int) '/');
+    cp = strrchr(dEntry->name,(int) '/');
     if (cp)
         cp++;
     else
-        cp = name;
+        cp = dEntry->name;
 
-    if (stat(name, &statbuf) < 0) {
+    /*if (stat(name, &statbuf) < 0) {
         perror(name);
         return;
-    }
+    }*/
 
-    if(S_ISDIR(statbuf.st_mode))
+    /*if(S_ISDIR(statbuf.st_mode))*/
+    if(dEntry->type == TYPE_DIR)
         color=RED;
     else
         color=BLACK;
@@ -137,39 +260,44 @@ int printName(char * name,int x,int y,int clear,int selected)
         cops->fillRect(WHITE,x, y , 315, h+1);
 
     if(selected)
-        cops->putS(color, BLUE,x, y, name);
+        cops->putS(color, BLUE,x, y, dEntry->name);
     else
-        cops->putS(color, WHITE,x, y, name);
+        cops->putS(color, WHITE,x, y, dEntry->name);
 }
 
 void printAllName(int pos,int nselect)
 {
-   int w = 0;
+    int w = 0;
     int h = 10;
     int i;
 
-   cops->getStringS("M", &w, &h);
+    cops->getStringS("M", &w, &h);
 
-    for (i = pos; i < listused && i < pos+MAXPOS; i++) {
-        printName(list[i],5, 2 + (i-pos)*(h+1)+ h+6+MENU_SHADOW,0,(i-pos)==nselect);
+    for (i = pos; i < listused && i < pos+MAXPOS; i++)
+    {
+        printName(&list[i],5, 2 + (i-pos)*(h+1)+ h+6+MENU_SHADOW,0,(i-pos)==nselect);
     }
 }
 
 void printAName(int pos, int nselect, int clear, int selected)
 {
-   int w = 0;
+    int w = 0;
     int h = 10;
-
-   cops->getStringS("M", &w, &h);
-
-    printName(list[pos],5,2 + nselect*(h+1)+ h+6+MENU_SHADOW,clear,selected);
+    
+    cops->getStringS("M", &w, &h);
+    
+    printName(&list[pos],5,2 + nselect*(h+1)+ h+6+MENU_SHADOW,clear,selected);
 }
 
 void cleanList()
 {
     int i;
     for (i = 0; i < listused; i++)
-        free(list[i]);
+    {
+        free(list[i].name);
+        free(&list[i]);
+    }
+    
     listused=0;
 }
 
@@ -250,9 +378,6 @@ int execBin(char * path, ...)
     }
 }
 
-
-
-
 int launchBin(char * name)
 {
     execBin(name, name, (char*)0);
@@ -324,12 +449,13 @@ int eventHandler(int evt)
     /*char tmp[50];
     sprintf(tmp,"in handler (%d)",evt);
     cops->putS(BLACK, WHITE,0, 220, tmp);*/
-   int w = 0;
+    int w = 0;
     int h = 10;
 
-   cops->getStringS("M", &w, &h);
+    cops->getStringS("M", &w, &h);
 
-    switch(evt) {
+    switch(evt)
+    {
         case BTN_UP:
             nselect--;
             if(nselect<0)
@@ -375,8 +501,8 @@ int eventHandler(int evt)
             }
             break;
         case BTN_RIGHT:
-            if(chdir(list[pos+nselect])<0)
-                handle_type_other(list[pos+nselect]);
+            if(chdir(list[pos+nselect].name)<0)
+                handle_type_other(list[pos+nselect].name);
             else
             {
                 cleanList();
