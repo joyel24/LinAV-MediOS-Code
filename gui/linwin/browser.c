@@ -39,7 +39,7 @@ static GR_SCREEN_INFO screen_info;
 #define FILE_TYPE_DIRECTORY 1
 #define FILE_TYPE_OTHER 2
 #define MAX_ENTRIES 200
-#define MAX_BROWSER_ENTRIES 12
+#define MAX_BROWSER_ENTRIES 13
 #define FILEENTRY_XPOS 15
 #define MAX_FILELENGTH 45
 
@@ -304,6 +304,7 @@ static void browser_drawentry(int i, int y)
 
 static void browser_draw_browser()
 {
+   char tmp[25];
 	int i;
 
 	int begin = browser_currentBase;
@@ -340,7 +341,12 @@ static void browser_draw_browser()
 	GrSetGCMode(browser_gc, GR_MODE_SET);
 	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
 	GrFillRect(browser_wid, browser_gc, 0, y + 2, screen_info.cols, screen_info.rows - (y + 2));
-	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
+/*
+	sprintf(tmp, "%d Entries", browser_nbEntries);
+	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
+   GrText(browser_wid, browser_gc, 8, 210, tmp, -1, GR_TFASCII);
+*/
+//	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
 }
 
 static void browser_do_draw(GR_EVENT *event)
