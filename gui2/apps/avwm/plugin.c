@@ -18,6 +18,10 @@
 #include "cops.h"
 #include "plugin.h"
 
+#ifndef AV_SCREEN
+    #include <dlfcn.h>
+#endif
+
 extern struct client_operations cops;
 
 struct plugin cur_plugin={
@@ -84,10 +88,18 @@ int loadPlugin(char * path, char * param)
 
 int launchPlugin(char * path,char * param)
 {
-    int pid,err;
     char cops_a[15];
+#ifdef AV_SCREEN
+    int pid,err;
+#else
+    void* pd;
+    int (*main_start)(int argc,char ** argv);
+    char * argv[2];
+#endif
     
     sprintf(cops_a, "%d",(int)&cops);
+    
+#ifdef AV_SCREEN
     pid = vfork();
     if (pid == 0)
     { // child
@@ -107,7 +119,26 @@ int launchPlugin(char * path,char * param)
         fprintf(stderr,"load success pid= %d\n",pid);
     }
     return 0;
-
+#else
+    pd = dlopen(path, RTLD_NOW);
+    if (!pd) {
+        fprintf(stderr,"Can't open %s with dlopen: %s\n",path,dlerror());        
+        dlclose(pd);
+        return -1;
+    }    
+    
+    main_start = dlsym(pd, "main");    
+    if (!main_start) {
+        fprintf(stderr,"Can't find main: %s\n",dlerror());
+        dlclose(pd);
+        return -1;
+    }
+    
+    argv[0]=path;
+    argv[1]=cops_a;
+    main_start(2,argv);
+    return 0;
+#endif
 }
 
 extern struct wkUP_evt nxt_action;

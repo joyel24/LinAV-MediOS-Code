@@ -2,6 +2,10 @@ include ../../../Makefile.conf
 
 GCCFLAGS += -I../../../include -I../../avwm/include
 
+ifeq ($(BUILD),X11)
+LDFLAGS  += -shared
+endif
+
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
 TARGET = tetris

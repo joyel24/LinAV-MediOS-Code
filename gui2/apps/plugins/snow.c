@@ -27,8 +27,8 @@
 #define LCD_HOEHE   240
 #define LCD_BREITE  320
 
-#define BLACK 1
-#define WHITE 16
+#define BLACK 0
+#define WHITE 15
 
 static short particles[NUM_PARTICLES][2];
 

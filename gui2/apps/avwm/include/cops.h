@@ -21,8 +21,13 @@
 
 #define REGISTER(ops,event,flag)    {ops=(struct client_operations*)atoi(argv[argc-1]);ops->registerPlugin(event,flag);}
 #define PACK(ops,loop)              {ops->pack(loop);}
-#define RELEASE(ops)                {ops->release_app();}
-#define STOPME(ops)                 {ops->stop_me();}
+#ifdef AV_SCREEN
+    #define RELEASE(ops)                {ops->release_app();}
+    #define STOPME(ops)                 {ops->stop_me();}
+#else
+    #define RELEASE(ops)                {ops->stop_me();}
+    #define STOPME(ops)                 {;}
+#endif
 
 
 #define MENU_SHADOW 2 // height of small shadow under the title

@@ -384,16 +384,18 @@ void ClearCalendar()
 
 int main(int argc,char * * argv)
 {
-	REGISTER(cops,eventHandler,0);
+    REGISTER(cops,eventHandler,0);
+    printf("after register\n");
+    calendar_init();
+    calendar_draw();
+    printf("after draw\n");   
+    PACK(cops,NULL)
+    
+    printf("after pack\n");      
+    
+    STOPME(cops)
 
-   calendar_init();
-	calendar_draw();
-        
-PACK(cops,NULL)
-  
-STOPME(cops)
-
-   return 0;
+return 0;
 }
 
 
