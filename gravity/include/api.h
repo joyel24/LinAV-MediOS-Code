@@ -62,6 +62,9 @@ ERROR_CODE API_VAR_SET              (const char* pVarName, const char* pVarValue
 ERROR_CODE API_MALLOC               (void** ppvBuffer, unsigned long nBytes);
 ERROR_CODE API_FREE                 (void* pvBuffer);
 ERROR_CODE API_MEMAVAIL             (unsigned long* pnBytes);
+ERROR_CODE API_MEMSET               (void* pvBuffer, int fill, int size);
+ERROR_CODE API_MEMCPY               (void* pvBuffer, const void* pvSrc, int size);
+
 ERROR_CODE API_HEAP_CREATE          (HEAP* phHeap, unsigned long nBytes);
 ERROR_CODE API_HEAP_DESTROY         (HEAP hHeap);
 ERROR_CODE API_HEAP_MALLOC          (HEAP hHeap, void** ppvBuffer, unsigned long nBytes);
@@ -151,6 +154,18 @@ ERROR_CODE API_GFX_BUILD_SPANS      (int nYmin, int nYmax);
 /////////////////////// GFX API ///////////////////////
 ///////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////
+/////////////////////// DSP API ///////////////////////
+ERROR_CODE API_DSP_OPEN             (void* pHandler);
+ERROR_CODE API_DSP_CLOSE            ();
+ERROR_CODE API_DSP_LOAD_MEMCODE     (void* pCode, int nSize);
+ERROR_CODE API_DSP_LOAD_HDDCODE     (const char* pszCoffProgram);
+ERROR_CODE API_DSP_ON               ();
+ERROR_CODE API_DSP_OFF              ();
+ERROR_CODE API_DSP_RESET            ();
+ERROR_CODE API_DSP_RUN              ();
+/////////////////////// DSP API ///////////////////////
+///////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////
 ////////////////////// SOUND API //////////////////////

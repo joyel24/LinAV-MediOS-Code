@@ -23,6 +23,7 @@
 #define nAPI_FILE_section_code     3
 #define nAPI_DEVICE_section_code   4
 #define nAPI_MEMORY_section_code   5
+#define nAPI_DSP_section_code      6
 
 #define nAPI_KERNEL_section  (nAPI_KERNEL_section_code << 8)
 #define nAPI_GFX_section     (nAPI_GFX_section_code    << 8)
@@ -30,6 +31,7 @@
 #define nAPI_FILE_section    (nAPI_FILE_section_code   << 8)
 #define nAPI_DEVICE_section  (nAPI_DEVICE_section_code << 8)
 #define nAPI_MEMORY_section  (nAPI_MEMORY_section_code << 8)
+#define nAPI_DSP_section     (nAPI_DSP_section_code    << 8)
 ///////////////////// API SECTIONS ////////////////////
 ///////////////////////////////////////////////////////
 
@@ -164,6 +166,19 @@
 
 #define nAPI_GFX_BUILD_SPANS      (nAPI_GFX_section + 80)
 /////////////////////// GFX API ///////////////////////
+///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+/////////////////////// DSP API ///////////////////////
+#define nAPI_DSP_OPEN             (nAPI_DSP_section + 0)
+#define nAPI_DSP_CLOSE            (nAPI_DSP_section + 1)
+#define nAPI_DSP_LOAD_MEMCODE     (nAPI_DSP_section + 2)
+#define nAPI_DSP_LOAD_HDDCODE     (nAPI_DSP_section + 3)
+#define nAPI_DSP_ON               (nAPI_DSP_section + 4)
+#define nAPI_DSP_OFF              (nAPI_DSP_section + 5)
+#define nAPI_DSP_RESET            (nAPI_DSP_section + 6)
+#define nAPI_DSP_RUN              (nAPI_DSP_section + 7)
+/////////////////////// DSP API ///////////////////////
 ///////////////////////////////////////////////////////
 
 ERROR_CODE swi_call               (long swi_num,long param1,long param2,long param3) ;

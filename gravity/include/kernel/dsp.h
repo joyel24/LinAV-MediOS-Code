@@ -61,4 +61,38 @@ typedef struct _COFF_SCNHDR
 
 void load_dsp_program (const char* pszFilename);
 
+
+
+////////////////////////////////////////////////////////
+// DSP - AV3XX interconnection data structs,
+// located in shared memory at address 0x0004100.
+////////////////////////////////////////////////////////
+typedef struct _AV3XX_DSP_GFX_CONTEXT
+{
+	unsigned long  pPixels;
+	unsigned short nWidth;
+	unsigned short nHeight;
+	unsigned short nStride;
+} AV3XX_DSP_GFX_CONTEXT;
+
+typedef struct _AV3XX_DSP_INTERCONNECTION
+{
+	unsigned short        nCommandToDSP;
+	unsigned short        nDSPResultCode;
+	unsigned short        nCommandToAV3XX;
+	unsigned short        nAV3XXResultCode;
+	unsigned long         nMemoryFileStart;
+	unsigned long         nMemoryFileSize;
+	unsigned long         nDecodingBufferAddress;
+	AV3XX_DSP_GFX_CONTEXT ctx;
+	short                 sMsgBuffer [64];
+} AV3XX_DSP_INTERCONNECTION;
+
+#define DSP_TO_AV3XX_COMMAND_MESSAGE  0x0100
+#define DSP_TO_AV3XX_COMMAND_READFILE 0x0101
+#define DSP_TO_AV3XX_COMMAND_COMPLETE 0x0102
+////////////////////////////////////////////////////////
+
+
+
 #endif //__DSP_H
