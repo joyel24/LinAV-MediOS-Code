@@ -17,29 +17,14 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include "graphics.h"
-
-/*===== define Keyboard // Archos ====== */
-#define KEYBOARD_GENERIC \
-  "Keyboard   Rockbox\n" \
-  "--------   --------------\n" \
-  "+          ON\n" \
-  "8          UP\n" \
-  "2          DOWN\n" \
-  "4          LEFT\n" \
-  "6          RIGHT\n" \
-  "Enter      OFF\n" \
-  "5          PLAY\n" \
-  "/          F1\n" \
-  "*          F2\n" \
-  "-          F3\n"
-/*=========== End of define ============ */
+#include "X11/keysym.h"
 
 extern Display* display;
 extern Window window;	/*variable Event */
-XEvent event;
 
 int nxtEvent(void)
 {   
+    XEvent event;
     XSelectInput(display, window, ExposureMask | KeyPressMask | KeyReleaseMask);
     /* next event */
     XNextEvent(display, &event);
@@ -51,7 +36,7 @@ int nxtEvent(void)
         lcd_update(FORCE_REDRAW,0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
       break;
       case KeyPress :
-        getKey(event.type);
+        getKey(&event);
       break;
       case KeyRelease :
       break;
@@ -61,39 +46,67 @@ int nxtEvent(void)
 
 int getKey(XEvent *event)
 {
-    switch (event.type)
+    int rep = event->type;
+    switch(rep)
     {
-    case ON :
-       return BTN_ON;
-    break;
-    case OFF :
-       return BTN_OFF;
-    break;
-    case F1 :
-       return BTN_F1;
-    break;
-    case F2 :
-       return BTN_F2;
-    break;
-    case PLAY :
-       return BTN_JOY;
-    break;
-    case F3 :
-       return BTN_F3;
-    break;
-    case UP :
-       return BTN_UP;
-    break;
-    case DOWN :
-       return BTN_DOWN;
-    break;
-    case LEFT :
-       return BTN_LEFT;
-    break;
-    case RIGHT :
-       return BTN_RIGHT;
-    break;
-    }
+	case XK_KP_Left:
+	case XK_Left:
+	case XK_KP_4:
+	    return BTN_LEFT;
+            break;
+
+	case XK_KP_Right:
+	case XK_Right:
+	case XK_KP_6:
+	    return BTN_RIGHT;
+            break;
+
+	case XK_KP_Up:
+	case XK_Up:
+	case XK_KP_8:
+	    return BTN_UP;
+            break;
+
+	case XK_KP_Down:
+	case XK_Down:
+	case XK_KP_2:
+	    return BTN_DOWN;
+            break;
+
+	case XK_KP_Space:
+	case XK_KP_5:
+	case XK_KP_Begin:
+	case XK_space:
+	    return BTN_JOY;
+            break;
+
+	case XK_KP_Enter:
+	case XK_A:
+	case XK_a:
+	case XK_Return:
+	    return BTN_OFF;
+            break;
+
+	case XK_KP_Add:
+	case XK_plus:
+	    return BTN_ON;
+            break;
+
+	case XK_KP_Divide:
+	case XK_1:
+	    return BTN_F1;
+            break;
+
+	case XK_KP_Multiply:
+	case XK_2:
+	    return BTN_F2;
+            break;
+
+	case XK_KP_Subtract:
+	case XK_3:
+	    return BTN_F3;
+            break;
+        }
 }
 
 int waitEvent(void)
