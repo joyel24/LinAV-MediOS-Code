@@ -158,6 +158,45 @@ void cleanList()
 	listused=0;
 }
 
+int is_script_type(char *extension)
+{
+	return strcmp(extension, ".sh") == 0;
+}
+
+int is_image_type(char *extension)
+{
+	return strcmp(extension, ".jpg") == 0
+		|| strcmp(extension, ".gif") == 0
+		|| strcmp(extension, ".bmp") == 0;
+}
+
+int is_mp3_type(char *extension)
+{
+	return strcmp(extension, ".mp3") == 0;
+}
+
+int is_text_type(char * extension)
+{
+   int retVal = 0;
+
+   if(strcmp(extension, ".txt") == 0)
+	   retVal = 1;
+   else if(strcmp(extension, ".cfg") == 0)
+	   retVal = 1;
+   else if(strcmp(extension, ".c") == 0)
+	   retVal = 1;
+   else if(strcmp(extension, ".cpp") == 0)
+	   retVal = 1;
+   else if(strcmp(extension, ".h") == 0)
+	   retVal = 1;
+   else if(strcmp(extension, ".ini") == 0)
+	   retVal = 1;
+   else if(strcmp(extension, ".csv") == 0)
+	   retVal = 1;
+
+	return retVal;
+}
+
 int launchBin(char * name)
 {
 	int pid;
@@ -182,6 +221,86 @@ int launchBin(char * name)
 	//execl();
 	//fprintf(stderr, "Cannot restart podzilla!\n");
 	//exit(1);
+}
+
+void launchSoundPlayer(char *name)
+{
+	int pid;
+
+	pid = vfork();
+	if (pid == 0) {
+		execl("/mnt/play", "play", name, 70, 0);
+		fprintf(stderr, "exec failed!\n");
+		_exit(1);
+	}
+	else {
+		if (pid > 0) {
+			int status;
+			cops->closeScreen();
+			waitpid(pid, &status, 0);
+			cops->openScreen();
+		}
+		else {
+			fprintf(stderr, "vfork failed %d\n", pid);
+		}
+	}
+}
+
+int launchScript(char * name)
+{
+	char tmp[1000];
+	int pid;
+	pid = vfork();
+	if (pid == 0) {
+		execl("/bin/sh", "sh", name);
+		fprintf(stderr, "exec failed!\n");
+		_exit(1);
+	}
+	else {
+		if (pid > 0) {
+			int status;
+			cops->closeScreen();
+			waitpid(pid, &status, 0);
+			cops->openScreen();
+		}
+		else {
+			fprintf(stderr, "vfork failed %d\n", pid);
+		}
+	}
+
+	//execl();
+	//fprintf(stderr, "Cannot restart podzilla!\n");
+	//exit(1);
+}
+
+void handle_type_other(char *filename)
+{
+	char *ext;
+
+	ext = strrchr(filename, '.');
+	if (ext == 0)
+	{
+      // no extension
+		launchBin(filename);
+	}
+	else if (is_image_type(ext))
+	{
+	}
+	else if (is_text_type(ext))
+	{
+	}
+	else if (is_mp3_type(ext))
+	{
+	   launchSoundPlayer(filename);
+	}
+	else if (is_script_type(ext))
+	{
+	   launchScript(filename);
+	}
+	else
+	{
+	   // unknown type
+	}
 }
 
 
@@ -240,7 +359,7 @@ int eventHandler(int evt)
 			break;
 		case BTN_RIGHT:
 			if(chdir(list[pos+nselect])<0)
-				launchBin(list[pos+nselect]);
+				handle_type_other(list[pos+nselect]);
 			cleanList();
 			if(doLs("./")<0)
 			{
