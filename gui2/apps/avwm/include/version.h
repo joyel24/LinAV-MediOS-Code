@@ -15,6 +15,6 @@
 #define __VERSION_H
 
 #define MAJOR_V 1
-#define MINOR_V 0
+#define MINOR_V 2
 
 #endif
