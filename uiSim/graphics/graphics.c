@@ -22,7 +22,7 @@
 
 int ini_graphics()
 {
-/* test*/
+/* initialisation X*/
 }
 
 void close_graphics()
