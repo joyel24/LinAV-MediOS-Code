@@ -19,6 +19,7 @@
 
 #define REGISTER(ops,event,flag)    {ops=(struct client_operations*)atoi(argv[argc-1]);ops->registerPlugin(event,flag);}
 #define PACK(ops)              {ops->pack();}
+#define STOPME(ops)            {ops->stop_me();}
 
 #define MENU_SHADOW 2 // height of small shadow under the title
 
@@ -49,7 +50,8 @@ struct client_operations {
     
     int  (*clearEventQueue)   (void);    
     void (*registerPlugin)    (void (*evtHandle),int flag);    
-    void (*pack)              (void);    
+    void (*pack)              (void);
+    void (*stop_me)           (void);    
     
     void (*showSBar)          (void);
     void (*hideSBar)          (void);
@@ -69,7 +71,7 @@ struct client_operations {
     int  (*pause_playback)      (void);
     int  (*stop_playback)       (void);
     
-    int  (*readPeack)           (struct av_peak * peack); 
+    int  (*readPeak)           (struct av_peak * peak); 
     
     int  (*setVolume)           (int val);
     int  (*setBass)             (int val);

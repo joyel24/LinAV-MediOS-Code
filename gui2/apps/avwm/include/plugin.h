@@ -26,6 +26,7 @@ struct plugin {
 
 void   doRegisterPlugin (struct plugin * plug,void (*evtHandle),int flag);
 void   registerPlugin   (void (*evtHandle),int flag);
+void   stop_me          (void);
 int    loadPlugin       (char * path, char * param);  // prepare env to load a new plugin
 int    launchPlugin     (char * path,char * param);   // launch a plugin
 

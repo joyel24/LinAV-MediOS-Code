@@ -38,6 +38,7 @@ struct client_operations cops={
     clearEventQueue    : clearEventQueue,
     registerPlugin     : registerPlugin,
     pack               : pack,
+    stop_me            : stop_me,
     drawImage          : drawImage,
     openScreen         : ini_graphics,
     closeScreen        : close_graphics,
@@ -59,7 +60,7 @@ struct client_operations cops={
     pause_playback     : pause_playback,
     stop_playback      : stop_playback,
     
-    readPeack          : readPeack,
+    readPeak          : readPeak,
     
     setVolume          : setVolume,
     setBass            : setBass,

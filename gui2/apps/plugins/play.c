@@ -259,20 +259,11 @@ void draw_settings(void)
  *******************/
 void apply_settings(void)
 {
-    int err=0;   
-    
-    if(!cops->setVolume(vol))
-    	err++;
-    if(!cops->setBass(bass))
-    	err++;
-    if(!cops->setTreble(treb))
-    	err++;
-    if(!cops->setLoudness(loud))
-    	err++;
-    if(!cops->setBalance(bal))
-    	err++;
-
-    cops->debug("applying settings (err=%d)",err);
+    cops->setVolume(vol);
+    cops->setBass(bass);
+    cops->setTreble(treb);
+    cops->setLoudness(loud);
+    cops->setBalance(bal);
 }
 
 /**************************
@@ -445,10 +436,10 @@ int eventHandler(int evt)
 {    
             switch(evt)
             {
-            	/*case EVT_TIMER:
+            	case EVT_TIMER:
                 	if(data.finished)
                         	stop=1;
-                        break;*/
+                        break;
                 case BTN_UP: /* settings_cursor up */
                     if(window == 1)
                     {
@@ -719,7 +710,7 @@ int eventHandler(int evt)
             }
 
             /* read peaks */
-            cops->readPeack(&av_p);            
+            cops->readPeak(&av_p);            
 
             /* get peak values */
             av_p.left=(av_p.left*200)/0x7FFF;
@@ -832,9 +823,7 @@ int main(int argc, char * * argv)
     /* set standard font */
     cops->setFont(STD6X9);
     eventHandler(-1); // initial draw !!    
-    
-    cops->debug("Before start");
-    
+        
     /* start mp3 */
     cops->start_playback();
         
@@ -842,10 +831,13 @@ int main(int argc, char * * argv)
     
     while(!stop) /*nothing*/;
 
-    cops->debug("I'm out");
+    fprintf(stderr,"out of mp3 play\n");
+    
     /* shut down everything used */
     
     cops->close_mp3_playback();
+    
+    STOPME(cops)
     
     return 0;
 }

@@ -53,6 +53,15 @@ void doRegisterPlugin(struct plugin * plug,void (*evtHandle),int flag)
         plug->flag=flag;
 }
 
+void stop_me(void)
+{
+    cur_plugin.handler=0;
+    showSBar();
+    menu_plugin.handle_on=1;
+    enableMenu();
+    sendEvt(&menu_plugin,EVT_REDRAW);       
+}
+
 int loadPlugin(char * path, char * param)
 {
     int status;
