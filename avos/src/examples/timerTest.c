@@ -97,9 +97,11 @@ int main() {
 
 //    interruptsSetCausesA(0xffffffff);
 //    interruptsSetCauses2A(0xffffffff);
-    interruptsSetMaskA(interruptsGetMaskA() | 0x7ffff3f);
+    interruptsSetMaskA(interruptsGetMaskA() | 0xffffff7f);
 //    interruptsSetMask2A(0x0);
     interruptsSetIRQEnabledA();
+    
+    gioSetAllIRQsA(0xff);    // Set all gio (0-7) to be IRQ!
     
     while(1) {
         graphicsBoxfA(&screenBitmap2, 320, 0, 1, 120, 0x0000);

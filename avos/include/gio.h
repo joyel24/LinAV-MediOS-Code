@@ -56,6 +56,7 @@ void gioSetAllBitsetsA(u32 bitsets);
 u32 gioGetAllBitsetsA();
 void gioSetAllBitclearsA(u32 bitclears);
 u32 gioGetAllBitclearsA();
+void gioSetAllIRQs(u32 bitset);
 
 void gioSetBitA(u32 line);
 void gioClearBitA(u32 line);

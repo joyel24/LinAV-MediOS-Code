@@ -42,6 +42,18 @@ gioInc = 1
 
 .text
 
+@ ------------------------------------------------------------------------------
+@ gioSetAllIRQs(r0=bitset)
+.globl gioSetAllIRQsA
+gioSetAllIRQsA:
+        switchThumb
+.globl gioSetAllIRQs
+.thumb_func
+
+gioSetAllIRQs:
+        ldr r2, =0x30590
+        strh r0, [r2]
+        bx lr
         
 @ ------------------------------------------------------------------------------
 @ gioSetAllDirections(r0=directions)

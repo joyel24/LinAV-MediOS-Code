@@ -23,8 +23,12 @@ typedef unsigned long u32;
 
 #define INTERRUPTS_OSD      7   // Seems to just interrupt really fast
                                 // Does this mean end of osd update?
-#define INTERRUPTS_UART0    12
+#define INTERRUPTS_UART0    12  // When a character is recieved...
 #define INTERRUPTS_UART1    13
+
+#define INTERRUPTS_EXT0     18  // ON button when enabled in gio
+#define INTERRUPTS_EXT1     19
+
 
 void interruptsSetMaskA(u32 bitmask);
 u32 interruptsGetMaskA();
