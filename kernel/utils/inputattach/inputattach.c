@@ -99,8 +99,10 @@ int main(int argc, char **argv)
 	char c;
 
 	if ((fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY | O_NONBLOCK)) < 0) {
-		perror("inputattach");
-		return 1;
+		if ((fd = open("/dev/tts/0", O_RDWR | O_NOCTTY | O_NONBLOCK)) < 0) {
+			perror("inputattach");
+			return 1;
+		}
 	}
 	setline(fd, av3xx_flags, av3xx_speed);
 
