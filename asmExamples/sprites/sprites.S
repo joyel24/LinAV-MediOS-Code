@@ -36,7 +36,6 @@ mloop:
         b mloop
 
 .include "../includes/lcd.S"
-.include "../includes/terminal.S"
 
 sprite:
 .include "sprite.inc"

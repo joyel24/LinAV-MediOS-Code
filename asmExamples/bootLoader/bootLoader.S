@@ -17,6 +17,7 @@
         .include "../includes/av300.S"
         
         doimage = 1
+
 		@uartDebug = 1 @ send debug info on UART
 		doTimeOut = 1 @ turn on the autorun of DEFAULT.BIN after time out
         
@@ -688,7 +689,7 @@ lopMove:ldrb r3, [r0]
         add r0, #1
         add r1, #1
         sub r2, #1
-        bne lopMove
+         bne lopMove
         pop {r0, r1, r2, r3}
         bx lr
 
