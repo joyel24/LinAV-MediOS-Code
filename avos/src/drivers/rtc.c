@@ -26,6 +26,19 @@ struct tm rtcGetTime() {
 
 void rtcSetTime(struct tm newTime) {
     int c = i2cWrite(RTC_ADDR, 0, &newTime, 9);
+
+    // TODO - Handle i2c errors...
+
+}
+
+void rtcInit() {
+    unsigned char cb[1];
+    int c;
+    
+    c = i2cRead(RTC_ADDR, 0x0c, cb, 1);
+    cb[0] &= ~0x40;                         // Make sure RTC is running!
+    c = i2cWrite(RTC_ADDR, 0x0c, cb, 1);
+    
     
     // TODO - Handle i2c errors...
 

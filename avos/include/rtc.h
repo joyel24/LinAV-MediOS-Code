@@ -28,5 +28,6 @@ struct tm {
     unsigned char tm_yday;
 };
 
+extern void rtcInit();
 extern struct tm rtcGetTime();
 extern void rtcSetTime(struct tm newTime);
