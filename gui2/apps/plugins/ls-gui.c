@@ -251,6 +251,31 @@ void launchSoundPlayer(char *name)
 	}
 }
 
+void launchViewer(char *name)
+{
+	int pid;
+
+	cops->clearEventQueue();
+
+	pid = vfork();
+	if (pid == 0) {
+		execl("/mnt/viewer", "viewer", name, 70, 0);
+		fprintf(stderr, "exec failed!\n");
+		_exit(1);
+	}
+	else {
+		if (pid > 0) {
+			int status;
+			cops->closeScreen();
+			waitpid(pid, &status, 0);
+			cops->openScreen();
+		}
+		else {
+			fprintf(stderr, "vfork failed %d\n", pid);
+		}
+	}
+}
+
 int launchScript(char * name)
 {
 	char tmp[1000];
@@ -293,6 +318,7 @@ void handle_type_other(char *filename)
 	}
 	else if (is_image_type(ext))
 	{
+	   launchViewer(filename);
 	}
 	else if (is_text_type(ext))
 	{
