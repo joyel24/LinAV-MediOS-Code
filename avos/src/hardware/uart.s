@@ -45,7 +45,7 @@ uartGetch:
         lsl r1, #26
          beq uartNon
         mov r0, #0
-        ldrh r0, [r2, #0]
+        ldrh r0, [r2, #uartRegDTTR]
 uartNon:pop {r1, r2, r3, pc}
 
 
@@ -80,7 +80,7 @@ uartLp1:ldrb r0, [r1, #0]
          beq uartEn1
         bl uartOutch
         add r1, r1, #1
-        b uartLoop1
+        b uartLp1
 uartEn1:pop {r1, pc}
 
         .ltorg
