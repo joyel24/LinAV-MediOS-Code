@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "events.h"
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 
 
 extern Display* display;	/*variable Event */

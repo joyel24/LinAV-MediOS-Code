@@ -7,15 +7,14 @@
 
 int main(int argc,char ** argv)
 {
-
- while(1)
- {
     ini_graphics();
     
-    nxtEvent();
-    
     clearScreen(COLOR_WHITE);
-       
-    drawRect(COLOR_BLUE,10,10,100,50);   
+ 
+ while(1)
+  {  
+    drawRect(COLOR_BLUE,10,10,100,50); 
+    
+    nxtEvent();
   }
 }
