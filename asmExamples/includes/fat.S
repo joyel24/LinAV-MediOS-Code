@@ -38,7 +38,9 @@ fatInitT:
         ldr r0, =fatTBuffer
         mov r1, r7
         mov r2, #1
-        callThumb r4, ataReadLBAT
+        callThumb r4, ataReadLBA
+		cmp r0, #0
+		bne error
         
         ldr r6, =fatTBuffer
         mov r0, r6
@@ -74,11 +76,11 @@ fatInitT:
         lsl r1, #9              @ * 512
         ldr r0, =fatClusterSize
         str r1, [r0]
+		mov r0, #0
+error:
+        pop {r1, r2, r3, r4, r5, r6, r7, pc}
 
-        pop {r1, r2, r3, r4, r5, r6, r7}
-        pop {r0}
-        bx r0
-        
+
 @ fatReadCT  r0=cluster, r1->buffer
 @
 .globl fatReadCT
@@ -100,7 +102,7 @@ fatReadM:
         mov r0, r6
         mov r1, r4
         mov r2, #1      @r5                          @ #1
-        callThumb r3, ataReadLBAT
+        callThumb r3, ataReadLBA
 
         ldr r0, =fatSectorSize
         add r6, r0
@@ -133,7 +135,7 @@ fatTraceCCT:
 
         ldr r0, =fatFATBuffer
         mov r2, #1
-        callThumb r3, ataReadLBAT
+        callThumb r3, ataReadLBA
 
 fatCacheHit:        
         ldr r5, =(fatSectorSize - 1)
@@ -172,6 +174,38 @@ fatRead2T:
         mov r0, r1
         pop {r1, r2}
         bx lr
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.globl getFatLBADATAT
+.thumb_func
+getFatLBADATAT:
+	ldr r0, =fatLBADATA
+	ldr r0, [r0]
+	bx lr
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.globl getFatLBAFAT
+.thumb_func
+getFatLBAFAT:
+	ldr r0, =fatLBAFAT
+	ldr r0, [r0]
+	bx lr
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.globl getFatSecPerCluT
+.thumb_func
+getFatSecPerCluT:
+	ldr r0, =fatSecPerClu
+	ldr r0, [r0]
+	bx lr
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.globl getFatRootCluT
+.thumb_func
+getFatRootCluT:
+	ldr r0, =fatRootClu
+	ldr r0, [r0]
+	bx lr
         
         .ltorg
         

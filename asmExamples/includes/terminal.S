@@ -18,8 +18,8 @@
 @ terminalSetColorFT r0=color
 @
 
-        .include "../includes/lcd.S"
-        .include "../includes/common.S"
+ @       .include "../includes/lcd.S"
+@        .include "../includes/common.S"
         
 .ifndef terminalInc
 terminalInc = 1

@@ -44,7 +44,7 @@
 @
 @ ostInitT
 
-.include "../includes/common.S"
+@.include "../includes/common.S"
 
 .ifndef osdInc
 osdInc = 1

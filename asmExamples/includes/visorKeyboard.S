@@ -13,7 +13,7 @@
 @
 @
 
-.include "../includes/common.S"
+@.include "../includes/common.S"
 
 .ifndef visorKeyboardInc
 visorKeyboardInc = 1

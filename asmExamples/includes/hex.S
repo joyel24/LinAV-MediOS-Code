@@ -166,6 +166,39 @@ hex8T:
         pop {r1, r2, r3, r4}
         bx lr
 
+.thumb
+.globl read4T
+.thumb_func
+read4T:
+        push {r1, r2}
+        ldrb r1, [r0, #0x03]
+        lsl r1, #8
+        ldrb r2, [r0, #0x02]
+        orr r1, r2
+        lsl r1, #8
+        ldrb r2, [r0, #0x01]
+        orr r1, r2
+        lsl r1, #8
+        ldrb r2, [r0, #0x00]
+        orr r1, r2
+        mov r0, r1
+        pop {r1, r2}
+        bx lr
+
+@ ------------------------------------------------------------------------------
+.globl read2T
+.thumb_func
+read2T:
+        push {r1, r2}
+        mov r1, #0
+        ldrb r1, [r0, #0x01]
+        lsl r1, #8
+        ldrb r2, [r0, #0x00]
+        orr r1, r2
+        mov r0, r1
+        pop {r1, r2}
+        bx lr
+
         .ltorg
         .arm
         

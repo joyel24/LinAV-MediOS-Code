@@ -15,8 +15,8 @@
 @ dec5T(r0->destnation, r1=value)
 @
 
-    .include "../includes/common.S"
-    .include "../includes/math.S"
+@    .include "../includes/common.S"
+@    .include "../includes/math.S"
     
 .ifndef decInc
 decInc = 1

@@ -15,7 +15,7 @@
 @ colorPackYCbCrT r0=Y, r1=Cr, r2=Cb -> r0=packed
 @
 
-.include "../includes/common.S"
+@.include "../includes/common.S"
 
 .ifndef colorInc
 colorInc = 1

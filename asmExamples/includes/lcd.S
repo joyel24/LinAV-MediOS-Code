@@ -21,8 +21,8 @@
 @ lcdScrollUpT (r0=lines, r1=color)
 @
 
-.include "../includes/common.S"
-.include "../includes/osd.S"
+@.include "../includes/common.S"
+@.include "../includes/osd.S"
 
 .ifndef lcdInc
 lcdInc = 1
@@ -350,6 +350,10 @@ lcdCLS:
         pop {r0}
         bx r0
 
+@ lcdClsT
+@
+.globl lcdClsT
+.thumb_func
 lcdClsT:
         push {r0, r1, r2}
         ldr r0, =lcdVideoBuffer
@@ -364,10 +368,71 @@ lcdCLS2:
         pop {r0, r1, r2}
         bx lr
 
+@ loadImg r0 -> buffer, r1 -> lcd, r2 nb pix in buffuer
+@return ->lcd
+
+.globl loadImg
+.thumb_func
+loadImg:
+		push {r1, r2, r3, r4, r5, r6, lr}
+
+		mov r4, r0
+		mov r6, r2
+		cmp r1, #0
+		mov r3, r1
+		bne lDisp
+        ldr r3, =lcdVideoBuffer2
+		add r3, r1
+lDisp:
+		mov r0, #0
+        mov r1, #0
+        mov r2, #0
+        ldrb r0, [r4]
+		add r4, #1
+		ldrb r1, [r4]
+		add r4, #1
+		ldrb r2, [r4]
+		add r4, #1
+		callThumb r5, colorRGB2YCbCrT
+        callThumb r5, colorPackYCbCrT
+        str r0, [r3]
+		add r3, #4
+		sub r6, #1
+		bne lDisp
+
+		mov r0, r3
+
+		pop {r1, r2, r3, r4, r5, r6, pc}
+
+@ lcdSetBgT r0= bgColor
+@
+.globl lcdSetBgT
+.thumb_func
+lcdSetBgT:
+	push {r1}
+	ldr r1, =fontBG
+	str r0, [r1]
+	pop {r1}
+	bx lr
+
+
+@ lcdSetCol r0=color
+@
+.globl lcdSetCol
+.thumb_func
+lcdSetCol:
+		push {r1}
+		ldr r1, =fontCol
+		str r0, [r1]
+		pop {r1}
+		bx lr
+
+
         .ltorg
     
         .arm
 fontBG: .word 0         @ eugh
+fontCol:.word 0
         
 @ SYSTEM FONT
 
