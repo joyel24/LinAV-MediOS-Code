@@ -60,43 +60,9 @@ int viewNewDir(struct browser_data *bdata,char *name)
     fillRect(COLOR_WHITE,bdata->x_start,bdata->y_start,bdata->width,bdata->height);
     
     bdata->pos=0;
-    bdata->nselect=0;
-    hideArrow(DOWN_ARROW,bdata);
-    hideArrow(UP_ARROW,bdata);
-    if(bdata->listused>bdata->nb_disp_entry)
-        showArrow(DOWN_ARROW,bdata);
+    bdata->nselect=0;    
     printAllName(bdata);
     return 1;
-}
-
-void showArrow(int type,struct browser_data *bdata)
-{
-    int H=bdata->entry_height;
-    
-    switch(type)
-    {
-        case UP_ARROW:
-            drawBITMAP(gui_ls_upBitmap,bdata->width-9,bdata->y_start);
-            break;
-        case DOWN_ARROW:
-            drawBITMAP(gui_ls_dwBitmap,bdata->width-9,bdata->y_start+(bdata->nb_disp_entry-1)*H);
-            break;
-    }
-}
-
-void hideArrow(int type,struct browser_data *bdata)
-{
-    int H=bdata->entry_height;
-
-    switch(type)
-    {
-        case UP_ARROW:
-            fillRect(COLOR_WHITE,bdata->width-9,bdata->y_start,9,9);
-            break;
-        case DOWN_ARROW:
-            fillRect(COLOR_WHITE,bdata->width-9,bdata->y_start+(bdata->nb_disp_entry-1)*H,9,9);
-            break;
-    }
 }
 
 int printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct browser_data *bdata)

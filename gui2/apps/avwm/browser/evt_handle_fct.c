@@ -67,18 +67,7 @@ int browserEvt(int evt,struct browser_data * bdata)
                 printAName(bdata,bdata->pos+bdata->nselect+1,bdata->nselect+1,0,0);
                 printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,0,1);
             }
-
-            if( (bdata->listused>bdata->nb_disp_entry) &&
-                (bdata->pos+bdata->nb_disp_entry < bdata->listused) )
-                showArrow(DOWN_ARROW,bdata);
-            else
-                hideArrow(DOWN_ARROW,bdata);
-
-            if(bdata->pos == 0)
-                hideArrow(UP_ARROW,bdata);
-            else
-                showArrow(UP_ARROW,bdata);
-                
+    
             evt=NO_EVENT; /* clear this event */
             
             break;
@@ -127,17 +116,7 @@ int browserEvt(int evt,struct browser_data * bdata)
                     printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,0,1);
                 }
             }
-            if(bdata->pos>0)
-                showArrow(UP_ARROW,bdata);
-            else
-                hideArrow(UP_ARROW,bdata);
-
-            if( (bdata->listused>bdata->nb_disp_entry) &&
-                (bdata->pos+bdata->nb_disp_entry < bdata->listused) )
-                showArrow(DOWN_ARROW,bdata);
-            else
-                hideArrow(DOWN_ARROW,bdata);
-
+            
             evt=NO_EVENT; /* clear this event */    
             
             break;
