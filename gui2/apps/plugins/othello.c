@@ -26,7 +26,6 @@
 #include "cops.h"
 #include "avevents.h"
 
-#include "msgBox.h"
 
 struct client_operations * cops;
 struct position {
