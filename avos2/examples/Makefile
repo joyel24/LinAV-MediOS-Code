@@ -1,4 +1,4 @@
-SUBDIRS = ataTest gioTest osdTest rtcTest timerTest
+SUBDIRS = ataTest gioTest osdTest rtcTest timerTest exploder
 
 all: subdirs
 
