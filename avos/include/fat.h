@@ -104,7 +104,6 @@ struct fat_info {
 #include "ata.h"
 
 extern int fatInit(struct partInfo * partition);
-extern int fatInit_info(struct partInfo * partition);
 extern int closeFat(int fd);
 extern int selectFat(int fd);
 extern void inifatinfo();

@@ -37,10 +37,8 @@ int main(int argc, char * * argv) {
 	inifatinfo();
 	inidir();
 	inifile();
-
 	ataSelectHDDA();
 	ataPowerUpHDDA();
-
 	ataReadMBR();
 	fatInit(getPartition(0));
 
