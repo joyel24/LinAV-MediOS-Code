@@ -137,8 +137,11 @@ struct av_peak {
 #define AV_LCD_ON              _IO(AV_OP_IOC_MAGIC,60)
 #define AV_LCD_OFF             _IO(AV_OP_IOC_MAGIC,61)
 #define AV_LCD_GET_STATE       _IOR(AV_OP_IOC_MAGIC,62,int)
+#define AV_HD_GET_TIMOUT       _IOR(AV_OP_IOC_MAGIC,63,int)
+#define AV_HD_SET_TIMOUT       _IOW(AV_OP_IOC_MAGIC,64,int)
+#define AV_HD_STOP             _IO(AV_OP_IOC_MAGIC,65)
 
-#define AV_OP_IOC_MAXNR        63
+#define AV_OP_IOC_MAXNR        66
 
 /* MAJOR / MINOR */
 
