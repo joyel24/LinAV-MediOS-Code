@@ -123,6 +123,33 @@ void SettingsEvtLoop(void)
     settings_plugin.handle_on=0;
 }
 
+int LoadSettings()
+{
+    return 0;
+}
+
+int SaveSettings()
+{
+    char strkey[20];
+    int i = 0;
+/*
+    openFile("setting.cfg",CFG_WRITE);
+
+    while (1)
+    {
+        sprintf(strkey, "%d", i);
+        if (!nxt_cfg(item,strkey)) break;
+        if(!strcmp(item,"name"))
+        {
+            addItem(cfg);
+            strcpy(current_item->name,value);
+        }
+    }
+    closeFile();
+*/
+    return 0;
+}
+
 void GetSettings(void)
 {
     // get actual settings
@@ -199,6 +226,8 @@ void SetSettings(void)
     {
         setTime(&date_time_setting);
     }
+
+    SaveSettings();
 }
 
 int GetNextValidParameter()
