@@ -74,7 +74,7 @@ int main() {
                                      
     for (y=0;y<height;y+=(height>>4)) {
         for (x=0;x<width;x+=(width>>4)) {
-    graphicsBoxfA(&screenBitmap, x, y, width>>4, height>>4, c);
+    graphicsBoxfA(&screenBitmap, x, y, width>>4, height>>4, c | (c<<8));
     stringPutHexA(hex2, c++, 2);
     pal16[1] = 0x0000;
     graphicsStringA(&screenBitmap, x, y, &sprite8_13, std8x13_, 8, 0, hex2);
