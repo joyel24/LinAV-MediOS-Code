@@ -17,8 +17,8 @@
 @ ataWaitForBSYT()          Waits until ATA is busy...
 @ ataWaitForStartOfXferT    Wait until start of xfer.
 @
-@ ataIdentifyT  r0->buffer
-@ ataReadLBAT   r0->buffer r1=LBA, r2=n
+@ ataIdentifyT  r0->buffer                  r0=0sucess, 1=failRDY, 2=failXfer
+@ ataReadLBAT   r0->buffer r1=LBA, r2=n     r0=0sucess, 1=failRDY, 2=failXfer
 @
 
 .ifndef ataInc
@@ -42,10 +42,10 @@ ataSelectLBA                =   0x40
         .thumb
 
 @ ataReadLBAT (r0->buffer, r1=lba, r2=n)
-@
+@       return 0-success, 1-Failed on waitRDY, 2-Failed on waitXFer
 ataReadLBAT:
         push {lr}
-        push {r1, r2, r3, r4, r5, r6}
+        push {r2, r3, r4, r5, r6}
         mov r5, r0
         mov r4, r1
         mov r6, r2
@@ -57,6 +57,10 @@ ataReadLBAT:
         .endif
 
         callThumb r1, ataWaitForRDYT        
+        mov r1, r0
+        mov r0, #1
+        cmp r1, #0
+         bne ataRT2
 
         ldr r2, =ataRegSector
         mov r1, r4
@@ -81,7 +85,11 @@ ataReadLBAT:
         ldr r1, =ataCommand_READ_SECTORS
         strb r1, [r2]
 
-        callThumb r4, ataWaitForStartOfXferT
+        callThumb r1, ataWaitForStartOfXferT
+        mov r1, r0
+        mov r0, #2
+        cmp r1, #0
+         bne ataRT2
 
         lsl r6, #8              @ * 256
         
@@ -93,12 +101,14 @@ ataR2:  ldrh r1, [r2]
         sub r6, #1
          bne ataR2
 
-        pop {r1, r2, r3, r4, r5, r6}        
-        pop {r0}
-        bx r0
+        mov r0, #0
+ataRT2:
+        pop {r2, r3, r4, r5, r6}        
+        pop {r1}
+        bx r1
 
 @ ataIdentifyT (r0->buffer)
-@
+@       return 0-success, 1-Failed on waitRDY, 2-Failed on waitXFer
 ataIdentifyT:
         push {lr}
         push {r1, r2, r3, r4, r5}

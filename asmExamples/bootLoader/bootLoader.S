@@ -161,7 +161,7 @@ loopsp:
         str r1, [r5, #4]
         ldr r0, =(msg101 + 27)
         callThumb r2, hex8T
-        
+
         callThumb2 r4, terminalPutsCT, msg101, 0xfdfd
 
         add r5, #8
@@ -196,6 +196,12 @@ loopsp:
         .ltorg
 oval1:
 
+waitScr:
+        callThumb r1, buttonsGetStatusT
+        ldr r1, =0x777
+        cmp r0, r1
+         bne waitScr
+
 @ ------------------------------------------------------------------------------
 @ Init program selection screen
 @ ------------------------------------------------------------------------------
@@ -229,21 +235,24 @@ lcop:   mov r0, #0
         ldr r2, =msg_001
         ldr r3, =0xfbfb
         callThumb r4, lcdPutsT
+
 @ ------------------------------------------------------------------------------
 @ Main loop
 @ ------------------------------------------------------------------------------
 
         ldr r0, =fatRootClu             @ Start at root dir.
         ldr r0, [r0]
+
+        @ r0 = LBA of dir...
 loopRR:
         ldr r6, =bufferx
         mov r7, r0
 loopRE: mov r0, r7
         mov r1, r6
-        ldr r2, =fatClusterSize
-        ldr r2, [r2]
-        callThumb r3, readLBAT
-        add r6, r2
+        callThumb r2, fatReadCT
+        ldr r0, =fatClusterSize
+        ldr r0, [r0]
+        add r6, r0
         mov r0, r7
         callThumb r2, fatTraceCCT
         mov r7, r0
@@ -276,7 +285,6 @@ noshp:  add r7, #32
         b lfval
          
 noshq:
-
 
 @ ------------------------------------------------------------------------------
 @ Display it on screen and process user navigation
@@ -614,9 +622,9 @@ loopLE:
         callThumb2 r4, terminalPutsCT, msg601, 0xffff
         mov r0, r7
         mov r1, r6
+        callThumb r4, fatReadCT
         ldr r2, =fatClusterSize
         ldr r2, [r2]
-        callThumb r4, fatReadCT
         add r6, r2                      @ move to next cluster in mem...
         mov r0, r7
         callThumb r2, fatTraceCCT
@@ -633,7 +641,7 @@ loopLE:
 @ ------------------------------------------------------------------------------
 
 readLBAT:
-        push {r3, r4, r5, r6, lr}
+        push {r1, r2, r3, r4, r5, r6, lr}
         mov r4, r0
         mov r5, r1
         mov r6, r2
@@ -655,7 +663,7 @@ readw1: sub r0, #1
          bne readw1
         b readTry                   @ try again...
 nreadtry:
-        pop {r3, r4, r5, r6}
+        pop {r1, r2, r3, r4, r5, r6}
         pop {r0}
         bx r0
 
@@ -740,7 +748,7 @@ msgDONE:  .asciz "[ DONE ]\n"
 msg_001:.asciz " -- avOs BootLoader Version 0.4a (c)2004 DoGgEr -- "
 
 dirLine:.asciz "xxxxxxxx.xxx"
-dirEmpt:.asciz "            "
+dirEmpt:.asciz ".           "
 
         .align 4
 .include "../includes/hex.S"

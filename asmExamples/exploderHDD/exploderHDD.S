@@ -13,6 +13,7 @@
 @
 @
         .include "../includes/common.S"
+        .include "../includes/av300.S"
 
 .text
 

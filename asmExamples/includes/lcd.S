@@ -253,6 +253,37 @@ lcdLoop7:
         pop {r0, r1, r2, r3, r4, r5, r6}
         bx lr
 
+@ lcdSpriteBT r0=x, r1=y, r2=width, r3=height, r4->data
+@
+lcdSpriteBT:
+        push {r0, r1, r2, r3, r4, r5, r6}
+        ldr r5, =(lcdWidth*2)
+        mul r1, r5
+        add r1, r0
+        add r1, r0
+        ldr r5, =lcdVideoBuffer
+        add r5, r1
+        mov r1, #0
+lcdLoopB6:
+        mov r0, r2
+        mov r6, #0
+lcdLoopB7:
+        ldrb r1, [r4, #0]
+        add r4, #1
+
+        strh r1, [r5, r6]
+        add r6, #2
+
+        sub r0, #1
+         bne lcdLoopB7
+
+        ldr r0, =(lcdWidth*2)
+        add r5, r0          @ move on to next line...
+        sub r3, #1
+         bne lcdLoopB6
+        pop {r0, r1, r2, r3, r4, r5, r6}
+        bx lr
+        
 @ lcdInitT
 @
 lcdInitT:

@@ -97,7 +97,7 @@ fatReadM:
         mov r1, r4
         mov r2, #1      @r5                          @ #1
         callThumb r3, ataReadLBAT
-        
+
         ldr r0, =fatSectorSize
         add r6, r0
         add r4, #1                                          @ Move to next LBA
