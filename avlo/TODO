@@ -2,7 +2,6 @@ AVLO TODO list
 
 - speedup ajz loading
 - delay before loading in s or ms
-- in failsafe mode, add an action to retry reading file
 - nice background
 - display errors found in config file
 - error message, if the default OS doesn't exist

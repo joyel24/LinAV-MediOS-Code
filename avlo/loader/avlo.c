@@ -253,7 +253,7 @@ void moveCursor(int direction)
 
 void err(int i)
 {
-    int key;
+    int key,stop=0;
     debug("error, let's loop\n");    
     graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, 0x466c4696);    
                         pal32[1]=0xc476c491;
@@ -263,9 +263,16 @@ void err(int i)
     graphicsStringA(&screenBitmap2, 65, 125, &sprite6_9, std6x9_, 6, 0,"Press a key to retry");
     usbEnableA();
     usbenable=1;
-    while(!((key=buttonsGetStatusA()) & BUTTONS_AV300_ANY))
+    while(1)
     {
-        chkOFF(key);
+        key=buttonsGetStatusA();
+        if(key & BUTTONS_AV300_ANY)
+        {
+            if(key & BUTTONS_AV300_OFF)
+                chkOFF(key);
+            else
+                break;
+        }
     }   
 }
 
