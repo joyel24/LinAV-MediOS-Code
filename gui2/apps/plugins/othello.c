@@ -493,12 +493,15 @@ void simpleMove(int dx,int dy)
     int offsetX=dx;
     int offsetY=dy;
     
-    while((cursor_pos.x+offsetX)>=0 && (cursor_pos.y+offsetY)>=0 && board[cursor_pos.x+offsetX][cursor_pos.y+offsetY]!=EMPTY)
+    while((cursor_pos.x+offsetX)>=0 && (cursor_pos.y+offsetY)>=0 
+        && (cursor_pos.x+offsetX)<=(NB_CELL-1) && (cursor_pos.y+offsetY)<=(NB_CELL-1)
+        && board[cursor_pos.x+offsetX][cursor_pos.y+offsetY]!=EMPTY)
     {
         offsetX+=dx;
         offsetY+=dy;
     }
-    if((cursor_pos.x+offsetX)>=0 && (cursor_pos.y+offsetY)>=0)
+    if((cursor_pos.x+offsetX)>=0 && (cursor_pos.y+offsetY)>=0
+        && (cursor_pos.x+offsetX)<=(NB_CELL-1) && (cursor_pos.y+offsetY)<=(NB_CELL-1))
         moveCursor(offsetX,offsetY);
 }
 
