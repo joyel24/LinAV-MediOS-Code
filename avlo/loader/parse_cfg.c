@@ -142,7 +142,7 @@ void iniCfg(struct config_image * cfg)
 void iniCfgG(struct config_gene * cfgG)
 {
 	cfgG->defBin[0]=0;
-        cfgG->key[0]=0;
+//        cfgG->key[0]=0;
         cfgG->repeat=0;
         cfgG->timeOut=0;
 }
@@ -230,10 +230,10 @@ int do_parse(struct config_image * cfg,struct config_gene * cfgG)
 	{
 		strcpy(cfgG->defBin,value);
 	}
-        else if(!strcmp(item,"key"))
+        /*else if(!strcmp(item,"key"))
 	{
 		strcpy(cfgG->key,value);
-	}
+	}*/
         else if(!strcmp(item,"repeat"))
 	{
 		cfgG->repeat=atoi(value);

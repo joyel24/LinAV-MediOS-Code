@@ -865,7 +865,7 @@ bool feof(int fd)
 //******************************************************
 extern void drawProgress(int offset,int length,int mode);
 
-int loadFile(char * fileN,char* buffer)
+int loadFile(char * fileN,char* buffer,int prog)
 {
     int curFile;
     int offset=0;
@@ -886,8 +886,9 @@ int loadFile(char * fileN,char* buffer)
 
 		while((fread(curFile,&buffer[offset],clustSize))>0)
                 {
+                    if(prog)
                 	drawProgress(offset,size,0);
-			offset+=clustSize;
+                    offset+=clustSize;
                 }
 		fclose(curFile);
 		return 1;

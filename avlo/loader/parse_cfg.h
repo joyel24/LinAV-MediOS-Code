@@ -26,7 +26,7 @@ struct config_image {
 
 struct config_gene {
 	char defBin[MAX_TOKEN];
-        char key[MAX_TOKEN];
+       // char key[MAX_TOKEN];
         int repeat;
         int timeOut;
 };

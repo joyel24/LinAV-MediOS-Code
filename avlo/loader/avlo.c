@@ -43,12 +43,16 @@
     
 
 //#define COLOR_TSP    0x0000
-int COLOR_TSP=       0x0000;
-#define COLOR_TXT    0xffff
-#define COLOR_BOX    0xD6D6
-#define COLOR_SEL    0x0101
-#define COLOR_LOAD   0x2525
-#define COLOR_WAIT   0x0909
+int COLOR_TSP=         0x0000;
+#define COLOR_TXT      0xffff
+#define COLOR_BOX      0xD6D6
+#define COLOR_SEL      0x0101
+#define COLOR_LOAD     0x2525
+#define COLOR_WAIT     0x0909
+#define COLOR_BOX_BAR  0x0C0C
+
+#define COLOR_MSG_BOX_0 0xA6A6
+#define COLOR_MSG_BOX_1 0xC6C6
 
 #define ENTRY_X      117
 #define ENTRY_Y      53
@@ -97,6 +101,7 @@ void printErr(int key);
 void waitKeyReleased(void);
 void chkOFF(int key);
 void drawProgress(int offset,int length,int mode);
+void drawBox(void);
 
 //extern int loadCJBM(char * filename,char * key);
 int fastLoadCJBM(char * filename);
@@ -136,7 +141,7 @@ usbenable=0;cleanUSBMsg=0;cnt=0;cursorPos=0;errNoDefault=0;cntNoDefault=0;stateN
     if(iniHD()<0)
         goto loopErr;
 #ifndef INCLUDE_IMG      
-    if (loadFile("/avlo.img",bg_img))
+    if (loadFile("/avlo.img",bg_img,0))
     {
         osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
         COLOR_TSP=0x0000;
@@ -191,7 +196,8 @@ loop:
     else
     	delayCnt=cfgG.timeOut;
        
-    debug("Gal opt:\n -default=%s,\n-key=%s,\n-repeat=%d,\n-time out=%d\n",cfgG.defBin,cfgG.key,maxRepeat,delayCnt);
+    //debug("Gal opt:\n -default=%s,\n-key=%s,\n-repeat=%d,\n-time out=%d\n",cfgG.defBin,cfgG.key,maxRepeat,delayCnt);
+    debug("Gal opt:\n -default=%s,\n-repeat=%d,\n-time out=%d\n",cfgG.defBin,maxRepeat,delayCnt);
         
     graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AVLO");
         
@@ -246,7 +252,7 @@ loop:
                                 //&& loadCJBM(cfg[cursorPos].image,cfgG.key))
                                 && fastLoadCJBM(cfg[cursorPos].image))
                 	launch=1;
-                else if (loadFile(cfg[cursorPos].image,(char*)0x03000000))
+                else if (loadFile(cfg[cursorPos].image,(char*)0x03000000,1))
                 	launch=1;
                 
                 if(launch)
@@ -285,6 +291,7 @@ loop:
                         usbenable=1;
                         
                         //graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);    
+                        //drawBox();
                         graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, COLOR_BOX);    
                         pal32[1]=0xc476c491;
                         pal32[0] = 0x466c4696;
@@ -305,15 +312,23 @@ loop:
     }
 }
 
+void drawBox(void)
+{
+    graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, COLOR_MSG_BOX_0);
+    graphicsBoxfA(&screenBitmap2, 61, 101, 228, 38, COLOR_MSG_BOX_1);
+    graphicsBoxfA(&screenBitmap2, 62, 102, 226, 36, COLOR_BOX);
+}
+
 int (*decode)(char * src,char * dst)=(void (*)(char * src,char * dst))0x03F00470;
 
 int fastLoadCJBM(char * filename)
 {
     unsigned char * cptr;
     
-    if (!loadFile(filename,(char*)0x03800000))
+    if (!loadFile(filename,(char*)0x03800000,1))
         return 0;
     debug("File loaded, now decompressing\n");
+    //drawBox();
     graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, COLOR_BOX);
     pal16[0] = COLOR_BOX;
     pal16[1] = COLOR_TXT;
@@ -359,6 +374,7 @@ void err(int i)
     int key,stop=0;
     debug("error, let's loop\n");    
     //graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, 0x466c4696); 
+    //drawBox();
     graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, COLOR_BOX); 
     pal32[1]=0xc476c491;
     pal32[0] = 0x466c4696;
@@ -390,7 +406,8 @@ void chkOFF(int key)
         nbOff++;
         if(nbOff>MAX_OFF_PRESS)
         {
-            //graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);    
+            //graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);   
+            //drawBox(); 
             graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, COLOR_BOX);    
             pal32[1]=0xc476c491;
             pal32[0] = 0x466c4696;
@@ -420,12 +437,13 @@ void waitKeyReleased(void)
     int nbPressed=0;;
     key=buttonsGetStatusA();
     while(key&BUTTONS_AV300_ANY && nbPressed < maxRepeat)
-    {
+    {        
+        /*if(key&BUTTONS_AV300_UP || key&BUTTONS_AV300_DOWN)
+        	nbPressed++;*/
         chkOFF(key);
-        if(key==BUTTONS_AV300_UP || key==BUTTONS_AV300_DOWN)
-        	nbPressed++;
         key=buttonsGetStatusA();
     }
+    for(key=0;key<100;key++) /* nothing */;
 }
 
 void iniGraph()
@@ -460,7 +478,7 @@ void iniGraph()
     j=(240*320*2)/4;
     for(i=0;i<j;i++)                
         ptr[i] = val;//0x6c706c93;
-            
+    
     osdSetComponentSizeA(OSD_VIDEO1, 320*2, 240);
     osdSetComponentPositionA(OSD_VIDEO1, 0x14, 0x12);
     osdSetComponentOffsetA(OSD_VIDEO1, (int)bg_img);
@@ -476,12 +494,9 @@ void iniGraph()
                                      | OSD_BITMAP_8BIT
                                      | OSD_BITMAP_0TRANS
                                      );
+                                     
+                                   
     
-    /*osdSetComponentSizeA(OSD_VIDEO2, 320*2, 240);
-    osdSetComponentPositionA(OSD_VIDEO2, 0x14, 0x12);
-    osdSetComponentOffsetA(OSD_VIDEO2, 0x03a00000);
-    osdSetComponentSourceWidthA(OSD_VIDEO2, 0x28);
-    osdSetComponentConfigA(OSD_VIDEO2, OSD_COMPONENT_ENABLE);*/
 }
 
 int iniHD(void)
@@ -550,7 +565,7 @@ int processDefault(int key,int nbCfg)
                 pos++;
             if(pos<nbCfg+1)
             {
-                if(loadFile(cfg[pos].image,(char*)0x03000000))
+                if(loadFile(cfg[pos].image,(char*)0x03000000,1))
                 {
                     binCaller();
                     err(1);
@@ -638,6 +653,10 @@ void drawMenu(int nbCfg)
     }
     //graphicsBoxfA(&screenBitmap2, 110, 52, 100, 100, 0x466c4696);
     graphicsBoxfA(&screenBitmap2, ENTRY_X, ENTRY_Y, 100-7, 100-7, COLOR_TSP);
+    
+    graphicsBoxfA(&screenBitmap2, BAR_X-2, BAR_Y-2, BAR_W+4, BAR_H+4,COLOR_BOX_BAR);
+    graphicsBoxfA(&screenBitmap2, BAR_X, BAR_Y, BAR_W, BAR_H,COLOR_TSP);
+    
     for(pos=0;pos<nbCfg+1;pos++)
     {
         pal32[1] = 0xff80ff80;
