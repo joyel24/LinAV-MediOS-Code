@@ -19,6 +19,7 @@
 #include "cops.h"
 #include "avevents.h"
 #include "font.h"
+#include "colordef.h"
 
 struct client_operations * cops;
 
@@ -28,6 +29,7 @@ struct client_operations * cops;
 #define MP3_BUFF_SIZE (1020*1000)
 #define MWINCLUDECOLORS
 
+/*
 #define COLOR_WHITE     16
 #define COLOR_GRAY      20
 #define COLOR_BLACK     1
@@ -38,7 +40,7 @@ struct client_operations * cops;
 #define COLOR_DARKGREEN 159
 #define COLOR_YELLOW    15
 #define COLOR_ORANGE    42
-
+*/
 /******************************
  * Color order for LCD printing
  *****************************/
@@ -63,10 +65,10 @@ COLOR_WHITE,
 COLOR_GRAY,
 COLOR_BLACK,
 COLOR_BLUE,
-COLOR_DARKBLUE,
+COLOR_DARK_BLUE,
 COLOR_RED,
 COLOR_GREEN,
-COLOR_DARKGREEN,
+COLOR_DARK_GREEN,
 COLOR_YELLOW,
 COLOR_ORANGE
 };
@@ -659,7 +661,7 @@ int eventHandler(int evt)
                     }
                     else if(window == 2 || window == 3)
                     {
-                        cops->fillRect(COLOR_BLACK, 0, 0, 320, 240); /* clear */
+                        cops->clearScreen(COLOR_BLACK); /* clear */
                         main_drawn = 0; /* redraw */
                         window = 1;
                     }
@@ -668,13 +670,13 @@ int eventHandler(int evt)
                 case BTN_F2: /* settings */
                     if(window == 1)
                     {
-                        cops->fillRect(COLOR_BLACK, 0, 0, 320, 240); /* clear */
+                        cops->clearScreen(COLOR_BLACK); /* clear */
                         settings_drawn = 0; /* redraw */
                         window = 2;
                     }
                     else if(window == 2)
                     {
-                        cops->fillRect(COLOR_BLACK, 0, 0, 320, 240); /* clear */
+                        cops->clearScreen(COLOR_BLACK); /* clear */
                         main_drawn = 0; /* redraw */
                         window = 1;
                     }
@@ -683,13 +685,13 @@ int eventHandler(int evt)
                 case BTN_F3: /* sound settings */
                     if(window == 1)
                     {
-                        cops->fillRect(COLOR_BLACK, 0, 0, 320, 240); /* clear */
+                        cops->clearScreen(COLOR_BLACK); /* clear */
                         soundsettings_drawn = 0; /* redraw */
                         window = 3;
                     }
                     else if(window == 3)
                     {
-                        cops->fillRect(COLOR_BLACK, 0, 0, 320, 240); /* clear */
+                        cops->clearScreen(COLOR_BLACK); /* clear */
                         main_drawn = 0; /* redraw */
                         window = 1;
                     }
@@ -845,7 +847,7 @@ int main(int argc, char * * argv)
     /* initialize the graphics and clear the lcd */
     cops->hideSBar();
     cops->disableMenu();
-    cops->fillRect(COLOR_BLACK, 0, 0, 320, 240);
+    cops->clearScreen(COLOR_BLACK); /* clear */
 
     /* set standard font */
     cops->setFont(STD6X9);
