@@ -25,7 +25,7 @@
 #define false 0
 #define X_OFFSET 80
 #define X_OFFSET_BALLS 10
-#define Y_OFFSET 40
+#define Y_OFFSET 30
 #define ROWS 8
 #define Y_STEP 18
 #define LENGTH 16
@@ -216,6 +216,8 @@ void delay(int value)
 
 void WinGame()
 {
+    showResult();
+
     cops->setFont(STD8X13);
     cops->putS(COLOR_BLACK, COLOR_WHITE, 70,90, "!!! Y O U  W I N !!!");
     cops->setFont(STD6X9);
@@ -390,10 +392,11 @@ void init(void)
     cops->putS(COLOR_WHITE, COLOR_GREEN, 60,5, "Mastermind by Schoki");
     cops->setFont(STD6X9);
 
-
     cops->putS(COLOR_BLACK, COLOR_GREEN, 271,13, "New game");
     cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
     cops->putS(COLOR_BLACK, COLOR_GREEN, 288,152, "Check");
+
+    cops->putS(COLOR_WHITE, COLOR_GREEN, 15,220, "black=right color and position  white=right color");
 
     initMatrix();
 
@@ -520,19 +523,24 @@ int eventHandler(int evt)
                 ch = check();
                 if(ch == 0)
                 {
+                    resetPieceValues();
+
                     setCursor(pos, 0);
 
                     pos = 0;
                     piece = 0;
                     turns++;
 
-                    if(turns == ROWS-1)
+                    if(turns == ROWS)
                     {
                         LooseGame();
                     }
-
-                    drawPieces();
-                    setCursor(pos, 1);
+                    else
+                    {
+                        pieceValues[0] = piece;
+                        drawPieces();
+                        setCursor(pos, 1);
+                    }
                 }
                 else if(ch == 1)
                 {
