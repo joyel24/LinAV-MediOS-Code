@@ -156,6 +156,62 @@ BITMAP mp3Bitmap   = {(unsigned int) mp3, 8, 8, 0, 0};
 BITMAP textBitmap  = {(unsigned int) text, 8, 8, 0, 0};
 BITMAP imageBitmap = {(unsigned int) image, 8, 8, 0, 0};
 
+
+
+
+int mode=1;
+
+void do_off(void * data)
+{
+    cops->stop_menu();
+    mode=1;
+}
+void do_on(void * data)
+{
+}
+void do_right(void * data)
+{
+}
+void do_F1(void * data)
+{
+}
+void do_F2(void * data)
+{
+}
+void do_F3(void * data)
+{
+}
+
+void mk_item_str(void * data,char * str)
+{
+    sprintf(str,"%s",(char*) data);
+}
+
+struct menu_data menu_cfg = {
+    useOwnDisp     : 1,
+    x:200,y:120,width:8*16,height:100,
+    dx:2,dy:2,
+    root           : NULL,
+    right_action   : do_right,
+    on_action      : do_on,
+    off_action     : do_off,
+    f1_action      : do_F1,
+    f2_action      : do_F2,
+    f3_action      : do_F3,
+    item_str       : mk_item_str,
+    submenu_str    : mk_item_str
+};
+
+struct menu_item rootMenu;
+struct menu_item menu1;
+struct menu_item menu2;
+struct menu_item menu3;
+
+
+
+
+
+
 int is_script_type(char *extension)
 {
     strlwr(extension);
@@ -607,161 +663,176 @@ int eventHandler(int evt)
 
     cops->getStringS("M", &w, &h);
 
-    switch(evt)
+    if(mode)
     {
-        case BTN_UP:
-            nselect--;
+        switch(evt)
+        {
+            case BTN_UP:
+                nselect--;
 
-            if(nselect<0)
-            {
-                nselect=0;
-                pos--;
-                if(pos<0) // we are at the beg => do wrapping
+                if(nselect<0)
                 {
-                    pos=listused-MAXPOS;//-1;
-                    if(pos<0)
+                    nselect=0;
+                    pos--;
+                    if(pos<0) // we are at the beg => do wrapping
                     {
-                        pos=0;
-                        nselect=listused-1;
-                    }
-                    else
-                        nselect=listused-pos-1;
-                    printAllName(pos,nselect);
-                    //pos=0;
-                }
-                else // not going up, scrolling
-                {
-                    cops->scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW, 320, (h+1)*MAXPOS, h+1,0);
-                    printAName(pos+nselect+1,nselect+1,1,0);
-                    printAName(pos+nselect,nselect,1,1);
-                }
-            }
-            else // just going up
-            {
-                printAName(pos+nselect+1,nselect+1,0,0);
-                printAName(pos+nselect,nselect,0,1);
-            }
-
-/*
-            sprintf(str,"pos: %2d select %2d used: %2d", pos, nselect, listused);
-            cops->fillRect(COLOR_BLUE, 0, 229, 250,12);
-            cops->putS(COLOR_WHITE, COLOR_BLUE,5, 230, str);
-*/
-            if( (listused>MAXPOS) &&
-                (pos+MAXPOS < listused) )
-                showArrow(DOWN_ARROW);
-            else
-                hideArrow(DOWN_ARROW);
-
-            if(pos == 0)
-                hideArrow(UP_ARROW);
-            else
-                showArrow(UP_ARROW);
-
-            break;
-
-        case BTN_DOWN:
-            nselect++;
-            if(nselect+pos>=listused)
-            {
-                // jump to beginning
-                pos=0;
-                nselect=0;
-                printAllName(pos,nselect);
-            }
-            else
-            {
-                if(nselect>=MAXPOS)
-                {
-                    nselect=MAXPOS-1;
-                    pos++;
-                    if(pos+MAXPOS>listused) // we are at the end => do wrapping
-                    {
-                        //pos=listused-MAXPOS-1;
-                        pos=0;
-                        nselect=0;
+                        pos=listused-MAXPOS;//-1;
+                        if(pos<0)
+                        {
+                            pos=0;
+                            nselect=listused-1;
+                        }
+                        else
+                            nselect=listused-pos-1;
                         printAllName(pos,nselect);
+                        //pos=0;
                     }
-                    else // not going down, scrolling
+                    else // not going up, scrolling
                     {
-                        cops->scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW, 320, (h+1)*MAXPOS, h+1,1);
-                        printAName(pos+nselect-1,nselect-1,1,0);
+                        cops->scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW, 320, (h+1)*MAXPOS, h+1,0);
+                        printAName(pos+nselect+1,nselect+1,1,0);
                         printAName(pos+nselect,nselect,1,1);
                     }
                 }
-                else
+                else // just going up
                 {
-                    printAName(pos+nselect-1,nselect-1,0,0);
+                    printAName(pos+nselect+1,nselect+1,0,0);
                     printAName(pos+nselect,nselect,0,1);
                 }
-            }
-/*
-            sprintf(str,"pos: %2d select %2d used: %2d", pos, nselect, listused);
-            cops->fillRect(COLOR_BLUE, 0, 229, 250,12);
-            cops->putS(COLOR_WHITE, COLOR_BLUE,5, 230, str);
-*/
-            if(pos>0)
-                showArrow(UP_ARROW);
-            else
-                hideArrow(UP_ARROW);
 
-            if( (listused>MAXPOS) &&
-                (pos+MAXPOS < listused) )
-                showArrow(DOWN_ARROW);
-            else
-                hideArrow(DOWN_ARROW);
+    /*
+                sprintf(str,"pos: %2d select %2d used: %2d", pos, nselect, listused);
+                cops->fillRect(COLOR_BLUE, 0, 229, 250,12);
+                cops->putS(COLOR_WHITE, COLOR_BLUE,5, 230, str);
+    */
+                if( (listused>MAXPOS) &&
+                    (pos+MAXPOS < listused) )
+                    showArrow(DOWN_ARROW);
+                else
+                    hideArrow(DOWN_ARROW);
 
-            break;
+                if(pos == 0)
+                    hideArrow(UP_ARROW);
+                else
+                    showArrow(UP_ARROW);
 
-        case BTN_RIGHT:
-            if(chdir(list[pos+nselect].name)<0)
-                handle_type_other(list[pos+nselect].name);
-            else
-            {
+                break;
+
+            case BTN_DOWN:
+                nselect++;
+                if(nselect+pos>=listused)
+                {
+                    // jump to beginning
+                    pos=0;
+                    nselect=0;
+                    printAllName(pos,nselect);
+                }
+                else
+                {
+                    if(nselect>=MAXPOS)
+                    {
+                        nselect=MAXPOS-1;
+                        pos++;
+                        if(pos+MAXPOS>listused) // we are at the end => do wrapping
+                        {
+                            //pos=listused-MAXPOS-1;
+                            pos=0;
+                            nselect=0;
+                            printAllName(pos,nselect);
+                        }
+                        else // not going down, scrolling
+                        {
+                            cops->scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW, 320, (h+1)*MAXPOS, h+1,1);
+                            printAName(pos+nselect-1,nselect-1,1,0);
+                            printAName(pos+nselect,nselect,1,1);
+                        }
+                    }
+                    else
+                    {
+                        printAName(pos+nselect-1,nselect-1,0,0);
+                        printAName(pos+nselect,nselect,0,1);
+                    }
+                }
+    /*
+                sprintf(str,"pos: %2d select %2d used: %2d", pos, nselect, listused);
+                cops->fillRect(COLOR_BLUE, 0, 229, 250,12);
+                cops->putS(COLOR_WHITE, COLOR_BLUE,5, 230, str);
+    */
+                if(pos>0)
+                    showArrow(UP_ARROW);
+                else
+                    hideArrow(UP_ARROW);
+
+                if( (listused>MAXPOS) &&
+                    (pos+MAXPOS < listused) )
+                    showArrow(DOWN_ARROW);
+                else
+                    hideArrow(DOWN_ARROW);
+
+                break;
+
+            case BTN_RIGHT:
+                if(chdir(list[pos+nselect].name)<0)
+                    handle_type_other(list[pos+nselect].name);
+                else
+                {
+                    cleanList();
+                    if(doLs("./")<0)
+                    {
+                        listused = 0;
+                        return -1;
+                    }
+                    hideArrow(DOWN_ARROW);
+                    hideArrow(UP_ARROW);
+                    if(listused>MAXPOS)
+                        showArrow(DOWN_ARROW);
+                    pos=0;
+                    nselect=0;
+                    //cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,(h+1)*MAXPOS);
+                    printAllName(pos,nselect);
+                    //cops->clearEventQueue();
+                }
+                break;
+            case BTN_LEFT:
+                if(chdir("../")<0)
+                    break;
                 cleanList();
                 if(doLs("./")<0)
                 {
                     listused = 0;
                     return -1;
                 }
+                pos=0;
+                nselect=0;
+                //cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,(h+1)*MAXPOS);
                 hideArrow(DOWN_ARROW);
                 hideArrow(UP_ARROW);
                 if(listused>MAXPOS)
                     showArrow(DOWN_ARROW);
-                pos=0;
-                nselect=0;
-                //cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,(h+1)*MAXPOS);
                 printAllName(pos,nselect);
                 //cops->clearEventQueue();
-            }
-            break;
-        case BTN_LEFT:            
-            if(chdir("../")<0)
                 break;
-            cleanList();
-            if(doLs("./")<0)
-            {
-                listused = 0;
-                return -1;
-            }
-            pos=0;
-            nselect=0;
-            //cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,(h+1)*MAXPOS);
-            hideArrow(DOWN_ARROW);
-            hideArrow(UP_ARROW);
-            if(listused>MAXPOS)
-                showArrow(DOWN_ARROW);
-            printAllName(pos,nselect);
-            //cops->clearEventQueue();
-            break;
-        case BTN_OFF:
-        case EVT_QUIT:
-            RELEASE(cops)
-            break;
-        case EVT_REDRAW:
-            //cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,225);
-            printAllName(pos,nselect);
-            break;
+
+            case BTN_F3:
+                menu_cfg.root=&menu1;
+                mode=0;
+                cops->start_menu(&menu_cfg);
+                cops->menuEvtHandler(EVT_REDRAW);
+                break;
+
+            case BTN_OFF:
+            case EVT_QUIT:
+                RELEASE(cops)
+                break;
+            case EVT_REDRAW:
+                //cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,225);
+                printAllName(pos,nselect);
+                break;
+        }
+    }
+    else
+    {
+        cops->menuEvtHandler(evt);
     }
 }
 
@@ -780,6 +851,25 @@ int main(int argc,char * * argv)
     {
         cops->disableMenu();
         cops->setFont(STD6X9);
+
+        menu1.data=(void*)"Rename";
+        menu2.data=(void*)"Delete";
+        menu3.data=(void*)"Add to Favorites";
+
+        menu1.prev=NULL;
+        menu1.nxt=&menu2;
+        menu1.sub=NULL;
+        menu1.up=NULL;
+
+        menu2.prev=&menu1;
+        menu2.nxt=&menu3;
+        menu2.sub=NULL;
+        menu2.up=NULL;
+
+        menu3.prev=&menu2;
+        menu3.nxt=NULL;
+        menu3.sub=NULL;
+        menu3.up=NULL;
 
         listused = 0;
 
