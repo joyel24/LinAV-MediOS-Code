@@ -1,3 +1,14 @@
+// avOS - http://avos.sourceforge.net
+// Copyright (c) 2003 by Jimmy Moore
+//
+// All files in this archive are subject to the GNU General Public License.
+// See the file COPYING in the source tree root for full license agreement.
+// This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+// KIND, either express of implied.
+//
+// Date:     01/03/2004
+// Author:   By Oxygen
+
 #include "stdlib.h"
 #include "string.h"
 
@@ -121,6 +132,8 @@ int fopen(const char* pathname,const char * mode)
 		file->eof=false;
 		file->write_done=false;
 
+		debug("file found: %x\n",file->fat_ent.startCluster);
+
 		nxtSector(file,DO_READ);
 
 		if((flags & (F_WR | F_WRP)) && file->size>0) // file need to be cleared
@@ -169,6 +182,7 @@ int getFlag(const char * mode)
 	}
 
 	if(len==2)
+	{
 		if(mode[1] == '+')
 			flag=flag<<3;
 		else
@@ -176,6 +190,7 @@ int getFlag(const char * mode)
 			debug("getFlag: bad mode modifier (%s)\n",mode);
 			return 0;
 		}
+	}
 
 	return flag;
 }

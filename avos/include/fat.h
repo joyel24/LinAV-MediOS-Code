@@ -1,5 +1,5 @@
 /* libavos.h
-   By William Bland aka awksedgrep
+   By oxygen
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy
@@ -68,16 +68,20 @@ struct dirEntry {
                                 // reading cluster 00080e81
 
 struct fatCache {
-	int fatBuffer[128];
+	char fatBuffer[513];
 	int fatBufferLba;
+	bool write_done;
+	int lastFree;
 };
 
 #include "dirent.h"
+#include "ata.h"
 
-extern int fatInit(u32 lba);
+extern int fatInit(struct partInfo * partition);
 
 extern int fatReadCluster(int cluster, char* buffer);
 extern int fatTrace(int cluster);
+extern int countFreeCluster();
 
 extern int fatNxtEntry(struct fatent * fat_ent,struct dirEntry * entry);
 extern int fatCreateEntry(struct fatent * fat_ent,struct dirent* ent,const char * name);
@@ -96,8 +100,10 @@ extern int fatTruncate(struct fatent * fat_ent,bool total_remove);
 //****************************************
 //* internal function
 
-extern int writeFatCache(struct fatCache * cache);
-extern int updateFatCache(int cluster,struct fatCache * cache,int mode);
+extern int flushFatCache();
+extern int updateFatCache(int cluster);
+extern int writeFatCache(int cluster,int val);
+extern int readFatCache(int cluster);
 
 extern int fatRWSector(struct fatent * fat_ent,bool write);
 extern int fatNxtSector(struct fatent * fat_ent,bool write);
@@ -116,8 +122,6 @@ extern char chkChar(char c);
 extern int fatCleanCluster(int cluster);
 
 extern int chkFAT();
-
-extern void printFat();
 
 ///////////////////////////////////////////////////////////////////////////////////
 // from initial fat.c

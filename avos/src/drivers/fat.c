@@ -1,3 +1,14 @@
+// avOS - http://avos.sourceforge.net
+// Copyright (c) 2003 by Jimmy Moore
+//
+// All files in this archive are subject to the GNU General Public License.
+// See the file COPYING in the source tree root for full license agreement.
+// This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+// KIND, either express of implied.
+//
+// Date:     01/03/2004
+// Author:   By Oxygen
+
 #include "string.h"
 
 #include <ata.h>
@@ -15,6 +26,7 @@ static int numFats;
 static int rsvdSecCnt;
 static int rootClu;
 static int secPerClu;
+static int fatType;
 
 static int LBAFat1;
 static int LBAFat2;
@@ -22,44 +34,16 @@ static int LBAData;
 
 static struct fatCache fat_cache;               // 1 sector fatcache
 
-void printFat()
-{
-	updateFatCache(rootClu,&fat_cache,NO_WRITE);
-	debug("lba=%d\n",fat_cache.fatBufferLba);
-	printBuffer((char*)fat_cache.fatBuffer,64);
-
-	updateFatCache(2,&fat_cache,NO_WRITE);
-	debug("val=%x\n",fat_cache.fatBuffer[2 & 127]);
-	updateFatCache(514,&fat_cache,NO_WRITE);
-	debug("val=%x\n",fat_cache.fatBuffer[514 & 127]);
-	/*struct fatent fat_ent;
-	struct dirEntry entry;
-	fat_ent.startCluster=rootClu;
-	fat_ent.curCluster=-1;
-	fat_ent.eof_disk=false;
-
-	fatNxtSector(&fat_ent,false);
-	fatRWSector(&fat_ent,false);
-
-	do
-	{
-		fatNxtEntry(&fat_ent,&entry);
-		debug("entryType=%d\n",fatValidateEntry(&entry));
-		printBuffer((char*)&entry,32);
-	}
-	while(fatValidateEntry(&entry)!=0);*/
-}
-
-
 //******************************************************
 // fatInit
 // do all fat initialization
 //
 // returns 1 on error
 //******************************************************
-int fatInit(u32 lba) {
-    int c;
-    
+int fatInit(struct partInfo * partition) {
+    int c,lba;
+	lba=partition->start;
+
     c=ataReadSectorsA(lba, 1, boot);      // Read the bootsector
 
     if (c!=ATA_ERROR_NONE) {
@@ -67,8 +51,26 @@ int fatInit(u32 lba) {
         return 1;
     }
 
-    fatSize = bootRead(36, 4);
+	switch (partition->type)
+	{
+		case 0xc:
+			fatSize = bootRead(36, 4);
+			rootClu = bootRead(44, 4);
+			fatType=32;
+			break;
+		case 0x1:
+			fatSize = bootRead(22, 2);
+			rootClu = 2;
+			fatType=12;
+			break;
+		default:
+			debug("Wrong fat type\n");
+			return 0;
+	}
+
 	debug("[fat.c] FATSz32 = %x\n",fatSize);
+	debug("[fat.c] rootClu = %x\n",rootClu);
+	debug("[fat.c] fatType = %d\n",fatType);
 
     numFats = bootRead(16, 1);
     debug("[fat.c] NumFATs = %x\n",numFats);
@@ -88,13 +90,13 @@ int fatInit(u32 lba) {
 	LBAData = LBAFat1 + (fatSize * numFats);
 	debug("[fat.c] LBAData = %x\n",LBAData);
 
-    rootClu = bootRead(44, 4);
-    debug("[fat.c] rootClu = %x\n",rootClu);
-
-    secPerClu = bootRead(13, 1);
+ secPerClu = bootRead(13, 1);
     debug("[fat.c] secPerClu = %x\n",secPerClu);
 
 	fat_cache.fatBufferLba=-1;
+	fat_cache.write_done=false;
+	fat_cache.lastFree=-1;
+
 
     return 0;
 }
@@ -124,30 +126,113 @@ int fatReadCluster(int cluster, char* buffer)
 //
 // returns 0 on error
 //******************************************************
-int updateFatCache(int cluster,struct fatCache * cache,int mode)
+int updateFatCache(int cluster)
 {
 	int lba, c;
-    lba = LBAFat1 + ((cluster*4) >> 9);   // 4 - 32bit, 9-512 byte sectors.
 
-    if(mode == ALWAYS_WRITE)
-		writeFatCache(cache);
+	lba = LBAFat1 + cluster/128;   // (cluster*32bit)/(512*8bit)
 
-    if (cache->fatBufferLba != lba)
+    if (fat_cache.fatBufferLba != lba)
 	{
-		if(mode == WRITE_IF_NEEDED)
+		if(!flushFatCache())
 		{
-			writeFatCache(cache);
+			debug("updateFatCache: error flushing cache\n");
+			return 0;
 		}
-        c = ataReadSectorsA(lba, 1, (char*) cache->fatBuffer);
+
+        c = ataReadSectorsA(lba, 1, (char*) fat_cache.fatBuffer);
         if (c!=ATA_ERROR_NONE)
 		{
 			debug("ataReadSectors error: %d\n",c);
 			return 0;
 		}
-        cache->fatBufferLba = lba;
+        fat_cache.fatBufferLba = lba;
     }
 
 	return 1;
+}
+
+//******************************************************
+// flushFatCache
+// flush cache to disk
+//
+// returns 0 on error
+//******************************************************
+int flushFatCache()
+{
+	if(fat_cache.write_done)
+	{
+		int c=ataWriteSectorsA(fat_cache.fatBufferLba,1,(char*) fat_cache.fatBuffer);
+		if (c!=ATA_ERROR_NONE)
+		{
+			debug("error writing FAT cache in FAT1 (ataerror=%d)\n",c);
+			return 0;
+		}
+
+		if(numFats>1)
+		{
+			c=ataWriteSectorsA(fat_cache.fatBufferLba+fatSize,1,(char*) fat_cache.fatBuffer);
+			if (c!=ATA_ERROR_NONE)
+			{
+				debug("error writing FAT cache in FAT2 (ataerror=%d)\n",c);
+				return 0;
+			}
+		}
+
+		fat_cache.write_done=false;
+	}
+
+	return 1;
+}
+
+//******************************************************
+// readFatCache
+//
+// returns -1 on error
+//******************************************************
+int readFatCache(int cluster)
+{
+	if(!updateFatCache(cluster))
+	{
+		debug("readFatCache: error updating fatcache\n");
+		return -1;
+	}
+
+	int result;
+	int offset=(cluster % 128)*4;
+
+	result=fat_cache.fatBuffer[offset]
+		|(fat_cache.fatBuffer[offset+1]<<8)
+		|(fat_cache.fatBuffer[offset+2]<<16)
+		|(fat_cache.fatBuffer[offset+3]<<24);
+
+	return result;
+}
+
+//******************************************************
+// writeFatCache
+//
+// returns 0 on error
+//******************************************************
+int writeFatCache(int cluster,int val)
+{
+	if(!updateFatCache(cluster))
+	{
+		debug("readFatCache: error updating fatcache\n");
+		return 0;
+	}
+
+	int offset=(cluster % 128)*4;
+
+	fat_cache.fatBuffer[offset]=val & 0xff;
+	fat_cache.fatBuffer[offset+1]=(val>>8) & 0xff;
+	fat_cache.fatBuffer[offset+2]=(val>>16) & 0xff;
+	fat_cache.fatBuffer[offset+3]=(val>>24) & 0xff;
+
+	fat_cache.write_done=true;
+
+	return 1;
+
 }
 
 //******************************************************
@@ -158,55 +243,13 @@ int updateFatCache(int cluster,struct fatCache * cache,int mode)
 //******************************************************
 int countFreeCluster()
 {
-	int c,sector,cluster,count;
-
-	//debug("max cluster:%d\n",(fatSize*SECTOR_SIZE)/4);
-
+	int cluster,count;
 	count=0;
-	struct fatCache myCache;
-	myCache.fatBufferLba=-1;
 
-	for(sector=0;sector<fatSize;sector++)
-	{
-		c = ataReadSectorsA(LBAFat1+sector, 1, (char*) myCache.fatBuffer);
-		if (c!=ATA_ERROR_NONE)
-		{
-			debug("countFreeCluster error: ata:%d\n",c);
-			return -1;
-		}
-		for(cluster=0;cluster<(SECTOR_SIZE/4);cluster++)
-			if(!(myCache.fatBuffer[cluster&127] & 0x0fffffff))
+	for(cluster=2;cluster<((fatSize*SECTOR_SIZE)/4);cluster++)
+		if(!(readFatCache(cluster) & 0x0fffffff))
 				count++;
-	}
-
-
 	return count;
-}
-
-//******************************************************
-// writeFatCache
-// flush cache to disk
-//
-// returns 0 on error
-//******************************************************
-int writeFatCache(struct fatCache * cache)
-{
-	int c=ataWriteSectorsA(cache->fatBufferLba,1,(char*) cache->fatBuffer);
-	if (c!=ATA_ERROR_NONE)
-	{
-		debug("error writing FAT cache in FAT1 (ataerror=%d)\n",c);
-		return 0;
-	}
-	if(numFats>1)
-	{
-		c=ataWriteSectorsA(cache->fatBufferLba+fatSize,1,(char*) cache->fatBuffer);
-		if (c!=ATA_ERROR_NONE)
-		{
-			debug("error writing FAT cache in FAT2 (ataerror=%d)\n",c);
-			return 0;
-		}
-	}
-	return 1;
 }
 
 //******************************************************
@@ -217,56 +260,51 @@ int writeFatCache(struct fatCache * cache)
 //******************************************************
 int fatTrace(int cluster)
 {
-	if(updateFatCache(cluster,&fat_cache,NO_WRITE))
-    	return fat_cache.fatBuffer[cluster & 127];
-	else
-	{
-		debug("error getting next cluster in chain\n");
-		return -1;
-	}
+	return readFatCache(cluster);
 }
 
 //******************************************************
 // getNxtFreeCluster
 // try to find next free cluster (starting at a given
 // cluster number)
+// if cluster == -1 then try starting at lastFree
 //
 // returns -1 on error
 // returns new cluster number otherwise
 //******************************************************
 int getNxtFreeCluster(int cluster)
 {
-	struct fatCache myCache;
-	myCache.fatBufferLba=-1;
-
-	int i=cluster & 127;
-	cluster=cluster-i; // first cluster of cache
-
-	int result=-1;
-
-	while(cluster < ((fatSize*SECTOR_SIZE)/4))
+	if(cluster==-1 && fat_cache.lastFree!=-1)
 	{
-		updateFatCache(cluster,&myCache,NO_WRITE);
-
-		while((i < (SECTOR_SIZE/4)) && (myCache.fatBuffer[i] & 0x0fffffff)) // loop on the sector
-			i++;
-
-		if(i<(SECTOR_SIZE/4)) // we exit the loop because we found an empty cluster
+		if((cluster=getNxtFreeCluster(fat_cache.lastFree))>=0)
 		{
-			myCache.fatBuffer[i] = FAT_CHAIN_END;
-			updateFatCache(cluster,&myCache,ALWAYS_WRITE);
-			result=cluster+i;
-			break;
+			fat_cache.lastFree=cluster;
+			writeFatCache(cluster,FAT_CHAIN_END);
+			return cluster;
 		}
-
-		cluster+=SECTOR_SIZE/4;
-		i=0;
+		else
+		{
+			cluster=2;
+			fat_cache.lastFree=-1;
+		}
 	}
 
-	if(result == -1)
-		debug("getNxtFreeCluster: no more free cluster\n");
+	if(cluster<2) cluster=2; // we can't use cluster 0 nor cluster 1
 
-	return result;
+	while((cluster < ((fatSize*SECTOR_SIZE)/4)) && (readFatCache(cluster) & 0x0fffffff))
+		cluster++;
+
+	if(cluster < ((fatSize*SECTOR_SIZE)/4))
+	{
+		fat_cache.lastFree=cluster;
+		writeFatCache(cluster,FAT_CHAIN_END);
+		return cluster;
+	}
+	else
+	{
+		debug("getNxtFreeCluster: no more free cluster\n");
+		return -1;
+	}
 }
 
 //******************************************************
@@ -280,34 +318,33 @@ int getNxtFreeCluster(int cluster)
 //******************************************************
 int addNewCluster(int cluster)
 {
-	int i=0;
-	if(cluster<(SECTOR_SIZE/4)) // we can't use cluster 0 nor cluster 1
-		i=2;
-	int nxtCluster;
-	updateFatCache(cluster,&fat_cache,NO_WRITE);
-	while(i < (SECTOR_SIZE/4) && (fat_cache.fatBuffer[i] & 0x0fffffff)) // trying to find a free cluster in current buffer
-		i++;
-	if(i<(SECTOR_SIZE/4))
+	if(cluster<2) cluster=2; // we can't use cluster 0 nor cluster 1
+
+	int curCluster=cluster;
+	int endCluster=((cluster/128)+1)*128;
+
+	while(curCluster<endCluster && (readFatCache(curCluster) & 0x0fffffff))
+		curCluster++;
+
+	if(curCluster<endCluster)
 	{
-		fat_cache.fatBuffer[i]=FAT_CHAIN_END;
-		nxtCluster=((fat_cache.fatBufferLba-LBAFat1) * SECTOR_SIZE)/4+i;
+		fat_cache.lastFree=curCluster;
+		writeFatCache(curCluster,FAT_CHAIN_END);
 	}
 	else
 	{
-		if((nxtCluster = getNxtFreeCluster(rootClu))<0) // try to get a free cluster starting search at cluster 0
+		if((curCluster = getNxtFreeCluster(-1))<0) // try to get a free cluster starting search at cluster 0
 		{
 			debug("error: can't find a free cluster\n");
 			return -1;
 		}
-		else
-			updateFatCache(cluster,&fat_cache,NO_WRITE);
-
 	}
 
-	fat_cache.fatBuffer[cluster & 127] = nxtCluster;
-	updateFatCache(nxtCluster,&fat_cache,ALWAYS_WRITE);
+	writeFatCache(cluster,curCluster);
 
-	return nxtCluster;
+	flushFatCache();
+
+	return curCluster;
 }
 
 //******************************************************
@@ -328,9 +365,7 @@ int fatRWSector(struct fatent * fat_ent,bool write)
 
 	int c;
 	if(write)
-	{
 		c=ataWriteSectorsA((fat_ent->curCluster-2)*secPerClu+LBAData+fat_ent->sectorNumber, 1, fat_ent->cache);
-	}
 	else
 		c=ataReadSectorsA((fat_ent->curCluster-2)*secPerClu+LBAData+fat_ent->sectorNumber, 1, fat_ent->cache);
 
@@ -338,9 +373,9 @@ int fatRWSector(struct fatent * fat_ent,bool write)
 	if (c!=ATA_ERROR_NONE)
 	{
 		if(write)
-			debug("error writing sector (ataerror=%d)\n",c);
+			debug("error writing sector %x,%d (ataerror=%d)\n",fat_ent->curCluster,fat_ent->sectorNumber,c);
 		else
-			debug("error reading sector (ataerror=%d)\n",c);
+			debug("error reading sector %x,%d (ataerror=%d)\n",fat_ent->curCluster,fat_ent->sectorNumber,c);
 
 		return 0;
 	}
@@ -802,7 +837,10 @@ int fatCreateEntry(struct fatent * fat_ent,struct dirent* ent,const char * name)
 
 	memset(&entry,0,sizeof(struct dirEntry));
 
-	int cluster=getNxtFreeCluster(rootClu);
+	int cluster=getNxtFreeCluster(-1);
+
+	debug("adding entry:%x\n",cluster);
+
 	entry.fatCluHI=(cluster >> 16) & 0xffff;
 	entry.fatCluLO=cluster & 0xffff;
 	entry.size=0;
@@ -983,37 +1021,51 @@ int getClusterSize() {
 //******************************************************
 int fatTruncate(struct fatent * fat_ent,bool total_remove)
 {
+	debug("in fat truncate: %x\n",fat_ent->curCluster);
+
 	int curCluster=fat_ent->curCluster;
 	int nxtCluster;
+	int res;
 
-	if(!updateFatCache(curCluster,&fat_cache,NO_WRITE))
+	if((nxtCluster=readFatCache(curCluster))<0)
 	{
-		debug("fatTruncate: error getting first cluster\n");
+		debug("fatTruncate: error getting first cluster of file\n");
 		return 0;
 	}
 
-	nxtCluster=fat_cache.fatBuffer[curCluster & 127];
 	if(total_remove)
-		fat_cache.fatBuffer[curCluster & 127]=0;
+		res=writeFatCache(curCluster,0);
 	else
-		fat_cache.fatBuffer[curCluster & 127]=FAT_CHAIN_END;
+		res=writeFatCache(curCluster,FAT_CHAIN_END);
+
+	if(!res)
+	{
+		debug("fatTruncate: error writing first cluster of file\n");
+		return 0;
+	}
+
 	curCluster=nxtCluster;
 
 	while(curCluster< FAT_CHAIN_END)
 	{
-		if(!updateFatCache(curCluster,&fat_cache,WRITE_IF_NEEDED))
+		if((nxtCluster=readFatCache(curCluster))<0)
 		{
-			debug("fatTruncate: error updating FAT cache\n");
+			debug("fatTruncate: error getting next cluster of file\n");
 			return 0;
 		}
-		nxtCluster=fat_cache.fatBuffer[curCluster & 127];
-		fat_cache.fatBuffer[curCluster & 127]=0;
+
+		if(!writeFatCache(curCluster,0))
+		{
+			debug("fatTruncate: error writing next cluster of file\n");
+			return 0;
+		}
+
 		curCluster=nxtCluster;
 	}
 
-	if(!writeFatCache(&fat_cache))
+	if(!flushFatCache())
 	{
-		debug("fatTruncate: error writing FAT cache\n");
+		debug("fatTruncate: error flushing FAT cache\n");
 		return 0;
 	}
 
@@ -1187,7 +1239,7 @@ int fatReadFile(int cluster, char* buffer) {
         buffer = buffer + (secPerClu*512);      // Move along,
         cluster = fatTrace(cluster);            // Trace the fat
         if (cluster<0) return cluster;          // ATA Error!
-        if (cluster>FAT_CHAIN_END) return 0;       // End of chain...
+        if (cluster>=FAT_CHAIN_END) return 0;       // End of chain...
     }
 	return ATA_ERROR_NONE;
 }

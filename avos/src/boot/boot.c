@@ -22,7 +22,6 @@ struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, -1, 0, 0, 0, 0, (int**
 
 struct dirEntry dirBuffer[10000];
 struct dirEntry dirBuffer2[10000];
-unsigned char mbr[512];
 
 char hex82[] = "xxxxxxxx";
 
@@ -44,7 +43,6 @@ int main() {
     int loopDelay = 0xc000;
     int source = 0;             // 0 = HDD, 1 = memCard
     int mode = 0;               // 0 = normal, 1 = usb
-    int part;
     int cursorMoved=1;
     void (*codeCaller)();
     
@@ -135,27 +133,14 @@ startInit:
     usbDisableA();
     for (c=0;c<0x24000;c++) {}
 
-    c = ataReadSectorsA(0, 1, mbr);
-    stringPutHexA(hex82, c, 8);
-    uartOutsA("[fatTest.c] MBR read returned = ");
-    uartOutsA(hex82);
-    uartOutsA("\n");
+   	ataReadMBR();
 
-    printBuffer(mbr,512);
+	for(i=0;i<4;i++)
+		printPartInfo(i);
 
-    part = mbr[0x1c6] | (mbr[0x1c7]<<8) | (mbr[0x1c8]<<16) | (mbr[0x1c9]<<24);
-    stringPutHexA(hex82, part, 8);
-    uartOutsA("[fatTest.c] Partition1 = ");
-    uartOutsA(hex82);
-    uartOutsA("\n");
-    if (part==0) part=0x3f;
-    
-    c = fatInit(part);
-    stringPutHexA(hex82, c, 8);
-    uartOutsA("[fatTest.c] fatInit returned = ");
-    uartOutsA(hex82);
-    uartOutsA("\n");
-    
+    c = fatInit(getPartition(0));
+	debug("[fatTest.c] fatInit returned = %x\n",c);
+
     cluster = getRootClu();
 
     while(1) {
@@ -168,10 +153,7 @@ startInit:
             }
 
             c = fatReadFile(cluster, (char*) dirBuffer);
-            stringPutHexA(hex82, c, 8);
-            uartOutsA("[fatTest.c] fatReadFile returned = ");
-            uartOutsA(hex82);
-            uartOutsA("\n");
+			debug("[fatTest.c] fatReadFile returned = %x\n",c);
 
             totalEntries = fatDirFilter(dirBuffer, dirBuffer2, 1000);
         
@@ -355,11 +337,8 @@ startInit:
                         if (i==1) {
                             
                             c = fatReadFile(pcluster, (char*) 0x03000000);
-                            stringPutHexA(hex82, c, 8);
-                            uartOutsA("[fatTest.c] fatReadFile returned = ");
-                            uartOutsA(hex82);
-                            uartOutsA("\n");
-                            
+							debug("[fatTest.c] fatReadFile returned = %x\n",c);
+
                             // Now CALL IT!
                             
                             codeCaller();           // Go go go!
@@ -411,22 +390,17 @@ startInit:
                     ataSelectMemoryCardA();
                 }
 
-                ataReadSectorsA(0, 1, mbr);
-                part = mbr[0x1c6] | (mbr[0x1c7]<<8) | (mbr[0x1c8]<<16) | (mbr[0x1c9]<<24);
-                stringPutHexA(hex82, part, 8);
-                uartOutsA("[fatTest.c] Partition1 = ");
-                uartOutsA(hex82);
-                uartOutsA("\n");
-                if (part==0) part=0x3f;
+				ataReadMBR();
 
-                c = fatInit(part);
-                stringPutHexA(hex82, c, 8);
-                uartOutsA("[fatTest.c] fatInit returned = ");
-                uartOutsA(hex82);
-                uartOutsA("\n");
-    
+				for(i=0;i<4;i++)
+					printPartInfo(i);
+
+
+                c = fatInit(getPartition(0));
+                debug("[fatTest.c] fatInit returned = %x\n",c);
+
                 cluster = getRootClu();
-                
+
                 do {
                     c =buttonsGetStatusA();
                 } while(c & BUTTONS_AV300_ANY);
@@ -438,7 +412,7 @@ startInit:
         }
     }
     
-    uartOutsA("All done!");
+    debug("All done!");
     
     while(1) {}
 }
