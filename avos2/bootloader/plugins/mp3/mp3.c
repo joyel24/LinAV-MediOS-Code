@@ -144,7 +144,7 @@ int main(int argc, char * * argv) {
     buffmem[0] = 0x0;
     masWriteD0A(0x7f6, buffmem, 1);     // App select - none
     while(1) {
-        uartOutsA("Waiting for app end...\n");
+        uartOutsA(0,"Waiting for app end...\n");
         masReadD0A(0x7f7, buffmem, 1);      // App running
         if (buffmem[0]==0) break;
     }
@@ -260,7 +260,7 @@ void intsub() {
     }
 
     stringPutHexA(irqb+4, i, 2);
-    uartOutsA(irqb);
+    uartOutsA(0,irqb);
 
     //debug("IRQ=%d\n", i);
     
