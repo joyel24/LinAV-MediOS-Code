@@ -1,19 +1,19 @@
 # Include global definitions
-include ../../Makefile.conf
+include ../../../Makefile.conf
 
 # State the main target to build
-TARGET = timerTest.bin
+TARGET = rgb.bin
 
 #LOCAL GCCFLAGS
 GCCFLAGS = -static-libgcc
-GCCINCDIRS = -I../../include
+GCCINCDIRS = -I../../../include
 
 #LOCAL LDFLAGS
-LDFLAGS = -L../../lib -lavmisc -lavhardware -lavgraphics -lavfonts -lavata -lc -lfloat -lgcc
+LDFLAGS = -L../../../lib -lavc -lavmisc -lavhardware -lavgraphics -lavfonts -lavata -lc -lfloat -lgcc
 
 
 # State the object files that the main target is made up of
-OBJS = timerTest.o
+OBJS = rgb.o
 
 ALL:$(TARGET)
 

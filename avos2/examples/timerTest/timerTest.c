@@ -1,13 +1,12 @@
 #include <graphics.h>
 #include <buttons.h>
 #include <osdDSC25.h>
-#include <ata.h>
 #include <fonts.h>
 #include <timers.h>
 #include <interrupts.h>
 #include <cpld.h>
+#include <gio.h>
 #include <uart.h>
-#include <debug.h>
 
     struct graphicsBuffer screenBitmap;
     struct graphicsBuffer screenTop;
@@ -22,7 +21,7 @@ char ct[] = "F1 Timer: x";
 void intsub();
 
 int main() {
-    int c, v, b, x, y = 120;
+    int c, v, b, y = 120;
     int ctimer=0;
     int div=1023;       // Slowest rate...
     int tmode[4] = {TIMERS_TMMD_STOP, TIMERS_TMMD_STOP, TIMERS_TMMD_STOP, TIMERS_TMMD_STOP};
@@ -121,7 +120,7 @@ int main() {
         }
         
         b = buttonsGetStatusA();
-        if (b & BUTTONS_AV300_OFF) return;
+        if (b & BUTTONS_AV300_OFF) return 0;
         if (b & BUTTONS_AV300_DOWN) {
             if (tmax[ctimer]>=0x100) {
                 tmax[ctimer]-=0x100;
