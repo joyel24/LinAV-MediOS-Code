@@ -31,14 +31,13 @@
 int ini_graphics()
 {
 
- XEvent event;
  char* displayName = 0;
  int screen; 					/* screen number */
  GC gc;		
  
  /*connect to X server */
  
- display = XOpenDisplay(displayName);
+ display = XOpenDisplay(displayName);   
  
  if(!display) 
  {
@@ -79,22 +78,6 @@ int ini_graphics()
   /* Affichage de la fenêtre */
   
   XMapWindow(display, window);
-	    
- /* Boucle d'attente d'événements */
-  
-  while(1) 
-  {
-    /* Récupération de l'événement suivant*/
-    XNextEvent(display, &event);
-    
-    switch (event.type) 
-    {
-      case Expose : 
-       printf("Événement Expose :)\n");
-      break;
-    }
-  }
-  return 0;
 
 }
 
@@ -123,6 +106,7 @@ void drawRect(int color, int x, int y, int width, int height)
 {
     tstXY(x,y);		/* x,y, test */
     tstWH(x,y,width,height); /* x,y,width,height */
+    printf("test");
     
     GC GCDrawRect;
     
@@ -130,10 +114,12 @@ void drawRect(int color, int x, int y, int width, int height)
     unsigned long gcm = GCForeground;
     gcv.foreground = color;
     GCDrawRect = XCreateGC(display, window, gcm, &gcv);		/* create a new GC */
+    
+    printf("test2");
        
     XDrawRectangle(display, window, GCDrawRect, x, y, width, height); /* XLib Function */
+    printf("test3");
  
-
 }
 
 void fillRect(int color, int x, int y, int width, int height)

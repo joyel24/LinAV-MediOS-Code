@@ -3,7 +3,7 @@ GCC=gcc
 
 
 GCCFLAGS=-I../include
-LDFLAGS=-L../lib -lGraphics
+LDFLAGS=-L../lib -lGraphics -L/usr/X11R6/lib -lX11
 
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
