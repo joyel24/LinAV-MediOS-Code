@@ -34,7 +34,7 @@ const unsigned char usb[6][15] = {
 {01,01,01,01,01,01,01,01,01,01,01,38,01,38,01},
 {38,38,38,38,01,01,01,01,01,01,01,01,01,01,01},
 {38,38,38,38,38,01,01,01,01,01,01,38,38,38,38} };
-const unsigned char power[6][12] = {
+const unsigned char power[6][13] = {
 {38,38,38,38,38,01,01,01,01,38,38,38,38},
 {38,38,38,38,01,01,01,01,01,01,01,01,01},
 {01,01,01,01,01,01,01,01,01,38,38,38,38},
@@ -43,7 +43,7 @@ const unsigned char power[6][12] = {
 {38,38,38,38,38,01,01,01,01,38,38,38,38} };
 
 BITMAP usbIcon = {(unsigned int) usb, 15, 6, 0, 0};
-BITMAP powerIcon = {(unsigned int) power, 12, 6, 0, 0};
+BITMAP powerIcon = {(unsigned int) power, 13, 6, 0, 0};
 
 /* draw the current time */
 void drawTime(void)

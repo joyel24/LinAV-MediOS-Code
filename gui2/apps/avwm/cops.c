@@ -20,6 +20,7 @@
 #include "plugin.h"
 #include "sound.h"
 #include "parse_cfg.h"
+#include "msgBox.h"
 
 #include <stdlib.h>
 
@@ -89,6 +90,8 @@ struct client_operations cops={
     putCfg             : write_cfg,
     putComment         : write_comment,
     newLine            : add_line,
-    curLineNum         : curLineNum
+    curLineNum         : curLineNum,
+    
+    msgBox             : msgBox
 
 };

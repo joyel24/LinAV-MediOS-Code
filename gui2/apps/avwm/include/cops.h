@@ -104,6 +104,8 @@ struct client_operations {
     int  (*newLine)             (void);
     int  (*curLineNum)          (void);
     
+    void (*msgBox)              (char *);
+    
 };
 
 #endif
