@@ -12,17 +12,21 @@
 
 #include <graphics.h>
 #include <sys_def/colordef.h>
+#include <sys_def/time.h>
 #include <api.h>
+
 
 void avwm(void)
 {
-    printf("Starting AvWm %d %d %d %d %d\n",1,2,3,4,5);
+    printf("Starting AvWm\n");
     
     open_graphics();
     clearScreen(COLOR_WHITE);
-    drawRect(COLOR_RED,10,10,100,100);
-    putS(COLOR_BLUE,COLOR_WHITE,0,0,"Hello world");
-    while(1) {
-        /*NOTHING*/
-    }
+    
+    iniIcon();
+    
+    ini_status_bar();
+    drawStatusLine(); /* should be done via EVT_REDRAW */
+    
+    while(1) /*NOTHING*/;
 }

@@ -12,6 +12,9 @@
 #include <api.h>
 #include <kernel/swi.h>
 #include <kernel/irq.h>
+#include <kernel/rtc.h>
+#include <kernel/usb_fw.h>
+#include <kernel/bat_power.h>
 
 extern int gfw_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
 extern void user_printf(const char * fmt, va_list args);
@@ -113,6 +116,36 @@ __IRAM_CODE int kcswi_handler (
 	break;
 /// Serialize critical API calls to memory manager
 
+        case nAPI_TIME:
+            switch((int)nParam1) {
+                case 0x000:
+                    return rtc_getTime((struct av_tm *)nParam2);
+                case 0x001:
+                    return rtc_setTime((struct av_tm *)nParam2);
+                default:
+                    printk("time swi %d not implemented\n",(int)nParam1);
+            }
+            return 0;
+        case nAPI_POWER:
+            switch((int)nParam1) {
+                case 0x000:
+                    *((int*)nParam2)=kusbIsConnected();
+                    break;
+                case 0x001:
+                    *((int*)nParam2)=kFWIsConnected();
+                    break;
+                case 0x002:
+                    *((int*)nParam2)=kpowerConnected();
+                    break;
+                case 0x003:
+                    *((int*)nParam2)=kgetBatLevel();
+                    break;
+                default:
+                    printk("power swi %d not implemented\n",(int)nParam1);
+            }
+            return 0;
+
+
 	case nAPI_PIPE_DELETE:      //(HPIPE hPipe);
 	{
 		API_FREE ((void*)nParam1);
@@ -185,6 +218,7 @@ __IRAM_CODE int kcswi_handler (
 		sti ();
 	}
 	break;
+
 
         case nAPI_GFX:
             return gfw_swi_handler((int)nParam1,(GFX_DATA *)nParam2, (void *)nParam3);

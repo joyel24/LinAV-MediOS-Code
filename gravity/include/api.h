@@ -15,29 +15,9 @@
 #include <stdarg.h>
 #include <kernel/errors.h>
 
-typedef struct _POINT
-{
-	long x;
-	long y;
-} POINT;
+#include <sys_def/time.h>
 
-typedef struct _RECT
-{
-	long x;
-	long y;
-	long w;
-	long h;
-} RECT;
-
-typedef struct _IMAGE
-{
-	void* pixels;
-	long w;
-	long h;
-	long stride;
-	long pixel_size;
-	long row_order; // 0=top first, 1=bottom first
-} IMAGE;
+// API data type
 
 typedef struct _GFX_DATA
 {
@@ -63,12 +43,6 @@ typedef unsigned long HTASK;
 typedef unsigned long HPIPE;
 typedef unsigned long HCRITSEC;
 typedef unsigned long MESSAGE;
-
-
-#define SAVE asm volatile ("stmdb sp!, {r3-r12}")
-#define LOAD asm volatile ("ldmia sp!, {r3-r12}")
-
-
 
 // API definition
 
@@ -100,8 +74,27 @@ ERROR_CODE API_CRITSEC_LEAVE    (HCRITSEC hCritSec);
 
 ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData);
 ERROR_CODE API_PRINTF           (const char * fmt, va_list args);
-void printf                     (char *fmt, ...);
 
+ERROR_CODE API_TIME             (int cmd,struct av_tm * time_data);
+
+ERROR_CODE API_POWER            (int cmd,int * val);
+int        do_api_power         (int cmd);
+
+void       printf               (char *fmt, ...);
+
+void *  malloc(long size);
+void    free(void *buff);
+
+#define  getTime(time_data)     API_TIME(0x000,time_data)
+#define  setTime(time_data)     API_TIME(0x001,time_data)
+
+#define  usbIsConnected()       do_api_power(0x000)
+#define  FWIsConnected()        do_api_power(0x001)
+#define  powerConnected()       do_api_power(0x001)
+#define  getBatLevel()          do_api_power(0x001)
+
+//ERROR_CODE getTime              (struct av_tm * time_data);
+//ERROR_CODE setTime              (struct av_tm * time_data);
 
 ERROR_CODE swi_call             (long swi_num,long param1,long param2,long param3) ;
 

@@ -24,6 +24,12 @@
 
 #include <kernel/version.h>
 
+#include <kernel/rtc.h>
+#include <kernel/usb_fw.h>
+#include <kernel/bat_power.h>
+#include <kernel/buttons.h>
+
+
 #include <kernel/threads.h>
 #include <kernel/pipes.h>
 #include <kernel/kgraphics.h>
@@ -32,9 +38,6 @@
 #include <kernel/memmgr.h>
 
 #include <kernel/config.h>
-
-int lcd_state=1;
-int lcd_bright=8;
 
 void print_boot_info(void)
 {
@@ -95,11 +98,7 @@ void kernel_start (void)
 {
     ini_graphics();
     ini_debugOnScreen();
-    
-#ifdef DEBUG_INIT
-    ata_stop_HD();
-#endif
-    
+   
     /* malloc of max space in SDRAM */
     init_malloc((void*)MALLOC_START,MALLOC_SIZE);
     
@@ -165,6 +164,10 @@ void kernel_startup_thread (void)
     init_HW_chk();
 
     init_buttons();
+    init_rtc();
+    init_usb_fw();
+    
+    init_power();
 
     printk("[init] ------------ all drivers\n");
 

@@ -19,6 +19,7 @@
 #include <kernel/gio.h>
 
 #include <kernel/hw_chk.h>
+#include <kernel/bat_power.h>
 
 #include <kernel/buttons.h>
 
@@ -35,7 +36,7 @@ __IRAM_DATA int nb_pressed[NB_BUTTONS];
 __IRAM_DATA int nb_off_press=0;
 __IRAM_DATA int nb_debug_switch=0;
 
-extern int inHold;
+int inHold=0;
 
 __IRAM_DATA struct hw_chk_s btn_chker;
 
@@ -56,7 +57,7 @@ __IRAM_CODE void chk_button(void)
         if(nb_debug_switch==0)
         {
             nb_debug_switch=mx_press*3;
-#if 0            
+            
             if(lcd_get_state()==0)
             {
                 /* the lcd is off => turn on and discard the event */
@@ -66,7 +67,7 @@ __IRAM_CODE void chk_button(void)
             else
                 lcd_launchTimer(); /* postpone the lcd timer */                
             halt_launchTimer(); /* postpone the poweroff timer */
-#endif
+
             error_scr_switch();
         }
         else
@@ -100,8 +101,7 @@ __IRAM_CODE void chk_button(void)
 
                
             if(!(btn==BUTTON_JOYPRESS && fastDir)) /* discard BTN_JOY evt if fastDir is set */
-            {   
-#if 0              
+            {                 
                 if(nb_pressed[btn]==0)
                 {
                     if(!inHold)
@@ -118,17 +118,17 @@ __IRAM_CODE void chk_button(void)
                             
                         halt_launchTimer(); /* postpone the poweroff timer */
 
-                        process_btn_evt(btn);                       
-                        //printk("BTN %d pressed\n",btn);
+                        //process_btn_evt(btn);                       
+                        printk("BTN %d pressed\n",btn);
                     }
                     else
                     {
-                        FM_putTmpText("** HOLD **",30);
+                        //FM_putTmpText("** HOLD **",30);
+                        printk("** HOLD **\n");
                     }                                
                 }
                 else
-                    nb_pressed[btn]--;
-#endif                    
+                    nb_pressed[btn]--;                   
                 /* a key is pressed if key num < 4 => it's a dir key we might be in fast dir mode
                     we need to discard BTN_JOY events   */                        
                 if(btn<4)
@@ -142,6 +142,9 @@ __IRAM_CODE void chk_button(void)
 void init_buttons(void)
 {
     int btn;
+    
+    inHold=0;
+    
     for(btn=0;btn<NB_BUTTONS;btn++)
         nb_pressed[btn]=0;
     /* set GIO for ON/OFF to input */

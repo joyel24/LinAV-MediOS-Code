@@ -55,6 +55,10 @@ ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData)       
 
 ERROR_CODE API_PRINTF           (const char * fmt, va_list args)                                { swi_call(nAPI_PRINTF); }
 
+ERROR_CODE API_TIME             (int cmd,struct av_tm * time_data)                              { swi_call(nAPI_TIME); }
+
+ERROR_CODE API_POWER            (int cmd,int * val)                                             { swi_call(nAPI_POWER); }
+
 void printf(char *fmt, ...)
 {
     va_list ap;
@@ -62,3 +66,24 @@ void printf(char *fmt, ...)
     API_PRINTF(fmt,ap);
     va_end(ap);
 }
+
+
+void * malloc(long size)
+{
+    void * ptr;
+    API_MALLOC(&ptr,size);
+    return ptr;
+}
+
+void free(void *buff)
+{
+    API_FREE(buff);
+}
+
+int do_api_power (int cmd)
+{
+    int res;
+    API_POWER(cmd,&res);
+    return res;
+}
+

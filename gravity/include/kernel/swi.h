@@ -37,6 +37,9 @@
 #define nAPI_CRITSEC_ENTER   36
 #define nAPI_CRITSEC_LEAVE   37
 
+#define nAPI_TIME            40
+#define nAPI_POWER           41
+
 #define nAPI_GFX             100
 #define nAPI_PRINTF          101
 
