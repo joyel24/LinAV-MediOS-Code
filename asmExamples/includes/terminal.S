@@ -14,17 +14,28 @@
 @
 @ terminalSetPosT r0=x, r1=y
 @ terminalPutchT r0=chr
+@ terminalSetColorFT r0=color
+@
 
 .text
         newLineCharacter    =   0x0a
 
-        fontWidth   =   6
-        fontHeight  =   6
+        fontWidth           =   6
+        fontHeight          =   6
 
-        terminalWidth   =   52
-        terminalHeight  =   40
-        
+        terminalWidth       =   52
+        terminalHeight      =   40
+
         .thumb
+
+@ terminalSetColorFT r0=color
+@
+terminalSetColorFT:
+        push {r1}
+        ldr r1, =terminalColor
+        str r0, [r1]
+        pop {r1}
+        bx lr
 
 @ terminalSetPosT r0=x, r1=y
 @

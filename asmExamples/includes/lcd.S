@@ -38,7 +38,7 @@ lcdScrollUpT:
         ldr r3, =lcdVideoBuffer
         ldr r4, =(lcdWidth*lcdHeight*2)
         sub r4, r2
-        
+
         @ r2 = count for last bit clear (+src offset)
         @ r4 = count for main scroll
         @ r3 -> dest
