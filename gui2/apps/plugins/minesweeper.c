@@ -1,13 +1,19 @@
-/*****************************************************************************
-Mine Sweeper by dionoea
-
-use arrow keys to move cursor
-use ON or F2 to clear a tile
-use PLAY or F1 to put a flag on a tile
-use F3 to see how many mines are left (supposing all your flags are correct)
-
-*****************************************************************************/
-
+/*
+ * minesweeper.c
+ * by Schoki 2004
+ *
+ * linav - http://linav.sourceforge.net
+ * Copyright (c) 2004 by Christophe THOMAS
+ *
+ * original code from dionoea
+ *
+ * All files in this archive are subject to the GNU General Public License.
+ * See the file COPYING in the source tree root for full license agreement.
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express of implied.
+ *
+ */
+ 
 #include "graphics.h"
 #include "events.h"
 #include "cops.h"
@@ -464,28 +470,45 @@ int eventHandler(int evt)
 					/* move cursor left */
 				case BTN_LEFT:
 					setCursor(1);
-					x = (x + width - 1)%width;
+					//x = (x + width - 1)%width;
+               if(x-1 >= 0)
+					   x--;
+					else
+					   x = width-1;
+
 					setCursor(0);
 					break;
 
 					/* move cursor right */
 				case BTN_RIGHT:
 					setCursor(1);
-					x = (x + 1)%width;
+//					x = (x + 1)%width;
+               if(x+1 >= width)
+					   x = 0;
+					else
+					   x++;
 					setCursor(0);
 					break;
 
 					/* move cursor down */
 				case BTN_DOWN:
 					setCursor(1);
-					y = (y + 1)%height;
+//					y = (y + 1)%height;
+               if(y+1 >= height)
+					   y = 0;
+					else
+					   y++;
 					setCursor(0);
 					break;
 
 					/* move cursor up */
 				case BTN_UP:
 					setCursor(1);
-					y = (y + height - 1)%height;
+//					y = (y + height - 1)%height;
+               if(y-1 >= 0)
+					   y--;
+					else
+					   y = height-1;
 					setCursor(0);
 					break;
 
