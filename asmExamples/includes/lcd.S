@@ -20,7 +20,6 @@
 @ lcdInitT ()
 @ lcdScrollUpT (r0=lines, r1=color)
 @
-@ lcdBRectfT (r0=x, r1=y, r2=width, r3=height, r4=color)
 
 .include "../includes/common.S"
 .include "../includes/osd.S"
@@ -81,11 +80,7 @@ lcdLoop1:
         mov r1, r5
         ldrb r2, [r6, #0]       @ get the char
 
-        mov r7, #1
-        mov lr, r7
-        ldr r7, =(lcdPutchT+1)
-        add lr, pc
-        bx r7
+        callThumb r7, lcdPutchT
 
         add r6, r6, #1
         mov r1, #0
@@ -113,7 +108,6 @@ lcdDone1:
 
 @ lcdPutchT r0=x, r1=y, r2=character, r3=color
 @
-
 lcdPutchT:
         push {r2, r3, r4, r5, r6, lr}  
         ldr r5, =0xff
@@ -127,30 +121,26 @@ lcdPutchT:
 lcdNotb:
         cmp r5, #0x20           @ ' '?
          blt lcdNota
-        cmp r5, #0x60           @ 'Z'
+        cmp r5, #0x7e
          bgt lcdNota
         ldr r4, =font1tab
-        sub r5, r5, #0x20
-        lsl r5, r5, #2
-        add r5, r4, r5
+        sub r5, #0x20
+        lsl r5, #2
+        add r5, r4
         ldr r4, [r5, #0]        @ get address of sprite for it...
 lcdNota:
         mov r2, #6
         mov r5, r3
         mov r3, #6
-        mov r6, #1
-        mov lr, r6
-        ldr r6, =(lcdSpritecT+1)
-        add lr, pc
-        bx r6
+
+        callThumb r6, lcdSpritecT
         pop {r2, r3, r4, r5, r6}
         pop {r0}
         bx r0
 
 
 @ lcdSpritecT r0=x, r1=y, r2=width, r3=height, r4->data, r5=colorF
-@
-    
+@   
 lcdSpritecT:
         push {r0, r1, r2, r3, r4, r5, r6, r7}
 
@@ -213,35 +203,8 @@ lcdLoop5:
         pop {r1, r2, r3, r4, r5, r6}
         bx lr
 
-@ lcdBRectfT r0=x, r1=y, r2=width, r3=height, r4=color
-@   
-lcdBRectfT:
-        push {r1, r2, r3, r4, r5, r6}
-
-        ldr r5, =(lcdWidth*4)
-        mul r1, r5
-        lsl r0, #2
-        add r1, r0
-        ldr r5, =lcdVideoBuffer
-        add r5, r1              @ r5-> start of vid mem for it
-lcdBLoop4:
-        mov r0, r2
-        mov r6, #0
-lcdBLoop5:
-        str r4, [r5, r6]
-        add r6, #4
-        sub r0, #1
-         bne lcdBLoop5
-        ldr r0, =(lcdWidth*4)
-        add r5, r0              @ move on to next line...
-        sub r3, #1
-         bne lcdBLoop4
-        pop {r1, r2, r3, r4, r5, r6}
-        bx lr
-
 @ lcdPlotT  r0=x, r1=y, r2=c
-@
-    
+@    
 lcdPlotT:
         push {r1, r3}
         ldr r3, =(lcdWidth*2)
@@ -255,7 +218,6 @@ lcdPlotT:
 
 @ lcdGetPixelT r0=x, r1=y
 @              r0 = pixel
-
 lcdGetPixelT:
         push {r1, r3}
         ldr r3, =(lcdWidth*2)
@@ -269,7 +231,6 @@ lcdGetPixelT:
 
 @ lcdSpriteT r0=x, r1=y, r2=width, r3=height, r4->data
 @
-    
 lcdSpriteT:
         push {r0, r1, r2, r3, r4, r5, r6}
         ldr r5, =(lcdWidth*2)
@@ -300,7 +261,6 @@ lcdLoop7:
 
 @ lcdInitT
 @
-
 lcdInitT:
         push {lr}
         mov r2, #0
@@ -353,7 +313,7 @@ lcdInitT:
         @ OSD Setup...        
         callThumb1 r3, osdSetScreenConfigT, 0x2000
         callThumb2 r3, osdSetScreenPositionT, 0x79, 0x00
-        callThumb2 r3, osdSetBackConfigT, 0x14, 0x02    @ 02
+        callThumb2 r3, osdSetBackConfigT, 0x14, 0x02
         callThumb2 r3, osdSetMainConfigT, 0x14, 0xf9    @ d9      
         callThumb2 r3, osdSetBack2ConfigT, 0x14, 0x00
         callThumb2 r3, osdSetMain2ConfigT, 0x14, 0x00
@@ -409,8 +369,14 @@ font1tab:
         .word font1t,   font1u,   font1v,   font1w
         .word font1x,   font1y,   font1z,   font_5b
         .word font_5c,  font_5d,  font_5e,  font_5f
-        .word font_60
-        
+        .word font_60,  font1a,   font1b,   font1c
+        .word font1d,   font1e,   font1f,   font1g
+        .word font1h,   font1i,   font1j,   font1k
+        .word font1l,   font1m,   font1n,   font1o
+        .word font1p,   font1q,   font1r,   font1s
+        .word font1t,   font1u,   font1v,   font1w
+        .word font1x,   font1y,   font1z,   font_7b
+        .word font_7c,  font_7d,  font_7e        
     
 font1_20:
          .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
@@ -864,6 +830,34 @@ font_5f: .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
 font_60: .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
          .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
          .hword 0x0000, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+
+font_7b: .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+
+font_7c: .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+
+font_7d: .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0x0000, 0xffff, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+
+font_7e: .hword 0x0000, 0xffff, 0x0000, 0xffff, 0x0000, 0x0000
+         .hword 0xffff, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000
+         .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
          .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
          .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
          .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000

@@ -19,6 +19,7 @@
 @
 @ ataIdentifyT  r0->buffer
 @ ataReadLBAT   r0->buffer r1=LBA, r2=n
+@
 
 .ifndef ataInc
 ataInc = 1
@@ -30,24 +31,23 @@ ataCommand_READ_SECTORS     =   0x20
 ataCommand_READ_MULTIPLE    =   0xc4
 ataCommand_SET_MULTIPLE_MODE=   0xc6
 
-ataStatus_BSY   =       0x80
-ataStatus_RDY   =       0x40
-ataStatus_DF    =       0x20
-ataStatus_DRQ   =       0x08
-ataStatus_ERR   =       0x01
+ataStatus_BSY               =   0x80
+ataStatus_RDY               =   0x40
+ataStatus_DF                =   0x20
+ataStatus_DRQ               =   0x08
+ataStatus_ERR               =   0x01
 
-ataSelectLBA    =       0x40
+ataSelectLBA                =   0x40
 
-ataRegData      =       0x02400000
-ataRegError     =       0x02400080
-ataRegNSector   =       0x02400100
-ataRegSector    =       0x02400180
-ataRegLCyl      =       0x02400200
-ataRegHCyl      =       0x02400280
-ataRegSelect    =       0x02400300
-ataRegCommand   =       0x02400380
-ataRegStatus    =       0x02400380
-
+ataRegData                  =   0x02400000
+ataRegError                 =   0x02400080
+ataRegNSector               =   0x02400100
+ataRegSector                =   0x02400180
+ataRegLCyl                  =   0x02400200
+ataRegHCyl                  =   0x02400280
+ataRegSelect                =   0x02400300
+ataRegCommand               =   0x02400380
+ataRegStatus                =   0x02400380
 
         .thumb
 
@@ -219,6 +219,7 @@ donehw:
         pop {r0}
         bx r0
 
+@ ------------------------------------------------------------------------------
         .ltorg
 hardwrites:
         .word 0x00030522, 0x00000800
@@ -308,9 +309,7 @@ hardwrites:
         .word 0x000307ea, 0x0000eb10   
         .word 0x000307ec, 0x0000eb10   
 
-
         .word 0x00000000, 0x00000000   
-
         
         .arm
         

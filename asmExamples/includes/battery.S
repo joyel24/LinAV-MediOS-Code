@@ -19,9 +19,10 @@ batteryInc = 1
 
 .text
 
+        .thumb
+
 @ batteryIsDCT
 @
-        .thumb
 batteryIsDCT:
         push {r1}
         ldr r1, =0x30a24

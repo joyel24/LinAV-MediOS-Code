@@ -37,7 +37,11 @@ buttonsInc = 1
 @   3058a/e but 0x10
 
         .thumb
+
+@ buttonsGetStatusT
+@
 buttonsGetStatusT:
+        push {r1, r2, r3}
         mov r3, #0x0f
         ldr r2, =0x2600680
         ldrh r1, [r2, #0]
@@ -55,9 +59,10 @@ buttonsGetStatusT:
         and r1, r3
         lsl r1, r1, #8
         orr r0, r1
+        pop {r1, r2, r3}
         bx lr                   @ incase its comming from arm code.
 
         .arm
         .ltorg
-        
+
 .endif

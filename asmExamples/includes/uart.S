@@ -35,7 +35,6 @@ uartGetchT:
         ldr r2, =uartBase
         mov r1, #0
         ldrh r1, [r2, #6]
-        
         ldr r0, =(-1)           @ assume failure...
         lsl r1, #26
         beq uartNon
@@ -80,7 +79,7 @@ uartEnd1:
         pop {r2}
         pop {r0}
         bx r0
-        
+
         .ltorg
         .arm
         

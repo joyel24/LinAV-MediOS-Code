@@ -19,9 +19,10 @@ usbInc = 1
 
 .text
 
+        .thumb
+
 @ usbIsConnectedT
 @
-        .thumb
 usbIsConnectedT:
         push {r1}
         ldr r1, =0x30a24

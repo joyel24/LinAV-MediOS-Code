@@ -38,6 +38,7 @@
 @
 @ osdSetScreenPositionT (r0=x, r1=y)
 @ osdSetScreenConfigT (r0=config)
+@
 
 .include "../includes/common.S"
 

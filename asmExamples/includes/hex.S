@@ -15,15 +15,17 @@
 @ hex2T(r0->destnation, r1=value)
 @ hex4T(r0->destnation, r1=value)
 @ hex8T(r0->destnation, r1=value)
+@
 
 .ifndef hexInc
 hexInc = 1
 
 .text
 
+        .thumb
+
 @ hex2T  r0->dest, r1=value
 @
-        .thumb
 hex2T:
         push {r1, r2, r3, r4}
         ldr r4, =hextable

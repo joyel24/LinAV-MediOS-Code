@@ -18,18 +18,18 @@
 
         add r0, pc, #1
         bx r0                       @ switch to thumb
-        
+
         .thumb
 
         mov r0, #0x30
         lsl r0, #20     @ 03000000
-        
+
         mov r1, #0x40
         lsl r1, #8      @ 4000
-        
+
         mov r2, #0x34
         lsl r2, #20     @ 03400000
-        
+
 lrel:   ldr r3, [r0]
         str r3, [r2]
         add r0, #4
@@ -182,7 +182,7 @@ loopLE:
         
 lwaitk: callThumb r4, buttonsGetStatusT
         ldr r1, =0x100
-        cmp r0, r1
+        tst r0, r1
          bne lwaitk
         
         callThumb2 r4, terminalPutsCT, msg700, 0xffff

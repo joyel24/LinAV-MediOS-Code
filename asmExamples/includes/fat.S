@@ -22,8 +22,13 @@ fatInc = 1
 
 .text
 
+        fatSectorSize       =   512
+        fatSectorSizeShift  =   9
+
         .thumb
 
+@ fatInitT (r0=LBA of Partition)
+@
 fatInitT:
         push {lr}
         push {r1, r2, r3, r4, r5, r6, r7}
@@ -42,7 +47,7 @@ fatInitT:
         mov r0, #0
         ldrb r0, [r6, #16]      @ BPB_NumFATs
         mul r5, r0
-        
+
         mov r0, r6
         add r0, #14             @ BPB_RsvdSecCnt
         callThumb r3, fatRead2T
@@ -92,16 +97,15 @@ fatReadM:
         mov r1, r4
         mov r2, #1
         callThumb r3, ataReadLBAT
-        ldr r0, =512
+        ldr r0, =fatSectorSize
         add r6, r0
         add r4, #1                                          @ Move to next LBA
         sub r5, #1
-        bne fatReadM
-
+         bne fatReadM
         pop {r1, r2, r3, r4, r5, r6, r7}
         pop {r0}
         bx r0
-        
+
 @ fatTraceCCT r0=cluster
 @            returns next cluster in chain.
 fatTraceCCT:
@@ -110,7 +114,7 @@ fatTraceCCT:
         mov r7, r0
         lsl r7, #2                                         @ *4
         mov r5, r7
-        lsr r5, #9                                         @ /512
+        lsr r5, #fatSectorSizeShift
         ldr r1, fatLBAFAT
         add r1, r5
 
@@ -125,7 +129,7 @@ fatTraceCCT:
         callThumb r3, ataReadLBAT
 
 fatCacheHit:        
-        ldr r5, =0x1ff
+        ldr r5, =(fatSectorSize - 1)
         and r5, r7                                         @ = offset
         ldr r4, =fatFATBuffer
         ldr r7, [r4, r5]
@@ -172,12 +176,12 @@ fatRead2T:
 fatClusterSize:     .word   0
 fatSecPerClu:       .word   0
 fatRootClu:         .word   0
-        
+
 fatLBAFAT:          .word   0
 fatLBADATA:         .word   0
-        
-fatTBuffer:         .space  512, 0
-fatFATBuffer:       .space  512, 0
+
+fatTBuffer:         .space  fatSectorSize, 0
+fatFATBuffer:       .space  fatSectorSize, 0
 fatFATBufferLBA:    .word   0
 
         .arm

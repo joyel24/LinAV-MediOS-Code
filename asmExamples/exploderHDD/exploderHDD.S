@@ -44,12 +44,7 @@
 
         callThumb r4, ataInitT
 loopr:
-        
-        ldr r0, =(buttonsGetStatusT+1)
-        mov r1, #1
-        mov lr, r1
-        add lr, pc
-        bx r0
+        callThumb r0, buttonsGetStatusT        
 
         ldr r1, =0x777
         eor r0, r1
@@ -137,7 +132,6 @@ notmenu3:
         mov r7, #0
 okr7:
 
-
         ldr r1, =saoff
         str r7, [r1]
 
@@ -190,11 +184,7 @@ buildLine:
 
         ldr r0, =messagf1
         mov r1, r7
-        ldr r2, =(hex2T+1)
-        mov r3, #1
-        mov lr, r3
-        add lr, pc
-        bx r2
+        callThumb r2, hex2T
 
         ldr r6, =bufferx
         add r7, r6
@@ -229,7 +219,6 @@ good3:  cmp r2, #0x7e
         mov r2, #0x2e
 good4:
         strb r2, [r4, #1]       @ store a chr
-        
         
         mov r0, r5
         callThumb r3, hex4T
