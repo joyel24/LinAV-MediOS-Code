@@ -8,9 +8,9 @@
 int main(int argc,char ** argv)
 {
     ini_graphics();
+
+    drawRect(1,10,10,100,50);
     
-    drawRect(10,10,10,100,50); 
- 
  while(1)
   {  
     nxtEvent();

@@ -35,6 +35,8 @@ char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
   Display* display;				/* display */	
   Window window;				/* Create a window */
   char texte[] = "LinAV project";		/* for events  */
+  GC gc;					/* Graphic Context */
+  
 
 struct graphicsBuffer BITMAP_1 = {
     offset             : 0,
@@ -113,9 +115,11 @@ int ini_graphics()
     VIDEO_1.offset=(unsigned int)&screen_VID1;
     VIDEO_2.offset=(unsigned int)&screen_VID2;
     
+    setPlane(BMAP1);
+    showPlane(BMAP1);
+    
     char* displayName = 0;
-    int screen; 					/* screen number */
-    GC gc;		
+    int screen; 					/* screen number */		
  
  /*connect to X server */
  
@@ -156,12 +160,54 @@ int ini_graphics()
   /* Affichage de la fenêtre */
   
   XMapWindow(display, window);
-  
-  XFlush(display);
          
   return 0;
 }
 
+void test()
+{
+	printf("%d\n", SCREEN_WIDTH*SCREEN_HEIGHT);
+}
+
+void readPixBuffer(int x, int y)
+{
+	char element;
+	element = screen_BMAP1[y*SCREEN_WIDTH+x];
+}
+
+void drawPixBuffer(char color, int x, int y)
+{
+	int blackColor = BlackPixel(display, DefaultScreen(display));
+        int whiteColor = WhitePixel(display, DefaultScreen(display));
+	
+	if(color== 0)
+	{
+	 XSetForeground(display, gc, whiteColor);
+	 XDrawPoint(display, window, gc, x, y);
+	}
+	if(color == 1)
+	{
+	 XSetForeground(display, gc, blackColor);
+	 XDrawPoint(display, window, gc, x, y);
+	}
+}
+	 
+
+void lcd_update()
+{
+	int x, y;
+	char color;
+	
+	for(y=0; y<SCREEN_HEIGHT; y++)
+	{
+	 for(x=0; x<SCREEN_WIDTH; x++)
+	  {
+	   color = *(screen_BMAP1+y*SCREEN_WIDTH+x);
+	   readPixBuffer(x,y);
+	   drawPixBuffer(color, x, y);
+	  }	
+        }
+}	
 
 void close_graphics()
 {
