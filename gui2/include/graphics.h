@@ -32,8 +32,8 @@
 #define USE_GC    -1
 #define GC_FONT   NULL
 
-#define LCD_WIDTH  320
-#define LCD_HEIGHT 240
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 240
 
 // sprite buffer type
 #define S1bit      0
@@ -97,6 +97,7 @@ void (*drawString)       (struct graphicsFont * font, int color,int bg_color, in
 void (*scrollWindowVert) (int bgColor, int x, int y, int width, int height, int scroll, int UP, struct graphicsBuffer * buff);
 void (*scrollWindowHoriz)(int bgColor, int x, int y, int width, int height, int scroll, int RIGHT, struct graphicsBuffer * buff);
 int  (*getStringSize)    (struct graphicsFont * font, const unsigned char *str, int *w, int *h);
+void (*clearScreen)      (int color);
 
 };
 
@@ -138,6 +139,7 @@ void drawSprite       (PALETTE * palette, SPRITE * sprite, int x, int y);
 void drawBITMAP       (BITMAP * bitmap, int x, int y);
 void scrollWindowVert (int bgColor, int x, int y, int width, int height, int scroll, int UP);
 void scrollWindowHoriz(int bgColor, int x, int y, int width, int height, int scroll, int RIGHT);
+void clearScreen      (int color);
 
 /* images */
 void drawImage        (char * filename);

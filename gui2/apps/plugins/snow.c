@@ -20,7 +20,6 @@ static short particles[NUM_PARTICLES][2];
 int g_cntSnow = 0;
 int g_cntPartSnow = 0;
 
-void ClearScreen();
 int GetTime();
 void delay(unsigned int time);
 void printNr(char* buffer, int nr, int withSign);
@@ -72,16 +71,6 @@ PACK(cops);
         cops->startTimout();
         cops->showTime();
         cops->showBat();
-}
-
-void ClearScreen()
-{
-	int i = 0;
-	int xPos = 0;
-	
-	cops->fillRect(BLACK,0, 0 , 320, 240); //clearScr();   
-
-	
 }
 
 int GetTime()
@@ -182,7 +171,7 @@ void snow_init(void)
         particles[i][1]=-1;
     }
 
-    ClearScreen();
+    cops->clearScreen(BLACK);
 }
 
 void printNr(char* buffer, int nr, int withSign)

@@ -62,7 +62,6 @@ struct today today;
 static int leap_year;
 struct shown shown;
 
-void ClearScreen();
 void ClearCalendar();
 void printNr(char* buffer, int nr, int withSign);
 void printTime(char* buffer, int nr);
@@ -336,12 +335,6 @@ static void prev_day(struct shown *shown, int step)
         prev_month(shown, step);
     else
         calendar_draw();
-}
-
-void ClearScreen()
-{
-    // Clear full Screen with black color
-//xxx   graphicsBoxfA(&screenBitmap, 0, 0, 640, 240, BACKCOLOR_MAIN);
 }
 
 void printNr(char* buffer, int nr, int withSign)

@@ -24,9 +24,6 @@
 
 #define STRING_MAXSIZE 200
 
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
-
 #define FBIO_INIT               _IO ('F', 0x26)
 
 #define tstXY(x,y)  {if(x>SCREEN_WIDTH) return; if(x<0) return; if(y>SCREEN_HEIGHT) return; if(y<0) return;}
@@ -96,7 +93,7 @@ int ini_graphics()
 	iniComponent(&BITMAP_2);
 	
 	gc_bmap2=createGC(BMAP2);
-	
+
 	VIDEO_1.offset            = (int)&screen3;
 	VIDEO_1.component         = AV3XX_OSD_VIDEO1;
 	VIDEO_1.bytesPerLine      = SCREEN_WIDTH*2;
@@ -180,7 +177,7 @@ GC_ID createGC(int vplane)
 		default:
 			printf("wrong plane\n");
 			return NULL;
-	}	
+	}
 			
 	return gc;
 }
@@ -205,7 +202,7 @@ void setPlane(int vplane)
 			break;
 		default:
 			printf("wrong plane\n");
-	}	
+	}
 }
 
 void hidePlane(int vplane)
@@ -252,6 +249,10 @@ void iniComponent(struct graphicsBuffer * buff)
 }
 
 /* drawing functions */
+void clearScreen(int color)
+{
+	default_gc->gops->fillRect(color,0,0,SCREEN_WIDTH,SCREEN_HEIGHT,default_gc->buffer);
+}
 
 void drawPixel(int color,int x, int y)
 {

@@ -46,10 +46,10 @@ int main(int argc,char * * argv)
 	 REGISTER(cops,eventHandler);
     PACK(cops);
 
-	 cops->fillRect(WHITE,0, 0, LCD_WIDTH, LCD_HEIGHT);
+	 cops->clearScreen(WHITE);
 
-	 for(w = 0; w < LCD_WIDTH; w+=7)
-   	 for(h = 0; h < LCD_HEIGHT; h+=7)
+	 for(w = 0; w < SCREEN_WIDTH; w+=7)
+   	 for(h = 0; h < SCREEN_HEIGHT; h+=7)
          cops->drawBITMAP (&testB, w, h);
 
     while (!stop)

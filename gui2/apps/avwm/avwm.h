@@ -56,6 +56,7 @@ struct client_operations {
     void (*hideTime)          (void);
     void (*showBat)           (void);
     void (*hideBat)           (void);
+    void (*clearScreen)       (int color);
 };
 
 struct menu_item {

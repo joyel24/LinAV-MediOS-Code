@@ -103,8 +103,6 @@ int doLs(char * name)
 #define BLUE         32
 #define RED          77
 
-//#define FONT_HEIGHT  10
-
 needFont(std6x9);
 
 int printName(char * name,int x,int y,int clear,int selected)

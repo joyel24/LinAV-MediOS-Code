@@ -44,7 +44,8 @@ struct client_operations cops={
     showTime           : showTime,
     hideTime           : hideTime,
     showBat            : showBat,
-    hideBat            : hideBat
+    hideBat            : hideBat,
+    clearScreen        : clearScreen
 };
 
 void (*currentHandler)(int evt)=NULL;
