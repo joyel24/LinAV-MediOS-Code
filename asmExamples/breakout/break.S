@@ -45,6 +45,9 @@ lcop:   mov r0, #0
         callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
         callThumb2 r3, osdSetMainConfigT, 0x14, 0xd9      
 
+        callThumb1 r3, osdSetCursorConfigT, 0x0201
+        callThumb2 r3, osdSetCursorSizeT, 64, 8
+        callThumb2 r3, osdSetCursorPositionT, 160, 100
         
 @ Initialise the ball on the 2nd bitmap plane...
         
@@ -111,12 +114,11 @@ lbmx:   mov r2, #1
         
         ldr r0, =paddlePos
         ldr r0, [r0]
+        lsl r0, #1
         mov r1, #230
-        mov r2, #32
-        mov r3, #5
-        ldr r4, =0x0202
-        callThumb r5, lcdRectfT
-
+        add r0, #0x14
+        add r1, #0x12
+        callThumb r3, osdSetCursorPositionT
 loopb:
 
 
@@ -164,21 +166,13 @@ okSave: ldr r2, [r3]
         
         @ changed! save it, and redraw...
         str r4, [r3]
-        mov r6, r4
-        
-        mov r0, r2
-        mov r1, #230
-        mov r2, #32
-        mov r3, #10
-        ldr r4, =0x0000
-        callThumb r5, lcdRectfT
 
-        mov r0, r6
+        mov r0, r4
+        lsl r0, #1
         mov r1, #230
-        mov r2, #32
-        mov r3, #5
-        ldr r4, =0x0202
-        callThumb r5, lcdRectfT
+        add r0, #0x14
+        add r1, #0x12
+        callThumb r3, osdSetCursorPositionT
 
 noChange:
 
