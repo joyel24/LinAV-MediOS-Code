@@ -123,7 +123,8 @@ GC_ID createGC       (int vplane);
 void  destroyGC      (GC_ID gc);
 
 void lcd_update	     (void);
-void drawPixBuffer   (char color, int x, int y);
+void drawPixBuffer   (unsigned char color, int x, int y);
+void calcpal         (void);
 
 
 

@@ -37,6 +37,7 @@ char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
   Window window;				/* Create a window */
   GC gc;
   int screen; 
+  int colorTab[256];
 
 struct graphicsBuffer BITMAP_1 = {
     offset             : 0,
@@ -150,26 +151,38 @@ int ini_graphics()
     
     /* Mapping window to display */    
     XMapWindow(display, window);
+    
+    calcpal();
          
   return 0;
 }
-    
-void drawPixBuffer(char color, int x, int y)
+
+void calcpal()
 {
-    int r,g,b,stockcolor;
+    int r,g,b,i;
+    Colormap pal = DefaultColormap(display,screen);
+    XColor c;
+
+    for(i=0; i<256; i++)
+    {
+    r = gui_pal[i][0];
+    g = gui_pal[i][1];
+    b = gui_pal[i][2];
+    c.red = r*0x100+r;
+    c.green = g*0x100+g;
+    c.blue = b*0x100+b;
+    colorTab[i] = c.pixel;
+    }
+}
+    
+        
+void drawPixBuffer(unsigned char color, int x, int y)
+{
+    int r,g,b;
     XColor c;
     Colormap pal = DefaultColormap(display,screen);
-    
-    stockcolor = color;
-    r = gui_pal[stockcolor][0];
-    g = gui_pal[stockcolor][1];
-    b = gui_pal[stockcolor][2];
-    c.red = r;
-    c.green = g;
-    c.blue = b;
-    
-    XAllocColor(display, pal, &c);
-    XSetForeground(display, gc, c.pixel);
+
+    XSetForeground(display, gc, colorTab[color]);
     XDrawPoint(display, window, gc, x, y);
 }
 	 
