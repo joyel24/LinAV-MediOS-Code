@@ -19,7 +19,7 @@
 #include <graphics.h>
 #include "events.h"
 #include "graphics_8.h"
-#include <gui_pal.h>
+#include "gui_pal.h"
 #include "jpeglib.h"
 
 #define STRING_MAXSIZE 200

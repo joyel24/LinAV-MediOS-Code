@@ -53,10 +53,10 @@ int ini_mp3_playback(struct mp3_play * mp3_p_data)
 void close_mp3_playback(void)
 {
     stop_playback();
-    if(fd_dsp>=0)
+   /* if(fd_dsp>=0)
         close(fd_dsp);
     if(fd_mix>=0)
-        close(fd_mix);    
+        close(fd_mix);  */  
 }
 
 int start_playback(void)

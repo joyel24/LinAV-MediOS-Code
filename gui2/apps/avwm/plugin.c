@@ -66,6 +66,8 @@ int loadPlugin(char * path, char * param)
 {
     int status;
     fprintf(stderr,"load plug: %s\n",path);
+    if(param!=NULL)
+    	fprintf("Param=%s\n",param);
     if(cur_plugin.handler)
     {
         cur_plugin.handler(EVT_RESUME);
@@ -77,9 +79,6 @@ int loadPlugin(char * path, char * param)
     drawGui();
     return launchPlugin(path,param);
 }
-
-
-extern int stopWM;
 
 int launchPlugin(char * path,char * param)
 {
@@ -103,7 +102,18 @@ int launchPlugin(char * path,char * param)
             return -1;
         }
         cur_plugin.pid=pid;
+        fprintf(stderr,"load success pid= %d\n",pid);
     }
     return 0;
 
+}
+
+extern struct wkUP_evt nxt_action;
+
+int playMp3(char * filename)
+{
+	fprintf(stderr,"[playMP3] name:%s\n",filename);
+        nxt_action.app=APP_MP3;
+        strcpy(nxt_action.arg,filename);
+	wakeUP();
 }

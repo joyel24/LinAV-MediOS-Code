@@ -303,7 +303,8 @@ void handle_type_other(char *filename)
     }
     else if (is_mp3_type(ext))
     {
-       launchSoundPlayer(filename);
+       //launchSoundPlayer(filename);
+       cops->playMp3(filename);
     }
     else if (is_script_type(ext))
     {
@@ -376,17 +377,20 @@ int eventHandler(int evt)
         case BTN_RIGHT:
             if(chdir(list[pos+nselect])<0)
                 handle_type_other(list[pos+nselect]);
-            cleanList();
-            if(doLs("./")<0)
+            else
             {
-                listused = 0;
-                return -1;
+                cleanList();
+                if(doLs("./")<0)
+                {
+                    listused = 0;
+                    return -1;
+                }
+                pos=0;
+                nselect=0;
+                cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
+                printAllName(pos,nselect);
+                //cops->clearEventQueue();
             }
-            pos=0;
-            nselect=0;
-            cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
-            printAllName(pos,nselect);
-            cops->clearEventQueue();
             break;
         case BTN_LEFT:
             if(chdir("../")<0)
@@ -401,9 +405,9 @@ int eventHandler(int evt)
             nselect=0;
             cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
             printAllName(pos,nselect);
-            cops->clearEventQueue();
+            //cops->clearEventQueue();
             break;
-        //case BTN_OFF:
+        case BTN_OFF:
         case EVT_QUIT:
             stop=1;
             break;
@@ -451,8 +455,9 @@ int main(int argc,char * * argv)
         }
 
         cleanList();
+        STOPME(cops)
         return 0;
     }
-
+    STOPME(cops)
     return -1;
 }

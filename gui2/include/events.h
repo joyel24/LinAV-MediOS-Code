@@ -28,12 +28,15 @@
 #define        BTN_ON      0x0009
 #define        BTN_OFF     0x000a
 #define        EVT_TIMER   0x000b
+#define        EVT_WKUP    0x000c
 
 
 int  iniEvent(void);
 int  nxtEvent(void);
 int  waitEvent(void);
 int  clearEventQueue(void);
+int  wakeUP(void);
+int  halt_device(void);
 int  setRepeate(int val);
 int  getRepeate(void);
 int  setFreq(int val);

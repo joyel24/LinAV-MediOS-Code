@@ -789,22 +789,21 @@ int eventHandler(int evt)
 
 int main(int argc, char * * argv)
 {
-    /*if(argc<3)
+    /*if(argc<2)
        return 0; 
     else
     {
         filename=argv[1];
-        vol=atoi(argv[2]);
     }*/
     
+    fprintf(stderr,"In play: %s\n",filename);
+        
     filename="/mnt/file.mp3";
     vol=70;
     wait=0;
     end=0;
     
     REGISTER(cops,eventHandler,0);
-    
-    fprintf(stderr,"In play\n");    
 
     data.size=MP3_BUFF_SIZE;
     data.filename=filename;

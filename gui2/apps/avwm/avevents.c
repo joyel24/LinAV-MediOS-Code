@@ -21,10 +21,16 @@ extern struct plugin status_bar_plugin;
 
 extern int stopWM;
 
+struct wkUP_evt nxt_action = {
+    app : NO_APP
+};
+
 void pack(void)
 {
     cur_plugin.handle_on=1;
 }
+
+int launchMP3=0;
 
 void eventLoop()
 {
@@ -32,10 +38,26 @@ void eventLoop()
     
     while(!stopWM)
     {
-        evt=waitEvent();       
+        evt=waitEvent();
+        
+        if(evt==EVT_WKUP)        
+        {
+            switch(nxt_action.app)
+            {
+                case NO_APP:
+                    break;
+                case APP_MP3:
+                    loadPlugin("/mnt/avwm/plugins/play",NULL);
+                    menu_plugin.handle_on=0;
+                    break;
+            }
+            nxt_action.app=0;
+            continue;          
+        }
+           
 
         if(status_bar_plugin.handle_on)
-            sendEvt(&status_bar_plugin,evt); 
+            sendEvt(&status_bar_plugin,evt);
                 
         if(menu_plugin.handle_on)
             sendEvt(&menu_plugin,evt);

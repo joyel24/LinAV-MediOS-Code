@@ -27,7 +27,6 @@ int waitEvent(void)
         return -1;
     if(ioctl(fdEv,AV_WAIT_EVENT,&evt)<0)
         return -1;
-    
     return evt+1;
 }
 
@@ -55,6 +54,24 @@ int clearEventQueue(void)
     if(ioctl(fdEv,AV_CLEAR_EVENTS,NULL)<0)
         return -1;
     
+    return 0;    
+}
+
+int wakeUP(void)
+{    
+    if(fdEv<0)
+        return -1;
+    if(ioctl(fdEv,AV_DO_WAKEUP,NULL)<0)
+        return -1;    
+    return 0;    
+}
+
+int halt_device(void)
+{    
+    if(fdEv<0)
+        return -1;
+    if(ioctl(fdEv,AV_HALT_DEVICE,NULL)<0)
+        return -1;    
     return 0;    
 }
 

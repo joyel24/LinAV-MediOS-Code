@@ -30,5 +30,6 @@ void   stop_me          (void);
 int    loadPlugin       (char * path, char * param);  // prepare env to load a new plugin
 int    launchPlugin     (char * path,char * param);   // launch a plugin
 
+int    playMp3          (char * filename);
 
 #endif

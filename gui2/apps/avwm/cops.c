@@ -77,6 +77,8 @@ struct client_operations cops={
     execDSP_ioctl      : execDSP_ioctl,
     execMIX_ioctl      : execMIX_ioctl,
     
-    debug              : debug
+    debug              : debug,
+    
+    playMp3            : playMp3
 
 };

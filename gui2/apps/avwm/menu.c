@@ -32,6 +32,8 @@
 #define MAXPOS       10
 #define TITLE_OFFSET  2
 
+#define MAX_OFF      10
+
 #define MENU_FILE_NAME "menu.cfg"
 
 //#define FONT_HEIGHT  10 // now using graphic function for that
@@ -51,6 +53,8 @@ struct cfg_menu * current_item=NULL;
 extern int cfg_line_num;
 
 struct plugin * menu_plug;
+
+int nbOff=MAX_OFF;
 
 int ini_menu(char * path,struct plugin * plug)
 {
@@ -329,6 +333,17 @@ void menuEvtHandler(int evt)
 
    getStringS("M", &w, &h);
 
+   if(evt==BTN_OFF)
+   {
+        if(nbOff)
+            nbOff--;
+        else
+            stopWM=1;
+        return;
+   }
+   else
+	nbOff=MAX_OFF;
+   
     switch(evt) {
         case BTN_UP:
             if(nselect==0) // moving out of current window
@@ -414,9 +429,6 @@ void menuEvtHandler(int evt)
                     clearEventQueue();
                 }
             }
-            break;
-        case BTN_OFF:
-//            stopWM=1;
             break;
         case EVT_REDRAW:
             fillRect(COLOR_WHITE,0 , h+6+MENU_SHADOW, 320, 240-h-6-MENU_SHADOW);

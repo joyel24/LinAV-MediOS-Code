@@ -90,6 +90,8 @@ struct client_operations {
 
     void (*debug)               (char *fmt, ...);
     
+    void (*playMp3)             (char * filename);
+    
 };
 
 #endif

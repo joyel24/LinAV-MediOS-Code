@@ -21,6 +21,16 @@
 #define EVT_SUSPEND 0x0102
 #define EVT_RESUME  0x0103
 
+#define NO_APP      0
+#define APP_MP3     1
+
+#define MAX_PATH 256
+
+struct wkUP_evt {
+	int app;
+        char arg[MAX_PATH];
+};
+
 void   addEventHandler  (void (*evtHandle));
 void   pack             (void);
 void   eventLoop        (void);
