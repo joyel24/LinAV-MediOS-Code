@@ -255,7 +255,7 @@ void drawSlider(int x, int y, char* text, int min, int max, int value, int activ
 
 	fillRect(COLOR_BLUE, x+SLIDER_OFFSET, y, 128, 9);
 
-    drawBITMAP (&SettingsSliderBitmap, x+filler+SLIDER_OFFSET-3,y-2); // -3 = half of bitmap width
+    drawBITMAP (&SettingsSliderBitmap, x+filler+SLIDER_OFFSET,y-2);
 
 	sprintf(tmp,"%d", value);
     if(filler < 128/2)
