@@ -51,7 +51,6 @@ __IRAM_CODE unsigned long kmemavail ()
 // Made from diffrent threads.
 __IRAM_CODE int kmemory_manager (void* pvParameters)
 {
-/*
 	register long _r7 asm("r7");
 	register long _r8 asm("r8");
 	register long _r12 asm("r12");
@@ -61,18 +60,15 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
 	__cli ();
 	printk("*** kmemory_manager *** [CPSR:%08x, R12:%08x, SP:%08x, LR:%08x]\n", _r7, _r12, _r13, _r8);
 	__sti ();
-*/
 
-	SYSTEM_CTRL_COMMAND SysCtrl;
-	TASK_INFO* pTCB = 0;
+   SYSTEM_CTRL_COMMAND* pSysCtrl = 0;
+   TASK_INFO* pTCB = 0;
 
-	while (1)
-	{
-		pTCB = 0;
+   while (1)
+   {
+      pSysCtrl = 0;
+      pTCB = 0;
 
-		API_PIPE_RECV ((HPIPE)g_pSystemCtrlPipe, &SysCtrl, sizeof(SYSTEM_CTRL_COMMAND));
-
-/*
       __cli ();
       if (g_pSystemCtrlPipe->nReceiver != g_pSystemCtrlPipe->nSender)
       {
@@ -80,29 +76,28 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
          g_pSystemCtrlPipe->nReceiver = (g_pSystemCtrlPipe->nReceiver + sizeof(SYSTEM_CTRL_COMMAND)) & PIPE_SIZE_MASK;
       };
       __sti ();
-*/
 
-//      if (pSysCtrl)
-//      {
-         switch (SysCtrl.nCmdId)
+      if (pSysCtrl)
+      {
+         switch (pSysCtrl->nCmdId)
          {
             case nAPI_MALLOC:
-               *((void**)SysCtrl.nCmdParam1) = kmalloc (SysCtrl.nCmdParam2);
+               *((void**)pSysCtrl->nCmdParam1) = kmalloc (pSysCtrl->nCmdParam2);
                break;
 
             case nAPI_FREE:
-               kfree ((void*)SysCtrl.nCmdParam1);
+               kfree ((void*)pSysCtrl->nCmdParam1);
                break;
 
             case nAPI_MEMAVAIL:
-               *((unsigned long*)SysCtrl.nCmdParam1) = kmemavail ();
+               *((unsigned long*)pSysCtrl->nCmdParam1) = kmemavail ();
                break;
 
             case nAPI_TASK_TERMINATE:
 
-//               printk ("[memmgr] TERMINATE\n");
+               printk ("[memmgr] TERMINATE\n");
 
-               pTCB = SysCtrl.pSenderThread;
+               pTCB = pSysCtrl->pSenderThread;
 
                // Remove task from task ring...
                __cli ();
@@ -112,49 +107,29 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
 
                // Free task memory resources...
                if (pTCB->pTaskCode)
-               {
                   kfree (pTCB->pTaskCode); //code memory
-                  pTCB->pTaskCode = 0;
-               }
-
                if (pTCB->pMessagePipe)
-               {
                   kfree (pTCB->pMessagePipe); //message pipe
-                  pTCB->pMessagePipe = 0;
-               }
-
-               if (pTCB->pMemoryContext)
-               {
-                  kfree (pTCB->pMemoryContext); //GFX context
-                  pTCB->pMemoryContext = 0;
-               }
-
-               if (pTCB->pStack)
-               {
-                  kfree (pTCB->pStack); //stack
-                  pTCB->pStack = 0;
-               }
-
+               kfree (pTCB->pStack); //stack
                kfree (pTCB); //TCB record
                API_TASK_YIELD ();
 
                // We should never get here...
                break;
          }
-//      }
+      }
 
       /// Unblock calling task...
       __cli ();
-      SysCtrl.pSenderThread->nBlockingState = TASK_BLOCKED_BY_NONE;
-      SysCtrl.pSenderThread->nBlockingValue = 0;
+      pSysCtrl->pSenderThread->nBlockingState = TASK_BLOCKED_BY_NONE;
+      pSysCtrl->pSenderThread->nBlockingValue = 0;
 
-//      API_TASK_YIELD ();
+      API_TASK_YIELD ();
       __sti ();
-	};
+   };
 
-//	__cli ();
-//	printk ("*** MEMORY MANAGER EXITED ***\n");
-//	__sti ();
-
+	__cli ();
+	printk ("*** MEMORY MANAGER EXITED ***\n");
+	__sti ();
 	return 0;
 }
