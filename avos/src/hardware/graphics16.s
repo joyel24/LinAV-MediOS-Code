@@ -114,7 +114,7 @@ g16s1x:
 
         lsl r2, #2
         ldr r6, [r3, #GRAPHICS_BUFFER_PALLETTE16]
-@        ldr r2, [r6, r2]
+        ldr r2, [r6, r2]
         strh r2, [r0]
 g16s1nd:
         sub r5, #1

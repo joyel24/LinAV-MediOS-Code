@@ -124,7 +124,7 @@ g32s1x:
 
         lsl r2, #2
         ldr r6, [r3, #GRAPHICS_BUFFER_PALLETTE32]
-@        ldr r2, [r6, r2]
+        ldr r2, [r6, r2]
         str r2, [r0]
 g32s1nd:
         sub r5, #1

@@ -4,7 +4,7 @@
 
 extern char (*std8x13_[]) [];
 
-    char tests[13] = {0xff, 0xff, 0x10, 0x30, 0x50, 0x10, 0x10, 0x10, 0x10, 0x10, 0x7C, 0xff, 0xff};
+    char tests[13] = {0xff, 0xff, 0x81, 0x42, 0x24, 0x18, 0xff, 0x18, 0x24, 0x42, 0x81, 0xff, 0xff};
 
 int main() {
     struct graphicsBuffer screenVideo;
@@ -71,12 +71,12 @@ int main() {
     graphicsBoxf(&screenVideo, 20, 120, 200, 100, 0xc0c000);
 
     graphicsBoxf(&screenBitmap, 0, 0, 160, 120, 0x0000);
-    graphicsBoxf(&screenBitmap, 20, 20, 140, 100, 0x0101);
+    graphicsBoxf(&screenBitmap, 20, 20, 120, 80, 0x0101);
     
-//    graphicsString(&screenBitmap, 2, 20, &sprite1, &std8x13_, 9, 1, "abcdefghijklmnopqrstuvwyxz");
+    graphicsSprite(&screenVideo, 20, 120, &sprite1);
 
-    graphicsSprite(&screenVideo, 20, 20, &sprite1);
-
+    graphicsString(&screenBitmap, 2, 20, &sprite1, &std8x13_, 9, 1, "abcdefghijklmnop");
+    
     graphicsBoxf(&screenVideo, 80, 60, 100, 100, 0x40e050);
     
     
