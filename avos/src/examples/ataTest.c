@@ -76,14 +76,22 @@ int main() {
             graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Selecting HDD...        ");
             ataSelectHDD();
-        } else {
+        } else if (source==1) {
             graphicsString(&screenBitmap, 212, 0, &sprite4_6, std4x6_, 5, 0,
                     "F2[MemCard]");
             graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Selecting MemCard...        ");
             uartOuts("\nSelecting Memory card...\n");
             ataPowerDownHDD();
-            ataSelectMemoryCard();
+            ataSelect(source);
+        } else {
+            graphicsString(&screenBitmap, 212, 0, &sprite4_6, std4x6_, 5, 0,
+                    "F2[Other]");
+            graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
+                    "Selecting Other...        ");
+            uartOuts("\nSelecting Other...\n");
+            ataPowerDownHDD();
+            ataSelect(source);
         }
 
         stringPutHex(showLba + 5, lba, 8);
@@ -96,10 +104,14 @@ int main() {
             b =buttonsGetStatus();
         } while(!(b & BUTTONS_AV300_ANY));
 
-        if (b & BUTTONS_AV300_MENU2) source=!source;
+        if (b & BUTTONS_AV300_MENU2) {
+            if (source==0) source=1;
+            else if(source==1) source=0;
+        }
         if (b & BUTTONS_AV300_MENU1) mode=!mode;
-        if (b & BUTTONS_AV300_MENU3) systemReboot();
 
+        source &= 7;
+        
         if (b & BUTTONS_AV300_RIGHT) lba++;
         if (b & BUTTONS_AV300_LEFT) lba--;
         if (b & BUTTONS_AV300_DOWN) lba+=0x100;

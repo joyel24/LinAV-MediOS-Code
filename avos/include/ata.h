@@ -25,6 +25,7 @@ typedef unsigned long u32;
 #define ATA_ERROR_NONE 0
 #define ATA_ERROR_TIMEOUT -1
 
+extern void ataSelect(u32 val);
 extern void ataSelectHDD();
 extern void ataSelectMemoryCard();
 extern void ataPowerUpHDD();

@@ -13,6 +13,7 @@
 @
 @ void ataSelectHDD()
 @ void ataSelectMemoryCard()
+@ void ataSelect(r0=val)
 @ void ataPowerUpHDD()
 @ void ataPowerDownHDD()
 @ u32 ataStatus()
@@ -407,15 +408,27 @@ ataPowerDownHDD:
 .thumb_func
 
 ataSelectHDD:
-        push {r0, r1}
+        push {lr}
         mov r0, #0
+        bl ataSelect
+        pop {r1}
+        bx r1
+
+@ ------------------------------------------------------------------------------
+@ ataSelect()
+@   Selects 
+.globl ataSelect
+.thumb_func
+
+ataSelect:
+        push {r1}
         ldr r1, =ataRegSelectSource
         strh r0, [r1]       @ Not sure why its done 5 times?
         strh r0, [r1]
         strh r0, [r1]
         strh r0, [r1]
         strh r0, [r1]
-        pop {r0, r1}
+        pop {r1}
         bx lr
 
 @ ------------------------------------------------------------------------------
@@ -425,16 +438,11 @@ ataSelectHDD:
 .thumb_func
 
 ataSelectMemoryCard:
-        push {r0, r1}
+        push {lr}
         mov r0, #1
-        ldr r1, =ataRegSelectSource
-        strh r0, [r1]       @ Not sure why its done 5 times?
-        strh r0, [r1]
-        strh r0, [r1]
-        strh r0, [r1]
-        strh r0, [r1]
-        pop {r0, r1}
-        bx lr
+        bl ataSelect
+        pop {r1}        
+        bx r1
         
         .ltorg
         .arm
