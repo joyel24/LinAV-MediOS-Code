@@ -66,6 +66,9 @@
 #define nAPI_SOUND_PAUSE       81
 #define nAPI_SOUND_STOP        82
 
+#define nAPI_VAR_GET           90
+#define nAPI_VAR_SET           91
+
 #define nAPI_GFX              100
 #define nAPI_PRINTF           101
 #define nAPI_FILE             102

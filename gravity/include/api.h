@@ -63,6 +63,9 @@ ERROR_CODE API_SOUND_PLAY       (void* pvBuffer, unsigned long nBytes, unsigned 
 ERROR_CODE API_SOUND_PAUSE      ();
 ERROR_CODE API_SOUND_STOP       ();
 
+ERROR_CODE API_VAR_GET          (const char* pVarName, char* pVarValue, int nBufferSize);
+ERROR_CODE API_VAR_SET          (const char* pVarName, const char* pVarValue);
+
 ERROR_CODE API_RUN_GRV          (const char* pGRVPath, HTASK* phTask);
 
 ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData);

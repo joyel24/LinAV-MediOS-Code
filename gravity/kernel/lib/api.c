@@ -70,6 +70,9 @@ ERROR_CODE API_SOUND_PLAY       (void* pvBuffer, unsigned long nBytes, unsigned 
 ERROR_CODE API_SOUND_PAUSE      ()                                                              { swi_call(nAPI_SOUND_PAUSE); }
 ERROR_CODE API_SOUND_STOP       ()                                                              { swi_call(nAPI_SOUND_STOP); }
 
+ERROR_CODE API_VAR_GET          (const char* pVarName, char* pVarValue, int nBufferSize)        { swi_call(nAPI_VAR_GET); }
+ERROR_CODE API_VAR_SET          (const char* pVarName, const char* pVarValue)                   { swi_call(nAPI_VAR_SET); }
+
 ERROR_CODE API_RUN_GRV          (const char* pGRVPath, HTASK* phTask)                           { swi_call(nAPI_RUN_GRV); }
 
 ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData)                       { swi_call(nAPI_GFX); }

@@ -170,7 +170,16 @@ void kernel_startup_thread (void)
     print_boot_info();
 
     printk("[init] END\n");
-    
+
+    printk ("Accessing registry file /gravity.cnf...\n");
+    int fReg = kfopen ("/gravity.cnf",O_RDONLY);
+    if (fReg < 0)
+        printk ("Setting not loaded.\n");
+    else
+    {
+        printk ("Setting loaded.\n");
+        kfclose (fReg);
+    }
+
     avwm();
-    
 }
