@@ -755,7 +755,7 @@ int main(int argc,char * * argv)
     displayMineField();
     setCursor(0);
 
-    PACK(cops);
+    PACK(cops,NULL);
     STOPME(cops)
 
     cops->showSBar();

@@ -1,13 +1,20 @@
+/*
+* empire.c
+* by Schoki
+*
+* linav - http://linav.sourceforge.net
+* Copyright (c) 2004 by Christophe THOMAS
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*
+*/
+
 /////////////////////////////////////////////////////////////////////
-// Empire.c
-//
 // A strategy game to explore a world and knock out your opponent.
 // Based on original amiga empire game.
-//
-// Copyright(c) 2004  by Goetz Minuth
-//
-// This game is open source. Feel free to copy and modify it.
-//
 /////////////////////////////////////////////////////////////////////
 
 /* ToDos:
@@ -18,6 +25,8 @@
 - End-Turn-Button
 */
 /////////////////////////////////////////////////////////////////////
+
+#include "stdlib.h"
 
 #include "colordef.h"
 #include "graphics.h"
@@ -398,7 +407,7 @@ int main(int argc,char * * argv)
 
     empire_init();
 
-    PACK(cops);
+    PACK(cops,NULL);
     STOPME(cops)
 
     cops->showSBar();

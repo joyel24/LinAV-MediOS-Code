@@ -39,7 +39,7 @@ struct client_operations cops={
     registerPlugin     : registerPlugin,
     pack               : pack,
     stop_me            : stop_me,
-    release_app        : release_app,
+    release_app        : myRelease_app,
     drawImage          : drawImage,
     openScreen         : ini_graphics,
     closeScreen        : close_graphics,

@@ -1,3 +1,17 @@
+/*
+* play.c
+* by midk
+*
+* linav - http://linav.sourceforge.net
+* Copyright (c) 2004 by Christophe THOMAS
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "av3xx_common.h"
@@ -431,6 +445,11 @@ void peak_meters(int l, int r)
     cops->fillRect(colortable[peak_levelcolor], 0, 224, rpos, 10);
 }
 
+void erase_peak(void)
+{
+    cops->fillRect(COLOR_BLACK, 0, 208, 270, 31);
+}
+
 int eventHandler(int evt)
 {    
             switch(evt)
@@ -706,42 +725,7 @@ int eventHandler(int evt)
                 draw_main_help_text();
 
                 main_drawn = 1;
-            }
-
-            /* read peaks */
-            cops->readPeak(&av_p);            
-
-            /* get peak values */
-            av_p.left=(av_p.left*200)/0x7FFF;
-            av_p.right=(av_p.right*200)/0x7FFF;
-
-            /* smoothen out if desired */
-            if(peak_decay > 0)
-            {
-                if(av_p.left < lpos)
-                    lpos -= peak_decay;
-                else
-                    lpos = av_p.left;
-
-                if(av_p.right < rpos)
-                    rpos -= peak_decay;
-                else
-                    rpos = av_p.right;
-            }
-            else
-            {
-                lpos = av_p.left;
-                rpos = av_p.right;
-            }
-
-            /* draw the peak meter, or the oscillograph */
-            if(peakmeters)
-                peak_meters(lpos, rpos);
-            else
-            {
-                if(pause == 0)
-                    oscillograph(av_p.left, av_p.right);
-            }
+            }           
 
             /* make sure the settings are applied */
             if(!settings_applied)
@@ -751,10 +735,12 @@ int eventHandler(int evt)
             }
         }
         else if(window == 2) /* settings */
-        {
+        {          
+            
             /* make sure the text is drawn */
             if(settings_drawn == 0)
             {
+                erase_peak();
                 draw_settings();
                 draw_settings_help_text();
                 settings_drawn = 1;
@@ -769,9 +755,12 @@ int eventHandler(int evt)
         }
         else if(window == 3) /* sound settings */
         {
+            
+            
             /* make sure the text is drawn */
             if(soundsettings_drawn == 0)
             {
+                erase_peak();
                 draw_soundsettings();
                 draw_soundsettings_help_text();
                 soundsettings_drawn = 1;
@@ -784,6 +773,47 @@ int eventHandler(int evt)
                 settings_applied = 1;
             }
         }
+}
+
+void drawPeak()
+{
+    if(window == 1)
+    {
+        /* read peaks */
+        cops->readPeak(&av_p);            
+
+        /* get peak values */
+        av_p.left=(av_p.left*200)/0x7FFF;
+        av_p.right=(av_p.right*200)/0x7FFF;
+
+        /* smoothen out if desired */
+        if(peak_decay > 0)
+        {
+            if(av_p.left < lpos)
+                lpos -= peak_decay;
+            else
+                lpos = av_p.left;
+
+            if(av_p.right < rpos)
+                rpos -= peak_decay;
+            else
+                rpos = av_p.right;
+        }
+        else
+        {
+            lpos = av_p.left;
+            rpos = av_p.right;
+        }
+
+        /* draw the peak meter, or the oscillograph */
+        if(peakmeters)
+            peak_meters(lpos, rpos);
+        else
+        {
+            if(pause == 0)
+                oscillograph(av_p.left, av_p.right);
+        }
+     }
 }
 
 int main(int argc, char * * argv)
@@ -825,7 +855,7 @@ int main(int argc, char * * argv)
     /* start mp3 */
     cops->start_playback();
         
-    PACK(cops);    
+    PACK(cops,drawPeak);    
 
     fprintf(stderr,"out of mp3 play\n");
     

@@ -1,11 +1,15 @@
 /*
-   acalendar.c, a simple calendar for AV3xx
-
-   Copyright 2004, Goetz Minuth
-
-   This File is free software; I give unlimited permission to copy
-   and/or distribute it, with or without modifications, as long as this
-   notice is preserved.
+* calendar.c
+* by Schoki
+*
+* linav - http://linav.sourceforge.net
+* Copyright (c) 2004 by Christophe THOMAS
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*
 */
 
 #include <stdio.h>
@@ -381,7 +385,7 @@ int main(int argc,char * * argv)
    calendar_init();
 	calendar_draw();
         
-PACK(cops)
+PACK(cops,NULL)
   
 STOPME(cops)
 

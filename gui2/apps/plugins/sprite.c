@@ -1,3 +1,19 @@
+/*
+* sprite.c
+* by Schoki
+*
+* linav - http://linav.sourceforge.net
+* Copyright (c) 2004 by Christophe THOMAS
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*
+*/
+
+#include "stdlib.h"
+
 #include "graphics.h"
 #include "events.h"
 #include "cops.h"
@@ -68,7 +84,7 @@ int main(int argc,char * * argv)
          }
      }
          
-         PACK(cops)
+         PACK(cops,NULL)
          
          STOPME(cops)
 

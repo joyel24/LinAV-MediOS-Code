@@ -27,10 +27,31 @@ struct wkUP_evt nxt_action = {
     app : NO_APP
 };
 
-void pack(void)
+int stopApp=0,inLoop=0;
+
+void pack(void (*loopFct)(void))
 {
     cur_plugin.handle_on=1;
-    pause_app();
+    stopApp=0;
+    if(loopFct)
+    {
+        inLoop=1;
+        while(!stopApp)
+            loopFct();
+    }
+    else
+    {
+        inLoop=0;
+        pause_app();
+    }
+}
+
+void myRelease_app(void)
+{
+    if(inLoop)
+        stopApp=1;
+    else
+        release_app();
 }
 
 void eventLoop()

@@ -673,7 +673,7 @@ int main(int argc,char * * argv)
         if(listused>MAXPOS)
             showArrow(DOWN_ARROW);
 
-        PACK(cops);
+        PACK(cops,NULL);
         
         cleanList();
         STOPME(cops);

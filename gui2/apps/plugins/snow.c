@@ -1,3 +1,17 @@
+/*
+* snow.c
+* by Schoki
+*
+* linav - http://linav.sourceforge.net
+* Copyright (c) 2004 by Christophe THOMAS
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*
+*/
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -58,17 +72,11 @@ int main(int argc,char * * argv)
  cops->hideSBar();
  
    snow_init();
-PACK(cops);
-	while (!stop)
-	{
+PACK(cops,snow_move);
 	
-	while(blocked) /* wait */;	
-
-      snow_move();
-
-  		
-	}
         cops->showSBar();
+STOPME(cops)
+return 1;
 }
 
 int GetTime()

@@ -18,7 +18,7 @@
 #include "graphics.h"
 
 #define REGISTER(ops,event,flag)    {ops=(struct client_operations*)atoi(argv[argc-1]);ops->registerPlugin(event,flag);}
-#define PACK(ops)                   {ops->pack();}
+#define PACK(ops,loop)              {ops->pack(loop);}
 #define RELEASE(ops)                {ops->release_app();}
 #define STOPME(ops)                 {ops->stop_me();}
 
@@ -52,7 +52,7 @@ struct client_operations {
     
     int  (*clearEventQueue)   (void);    
     void (*registerPlugin)    (void (*evtHandle),int flag);    
-    void (*pack)              (void);
+    void (*pack)              (void (*loopFct));
     void (*stop_me)           (void);    
     int  (*release_app)       (void);
     
