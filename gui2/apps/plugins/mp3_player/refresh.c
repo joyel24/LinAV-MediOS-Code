@@ -1,3 +1,17 @@
+/*
+* refresh.c
+*
+*
+* linav - http://linav.sourceforge.net
+* Copyright (c) 2004 by Christophe THOMAS
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*
+*/
+
 #include "cops.h"
 #include "colordef.h"
 #include "mp3_player.h"
@@ -7,6 +21,7 @@
 extern struct client_operations * cops;
 
 /*extern variables */
+extern const char colortable[];
 extern char * filename;
 extern int fade;
 extern int vol,bass,treb,bal,loud;
@@ -35,20 +50,20 @@ void refreshScreen(int window)
             cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 55, tmp);
             cops->setFont(STD6X9);
             /* fill in the peak meter background */
-            /*if(peakmeters)
+            if(peakmeters)
             {
-                cops->fillRect(colortable[peak_bgcolor], 0, 208, 270-(av_p.left+10), 15);
-                cops->fillRect(colortable[peak_bgcolor], 0, 224, 270-(av_p.left+10), 15);
-            }*/
+                cops->fillRect(colortable[peak_bgcolor], 0, 208, 270, 15);
+                cops->fillRect(colortable[peak_bgcolor], 0, 224, 270, 15);
+            }
             draw_main_help_text();
             break;
         case SETTINGS_WIN:
-            erase_peak();
+            //erase_peak();
             draw_settings();
             draw_settings_help_text();
             break;
         case SOUND_WIN:
-            erase_peak();
+            //erase_peak();
             draw_soundsettings();
             draw_soundsettings_help_text();
             break;

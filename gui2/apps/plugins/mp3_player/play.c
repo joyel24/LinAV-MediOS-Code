@@ -1,6 +1,6 @@
 /*
 * play.c
-* by midk
+*
 *
 * linav - http://linav.sourceforge.net
 * Copyright (c) 2004 by Christophe THOMAS
@@ -74,7 +74,7 @@ int oldvol;                  /* used for pause/resume */
 /******************
  * Ints for WINDOWS
  *****************/
-int window = 1;                   /* "1" = main, "2" = settings, "3" = sound */
+int window = MAIN_WIN;                   /* "1" = main, "2" = settings, "3" = sound */
 
 /*********************
  * Miscellaneous CHARs
