@@ -24,10 +24,10 @@
 #define INL(addr)                (*(volatile unsigned int *)(addr))
 
 // vplane constant
-#define BMAP1   1
-#define BMAP2   2
-#define VID1    3
-#define VID2    4
+#define BMAP1   0
+#define BMAP2   1
+#define VID1    2
+#define VID2    3
 
 // general constants
 #define USE_GC    -1
@@ -80,15 +80,12 @@ typedef struct graphicsFont *     FONT_ID;
 struct graphicsBuffer {
     unsigned int  offset;                 // ->The data
     int           component;
-    int           bytesPerLine;
     int           width;
     int           height;
     int           x;
     int           y;
     int           bitsPerPixel;           // eg 32 = YCbCr color
-    int           bitsPerPixelShift;      // eg  5 = YCbCr color
-    int           SWidth;
-    int           enable;
+    int           state;
 };
 
 struct graphics_operations {
@@ -124,7 +121,7 @@ typedef struct graphics_context * GC_ID;
 int   ini_graphics   (void);
 void  close_graphics (void);
 #ifdef AV_SCREEN
-void  iniComponent   (struct graphicsBuffer * buff,unsigned int offset);
+void  iniComponent   (int vplane,struct graphicsBuffer * buff,unsigned int offset);
 #endif
 GC_ID createGC       (int vplane);
 void  destroyGC      (GC_ID gc);
@@ -163,6 +160,12 @@ FONT_ID getFont(void);
 void  setPlane        (int vplane);
 void  hidePlane       (int vplane);
 void  showPlane       (int vplane);
+void  setSate         (int vplane,int state);
+int   getSate         (int vplane);
+void  setSize         (int vplane,int width,int height,int bitsPerPixel);
+void  getSize         (int vplane,int * width,int * height,int * bitsPerPixel);
+void  setPos          (int vplane,int x,int y);
+void  getPos          (int vplane,int * x,int * y);
 
 
 

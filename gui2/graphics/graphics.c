@@ -32,7 +32,6 @@ int colorTab[256];
 
 #include <graphics.h>
 #include "events.h"
-#include "graphics_8.h"
 #include "gui_pal.h"
 
 #ifdef HAVE_JPEG
@@ -56,67 +55,62 @@ char screen_BMAP1_SAV[SCREEN_WIDTH*SCREEN_HEIGHT+40];
 struct graphicsBuffer BITMAP_1 = {
     offset             : 0,
 #ifdef AV_SCREEN
-    component          : AV3XX_OSD_BITMAP1,
-    enable             : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
-                    AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE,
+    state              : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
+                    AV3XX_OSD_BITMAP_8BIT ,
 #endif
-    bytesPerLine       : SCREEN_WIDTH*2,
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
     x                  : 0x14,
     y                  : 0x12,
-    bitsPerPixel       : 8,
-    bitsPerPixelShift  : 3,
-    SWidth             : 0xa    
+    bitsPerPixel       : 8,   
 };
 
 struct graphicsBuffer BITMAP_2 = {
     offset             : 0,
 #ifdef AV_SCREEN
-    component          : AV3XX_OSD_BITMAP2,
-    enable             : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
-                    AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE,
+    state              : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
+                    AV3XX_OSD_BITMAP_8BIT ,
 #endif
-    bytesPerLine       : SCREEN_WIDTH*2,
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
     x                  : 0x14,
     y                  : 0x12,
     bitsPerPixel       : 8,
-    bitsPerPixelShift  : 3,
-    SWidth             : 0xa    
 };        
 
 struct graphicsBuffer VIDEO_1 = {
     offset             : 0,
 #ifdef AV_SCREEN
-    component          : AV3XX_OSD_VIDEO1,
-    enable             : AV3XX_OSD_COMPONENT_ENABLE,
+    state              : 0,
 #endif
-    bytesPerLine       : SCREEN_WIDTH*2,
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
     x                  : 0x14,
     y                  : 0x12,
     bitsPerPixel       : 32,
-    bitsPerPixelShift  : 5,
-    SWidth             : 0x28
 };
 
 struct graphicsBuffer VIDEO_2 = {
     offset             : 0,
 #ifdef AV_SCREEN
-    component          : AV3XX_OSD_VIDEO2,
-    enable             : AV3XX_OSD_COMPONENT_ENABLE,
+    state              : 0,
 #endif
-    bytesPerLine       : SCREEN_WIDTH*2,
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
     x                  : 0x14,
     y                  : 0x12,
     bitsPerPixel       : 32,
-    bitsPerPixelShift  : 5,
-    SWidth             : 0x28    
+};
+
+#define NB_BUFFER 4
+
+struct graphicsBuffer buffers[NB_BUFFER];
+
+int buffers_comp[NB_BUFFER] = {
+    AV3XX_OSD_BITMAP1,
+    AV3XX_OSD_BITMAP2,
+    AV3XX_OSD_VIDEO1,
+    AV3XX_OSD_VIDEO2
 };
 
 GC_ID   default_gc=NULL;
@@ -124,10 +118,20 @@ FONT_ID default_font=GC_FONT;
 
 GC_ID   gc_bmap1,gc_bmap2,gc_vid1,gc_vid2;
 
+GC_ID listGC[NB_BUFFER];
+
 extern struct graphics_operations g8ops;
+extern struct graphics_operations g32ops;
 
 int ini_graphics()
 {
+    int x, y;
+    
+    buffers[0]=BITMAP_1;
+    buffers[1]=BITMAP_2;
+    buffers[2]=VIDEO_1;
+    buffers[3]=VIDEO_2;
+    
 #ifdef AV_SCREEN
     osdInit();
     
@@ -139,15 +143,13 @@ int ini_graphics()
     osdSetComponentConfig(AV3XX_OSD_CURSOR1, 0);
     osdSetComponentConfig(AV3XX_OSD_CURSOR2, 0);
     
-    iniComponent(&BITMAP_1,(unsigned int)&screen_BMAP1); 
-    iniComponent(&BITMAP_2,(unsigned int)&screen_BMAP2); 
-    iniComponent(&VIDEO_1,(unsigned int)&screen_VID1);
-    iniComponent(&VIDEO_2,(unsigned int)&screen_VID2);
+    iniComponent(BMAP1,&BITMAP_1,(unsigned int)&screen_BMAP1); 
+    iniComponent(BMAP2,&BITMAP_2,(unsigned int)&screen_BMAP2); 
+    iniComponent(VID1,&VIDEO_1,(unsigned int)&screen_VID1);
+    iniComponent(VID2,&VIDEO_2,(unsigned int)&screen_VID2);
     
     setPalette(gui_pal,256);
 #else
-    int x, y;
-    
     BITMAP_1.offset=(unsigned int)&screen_BMAP1;
     BITMAP_2.offset=(unsigned int)&screen_BMAP2;
     VIDEO_1.offset=(unsigned int)&screen_VID1;
@@ -199,6 +201,11 @@ int ini_graphics()
     gc_bmap2=createGC(BMAP2);
     gc_vid1=createGC(VID1);
     gc_vid2=createGC(VID2);
+    
+    listGC[0]=gc_bmap1;
+    listGC[1]=gc_bmap2;
+    listGC[2]=gc_vid1;
+    listGC[3]=gc_vid2;
     
     if(iniEvent()<0)
         return -1;
@@ -297,15 +304,15 @@ GC_ID createGC(int vplane)
             gc->buffer=&BITMAP_2;
             break;
         case VID1:
-            gc->gops=NULL;
+            gc->gops=&g32ops;
             gc->buffer=&VIDEO_1;
             break;
         case VID2:
-            gc->gops=NULL;
+            gc->gops=&g32ops;
             gc->buffer=&VIDEO_2;
             break;
         default:
-            fprintf(stderr,"wrong plane\n");
+            fprintf(stderr,"wrong plane %d\n",vplane);
             return NULL;
     }
             
@@ -320,83 +327,154 @@ void destroyGC(GC_ID gc)
 
 void setPlane(int vplane)
 {
-    switch(vplane) {
-        case BMAP1:
-            default_gc=gc_bmap1;
-            break;
-        case BMAP2:
-            default_gc=gc_bmap2;
-            break;
-        case VID1:
-            default_gc=gc_vid1;
-            break;
-                case VID2:
-            default_gc=gc_vid2;
-            break;
-        default:
-            fprintf(stderr,"wrong plane\n");
+    if(vplane>=0 && vplane < NB_BUFFER)
+    {
+        default_gc=listGC[vplane];
     }
+    else
+    {
+        fprintf(stderr,"wrong plane %d\n",vplane);
+    } 
 }
 
 void hidePlane(int vplane)
 {
 #ifdef AV_SCREEN
-    switch(vplane) {
-        case BMAP1:
-            osdSetComponentConfig(AV3XX_OSD_BITMAP1, 0);
-            break;
-        case BMAP2:
-            osdSetComponentConfig(AV3XX_OSD_BITMAP2, 0);
-            break;
-        case VID1:
-            osdSetComponentConfig(AV3XX_OSD_VIDEO1, 0);
-            break;
-                case VID2:
-            osdSetComponentConfig(AV3XX_OSD_VIDEO2, 0);
-            break;
-        default:
-            fprintf(stderr,"wrong plane\n");
+    if(vplane>=0 && vplane < NB_BUFFER)
+    {
+        osdSetComponentConfig(buffers_comp[vplane],0);
     }
+    else
+    {
+        fprintf(stderr,"wrong plane %d\n",vplane);
+    }    
 #endif
 }
 
 void showPlane(int vplane)
 {
 #ifdef AV_SCREEN
-    switch(vplane) {
-        case BMAP1:
-            //tstPlane(&BITMAP_1);
-            osdSetComponentConfig(AV3XX_OSD_BITMAP1,BITMAP_1.enable);
-            break;
-        case BMAP2:
-            //tstPlane(&BITMAP_2);
-            osdSetComponentConfig(AV3XX_OSD_BITMAP2,BITMAP_2.enable);
-            break;
-        case VID1:
-            //tstPlane(&VIDEO_1);
-            osdSetComponentConfig(AV3XX_OSD_VIDEO1,VIDEO_1.enable);
-            break;
-        case VID2:
-            //tstPlane(&VIDEO_2);
-            osdSetComponentConfig(AV3XX_OSD_VIDEO2,VIDEO_2.enable);
-            break;
-        default:
-            fprintf(stderr,"wrong plane\n");
+    if(vplane>=0 && vplane < NB_BUFFER)
+    {
+        osdSetComponentConfig(buffers_comp[vplane],buffers[vplane].state|AV3XX_OSD_COMPONENT_ENABLE);
+    }
+    else
+    {
+        fprintf(stderr,"wrong plane %d\n",vplane);
+    }
+#endif          
+}
+
+void setSate(int vplane,int state)
+{
+#ifdef AV_SCREEN
+    if(vplane>=0 && vplane < NB_BUFFER)
+    {
+        buffers[vplane].state=state;
+    }
+    else
+    {
+        fprintf(stderr,"wrong plane %d\n",vplane);
+    }  
+#endif          
+}
+
+int getSate(int vplane)
+{
+#ifdef AV_SCREEN
+    if(vplane>=0 && vplane < NB_BUFFER)
+    {
+        return buffers[vplane].state;
+    }
+    else
+    {
+        fprintf(stderr,"wrong plane %d\n",vplane);
+        return -1;
+    }  
+#endif          
+}
+
+void setSize(int vplane,int width,int height,int bitsPerPixel)
+{
+#ifdef AV_SCREEN
+    if(vplane>=0 && vplane < NB_BUFFER)
+    {
+        buffers[vplane].width=width;
+        buffers[vplane].height=height;
+        buffers[vplane].bitsPerPixel=bitsPerPixel;
+        osdSetComponentSize(buffers_comp[vplane], 2*width, height);
+        osdSetComponentSourceWidth(buffers_comp[vplane], ((width*bitsPerPixel)/32)/8);
+    }
+    else
+    {
+        fprintf(stderr,"wrong plane %d\n",vplane);
+    }  
+#endif          
+}
+
+void getSize(int vplane,int * width,int * height,int * bitsPerPixel)
+{
+#ifdef AV_SCREEN
+    if(vplane>=0 && vplane < NB_BUFFER)
+    {
+        if(width)
+            *width=buffers[vplane].width;
+        if(height)
+            *height=buffers[vplane].height;
+        if(bitsPerPixel)
+            *bitsPerPixel=buffers[vplane].bitsPerPixel;
+    }
+    else
+    {
+        fprintf(stderr,"wrong plane %d\n",vplane);
+    }  
+#endif          
+}
+
+void setPos(int vplane,int x,int y)
+{
+#ifdef AV_SCREEN
+    if(vplane>=0 && vplane < NB_BUFFER)
+    {
+        buffers[vplane].x=x;
+        buffers[vplane].y=y;
+        osdSetComponentPosition(buffers_comp[vplane],x,y);        
+    }
+    else
+    {
+        fprintf(stderr,"wrong plane %d\n",vplane);
+    }  
+#endif          
+}
+
+void getPos(int vplane,int * x,int * y)
+{
+#ifdef AV_SCREEN
+    if(vplane>=0 && vplane < NB_BUFFER)
+    {
+        if(x)
+            *x=buffers[vplane].x;
+        if(y)
+            *y=buffers[vplane].y;
+    }
+    else
+    {
+        fprintf(stderr,"wrong plane %d\n",vplane);
     }  
 #endif          
 }
 
 #ifdef AV_SCREEN
-void iniComponent(struct graphicsBuffer * buff,unsigned int offset)
+void iniComponent(int vplane,struct graphicsBuffer * buff,unsigned int offset)
 {    
     int diff=offset % 32;
     if(diff)
         offset+=(32-diff);
     buff->offset=offset;
-    osdSetComponentOffset(buff->component,offset);
-    osdSetComponentSize(buff->component, buff->bytesPerLine, buff->height);
-    osdSetComponentPosition(buff->component,buff->x, buff->y);
-    osdSetComponentSourceWidth(buff->component, buff->SWidth);
+    osdSetComponentOffset(buffers_comp[vplane],offset);
+    osdSetComponentSize(buffers_comp[vplane], 2*buff->width, buff->height);
+    osdSetComponentPosition(buffers_comp[vplane],buff->x, buff->y);
+    osdSetComponentSourceWidth(buffers_comp[vplane], ((buff->width*buff->bitsPerPixel)/32)/8);
 }
 #endif
 
@@ -594,10 +672,12 @@ void getStringS(unsigned char *str, int *w, int *h)
 {
     FONT_ID font=default_font;
     
-    int width = 0;
     if ( w )
+    {
+        *w=0;
         while(*str++)
             *w += font->width;
+    }
     if ( h )
         *h = font->height;
 }
