@@ -23,7 +23,12 @@ struct graphicsBuffer {
     u32 height;
     u32 bitsPerPixel;           // eg 32 = YCbCr color
     u32 bitsPerPixelShift;      // eg  5 = YCbCr color
-    int (*pallette) [];         // Pallette (index->YCbCr)
+    int (*pallette1) [];        // Pallette (index->1bit)
+    int (*pallette2) [];        // Pallette (index->2bit)
+    int (*pallette4) [];        // Pallette (index->4bit)
+    int (*pallette8) [];        // Pallette (index->8bit)
+    int (*pallette16) [];       // Pallette (index->16bit)
+    int (*pallette32) [];       // Pallette (index->YCbCr)
     u32 transparent;            // Color index that shall be transparent
 };
 

@@ -8,8 +8,11 @@ int main() {
     struct graphicsBuffer screenVideo;
     struct graphicsBuffer sprite1;
     
-    static int pal[2] = {
+    static int pal32[2] = {
         0x80c0e0, 0xffffff
+    };
+    static int pal16[2] = {
+        0x0101, 0xffff
     };
         
     osdInit();
@@ -40,7 +43,8 @@ int main() {
     sprite1.bitsPerPixelShift = 0;
     sprite1.bitsPerPixel = 1;
     sprite1.transparent = 0;
-    sprite1.pallette = &pal;
+    sprite1.pallette16 = &pal16;
+    sprite1.pallette32 = &pal32;
 
     graphicsBoxf(&screenVideo, 0, 0, 320, 240, 0x000000);
 
@@ -54,4 +58,3 @@ int main() {
     
     while(1) {}
 }
-

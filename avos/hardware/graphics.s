@@ -23,9 +23,14 @@ graphicsInc = 1
         GRAPHICS_BUFFER_HEIGHT      =   0x000c      @ Height in pixels
         GRAPHICS_BUFFER_BITSPERPIXEL=   0x0010      @ Bits per pixel
         GRAPHICS_BUFFER_BPPSHIFT    =   0x0014
-        GRAPHICS_BUFFER_PALLETTE    =   0x0018      @ ->Pallette
-        GRAPHICS_BUFFER_TRANSPARENT =   0x001c
-        GRAPHICS_BUFFER_SIZE        =   0x0020
+        GRAPHICS_BUFFER_TRANSPARENT =   0x0018
+        GRAPHICS_BUFFER_PALLETTE1   =   0x001c      @ ->Pallette for 1bit        
+        GRAPHICS_BUFFER_PALLETTE2   =   0x0020      @ ->Pallette for 2bit
+        GRAPHICS_BUFFER_PALLETTE4   =   0x0024      @ ->Pallette for 4bit
+        GRAPHICS_BUFFER_PALLETTE8   =   0x0028      @ ->Pallette for 8bit
+        GRAPHICS_BUFFER_PALLETTE16  =   0x0032      @ ->Pallette for 16bit
+        GRAPHICS_BUFFER_PALLETTE32  =   0x0036      @ ->Pallette for 32bit
+        GRAPHICS_BUFFER_SIZE        =   0x0040
         
         GRAPHICS_ROUTINE_SETPIXEL   =   0x0000
         GRAPHICS_ROUTINE_GETPIXEL   =   0x0001
