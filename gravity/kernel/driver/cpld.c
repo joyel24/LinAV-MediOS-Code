@@ -32,6 +32,21 @@ __IRAM_DATA int cpld_port_array[4] = {
     CPLD_PORT3
 };
 
+void init_cpld(void)
+{
+    int version;
+    
+    cpld_do_select(); 
+    outw(cpld_port_state[CPLD1],CPLD_PORT1);
+    outw(cpld_port_state[CPLD2],CPLD_PORT2);
+    outw(cpld_port_state[CPLD3],CPLD_PORT3);
+    
+    version=(cpld_read(CPLD2) & 0x000F) | ((cpld_read(CPLD3) & 0x0007)<<4);
+    
+    /* everything is ok */
+    printk("[init] CPLD Ver:0x%x\n",version);
+}
+
 __IRAM_CODE void cpld_chg_state(int cpld_port,int bit_num,int direction)
 {
     int tmp;
@@ -95,17 +110,4 @@ __IRAM_CODE void cpld_do_select(void)
 
 
 
-__IRAM_CODE void init_cpld(void)
-{
-    int version;
-    
-    cpld_do_select(); 
-    outw(cpld_port_state[CPLD1],CPLD_PORT1);
-    outw(cpld_port_state[CPLD2],CPLD_PORT2);
-    outw(cpld_port_state[CPLD3],CPLD_PORT3);
-    
-    version=(cpld_read(CPLD2) & 0x000F) | ((cpld_read(CPLD3) & 0x0007)<<4);
-    
-    /* everything is ok */
-    printk("[init] CPLD Ver:0x%x\n",version);
-}
+

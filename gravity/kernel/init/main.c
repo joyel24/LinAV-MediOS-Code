@@ -17,13 +17,12 @@
 #include <kernel/kernel.h>
 #include <kernel/irq.h>
 #include <kernel/timer.h>
+#include <kernel/hw_chk.h>
 
 #include <kernel/uart.h>
 #include <kernel/cpld.h>
 
 #include <kernel/version.h>
-
-#include <kernel/ata.h>
 
 
 int lcd_state=1;
@@ -43,14 +42,13 @@ void kernel_start(void)
     /* malloc of max space in SDRAM */
     init_malloc((void*)MALLOC_START,MALLOC_SIZE);   
     
-    ata_stop_HD(); /* to allow nice stop of HD in case of crash */
-    
     ini_graphics();
     ini_debugOnScreen();
     /* print banner on uart */ 
     printk("AMOS %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);    
-    printk("Initial SP: %08x, kernel end: %08x Malloc start: %08x, size: %08x\n",get_sp(),
+    printk("Initial SP: %08x, kernel end: %08x, size in IRAM: %08x  Malloc start: %08x, size: %08x\n",get_sp(),
         (unsigned int)&_end_kernel,
+        (unsigned int)&_iram_end - (unsigned int)&_iram_start,
         (unsigned int)MALLOC_START,
         (unsigned int)MALLOC_SIZE);
             
@@ -66,7 +64,10 @@ void kernel_start(void)
     
     /* driver init */
     init_cpld();
+    init_HW_chk();
            
+    init_buttons();
+    
     printk("[init] ------------ all drivers\n");
     
     print_boot_info();    

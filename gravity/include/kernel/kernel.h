@@ -22,6 +22,8 @@ unsigned int get_sp(void);
 extern unsigned long tick;
 
 extern unsigned int _end_kernel;
+extern unsigned int _iram_start;
+extern unsigned int _iram_end;
 
 struct pt_regs {
 	long uregs[18];
