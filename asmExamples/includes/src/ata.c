@@ -95,6 +95,14 @@ int ataReadMBR()
 		partList[i].type=buffer[offset+4];
 		partList[i].start=read4T(&buffer[offset+8]);
 		partList[i].size=read4T(&buffer[offset+12]);
+
+		if(i==0 && partList[i].start == 0x00) // fix for buggy MBR
+		{
+			partList[i].start = 0x3F;
+			terminalPutsT("Fix wrong MBR to 3F\n" );
+
+		}
+
 		j=0;
 		while(j<9 && fatId[j]!=partList[i].type) j++;
 		if(j<9)
