@@ -42,4 +42,24 @@ So what can we run so far?
     So far, there are a few little demo programs written (Checkout asmExamples
 in cvs). etch is quite a nice etch-a-sketch.
 
+What do I need to develop for this thing then?
+==============================================
+    First off, you need to have an IQ of >100. Then get gnu binutils toolchain
+and build it for arm. Then you could play with garme (A cool arm emulator)
+www.sf.net/projects/garme.
+    If you want to go hardcore, you might wanna get a serial cable. I use a
+nokia 3210 data cable, with the plug changed. Also get a keyboard. I use a
+handspring visor foldup PDA keyboard. This is the only one I know of with the
+right levels/connections.
 
+Where can I get help?
+=====================
+    Load up an IRC client, connect to irc.freenode.net, and join the #avos
+channel. I am there most days. Please make sure to ask well formed and thought
+out questions though :)
+
+You broke my av300! You owe me $1,000,000
+=========================================
+    No I didn't. YOU broke your av300. Anything you do with your hardware is
+totally your problem. I cannot be held responsible for ANY bad things that may
+happen to you or your archos by using this software.
