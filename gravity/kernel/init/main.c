@@ -125,7 +125,7 @@ void SetSkin (int w, int h)
 	rc.w = w;
 	rc.h = h;
 
-	API_GFX_FILLRECT (&rc, random());
+//	API_GFX_FILLRECT (&rc, random());
 
 /*
 	switch (random()%5)
@@ -138,10 +138,10 @@ void SetSkin (int w, int h)
 	}
 */
 
-	rc.x = 3;
-	rc.y = 3;
-	rc.w = w-6;
-	rc.h = h-6;
+	rc.x = 5;
+	rc.y = 5;
+	rc.w = w-10;
+	rc.h = h-10;
 	API_GFX_SET_DRAWING_RECT (&rc);
 }
 
@@ -158,17 +158,22 @@ void win_thread (GFX_RECT* rc)
 	SetSkin (rc->w, rc->h);
 //	API_GFX_CREATE_CONTEXT (rc->w, rc->h, 0);
 
+	printk ("We are before moving our context...\n");
+
 	GFX_POINT pt;
 	pt.x = rc->x;
 	pt.y = rc->y;
 	API_GFX_MOVE (&pt);
 
+	printk ("Sleeping...\n");
+	API_TASK_SLEEP (1000000);
+
 	while (1)
 	{
-		API_TASK_SLEEP (50);
+//		API_TASK_SLEEP (50);
 
 		int i;
-		for (i=0;i<50;i++)
+		for (i=0;i<5;i++)
 		{
 			GFX_POINT pt1, pt2;
 			pt1.x = random() % rc->w;
@@ -361,6 +366,7 @@ void kernel_startup_thread (void)
 	GFX_init ();
 	////////////////////////////////////////////////////
 
+/*
 	pS2.ptOrig.x = 40;
 	pS2.ptOrig.y = 20;
 	pS2.w = 128;
@@ -396,22 +402,55 @@ void kernel_startup_thread (void)
 	rc4.w = 110;
 	rc4.h = 100;
 	API_TASK_CREATE (win_thread, &rc4, 0);
+*/
+
 
 	GFX_RECT rc5;
-	rc5.x = 250;
-	rc5.y = 10;
-	rc5.w = 20;
-	rc5.h = 220;
+	rc5.x = 9;
+	rc5.y = 5;
+	rc5.w = 73;
+	rc5.h = 230;
 	API_TASK_CREATE (win_thread, &rc5, 0);
 
+
+/*
 	GFX_RECT rc6;
 	rc6.x = 10;
 	rc6.y = 150;
 	rc6.w = 48;
 	rc6.h = 48;
 	API_TASK_CREATE (win_thread, &rc6, 0);
+*/
 
-	API_GFX_UPDATE_RECT (0);
+	printk ("Loading font 1...\n");
+	void* pFont1 = 0;
+	int fFnt1 = kfopen ("/fonts/8bit.grf",O_RDONLY);
+	if (fFnt1 < 0)
+		printk ("Font not loaded.\n");
+	else
+	{
+		int nSize = filesize (fFnt1);
+		API_MALLOC (&pFont1, nSize);
+		int nReaded = fread (fFnt1, pFont1, nSize);
+		printk ("Font loaded (%d bytes)\n", nReaded);
+		kfclose (fFnt1);
+	}
+
+
+	API_SET_FONT_COLOR (COLOR32_RED);
+	printk ("Setting font...\n");
+	API_SET_FONT (pFont1);
+
+
+	while (1)
+	{
+		printk ("Printing text...\n");
+		for (i=0;i<5000;i++)
+		{
+			API_TEXT ("Hello from GRAVITY!", 50, 50);
+		}
+		API_GFX_UPDATE_RECT (0);
+	}
 
 //    avwm();
 	while (1)

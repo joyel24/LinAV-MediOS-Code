@@ -51,6 +51,7 @@ __IRAM_CODE unsigned long kmemavail ()
 // Made from diffrent threads.
 __IRAM_CODE int kmemory_manager (void* pvParameters)
 {
+/*
 	register long _r7 asm("r7");
 	register long _r8 asm("r8");
 	register long _r12 asm("r12");
@@ -60,6 +61,7 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
 	__cli ();
 	printk("*** kmemory_manager *** [CPSR:%08x, R12:%08x, SP:%08x, LR:%08x]\n", _r7, _r12, _r13, _r8);
 	__sti ();
+*/
 
    SYSTEM_CTRL_COMMAND* pSysCtrl = 0;
    TASK_INFO* pTCB = 0;
@@ -105,14 +107,29 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
                pTCB->pNextTask->pPrevTask = pTCB->pPrevTask;
                __sti ();
 
-               // Free task memory resources...
-               if (pTCB->pTaskCode)
-                  kfree (pTCB->pTaskCode); //code memory
-               if (pTCB->pMessagePipe)
-                  kfree (pTCB->pMessagePipe); //message pipe
-               kfree (pTCB->pStack); //stack
-               kfree (pTCB); //TCB record
-               API_TASK_YIELD ();
+				// Free task memory resources...
+				if (pTCB->pTaskCode)
+					kfree (pTCB->pTaskCode); //code memory
+
+				if (pTCB->pMessagePipe)
+					kfree (pTCB->pMessagePipe); //message pipe
+
+				if (pTCB->pMemoryContext)
+					kfree (pTCB->pMessagePipe); //memory context
+
+				if (pTCB->pDrawingContext)
+					kfree (pTCB->pDrawingContext); //drawing context
+
+				if (pTCB->pRegionLeft)
+					kfree (pTCB->pRegionLeft); //left region border offsets
+
+				if (pTCB->pRegionRight)
+					kfree (pTCB->pRegionRight); //left region border offsets
+
+				kfree (pTCB->pStack); //stack
+
+				kfree (pTCB); //TCB record
+				API_TASK_YIELD ();
 
                // We should never get here...
                break;
@@ -128,8 +145,8 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
       __sti ();
    };
 
-	__cli ();
-	printk ("*** MEMORY MANAGER EXITED ***\n");
-	__sti ();
+//	__cli ();
+//	printk ("*** MEMORY MANAGER EXITED ***\n");
+//	__sti ();
 	return 0;
 }

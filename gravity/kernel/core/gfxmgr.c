@@ -101,6 +101,8 @@ __IRAM_CODE void GFX_DestroySpanStructure (int nYmin, int nYmax)
 
 __IRAM_CODE void GFX_BuildSpanStructure (int nYmin, int nYmax)
 {
+	printk ("GFX_BuildSpanStructure [1] (%d, %d)\n", nYmin, nYmax);
+
 	GFX_Z_RECT* pCtx = g_pZRectList;
 	while (pCtx)//for (i=0;i<m_stack.size();i++)
 	{
@@ -315,6 +317,10 @@ void GFX_init ()
 	pTask->pMemoryContext->pixel_size = 4;
 	pTask->pMemoryContext->pixels = screen_VID2;
 	pTask->pMemoryContext->delta = SCR_WIDTH*4;
+
+	API_MALLOC (&pTask->pDrawingContext, sizeof(GFX_CONTEXT));
+	*pTask->pDrawingContext = *pTask->pMemoryContext;
+
 	GFX_Z_RECT* pBackgroundZ = 0;
 	API_MALLOC (&pBackgroundZ, sizeof(GFX_Z_RECT));
 	pBackgroundZ->ptLocation.x = 0;
@@ -374,13 +380,15 @@ __IRAM_CODE void GFX_MoveContext (TASK_INFO* pOwner, int nX, int nY)
 		rc2.x = nX;
 		rc2.y = nY;
 		rc2.w = rc1.w;
-		rc2.h = rc2.w;
+		rc2.h = rc1.h;
 
 		long nYmin = MAX(MIN(rc1.y, rc2.y), 0);
 		long nYmax = MIN(MAX(rc1.y + rc1.h, rc2.y + rc2.h), SCR_HEIGHT);
 
 //API_TASK_SLEEP (1000);
 //printk ("GFX_MoveContext [2]\n");
+
+//printk ("GFX_MoveContext [1] destroy area: (%i, %i)\n", nYmin, nYmax);
 
 		GFX_DestroySpanStructure (nYmin, nYmax);
 
@@ -391,6 +399,8 @@ __IRAM_CODE void GFX_MoveContext (TASK_INFO* pOwner, int nX, int nY)
 
 //API_TASK_SLEEP (1000);
 //printk ("GFX_MoveContext [3]\n");
+
+//printk ("GFX_MoveContext [2] build area: (%i, %i)\n", nYmin, nYmax);
 
 		GFX_BuildSpanStructure (nYmin, nYmax);
 

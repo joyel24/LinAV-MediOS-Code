@@ -57,12 +57,27 @@ __IRAM_CODE int swi_gfx_handler (
 		pCtx->pixel_size = 4;
 
 		API_MALLOC (&pCtx->pixels, pCtx->w * pCtx->h * 4);
-		memset (pCtx->pixels, 0, pCtx->w * pCtx->h * 4);
+//		memset (pCtx->pixels, 0, pCtx->w * pCtx->h * 4);
 
-		lock_task()->pMemoryContext = pCtx;
+		TASK_INFO* pTask = lock_task();
+
+		API_MALLOC (&pTask->pDrawingContext, sizeof(GFX_CONTEXT));
+
+		pTask->pMemoryContext = pCtx;
+
+		*pTask->pDrawingContext = *pTask->pMemoryContext;
 
 //		kgfx_manager_handler (eGFX_MGR_ADD, 0, 0, pTask);
 		GFX_AddContext (lock_task(), 0, 0);
+
+		GFX_RECT rc;
+		rc.x = 0;
+		rc.y = 0;
+		rc.w = pCtx->w;
+		rc.h = pCtx->h;
+		API_GFX_FILLRECT (&rc, COLOR32_BLACK);
+
+		API_GFX_UPDATE_RECT (0);
 
 /*
 		__cli ();
@@ -87,8 +102,8 @@ __IRAM_CODE int swi_gfx_handler (
 	case nAPI_GFX_GET_CONTEXT:      //(GFX_CONTEXT* pCtx);
 	{
 		__cli ();
-		if (g_pTaskRing->pMemoryContext)
-			*((GFX_CONTEXT*)nParam1) = *g_pTaskRing->pMemoryContext;
+		if (g_pTaskRing->pDrawingContext)
+			*((GFX_CONTEXT*)nParam1) = *g_pTaskRing->pDrawingContext;
 		__sti ();
 	}
 	break;
@@ -393,17 +408,36 @@ __IRAM_CODE int swi_gfx_handler (
 
 		if ((nSrcElementSize == 1) && (nDstElementSize == 4))
 		{
-			int nRow = dx * nDstElementSize;
 			for (i=0;i<dy;i++)
 			{
-				for (j=0;j<nRow;j+=4)
+				for (j=0;j<dx;j++)
 				{
-					unsigned long nC1 = sptr[j/4] + 1;
-					unsigned long nC2 = 256 - nC1;
-					dptr[j+0] = (dptr[j+0] * nC1 + pForeColor[0] * nC2) >> 8;
-					dptr[j+1] = (dptr[j+1] * nC1 + pForeColor[1] * nC2) >> 8;
-					dptr[j+2] = (dptr[j+2] * nC1 + pForeColor[2] * nC2) >> 8;
-					dptr[j+3] = (dptr[j+3] * nC1 + pForeColor[3] * nC2) >> 8;
+					unsigned char nC1 = sptr[j];
+					if (nC1 < 248)
+					{
+						if (nC1 > 8)
+						{
+/*
+							unsigned long nC2 = 256 - nC1;
+							dptr[j+0] = (dptr[j+0] * nC1 + pForeColor[0] * nC2) >> 8;
+							dptr[j+1] = (dptr[j+1] * nC1 + pForeColor[1] * nC2) >> 8;
+							dptr[j+2] = (dptr[j+2] * nC1 + pForeColor[2] * nC2) >> 8;
+							dptr[j+3] = (dptr[j+3] * nC1 + pForeColor[3] * nC2) >> 8;
+*/
+
+							unsigned char nC2 = 255 - nC1;
+							unsigned long nScr = ((unsigned long*)dptr)[j];
+							unsigned long nMix1 = (((nScr      ) & 0xFF) * nC1 + ((nForeColor      ) & 0xFF) * nC2) >> 8;
+							unsigned long nMix2 = (((nScr >>  8) & 0xFF) * nC1 + ((nForeColor >>  8) & 0xFF) * nC2) >> 8;
+							unsigned long nMix3 = (((nScr >> 16) & 0xFF) * nC1 + ((nForeColor >> 16) & 0xFF) * nC2) >> 8;
+							unsigned long nMix4 = (((nScr >> 24) & 0xFF) * nC1 + ((nForeColor >> 24) & 0xFF) * nC2) >> 8;
+							((unsigned long*)dptr)[j] = nMix1 | (nMix2 << 8) | (nMix3 << 16) | (nMix4 << 24);
+						}
+						else
+						{
+							((unsigned long*)dptr)[j] = nForeColor;//*((unsigned long*)pForeColor);
+						}
+					}
 				}
 				dptr += dt;
 				sptr += st;
@@ -416,7 +450,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_DRAWPIXEL:        //(int nX, int nY, COLOR Color);
 	{
-		GFX_CONTEXT* pCtx = lock_task ()->pMemoryContext;
+		GFX_CONTEXT* pCtx = lock_task ()->pDrawingContext;
 		if (pCtx)
 		{
 			graphics32_DrawPixel (nParam3, nParam1, nParam2, pCtx);
@@ -426,7 +460,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_READPIXEL:        //(int nX, int nY);
 	{
-		GFX_CONTEXT* pCtx = lock_task ()->pMemoryContext;
+		GFX_CONTEXT* pCtx = lock_task ()->pDrawingContext;
 		if (pCtx)
 			return graphics32_ReadPixel (nParam1, nParam2, pCtx);
 		else
@@ -436,7 +470,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_DRAWLINE:         //(GFX_POINT* pt1, GFX_POINT* pt2, COLOR Color);
 	{
-		GFX_CONTEXT* pCtx = lock_task ()->pMemoryContext;
+		GFX_CONTEXT* pCtx = lock_task ()->pDrawingContext;
 		if (pCtx)
 		{
 			GFX_POINT* pt1 = (GFX_POINT*)nParam1;
@@ -449,7 +483,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_DRAWRECT:         //(GFX_RECT* pRect, COLOR Color);
 	{
-		GFX_CONTEXT* pCtx = lock_task ()->pMemoryContext;
+		GFX_CONTEXT* pCtx = lock_task ()->pDrawingContext;
 		if (pCtx)
 		{
 			GFX_RECT* pRect = (GFX_RECT*)nParam1;
@@ -460,7 +494,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_FILLRECT:         //(GFX_RECT* pRect, COLOR Color);
 	{
-		GFX_CONTEXT* pCtx = lock_task ()->pMemoryContext;
+		GFX_CONTEXT* pCtx = lock_task ()->pDrawingContext;
 		if (pCtx)
 		{
 			GFX_RECT* pRect = (GFX_RECT*)nParam1;
@@ -471,11 +505,32 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_SET_DRAWING_RECT: //(GFX_RECT* pRect);
 	{
+		TASK_INFO* pTask = lock_task();
+		if (!pTask->pDrawingContext || !pTask->pMemoryContext)
+			return ERR_NO_GFX_CONTEXT;
+
+		if (nParam1)
+		{
+			GFX_RECT* pRect = (GFX_RECT*)nParam1;
+			pTask->pDrawingContext->x = pTask->pMemoryContext->x + pRect->x;
+			pTask->pDrawingContext->y = pTask->pMemoryContext->y + pRect->y;
+			pTask->pDrawingContext->w = pRect->w;
+			pTask->pDrawingContext->h = pRect->h;
+			pTask->pDrawingContext->pixels = (unsigned char*)pTask->pMemoryContext->pixels + pRect->x * 4 + pRect->y * pTask->pMemoryContext->delta;
+		}
+		else
+			*pTask->pDrawingContext = *pTask->pMemoryContext;
 	}
 	break;
 
 	case nAPI_GFX_GET_DRAWING_RECT: //(GFX_RECT* pRect);
 	{
+		GFX_RECT* pRect = (GFX_RECT*)nParam1;
+		TASK_INFO* pTask = lock_task();
+		pRect->x = pTask->pDrawingContext->x - pTask->pMemoryContext->x;
+		pRect->y = pTask->pDrawingContext->y - pTask->pMemoryContext->y;
+		pRect->w = pTask->pDrawingContext->w;
+		pRect->h = pTask->pDrawingContext->h;
 	}
 	break;
 
@@ -537,7 +592,7 @@ __IRAM_CODE int swi_gfx_handler (
 			char_ctx.pixel_size = 1;
 			char_ctx.pixels = ((unsigned char*)pTask->pFont) + pVarMap[nSym].offset;
 			char_ctx.delta = pVarMap[nSym].w * 1;
-			swi_gfx_handler (nAPI_GFX_CHARBLIT, pTask->pMemoryContext, &char_ctx, &char_pos);
+			swi_gfx_handler (nAPI_GFX_CHARBLIT, pTask->pDrawingContext, &char_ctx, &char_pos);
 
 			x += pVarMap[nSym].a + pVarMap[nSym].b + pVarMap[nSym].c;
 
@@ -620,11 +675,11 @@ __IRAM_CODE int swi_gfx_handler (
 
 		TASK_INFO* pTask = lock_task ();
 
-		if (!pTask->pMemoryContext)
+		if (!pTask->pDrawingContext)
 			return ERR_NO_GFX_CONTEXT;
 
 		return gfx_swi_handler (
-			pTask->pMemoryContext,
+			pTask->pDrawingContext,
 			(int)nParam1,
 			(GFX_CONTEXT*)nParam2,
 			(void*)nParam3);
