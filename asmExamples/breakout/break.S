@@ -102,7 +102,7 @@ initGame:
 
         ldr r0, =scoMsgH
         mov r1, #0
-        callThumb r2, hex4T
+        callThumb r2, dec5T
         
         mov r0, #4
         mov r1, #234
@@ -347,9 +347,9 @@ checkBrick:
         str r1, [r0]
 
         ldr r0, =scoMsgH
-        callThumb r2, hex4T
+        callThumb r2, dec5T
 
-        ldr r0, =(4+(6*48))
+        ldr r0, =(4+(6*47))
         mov r1, #234
         ldr r2, =scoMsgH
         ldr r3, =0xffff
@@ -439,8 +439,8 @@ posdx:      .word 1
 posdy:      .word 1
 paddlePos:  .word 146
 score:      .word 0
-botMsg:     .ascii "Breakout 0.02 (c)2004 DoGgEr              Score:"
-scoMsgH:    .asciz "0000"
+botMsg:     .ascii "Breakout 0.02 (c)2004 DoGgEr             Score:"
+scoMsgH:    .asciz "00000"
 
 
         .align 4
@@ -465,6 +465,7 @@ brickMap:
 .include "../includes/buttons.S"
 .include "../includes/color.S"
 .include "../includes/hex.S"
+.include "../includes/decimal.S"
 
 sprite:
 .incbin     "image.rgb"

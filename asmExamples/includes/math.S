@@ -19,9 +19,9 @@ mathInc = 1
 .text
         .thumb
 
-@ u32 mathDivLU(u32 x, u32 y, u32 z) 
-@       returns r0 = (x||y) / z
-@               r1 = (x||y) % z
+@ u32 mathDivLU(r0= x, r1= y, r2= z) 
+@       returns r0 = (x||y) % z
+@               r1 = (x||y) / z
 @
 .globl mathDivLU
 .thumb_func
