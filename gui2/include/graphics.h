@@ -164,6 +164,7 @@ FONT_ID getFont(void);
 
 /* Planes */
 void  setPlane        (int vplane);
+int   getPlane        (void);
 void  hidePlane       (int vplane);
 void  showPlane       (int vplane);
 void  setSate         (int vplane,int state);

@@ -550,6 +550,11 @@ void setPlane(int vplane)
     } 
 }
 
+int getPlane(void)
+{
+    return default_plane;
+}
+
 void hidePlane(int vplane)
 {
     if(vplane>=0 && vplane < NB_BUFFER)

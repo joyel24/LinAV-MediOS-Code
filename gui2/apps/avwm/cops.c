@@ -22,38 +22,48 @@
 #include "parse_cfg.h"
 #include "msgBox.h"
 #include "misc.h"
+#include "avgraphics.h"
 
 #include <stdlib.h>
 
 struct client_operations cops={
-    drawPixel          : drawPixel,
-    readPixel          : readPixel,
-    drawRect           : drawRect,
-    fillRect           : fillRect,
-    drawLine           : drawLine,
+    openScreen         : ini_graphics,
+    closeScreen        : close_graphics,
+    
+    drawPixel          : wmDrawPixel,
+    readPixel          : wmReadPixel,
+    drawRect           : wmDrawRect,
+    fillRect           : wmFillRect,
+    drawLine           : wmDrawLine,
     putS               : wmPutS,
     putC               : wmPutC,
+    drawSprite         : wmDrawSprite,
+    drawBITMAP         : wmDrawBITMAP,
+    scrollWindowVert   : wmScrollWindowVert,
+    scrollWindowHoriz  : wmScrollWindowHoriz,
+    clearScreen        : wmClearScreen,
+    
+    drawImage          : drawImage,
+    
     getStringS         : wmgetStringS,
-    drawSprite         : drawSprite,
-    drawBITMAP         : drawBITMAP,
-    scrollWindowVert   : scrollWindowVert,
-    scrollWindowHoriz  : scrollWindowHoriz,
+    
     clearEventQueue    : clearEventQueue,
     registerPlugin     : registerPlugin,
     pack               : pack,
     stop_me            : stop_me,
     release_app        : myRelease_app,
-    drawImage          : drawImage,
-    openScreen         : ini_graphics,
-    closeScreen        : close_graphics,
-    setFont            : wmSetFont,
-    showSBar           : showSBar,
-    hideSBar           : hideSBar,
-    sBarStatus         : sBarStatus,    
-    clearScreen        : clearScreen,
-    setPlane           : setPlane,
+    
+    setFont            : wmSetFont,      
+    
+    setPlane           : wmSetPlane,
+    getPlane           : wmGetPlane,
     hidePlane          : hidePlane,
     showPlane          : showPlane,
+    
+    showSBar           : showSBar,
+    hideSBar           : hideSBar,
+    sBarStatus         : sBarStatus,
+    
     enableMenu         : enableMenu,
     disableMenu        : disableMenu,
     menuStatus         : menuStatus,

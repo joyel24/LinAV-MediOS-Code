@@ -73,6 +73,7 @@ struct client_operations {
     int  (*menuStatus )       (void); 
     
     void (*setPlane)          (int vplane);
+    int  (*getPlane)          (void);
     void (*hidePlane)         (int vplane);
     void (*showPlane)         (int vplane);
     

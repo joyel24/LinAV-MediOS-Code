@@ -8,8 +8,10 @@ endif
 	$(MAKE) -C apps/ all
 
 
-clean:
+all-clean: clean
 	$(MAKE) -C jpeg-6b/ clean
+        
+clean:
 	$(MAKE) -C graphics/ clean
 	$(MAKE) -C apps/ clean
 	@rm -f *~

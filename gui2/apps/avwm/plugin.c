@@ -82,6 +82,7 @@ int loadPlugin(char * path, char * param)
     }
     /* setting font back to normal */
     defaultFont();
+    defaultPlane();
     drawGui();
     return launchPlugin(path,param);
 }

@@ -15,8 +15,8 @@
 #define __AVSTRING_H
 
 void   ini_font         (int font);
-void   wmPutS           (unsigned int color, unsigned int bg_color,int x, int y, unsigned char *s);
-void   wmPutC           (unsigned int color, unsigned int bg_color,int x, int y, unsigned char s);
+void   wmPutSFont       (unsigned int color, unsigned int bg_color,int x, int y, unsigned char *s);
+void   wmPutCFont       (unsigned int color, unsigned int bg_color,int x, int y, unsigned char s);
 void   wmSetFont        (int font);
 void   wmgetStringS     (unsigned char *str, int *w, int *h);
 void   defaultFont      (void);
