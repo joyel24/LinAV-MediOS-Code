@@ -22,6 +22,7 @@
 #include "font.h"
 #include "cops.h"
 #include "avevents.h"
+#include "msgBox.h"
 
 #define    false 0
 #define    true  1
@@ -112,7 +113,7 @@ void do_right(void * data)
     }
     else if(strcmp((char*)data, "Delete") == 0)
     {
-        cops->msgBox("Delete");
+        cops->msgBox("Info", "Delete", MSGBOX_TYPE_OKCANCEL, MSGBOX_ICON_WARNING);
 
 //        remove(list[pos+nselect].name);
 //        reload = true;

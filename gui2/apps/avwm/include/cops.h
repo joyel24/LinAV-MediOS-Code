@@ -74,7 +74,7 @@ struct client_operations {
     int  (*clearEventQueue)   (void);    
     void (*registerPlugin)    (void (*evtHandle),int flag);    
     void (*pack)              (void (*loopFct)(void));
-    void (*stop_me)           (void);    
+    void (*stop_me)           (void);
     void (*release_app)       (void);
     
     void (*showSBar)          (void);
@@ -123,8 +123,8 @@ struct client_operations {
     int  (*newLine)             (void);
     int  (*curLineNum)          (void);
     
-    int  (*msgBox)              (unsigned char * msg);
-    
+    int  (*msgBox)              (unsigned char* caption, unsigned char* msg, int type, int icon);
+
     int  (*getTick)             (void);
     int  (*getTime)             (struct av_tm * date_time);
     int  (*getTimeS)            (char * timeSt);

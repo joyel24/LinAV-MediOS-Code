@@ -64,6 +64,7 @@ void drawMsgBox(void)
     showPlane(BMAP2);
     setPlane(BMAP2);
     fillRect(COLOR_RED, 0, 0, 160, 100);
+    setPlane(BMAP1);
 }
 
 /* restore the previous state */
@@ -74,7 +75,7 @@ void eraseMsgBox(void)
 }
 
 /* main function */
-int msgBox(unsigned char * msg)
+int msgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
 {
     drawMsgBox();
     msgEvtLoop();
