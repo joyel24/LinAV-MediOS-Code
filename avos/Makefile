@@ -12,8 +12,8 @@
 
 
 libavos:
-	arm-elf-gcc -c -mthumb -mcallee-super-interworking -fno-zero-initialized-in-bss -nostdlib -nodefaultlibs -Iinclude/ src/fonts/*.c
-	arm-elf-gcc -c -mthumb -mcallee-super-interworking -fno-zero-initialized-in-bss -nostdlib -nodefaultlibs -Iinclude/ src/drivers/*.c
+	arm-elf-gcc -c -mthumb -mthumb-interwork -fno-zero-initialized-in-bss -nostdlib -nodefaultlibs -Iinclude/ src/fonts/*.c
+	arm-elf-gcc -c -mthumb -mthumb-interwork -fno-zero-initialized-in-bss -nostdlib -nodefaultlibs -Iinclude/ src/drivers/*.c
 	arm-elf-as -o lib/libavos.o src/hardware/*.s
 	mv *.o lib
 
