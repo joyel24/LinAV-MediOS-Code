@@ -202,26 +202,24 @@ static void calendar_init()
       printf("Error getting time and date\n");
    }
    close(fd);
-
-	GrSetGCForegroundPixelVal(calendar_gc, AV3XX_COLOR_BLACK);
-	sprintf(tmp, "%d %d %d %d %d %d %d",tm.tm_wday,tm.tm_year,tm.tm_mon,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
-	GrText(calendar_wid, calendar_gc, 10, 200,tmp, -1, GR_TFASCII);
-
-
-
-
-   today.mon = tm.tm_mon;
-   today.year = 2000+tm.tm_year%100;
 /*
-   char timeSt[] = "xx";
-	stringPutHexA(timeSt,   tm.tm_mon,  2); // xxx
+	GrSetGCForegroundPixelVal(calendar_gc, AV3XX_COLOR_BLACK);
+	sprintf(tmp, "%x %x %x %x %x %x %x",tm.tm_wday,tm.tm_year,tm.tm_mon,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
+	GrText(calendar_wid, calendar_gc, 10, 200,tmp, -1, GR_TFASCII);
 */
 
-   today.mday = tm.tm_mday;
-   today.wday = tm.tm_wday;
+
+	sprintf(tmp, "%02x",tm.tm_wday);
+   today.wday = atoi(tmp);
+	sprintf(tmp, "%02x",tm.tm_year);
+   today.year = 2000+atoi(tmp)%100;
+	sprintf(tmp, "%02x",tm.tm_mon);
+   today.mon = atoi(tmp);
+	sprintf(tmp, "%02x",tm.tm_mday);
+   today.mday = atoi(tmp);
 
    shown.mday = today.mday;
-   shown.mon = today.mon;
+   shown.mon  = today.mon;
    shown.year = today.year;
    shown.wday = today.wday;
 
