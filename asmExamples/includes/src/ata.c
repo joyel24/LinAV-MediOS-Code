@@ -71,7 +71,7 @@ void swapChar(char * txt,int size)
 int ataReadMBR()
 {
 	int res,i;
-	if((res=ataReadLBA( buffer, 1, 1 ))!=0)
+	if((res=ataReadLBA( buffer, 0, 1 ))!=0)
 	{
 		if(res == 1)
 			terminalPutsT("Error ataReadMBR, not rdy\n");
@@ -121,12 +121,12 @@ int ataReadMBR()
 
 	}
 
-	/*if(buffer[510]!=0x55 || buffer[511]!=0xAA)
+	if(buffer[510]!=0x55 || buffer[511]!=0xAA)
 	{
 		snprintf (txt, 80, "Error: MBR wrong, missing 55AA at the end of MBR: %x %x\n",buffer[510],buffer[511]);
 		terminalPutsT(txt);
 		return 1;
-	}*/
+	}
 
 	return 0;
 }
