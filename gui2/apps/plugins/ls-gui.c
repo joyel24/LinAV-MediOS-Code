@@ -112,7 +112,7 @@ void do_right(void * data)
         // Copy the current selection
 //        sprintf(tmp,"cp %s CopyOf_%s",list[pos+nselect].name,list[pos+nselect].name);
 //        system(tmp);
-        cops->putS(COLOR_BLACK, COLOR_WHITE,5, 230, list[pos+nselect].name);
+        buttonResult = cops->msgBox("Info", "Copy file not supported", MSGBOX_TYPE_OK, MSGBOX_ICON_INFORMATION);
 
     }
     else if(strcmp((char*)data, "Delete") == 0)
@@ -131,10 +131,14 @@ void do_right(void * data)
     }
     else if(strcmp((char*)data, "Rename") == 0)
     {
+/*
         ptext = cops->editBox("Rename this file",list[pos+nselect].name, COLOR_BLACK,COLOR_WHITE,COLOR_BLACK,COLOR_RED);
         if(ptext != 0)
             strcpy(text,ptext);
+*/
 //        cops->msgBox("Test", text, MSGBOX_TYPE_OKCANCEL, MSGBOX_ICON_WARNING);
+
+        buttonResult = cops->msgBox("Info", "Rename file not supported", MSGBOX_TYPE_OK, MSGBOX_ICON_INFORMATION);
     }
     else if(strcmp((char*)data, "New Dir") == 0)
     {
