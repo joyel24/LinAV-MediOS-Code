@@ -44,6 +44,8 @@ void print_boot_info(void)
     printk("SP: %08x\n",get_sp());
     print_irq();
     print_timer();
+    /* int vector */
+    print_data(0x0,0x20);
 }
 
 void kidle (void)

@@ -30,13 +30,13 @@
 #define BTN_NOT_PRESSED(val,btn)    (val&(0x1<<btn))
 #define BTN_PRESSED(val,btn)        !(val&(0x1<<btn))
 
-__IRAM_DATA int mx_press = MAX_PRESSED;
+__IRAM_DATA int mx_press;
 
 __IRAM_DATA int nb_pressed[NB_BUTTONS];
-__IRAM_DATA int nb_off_press=0;
-__IRAM_DATA int nb_debug_switch=0;
+__IRAM_DATA int nb_off_press;
+__IRAM_DATA int nb_debug_switch;
 
-int inHold=0;
+int inHold;
 
 __IRAM_DATA struct hw_chk_s btn_chker;
 
@@ -89,6 +89,7 @@ __IRAM_CODE void chk_button(void)
         }
         else            /* the btn i is pressed */
         {    
+            
             if(btn==BUTTON_OFF)    /* OFF btn pressed => check if we have to halt */
             {
                 nb_off_press++;
@@ -144,6 +145,9 @@ void init_buttons(void)
     int btn;
     
     inHold=0;
+    mx_press = MAX_PRESSED;
+    nb_off_press=0;
+    nb_debug_switch=0;
     
     for(btn=0;btn<NB_BUTTONS;btn++)
         nb_pressed[btn]=0;

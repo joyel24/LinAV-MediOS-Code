@@ -100,7 +100,7 @@ void lcd_launchTimer(void)
 
 void lcd_timer_action(void)
 {
-    int num=getCurrentTimer();
+    int num=getCurrentTimer();    
     if(lcd_timer_used[num])
     {
         lcd_off();
@@ -151,16 +151,16 @@ void hd_launchTimer(void)
     }
 }
 
-extern int usb_status;
+extern int kusb_status;
 
 void hd_timer_fct(void)
 {
     int num=getCurrentTimer();
-    if(hd_timer_used[num] && !usb_status)
+    if(hd_timer_used[num] && !kusb_status)
     {
         ata_stop_HD();
     }
-    if(usb_status)
+    if(kusb_status)
         hd_launchTimer(); // we have enable the usb => keep the timer running
 }
 
@@ -207,18 +207,18 @@ int getCurrentTimer(void)
         return AV_TIMER_ON_BAT;
 }
 
-int pwrState;
+int kpwrState;
 
 void chk_DC_connector(void)
 {
-    if(kpowerConnected()!=pwrState)
+    if(kpowerConnected()!=kpwrState)
     {
-        pwrState=kpowerConnected();
+        kpwrState=kpowerConnected();
         /* change the timers */
         chgTimer();
            
 //        send_evt(EVT_PWR);
-        printk("DC connector %s\n",pwrState==1?"plugged":"unplugged");
+        printk("DC connector %s\n",kpwrState==1?"plugged":"unplugged");
 
     }
 }
@@ -232,16 +232,33 @@ void init_power(void)
     setup_timer(&hd_timer,"HD");
     hd_timer.action = hd_timer_fct;
     
+    lcd_state=1;
+    lcd_bright=10;
+    lcd_timer_used[0]=1;
+    lcd_timer_used[1]=0;
+    lcd_freq_rep[0]=LCD_FREQ_DEFAULT_0;
+    lcd_freq_rep[1]=LCD_FREQ_DEFAULT_1;
+
+    halt_timer_used[0]=1;
+    halt_timer_used[1]=0;
+    halt_freq_rep[0]=HALT_FREQ_DEFAULT_0;
+    halt_freq_rep[1]=HALT_FREQ_DEFAULT_1;
+
+    hd_freq_rep[0]=HD_FREQ_DEFAULT_0;
+    hd_freq_rep[1]=HD_FREQ_DEFAULT_1;
+    hd_timer_used[0]=1;
+    hd_timer_used[1]=1;
     hd_sleep_state=0;
     
     halt_launchTimer();
     lcd_launchTimer();
     hd_launchTimer();
     
+    kpwrState=kpowerConnected();
+    
     dc_chker.action=chk_DC_connector;
     add_hw_chker(&dc_chker);
+      
     
-    pwrState=kpowerConnected();
-    
-    printk("[init] power : Bat level: %x, DC %s connected\n",kgetBatLevel(),pwrState==0?"not":"is");
+    printk("[init] power : Bat level: %x, DC %s connected\n",kgetBatLevel(),kpwrState==0?"not":"is");
 }

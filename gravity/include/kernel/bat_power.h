@@ -16,8 +16,8 @@
 #define AV_TIMER_ON_BAT        0
 #define AV_TIMER_ON_DC         1
 
-#define LCD_FREQ_DEFAULT_0  60
-#define LCD_FREQ_DEFAULT_1  60
+#define LCD_FREQ_DEFAULT_0  20
+#define LCD_FREQ_DEFAULT_1  20
 
 #define HALT_FREQ_DEFAULT_0 180
 #define HALT_FREQ_DEFAULT_1 180

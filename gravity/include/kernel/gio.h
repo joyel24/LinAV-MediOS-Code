@@ -69,13 +69,13 @@
 #define GIO_DIRECTION(num)                gio_addr(num,GIO_DIRECTION0,GIO_DIRECTION1)
 #define GIO_INVERT(num)                   gio_addr(num,GIO_GIO_INVERT0,GIO_GIO_INVERT1)
 #define GIO_BITSET(num)                   gio_addr(num,GIO_BITSET0,GIO_BITSET1)
-#define GIO_BITCLEAR(num)                 gio_addr(num,GIO_DIRECTION0,GIO_DIRECTION1)
+#define GIO_BITCLEAR(num)                 gio_addr(num,GIO_BITCLEAR0,GIO_BITCLEAR1)
 
 
 /*functions */
 
 #define GIO_NUM(num)                    (num<16?num:num-16)
-#define GIO_OUT_VAL(dir,num,addr)       {outw((dir?inw(addr)|(0x1 << num):(addr)&~(0x1 << num)),addr);}
+#define GIO_OUT_VAL(dir,num,addr)       {outw((dir?inw(addr)|(0x1 << num):inw(addr)&~(0x1 << num)),addr);}
 
 
 #define gio_dir(gio_num,direction)      GIO_OUT_VAL(direction,GIO_NUM(gio_num),GIO_DIRECTION(gio_num))

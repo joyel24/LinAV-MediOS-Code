@@ -14,7 +14,7 @@
 #ifndef __HW_CHK_H
 #define __HW_CHK_H
 
-#define HW_FREQ                     HZ/50
+#define HW_FREQ                     HZ/25
 
 struct hw_chk_s {
     void (*action)(void);

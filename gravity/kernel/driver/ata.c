@@ -30,7 +30,7 @@ int av_cmd_array[]= {
     IDE_CMD_WRITE_SECTORS
 };
 
-//extern struct timer_s hd_timer;
+extern struct timer_s hd_timer;
 
 int ata_RW_Sector(unsigned int lba,int count,void * buffer,int direction)
 {
@@ -143,7 +143,7 @@ void ata_stop_HD(void)
     ata_powerDown_HD();    
     //udelay(100);
     printk("[ide sleep]\n");
-//    stop_timer(&hd_timer);
+    stop_timer(&hd_timer);
 }
 
 int ata_waitForXfer(void)

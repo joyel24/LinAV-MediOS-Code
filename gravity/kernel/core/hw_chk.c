@@ -25,9 +25,11 @@ __IRAM_DATA struct hw_chk_s * hw_chk_head;
 __IRAM_CODE void hw_chk_loop(void)
 {
     struct hw_chk_s * ptr;
+    cli();
     for(ptr=hw_chk_head;ptr!=NULL;ptr=ptr->nxt)
         if(ptr->action)
             ptr->action();
+    sti();
     hw_chk_timer.expires = tick + HW_FREQ;
     start_timer(&hw_chk_timer);
 }
