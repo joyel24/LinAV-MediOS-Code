@@ -24,7 +24,8 @@ LDFLAGS  = -L../build/lib -lav -lc -lfloat -lgcc
 
 
 # State the object files that the main target is made up of
-OBJS = bootstart.O avlo.o parse_cfg.o loadCJBM.o
+OBJS = bootstart.O avlo.o parse_cfg.o 
+#img.O
 
 all:$(TARGET)
 

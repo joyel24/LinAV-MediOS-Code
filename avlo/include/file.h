@@ -105,7 +105,7 @@ extern int fsize(int fd);
 extern int ftruncate(int fd,int size);
 extern int fflush(int fd);
 
-extern int loadFile(char * fileN);
+extern int loadFile(char * fileN,char * buffer);
 
 // internal functions
 extern int findFileEntry(const char* pathname,struct dirent ** direntry,bool remove);

@@ -9,6 +9,7 @@
 #include <fonts.h>
 #include <debug.h>
 #include <usb.h>
+#include <timers.h>
 
 #include "parse_cfg.h"
 
@@ -28,6 +29,38 @@
     : "memory");                        \
     })
 
+#define __cli()							\
+	({							\
+		unsigned long temp;				\
+	__asm__ __volatile__(					\
+	"mrs	%0, cpsr		@ cli\n"		\
+"	orr	%0, %0, #128\n"					\
+"	msr	cpsr_c, %0"					\
+	: "=r" (temp)						\
+	:							\
+	: "memory");						\
+	})   
+    
+
+//#define COLOR_TSP    0x0000
+int COLOR_TSP=       0x0000;
+#define COLOR_TXT    0xffff
+#define COLOR_BOX    0xD6D6
+#define COLOR_SEL    0x0101
+#define COLOR_LOAD   0x2525
+#define COLOR_WAIT   0x0909
+
+#define ENTRY_X      117
+#define ENTRY_Y      53
+#define STATUS_X     75
+#define STATUS_Y     227
+#define BAR_X        60
+#define BAR_Y        190
+#define BAR_W        (320-2*BAR_X)
+#define BAR_H        5
+
+#define BTM_TXT      "V2.0 | image: "
+        
 /**************************************************************
 ***************************************************************
 I should remove return -1 with clean halt
@@ -35,9 +68,10 @@ I should remove return -1 with clean halt
 **************************************************************/
 
 static struct graphicsBuffer screenBitmap2;
-static unsigned int * screenDirect = (unsigned int*) 0x03a00000;
+//static unsigned int * screenDirect = (unsigned int*) 0x03a00000;
+static unsigned char * screenDirect = (unsigned char*) 0x03a00000;
 static int pal32[2] = {0x6c706c93, 0xffffffff};
-static int pal16[2] = {0x0000, 0xffff};
+static int pal16[2] = {0x0000, COLOR_TXT};
 static struct graphicsBuffer sprite6_9 = {0, 1, 6, 9, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 static struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 void (*binCaller)()=(void (*)())0x03000000;
@@ -64,7 +98,8 @@ void waitKeyReleased(void);
 void chkOFF(int key);
 void drawProgress(int offset,int length,int mode);
 
-extern int loadCJBM(char * filename,char * key);
+//extern int loadCJBM(char * filename,char * key);
+int fastLoadCJBM(char * filename);
 
 int usbstate,usbenable=0,cleanUSBMsg=0;
 int chkdefault,cnt=0,cursorPos=0,delayCnt;
@@ -72,25 +107,49 @@ int errNoDefault=0,cntNoDefault=0,stateNoDefault=0;
 int nbOff=0;
 int * wdt = (int*)0x30a1a;
 int maxRepeat;
+char tmp_txt[100];
 
+#ifdef INCLUDE_IMG
+extern char bg_img[320*4*240];
+#else
+char *bg_img=0x03b00000;
+#endif
 
 int main(int argc,char **argv)
 {
     int ret,nbCfg,key,redraw;
-    int i;
+    int i,j;
     
     void (*systemRelocateAdjusted)();
 
         systemRelocateAdjusted = systemRelocateMeA - 0x00400000;    
         systemRelocateAdjusted();
-loopErr:    
+loopErr:  
+  
+pal16[0] = COLOR_TSP;
+
 
 usbenable=0;cleanUSBMsg=0;cnt=0;cursorPos=0;errNoDefault=0;cntNoDefault=0;stateNoDefault=0;nbOff=0;
     iniGraph();
    
     if(iniHD()<0)
         goto loopErr;
-        
+#ifndef INCLUDE_IMG      
+    if (loadFile("/avlo.img",bg_img))
+    {
+        osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
+        COLOR_TSP=0x0000;
+    }
+    else
+    {
+        COLOR_TSP=0xA6A6;
+        pal16[0] = COLOR_TSP;
+        for (j=0;j<240;j++)
+            for (i=0;i<320*2;i++)            
+                screenDirect[j*320*2 + i] = COLOR_TSP;
+        graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader by OxyGen"); 
+    }
+#endif  
 loop:
     if((ret=file_open("/avlo.cfg"))<0)
     {
@@ -101,8 +160,13 @@ loop:
     pal32[0] = 0x6c706c93;
     pal32[1] = 0xffffffff;
         
+    pal16[0] = COLOR_TSP;
+    pal16[1] = COLOR_TXT;
+    
     graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AVL");
         
+    
+    
     if((nbCfg=do_parse(&cfg,&cfgG))<0)
     {
         debug("Error getting config info\n");
@@ -128,8 +192,9 @@ loop:
         
     graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AVLO");
         
-    graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader Version 1.2 by OxyGen");    
+    //graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader Version 1.2 by OxyGen");    
         
+    //graphicsStringA(&screenBitmap2, 70, STATUS_Y, &sprite8_13, std8x13_, 8, 0,"V2.0|image:");
     
     usbstate=!usbIsConnectedA();
     
@@ -172,11 +237,13 @@ loop:
             	// let's find out the file extension
                 char * ext=strrchr(cfg[cursorPos].image,'.')+1;
                 int launch=0;
-                
+                debug("loading: %s ext:%s\n",cfg[cursorPos].image,ext);
                 if(ext[0]=='a' && ext[1]=='j' && ext[2]=='z' && ext[3]=='\0' 
-                		&& cfgG.key[0]!=0 && loadCJBM(cfg[cursorPos].image,cfgG.key))
+                		//&& cfgG.key[0]!=0 
+                                //&& loadCJBM(cfg[cursorPos].image,cfgG.key))
+                                && fastLoadCJBM(cfg[cursorPos].image))
                 	launch=1;
-                else if (loadFile(cfg[cursorPos].image))
+                else if (loadFile(cfg[cursorPos].image,(char*)0x03000000))
                 	launch=1;
                 
                 if(launch)
@@ -214,10 +281,13 @@ loop:
                         debug("enable usb\n");
                         usbenable=1;
                         
-                        graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);    
+                        //graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);    
+                        graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, COLOR_BOX);    
                         pal32[1]=0xc476c491;
                         pal32[0] = 0x466c4696;
-                        graphicsStringA(&screenBitmap2,   65, 120, &sprite6_9, std6x9_, 6, 0,"USB Enable, PRESS F3 to resume");
+                        pal16[0] = COLOR_BOX;
+                        pal16[1] = COLOR_TXT;
+                        graphicsStringA(&screenBitmap2,   65, 115, &sprite6_9, std6x9_, 6, 0,"USB Enable, PRESS F3 to resume");
                         usbEnableA();
                         for(i=0;i<0x10000;i++); /* Nothing */
                         ataPowerUpHDDA();
@@ -232,32 +302,65 @@ loop:
     }
 }
 
+int (*decode)(char * src,char * dst)=(void (*)(char * src,char * dst))0x03F00470;
+
+int fastLoadCJBM(char * filename)
+{
+    unsigned char * cptr;
+    
+    if (!loadFile(filename,(char*)0x03800000))
+        return 0;
+    debug("File loaded, now decompressing\n");
+    graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, COLOR_BOX);
+    pal16[0] = COLOR_BOX;
+    pal16[1] = COLOR_TXT;
+    graphicsStringA(&screenBitmap2, 65, 115, &sprite6_9, std6x9_, 6, 0,"File Loaded, decompressing...");
+    cptr=(unsigned char *)0x03F00860+0x10;
+    *cptr=0; 
+    
+    decode((char*)0x03800000,(char*)0x03000000);
+    debug("decompress done\n");    
+    
+    return 1;
+}
+
 void moveCursor(int direction)
 {
-        // unhighlight current
-        pal32[1] = 0xff80ff80;
-        pal32[0] = 0x466c4696;
-        graphicsStringA(&screenBitmap2, 110, 52 + cursorPos*9, &sprite6_9, std6x9_, 6, 0,cfg[cursorPos].label);
-        // move to nxt
-        cursorPos+=direction;
-        // highlight nxt
-        pal32[1] = 0xff80ff80;
-        pal32[0] = 0x00800080;
-        graphicsStringA(&screenBitmap2, 110, 52 + cursorPos*9, &sprite6_9, std6x9_, 6, 0,cfg[cursorPos].label);
-        // change bottom status
-        pal32[1]=0xc476c491;
-        pal32[0] = 0x466c4696;
-        graphicsBoxfA(&screenBitmap2, 10, 230, 280, 10, 0x466c4696);
-        graphicsStringA(&screenBitmap2, 10, 230, &sprite6_9, std6x9_, 6, 0,cfg[cursorPos].image);
+    // unhighlight current
+    pal32[1] = 0xff80ff80;
+    pal32[0] = 0x466c4696;
+    pal16[0] = COLOR_TSP;
+    pal16[1] = COLOR_TXT;
+    graphicsStringA(&screenBitmap2, ENTRY_X, ENTRY_Y + cursorPos*9, &sprite6_9, std6x9_, 6, 0,cfg[cursorPos].label);
+    // move to nxt
+    cursorPos+=direction;
+    // highlight nxt
+    pal16[0] = COLOR_SEL;
+    pal16[1] = COLOR_TXT;
+    pal32[1] = 0xff80ff80;
+    pal32[0] = 0x00800080;
+    graphicsStringA(&screenBitmap2, ENTRY_X, ENTRY_Y + cursorPos*9, &sprite6_9, std6x9_, 6, 0,cfg[cursorPos].label);
+    // change bottom status
+    pal32[1]=0xc476c491;
+    pal32[0] = 0x466c4696;
+    pal16[0] = COLOR_TSP;
+    pal16[1] = COLOR_TXT;
+    //graphicsBoxfA(&screenBitmap2, 10, 230, 280, 10, 0x466c4696);
+    graphicsBoxfA(&screenBitmap2, STATUS_X, STATUS_Y, 200, 10, COLOR_TSP);
+    snprintf(tmp_txt,100,"%s%s",BTM_TXT,cfg[cursorPos].image);
+    graphicsStringA(&screenBitmap2, STATUS_X, STATUS_Y, &sprite6_9, std6x9_, 6, 0,tmp_txt);
 }
 
 void err(int i)
 {
     int key,stop=0;
     debug("error, let's loop\n");    
-    graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, 0x466c4696);    
-                        pal32[1]=0xc476c491;
-                        pal32[0] = 0x466c4696;
+    //graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, 0x466c4696); 
+    graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, COLOR_BOX); 
+    pal32[1]=0xc476c491;
+    pal32[0] = 0x466c4696;
+    pal16[0] = COLOR_BOX;
+    pal16[1] = COLOR_TXT;
     graphicsStringA(&screenBitmap2, 65, 105, &sprite6_9, std6x9_, 6, 0,errorMsg[i]);
     graphicsStringA(&screenBitmap2, 65, 115, &sprite6_9, std6x9_, 6, 0,"USB is enable, you can access the HD");
     graphicsStringA(&screenBitmap2, 65, 125, &sprite6_9, std6x9_, 6, 0,"Press a key to retry");
@@ -284,10 +387,13 @@ void chkOFF(int key)
         nbOff++;
         if(nbOff>MAX_OFF_PRESS)
         {
-            graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);    
+            //graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);    
+            graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, COLOR_BOX);    
             pal32[1]=0xc476c491;
             pal32[0] = 0x466c4696;
-            graphicsStringA(&screenBitmap2,   65, 120, &sprite6_9, std6x9_, 6, 0,"Shutting down NOW !!");    
+            pal16[0] = COLOR_BOX;
+            pal16[1] = COLOR_TXT;
+            graphicsStringA(&screenBitmap2,   65, 115, &sprite6_9, std6x9_, 6, 0,"Shutting down NOW !!");    
             if(usbenable)
             {
                 usbDisableA();
@@ -326,28 +432,51 @@ void iniGraph()
     osdInitA();
     
     osdSetComponentConfigA(OSD_VIDEO1, 0);
-        osdSetComponentConfigA(OSD_VIDEO2, 0);
-        osdSetComponentConfigA(OSD_BITMAP1, 0);
-        osdSetComponentConfigA(OSD_BITMAP2, 0);
-        osdSetComponentConfigA(OSD_CURSOR1, 0);
-        osdSetComponentConfigA(OSD_CURSOR2, 0);
+    osdSetComponentConfigA(OSD_VIDEO2, 0);
+    osdSetComponentConfigA(OSD_BITMAP1, 0);
+    osdSetComponentConfigA(OSD_BITMAP2, 0);
+    osdSetComponentConfigA(OSD_CURSOR1, 0);
+    osdSetComponentConfigA(OSD_CURSOR2, 0);
     
-    screenBitmap2.offset = 0x03a00000;
+    /*screenBitmap2.offset = 0x03a00000;
         screenBitmap2.bytesPerLine = 320*4;
         screenBitmap2.width = 320;
         screenBitmap2.height =240;
         screenBitmap2.bitsPerPixelShift = 5;
-        screenBitmap2.bitsPerPixel = 32;
+        screenBitmap2.bitsPerPixel = 32;*/
+        
+    screenBitmap2.offset = 0x03a00000;
+    screenBitmap2.bytesPerLine = 320*2;
+    screenBitmap2.width = 320;
+    screenBitmap2.height = 240;
+    screenBitmap2.bitsPerPixelShift = 4;
+    screenBitmap2.bitsPerPixel = 16;
     
      for (j=0;j<240;j++)
-            for (i=0;i<320;i++)            
-                    screenDirect[j*320 + i] = 0x6c706c93;
+        for (i=0;i<320*2;i++)            
+            screenDirect[j*320*2 + i] = COLOR_TSP;//0x6c706c93;
             
     osdSetComponentSizeA(OSD_VIDEO1, 320*2, 240);
     osdSetComponentPositionA(OSD_VIDEO1, 0x14, 0x12);
-    osdSetComponentOffsetA(OSD_VIDEO1, 0x03a00000);
+    osdSetComponentOffsetA(OSD_VIDEO1, (int)bg_img);
     osdSetComponentSourceWidthA(OSD_VIDEO1, 0x28);
+#ifdef INCLUDE_IMG    
     osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
+#endif
+    osdSetComponentSizeA(OSD_BITMAP1, 320*2, 240);
+    osdSetComponentPositionA(OSD_BITMAP1, 0x14, 0x13);
+    osdSetComponentOffsetA(OSD_BITMAP1, 0x03a00000);
+    osdSetComponentSourceWidthA(OSD_BITMAP1, 0x14);
+    osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
+                                     | OSD_BITMAP_8BIT
+                                     | OSD_BITMAP_0TRANS
+                                     );
+    
+    /*osdSetComponentSizeA(OSD_VIDEO2, 320*2, 240);
+    osdSetComponentPositionA(OSD_VIDEO2, 0x14, 0x12);
+    osdSetComponentOffsetA(OSD_VIDEO2, 0x03a00000);
+    osdSetComponentSourceWidthA(OSD_VIDEO2, 0x28);
+    osdSetComponentConfigA(OSD_VIDEO2, OSD_COMPONENT_ENABLE);*/
 }
 
 int iniHD(void)
@@ -390,11 +519,12 @@ void affUSB(void)
         usbstate=usbIsConnectedA();
         if(usbstate)
         {
-            graphicsStringA(&screenBitmap2, 290, 231, &sprite6_9, std6x9_, 6, 0,"USB");
+            graphicsStringA(&screenBitmap2, 290, STATUS_Y, &sprite6_9, std6x9_, 6, 0,"USB");
         }
         else
         {
-            graphicsBoxfA(&screenBitmap2, 290, 230, 20, 10, 0x466c4696);
+            //graphicsBoxfA(&screenBitmap2, 290, 230, 20, 10, 0x466c4696);
+            graphicsBoxfA(&screenBitmap2, 290, STATUS_Y, 20, 10, COLOR_TSP);
         }
     }
 }
@@ -405,7 +535,8 @@ int processDefault(int key,int nbCfg)
     if(chkdefault)
     {
         if(!(key & BUTTONS_AV300_ANY) && cnt < delayCnt)
-            graphicsBoxfA(&screenBitmap2, (320*(cnt++))/delayCnt, 210, 1, 5, 0x466c4696);
+            //graphicsBoxfA(&screenBitmap2, (320*(cnt++))/delayCnt, 210, 1, 5, 0x466c4696);
+            graphicsBoxfA(&screenBitmap2, BAR_X+(BAR_W*(cnt++))/delayCnt, BAR_Y, 1, BAR_H, COLOR_WAIT);
 
         if(cnt==delayCnt)
         {    
@@ -414,7 +545,7 @@ int processDefault(int key,int nbCfg)
                 pos++;
             if(pos<nbCfg+1)
             {
-                if(loadFile(cfg[pos].image))
+                if(loadFile(cfg[pos].image,(char*)0x03000000))
                 {
                     binCaller();
                     err(1);
@@ -432,7 +563,8 @@ int processDefault(int key,int nbCfg)
         
         if(key & BUTTONS_AV300_ANY)
         {
-            graphicsBoxfA(&screenBitmap2, 0, 210, 320, 5, 0x6c706c93);
+            //graphicsBoxfA(&screenBitmap2, 0, 210, 320, 5, 0x6c706c93);
+            graphicsBoxfA(&screenBitmap2, BAR_X, BAR_Y, BAR_W, BAR_H, COLOR_TSP);
             chkdefault=0;
             cnt=0;
         }
@@ -443,11 +575,11 @@ int processDefault(int key,int nbCfg)
 void drawProgress(int offset,int length,int mode)
 {
 	if(mode)
-		graphicsBoxfA(&screenBitmap2, 10+(300*offset)/length, 210, 1 , 5, 0xffffffff);
+            //graphicsBoxfA(&screenBitmap2, 10+(300*offset)/length, 210, 1 , 5, 0xffffffff);
+            graphicsBoxfA(&screenBitmap2, BAR_X+(BAR_W*offset)/length, BAR_Y, 1 , BAR_H, COLOR_LOAD);
         else
-        {
-        	graphicsBoxfA(&screenBitmap2, 10, 210, (300*offset)/length+1 , 5, 0xffffffff);
-        }
+            //graphicsBoxfA(&screenBitmap2, 10, 210, (300*offset)/length+1 , 5, 0xffffffff);
+            graphicsBoxfA(&screenBitmap2, BAR_X, BAR_Y, (BAR_W*offset)/length+1 , BAR_H, COLOR_LOAD);
 }
 
 void printErr(int key)
@@ -460,13 +592,17 @@ void printErr(int key)
         {
             if(stateNoDefault)
             {
-                graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, 0x6c706c93);
+                //graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, 0x6c706c93);
+                graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, COLOR_TSP);
             }
             else
             {
-                graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, 0x6c706c93);
+                //graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, 0x6c706c93);
+                graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, COLOR_TSP);
                 pal32[1]=0xc476c491;
                 pal32[0] = 0x6c706c93;//0x466c4696;
+                pal16[0] = COLOR_TSP;
+                pal16[1] = COLOR_TXT;
                 graphicsStringA(&screenBitmap2, 80, 210, &sprite6_9, std6x9_, 6, 0,"default image can't be found");
             }
             stateNoDefault=!stateNoDefault;
@@ -475,7 +611,8 @@ void printErr(int key)
         
         if(key & BUTTONS_AV300_ANY)
         {
-            graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, 0x6c706c93);
+            //graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, 0x6c706c93);
+            graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, COLOR_TSP);
             errNoDefault=0;
         }
     }
@@ -484,32 +621,45 @@ void printErr(int key)
 void drawMenu(int nbCfg)
 {
     int pos;
+    
+    // clean AVLO txt */
+    graphicsBoxfA(&screenBitmap2, 0, 0, 40, 20, COLOR_TSP);
+    
     if(cleanUSBMsg)
     {
-        graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x6c706c93);
+        //graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x6c706c93);
+        graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, COLOR_TSP);
         cleanUSBMsg=0;
     }
-    graphicsBoxfA(&screenBitmap2, 110, 52, 100, 100, 0x466c4696);
+    //graphicsBoxfA(&screenBitmap2, 110, 52, 100, 100, 0x466c4696);
+    graphicsBoxfA(&screenBitmap2, ENTRY_X, ENTRY_Y, 100-7, 100-7, COLOR_TSP);
     for(pos=0;pos<nbCfg+1;pos++)
     {
         pal32[1] = 0xff80ff80;
+        pal16[1] = COLOR_TXT;
         if (pos==cursorPos)
         {
             pal32[0] = 0x00800080;
+            pal16[0] = COLOR_SEL;
         }
         else
         {
             pal32[0] = 0x466c4696;
+            pal16[0] = COLOR_TSP;
         }
             
-        graphicsStringA(&screenBitmap2, 110, 52 + pos*9, &sprite6_9, std6x9_, 6, 0,cfg[pos].label);
+        graphicsStringA(&screenBitmap2, ENTRY_X, ENTRY_Y + pos*9, &sprite6_9, std6x9_, 6, 0,cfg[pos].label);
         
         if(pos==cursorPos)
         {
             pal32[1]=0xc476c491;
             pal32[0] = 0x466c4696;
-            graphicsBoxfA(&screenBitmap2, 10, 230, 280, 10, 0x466c4696);
-            graphicsStringA(&screenBitmap2, 10, 230, &sprite6_9, std6x9_, 6, 0,cfg[pos].image);
+            pal16[0] = COLOR_TSP;
+            pal16[1] = COLOR_TXT;
+            //graphicsBoxfA(&screenBitmap2, 10, 230, 280, 10, 0x466c4696);
+            graphicsBoxfA(&screenBitmap2, STATUS_X, STATUS_Y, 200, 10, COLOR_TSP);
+            snprintf(tmp_txt,100,"%s%s",BTM_TXT,cfg[pos].image);
+            graphicsStringA(&screenBitmap2, STATUS_X, STATUS_Y, &sprite6_9, std6x9_, 6, 0,tmp_txt);
         }
     }
 }
