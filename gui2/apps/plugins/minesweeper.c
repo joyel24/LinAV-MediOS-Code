@@ -13,7 +13,9 @@
  * KIND, either express of implied.
  *
  */
- 
+#include "stdlib.h"
+#include "stdio.h"
+
 #include "graphics.h"
 #include "events.h"
 #include "cops.h"
@@ -37,6 +39,7 @@ void displayMineField(void);
 int GameMode = 0;
 
 int tiles_left = 0;
+int g_changes = 0;
 
 /* percentage of mines on minefield used durring generation */
 int p=22;
@@ -211,28 +214,60 @@ int mine_num = 0;
 
 void writeMinesINI()
 {
-   int fd;
+    char tmp[250];
 
-	fd = fopen("mines.ini","w");
-	if(fd > 0)
-	{
-	   fprintf(fd,"%ld", p);
+    if(g_changes == 1)
+    {
+        cops->openCfg("/mnt/avwm/plugins/minesweeper.ini",CFG_WRITE);
 
-		fclose(fd);
-	}
+        sprintf(tmp,"%d",p);
+        cops->putCfg("mines",tmp);
+        cops->newLine();
+        sprintf(tmp,"%d",height);
+        cops->putCfg("heigth",tmp);
+        cops->newLine();
+        sprintf(tmp,"%d",width);
+        cops->putCfg("width",tmp);
+        cops->newLine();
+
+        cops->closeCfg();
+
+        g_changes = 0;
+    }
 }
 
 void readMinesINI()
 {
-   int fd;
+    char item_buff[MAX_TOKEN+1];
+    char value_buff[MAX_TOKEN+1];
+    char *item=item_buff;
+    char *value=value_buff;
+    char str1[MAX_TOKEN+1];
 
-	fd = fopen("mines.ini","r+");
-	if(fd > 0)
-	{
-	   fscanf(fd,"%ld", &p);
+    cops->openCfg("/mnt/avwm/plugins/minesweeper.ini",CFG_READ);
 
-		fclose(fd);
-	}
+    while (1)
+    {
+        /* get next item/value couple, returns 0 if ther is no more item/value in the file */
+        if (!cops->getCfg(item,value)) break;
+        /* now parse the item using strcmp */
+        if(!strcmp(item,"mines"))
+        {
+            p=atoi(value);
+        }
+        else if(!strcmp(item,"heigth"))
+        {
+            height=atoi(value);
+        }
+        else if(!strcmp(item,"width"))
+        {
+            width=atoi(value);
+        }
+        else
+            fprintf(stderr,"unknown item type: %s on line %d\n",item,cops->curLineNum());
+    }
+
+    cops->closeCfg();
 }
 
 void RefreshSettings()
@@ -240,47 +275,48 @@ void RefreshSettings()
     char tmp[10];
     cops->fillRect(COLOR_GREEN, 0, 20, 160,80); // clear
 
-	 sprintf(tmp,"%ld", p);
+	sprintf(tmp,"%ld", p);
 
-	 if(settingParam == 0)
-	 {
-      sprintf(tmp,"%ld", width);
-      cops->putS(COLOR_RED, COLOR_GREEN, 5,30, "Width");
-      cops->putS(COLOR_RED, COLOR_GREEN, 100,30, tmp);
-	 }
-	 else
-	 {
-      sprintf(tmp,"%ld", width);
-      cops->putS(COLOR_BLACK, COLOR_GREEN, 5,30, "Width");
-      cops->putS(COLOR_BLACK, COLOR_GREEN, 100,30, tmp);
-	 }
+	if(settingParam == 0)
+	{
+        sprintf(tmp,"%ld", width);
+        cops->putS(COLOR_RED, COLOR_GREEN, 5,30, "Width");
+        cops->putS(COLOR_RED, COLOR_GREEN, 100,30, tmp);
+	}
+	else
+	{
+        sprintf(tmp,"%ld", width);
+        cops->putS(COLOR_BLACK, COLOR_GREEN, 5,30, "Width");
+        cops->putS(COLOR_BLACK, COLOR_GREEN, 100,30, tmp);
+	}
 
-	 if(settingParam == 1)
-	 {
-       sprintf(tmp,"%ld", height);
-       cops->putS(COLOR_RED, COLOR_GREEN, 5,50, "Height");
-       cops->putS(COLOR_RED, COLOR_GREEN, 100,50, tmp);
-	 }
-	 else
-	 {
-      sprintf(tmp,"%ld", height);
-      cops->putS(COLOR_BLACK, COLOR_GREEN, 5,50, "Height");
-      cops->putS(COLOR_BLACK, COLOR_GREEN, 100,50, tmp);
-	 }
+	if(settingParam == 1)
+	{
+        sprintf(tmp,"%ld", height);
+        cops->putS(COLOR_RED, COLOR_GREEN, 5,50, "Height");
+        cops->putS(COLOR_RED, COLOR_GREEN, 100,50, tmp);
+    }
+	else
+	{
+        sprintf(tmp,"%ld", height);
+        cops->putS(COLOR_BLACK, COLOR_GREEN, 5,50, "Height");
+        cops->putS(COLOR_BLACK, COLOR_GREEN, 100,50, tmp);
+	}
 
-	 if(settingParam == 2)
-	 {
-      sprintf(tmp,"%ld", p);
-   	cops->putS(COLOR_RED, COLOR_GREEN, 5,70, "Mines[%]");
-      cops->putS(COLOR_RED, COLOR_GREEN, 100,70, tmp);
-	 }
-	 else
-	 {
-      sprintf(tmp,"%ld", p);
-      cops->putS(COLOR_BLACK, COLOR_GREEN, 5,70, "Mines[%]");
-      cops->putS(COLOR_BLACK, COLOR_GREEN, 100,70, tmp);
-	 }
+	if(settingParam == 2)
+	{
+        sprintf(tmp,"%ld", p);
+   	    cops->putS(COLOR_RED, COLOR_GREEN, 5,70, "Mines[%]");
+        cops->putS(COLOR_RED, COLOR_GREEN, 100,70, tmp);
+	}
+	else
+	{
+        sprintf(tmp,"%ld", p);
+        cops->putS(COLOR_BLACK, COLOR_GREEN, 5,70, "Mines[%]");
+        cops->putS(COLOR_BLACK, COLOR_GREEN, 100,70, tmp);
+	}
 
+    g_changes = 1;
 }
 
 void init_settings_screen()
@@ -335,14 +371,14 @@ static int GetTime()
 	{
       printf("Error getting time and date\n");
    }
-   close(fd);
+    close(fd);
 
 	sprintf(tmp, "%02d",tm.tm_hour);
-   seconds = atoi(tmp)*3600;
+    seconds = atoi(tmp)*3600;
 	sprintf(tmp, "%02d",tm.tm_min);
-   seconds += atoi(tmp)*60;
+    seconds += atoi(tmp)*60;
 	sprintf(tmp, "%02d",tm.tm_sec);
-   seconds += atoi(tmp);
+    seconds += atoi(tmp);
 
 	return seconds;
 }
@@ -351,13 +387,15 @@ static int GetTime()
 /* init not mine related elements of the mine field */
 void minesweeper_init(void){
     int i,j;
-	 int time = 0;
-	 char tmp[20];
+	int time = 0;
+	char tmp[20];
+
+    readMinesINI();
 
     tiles_left=width*height;
     mine_num = 0;
 
-	 time = GetTime();
+	time = GetTime();
 
     srand(time);
 
@@ -373,8 +411,6 @@ void minesweeper_init(void){
             minefield[i][j].flag = 0;
         }
     }
-
-    readMinesINI();
 }
 
 void printNumberOfMines(void)
@@ -578,8 +614,8 @@ int eventHandler(int evt)
 
 			case BTN_ON: // new game
 				cops->clearScreen(COLOR_GREEN);
-            GameMode = 0;
-            x=0;y=0;
+                GameMode = 0;
+                x=0;y=0;
 				minesweeper_init();
 				displayMineField();
 				setCursor(0);
@@ -590,7 +626,7 @@ int eventHandler(int evt)
 	{
 		switch (evt) {
 		   case BTN_UP:
-            if(settingParam == 0)
+                if(settingParam == 0)
 				   settingParam = 2;
 				else
 				   settingParam--;
@@ -599,7 +635,7 @@ int eventHandler(int evt)
 			   break;
 
 		   case BTN_DOWN:
-            if(settingParam == 2)
+                if(settingParam == 2)
 				   settingParam = 0;
 				else
 				   settingParam++;
@@ -615,7 +651,6 @@ int eventHandler(int evt)
 					{
                   width--;
                   RefreshSettings();
-//                  writeMinesINI();
 					}
 				}
 				else if(settingParam == 1)
@@ -624,7 +659,6 @@ int eventHandler(int evt)
 					{
                   height--;
                   RefreshSettings();
-//                  writeMinesINI();
 					}
 				}
 				else
@@ -633,7 +667,6 @@ int eventHandler(int evt)
 					{
 					   p--;
                   RefreshSettings();
-//                  writeMinesINI();
 					}
 				}
 			   break;
@@ -645,7 +678,6 @@ int eventHandler(int evt)
 					{
                   width++;
                   RefreshSettings();
-//                  writeMinesINI();
 					}
 				}
 				else if(settingParam == 1)
@@ -654,7 +686,6 @@ int eventHandler(int evt)
 					{
                   height++;
                   RefreshSettings();
-//                  writeMinesINI();
                }
 				}
 				else
@@ -663,16 +694,16 @@ int eventHandler(int evt)
 					{
 					   p++;
                   RefreshSettings();
-//                  writeMinesINI();
 					}
 				}
 			   break;
 
 			case BTN_OFF:
 			case EVT_QUIT:
+                writeMinesINI();
 				cops->clearScreen(COLOR_GREEN);
-            GameMode = 0;
-            x=0;y=0;
+                GameMode = 0;
+                x=0;y=0;
 				minesweeper_init();
 				displayMineField();
 				setCursor(0);
@@ -749,7 +780,7 @@ int main(int argc,char * * argv)
     cops->clearScreen(COLOR_GREEN);
     /* end of plugin init */
 
-	 cops->disableMenu();
+	cops->disableMenu();
 
     minesweeper_init();
     displayMineField();
