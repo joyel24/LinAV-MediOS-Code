@@ -42,6 +42,41 @@ struct client_operations cops={
 void (*currentHandler)(int evt)=NULL;
 void (*tmpHandler)(int evt)=NULL;
 
+void draw_batt_status()
+{
+   char tmp[10];
+   int fd;
+   int power = 0;
+	int color = 0;
+
+   fd=open("/dev/avtsc",O_RDONLY | O_NONBLOCK);
+   if (fd < 0)
+	{
+      printf("Can't open /dev/avtsc\n");
+   }
+
+	if(ioctl(fd,AV_LEVEL_BAT0_IOC,&power)<0)
+	{
+      printf("Error getting power value\n");
+   }
+   close(fd);
+
+	if(power < 1350)
+   	color = COLOR_DARK_RED;
+	else if(power < 1500)
+   	color = COLOR_ORANGE2;
+   else
+   	color = COLOR_GREEN;
+
+	sprintf(tmp, "%d", power);
+	putS(color,COLOR_LIGHT_BLUE,50,2,tmp);
+
+	fillRect(COLOR_BLACK,79,1,22,11);
+	fillRect(COLOR_BLACK,97,3,3,7);
+	fillRect(color,80,2,20,9);
+}
+
+
 int plugin_pid=-1;
 
 int loadPlugin(char * path, char * param)
@@ -105,7 +140,7 @@ int main(int argc,char * * argv)
 		close_graphics();
 		return -1;
 	}
-	
+
 	fillRect(COLOR_BLACK,5 , 110, 315, 10);
 #ifdef DO_DEBUG
 	printMenu();
@@ -128,6 +163,7 @@ void drawGui(void)
 	fillRect(COLOR_BLACK,0,13,320,2);
 	putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,2,2,"AvWm");
 	drawTime();
+   draw_batt_status();
 }
 
 void drawTime()
