@@ -1,6 +1,5 @@
-* Clean up all those horrid c pointer warnings (I am still only just learning c)
+* Fix rockbox fat/file/dir access routines
 * Port as much rockbox code as is useful/applicable
-* Port uclib
 * Look at the uclinux kernel etc
 * Work out MAS
 * Work out line in, line out
