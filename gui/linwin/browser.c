@@ -29,6 +29,7 @@
 #include "pz.h"
 #include "piezo.h"
 #include "av3xx_colordef.h"
+#include "browser.h"
 
 static GR_WINDOW_ID browser_wid;
 static GR_GC_ID browser_gc;
@@ -39,17 +40,21 @@ static GR_SCREEN_INFO screen_info;
 #define FILE_TYPE_OTHER 2
 #define MAX_ENTRIES 200
 #define MAX_BROWSER_ENTRIES 12
+#define FILEENTRY_XPOS 15
+#define MAX_FILELENGTH 45
 
 #define PATH "/mnt/LinAv"
 
 typedef struct {
-	char name[32];
+	char name[MAX_FILELENGTH];
 	char name_size;
 	char *full_name;
 	unsigned short type;
 } Directory;
 
 int yPosDebug = 100;
+static int g_textversion = 1;
+GR_SIZE g_width, g_height, g_base;
 
 int browser_nbEntries = 0;
 int browser_currentSelection = 0;
@@ -60,6 +65,9 @@ Directory browser_entries[MAX_ENTRIES];
 void delay(unsigned int time);
 void new_script_window(char *filename);
 void new_exe_window(char *filename);
+static void browser_drawentry(int i, int y);
+static void browser_changeselectiondown();
+static void browser_changeselectionup();
 
 static void browser_exit()
 {
@@ -97,8 +105,8 @@ static void browser_mscandir(char *dira)
 			browser_entries[browser_nbEntries].full_name = malloc(sizeof(char) * size + 1);
 			strcpy(browser_entries[browser_nbEntries].full_name, subdir->d_name);
 
-			if (size > 30) {
-				size = 30;
+			if (size > MAX_FILELENGTH-2) {
+				size = MAX_FILELENGTH-2;
 			}
 
 			memcpy(browser_entries[browser_nbEntries].name, subdir->d_name, size);
@@ -126,75 +134,213 @@ static void browser_mscandir(char *dira)
 	browser_currentBase = 0;
 }
 
-static void browser_draw_browser()
+static void browser_scrollup()
 {
-	int i;
+   int yBase;
+   int yHeight;
 
-	GR_SIZE width, height, base;
+	// Dont get expose events for the moment
+	GrSelectEvents(browser_wid, GR_EVENT_MASK_KEY_DOWN);
 
+	yBase   = 7 + g_height;
+   yHeight = g_height * (MAX_BROWSER_ENTRIES-1);
+
+	// Move the last entries to the bottom
+   GrCopyArea(browser_wid,
+	           browser_gc,
+              0, yBase, screen_info.cols, yHeight,
+	           browser_wid,
+				  0, 7,
+				  MWROP_SRCCOPY);
+
+	// Add an entry at the beginning
+   browser_changeselectionup();
+
+	GrSelectEvents(browser_wid, GR_EVENT_MASK_EXPOSURE|GR_EVENT_MASK_KEY_DOWN);
+}
+
+static void browser_scrolldown()
+{
+   int yBase;
+   int yHeight;
+
+	// Dont get expose events for the moment
+	GrSelectEvents(browser_wid, GR_EVENT_MASK_KEY_DOWN);
+
+	yBase   = 7 + g_height;
+   yHeight = g_height * (MAX_BROWSER_ENTRIES-1);
+
+	// Move the first entries to the top
+   GrCopyArea(browser_wid,
+	           browser_gc,
+              0, 7, screen_info.cols, yHeight,
+	           browser_wid,
+				  0, yBase,
+				  MWROP_SRCCOPY);
+
+	// Add an entry at the end
+   browser_changeselectiondown();
+
+	GrSelectEvents(browser_wid, GR_EVENT_MASK_EXPOSURE|GR_EVENT_MASK_KEY_DOWN);
+}
+
+// DRAW ONLY THE LAST SELECTED AND CURRENT SELECTED
+static void browser_changeselectionup()
+{
 	int begin = browser_currentBase;
 	int y;
-
-	GrGetGCTextSize(browser_gc, "M", -1, GR_TFASCII, &width, &height, &base);
-	height += 2;
+	int i;
 
 	y = 5;
 	for (i = begin; i < begin + MAX_BROWSER_ENTRIES && i < browser_nbEntries; i++)
 	{
-		if (i == browser_currentSelection) {
-       	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
+		if (i == browser_currentSelection)
+		{
+		   // draw the new selected
+			GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
 			GrFillRect(browser_wid, browser_gc, 0, y + 2,
-				   screen_info.cols, height);
-       	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
+					screen_info.cols, g_height);
+			GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
 			GrSetGCUseBackground(browser_gc, GR_FALSE);
-		} else {
-			GrSetGCUseBackground(browser_gc, GR_TRUE);
-			GrSetGCMode(browser_gc, GR_MODE_SET);
-       	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
+
+   		y += g_height;
+         browser_drawentry(i, y);
+
+			// draw the last selected
+			GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
 			GrFillRect(browser_wid, browser_gc, 0, y + 2,
-				   screen_info.cols, height);
-       	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
+					screen_info.cols, g_height);
+			GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
+			GrSetGCUseBackground(browser_gc, GR_FALSE);
+
+   		y += g_height;
+         browser_drawentry(i+1, y);
+			break;
+	   }
+		else
+   		y += g_height;
+	}
+}
+
+static void browser_changeselectiondown()
+{
+	int begin = browser_currentBase;
+	int y;
+	int i;
+
+	y = 5;
+	for (i = begin; i < begin + MAX_BROWSER_ENTRIES && i < browser_nbEntries; i++)
+	{
+		if (i == browser_currentSelection-1)
+		{
+		   // draw the new selected
+			GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
+			GrFillRect(browser_wid, browser_gc, 0, y + 2,
+					screen_info.cols, g_height);
+			GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
+			GrSetGCUseBackground(browser_gc, GR_FALSE);
+
+   		y += g_height;
+         browser_drawentry(i, y);
+
+			// draw the last selected
+			GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
+			GrFillRect(browser_wid, browser_gc, 0, y + 2,
+					screen_info.cols, g_height);
+			GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
+			GrSetGCUseBackground(browser_gc, GR_FALSE);
+
+   		y += g_height;
+         browser_drawentry(i+1, y);
+			break;
+	   }
+		else
+   		y += g_height;
+	}
+}
+
+static void browser_drawentry(int i, int y)
+{
+	GR_BITMAP *bits;
+
+	if (strncmp(browser_entries[i].name, "..", 2) == 0) {
+		GrText(browser_wid, browser_gc, FILEENTRY_XPOS, y,
+			"<", -1, GR_TFASCII);
+	}
+	else {
+		GrText(browser_wid, browser_gc, FILEENTRY_XPOS, y,
+			browser_entries[i].name, -1, GR_TFASCII);
+	}
+
+	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_GREY);
+
+	switch (browser_entries[i].type) {
+	case FILE_TYPE_PROGRAM:
+
+		if(g_textversion)
+			GrText(browser_wid, browser_gc, 1, y, "x", -1, GR_TFASCII);
+		else
+		{
+			bits = music_bits;
+
+			GrBitmap(browser_wid, browser_gc, 1, y, 10,10, bits);
 		}
+		break;
 
-		y += height;
-
+	case FILE_TYPE_DIRECTORY:
 		if (strncmp(browser_entries[i].name, "..", 2) == 0) {
-			GrText(browser_wid, browser_gc, 8, y,
-				"<", -1, GR_TFASCII);
+			GrText(browser_wid, browser_gc, 1, y, "<", -1,
+				GR_TFASCII);
 		}
 		else {
-			GrText(browser_wid, browser_gc, 8, y,
-				browser_entries[i].name, -1, GR_TFASCII);
+			GrText(browser_wid, browser_gc, 1, y, ">", -1,
+				GR_TFASCII);
+		}
+		break;
+	case FILE_TYPE_OTHER:
+		break;
+	}
+}
+
+static void browser_draw_browser()
+{
+	int i;
+
+	int begin = browser_currentBase;
+	int y;
+
+	y = 5;
+	for (i = begin; i < begin + MAX_BROWSER_ENTRIES && i < browser_nbEntries; i++)
+	{
+		if (i == browser_currentSelection)
+		{
+			GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
+			GrFillRect(browser_wid, browser_gc, 0, y + 2,
+					screen_info.cols, g_height);
+			GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
+			GrSetGCUseBackground(browser_gc, GR_FALSE);
+		}
+		else
+		{
+			GrSetGCUseBackground(browser_gc, GR_TRUE);
+			GrSetGCMode(browser_gc, GR_MODE_SET);
+			GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
+			GrFillRect(browser_wid, browser_gc, 0, y + 2,
+					screen_info.cols, g_height);
+			GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
 		}
 
-     	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_GREY);
+		y += g_height;
 
-		switch (browser_entries[i].type) {
-		case FILE_TYPE_PROGRAM:
-			GrText(browser_wid, browser_gc, 1, y, "x", -1,
-			       GR_TFASCII);
-			break;
-		case FILE_TYPE_DIRECTORY:
-			if (strncmp(browser_entries[i].name, "..", 2) == 0) {
-				GrText(browser_wid, browser_gc, 1, y, "<", -1,
-					GR_TFASCII);
-			}
-			else {
-				GrText(browser_wid, browser_gc, 1, y, ">", -1,
-					GR_TFASCII);
-			}
-			break;
-		case FILE_TYPE_OTHER:
-			break;
-		}
+		browser_drawentry(i, y);
 	}
 
 	/* clear bottom portion of display */
 	GrSetGCUseBackground(browser_gc, GR_TRUE);
 	GrSetGCMode(browser_gc, GR_MODE_SET);
-  	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
+	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
 	GrFillRect(browser_wid, browser_gc, 0, y + 2, screen_info.cols, screen_info.rows - (y + 2));
-  	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
+	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
 }
 
 static void browser_do_draw(GR_EVENT *event)
@@ -317,11 +463,18 @@ static int browser_do_keystroke(GR_EVENT * event)
 		if (browser_currentSelection < browser_nbEntries - 1) {
 			browser_currentSelection++;
 
-			if (browser_top > MAX_BROWSER_ENTRIES-2) {
+			if (browser_top > MAX_BROWSER_ENTRIES-2)
+			{
 				browser_currentBase++;
-			} else
+            browser_scrolldown();
+//   			browser_draw_browser();
+			}
+			else
+			{
 				browser_top++;
-			browser_draw_browser();
+            browser_changeselectiondown();
+			}
+
 			ret = 1;
 		}
 
@@ -331,12 +484,17 @@ static int browser_do_keystroke(GR_EVENT * event)
 		if (browser_currentSelection > 0) {
 			browser_currentSelection--;
 
-			if (browser_top == 0) {
+			if (browser_top == 0)
+			{
 				browser_currentBase--;
-			} else {
-				browser_top--;
+            browser_scrollup();
+//   			browser_draw_browser();
 			}
-			browser_draw_browser();
+			else
+			{
+				browser_top--;
+            browser_changeselectionup();
+			}
 			ret = 1;
 		}
 		break;
@@ -359,6 +517,9 @@ void new_browser_window(void)
                                     browser_do_draw, browser_do_keystroke);
 
 	GrSelectEvents(browser_wid, GR_EVENT_MASK_EXPOSURE|GR_EVENT_MASK_KEY_DOWN);
+
+	GrGetGCTextSize(browser_gc, "M", -1, GR_TFASCII, &g_width, &g_height, &g_base);
+	g_height += 2;
 
 	browser_mscandir("./");
 

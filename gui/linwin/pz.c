@@ -340,7 +340,7 @@ main(int argc, char **argv)
 	GrSetGCForegroundPixelVal(root_gc, AV3XX_COLOR_WHITE);
 	GrGetScreenInfo(&screen_info);
 
-//   GrHideCursor();
+   GrHideCursor();
 
 	root_wid = GrNewWindowEx(GR_WM_PROPS_APPFRAME |
 			    GR_WM_PROPS_CAPTION |
