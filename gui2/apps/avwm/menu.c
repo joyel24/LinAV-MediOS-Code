@@ -7,6 +7,7 @@
 #include "events.h"
 #include "avwm.h"
 #include "parse_cfg.h"
+#include "menu.h"
 #include "colordef.h"
 
 #define SHOW_ALL        1
@@ -17,12 +18,19 @@
 
 #define FONT_HEIGHT  10
 
-struct cfg_item * cfgMenu=NULL;;
+struct cfg_menu * cfgMenu=NULL;;
 struct menu_item * rootMenu=NULL;
 
 int stop,nselect;
 struct menu_item *pos;
 struct menu_item *pselect;
+
+char item_buff[MAX_TOKEN+1];
+char value_buff[MAX_TOKEN+1];
+
+struct cfg_menu * current_item=NULL;
+
+extern int cfg_line_num;
 
 void cleanMenu(struct menu_item * root)
 {
@@ -36,7 +44,7 @@ void cleanMenu(struct menu_item * root)
 	}
 }
 
-struct menu_item * newItem(struct cfg_item * data)
+struct menu_item * newItem(struct cfg_menu * data)
 {
 	struct menu_item * ptr=(struct menu_item *) malloc(sizeof(struct menu_item));
 	if(ptr)
@@ -102,9 +110,89 @@ int insertItem(struct menu_item * item)
 	return 0;
 }
 
+void addItem(struct cfg_menu ** cfg)
+{
+	struct cfg_menu * ptr =(struct cfg_menu *) malloc(sizeof(struct cfg_menu));
+	if(current_item == NULL)
+		*cfg=ptr;
+	else
+		current_item->nxt=ptr;
+	current_item=ptr;
+	current_item->name[0]=0;
+	current_item->link[0]=0;
+	current_item->parent[0]=0;
+	current_item->param[0]=0;
+}
+
+void cfgCleanMenu(struct cfg_menu * cfg)
+{
+	struct cfg_menu * ptr;
+	while(cfg!=NULL)
+	{
+		ptr=cfg->nxt;
+		free(cfg);
+		cfg=ptr;
+	}	
+}
+
+int do_parse(struct cfg_menu ** cfg,char * filename)
+{
+    char *item=item_buff;
+    char *value=value_buff; 
+     
+    openFile(filename);
+    
+    while (1) {
+	if (!nxt_cfg(item,value)) break;
+	if(!strcmp(item,"name"))
+	{
+		addItem(cfg);
+		strcpy(current_item->name,value);
+	}
+	else if(!strcmp(item,"parent"))
+	{
+		if(current_item==NULL)
+		{
+			fprintf(stderr,"'label' param before image\n");
+		}
+		else
+		{
+			strcpy(current_item->parent,value);
+		}
+		
+	}
+	else if(!strcmp(item,"link"))
+	{
+		if(current_item==NULL)
+		{
+			fprintf(stderr,"'link' param before image\n");
+		}
+		else
+		{
+			strcpy(current_item->link,value);
+		}
+	}
+	else if(!strcmp(item,"param"))
+	{
+		if(current_item==NULL)
+		{
+			fprintf(stderr,"'param' param before image\n");
+		}
+		else
+		{
+			strcpy(current_item->param,value);
+		}
+	}
+	else
+		fprintf(stderr,"unknown item type: %s on line %d\n",item,cfg_line_num);
+    }
+    closeFile();
+    return 0;    
+}
+
 int loadMenu(void)
 {
-	struct cfg_item * data;
+	struct cfg_menu * data;
 	struct menu_item * new_item;
 	cfgCleanMenu(cfgMenu);
 	cfgMenu=NULL;
@@ -318,7 +406,7 @@ void doPrint(struct menu_item * ptr,int level)
 
 void printMenu(void)
 {
-	struct cfg_item * ptr=cfgMenu;
+	struct cfg_menu * ptr=cfgMenu;
 	printf("cfg:\n");
 	while(ptr)
 	{

@@ -16,20 +16,13 @@
 
 #define MAX_TOKEN 250
 
-struct cfg_item {
-	char name[MAX_TOKEN];
-	char parent[MAX_TOKEN];
-	char link[MAX_TOKEN];
-	char param[MAX_TOKEN];
-	struct cfg_item * nxt;
-};
-
 int  next_char(void);
 void again(int ch);
 int  nxt_token(char * buff);
 int  nxt_cfg(char *item,char *value);
-int  do_parse(struct cfg_item ** cfg,char * filename);
-void cfgCleanMenu(struct cfg_item * cfg);
+
+int  openFile(char * filename);
+void closeFile(void);
 
 
 #endif

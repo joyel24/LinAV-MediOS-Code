@@ -14,8 +14,19 @@
 #ifndef __MENU_H
 #define __MENU_H
 
+struct cfg_menu {
+	char name[MAX_TOKEN];
+	char parent[MAX_TOKEN];
+	char link[MAX_TOKEN];
+	char param[MAX_TOKEN];
+	struct cfg_menu * nxt;
+};
+
 void doDraw(void);
 int  loadMenu(void);
 void printMenu(void);
+int  do_parse(struct cfg_menu ** cfg,char * filename);
+void cfgCleanMenu(struct cfg_menu * cfg);
+void addItem(struct cfg_menu ** cfg);
 
 #endif

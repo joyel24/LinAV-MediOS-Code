@@ -48,7 +48,7 @@ struct client_operations {
 };
 
 struct menu_item {
-	struct cfg_item * data;
+	struct cfg_menu * data;
 	struct menu_item * nxt;
 	struct menu_item * prev;
 	struct menu_item * sub;

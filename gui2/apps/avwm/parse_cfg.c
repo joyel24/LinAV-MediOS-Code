@@ -7,13 +7,8 @@
 
 FILE * file;
 
-int line_num;
+int cfg_line_num;
 int back = 0; /* can go back by one char */
-
-struct cfg_item * current_item=NULL;
-
-char item_buff[MAX_TOKEN+1];
-char value_buff[MAX_TOKEN+1];
 
 int next_char(void)
 {
@@ -38,12 +33,12 @@ int nxt_token(char * buff)
 /* processing empty lines and comments */
     while (1) {
 	while ((ch = next_char()), ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
-	    if (ch == '\n' || ch == '\r') line_num++;
+	    if (ch == '\n' || ch == '\r') cfg_line_num++;
 	if (feof(file)) return 0;
 	if (ch != '#') break;
 	while ((ch = next_char()), (ch != '\n' && ch != '\r'))
 	    if (feof(file)) return 0;
-	line_num++;
+	cfg_line_num++;
     }
 /* processing '=' char */    
     if (ch == '=')
@@ -114,89 +109,19 @@ int nxt_cfg(char *item,char *value)
     return 1;
 }
 
-void addItem(struct cfg_item ** cfg)
+int openFile(char * filename)
 {
-	struct cfg_item * ptr =(struct cfg_item *) malloc(sizeof(struct cfg_item));
-	if(current_item == NULL)
-		*cfg=ptr;
-	else
-		current_item->nxt=ptr;
-	current_item=ptr;
-	current_item->name[0]=0;
-	current_item->link[0]=0;
-	current_item->parent[0]=0;
-	current_item->param[0]=0;
-}
-
-int do_parse(struct cfg_item ** cfg,char * filename)
-{
-    char *item=item_buff;
-    char *value=value_buff;
-    
-    if ((file = fopen(filename,"r"))<0)
-    {
-    	fprintf(stderr,"error reading config file %s\n",filename);
+	if ((file = fopen(filename,"r"))<0)
+	{
+	fprintf(stderr,"error reading config file %s\n",filename);
 	return -1;
-    }
-    line_num = 1;
-    
-    while (1) {
-	if (!nxt_cfg(item,value)) break;
-	if(!strcmp(item,"name"))
-	{
-		addItem(cfg);
-		strcpy(current_item->name,value);
 	}
-	else if(!strcmp(item,"parent"))
-	{
-		if(current_item==NULL)
-		{
-			fprintf(stderr,"'label' param before image\n");
-		}
-		else
-		{
-			strcpy(current_item->parent,value);
-		}
-		
-	}
-	else if(!strcmp(item,"link"))
-	{
-		if(current_item==NULL)
-		{
-			fprintf(stderr,"'link' param before image\n");
-		}
-		else
-		{
-			strcpy(current_item->link,value);
-		}
-	}
-	else if(!strcmp(item,"param"))
-	{
-		if(current_item==NULL)
-		{
-			fprintf(stderr,"'param' param before image\n");
-		}
-		else
-		{
-			strcpy(current_item->param,value);
-		}
-	}
-	else
-		fprintf(stderr,"unknown item type: %s on line %d\n",item,line_num);
-    }
-    fclose(file);
-    return 0;    
+	cfg_line_num=1;
 }
 
-void cfgCleanMenu(struct cfg_item * cfg)
+void closeFile(void)
 {
-	struct cfg_item * ptr;
-	while(cfg!=NULL)
-	{
-		ptr=cfg->nxt;
-		free(cfg);
-		cfg=ptr;
-	}	
+	fclose(file);
 }
 
 
