@@ -290,6 +290,31 @@ void launchViewer(char *name)
 	}
 }
 
+void launchTxtView(char *name)
+{
+	int pid;
+
+	cops->clearEventQueue();
+
+	pid = vfork();
+	if (pid == 0) {
+		execl("/mnt/txtviewer", "txtviewer", name, 70, 0);
+		fprintf(stderr, "exec failed!\n");
+		_exit(1);
+	}
+	else {
+		if (pid > 0) {
+			int status;
+			cops->closeScreen();
+			waitpid(pid, &status, 0);
+			cops->openScreen();
+		}
+		else {
+			fprintf(stderr, "vfork failed %d\n", pid);
+		}
+	}
+}
+
 int launchScript(char * name)
 {
 	char tmp[1000];
@@ -336,6 +361,7 @@ void handle_type_other(char *filename)
 	}
 	else if (is_text_type(ext))
 	{
+	   launchTxtView(filename);
 	}
 	else if (is_mp3_type(ext))
 	{

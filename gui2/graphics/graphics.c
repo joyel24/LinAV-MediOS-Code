@@ -24,14 +24,17 @@
 
 #define STRING_MAXSIZE 200
 
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 240
+
 #define FBIO_INIT               _IO ('F', 0x26)
 
-#define tstXY(x,y)  {if(x>320) return; if(x<0) return; if(y>240) return; if(y<0) return;}
-#define tstWH(x,y,w,h)  {if(x+w>320)return; if(x+w<0) return; if(y+h>240) return; if(y+h<0) return;}
+#define tstXY(x,y)  {if(x>SCREEN_WIDTH) return; if(x<0) return; if(y>SCREEN_HEIGHT) return; if(y<0) return;}
+#define tstWH(x,y,w,h)  {if(x+w>SCREEN_WIDTH)return; if(x+w<0) return; if(y+h>SCREEN_HEIGHT) return; if(y+h<0) return;}
 
-char screen1[320*240+40];
-char screen2[320*240+40];
-char screen3[320*240*4+40];
+char screen1[SCREEN_WIDTH*SCREEN_HEIGHT+40];
+char screen2[SCREEN_WIDTH*SCREEN_HEIGHT+40];
+char screen3[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
 struct graphicsBuffer BITMAP_1;
 struct graphicsBuffer BITMAP_2;
 struct graphicsBuffer VIDEO_1;
@@ -54,9 +57,9 @@ int ini_graphics()
 		
 	BITMAP_1.offset            = (int)&screen1;
 	BITMAP_1.component         = AV3XX_OSD_BITMAP1;
-	BITMAP_1.bytesPerLine      = 320*2;
-	BITMAP_1.width             = 320;
-	BITMAP_1.height            = 240;
+	BITMAP_1.bytesPerLine      = SCREEN_WIDTH*2;
+	BITMAP_1.width             = SCREEN_WIDTH;
+	BITMAP_1.height            = SCREEN_HEIGHT;
 	BITMAP_1.x                 = 0x14;
 	BITMAP_1.y                 = 0x12;
 	BITMAP_1.bitsPerPixel      = 8;
@@ -72,12 +75,12 @@ int ini_graphics()
 	
 	gc_bmap1=createGC(BMAP1);
 	setPlane(BMAP1);
-	
+
 	BITMAP_2.offset            = (int)&screen2;
 	BITMAP_2.component         = AV3XX_OSD_BITMAP2;
-	BITMAP_2.bytesPerLine      = 320*2;
-	BITMAP_2.width             = 320;
-	BITMAP_2.height            = 240;
+	BITMAP_2.bytesPerLine      = SCREEN_WIDTH*2;
+	BITMAP_2.width             = SCREEN_WIDTH;
+	BITMAP_2.height            = SCREEN_HEIGHT;
 	BITMAP_2.x                 = 0x14;
 	BITMAP_2.y                 = 0x12;
 	BITMAP_2.bitsPerPixel      = 8;
@@ -96,9 +99,9 @@ int ini_graphics()
 	
 	VIDEO_1.offset            = (int)&screen3;
 	VIDEO_1.component         = AV3XX_OSD_VIDEO1;
-	VIDEO_1.bytesPerLine      = 320*2;
-	VIDEO_1.width             = 320;
-	VIDEO_1.height            = 240;
+	VIDEO_1.bytesPerLine      = SCREEN_WIDTH*2;
+	VIDEO_1.width             = SCREEN_WIDTH;
+	VIDEO_1.height            = SCREEN_HEIGHT;
 	VIDEO_1.x                 = 0x14;
 	VIDEO_1.y                 = 0x12;
 	VIDEO_1.bitsPerPixel      = 32;
@@ -121,7 +124,7 @@ int ini_graphics()
 	hidePlane(VID1);
 	
 	setPalette(gui_pal,256);
-	
+
 	return 0;
 }
 
@@ -219,7 +222,7 @@ void hidePlane(int vplane)
 			break;
 		default:
 			printf("wrong plane\n");
-	}			
+	}
 }
 
 void showPlane(int vplane)
@@ -357,18 +360,29 @@ void putS(int color, int bg_color, int x, int y, char *s)
 
 	tstXY(x,y);
 
-	/*if(font->width*len>STRING_MAXSIZE)
-		s[STRING_MAXSIZE/font->width]=0;*/
+	if(font->width*len>SCREEN_WIDTH)
+	{
+		s[SCREEN_WIDTH/font->width]=0;
+		c = s[SCREEN_WIDTH/font->width];
+   }
+
+/*
 	if(len>30)
 	{
 		c=s[30];
 		s[30]=0;
 	}
-
+*/
 	default_gc->gops->drawString(font,color,bg_color,x,y,s,default_gc->buffer);
-
+/*
 	if(len>30)
 		s[30]=c;
+*/
+
+	if(font->width*len>SCREEN_WIDTH)
+	{
+		s[SCREEN_WIDTH/font->width]=c;
+	}
 }
 
 int getStringS(const unsigned char *str, int *w, int *h)
@@ -403,7 +417,7 @@ void scrollWindowVert(int bgColor, int x, int y, int width, int height, int scro
 {
 	/*if(UP)
 	{
-		if(x>320) x=320; if(x<0) x=0; if(y>240) y=240; if((y-scroll)<0) y=scroll;		
+		if(x>320) x=320; if(x<0) x=0; if(y>240) y=240; if((y-scroll)<0) y=scroll;
 		tstWH(x,y,width,height);
 	}
 	else
@@ -460,10 +474,10 @@ void drawImage(char * filename)
 	
 	cinfo.out_color_space=JCS_CUST;
 	
-	if(cinfo.image_width > 320 || cinfo.image_height > 240)
+	if(cinfo.image_width > SCREEN_WIDTH || cinfo.image_height > SCREEN_HEIGHT)
 	{
 		for(i=0;i<3;i++)
-			if((cinfo.image_width/scale[i])<320 && (cinfo.image_height/scale[i])<240)
+			if((cinfo.image_width/scale[i])<SCREEN_WIDTH && (cinfo.image_height/scale[i])<SCREEN_HEIGHT)
 				break;
 		if(i==3)
 		{
@@ -486,12 +500,12 @@ void drawImage(char * filename)
 	showPlane(VID1);
 	
 	screenDirect=(unsigned int *)buff->offset;
-	for (j=0;j<240;j++)
-        	for (i=0;i<320;i++)            
-            		screenDirect[j*320 + i] = 0x00800080;
+	for (j=0;j<SCREEN_HEIGHT;j++)
+        	for (i=0;i<SCREEN_WIDTH;i++)
+            		screenDirect[j*SCREEN_WIDTH + i] = 0x00800080;
 	
-	x=(320-cinfo.output_width)/2;
-	y=(240-cinfo.output_height)/2;
+	x=(SCREEN_WIDTH-cinfo.output_width)/2;
+	y=(SCREEN_HEIGHT-cinfo.output_height)/2;
 	offset=buff->offset+x*4+y*buff->width*4;
 	
 	while(cinfo.output_scanline < cinfo.output_height)
