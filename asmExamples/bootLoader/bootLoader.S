@@ -20,7 +20,7 @@
 
 		@uartDebug = 1 @ send debug info on UART
 		doTimeOut = 1 @ turn on the autorun of DEFAULT.BIN after time out
-
+        
 .text
 
         add r0, pc, #1
@@ -250,34 +250,20 @@ endSF:
 @ Init program selection screen
 @ ------------------------------------------------------------------------------
 
-.ifdef doimage
-		ldr r0, imgClus
-		cmp r0, #0
-		beq noFimg
-		callThumb	r4, loadImg
-		b endImg
-noFimg:
-		callThumb r0, lcdClsT      @ Clear screen...
-		callThumb2 r4, terminalSetPosT, 0, 25
-		callThumb2 r4, terminalPutsCT, msg783, 0xffff  @ no image found
-		callThumb2 r4, terminalSetPosT, 0, 0
-
-endImg:
-.endif
-
-        mov r0, #4
-        mov r1, #6
-        ldr r2, =msg_001
-        ldr r3, =0xfbfb
-        callThumb r4, lcdPutsT
+	callThumb r4, loadDisp
 
 @ Main loop
 @ ------------------------------------------------------------------------------
 
         ldr r0, =fatRootClu             @ Start at root dir.
         ldr r0, [r0]
+		ldr r1, =dirCurrentClust
+		str r0, [r1]
 
         @ r0 = LBA of dir...
+lNdir:
+		ldr r0, =dirCurrentClust
+		ldr r0, [r0]
 loopRR:
 		ldr r1, =bufferx
 		callThumb r4, getNxtFile
@@ -442,7 +428,9 @@ wnkd1:                                      @ Wait for no key down...
         bne oklp
         add r0, #2                  @ eugh! horrid fixup for root?
 oklp:
-        b loopRR
+		ldr r1, =dirCurrentClust
+		str r0, [r1]
+        b lNdir
 notm1:
         ldr r1, =0x200
         tst r7, r1
@@ -468,7 +456,8 @@ notm1:
         tst r1, r2
          bne notm2                  @ is it (not a dir)?
 
-        b launchFile                @ Launch the file...
+        callThumb r4, launchFile                @ Launch the file...
+		b lNdir
 notm2:
         ldr r0, timeoutC
         cmp r0, #0
@@ -515,6 +504,7 @@ timeoutC:           .word   0x100
 timeoutMax:         .word   0x100
 dirCurrentScroll:   .word   0
 dirCurrentCursor:   .word   0
+dirCurrentClust:	.word	0
 
 @ ------------------------------------------------------------------------------
 
@@ -596,13 +586,14 @@ errorDn:mov r0, #0
 @ ------------------------------------------------------------------------------
         
 launchFile:
+		push {r0, r1, r2, r4, r7, lr}
         mov r7, r0
 
         callThumb2 r4, terminalSetPosT, 0, 36
         callThumb2 r4, terminalPutsCT, msg600, 0xffff
 
         ldr r6, =ramStart
-loopLE: 
+loopLE:
         callThumb2 r4, terminalPutsCT, msg601, 0xffff
         mov r0, r7
         mov r1, r6
@@ -619,8 +610,19 @@ loopLE:
 
         callThumb2 r4, terminalPutsCT, msg700, 0xffff
 
-        ldr r0, =ramStart
-        bx r0                           @ EXECUTE IT!
+        mov r0, #1
+    	mov lr, r0
+    	ldr r0, =ramStart
+    	add lr, pc
+    	bx r0
+
+
+		callThumb r4, lcdClsT
+		callThumb2 r4, terminalPutsCT, msg701, 0xffff
+		callThumb r4, loadDisp
+
+		pop {r0, r1, r2, r4, r7, pc}
+
 
 @ ------------------------------------------------------------------------------
 @ r0 -> LBAbuffer r1->file name r2->cluster save
@@ -716,6 +718,35 @@ noshp1:  add r7, #32
 noshq1:
 		pop {r0, r1, r2, r4, pc}
 
+@ ------------------------------------------------------------------------------
+
+loadDisp:
+	push {r0, r1, r2, r3, r4, lr}
+.ifdef doimage
+		ldr r0, =imgClus
+		ldr r0, [r0]
+		cmp r0, #0
+		beq noFimg
+		callThumb	r4, loadImg
+		b endImg
+noFimg:
+		callThumb r0, lcdClsT      @ Clear screen...
+		callThumb2 r4, terminalSetPosT, 0, 25
+		callThumb2 r4, terminalPutsCT, msg783, 0xffff  @ no image found
+		callThumb2 r4, terminalSetPosT, 0, 0
+
+endImg:
+.elseif
+		callThumb r0, lcdClsT      @ Clear screen...
+.endif
+
+
+        mov r0, #4
+        mov r1, #6
+        ldr r2, =msg_001
+        ldr r3, =0xfbfb
+        callThumb r4, lcdPutsT
+	pop {r0, r1, r2, r3, r4, pc}
 
 @ ------------------------------------------------------------------------------
 @ r0 -> cluster of the img
@@ -901,6 +932,7 @@ msg201: .asciz " OEM:       xxxxxxxx\n"
 msg600: .asciz "Loading image...                           \n"
 msg601: .asciz "."
 msg700: .asciz "\nRunning image...                           \n"
+msg701: .asciz "Restoring bootloader\n"
 msg780: .asciz "Timed out!                                 \n"
 msg781: .asciz "Error: no default file\n"
 msg782: .asciz "Found file: xxxxxxxxxxx\n"
