@@ -20,8 +20,6 @@
 #define I2C_WRITE_DEVICE(val)                   (val & ~0x01)
 #define I2C_READ_DEVICE(val)                    (val | 0x01)
 
-#define DO_OUTB(val,func_name,errmsg)           i2c_outb(val)
-
 void i2c_stop(void);
 void i2c_start(void);
 

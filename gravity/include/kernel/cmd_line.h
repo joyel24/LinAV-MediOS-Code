@@ -24,7 +24,6 @@ struct cmd_line_s {
 /* cmd list */
 
 void do_help(char ** params);
-void do_print_info(char ** params);
 void do_mem (char ** params);
 void do_run (char ** params);
 void do_tasks (char ** params);

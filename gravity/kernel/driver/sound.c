@@ -13,10 +13,12 @@
 #include <sys_def/stddef.h>
 
 #include <kernel/io.h>
+
 #include <kernel/irq.h>
 #include <kernel/kernel.h>
 
 #include <kernel/hardware.h>
+#include <kernel/gio.h>
 
 #include <kernel/mas.h>
 #include <kernel/sound.h>
@@ -27,64 +29,87 @@
 /********************* DSP                    ***************************/
 
 
-int playing=0;   // 1 if we are sending data to MAS, 0 if no more data to send or Stop mode or Pause mode
-int in_pause=0;     // 1 if in Pause mode
+__IRAM_DATA int playing=0;   // 1 if we are sending data to MAS, 0 if no more data to send or Stop mode or Pause mode
+__IRAM_DATA int in_pause=0;     // 1 if in Pause mode
 
-struct mp3_play * data;
+__IRAM_DATA struct mp3_play * data;
 
-void dsp_interrupt(int irq)
+#define SEND_TO_MAS(BUFFER,SIZE)                              \
+ ({                                                           \
+    int  __i;                                                 \
+    char __data;                                              \
+    for(__i=0;__i<SIZE;__i++)                                 \
+    {                                                         \
+        if(inw(GIO_BITSET0) & (0x1<<GIO_MAS_EOD))             \
+            break;  /* EOD set => exit */                     \
+        __data=(BUFFER[__i] << 8) & 0xFF00;                   \
+        if(__data!=0)                                         \
+            outw(__data,GIO_BITSET0);                         \
+        __data ^= 0xFF00;                                     \
+        if(__data!=0)                                         \
+            outw(__data,GIO_BITCLEAR0);                       \
+        /* try to latch data (raise PR) */                    \
+        outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);               \
+        /* wait for RTR to be set */                          \
+        while(!(inw(GIO_BITSET1) & (0x1<<(GIO_MAS_RTR-16))))  \
+            /*nothing*/;                                      \
+        /* clear latch (lower raise PR) */                    \
+        outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);             \
+    }                                                         \
+    __i;                                                      \
+  })
+
+__IRAM_CODE void dsp_interrupt(int irq)
 {
-   int unread=0;int toSend;
-   static int old_unread=-1;
-   int send;
-   
+   int toSend;
+   char * buffer;
    if(playing)
    {       
-        toSend=data->buffer_len-data->buffer_read;
-        toSend=MIN(toSend,120);
-        send=mas_pio_write((void *) (data->buffer+data->buffer_read),toSend); 
-        data->buffer_read+=send;
-        //printk("%d ",send);         
+        if(data->buffer_write<data->buffer_read)
+            toSend=data->buffer_len-data->buffer_read;
+        else
+            toSend=data->buffer_write-data->buffer_read;        
+        buffer=data->buffer+data->buffer_read;        
+        data->buffer_read+=SEND_TO_MAS(buffer,toSend); 
         if(data->buffer_read>= data->buffer_len)
         {
-            data->buffer_read=0;        
-            data->buffer_read+=mas_pio_write((void *) (data->buffer+data->buffer_read),120); 
-        }
-        
-        if(data->endOfFile)
-        {
-            printk("EOF irq\n");
-            unread=data->buffer_write-data->buffer_read;
-            
-            if(unread<0)
-                unread+=data->buffer_len;
-            //printk("%x|%x ",unread,old_unread);
-            if(old_unread < unread && old_unread!=-1)
-            {
-                disable_irq(IRQ_MAS_DATA);
-                playing=0;
-                data->finished=1;
-                printk("finished playback\n");
-            }
-            old_unread=unread;
+            data->buffer_read=0;
+            toSend=data->buffer_write-data->buffer_read;
+            buffer=data->buffer;
+            data->buffer_read+=SEND_TO_MAS(buffer,toSend); 
         }
     }
 }
 
-void dsp_ctl(unsigned int cmd, int dir,void * arg)
+__IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
 {	
     int * val;
     struct av_peak * av_p;
     switch(cmd)
     {
         case DSP_INI_MP3:
-            ini_mp3_playback((struct mp3_play *)arg);
+            ini_mas_for_mp3();
+            data=(struct mp3_play *)arg;    
+            playing=0;
+            in_pause=0;
             break;
         case DSP_START_MP3:
-            start_mp3_playback();
+            if(in_pause)
+            {
+                playing=1;
+                in_pause=0;
+                dsp_interrupt(IRQ_MAS_DATA);
+            }
+            else
+            {
+                playing=1;
+                enable_irq(IRQ_MAS_DATA);
+                dsp_interrupt(IRQ_MAS_DATA);                
+            }
             break;
         case DSP_STOP_MP3:
-            stop_mp3_playback();
+            playing=0;
+            disable_irq(IRQ_MAS_DATA);
             break;
         case DSP_PAUSE_MP3:
             playing=0;
@@ -116,43 +141,6 @@ void dsp_ctl(unsigned int cmd, int dir,void * arg)
             break;
     }	
 
-}
-
-int start_mp3_playback()
-{
-    printk("Statring mp3 playback\n");
-        
-    if(in_pause)
-    {
-        playing=1;
-        in_pause=0;
-        dsp_interrupt(IRQ_MAS_DATA);
-    }
-    else
-    {
-        playing=1;
-        enable_irq(IRQ_MAS_DATA);
-        dsp_interrupt(IRQ_MAS_DATA);                
-    }
-    return 0;       
-}
-
-int stop_mp3_playback(void)
-{
-    int i=0;
-    playing=0;
-    disable_irq(IRQ_MAS_DATA);
-    for(i=0;i<100;i++);
-    return 0;
-}
-
-int ini_mp3_playback(struct mp3_play * arg)
-{
-    ini_mas_for_mp3();
-    data=arg;
-    
-    playing=0;
-    return 0;
 }
 
 int mas_stop_mp3_app(void)
@@ -346,6 +334,7 @@ void init_sound(void)
     printk("S%x:%d:%c%d ",version.major_number,version.derivate,version.char_order_version,version.digit_order_version);
     oldVol=mas_control_config(MAS_GET,MAS_VOLUME,0);
     playing=0;
+    in_pause=0;
 
     disable_irq(IRQ_MAS_DATA);
     
@@ -387,7 +376,7 @@ void init_sound(void)
     }
     #endif
     /*************************************************************/
-    printk("done\n");
+    printk(" done\n");
 
 }
 

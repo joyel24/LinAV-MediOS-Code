@@ -66,6 +66,9 @@ ERROR_CODE API_FILE             (int cmd,void * data1,void * data2);
 ERROR_CODE API_POWER            (int cmd,int * val);
 int        do_api_power         (int cmd);
 
+ERROR_CODE API_MIXER            (int cmd, int dir, void * arg);
+ERROR_CODE API_DSP              (int cmd, void * arg);
+
 void       printf               (char *fmt, ...);
 
 void *  malloc(long size);

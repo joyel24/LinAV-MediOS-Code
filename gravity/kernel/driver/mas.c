@@ -38,11 +38,11 @@ int in_32_val(void)
 	return ret|i2c_inb();
 }
 
-#define OUT_WRITE_DEVICE           DO_OUTB(I2C_WRITE_DEVICE(MAS_DEVICE),"I2C - mas","Error sending write device");
-#define OUT_READ_DEVICE            DO_OUTB(I2C_READ_DEVICE(MAS_DEVICE),"I2C - mas","Error sending read device");
-#define OUT_SUBADDRESS(addr)       DO_OUTB(addr,"I2C - mas","Error sending write device");
-#define OUT_16_VAL(val)            DO_OUTB(val>>8,"I2C - mas","Error sending val [15-8]"); \
-                               DO_OUTB(val,"I2C - mas","Error sending val [7-0]");
+#define OUT_WRITE_DEVICE           i2c_outb(I2C_WRITE_DEVICE(MAS_DEVICE));
+#define OUT_READ_DEVICE            i2c_outb(I2C_READ_DEVICE(MAS_DEVICE));
+#define OUT_SUBADDRESS(addr)       i2c_outb(addr);
+#define OUT_16_VAL(val)            i2c_outb(val>>8); \
+                                       i2c_outb(val);
 #define OUT_32_VAL(val)            OUT_16_VAL(val >> 16) OUT_16_VAL(val); 
 #define IN_16_VAL                  in_16_val()
 #define IN_32_VAL                  in_32_val()
@@ -58,6 +58,7 @@ int mas_reset(void)
     //for(i=0;i<0x40000;i++) /* NOTHING */ ;
     mdelay(10);
     mas_write_direct_config(MAS_CONTROL,0x8c00);
+    //mdelay(100);
     return 0;
 }
 
@@ -66,7 +67,7 @@ int mas_gio_init(void)
     int i;
     gio_dir(GIO_MAS_EOD,GIO_IN);
     for(i=0;i<8;i++)
-        gio_dir(GIO_MAS_D0+i,GIO_OUT);
+        gio_dir((GIO_MAS_D0+i),GIO_OUT);
     gio_dir(GIO_MAS_PWR,GIO_OUT);   
     gio_dir(GIO_MAS_RTR,GIO_IN);
     gio_dir(GIO_MAS_PR,GIO_OUT);
@@ -99,34 +100,6 @@ int mas_set_clk_speed(int spd)
 int mas_get_frame_count(void)
 {
 	return (mas_get_D0(MAS_MPEG_FRAME_COUNT)&0xFFFFF);
-}
-
-/********************* PIO read/write               ***************************/
-int mas_pio_read(void * buffer,int maxSize)
-{
-	return 0;
-}
-
-int mas_pio_write(void * buffer,int size)
-{
-    int i,data;
-    char * buf=(char*)buffer;
-    if(size<=0)
-        return 0;
-    for(i=0;i<size;i++)
-    {
-        if(gio_is_set(GIO_MAS_EOD)) // EOD set => exit
-            break;
-
-        data=(buf[i] << 8) & 0xFF00;
-        gio_raw(data,GIO_BANK0,0xFF00);
-        gio_set(GIO_MAS_PR); // try to latch data (raise PR)
-            
-        while(!gio_is_set(GIO_MAS_RTR)) /* NOTHING */; // wait for RTR to be set
-        
-        gio_clear(GIO_MAS_PR);   // clear latch (lower raise PR)
-    }
-    return i;
 }
 
 /********************* Direct config i2c read/write ***************************/
@@ -575,7 +548,7 @@ int tst_write(int dest,int addr,int size,char * buffer)
 
 	for(j=0;j<size*4;j++)
 	{
-            DO_OUTB(buffer[j]&0xff,"I2C - mas","Error")
+            i2c_outb(buffer[j]&0xff);
  	}
 	i2c_stop();
         return 0;
@@ -649,7 +622,7 @@ int mas_load_PCM_code(void)
             OUT_WRITE_DEVICE
             OUT_SUBADDRESS(MAS_DATA_WRITE)            
             OUT_16_VAL(MAS_WRITE_Di(0))
-            DO_OUTB(0xE0,"I2C - mas","Error, sending val")
+           i2c_outb(0xE0);
             //OUT_16_VAL(size)
             //OUT_16_VAL(0)
             i2c_stop();

@@ -73,6 +73,9 @@ ERROR_CODE API_POWER            (int cmd,int * val)                             
 
 ERROR_CODE API_FILE             (int cmd,void * data1,void * data2)                             { swi_call(nAPI_FILE); }
 
+ERROR_CODE API_MIXER            (int cmd, int dir, void * arg)                                  { swi_call(nAPI_MIXER); }
+ERROR_CODE API_DSP              (int cmd, void * arg)                                           { swi_call(nAPI_DSP); }
+
 void printf(char *fmt, ...)
 {
     va_list ap;

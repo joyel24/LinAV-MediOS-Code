@@ -153,6 +153,8 @@ void kernel_startup_thread (void)
     
     init_ext_module();
     
+    init_sound();
+    
     init_disk();
 
     printk("[init] ------------ all drivers\n");

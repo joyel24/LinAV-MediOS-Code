@@ -12,6 +12,7 @@
 
 #include <kernel/kfile.h>
 #include <kernel/kdir.h>
+#include <kernel/kernel.h>
 #include <api.h>
 
 
@@ -58,7 +59,7 @@ int fs_swi(int cmd,void * data1, void * data2)
             *(int *)data2=kftruncate((int)data->a,(off_t)data->b);
             break;
         case 0x00B:
-            *(int *)data2=kremove((int)data1);
+            *(int *)data2=kfilesize((int)data1);
             break;
             
         case 0x100:

@@ -18,6 +18,9 @@
 
 #include <kernel/kernel.h>
 #include <kernel/kfile.h>
+
+#include <kernel/memmgr.h>
+
 #include <kernel/bflat.h>
 
 #define swap_val(x) (                \
@@ -68,7 +71,7 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
     unsigned long start_code;
     unsigned long * reloc_table;
     
-    int (*run_flat)(int argc,char**argv);
+    /*int (*run_flat)(int argc,char**argv);*/
     
     
     fd_bflat = kfopen(fname,O_RDONLY);
@@ -117,7 +120,7 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
                    
     printk("[load_bflat] flags: %08x\n",header.flags);
     
-    text_pos=malloc(text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
+    text_pos=(unsigned long)kmalloc(text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
     
     if(!text_pos)
     {
@@ -139,7 +142,7 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
     if(ret<text_len)
     {
         printk("[load_bflat] can't read text section (ret=%d)\n",ret);
-        free(text_pos);
+        kfree((void*)text_pos);
         kfclose(fd_bflat);
         return -1;
     }
@@ -151,7 +154,7 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
     if(ret<(data_len+header.reloc_count*sizeof(unsigned long)))
     {
         printk("[load_bflat] can't read data+remoc section (ret=%d)\n",ret);
-        free(text_pos);
+        kfree((void*)text_pos);
         kfclose(fd_bflat);
         return -1;
     }
@@ -223,7 +226,7 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
 //    pTCB->pTaskCode = text_pos;
 //    pTCB->pEntry    = text_pos + header.entry;
 
-    free(text_pos);
+    kfree((void*)text_pos);
     kfclose(fd_bflat);         
     return ERR_OK;
 }

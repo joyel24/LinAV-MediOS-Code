@@ -52,6 +52,8 @@
 
 #define nAPI_TIME              50
 #define nAPI_POWER             51
+#define nAPI_MIXER             52
+#define nAPI_DSP               53
 
 #define nAPI_RUN_GRV           60
 

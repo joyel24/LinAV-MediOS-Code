@@ -23,6 +23,6 @@ void halt_device(void)
 
     udelay(100);
     clf();
-    while(1)
-        outw(0,0x30a1a);
+    outw(0,0x30a1a);
+    while(1) /* nothing */;
 }

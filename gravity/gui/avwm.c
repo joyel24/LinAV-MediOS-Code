@@ -17,6 +17,11 @@
 #include <api.h>
 #include <fs_io.h>
 
+#include <gui/icons.h>
+
+
+extern void ini_status_bar(void);
+extern void drawStatusLine(void);
 
 void avwm(void)
 {
@@ -33,7 +38,7 @@ void avwm(void)
     drawStatusLine(); /* should be done via EVT_REDRAW */
     
     dir=opendir("/");
-    while(entry=readdir(dir))
+    while((entry=readdir(dir)))
     {
         printf("%s\n",entry->d_name);
     }

@@ -17,10 +17,6 @@
 int mas_reset(void);
 int mas_gio_init(void);
 
-/********************* PIO read/write               ***************************/
-int mas_pio_read(void * buffer,int maxSize);
-int mas_pio_write(void * buffer,int size);
-
 /********************* Direct config function       ***************************/
 /* register */
 #define MAS_CONTROL                0x6a

@@ -59,11 +59,11 @@ __IRAM_CODE void i2c_start(void)
 {
     DELAY_1        
     CL_1  
-    //DELAY_1
+    DELAY_1
     DA_0    
     DELAY_1    
     CL_0
-    //DELAY_1
+    DELAY_1
 }
 
 __IRAM_CODE void i2c_stop(void)
@@ -75,7 +75,7 @@ __IRAM_CODE void i2c_stop(void)
     CL_1
     DELAY_1
     DA_1
-    //DELAY_1
+    DELAY_1
 }
 
 __IRAM_CODE void i2c_ack(void)
@@ -85,13 +85,13 @@ __IRAM_CODE void i2c_ack(void)
     DA_0
     DELAY_1
     CL_1
-    //DELAY_1
+    DELAY_1
     while(!SCL) /*nothing*/;
     DELAY_1
     CL_0
     DELAY_1
     DA_1
-    //DELAY_1
+    DELAY_1
 }
 
 __IRAM_CODE void i2c_notAck(void)
@@ -101,11 +101,11 @@ __IRAM_CODE void i2c_notAck(void)
     DA_1
     DELAY_1
     CL_1
-    //DELAY_1
+    DELAY_1
     WAIT_I2C
     DELAY_1
     CL_0
-    //DELAY_1
+    DELAY_1
 }
 
 __IRAM_CODE int i2c_getAck(void)
@@ -117,14 +117,14 @@ __IRAM_CODE int i2c_getAck(void)
     DA_1
     DELAY_1
     CL_1
-    //DELAY_1
+    DELAY_1
     WAIT_I2C
-    //DELAY_1
+    DELAY_1
     if(SDA)
         ret=1;
-    //DELAY_1
+    DELAY_1
     CL_0
-    //DELAY_1
+    DELAY_1
     return ret;
 }
 
@@ -137,14 +137,14 @@ __IRAM_CODE char i2c_inb(void)
         CL_0
         DELAY_1
         CL_1
-        //DELAY_1
+        DELAY_1
         WAIT_I2C
         if(SDA)
             ret |= i; 
          DELAY_1     
     }
     CL_0
-    //DELAY_1    
+    DELAY_1    
     return ret;
 }
 

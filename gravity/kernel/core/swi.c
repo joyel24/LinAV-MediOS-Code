@@ -15,6 +15,7 @@
 #include <kernel/rtc.h>
 #include <kernel/usb_fw.h>
 #include <kernel/bat_power.h>
+#include <kernel/sound.h>
 
 extern int gfx_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
 extern int fs_swi(int cmd,void * data1, void * data2);
@@ -349,6 +350,15 @@ __IRAM_CODE int kcswi_handler (
 
         case nAPI_FILE:
             return fs_swi((int)nParam1,(void *)nParam2, (void *)nParam3);
+        
+        case nAPI_MIXER:
+            mixer_ctl((int)nParam1,(int)nParam2,(void *)nParam3);
+            return 0;
+        
+        case nAPI_DSP:
+            dsp_ctl((int)nParam1,(void *)nParam2);
+            return 0;
+            
 
       default:
          printk("Unknown SWI call %d\n", nCmd);

@@ -31,12 +31,6 @@ struct cmd_line_s cmd_tab[] = {
         help_str   : "This is help",
         cmd_action : do_help,
         nb_args    : 0
-    },    
-    {
-        cmd        : "printInfo",
-        help_str   : "print the list of args (3 args needed)",
-        cmd_action : do_print_info,
-        nb_args    : 3
     },
     {
         cmd        : "mem",
@@ -108,7 +102,6 @@ __IRAM_CODE void cmd_line_task(PIPE * uart_pipe)
     while(1)
     {
         c='\0';
-        nb_args=0;
         while(1)
         {
             //printk(" d ");
@@ -192,7 +185,7 @@ __IRAM_CODE void cmd_line_task(PIPE * uart_pipe)
             {
                 /* processing the cmd */
                 //printk("[cmd_line] get cmd |%s|\n",cur_cmd);
-                
+                nb_args=0;
                 RM_HEAD_SPC(cur_cmd);
                 
                 /* let's find the cmd name */
@@ -253,6 +246,7 @@ __IRAM_CODE void cmd_line_task(PIPE * uart_pipe)
 loop:
            
     }
+    printk("OUT OF CMDLINE LOOP\n");
 }
 
 extern PIPE * UART_0_Pipe;
@@ -283,11 +277,6 @@ void do_help(char ** params)
     printk("Available cmd:\n");
     for(i=0;cmd_tab[i].cmd!=NULL;i++)
         printk("%s: %s\n",cmd_tab[i].cmd,cmd_tab[i].help_str);
-}
-
-void do_print_info(char ** params)
-{
-    printk("Param received: %s %s %s\n",params[0],params[1],params[2]);
 }
 
 void do_mem (char ** params)

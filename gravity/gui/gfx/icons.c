@@ -28,6 +28,7 @@ struct icon_elem * icon_list_head=NULL;
 
 struct icon_elem * loadIcon(char * filename)
 {
+#if 0 
     int infile;
     int i;
     int len;
@@ -35,7 +36,7 @@ struct icon_elem * loadIcon(char * filename)
     char * tmpF;
     char * name;
     char buff[6];
-#if 0    
+  
     /* create the filename+path */
     tmpF=(char*)malloc(sizeof(char)*(strlen(ICON_DIR)+1+strlen(filename)+1));
     if(!tmpF)

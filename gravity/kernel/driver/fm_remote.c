@@ -84,7 +84,6 @@ int key_evt_array[NB_KEY][2] = {
 void FM_remote_thread(PIPE * fm_remote_pipe)
 {
     char c;
-    printk("FM_remote_thread start\n");
     while(1)
     {
         //printk("FM loop ");
@@ -99,7 +98,12 @@ void FM_remote_thread(PIPE * fm_remote_pipe)
             switch(c)
             {
                 case 0xf8:
-                    printk("[FM Remote] send ping\n");
+                    while(API_PIPE_TEST(fm_remote_pipe))
+                    {
+                        API_PIPE_RECV(fm_remote_pipe,&c,1);
+                        if(c!=0xf8)
+                            break;
+                    }
                     uartOut('v',UART_1);
                     break;
                 case 'V':
