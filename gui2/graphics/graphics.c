@@ -32,6 +32,7 @@ Display* display;
 Window window;
 GC gc;
 int screen;
+colorTab[256];
 #endif
 
 #include <graphics.h>
@@ -173,6 +174,9 @@ int ini_graphics()
             exit(1);
     }
     XStoreName(display, window, "LinAV project");
+    
+    calcpal();
+    
     XMapWindow(display, window);
 #endif  
           
@@ -195,6 +199,15 @@ int ini_graphics()
 #ifndef AV_SCREEN
 void lcd_update(void)
 {
+    int x, y;
+    Colormap pal = DefaultColormap(display,screen);
+    
+    for(y=0; y<SCREEN_HEIGHT; y++)
+        for(x=0; x<SCREEN_WIDTH; x++)
+        {
+    XSetForeground(display, gc, colorTab[color]);
+    XDrawPoint(display, window, gc, x, y);
+        }   /*drawPixBuffer(screen_BMAP1[y*SCREEN_WIDTH+x], x, y);*/
 }
 #endif
 
@@ -212,6 +225,21 @@ void setPalette(int palette[256][3],int size)
         osdSetPallette (y, cr, cb, i);
     }
 #else
+    int r,g,b,i;
+    XColor c;
+    Colormap pal = DefaultColormap(display,screen);
+
+    for(i=0; i<256; i++)
+    {
+    r = gui_pal[i][0];
+    g = gui_pal[i][1];
+    b = gui_pal[i][2];
+    c.red = r*0x100+r;
+    c.green = g*0x100+g;
+    c.blue = b*0x100+b;
+    XAllocColor(display, pal, &c);
+    colorTab[i] = c.pixel;
+    }
 #endif
 }
 
