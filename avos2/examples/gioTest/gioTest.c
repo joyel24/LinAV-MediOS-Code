@@ -5,12 +5,18 @@
 #include <osdDSC25.h>
 #include <fonts.h>
 #include <gio.h>
+#include <cpld.h>
+#include <interrupts.h>
+#include <debug.h>
+#include <uart.h>
 
 char hex2[] = "xx";
 
 struct graphicsBuffer screenBitmap;
 static int pal16[2] = {0x0000, 0xffff};
 struct graphicsBuffer sprite5_8 = {0, 1, 5, 8, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, 0};
+
+void intsub();
 
 int main() {
     unsigned int a,b,c,d;
@@ -50,6 +56,17 @@ int main() {
                 "INVERT");
     graphicsStringA(&screenBitmap, 280, 210, &sprite5_8, std5x8_, 6, 0,
                 "Exit");
+
+    cpldSetModeA(4);
+    cpldSetReg2A(0x0b);
+    cpldSetReg1A(0x06);
+
+    interruptsInitA((void*)intsub);    
+    interruptsSetMaskA(0xffffff7f);     // 0100 = DVR thing?
+    interruptsSetIRQEnabledA();
+    
+    gioSetAllIRQsA(0xff);    // Set all gio (0-7) to be IRQ!
+
 
     while(1) {
         c = gioGetAllDirectionsA();
@@ -128,3 +145,44 @@ int main() {
         if (a & BUTTONS_AV300_MENU3) return;
     }
 }
+
+int v=0;
+char hex4[] = "xxxx";
+
+void intsub() {
+    int i=0,c=0, op0, op1;
+    c = interruptsGetCausesA();
+    c = c | (~interruptsGetMaskA());
+    debug("INT called %d: ", v);
+    debug("CAUSES %08x MASK %08x ", c, interruptsGetMaskA());
+    debug("CAUSES2 %08x MASK2 %08x\n", interruptsGetCauses2A(), interruptsGetMask2A());
+    
+    for (i=0;i<32;i++) {
+        if (!(c&1)) break;
+        c = c>>1;
+    }
+
+    debug("ID=%d\n", i);
+
+    op0 = pal16[0];
+    op1 = pal16[1];
+    
+    pal16[0] = 0x0000;
+    pal16[1] = 0xffff;
+    stringPutHexA(hex4, v, 4);
+    graphicsStringA(&screenBitmap, 4, 210, &sprite5_8, std5x8_, 6, 0, hex4);
+
+    stringPutHexA(hex4, i, 4);
+    graphicsStringA(&screenBitmap, 4+(5*6), 210, &sprite5_8, std5x8_, 6, 0, hex4);
+    pal16[0] = op0;
+    pal16[1] = op1;
+    
+    
+    //interruptsResetMaskA(i);      One shot
+    interruptsResetIRQA(i);
+    
+    debug("INT RET    %d: ", v++);
+    debug("CAUSES %08x MASK %08x ", interruptsGetCausesA(), interruptsGetMaskA());
+    debug("CAUSES2 %08x MASK2 %08x\n", interruptsGetCauses2A(), interruptsGetMask2A());
+}
+

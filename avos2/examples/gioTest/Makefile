@@ -9,7 +9,7 @@ GCCFLAGS = -static-libgcc
 GCCINCDIRS = -I../../include
 
 #LOCAL LDFLAGS
-LDFLAGS = -L../../lib -lavhardware -lavgraphics -lavfonts -lavmisc -lavata -lc -lfloat -lgcc
+LDFLAGS = -L../../lib -lavmisc -lavhardware -lavgraphics -lavfonts -lavata -lc -lfloat -lgcc
 
 
 # State the object files that the main target is made up of

@@ -99,10 +99,6 @@ int main() {
         timersConfigA(c, tmode[c], 0, div, tmax[c]);        
     }
 
-    cpldSetModeA(4);
-
-    cpldInitVideoA();
-    
     interruptsSetMaskA(0xffffff7f);     // 0100 = DVR thing?
     interruptsSetIRQEnabledA();
     

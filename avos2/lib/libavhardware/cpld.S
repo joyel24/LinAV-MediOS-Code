@@ -39,7 +39,7 @@ cpldSetModeA:
 
 cpldSetMode:
         push {r1}
-        ldr r1, =0x02600300
+        ldr r1, =0x02600000
         mov r0, r0
         strh r0, [r1]       @ Not sure why its done 5 times?
         mov r0, r0
@@ -99,21 +99,30 @@ cpldstab:
         bx lr
 
 @ ------------------------------------------------------------------------------
-@ cpldInitVideoA()
+@ cpldSetReg1A()
 @
-.globl cpldInitVideoA
-cpldInitVideoA:
+.globl cpldSetReg1A
+cpldSetReg1A:
         switchThumb
-.globl cpldInitVideo
+.globl cpldSetReg1
 .thumb_func
 
-cpldInitVideo:
+cpldSetReg1:
         ldr r1, =0x02600200
-        mov r0, #0x6              @ Keep backlight enabled...
         strh r0, [r1]
+        bx lr
+        
+@ ------------------------------------------------------------------------------
+@ cpldSetReg2A()
+@
+.globl cpldSetReg2A
+cpldSetReg2A:
+        switchThumb
+.globl cpldSetReg2
+.thumb_func
 
+cpldSetReg2:
         ldr r1, =0x02600300
-        mov r0, #0x2
         strh r0, [r1]
         bx lr
 
