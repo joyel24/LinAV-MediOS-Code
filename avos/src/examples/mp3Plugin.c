@@ -21,7 +21,7 @@ void feedMas();
     struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, 0};
 
 static unsigned int buffmem[1];
-static char * mp3Buff = 0x03600000;
+static char * mp3Buff = (void*)0x03600000;
 static int mp3ptr=0;
 static int fileSize;
 static int masReady=0;
@@ -29,7 +29,8 @@ static int masReady=0;
 int main(int argc, char * * argv) {
     unsigned int c, v, b, a, i;
     unsigned int vol=0x60;
-
+    unsigned int speed=0x4800;
+    
     osdInitA();
 
     osdSetComponentConfigA(OSD_VIDEO1, 0);
@@ -202,7 +203,26 @@ int main(int argc, char * * argv) {
                 if (b>0) graphicsBoxfA(&screenBitmap, 54 + v, 138, b, 6, 0x0000);
                 if (v>0) graphicsBoxfA(&screenBitmap, 54, 138, v, 6, 0x0202);
             }
+        } else if (c & BUTTONS_AV300_LEFT) {
+            if (speed>0) {
+                speed-=0x80;
+                buffmem[0] = speed;
+                masWriteD0A(0x7f3, buffmem, 1);     // Demand mode
+                //buffmem[0] = 0x125;
+                //masWriteD0A(0x7f1, buffmem, 1);     // Demand mode
+                
+            }
+        } else if (c & BUTTONS_AV300_RIGHT) {
+            if (speed<0xff80) {
+                speed+=0x80;
+                buffmem[0] = speed;
+                masWriteD0A(0x7f3, buffmem, 1);     // Demand mode
+                //buffmem[0] = 0x125;
+                //masWriteD0A(0x7f1, buffmem, 1);     // Demand mode
+                
+            }
         }
+
         
         for (c=0;c<20;c++) {
             feedMas();

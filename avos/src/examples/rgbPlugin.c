@@ -11,7 +11,7 @@ int colorRGB2Packed(int r, int g, int b);
 struct graphicsBuffer screenVideo;
 
 static char imBuff[320*240*3];
-static unsigned int * screenDirect = 0x03c00000;
+static unsigned int * screenDirect = (unsigned int*) 0x03c00000;
 
 int main(int argc, char * * argv) {
     int i, j, r, g, b, v, c, vmode=0;

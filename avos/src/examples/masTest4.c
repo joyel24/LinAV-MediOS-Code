@@ -21,7 +21,7 @@ void feedMas();
     struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, 0};
 
 static unsigned int buffmem[1];
-static char * mp3Buff = 0x03600000;
+static char * mp3Buff = (char*) 0x03600000;
 static int mp3ptr=0;
 static int fileSize;
 static int masReady=0;
