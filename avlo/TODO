@@ -1,7 +1,8 @@
 AVLO TODO list
 
+- speedup ajz loading
 - delay before loading in s or ms
-- in failsafe mode, button to retry reading file
+- in failsafe mode, add an action to retry reading file
 - nice background
-- display error messages while reading the config file
-- error message if can't load default bin
+- display errors found in config file
+- error message, if the default OS doesn't exist
