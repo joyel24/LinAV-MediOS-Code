@@ -177,6 +177,13 @@ loopLE:
         ldr r0, =0x0ffffff8
         cmp r7, r0
         blt loopLE
+
+        callThumb2 r4, terminalPutsCT, msg680, 0xffff
+        
+lwaitk: callThumb r4, buttonsGetStatusT
+        ldr r1, =0x100
+        cmp r0, r1
+         bne lwaitk
         
         callThumb2 r4, terminalPutsCT, msg700, 0xffff
 
@@ -329,7 +336,7 @@ read2T:
         pop {r1, r2}
         bx lr
                 
-msg1:   .asciz " -- avOS BootLoader version 0.01a (c)2004 DoGgEr -- \n\n"
+msg1:   .asciz " -- avOS BootLoader version 0.02a (c)2004 DoGgEr -- \n\n"
 msg2:   .asciz "Initialising ATA...                        "
 msg3:   .asciz "Identifying hard drive...                  "
 msg4:   .asciz " Serial:    xxxxxxxxxxxxxxxxxxxx\n"
@@ -343,6 +350,7 @@ msg300: .asciz "Loading root directory entries...          \n"
 msg400: .asciz " xxxxxxxxxxx SIZE=xxxxxxxx ATTR=xx CLUST=xxxxxxxx\n"
 msg500: .asciz " FAT ENTRY: xxxxxxxx\n"
 msg600: .asciz "Loading image...                           \n"
+msg680: .asciz "Press menu1 key to run image...            \n"
 msg700: .asciz "Running image...                           \n"
 msg900: .asciz "ALL DONE\n"
 msgDONE:  .asciz "[ DONE ]\n"
