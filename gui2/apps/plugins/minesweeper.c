@@ -25,7 +25,7 @@ use F3 to see how many mines are left (supposing all your flags are correct)
    in the plugin */
 struct client_operations * cops;
 
-int endGameMode = 0;
+int GameMode = 0;
 
 int tiles_left = 0;
 
@@ -192,11 +192,97 @@ typedef struct tile {
 const int height = SCREEN_HEIGHT/PIECE_DIM;
 const int width = (SCREEN_WIDTH-50)/PIECE_DIM;
 
+int settingParam = 0;
+
 /* the minefield */
 tile minefield[SCREEN_HEIGHT/PIECE_DIM][(SCREEN_WIDTH-50)/PIECE_DIM];
 
 /* total number of mines on the game */
 int mine_num = 0;
+
+void writeMinesINI()
+{
+   int fd;
+
+	fd = fopen("mines.ini","w");
+	if(fd > 0)
+	{
+	   fprintf(fd,"%ld", p);
+
+		fclose(fd);
+	}
+}
+
+void readMinesINI()
+{
+   int fd;
+
+	fd = fopen("mines.ini","r+");
+	if(fd > 0)
+	{
+	   fscanf(fd,"%ld", &p);
+
+		fclose(fd);
+	}
+}
+
+void RefreshSettings()
+{
+    char tmp[10];
+    cops->fillRect(COLOR_GREEN, 0, 20, 160,80); // clear
+
+	 sprintf(tmp,"%ld", width);
+	 sprintf(tmp,"%ld", p);
+
+	 if(settingParam == 0)
+	 {
+      sprintf(tmp,"%ld", width);
+      cops->putS(COLOR_RED, COLOR_GREEN, 5,30, "Width");
+      cops->putS(COLOR_RED, COLOR_GREEN, 100,30, tmp);
+	 }
+	 else
+	 {
+      sprintf(tmp,"%ld", width);
+      cops->putS(COLOR_BLACK, COLOR_GREEN, 5,30, "Width");
+      cops->putS(COLOR_BLACK, COLOR_GREEN, 100,30, tmp);
+	 }
+
+	 if(settingParam == 1)
+	 {
+       sprintf(tmp,"%ld", height);
+       cops->putS(COLOR_RED, COLOR_GREEN, 5,50, "Height");
+       cops->putS(COLOR_RED, COLOR_GREEN, 100,50, tmp);
+	 }
+	 else
+	 {
+      sprintf(tmp,"%ld", height);
+      cops->putS(COLOR_BLACK, COLOR_GREEN, 5,50, "Height");
+      cops->putS(COLOR_BLACK, COLOR_GREEN, 100,50, tmp);
+	 }
+
+	 if(settingParam == 2)
+	 {
+      sprintf(tmp,"%ld", p);
+   	cops->putS(COLOR_RED, COLOR_GREEN, 5,70, "Mines[%]");
+      cops->putS(COLOR_RED, COLOR_GREEN, 100,70, tmp);
+	 }
+	 else
+	 {
+      sprintf(tmp,"%ld", p);
+      cops->putS(COLOR_BLACK, COLOR_GREEN, 5,70, "Mines[%]");
+      cops->putS(COLOR_BLACK, COLOR_GREEN, 100,70, tmp);
+	 }
+
+}
+
+void init_settings_screen()
+{
+    char tmp[10];
+
+    cops->putS(COLOR_BLACK, COLOR_GREEN, 5,5, "S E T T I N G S");
+
+    RefreshSettings();
+}
 
 /* discovers the tile when player clears one of them */
 /* a chain reaction (of discovery) occurs if tile has no mines */
@@ -260,9 +346,12 @@ void minesweeper_init(void){
 	 int time = 0;
 	 char tmp[20];
 
+    tiles_left=width*height;
+    mine_num = 0;
+
 	 time = GetTime();
-	 sprintf(tmp,"%ld", time);
-    cops->putS(COLOR_ORANGE, COLOR_GREEN, 268,100, tmp);
+//	 sprintf(tmp,"%ld", time);
+//    cops->putS(COLOR_ORANGE, COLOR_GREEN, 268,100, tmp);
 
     srand(time);
 
@@ -278,12 +367,13 @@ void minesweeper_init(void){
             minefield[i][j].flag = 0;
         }
     }
+
+    readMinesINI();
 }
 
 void printNumberOfMines(void)
 {
     char tmp[20];
-	 int tiles_left = 0;
 	 int i=0;
 	 int j=0;
 
@@ -298,7 +388,7 @@ void printNumberOfMines(void)
 
 		cops->fillRect(COLOR_GREEN, 265,79, 54, 15);
 		sprintf(tmp,"%ld Mines", mine_num-tiles_left);
-		cops->putS(COLOR_ORANGE, COLOR_GREEN, 266,80, tmp);
+		cops->putS(COLOR_WHITE, COLOR_GREEN, 266,80, tmp);
 	 }
 }
 
@@ -307,7 +397,11 @@ void printNumberOfMines(void)
 /* if the tile has coordinates (x,y), then it can't be a mine */
 void minesweeper_putmines(int p, int x, int y){
     int i,j;
-
+/*
+	 char tmp[10];
+		sprintf(tmp,"p: %ld", p);
+		cops->putS(COLOR_WHITE, COLOR_GREEN, 266,110, tmp);
+*/
     for(i=0;i<height;i++){
         for(j=0;j<width;j++){
             if(rand()%100<p && !(y==i && x==j)){
@@ -358,7 +452,7 @@ int eventHandler(int evt)
     char buffer[40];
     int i=0,j=0;
 
-    if(endGameMode == 0)
+    if(GameMode == 0)
     {
 		switch (evt) {
 			case BTN_OFF:
@@ -404,7 +498,8 @@ int eventHandler(int evt)
 					discover(x,y);
 					if(minefield[y][x].mine)
 					{
-                  endGameMode = 1;
+                  GameMode = 1;
+                  x=0;y=0;
 						cops->clearScreen(COLOR_GREEN);
 						cops->putS(COLOR_BLACK, COLOR_GREEN, 120, 100, "You lose!");
 						cops->putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
@@ -419,7 +514,8 @@ int eventHandler(int evt)
 					}
 					if(tiles_left == mine_num)
 					{
-                  endGameMode = 1;
+                  GameMode = 1;
+                  x=0;y=0;
 						cops->clearScreen(COLOR_GREEN);
 						cops->putS(COLOR_BLACK, COLOR_GREEN, 120, 100, "You win!");
 						cops->putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
@@ -428,6 +524,7 @@ int eventHandler(int evt)
 					}
 
 					displayMineField();
+					setCursor(0);
 					break;
 
 					/* toggle flag under cursor */
@@ -444,10 +541,13 @@ int eventHandler(int evt)
 					break;
 
 				case BTN_F3: // settings
+					cops->clearScreen(COLOR_GREEN);
+               GameMode = 2;
+					init_settings_screen();
 					break;
 		}
 	}
-	else
+	else if(GameMode == 1)
 	{
 		switch (evt) {
 			case BTN_OFF:
@@ -458,12 +558,83 @@ int eventHandler(int evt)
 
 			case BTN_ON: // new game
 				cops->clearScreen(COLOR_GREEN);
-            endGameMode = 0;
+            GameMode = 0;
+            x=0;y=0;
 				minesweeper_init();
 				displayMineField();
 				setCursor(0);
 				break;
 		}
+	}
+	else
+	{
+		switch (evt) {
+		   case BTN_UP:
+            if(settingParam == 0)
+				   settingParam = 2;
+				else
+				   settingParam--;
+
+				RefreshSettings();
+			   break;
+
+		   case BTN_DOWN:
+            if(settingParam == 2)
+				   settingParam = 0;
+				else
+				   settingParam++;
+
+				RefreshSettings();
+			   break;
+
+		   case BTN_LEFT:
+
+			   if(settingParam == 0)
+				{
+				}
+				else if(settingParam == 1)
+				{
+				}
+				else
+				{
+				   if(p > 0)
+					{
+					   p--;
+                  RefreshSettings();
+//                  writeMinesINI();
+					}
+				}
+			   break;
+
+		   case BTN_RIGHT:
+			   if(settingParam == 0)
+				{
+				}
+				else if(settingParam == 1)
+				{
+				}
+				else
+				{
+				   if(p < 100)
+					{
+					   p++;
+                  RefreshSettings();
+//                  writeMinesINI();
+					}
+				}
+			   break;
+
+			case BTN_OFF:
+			case EVT_QUIT:
+				cops->clearScreen(COLOR_GREEN);
+            GameMode = 0;
+            x=0;y=0;
+				minesweeper_init();
+				displayMineField();
+				setCursor(0);
+				break;
+		}
+
 	}
 }
 
@@ -527,8 +698,6 @@ void displayMineField()
 /* plugin entry point */
 int main(int argc,char * * argv)
 {
-    tiles_left=width*height;
-
     /* plugin init */
     REGISTER(cops,eventHandler,0);
     cops->hideSBar();
