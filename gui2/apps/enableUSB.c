@@ -79,7 +79,7 @@ int main(int argc,char ** argv)
     }
     fprintf(stderr,"usb disable\n");
 end2:
-    if(mount("/dev/hda1","/mnt","vfat",MS_MGC_VAL,NULL)<0)
+    if(mount("/dev/avhd1","/mnt","vfat",MS_MGC_VAL,NULL)<0)
     {
         fprintf(stderr,"Error mounting fs\n");
         goto end;
