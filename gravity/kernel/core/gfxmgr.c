@@ -19,10 +19,13 @@
 #include <kernel/swi.h>
 #include <api.h>
 #include <kernel/gfxmgr.h>
+#include <kernel/kgraphics.h>
 
 GFX_Z_RECT* g_pZRectList = 0;
 
 extern char screen_VID1 [SCR_WIDTH * SCR_HEIGHT *4 + 40];
+extern char screen_VID2 [320 * 240 *4 + 40];
+
 GFX_DATA g_PhysicalScreen;
 
 #define MAX(a,b) (a>b?a:b)
@@ -256,8 +259,13 @@ __IRAM_CODE void GFX_BuildSpanStructure (int nYmin, int nYmax)
 	}
 }
 
-void GFX_init ()
+__IRAM_CODE void GFX_init ()
 {
+	printk ("GFX subsystem starting...\n");
+
+	TASK_INFO* pTask = 0;
+	API_TASK_GETHANDLE (&pTask);
+
 	API_CRITSEC_CREATE (&g_pCS_GFX);
 
 	g_PhysicalScreen.w = SCR_WIDTH;
@@ -288,6 +296,45 @@ void GFX_init ()
 	g_Phys.y = 0;
 	g_Phys.w = SCR_WIDTH;
 	g_Phys.h = SCR_HEIGHT;
+
+	API_MALLOC (&pTask->pMemoryContext, sizeof(GFX_DATA));
+	pTask->pMemoryContext->w = SCR_WIDTH;
+	pTask->pMemoryContext->h = SCR_HEIGHT;
+	pTask->pMemoryContext->x = 0;
+	pTask->pMemoryContext->y = 0;
+	pTask->pMemoryContext->bg_color = 0;
+	pTask->pMemoryContext->color = 0;
+	pTask->pMemoryContext->direction = 0;
+	pTask->pMemoryContext->pixel_size = 4;
+	pTask->pMemoryContext->pixels = screen_VID2;
+	pTask->pMemoryContext->delta = SCR_WIDTH*4;
+	GFX_Z_RECT* pBackgroundZ = 0;
+	API_MALLOC (&pBackgroundZ, sizeof(GFX_Z_RECT));
+	pBackgroundZ->ptLocation.x = 0;
+	pBackgroundZ->ptLocation.y = 0;
+	pBackgroundZ->pPrev = 0;
+	pBackgroundZ->pNext = 0;
+	pBackgroundZ->pOwner = pTask;
+	__cli();
+	g_pZRectList = pBackgroundZ;
+	__sti();
+//	printk ("GFX Manager [2]\n");
+	GFX_BuildSpanStructure (0, SCR_HEIGHT);
+//	printk ("GFX Manager [3]\n");
+
+	open_graphics ();
+
+	hidePlane (BMAP1);
+	hidePlane (BMAP2);
+	hidePlane (VID1);
+	hidePlane (VID2);
+	hidePlane (CUR1);
+	hidePlane (CUR2);
+
+	showPlane (VID1);
+
+	API_GFX_COMMIT (0);
+	printk ("GFX subsystem initialized\n");
 }
 
 __IRAM_CODE void GFX_MoveContext (TASK_INFO* pOwner, int nX, int nY)

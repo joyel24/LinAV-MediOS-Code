@@ -42,10 +42,13 @@
 
 #include <api.h>
 #include <kernel/memmgr.h>
+#include <kernel/gfxmgr.h>
 
 #include <kernel/config.h>
 
 #include <sys_def/file.h>
+
+extern char screen_VID2 [320 * 240 *4 + 40];
 
 void print_boot_info(void)
 {
@@ -61,12 +64,29 @@ extern void ini_debugOnScreen(void);
 extern void avwm(void);
 
 extern int kmemory_manager (void* pvParameters);
-extern int kgfx_manager    (void* pvParameters);
 
 extern void API_BKT(void);
 
-#if 0
-void debug_thread (void)
+#if 1
+typedef struct _SDBG
+{
+	GFX_POINT ptOrig;
+	int w, h;
+	int nDelay;
+	int nStep;
+} SDBG;
+void win_thread (GFX_RECT* rc)
+{
+	API_CREATE_CONTEXT (rc->w, rc->h, 0);
+	GFX_POINT pt;
+	pt.x = rc->x;
+	pt.y = rc->y;
+	API_GFX_MOVE (&pt);
+	while (1)
+		API_TASK_SLEEP (10000);
+}
+
+void debug_thread (SDBG* pS)
 {
 	register long _r7 asm("r7");
 	register long _r8 asm("r8");
@@ -78,7 +98,24 @@ void debug_thread (void)
 	printk("*** debug_thread *** [CPSR:%08x, R12:%08x, SP:%08x, LR:%08x]\n", _r7, _r12, _r13, _r8);
 	__sti ();
 
-    while(1);
+	API_CREATE_CONTEXT (pS->w, pS->h, 0);
+
+	TASK_INFO* pTask = 0;
+	API_TASK_GETHANDLE (&pTask);
+
+	GFX_POINT pt;
+
+	int i = 0;
+
+	while (1)
+	{
+		pt.x = pS->ptOrig.x + (i%125);
+		pt.y = pS->ptOrig.y + (i%83);
+
+		i += 1;
+
+		API_GFX_MOVE (&pt);
+	};
 }
 #endif
 
@@ -107,7 +144,6 @@ void kernel_start (void)
 ///////////////////////////////////////////////////
 /// TODO: This code gows to kinit_tcb ()...
     kadd_tcb (&g_pTaskRing, kcreate_tcb (kmemory_manager,       TASK_STACK_SIZE,   0, "MEMMGR"));
-    kadd_tcb (&g_pTaskRing, kcreate_tcb (kgfx_manager,          TASK_STACK_SIZE,   0, "GFXMGR"));
     kadd_tcb (&g_pTaskRing, kcreate_tcb (kernel_startup_thread, TASK_STACK_SIZE, 0, "USER"));
 
 #if 0
@@ -131,6 +167,8 @@ void kernel_start (void)
     kload_context();
 }
 
+SDBG pS1, pS2, pS3;
+
 void kernel_startup_thread (void)
 {
 /*
@@ -148,25 +186,25 @@ void kernel_startup_thread (void)
     /* driver init */
 
     init_uart();
-    
+
     init_cpld();
     init_HW_chk();
 
     init_cmd_line();
 
     init_evt();
-    
+
     init_buttons();
     init_power();
     init_rtc();
     init_usb_fw();
-    
+
     init_fm_remote();
-    
+
     init_ext_module();
-    
+
     init_sound();
-    
+
     init_disk();
 
     printk("[init] ------------ all drivers\n");
@@ -175,15 +213,64 @@ void kernel_startup_thread (void)
 
     printk("[init] END\n");
 
-    printk ("Accessing registry file /gravity.cnf...\n");
-    int fReg = kfopen ("/gravity.cnf",O_RDONLY);
-    if (fReg < 0)
-        printk ("Setting not loaded.\n");
-    else
-    {
-        printk ("Setting loaded.\n");
-        kfclose (fReg);
-    }
+	printk ("Accessing registry file /gravity.cnf...\n");
+	int fReg = kfopen ("/gravity.cnf",O_RDONLY);
+	if (fReg < 0)
+		printk ("Setting not loaded.\n");
+	else
+	{
+		printk ("Setting loaded.\n");
+		kfclose (fReg);
+	}
 
-    avwm();
+	printk ("Loading background image...\n");
+	int fBack = kfopen ("/back.img",O_RDONLY);
+	if (fBack < 0)
+		printk ("Background not loaded.\n");
+	else
+	{
+		int nReaded = fread (fBack, screen_VID2, 307200);
+		printk ("Background loaded (%d bytes, %d)\n", nReaded, screen_VID2[0]);
+		kfclose (fBack);
+	}
+
+	////////////////////////////////////////////////////
+	// Setup background memory context in vid1 plane...
+	GFX_init ();
+	////////////////////////////////////////////////////
+
+	pS2.ptOrig.x = 40;
+	pS2.ptOrig.y = 20;
+	pS2.w = 96;
+	pS2.h = 80;
+	pS2.nDelay = 0;
+	pS2.nStep = 2;
+	API_TASK_CREATE (debug_thread, &pS2, 0);
+
+	GFX_RECT rc1;
+	rc1.x = 50;
+	rc1.y = 50;
+	rc1.w = 32;
+	rc1.h = 32;
+	API_TASK_CREATE (win_thread, &rc1, 0);
+
+	GFX_RECT rc2;
+	rc2.x = 90;
+	rc2.y = 90;
+	rc2.w = 64;
+	rc2.h = 64;
+	API_TASK_CREATE (win_thread, &rc2, 0);
+
+	GFX_RECT rc3;
+	rc3.x = 160;
+	rc3.y = 20;
+	rc3.w = 80;
+	rc3.h = 64;
+	API_TASK_CREATE (win_thread, &rc3, 0);
+
+//    avwm();
+	while (1)
+	{
+		API_TASK_SLEEP (10000);
+	};
 }
