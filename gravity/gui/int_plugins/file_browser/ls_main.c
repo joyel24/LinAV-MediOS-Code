@@ -16,7 +16,7 @@
 #include <evt.h>
 #include <api.h>
 #include <sys_def/colordef.h>
-
+#include <gui/taskmgr.h>
 //#include <gui/helperMenu.h>
 #include <gui/file_browser.h>
 #include <gui/file_type.h>
@@ -93,6 +93,7 @@ void ini_file_browser(void)
 {
     bdata = &realData;
     iniBrowser();
+    launchInternalTask(bwseventHandler,1,TASK_BROWSER);
 }
 
 

@@ -37,9 +37,11 @@ SECTIONS
         _iram_end = .;
     } > IRAM
     
-    .bss :
+    .bss : AT ( _real_iram_start )
     {
+        _bss_start = .;
         *(.bss)
+        _bss_end = .;
     } > DRAM
     
     .common :

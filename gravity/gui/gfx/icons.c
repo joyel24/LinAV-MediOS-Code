@@ -211,7 +211,7 @@ err1:
 struct icon_elem * addIcon(char * name,unsigned char * data,int w,int h)
 {
     struct icon_elem * ptr;
-    
+    printf("addIcon %s ",name);
     /* check if an icon with the same name is not already present */
     
     for(ptr=icon_list_head;ptr!=NULL;ptr=ptr->nxt)
@@ -222,7 +222,7 @@ struct icon_elem * addIcon(char * name,unsigned char * data,int w,int h)
             goto out;
         }
     }
-    
+    printf("- not defined ");
     /* create new icon struct*/
     ptr=(struct icon_elem *)malloc(sizeof(struct icon_elem));
     if(!ptr)
@@ -230,7 +230,7 @@ struct icon_elem * addIcon(char * name,unsigned char * data,int w,int h)
         printf("[loadIcon] not enough memory for icon structure\n"); 
         goto err1;
     }
-    
+    printf("- created ");
     ptr->name=name;
     ptr->data=data;
     ptr->bmap_data.data=(unsigned int)ptr->data;
@@ -242,7 +242,7 @@ struct icon_elem * addIcon(char * name,unsigned char * data,int w,int h)
     /* insert new icon in list */
     ptr->nxt=icon_list_head;
     icon_list_head=ptr;
-
+    printf("- init\n");
 out:
     return ptr;
 
@@ -268,6 +268,8 @@ struct icon_elem * getIcon(char * name)
 
 void iniIcon(void)
 {
+    printf("in iniIcon\n");
+    //icon_list_head=NULL;
     addIcon("linavLogo",(unsigned char*)linav_logo, 65, 10);
     addIcon("usbIcon",(unsigned char*)usb_icon, 15, 6);
     addIcon("fwExtIcon",(unsigned char*)fw_ext_icon, 15, 6);
@@ -284,4 +286,5 @@ void iniIcon(void)
     addIcon("MsgBoxWarningBitmap",(unsigned char*)MsgBoxWarning, 18, 18);
     addIcon("MsgBoxInformationBitmap",(unsigned char*)MsgBoxInformation, 18, 18);
     addIcon("MsgBoxErrorBitmap",(unsigned char*)MsgBoxError, 18, 18);
+    printf("out iniIcon\n");
 }

@@ -18,6 +18,7 @@
 #include <sys_def/colordef.h>
 #include <graphics.h>
 
+#include <gui/taskmgr.h>
 
 #include <api.h>
 #include <evt.h>
@@ -261,4 +262,6 @@ void ini_status_bar(void)
     fwExtState=FWIsConnected();
     /*cfState=cfIsConnected(); */
     cfState=0;
+    
+    launchInternalTask(statusEvtHandler,1,TASK_STATUS_LINE);
 }

@@ -21,43 +21,29 @@
 
 #include <gui/icons.h>
 #include <gui/status_line.h>
+#include <gui/taskmgr.h>
 
 void avwm(void)
 {
     unsigned int evt_buffer;
-    int evt;
-    
-     HTASK task;
-    
     
     printf("Starting AvWm\n");
-    
+        
     open_graphics();
     clearScreen(COLOR_WHITE);
     setFont(STD6X9);
+    printf("before icon\n");
     iniIcon();
+    printf("Icon init\n");
+    init_taskmgr();
+    
+    evt_buffer=register_evt();
     
     ini_status_bar();
     ini_file_browser();
     
-    evt_buffer=register_evt();
-    if(!evt_buffer)
-    {
-        printf("[ini_status_bar] can't register to evt\n");
-        return;
-    } 
-    
-    //browse_root();
-    
-    printk("browser started\n");
-    
     sendEvt(EVT_REDRAW);
 
-    while(1)
-    {
-        evt=waitEvt(evt_buffer);
-        
-        bwseventHandler(evt);       
-        statusEvtHandler(evt);
-    }
+    evtLoop(evt_buffer);
+    while(1) /*nothing*/;
 }
