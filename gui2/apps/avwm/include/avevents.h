@@ -36,6 +36,7 @@ struct wkUP_evt {
 void   addEventHandler  (void (*evtHandle));
 void   pack             (void (*loopFct)(void));
 void   myRelease_app    (void);
+void   procNxtEvent     (int evt);
 void   eventLoop        (void);
 
 void   sendEvt(struct plugin * plug,int evt);

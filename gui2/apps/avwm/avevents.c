@@ -30,12 +30,13 @@ struct wkUP_evt nxt_action = {
 int stopApp=0,inLoop=0;
 
 void pack(void (*loopFct)(void))
-{
+{    
+    int evt;
     cur_plugin.handle_on=1;
     stopApp=0;
-    if(loopFct)
+    
+    /*if(loopFct)
     {
-        inLoop=1;
         while(!stopApp)
             loopFct();
     }
@@ -43,75 +44,90 @@ void pack(void (*loopFct)(void))
     {
         inLoop=0;
         pause_app();
+    }*/    
+    
+    while(!stopApp)
+    {
+        if(loopFct)
+            evt=nxtEvent();
+        else
+            evt=waitEvent();
+        procNxtEvent(evt);
+        if(loopFct)
+            loopFct();
     }
+    stop_me();
 }
 
 void myRelease_app(void)
 {
-    if(inLoop)
+    /*if(inLoop)*/
         stopApp=1;
+    /*else
+        release_app();*/
+}
+
+void procNxtEvent(int evt)
+{                          
+    if(evt==BTN_OFF)
+    {
+        if(nbOff)
+            nbOff--;
+        else
+        {
+            stopWM=1;
+            return;
+        }
+    }
     else
-        release_app();
+        nbOff=MAX_OFF;
+    
+    if(evt==EVT_WKUP)        
+    {
+        switch(nxt_action.app)
+        {
+            case NO_APP:
+                break;
+            case APP_MP3:
+                loadPlugin("/mnt/avwm/plugins/play",nxt_action.arg);
+                menu_plugin.handle_on=0;
+                break;
+        }
+        nxt_action.app=0;
+        return;          
+    }
+        
+
+    if(status_bar_plugin.handle_on)
+        sendEvt(&status_bar_plugin,evt);
+            
+    if(menu_plugin.handle_on)
+        sendEvt(&menu_plugin,evt);
+    else
+    {        
+        if(evt==BTN_F3 && menuStatus() )
+        {
+            clearEventQueue();
+            sendEvt(&cur_plugin,EVT_SUSPEND);
+            // Show status line, maybe disabled by plugin before
+            showSBar();
+            menu_plugin.handle_on=1;
+            sendEvt(&menu_plugin,EVT_REDRAW);
+        }
+        else
+        {
+            sendEvt(&cur_plugin,evt);
+        }
+    }
 }
 
 void eventLoop()
 {
     int evt;
-    
     while(!stopWM)
     {
-        evt=waitEvent();
-                      
-        if(evt==BTN_OFF)
-        {
-            if(nbOff)
-                nbOff--;
-            else
-            {
-                stopWM=1;
-                continue;
-            }
-        }
-        else
-            nbOff=MAX_OFF;
-        
-        if(evt==EVT_WKUP)        
-        {
-            switch(nxt_action.app)
-            {
-                case NO_APP:
-                    break;
-                case APP_MP3:
-                    loadPlugin("/mnt/avwm/plugins/play",nxt_action.arg);
-                    menu_plugin.handle_on=0;
-                    break;
-            }
-            nxt_action.app=0;
-            continue;          
-        }
-           
-
-        if(status_bar_plugin.handle_on)
-            sendEvt(&status_bar_plugin,evt);
-                
-        if(menu_plugin.handle_on)
-            sendEvt(&menu_plugin,evt);
-        else
-        {        
-            if(evt==BTN_F3 && menuStatus() )
-            {
-                clearEventQueue();
-                sendEvt(&cur_plugin,EVT_SUSPEND);
-                // Show status line, maybe disabled by plugin before
-                showSBar();
-                menu_plugin.handle_on=1;
-                sendEvt(&menu_plugin,EVT_REDRAW);
-            }
-            else
-            {
-                sendEvt(&cur_plugin,evt);
-            }
-        }
+       evt=waitEvent();
+       procNxtEvent(evt); 
     }
 }
 

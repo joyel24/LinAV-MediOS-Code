@@ -69,13 +69,11 @@ void do_right(void * data)
     {
         if(cfg_data->param[0]!=0)
         {
-            if(loadPlugin(cfg_data->link,cfg_data->param)>=0)
-                menu_plug->handle_on=0;                            
+            loadPlugin(cfg_data->link,cfg_data->param);     
         }
         else
         {
-            if(loadPlugin(cfg_data->link,NULL)>=0)
-                menu_plug->handle_on=0;
+            loadPlugin(cfg_data->link,NULL);
         }
     }
 }

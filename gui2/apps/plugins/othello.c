@@ -601,6 +601,6 @@ int main(int argc,char ** argv)
     computeAllowed(allowedHuman,HUMAN);
     eventHandler(EVT_REDRAW);
     PACK(cops,NULL);
-    STOPME(cops);
+ //   STOPME(cops);
     return 1;
 }

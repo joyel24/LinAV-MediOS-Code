@@ -90,7 +90,7 @@ int launchPlugin(char * path,char * param)
 {
     char cops_a[15];
 #ifdef AV_SCREEN
-    int pid,err;
+    int pid,err,status;
 #else
     void* pd;
     int (*main_start)(int argc,char ** argv);
@@ -115,9 +115,11 @@ int launchPlugin(char * path,char * param)
             fprintf(stderr, "vfork failed %d\n", pid);
             return -1;
         }
-        cur_plugin.pid=pid;
+        cur_plugin.pid=pid;        
+        menu_plugin.handle_on=0;
         fprintf(stderr,"load success pid= %d\n",pid);
-    }
+        waitpid(cur_plugin.pid, &status, 0);        
+    }    
     return 0;
 #else
     pd = dlopen(path, RTLD_NOW);
@@ -133,6 +135,8 @@ int launchPlugin(char * path,char * param)
         dlclose(pd);
         return -1;
     }
+    
+    menu_plugin.handle_on=0;
     
     argv[0]=path;
     argv[1]=cops_a;
