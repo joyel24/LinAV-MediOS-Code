@@ -48,4 +48,4 @@ extern void graphicsSpriteA(struct graphicsBuffer *buffDest, u32 x, u32 y, struc
 extern void graphicsStringA(struct graphicsBuffer *buffDest, u32 x, u32 y,
                            struct graphicsBuffer *font, char** fontlut, u32 dx, u32 dy,
                            char *s);
-                           
+extern u32 graphicsRGB2PackedA(int r, int g, int b);

@@ -81,6 +81,65 @@ graphicsRoutines:
         .word graphics1Sprite,      graphics2Sprite
         .word graphics4Sprite,      graphics8Sprite
         .word graphics16Sprite,     graphics32Sprite
+
+@ ------------------------------------------------------------------------------
+@ graphicsRGB2Packed(r0=r, r1=g, r2=b)
+@       Returns Packed CrYCb value.
+@
+.globl graphicsRGB2PackedA
+graphicsRGB2PackedA:
+        switchThumb
+.globl graphicsRGB2Packed
+.thumb_func
+
+graphicsRGB2Packed:
+        push {r4, r5, r6}
+        mov r5, r0
+        ldr r4, =306
+        mul r5, r4          @ r5 = r*306
+        mov r3, r1
+        ldr r4, =601
+        mul r3, r4
+        add r5, r3          @ r5 = r*306 + g*601
+        mov r3, r2
+        ldr r4, =117
+        mul r3, r4
+        add r5, r3          @ r5 = r*306 + g*601 + b*117
+        lsr r5, #10         @ int y = (306*r + 601*g + 117*b) >> 10;
+        lsl r5, #8
+        mov r6, r5          @ Ready in r6
+        
+        mov r5, r0
+        ldr r4, =173
+        mul r5, r4          @ r5 = r*173
+        mov r3, r1
+        ldr r4, =339
+        mul r3, r4
+        add r5, r3          @ r5 = r*173 + g*339
+        mov r3, r2
+        ldr r4, =256
+        add r3, r4
+        lsl r3, #9          @ r3 = b*512
+        sub r3, r5          @ r3 = b*512 - r*173 - g*339
+        lsr r3, #10         @ int cb = ((-173*r -339*g + 512*b) >> 10) + 128;
+        orr r6, r3
+
+        mov r5, r1
+        ldr r4, =429
+        mul r5, r4
+        mov r3, r2
+        ldr r4, =83
+        mul r3, r4
+        add r5, r3
+        ldr r4, =256
+        add r0, r4
+        lsl r0, #9
+        sub r0, r5
+        lsr r0, #10         @ int cr = (512*r - 429*g - 83*b) >> 10) + 128;
+        lsl r0, #16
+        orr r0, r6
+        pop {r4, r5, r6}
+        bx lr
         
 @ ------------------------------------------------------------------------------
 @ graphicsGetOffset(r0->bufferDef, r1=x, r2=y)
