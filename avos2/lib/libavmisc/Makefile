@@ -27,12 +27,12 @@ depend:
 	makedepend -Y $(GCCINCDIR) *.c
 # DO NOT DELETE
 
-debug.o: $(BUILDDIR)/lib/gcc-lib/arm-linux-uclibc/3.3.2/include/stdarg.h
+debug.o: $(BUILDDIR)/lib/gcc-lib/arm-linux-uclibc/$(BUILDVER)/include/stdarg.h
 debug.o: $(BUILDDIR)/arm-linux/include/string.h
 debug.o: $(BUILDDIR)/arm-linux/include/features.h
 debug.o: $(BUILDDIR)/arm-linux/include/sys/cdefs.h
 debug.o: $(BUILDDIR)/arm-linux/include/bits/uClibc_config.h
-debug.o: $(BUILDDIR)/lib/gcc-lib/arm-linux-uclibc/3.3.2/include/stddef.h
+debug.o: $(BUILDDIR)/lib/gcc-lib/arm-linux-uclibc/$(BUILDVER)/include/stddef.h
 debug.o: $(BUILDDIR)/arm-linux/include/stdlib.h
 debug.o: $(BUILDDIR)/arm-linux/include/sys/types.h
 debug.o: $(BUILDDIR)/arm-linux/include/bits/types.h

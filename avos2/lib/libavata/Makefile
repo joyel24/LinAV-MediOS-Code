@@ -32,7 +32,7 @@ ata.o: $(BUILDDIR)/arm-linux/include/stdlib.h
 ata.o: $(BUILDDIR)/arm-linux/include/features.h
 ata.o: $(BUILDDIR)/arm-linux/include/sys/cdefs.h
 ata.o: $(BUILDDIR)/arm-linux/include/bits/uClibc_config.h
-ata.o: $(BUILDDIR)/lib/gcc-lib/arm-linux-uclibc/3.3.2/include/stddef.h
+ata.o: $(BUILDDIR)/lib/gcc-lib/arm-linux-uclibc/$(BUILDVER)/include/stddef.h
 ata.o: $(BUILDDIR)/arm-linux/include/sys/types.h
 ata.o: $(BUILDDIR)/arm-linux/include/bits/types.h
 ata.o: $(BUILDDIR)/arm-linux/include/bits/kernel_types.h
