@@ -54,11 +54,15 @@ int eventHandler(int evt)
                         if(pos<0)
                         {
                             pos=0;
+                            printAName(0,0,0,0);
                             nselect=listused-1;
+                            printAName(pos+nselect,nselect,0,1);
                         }
                         else
+                        {
                             nselect=listused-pos-1;
-                        printAllName(pos,nselect);
+                            printAllName(pos,nselect);
+                        }
                     }
                     else // not going up, scrolling
                     {
@@ -89,10 +93,20 @@ int eventHandler(int evt)
             case BTN_DOWN:
                 nselect++;
                 if(nselect+pos>=listused)       // jump to beginning
-                {                    
-                    pos=0;
-                    nselect=0;
-                    printAllName(pos,nselect);
+                {
+                    if(listused<=MAXPOS)
+                    {
+                        printAName(pos+nselect-1,nselect-1,0,0);
+                        pos=0;
+                        nselect=0;
+                        printAName(pos+nselect,nselect,0,1);
+                    }
+                    else
+                    {
+                        pos=0;
+                        nselect=0;
+                        printAllName(pos,nselect);
+                    }
                 }
                 else
                 {

@@ -26,7 +26,7 @@ extern struct client_operations * cops;
 extern struct dir_entry * list;
 extern int listused;
 extern int pos,nselect;
-extern int nbFile,nbDir,totSize;
+extern int nbFile,nbDir,totSize,nbElem;
 /************************/
 
 int viewNewDir(char *name)
