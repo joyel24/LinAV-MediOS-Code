@@ -24,15 +24,19 @@
 #define BG_COLOR  COLOR_LIGHT_BLUE
 #define TXT_COLOR COLOR_DARK_GREY
 #define TIME_COLOR COLOR_BLACK
-#define BATTERY_REFRESH_VALUE 20
 
-NEED_ICONE(linavLogo)
-NEED_ICONE(usbIcon)
-NEED_ICONE(powerIcon)
+NEED_ICON(linavLogo);
+NEED_ICON(usbIcon);
+NEED_ICON(powerIcon);
 
 int batteryRefresh=0;
+int batteryRefreshValue = 10;
 int pwrState=0;
 int usbState=0;
+int power = 0;
+int color = 0;
+int level = 0;
+int chargeProgress = 0;
 
 /* draw the current time */
 void drawTime(void)
@@ -49,49 +53,51 @@ void drawTime(void)
 
 void drawBat(void)
 {
-    int power = 0;
-    int color = 0;
-    int level = 0;
-
-    /* get batt levels and draw a meter */
-    if(power=getBat())
-    {
-        if(power < 1320)
-        {
-            color = COLOR_DARK_RED;
-            level = 4;
-        }
-        else if(power < 1380)
-        {
-            color = COLOR_RED;
-            level = 8;
-        }
-        else if(power < 1440)
-        {
-            color = COLOR_ORANGE2;
-            level = 12;
-        }
-        else if(power < 1500)
-        {
-            color = COLOR_LIGHT_YELLOW;
-            level = 16;
-        }
-        else
-        {
-            color = COLOR_GREEN;
-            level = 20;
-        }
-
-        //fprintf(stderr,"[BAT] P=%d,C=%d,L=%d\n",power,color,level);
-
-        drawRect(COLOR_BLACK,293,2,22,10);
-        fillRect(COLOR_BLACK,315,4,3,6);
-        fillRect(BG_COLOR,294,3,20,8);
-        fillRect(color,294,3,level,8);
-    }
+    if(pwrState == 0)
+        batteryRefreshValue = 10;
     else
-        fprintf(stderr,"[BAT] error getting bat level\n");
+        batteryRefreshValue = 0;
 
+    if(pwrState == 0)
+    {
+        power = getBat();
+        if(power < 1320)
+            color = COLOR_DARK_RED;
+        else if(power < 1400)
+            color = COLOR_RED;
+        else if(power < 1480)
+            color = COLOR_ORANGE2;
+        else
+            color = COLOR_GREEN;
+
+        if(power > 1200)
+            level = (int)(power - 1300) / 15;
+        if(level > 20)
+            level = 20;
+    }
+    else if(pwrState == 1)
+    {
+        if(chargeProgress == 0)
+            level = 0;
+        else if(chargeProgress == 1)
+            level = 7;
+        else if(chargeProgress == 2)
+            level = 14;
+        else
+            level = 20;
+
+        if(chargeProgress < 3)
+            chargeProgress++;
+        else
+            chargeProgress = 0;
+
+        color = COLOR_GREEN;
+    }
+
+    drawRect(COLOR_BLACK,293,2,22,10);
+    fillRect(COLOR_BLACK,315,4,3,6);
+    fillRect(BG_COLOR,294,3,20,8);
+    fillRect(color,294,3,level,8);
 }
 
 void drawStatus(void)
@@ -151,16 +157,14 @@ int statusEvtHandler(int evt)
             drawTime();
             if(batteryRefresh == 0)
                 drawBat();
-            else
-            {
+            if(batteryRefresh < batteryRefreshValue)
                 batteryRefresh++;
-                if(batteryRefresh == BATTERY_REFRESH_VALUE)
-                    batteryRefresh = 0; // Reset
-            }
-
+            else
+                batteryRefresh = 0;
             break;
         case EVT_PWR:
             pwrState=getPwr();
+            batteryRefresh = 0;
             drawStatus();
             break;
         case EVT_USB:
