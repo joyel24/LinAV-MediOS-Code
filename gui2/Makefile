@@ -2,16 +2,18 @@ include Makefile.conf
 
 all:
 ifeq ($(HAVE_JPEG),y)
-	$(MAKE) -C jpeg-6b/ all
+	@echo "----- building jpeg lib"
+	@$(MAKE) -C jpeg-6b/ --no-print-directory all
 endif
-	$(MAKE) -C graphics/ all
-	$(MAKE) -C apps/ all
+	@$(MAKE) -C graphics/ --no-print-directory all
+	@$(MAKE) -C apps/ --no-print-directory all
 
 
 all-clean: clean
-	$(MAKE) -C jpeg-6b/ clean
+	@echo "----- jpeg lib cleaned"
+	@$(MAKE) -C jpeg-6b/ --no-print-directory clean
         
 clean:
-	$(MAKE) -C graphics/ clean
-	$(MAKE) -C apps/ clean
+	@$(MAKE) -C graphics/ --no-print-directory clean
+	@$(MAKE) -C apps/ --no-print-directory clean
 	@rm -f *~

@@ -113,9 +113,9 @@ TROBJECTS= jpegtran.o rdswitch.o cdjpeg.o transupp.o
 all: libjpeg.a 
 
 libjpeg.a: $(LIBOBJECTS)
-	$(RM) libjpeg.a
-	$(AR) libjpeg.a  $(LIBOBJECTS)
-	$(AR2) libjpeg.a
+	@$(RM) libjpeg.a
+	@$(AR) libjpeg.a  $(LIBOBJECTS)
+	@$(AR2) libjpeg.a
 	@mv  libjpeg.a ../lib
 
 cjpeg: $(COBJECTS) libjpeg.a
@@ -139,10 +139,10 @@ jconfig.h:
 	exit 1
 
 clean:
-	$(RM) *.o cjpeg djpeg jpegtran libjpeg.a rdjpgcom wrjpgcom
-	$(RM) core testout*
-	$(RM) *~
-	$(RM) ../lib/libjpeg.a
+	@$(RM) *.o cjpeg djpeg jpegtran libjpeg.a rdjpgcom wrjpgcom
+	@$(RM) core testout*
+	@$(RM) *~
+	@$(RM) ../lib/libjpeg.a
 
 test: cjpeg djpeg jpegtran
 	$(RM) testout*
@@ -229,3 +229,6 @@ rdbmp.o: rdbmp.c cdjpeg.h jinclude.h jconfig.h jpeglib.h jmorecfg.h jerror.h cde
 wrbmp.o: wrbmp.c cdjpeg.h jinclude.h jconfig.h jpeglib.h jmorecfg.h jerror.h cderror.h
 rdrle.o: rdrle.c cdjpeg.h jinclude.h jconfig.h jpeglib.h jmorecfg.h jerror.h cderror.h
 wrrle.o: wrrle.c cdjpeg.h jinclude.h jconfig.h jpeglib.h jmorecfg.h jerror.h cderror.h
+
+.c.o:
+	@$(GCC) -c -o $@ $<

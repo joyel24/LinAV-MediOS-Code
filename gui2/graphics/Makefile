@@ -20,24 +20,34 @@ LIB_CONTENT += events_X11.o misc_X11.o debug.o sound_X11.o
 endif
 
 TARGET = libGraphics.a
+
+SUBDIRS = fonts
 	
 all: $(TARGET)
 force: clean $(TARGET)
 
-$(TARGET) : fontDir $(LIB_CONTENT)
-	$(AR) -rc $(TARGET) $(LIB_CONTENT) fonts/*.o
-	$(RANLIB) $(TARGET)
+$(TARGET) : subdirs $(LIB_CONTENT)
+	@$(AR) -rc $(TARGET) $(LIB_CONTENT) fonts/*.o
+	@$(RANLIB) $(TARGET)
 	@mv $(TARGET) $(DEST)
 
-fontDir:
-	@$(MAKE) -C fonts/ all
+subdirs:        
+	@@for p in $(SUBDIRS); do \
+		echo '-----   building ' $$p; \
+		make -C $$p --no-print-directory -s all; \
+	done
+
+clean-subdirs:
+	@@for p in $(SUBDIRS); do \
+		echo '-----   cleaning ' $$p; \
+		make -C $$p --no-print-directory clean; \
+	done
 	
-clean:
-	@echo "**** Cleaning..."
+clean: clean-subdirs
+	@echo "----- graphics dir cleaned"
 	@rm -f *.o *.bak *~
 	@rm -f $(DEST)/$(TARGET)
 	@rm -f ../include/*~
-	@$(MAKE) -C fonts/ clean
 
 .c.o:
-	$(GCC) $(GCCFLAGS) -c -o $@ $<
+	@$(GCC) $(GCCFLAGS) -c -o $@ $<

@@ -35,18 +35,6 @@ endif
 
 force: clean all        
 
-subdirs:        
-	@@for p in $(SUBDIRS); do \
-		echo '----- building ' $$p; \
-		make -C $$p --no-print-directory -s all; \
-	done
-
-clean-subdirs:
-	@@for p in $(SUBDIRS); do \
-		echo '----- cleaning ' $$p; \
-		make -C $$p --no-print-directory clean; \
-	done
-                
 $(TARGET) : $(OBJS)
 	@$(GCC) *.o -o $@  $(LDFLAGS)
 ifeq ($(HOST),CYGWIN)
@@ -55,9 +43,8 @@ endif
 	@rm $@.gdb
 
 clean:  clean-subdirs
-	@echo "----- Cleaning  avwm ROOT"
+	@echo "----- avwm dir cleaned"
 	@rm -f *.o *.bak *~ *.gdb *..elf *.elf2flt $(TARGET) include/*~
 	@rm -Rf ../../build/avwm/
-        
-.c.o:
-	@$(GCC) $(GCCFLAGS) -c -o $@ $<
+
+include ../../default.rule        

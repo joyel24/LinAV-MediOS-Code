@@ -24,8 +24,6 @@ endif
 	@rm -f *.gdb
 
 clean:
-	@echo "**** Cleaning..."
 	@rm -f *.o *.bak *~ *.gdb $(TARGET)
 
-.c.o:
-	$(GCC) $(GCCFLAGS) -c -o $@ $<
+include ../../../default.rule

@@ -11,24 +11,20 @@ LDFLAGS  += -lpthread
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
 TARGET = $(SRC:%.c=%)
+SUBDIRS = bluecube test mp3_player clock browser
 
-all: $(TARGET)
+all: subdirs $(TARGET)
 	@mkdir -p ../../build/avwm/plugins
 	@rm -f ../../build/avwm/plugins/*
 	@mv $(TARGET) ../../build/avwm/plugins/
 	@rm -f *.gdb
-	@$(MAKE) -C bluecube/ all
 	@mv -f bluecube/tetris ../../build/avwm/plugins/
-	@$(MAKE) -C test/ all
-	@$(MAKE) -C mp3_player/ all
 	@mv -f mp3_player/mp3_play ../../build/avwm/plugins/play
-	@$(MAKE) -C clock/ all
 	@mv -f clock/clock ../../build/avwm/plugins/clock
-	@$(MAKE) -C browser/ all
 	@mv -f browser/ls-gui ../../build/avwm/plugins/ls-gui
 
 $(TARGET) : $(OBJS)
-	$(GCC) $@.o -o $@  $(LDFLAGS)   
+	@$(GCC) $@.o -o $@  $(LDFLAGS)   
 ifeq ($(HOST),CYGWIN)
 	@mv $@.elf.bflt $@
 endif
@@ -36,16 +32,9 @@ endif
 
 force: clean all
                 
-clean:
-	@echo "**** Cleaning..."
+clean: clean-subdirs
+	@echo "----- plugins dir cleaned"
 	@rm -f *.o *.bak *~ *.gdb $(TARGET)
-	@rm -Rf ../../build/avwm/plugins
-	@$(MAKE) -C bluecube/ clean
-	@$(MAKE) -C test/ clean
-	@$(MAKE) -C mp3_player/ clean
-	@$(MAKE) -C clock/ clean
-	@$(MAKE) -C browser/ clean
-        
+	@rm -Rf ../../build/avwm/plugins        
 
-.c.o:
-	$(GCC) $(GCCFLAGS) -c -o $@ $<
+include ../../default.rule

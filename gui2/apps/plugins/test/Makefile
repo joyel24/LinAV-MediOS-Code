@@ -11,7 +11,7 @@ OBJS = $(SRC:%.c=%.o)
 TARGET = $(SRC:%.c=%)
 
 all: $(TARGET)
-	@mkdir -p ../../build/avwm/plugins
+	@mkdir -p ../../../build/avwm/plugins
 	@mv -f $(TARGET) ../../../build/avwm/plugins/
 
 force: clean all
@@ -24,9 +24,6 @@ endif
 	@rm -f *.gdb
 
 clean:
-	@echo "**** Cleaning..."
 	@rm -f *.o *.bak *~ *.gdb $(TARGET)	
         
-
-.c.o:
-	$(GCC) $(GCCFLAGS) -c -o $@ $<
+include ../../../default.rule

@@ -7,11 +7,11 @@ OBJS = $(SRC:%.c=%.o)
 
 
 all: $(OBJS)
+	@mv *.o ../
 
 force: clean all      
 
 clean:
 	@rm -f *~ *.o
         
-.c.o:
-	$(GCC) $(GCCFLAGS) -c -o ../$@ $<
+include ../../../default.rule

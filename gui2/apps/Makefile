@@ -16,7 +16,9 @@ SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
 TARGET = $(SRC:%.c=%)
 
-all:   avwmDir $(TARGET) plugDir
+SUBDIRS = avwm plugins
+
+all: subdirs $(TARGET)
 	@mkdir -p ../build/avwm/apps
 	@rm -f ../build/avwm/apps/*
 	@mv $(TARGET) ../build/avwm/apps
@@ -25,24 +27,18 @@ all:   avwmDir $(TARGET) plugDir
 force: clean all
 
 $(TARGET) : $(OBJS)
-	$(GCC) $@.o -o $@  $(LDFLAGS)
+	@$(GCC) $@.o -o $@  $(LDFLAGS)
 ifeq ($(HOST),CYGWIN)
 	@mv $@.elf.bflt $@
 endif
 	@rm $@.gdb
 
-plugDir:
-	@$(MAKE) -C plugins/ all
 
-avwmDir:
-	@$(MAKE) -C avwm/ all
-	
-clean:
-	@echo "**** Cleaning..."
-	@rm -f *.o *.bak *~ *.gdb *..elf *.elf2flt $(TARGET)
-	@$(MAKE) -C plugins/ clean
-	@$(MAKE) -C avwm/ clean
-	@rm -Rf ../../build/avwm/apps
         
-.c.o:
-	$(GCC) $(GCCFLAGS) -c -o $@ $<
+clean: clean-subdirs
+	@echo "----- apps dir cleaned"
+	@rm -f *.o *.bak *~ *.gdb *..elf *.elf2flt $(TARGET)
+	@rm -Rf ../../build/avwm/apps
+
+include ../default.rule
+  
