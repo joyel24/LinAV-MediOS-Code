@@ -638,7 +638,7 @@ int eventHandler(int evt)
                 }
                 else // not going up, scrolling
                 {
-                    cops->scrollWindowVert(COLOR_WHITE, 5, 1  + h+6+MENU_SHADOW, 305, (h+1)*MAXPOS, h+1,0);
+                    cops->scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW, 320, (h+1)*MAXPOS, h+1,0);
                     printAName(pos+nselect+1,nselect+1,1,0);
                     printAName(pos+nselect,nselect,1,1);
                 }
@@ -691,7 +691,7 @@ int eventHandler(int evt)
                     }
                     else // not going down, scrolling
                     {
-                        cops->scrollWindowVert(COLOR_WHITE, 5, 1  + h+6+MENU_SHADOW, 305, (h+1)*MAXPOS, h+1,1);
+                        cops->scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW, 3320, (h+1)*MAXPOS, h+1,1);
                         printAName(pos+nselect-1,nselect-1,1,0);
                         printAName(pos+nselect,nselect,1,1);
                     }
