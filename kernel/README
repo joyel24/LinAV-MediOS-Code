@@ -11,14 +11,23 @@ To apply the patch:
 where patch-xxxx is the patch you are trying to apply
 
 To build the kernel:
-make mrpoper
+make mrproper
 make menuconfig (not xconfig)
-	in system type choose av3xx architecture, kernel executes
-	from RAM and check 'Debug on serial low level' if you want to see debug
-	info other the serial line
+	in system type:
+		(Av3xx) ARM system type
+		(RAM) Kernel executes from
+		[*] Debug on serial low level
+	in Block devices:
+		[*] ROM disk memory block device (blkmem)
+	in File systems
+		[*] ROM file system support
+
 make dep
 make
-objcopy -O binary linux linux-bin (where objcopy is the one from your toolchain)
+objcopy -O binary linux linux-exe.bin (where objcopy is the one from your toolchain)
+=> get the 'rom' file from linav.sf.net
+cat linux-exe.bin rom > linux.bin
+
 you can then run linux.bin from the bootloader.
 
 	
