@@ -191,7 +191,7 @@ int main(int argc,char * * argv)
     setFont(std6x12);
     plugin_font=std6x12;
     iniFont();
-    
+
     set_mouseParam(6, 3);
 
     fillRect(COLOR_BLACK,0 , 0, 320, 240);
@@ -303,7 +303,9 @@ void wmNxtEvent(int evt)
     if(evt==BTN_F3)
     {
         clearEventQueue();
-        drawMenu();
+
+		  drawMenu();
+
     }
     else
     {
@@ -337,13 +339,19 @@ void eventLoop()
         {
             processTimeOut();
         }
-        
+
         if(evtOn)
         {
             if(evt==BTN_F3)
             {
                 clearEventQueue();
-                drawGui();
+
+					 // Show status line, maybe disabled by plugin before
+					 startTimout();
+					 showTime();
+					 showBat();
+
+					 drawGui();
                 drawMenu();
             }
             else
