@@ -30,6 +30,7 @@
 #define true 1
 #define false 0
 #define COLOR_WHITE    16
+#define COLOR_BLUE     38
 #define COLOR_BLACK    1
 #define LCD_WIDTH 320
 #define LCD_HEIGHT 240
@@ -76,16 +77,16 @@ int yDebug = 100;
 needFont(std7x13);
 
 enum {
-    WRAP=0,
-    CHOP,
+    WRAP=0,      // Zeilenumbruch nicht mitten in Wörtern
+    CHOP,        // Umbruch am Ende der Zeile, auch wenns mitten in einem Wort ist
     WORD_MODES
 } word_mode = 0;
 static unsigned char *word_mode_str[] = {"wrap", "chop", "words"};
 
 enum {
-    NORMAL=0,
-    JOIN,
-    EXPAND,
+    NORMAL=0,    // \n erzeugt neue Zeile
+    JOIN,        // Keine \n, alles hintereinander
+    EXPAND,      // \n erzeugt neue Zeile mit zusätzlicher Leerzeile dazwischen
     LINE_MODES
 } line_mode = 0;
 static unsigned char *line_mode_str[] = {"normal", "join", "expand", "lines"};
@@ -111,6 +112,21 @@ enum {
 } page_mode = 0;
 static unsigned char *page_mode_str[] = {"don't overlap", "overlap", "pages"};
 
+void DrawStatusLine(int type)
+{
+   char tmp[50];
+
+   sprintf(tmp, "%s %s / %s %s / %s %s",  word_mode_str[word_mode],
+														word_mode_str[WORD_MODES],
+														line_mode_str[line_mode],
+														line_mode_str[LINE_MODES],
+														view_mode_str[view_mode],
+														view_mode_str[VIEW_MODES]);
+
+   lcd_fillrect(COLOR_BLUE, 0, 320, 200, 16);
+   lcd_putsxy(COLOR_BLACK, COLOR_BLUE, 5, 225, tmp);
+}
+
 static unsigned char buffer[BUFFER_SIZE + 1];
 static unsigned char line_break[] = {0,0x20,'-',9,0xB,0xC};
 static int display_columns; /* number of columns on the display */
@@ -125,6 +141,7 @@ static unsigned char *screen_top_ptr;
 static unsigned char *next_screen_ptr;
 static unsigned char *next_screen_to_draw_ptr;
 static unsigned char *next_line_ptr;
+
 
 int set_mouseParam(int freq, int repeat)
 {
@@ -208,6 +225,9 @@ static unsigned char* find_next_line(const unsigned char* cur_line)
 
 
     size = BUFFER_OOB(cur_line+search_len) ? buffer_end-cur_line : search_len;
+
+//    sprintf(tmp,"%ld %ld", size,search_len);
+//    lcd_putsxy(COLOR_BLACK, COLOR_BLUE, 220, 225, tmp);
 
     if (line_mode == JOIN) {
         /* Need to scan ahead and possibly increase search_len and size,
@@ -495,11 +515,12 @@ static void viewer_draw(int col)
     unsigned char c;
     unsigned char scratch_buffer[MAX_COLUMNS + 1];
 	 char tmp[20];
+	 char text[200];
 
     /* If col==-1 do all calculations but don't display */
     if (col != -1)
 	 {
-        left_col = need_scrollbar? 1:0;
+//xxx        left_col = need_scrollbar? 1:0; // solange es keine scrollbars gibt raus
         lcd_fillrect(COLOR_WHITE, 0, 0, 320, 240);
     }
 
@@ -568,8 +589,7 @@ static void viewer_draw(int col)
 /*
 		  memset(tmp, 0, sizeof(tmp));
 		  sprintf(tmp,"%d Col: %d",line_len, col);
-        lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 5,yDebug, tmp);
- 		  yDebug+=10;
+        lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 200, 225, tmp);
 */
         if (line_mode == JOIN)
 		  {
@@ -606,7 +626,10 @@ static void viewer_draw(int col)
                 if (k > col)
 					 {
                     scratch_buffer[k] = 0;
-                    lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col, i*TEXT_HEIGHT, scratch_buffer + col);
+
+						  strncpy(&text, scratch_buffer + col, k);
+                    lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, text);
+//                    lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, scratch_buffer + col);
                 }
         }
         else
@@ -615,13 +638,12 @@ static void viewer_draw(int col)
 				{
                 if (line_len > col)
 					 {
-//                    lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 5, yDebug, "print");
-//				        yDebug+=10;
-
                     c = line_end[0];
                     line_end[0] = 0;
 
-                    lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col, i*TEXT_HEIGHT, line_begin + col);
+						  strncpy(&text, line_begin + col, line_len);
+                    lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, text);
+//                    lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, line_begin + col);
                     line_end[0] = c;
                 }
 			   }
@@ -727,23 +749,18 @@ static int viewer_init(char* file)
   int w=TEXT_WIDTH,h=TEXT_HEIGHT;
 
 //xxx    cops->getStringS("M", &w, &h);
-    display_lines = LCD_HEIGHT / h;
-    display_columns = LCD_WIDTH / w;
+    display_lines = (LCD_HEIGHT / h) - 1;  // -1 for reserve status line
+    display_columns = LCD_WIDTH / w ;
 
     /*********************
     * (Could re-initialize settings here, if you
-    *   wanted viewer to start the same way every time)
+    *   wanted viewer to start the same way every time)*/
     word_mode = WRAP;
     line_mode = NORMAL;
     view_mode = NARROW;
-#ifdef HAVE_LCD_BITMAP
     page_mode = NO_OVERLAP;
     scrollbar_mode[NARROW] = SB_OFF;
     scrollbar_mode[WIDE] = SB_ON;
-#endif
-    **********************/
-
-//    lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 10, 120, file);
 
     fd = open(file, O_RDONLY);
     if (fd==-1)
@@ -890,7 +907,7 @@ int main(int argc,char * * argv)
 	 set_mouseParam(6, 3);
 
     ok = viewer_init(file);
-	 
+
     if (!ok)
 	 {
         viewer_exit();
@@ -898,6 +915,7 @@ int main(int argc,char * * argv)
     }
 
     viewer_draw(col);
+    DrawStatusLine(0);
 
     while (!stop)
 	 {
@@ -918,12 +936,9 @@ int main(int argc,char * * argv)
 						init_need_scrollbar();
 
 						viewer_draw(col);
-		/*
-						rb->splash(HZ, true, "%s %s",
-										word_mode_str[word_mode],
-										word_mode_str[WORD_MODES]);
-		*/
-						viewer_draw(col);
+
+                  DrawStatusLine(1);
+
 						break;
 
 					case BUTTON_F2:
@@ -939,21 +954,16 @@ int main(int argc,char * * argv)
 						init_need_scrollbar();
 
 						viewer_draw(col);
-		/*
-						rb->splash(HZ, true, "%s %s",
-										line_mode_str[line_mode],
-										line_mode_str[LINE_MODES]);
-		*/
-						viewer_draw(col);
+
+                  DrawStatusLine(2);
+
 						break;
 
 					case BUTTON_F3:
 						/* View-width mode: NARROW or WIDE */
 						if (line_mode == JOIN)
 						{
-		/*					rb->splash(HZ, true, "(no %s %s)",
-											view_mode_str[WIDE],
-											line_mode_str[JOIN]);*/
+                     DrawStatusLine(3);
 						}
 						else
 							if (++view_mode == VIEW_MODES)
@@ -977,12 +987,9 @@ int main(int argc,char * * argv)
 						init_need_scrollbar();
 
 						viewer_draw(col);
-		/*
-						rb->splash(HZ, true, "%s %s",
-										view_mode_str[view_mode],
-										view_mode_str[VIEW_MODES]);
-		*/
-						viewer_draw(col);
+
+                  DrawStatusLine(4);
+
 						break;
 
 					case BUTTON_UP:
@@ -991,6 +998,7 @@ int main(int argc,char * * argv)
 							viewer_scroll_up();
 
 						viewer_draw(col);
+                  DrawStatusLine(0);
 						break;
 
 					case BUTTON_DOWN:
@@ -999,6 +1007,7 @@ int main(int argc,char * * argv)
 							screen_top_ptr = next_screen_to_draw_ptr;
 
 						viewer_draw(col);
+                  DrawStatusLine(0);
 						break;
 
 					case BUTTON_LEFT:
@@ -1013,6 +1022,7 @@ int main(int argc,char * * argv)
 						}
 
 						viewer_draw(col);
+                  DrawStatusLine(0);
 						break;
 
 					case BUTTON_RIGHT:
@@ -1027,11 +1037,13 @@ int main(int argc,char * * argv)
 						}
 
 						viewer_draw(col);
+                  DrawStatusLine(0);
 						break;
 
 					case BUTTON_ON:
 						/*Go to On-btn combinations */
 						col = viewer_recorder_on_button(col);
+                  DrawStatusLine(0);
 						break;
 				}
 		  }
@@ -1039,3 +1051,4 @@ int main(int argc,char * * argv)
 
     return true;
 }
+
