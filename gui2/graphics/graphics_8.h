@@ -19,7 +19,7 @@ int  graphics8_ReadPixel         (int x, int y, struct graphicsBuffer * buff);
 void graphics8_DrawRect          (int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
 void graphics8_FillRect          (int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
 void graphics8_DrawChar          (struct graphicsFont * font, int color,int bg_color, int x, int y, char c, struct graphicsBuffer * buff);
-void graphics8_DrawSprite        (SPRITE * sprite, PALETTE * palette, unsigned int trsp,int x, int y, struct graphicsBuffer * buff);
+void graphics8_DrawSprite        (PALETTE * palette, SPRITE * sprite, unsigned int trsp,int x, int y, struct graphicsBuffer * buff);
 void graphics8_DrawBITMAP        (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
 void graphics8_ScrollWindowVert  (int bgColor, int x, int y, int width, int height, int scroll, int UP, struct graphicsBuffer * buff);
 void graphics8_ScrollWindowHoriz (int bgColor, int x, int y, int width, int height, int scroll, int RIGHT, struct graphicsBuffer * buff);

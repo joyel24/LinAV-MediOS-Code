@@ -91,7 +91,7 @@ int  (*readPixel)        (int x, int y, struct graphicsBuffer * buff);
 void (*drawRect)         (int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
 void (*fillRect)         (int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
 void (*drawChar)         (struct graphicsFont * font, int color,int bg_color, int x, int y, char c, struct graphicsBuffer * buff);
-void (*drawSprite)       (SPRITE * sprite, PALETTE * palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+void (*drawSprite)       (PALETTE * palette, SPRITE * sprite, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
 void (*drawBITMAP)       (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
 void (*drawString)       (struct graphicsFont * font, int color,int bg_color, int x, int y, char * s, struct graphicsBuffer * buff);
 void (*scrollWindowVert) (int bgColor, int x, int y, int width, int height, int scroll, int UP, struct graphicsBuffer * buff);

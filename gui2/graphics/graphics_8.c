@@ -62,7 +62,7 @@ void graphics8_DrawHorizLine(int color, int width,char * offset)
     memset((void*)offset,(char)color,width);
 }
 
-void graphics8_DrawSprite(SPRITE * sprite, PALETTE * palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
+void graphics8_DrawSprite(PALETTE * palette,SPRITE * sprite, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
 {
     void (*routine)(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
     if(sprite->type == 8)

@@ -88,7 +88,7 @@ int main(int argc,char * * argv)
     menu_plugin.handle_on=1;
     sendEvt(&menu_plugin,EVT_REDRAW);
         
-    eventLoop(); //main loop    
+    eventLoop(); //main loop
     
     close_graphics();
     free(path);    
@@ -97,4 +97,4 @@ int main(int argc,char * * argv)
 
 void showSBar(void)  {status_bar_plugin.handle_on=1;sendEvt(&status_bar_plugin,EVT_REDRAW);}
 void hideSBar(void)  {status_bar_plugin.handle_on=0;}
-int sBarStatus(void) {return status_bar_plugin.handle_on;}
+int  sBarStatus(void) {return status_bar_plugin.handle_on;}
