@@ -90,6 +90,7 @@ struct graphicsBuffer {
     int           enable;
     int           component;
     int           width;
+    int           real_width;
     int           height;
     int           x;
     int           y;

@@ -52,7 +52,7 @@ void mk_item_str(void * data,char * str)
 
 struct menu_data menu_cfg = {
     useOwnDisp     : 1,
-    x:20,y:20,width:12*16,height:100,
+    x:20,y:20,width:45,height:100,
     dx:2,dy:2,
     txt_color      : COLOR_BLACK,
     bg_color       : COLOR_WHITE,

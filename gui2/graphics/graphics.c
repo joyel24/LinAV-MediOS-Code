@@ -67,6 +67,7 @@ struct graphicsBuffer BITMAP_1 = {
 #endif
     enable             : 0,
     width              : SCREEN_WIDTH,
+    real_width         : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
     x                  : 0x14,
     y                  : 0x12,
@@ -83,6 +84,7 @@ struct graphicsBuffer BITMAP_2 = {
 #endif
     enable             : 0,
     width              : SCREEN_WIDTH,
+    real_width         : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
     x                  : 0x14,
     y                  : 0x12,
@@ -98,6 +100,7 @@ struct graphicsBuffer VIDEO_1 = {
 #endif
     enable             : 0,
     width              : SCREEN_WIDTH,
+    real_width         : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
     x                  : 0x14,
     y                  : 0x12,
@@ -113,6 +116,7 @@ struct graphicsBuffer VIDEO_2 = {
 #endif
     enable             : 0,
     width              : SCREEN_WIDTH,
+    real_width         : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
     x                  : 0x14,
     y                  : 0x12,
@@ -125,6 +129,7 @@ struct graphicsBuffer CURSOR_1 = {
     state              : 0 ,
 #endif
     width              : 0,
+    real_width         : 0,
     height             : 0,
     x                  : 0,
     y                  : 0,
@@ -137,6 +142,7 @@ struct graphicsBuffer CURSOR_2 = {
     state              : 0 ,
 #endif
     width              : 0,
+    real_width         : 0,
     height             : 0,
     x                  : 0,
     y                  : 0,
@@ -624,12 +630,16 @@ void setSize(int vplane,int width,int height,int bitsPerPixel)
 {
     if(vplane>=0 && vplane < NB_BUFFER)
     {
-        buffers[vplane]->width=width;
+        buffers[vplane]->real_width=width;
+        if(width%32)
+            buffers[vplane]->width=width+(32-(width%32));
+        else
+            buffers[vplane]->width=width;
         buffers[vplane]->height=height;
         buffers[vplane]->bitsPerPixel=bitsPerPixel;
 #ifdef AV_SCREEN
-        osdSetComponentSize(buffers_comp[vplane], 2*width, height);
-        osdSetComponentSourceWidth(buffers_comp[vplane], ((width*bitsPerPixel)/32)/8);
+        osdSetComponentSize(buffers_comp[vplane], 2*buffers[vplane]->real_width, height);
+        osdSetComponentSourceWidth(buffers_comp[vplane], ((buffers[vplane]->width*bitsPerPixel)/32)/8);
 #endif
     }
     else
@@ -643,7 +653,7 @@ void getSize(int vplane,int * width,int * height,int * bitsPerPixel)
     if(vplane>=0 && vplane < NB_BUFFER)
     {
         if(width)
-            *width=buffers[vplane]->width;
+            *width=buffers[vplane]->real_width;
         if(height)
             *height=buffers[vplane]->height;
         if(bitsPerPixel)
