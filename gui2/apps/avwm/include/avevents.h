@@ -26,6 +26,8 @@
 
 #define MAX_PATH 256
 
+#define MAX_OFF      10
+
 struct wkUP_evt {
 	int app;
         char arg[MAX_PATH];

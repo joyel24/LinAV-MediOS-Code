@@ -86,7 +86,6 @@ static void draw_headers(void);
 static void calendar_draw();
 
 static int start = 0;
-int stop = 0;
 
 static void next_month(struct shown *shown, int step);
 static void prev_month(struct shown *shown, int step);
@@ -114,7 +113,7 @@ int eventHandler(int evt)
 
 	case BTN_OFF:
 	case EVT_QUIT:
-		stop=1;
+		RELEASE(cops)
 		break;
 
 	case BTN_DOWN:
@@ -378,14 +377,13 @@ void ClearCalendar()
 int main(int argc,char * * argv)
 {
 	REGISTER(cops,eventHandler,0);
-   PACK(cops);
 
    calendar_init();
 	calendar_draw();
-
-   while (!stop)
-	{
-	}
+        
+PACK(cops)
+  
+STOPME(cops)
 
    return 0;
 }

@@ -11,8 +11,6 @@
 
 struct client_operations * cops;
 
-int stop = 0;
-
 static unsigned char test[7][7] =
     { {0xB9, 0xB9, 0xB9, 0xB9, 0xB9, 0xB9, 0xB9},
       {0xB9, 0xff, 0xff, 0xff, 0xff, 0xff, 0xB9},
@@ -32,7 +30,7 @@ int eventHandler(int evt)
         case BTN_OFF:
         case EVT_QUIT:
             /* get out of here */
-            stop=1;
+            RELEASE(cops)
             break;
     }
 }
@@ -43,9 +41,7 @@ int main(int argc,char * * argv)
     int w, h, i;
 
     REGISTER(cops,eventHandler,0);
-    cops->hideSBar();
-    
-    PACK(cops);
+    cops->hideSBar();   
 
     cops->clearScreen(WHITE);
 
@@ -53,8 +49,10 @@ int main(int argc,char * * argv)
         for(h = 0; h < SCREEN_HEIGHT; h+=7)
             cops->drawBITMAP (&testB, w, h);
 
-    while (!stop) /* NOTHING */;
+    PACK(cops)
+    
+    STOPME(cops)
 
-    return 1;
+    return ;
 }
 

@@ -21,6 +21,8 @@ extern struct plugin status_bar_plugin;
 
 extern int stopWM;
 
+int nbOff=MAX_OFF;
+
 struct wkUP_evt nxt_action = {
     app : NO_APP
 };
@@ -28,9 +30,8 @@ struct wkUP_evt nxt_action = {
 void pack(void)
 {
     cur_plugin.handle_on=1;
+    pause_app();
 }
-
-int launchMP3=0;
 
 void eventLoop()
 {
@@ -39,6 +40,19 @@ void eventLoop()
     while(!stopWM)
     {
         evt=waitEvent();
+        
+        if(evt==BTN_OFF)
+        {
+            if(nbOff)
+                nbOff--;
+            else
+            {
+                stopWM=1;
+                continue;
+            }
+        }
+        else
+            nbOff=MAX_OFF;
         
         if(evt==EVT_WKUP)        
         {

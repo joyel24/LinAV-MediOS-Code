@@ -18,8 +18,10 @@
 #include "graphics.h"
 
 #define REGISTER(ops,event,flag)    {ops=(struct client_operations*)atoi(argv[argc-1]);ops->registerPlugin(event,flag);}
-#define PACK(ops)              {ops->pack();}
-#define STOPME(ops)            {ops->stop_me();}
+#define PACK(ops)                   {ops->pack();}
+#define RELEASE(ops)                {ops->release_app();}
+#define STOPME(ops)                 {ops->stop_me();}
+
 
 #define MENU_SHADOW 2 // height of small shadow under the title
 
@@ -52,6 +54,7 @@ struct client_operations {
     void (*registerPlugin)    (void (*evtHandle),int flag);    
     void (*pack)              (void);
     void (*stop_me)           (void);    
+    void (*release_app)        (void);
     
     void (*showSBar)          (void);
     void (*hideSBar)          (void);

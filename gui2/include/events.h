@@ -47,5 +47,7 @@ int  setTimerFreq(int val);
 int  startTimer();
 int  stopTimer();
 int  timerState();
+int  pause_app(void);
+int release_app(void);
 
 #endif

@@ -317,7 +317,7 @@ void handle_type_other(char *filename)
 }
 
 
-int pos,nselect,stop;
+int pos,nselect;
 
 int eventHandler(int evt)
 {
@@ -409,7 +409,7 @@ int eventHandler(int evt)
             break;
         case BTN_OFF:
         case EVT_QUIT:
-            stop=1;
+            RELEASE(cops)
             break;
         case EVT_REDRAW:
             cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,225);
@@ -428,7 +428,6 @@ int main(int argc,char * * argv)
 
     pos=0;
     nselect=0;
-    stop=0;
 
     if(argc>0)
     {
@@ -441,21 +440,15 @@ int main(int argc,char * * argv)
             listused = 0;
             return -1;
         }
-        PACK(cops);
-
+        
         cops->getStringS("M", &w, &h);
         cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,240-h-6-MENU_SHADOW);
         printAllName(pos,nselect);
 
-        while(!stop) /*wait */
-        {
-            //while((evt=cops->nxtEvent())==NO_EVENT) /* wait */;
-            //eventHandler(evt);
-
-        }
-
+        PACK(cops);
+        
         cleanList();
-        STOPME(cops)
+        STOPME(cops);
         return 0;
     }
     STOPME(cops)

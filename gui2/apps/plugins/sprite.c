@@ -9,8 +9,6 @@
 
 struct client_operations * cops;
 
-int stop = 0;
-
 // Matrix entries are the indexes from the palette entries
 
 static unsigned char test[7][7] =
@@ -37,7 +35,7 @@ int eventHandler(int evt)
             case BTN_OFF:
 	         case EVT_QUIT:
                 /* get out of here */
-          		 stop=1;
+          		 RELEASE(cops)
                 break;
         }
 }
@@ -50,7 +48,7 @@ int main(int argc,char * * argv)
 	 REGISTER(cops,eventHandler,0);
     cops->hideSBar();
 
-    PACK(cops);
+    
 
 	 cops->clearScreen(COLOR_WHITE);
 
@@ -69,11 +67,11 @@ int main(int argc,char * * argv)
             cops->drawSprite (&pal2, &testS, w, h);
 		 }
 	 }
+         
+         PACK(cops)
+         
+         STOPME(cops)
 
-    while (!stop)
- 	 {
-	 }
-
-    return ;
+    return 0;
 }
 

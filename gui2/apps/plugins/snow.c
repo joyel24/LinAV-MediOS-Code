@@ -38,7 +38,7 @@ void eventHandler(int evt)
 	switch(evt) {
 		case BTN_OFF:
 		case EVT_QUIT:
-			stop=1;
+			RELEASE(cops)
 			break;
 		case EVT_SUSPEND:
 			blocked=1;

@@ -124,8 +124,10 @@ struct av_peak {
 #define AV_TIMER_STATE         _IOW(AV_OP_IOC_MAGIC,50,int) /* -1 => timer stop, >=0 => elapsed time */
 #define AV_DO_WAKEUP           _IO(AV_OP_IOC_MAGIC,51)
 #define AV_HALT_DEVICE         _IO(AV_OP_IOC_MAGIC,52)
+#define AV_PAUSE_APP           _IO(AV_OP_IOC_MAGIC,53)
+#define AV_RELEASE_APP         _IO(AV_OP_IOC_MAGIC,54)
 
-#define AV_OP_IOC_MAXNR        52
+#define AV_OP_IOC_MAXNR        55
 
 /* MAJOR / MINOR */
 

@@ -4,6 +4,7 @@
 #include "cops.h"
 #include "avevents.h"
 #include "font.h"
+#include "events.h"
 
 #define WHITE        0
 #define BLACK        1
@@ -14,9 +15,20 @@
 
 struct client_operations * cops;
 
+int eventHandler(int evt)
+{
+    switch (evt) {
+        case BTN_OFF:
+        case EVT_QUIT:
+            /* get out of here */
+            RELEASE(cops)
+            break;
+    }
+}
+
 int main(int argc,char * * argv)
 {
-	REGISTER(cops,NULL,0);
+	REGISTER(cops,eventHandler,0)
 	
 	cops->fillRect(WHITE,5, 15 , 320,225);
 	cops->putS(BLACK, BLUE,10, 40, "string 1");
@@ -25,6 +37,9 @@ int main(int argc,char * * argv)
 	cops->setFont(STD6X9);
 	cops->putS(BLACK, BLUE,10, 80, "string 3");
 	
-	while(1);
+	RELEASE(cops)
+        
+        STOPME(cops)
+        
 	return 0;
 }

@@ -8,7 +8,6 @@
 #include "font.h"
 
 struct client_operations * cops;
-int stop=0;
 
 /***********************
  * Miscellaneous DEFINEs
@@ -438,7 +437,7 @@ int eventHandler(int evt)
             {
             	case EVT_TIMER:
                 	if(data.finished)
-                        	stop=1;
+                        	RELEASE(cops);
                         break;
                 case BTN_UP: /* settings_cursor up */
                     if(window == 1)
@@ -638,7 +637,7 @@ int eventHandler(int evt)
                             fprintf(stderr,"error stopping\n");
                             return -1;
                         }
-                        stop=1;
+                        RELEASE(cops);
                     }
                     else if(window == 2 || window == 3)
                     {
@@ -826,9 +825,7 @@ int main(int argc, char * * argv)
     /* start mp3 */
     cops->start_playback();
         
-    PACK(cops);
-    
-    while(!stop) /*nothing*/;
+    PACK(cops);    
 
     fprintf(stderr,"out of mp3 play\n");
     

@@ -75,6 +75,24 @@ int halt_device(void)
     return 0;    
 }
 
+int pause_app(void)
+{    
+    if(fdEv<0)
+        return -1;
+    if(ioctl(fdEv,AV_PAUSE_APP,NULL)<0)
+        return -1;    
+    return 0;    
+}
+
+int release_app(void)
+{    
+    if(fdEv<0)
+        return -1;
+    if(ioctl(fdEv,AV_RELEASE_APP,NULL)<0)
+        return -1;    
+    return 0;    
+}
+
 int setRepeate(int val)
 {
     if(getSettings(&settings)<0)
