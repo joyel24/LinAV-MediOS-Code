@@ -19,8 +19,8 @@
 
 #ifdef USE_DEBUG_ON_SCREEN
 #include <kernel/kgraphics.h>
-#include <kernel/font.h>
-#include <kernel/colordef.h>
+#include <kernel/kfont.h>
+#include <sys_def/colordef.h>
 
 #define MAX_COL      78
 #define MAX_LINE     38
@@ -48,6 +48,15 @@ void printk(char *fmt, ...)
     va_start(ap, fmt);
     vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
     va_end(ap);
+    uartOutString(debugmembuf,DEBUG_UART);
+#ifdef USE_DEBUG_ON_SCREEN
+    printOnScreen(debugmembuf);
+#endif
+}
+
+void user_printf(const char * fmt, va_list args)
+{
+    vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, args);
     uartOutString(debugmembuf,DEBUG_UART);
 #ifdef USE_DEBUG_ON_SCREEN
     printOnScreen(debugmembuf);

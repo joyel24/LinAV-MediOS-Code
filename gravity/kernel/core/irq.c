@@ -21,51 +21,16 @@ __IRAM_DATA struct irq_data_s irq_data[NR_IRQS];
 __IRAM_DATA int cli_var=0;
 __IRAM_DATA int clf_var=0;
 
-__IRAM_CODE void cli(void)
-{
-    if(!cli_var)
-        __cli();
-    cli_var++;
-}
-
-__IRAM_CODE void sti(void)
-{
-    if(!cli_var)
-        return;
-    cli_var--;    
-    if(!cli_var)
-        __sti();
-}
-
-__IRAM_CODE void clf(void)
-{
-    if(!clf_var)
-        __clf();
-    clf_var++;
-}
-
-__IRAM_CODE void stf(void)
-{
-    if(!clf_var)
-        return;
-    clf_var--;    
-    if(!clf_var)
-        __stf();
-}
-
 __IRAM_CODE void do_IRQ(int irq, struct pt_regs *regs)
 {
     struct irq_data_s * desc;
-    //printk("I%d",irq);
-    mask_ack_irq(irq);    
-    if(irq>=0 && irq<NR_IRQS)
+    mask_ack_irq(irq); 
+    irq_data[irq].nb_irq++;    
+    desc=&irq_data[irq];
+    if(desc->enable==1 && desc->action!=NULL)
     {
-        desc=&irq_data[irq];
-        if(desc->enable==1 && desc->action!=NULL)
-        {
-            desc->action();
-            unmask_irq(irq);
-        }
+        desc->action();
+        unmask_irq(irq);
     }
 }
 
@@ -146,6 +111,9 @@ void init_irq(void)
     {
         irq_data[irq].enable=0;
         irq_data[irq].action=NULL;
+        irq_data[irq].name=NULL;
+        irq_data[irq].nb_irq=0;
+        
     }
     
     printk("[init] irq\n");    
@@ -166,6 +134,7 @@ __IRAM_CODE void del_irq_handler(int irq)
     {
         irq_data[irq].action=NULL;
         irq_data[irq].name=NULL;
+        irq_data[irq].enable=0;
     }
 }
 
@@ -195,9 +164,6 @@ __IRAM_CODE int irq_state(int irq)
         return 0;
 }
 
-__IRAM_CODE void irq_handler ()
-{
-}
 
 void print_irq(void)
 {
@@ -205,11 +171,12 @@ void print_irq(void)
     printk("IRQ handler list:\n");
     for(irq=0;irq<NR_IRQS;irq++)
     {
-        if(irq_data[irq].action!=NULL)
+        if(irq_data[irq].action!=NULL || irq_data[irq].nb_irq !=0)
         {            
-            printk("%d: irq:%d %s, %s\n",
+            printk("%d: irq:%d %s, %s (%d irqs)\n",
                 irqnr,irq,irq_data[irq].name!=NULL?irq_data[irq].name:"UNDEF",
-                irq_data[irq].enable==1?"enable":"disable");
+                irq_data[irq].enable==1?"enable":"disable",
+                irq_data[irq].nb_irq);
             irqnr++;
         }
     }

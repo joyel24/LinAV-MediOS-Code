@@ -10,13 +10,13 @@
 */
 
 #include <sys_def/stddef.h>
-#include <sys_def/malloc.h>
+#include <kernel/malloc.h>
 
 #include <kernel/kernel.h>
 #include <kernel/threads.h>
 #include <kernel/pipes.h>
 #include <kernel/irq.h>
-#include <kernel/api.h>
+#include <kernel/swi.h>
 
 __IRAM_CODE void* kmalloc (int nBytes)
 {

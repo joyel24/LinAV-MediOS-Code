@@ -10,7 +10,7 @@
 */
 
 #include <sys_def/stddef.h>
-#include <sys_def/malloc.h>
+#include <kernel/malloc.h>
 
 #include <kernel/kernel.h>
 #include <kernel/threads.h>

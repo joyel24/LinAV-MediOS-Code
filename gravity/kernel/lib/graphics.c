@@ -12,8 +12,8 @@
 
 #include <sys_def/stddef.h>
 
-#include <kernel/api.h>
-#include <kernel/graphics.h>
+#include <api.h>
+#include <graphics.h>
 
 /************************************************** general functions ********/
 

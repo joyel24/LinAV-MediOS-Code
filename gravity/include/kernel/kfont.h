@@ -1,5 +1,5 @@
 /* 
-*   kernel/gfx/font.c
+*   include/kernel/kfont.h
 *
 *   AMOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,15 +10,13 @@
 * KIND, either express of implied.
 */
 
-#include <kernel/kfont.h>
-#include <kernel/kgraphics.h>
+#ifndef __KFONT_H
+#define __KFONT_H
 
-needFont(std4x6);
+#include <sys_def/font.h>
 
-FONT_ID font_table[NBFONT] ;
+#define NBFONT        0x16
 
+void ini_font(void);
 
-void ini_font(void)
-{
-    font_table[0]=std4x6;
-}
+#endif

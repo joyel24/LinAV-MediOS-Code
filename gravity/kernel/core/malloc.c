@@ -34,7 +34,7 @@
 
 
 #include <sys_def/string.h>
-#include <sys_def/malloc.h>
+#include <kernel/malloc.h>
 #include <kernel/kernel.h>
 
 

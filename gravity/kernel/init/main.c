@@ -10,7 +10,7 @@
 * KIND, either express of implied.
 */
 
-#include <sys_def/malloc.h>
+#include <kernel/malloc.h>
 
 #include <kernel/io.h>
 #include <kernel/hardware.h>
@@ -28,7 +28,7 @@
 #include <kernel/pipes.h>
 #include <kernel/kgraphics.h>
 
-#include <kernel/api.h>
+#include <api.h>
 #include <kernel/memmgr.h>
 
 #include <kernel/config.h>
@@ -90,6 +90,7 @@ extern int kmemory_manager (void* pvParameters);
 
 extern void API_BKT(void);
 
+
 void kernel_start (void)
 {
     ini_graphics();
@@ -137,8 +138,8 @@ void kernel_start (void)
     init_timer();
 
     /* enable the IRQ */
-    __sti(); /*using direct*/
-
+    __sti(); 
+    
     /* switch to first task in list */
     kload_context();
 }

@@ -9,10 +9,12 @@
 #include <kernel/kernel.h>
 #include <kernel/threads.h>
 #include <kernel/pipes.h>
-#include <kernel/api.h>
+#include <api.h>
+#include <kernel/swi.h>
 #include <kernel/irq.h>
 
 extern int gfw_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
+extern void user_printf(const char * fmt, va_list args);
 
 __IRAM_CODE int kcswi_handler (
 	unsigned long nParam1,
@@ -61,6 +63,9 @@ __IRAM_CODE int kcswi_handler (
 /// Serialize critical API calls to memory manager
         case nAPI_GFX:
             return gfw_swi_handler((int)nParam1,(GFX_DATA *)nParam2, (void *)nParam3);
+        case nAPI_PRINTF:
+            user_printf((const char *)nParam1, (va_list) nParam2);
+            return 0;
       default:
          return 0;
    }

@@ -10,12 +10,13 @@
 * KIND, either express of implied.
 */
 
-#include <kernel/graphics.h>
-#include <kernel/colordef.h>
+#include <graphics.h>
+#include <sys_def/colordef.h>
+#include <api.h>
 
 void avwm(void)
 {
-    printk("Starting AvWm\n");
+    printf("Starting AvWm %d %d %d %d %d\n",1,2,3,4,5);
     
     open_graphics();
     clearScreen(COLOR_WHITE);

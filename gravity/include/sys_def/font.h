@@ -32,10 +32,6 @@
 #define SHADOW               0X0010
 #define SHADOWBOLD           0X0011
 
-#define NBFONT        0x16
-
-void ini_font(void);
-
 #define needFont(name)     extern FONT_ID name;
 
 #endif

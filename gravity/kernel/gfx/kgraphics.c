@@ -12,15 +12,15 @@
 
 
 #include <sys_def/stddef.h>
-#include <sys_def/malloc.h>
+#include <kernel/malloc.h>
 #include <kernel/kernel.h>
 
 #include <kernel/kgraphics.h>
 #include <kernel/osd.h>
 
 #include <kernel/gui_pal.h>
-#include <kernel/colordef.h>
-#include <kernel/font.h>
+#include <sys_def/colordef.h>
+#include <kernel/kfont.h>
 
 #define STRING_MAXSIZE 200
 
