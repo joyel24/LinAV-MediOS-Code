@@ -19,6 +19,9 @@
 @ NOTE: at the moment only supports UART1, but then thats the only
 @       useful one as yet...
 
+.ifndef uartInc
+uartInc = 1
+
 .text
 
         uartBase    =   0x30300     @ av300 UART1
@@ -80,3 +83,5 @@ uartEnd1:
         
         .ltorg
         .arm
+        
+.endif

@@ -17,6 +17,12 @@
 @ terminalSetColorFT r0=color
 @
 
+        .include "../includes/lcd.S"
+        .include "../includes/common.S"
+        
+.ifndef terminalInc
+terminalInc = 1
+
 .text
         newLineCharacter    =   0x0a
 
@@ -111,3 +117,5 @@ terminalPosX:   .word 0
 terminalPosY:   .word 0
 terminalColorF: .word 0xffff
 terminalColorB: .word 0x0000
+
+.endif

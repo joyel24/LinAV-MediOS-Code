@@ -16,6 +16,9 @@
 @ buttonsGetStatusT
 @   - Returns button status in r0
 
+.ifndef buttonsInc
+buttonsInc = 1
+
 .text
 
 @
@@ -56,3 +59,5 @@ buttonsGetStatusT:
 
         .arm
         .ltorg
+        
+.endif

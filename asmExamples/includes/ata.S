@@ -18,6 +18,9 @@
 @ ataWaitForStartOfXferT    Wait until start of xfer.
 @
 
+.ifndef ataInc
+ataInc = 1
+
 .text
 
 ataStatus_BSY   =       0x80
@@ -216,3 +219,5 @@ hardwrites:
 
         
         .arm
+        
+.endif

@@ -16,6 +16,9 @@
 @ hex4T(r0->destnation, r1=value)
 @ hex8T(r0->destnation, r1=value)
 
+.ifndef hexInc
+hexInc = 1
+
 .text
 
 @ hex2T  r0->dest, r1=value
@@ -119,3 +122,5 @@ hex8T:
 hextable:   .ascii "0123456789ABCDEF"
         .ltorg
         .arm
+        
+.endif

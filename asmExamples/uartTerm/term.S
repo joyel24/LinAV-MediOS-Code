@@ -36,5 +36,5 @@ mloop:
         b mloop
 
 .include "../includes/uart.S"
-.include "../includes/lcd.S"
 .include "../includes/terminal.S"
+
