@@ -59,7 +59,7 @@ examples: src/examples/*.c
     rm -f `basename $$i .c`.elf `basename $$i .c`.o;\
     mv *.bin dist/;\
     done
-    
+
 debug: src/examples/*.c
 	@for i in src/examples/*.c;do\
 	arm-linux-gcc -mthumb-interwork -static-libgcc -c -Wa,-R\
