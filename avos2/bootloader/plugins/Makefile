@@ -1,4 +1,4 @@
-SUBDIRS = lib include examples bootloader
+SUBDIRS = rgb mp3
 
 all: subdirs
 
@@ -9,7 +9,7 @@ $(patsubst %, _dir_%, $(SUBDIRS)) : dummy
 
 clean: subdirs_clean
 	@echo "**** Cleaning..."
-	rm -f *~ *.bak
+	@rm -f *~ *.bak
 	
 subdirs_clean: $(patsubst %, _dirclean_%, $(SUBDIRS))
 
@@ -24,10 +24,12 @@ $(patsubst %, _dirdepend_%, $(SUBDIRS)) : dummy
 	@$(MAKE) -C $(patsubst _dirdepend_%, %, $@) depend
 
 spotless: subdirs_spotless
+	@echo "**** Cleaning..."
+	@rm -f *~ *.bak
 	
 subdirs_spotless: $(patsubst %, _dirspotless_%, $(SUBDIRS))
 
 $(patsubst %, _dirspotless_%, $(SUBDIRS)) : dummy
 	@$(MAKE) -C $(patsubst _dirspotless_%, %, $@) spotless
 
-.PHONY: dummy subdirs subdirs_clean subdirs_depend subdirs_spotless
+.PHONY: dummy subdirs

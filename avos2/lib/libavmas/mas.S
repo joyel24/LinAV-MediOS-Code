@@ -63,47 +63,65 @@ masWriteDataA:
 .thumb_func
 
 masWriteData:
-    ldr r1, =0x30588
-    ldrh r2, [r1, #0]
+    push {r4, r5}
+    mov r5, #0
+    mov r4, r0              @ r4->data
+    ldr r3, =0x30588
+    ldrh r2, [r3, #0]
     lsr r2, #5
      bcs mwdto              @ Not ready to xfer data
+    cmp r1, #0
+     beq mwdto
+mwdlp:
 
+    ldrb r0, [r4, r5]       @ Get a byte of data...
     lsl r0, #24
     lsr r0, #16
-    strh r0, [r1, #0]       @ Set 1 bits
-    
+    cmp r0, #0
+     beq dne1
+    strh r0, [r3, #0]       @ Set 1 bits
+dne1:
     mov r2, #0xff
     lsl r2, #8
     eor r0, r2
-    strh r0, [r1, #4]       @ Set 0 bits
-    
+    cmp r0, #0
+     beq dne2
+    strh r0, [r3, #4]       @ Set 0 bits
+dne2:
     mov r0, #1
     lsl r0, #15
-    strh r0, [r1, #2]       @ Try to latch data
-    mov r3, #5
+    strh r0, [r3, #2]       @ Try to latch data (Raise PR)
+    mov r2, #10
 mwdw:
-    sub r3, #1
+    sub r2, #1
      bne mwdw
-     
-    ldrh r2, [r1, #2]       @ See if it worked...
+
+    ldrh r2, [r3, #2]       @ See if it worked...   (Read RTR)
     lsr r2, #15
      bcs mwdok
 mwdw2:
-    ldrh r3, [r1, #2]
+    ldrh r2, [r3, #2]
     lsr r2, #15
      bcc mwdw2
      
 mwdok:
-    strh r0, [r1, #6]       @ Clear latch
-    mov r0, #0
-    bx lr
+    strh r0, [r3, #6]       @ Clear latch (Low PR)
+    
+    add r5, #1              @ Inc count
+    sub r1, #1              @ Done another byte...
+    ldrh r0, [r3, #0]
+    lsr r0, #5
+     bcs mwdto              @ EOD set! Quit...
+    cmp r1, #0
+     bne mwdlp
+
 mwdto:
-    mov r0, #0
-    sub r0, #1
+    mov r0, r5
+    pop {r4, r5}
     bx lr
 
 @ ------------------------------------------------------------------------------
-@ masReadData()
+@ masReadData(u32 buff, u32 maxdata)
 @   
 .globl masReadDataA
 masReadDataA:
@@ -112,12 +130,14 @@ masReadDataA:
 .thumb_func
 
 masReadData:
+    push {r4, r5, r6}
+    mov r4, #0              @ num bytes read...
+    mov r5, r0
+    mov r6, r1
     mov r0, #1
     lsl r0, #15
     ldr r1, =0x30588
-    ldrh r2, [r1, #0]
-    lsr r2, #5
-     bcs mrdto              @ Not ready to xfer data
+mrdl:
     strh r0, [r1, #2]       @ Try to latch data
     ldrh r2, [r1, #2]       @ See if it worked...
     lsr r2, #15
@@ -130,16 +150,24 @@ mrdw:
     lsr r2, #15
      bcs mrdw
 mrdok:
+    nop
+    nop
+    nop
+    nop
+    nop
     ldrh r3, [r1, #0]       @ Get some data
     lsr r3, #8
-    strh r0, [r1, #6]       @ Clear the latch...    
-    lsl r0, r3, #24
-    lsr r0, #24
-    bx lr
+    strb r3, [r5, r4]       @ Store the data...
+    strh r0, [r1, #6]       @ Clear the latch...
+    add r4, #1
+    sub r6, #1
+    cmp r6, #0
+     bne mrdl
+
 mrdto:
-    strh r0, [r1, #6]       @ Clear the latch if needed
-    mov r0, #0
-    sub r0, #1
+    strh r0, [r1, #6]       @ Clear the latch...    
+    mov r0, r4
+    pop {r4, r5, r6}
     bx lr
 
 @ ------------------------------------------------------------------------------
@@ -157,13 +185,13 @@ masReset:
         mov r0, #1
         strh r0, [r1]
 
-        ldr r0, =0x20000
+        ldr r0, =0x40000
 masD1:  sub r0, #1
          bne masD1
         ldr r1, =0x3058a
         mov r0, #1
         strh r0, [r1]
-        ldr r0, =0x20000
+        ldr r0, =0x40000
 masD2:  sub r0, #1
          bne masD2
         
@@ -284,6 +312,60 @@ mgvE:
         .ltorg
 
 @ ------------------------------------------------------------------------------
+@ masControlRead()
+@   
+.globl masControlReadA
+masControlReadA:
+        switchThumb
+.globl masControlRead
+.thumb_func
+
+masControlRead:
+        push {lr}
+        mov r3, r0
+        bl i2cStart
+
+        mov r0, #MAS_DEV_WRITE
+        bl i2cOutb
+        cmp r0, #0
+         bne mcrE
+
+        mov r0, #MAS_CONTROL
+        bl i2cOutb
+        cmp r0, #0
+         bne mcrE
+        
+        bl i2cStart
+         
+        mov r0, #MAS_DEV_READ
+        bl i2cOutb
+        cmp r0, #0
+         bne mcrE
+
+        bl i2cInb
+        mov r3, r0
+        bl i2cAck
+
+        bl i2cInb
+        lsl r3, #24
+        lsr r3, #16
+        lsl r0, #24
+        lsr r0, #24
+        orr r3, r0
+        bl i2cAckEnd
+
+        bl i2cStop
+    
+        mov r0, r3
+        pop {r1}
+        bx r1
+mcrE:
+        mov r0, #0
+        sub r0, #1
+        pop {r1}
+        bx r1
+        
+@ ------------------------------------------------------------------------------
 @ masControlWrite(u32 data)
 @   
 .globl masControlWriteA
@@ -328,7 +410,7 @@ mcwE:
         sub r0, #1
         pop {r1}
         bx r1
-        
+
 @ ------------------------------------------------------------------------------
 @ masReadReg(u32 reg)
 @   
@@ -950,10 +1032,9 @@ masReadCodecReg:
         cmp r0, #0
          bne mrcE
         
-        mov r2, #0    
         bl i2cInb
         lsl r0, #8
-        orr r2, r0
+        mov r2, r0
         bl i2cAck
 
         bl i2cInb

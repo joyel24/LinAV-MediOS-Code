@@ -13,7 +13,7 @@ ASFLAGS = -R
 # State the object files that the main target is made up of
 OBJS = graphics.O graphics1.O\
        graphics2.O graphics4.O graphics8.O graphics16.O\
-       graphics32.O osdDSC25.O 
+       graphics32.O osdDSC25.O video.O
 
 
 ALL:$(TARGET)
