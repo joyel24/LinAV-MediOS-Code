@@ -22,8 +22,9 @@
 #define TYPE_DIR    0
 #define TYPE_FILE   1
 struct dir_entry {
-    char *name;
+    char * name;
     int type;
+    int size;
 };
 
 #define    UP_ARROW     0
@@ -37,13 +38,15 @@ struct dir_entry {
 #define    TRUE  1
 
 #define PATHLEN    256
+#define MAX_CHAR   100;
 
 /*****    str_fct   *****/
-int  qNameSort   (const void * a1,const void * a2);
-int  namesort    (char **s1,char **s2);
-void strlwr      (char *s);
+int  namesort          (char **s1,char **s2);
+void strlwr            (char *s);
+void createSizeString  (char * str,int Isize);
 
 /*****    ls_fct    *****/
+int  qSortEntry  (const void * a1,const void * a2);
 void cleanList   (void);
 int  ini_lists   (void);
 int  add_dir     (char * name);
@@ -90,3 +93,4 @@ int  printName          (struct dir_entry * dEntry,int x,int y,int clear,int sel
 void printAllName       (int pos,int nselect);
 void printAName         (int pos, int nselect, int clear, int selected);
 void draw_bottom_status (void);
+void draw_file_size     (struct dir_entry * entry);

@@ -23,16 +23,9 @@
 
 #define SHOW_ALL   1
 
-char            **dir_list;
-int             dir_listsize;
-int             dir_listused;
-
-char            **file_list;
-int             file_listsize;
-int             file_listused;
-
 struct dir_entry * list;
-int                listused;
+int                listused=0;
+int                listsize=0;
 
 int nbFile=0,nbDir=0,totSize=0;
 
@@ -40,92 +33,66 @@ void cleanList(void)
 {
     int i;
     for (i = 0; i < listused; i++)
-    {
         free(list[i].name);
-        //free(&list[i]);
-    }
     free(list);
     listused=0;
+    listsize=0;
 }
 
 int ini_lists(void)
 {
-    if (dir_listsize == 0) {
-        dir_list = (char **) malloc(LISTSIZE * sizeof(char *));
-        if (dir_list == NULL) {
+   
+    if (listsize == 0) {
+        list = (struct dir_entry *) malloc(LISTSIZE * sizeof(struct dir_entry));
+        if (list == NULL) {
             fprintf(stderr, "No memory for ls buffer\n");
             return -1;
         }
-        dir_listsize = LISTSIZE;
+        listsize = LISTSIZE;
     }
-    dir_listused = 0;
-
-    if (file_listsize == 0) {
-        file_list = (char **) malloc(LISTSIZE * sizeof(char *));
-        if (file_list == NULL) {
-            fprintf(stderr, "No memory for ls buffer\n");
-            return -1;
-        }
-        file_listsize = LISTSIZE;
-    }
-    file_listused = 0;
-    return 0;
-}
-
-int add_dir(char * name)
-{
-    char **newlist;
+    listused = 0;
     
-    if (dir_listused >= dir_listsize)
-    {
-        newlist = (char **)malloc((sizeof(char **)) * (dir_listsize + LISTSIZE));
-        if (newlist == NULL)
-        {
-            fprintf(stderr, "No memory for ls buffer\n");
-            return -1;
-        }
-        memcpy(newlist, dir_list, sizeof(char**) * dir_listsize);
-        free(dir_list);
-        dir_list=newlist;
-        dir_listsize += LISTSIZE;
-    }
-
-    dir_list[dir_listused] = strdup(name);
-    if (dir_list[dir_listused] == NULL) {
-        fprintf(stderr, "No memory for filenames\n");
-        return -1;
-    }
-    dir_listused++;
     return 0;
-
 }
 
-int add_file(char * name)
+int qSortEntry(const void * a1,const void * a2)
 {
-    char            **newlist;
+    struct dir_entry * e1=(struct dir_entry *)a1;
+    struct dir_entry * e2=(struct dir_entry *)a2;
+    if(e1->type != e2->type)
+        return e1->type-e2->type;
+    return namesort((char**) &e1->name,(char**) &e2->name);
+}
 
-    if (file_listused >= file_listsize)
+int addEntry(char * name,int type,int size)
+{
+    struct dir_entry * newlist;
+    
+    if (listused >= listsize) /* do we need to increase the list size? */
     {
-        newlist = (char **)malloc((sizeof(char **)) * (file_listsize + LISTSIZE));
-        if (newlist == NULL)
+        newlist = (struct dir_entry *) malloc((LISTSIZE+listsize) * sizeof(struct dir_entry));
+        if (!newlist)
         {
             fprintf(stderr, "No memory for ls buffer\n");
             return -1;
         }
-        memcpy(newlist, file_list, sizeof(char**) * file_listsize);
-        free(file_list);
-        file_list=newlist;
-        file_listsize += LISTSIZE;
+        memcpy(newlist, list, sizeof(struct dir_entry) * listsize);
+        free(list);
+        list=newlist;
+        listsize += LISTSIZE;
     }
-
-    file_list[file_listused] = strdup(name);
-    if (file_list[file_listused] == NULL) {
+    list[listused].name = strdup(name);
+    
+    if (list[listused].name == NULL)
+    {
         fprintf(stderr, "No memory for filenames\n");
         return -1;
     }
-    file_listused++;
+    list[listused].type=type;
+    list[listused].size=size;
+    
+    listused++;
     return 0;
-
 }
 
 int doLs(char * name)
@@ -134,13 +101,9 @@ int doLs(char * name)
     struct dirent   *dp;
     struct stat     statbuf;
     char            fullname[PATHLEN];
-    int             endslash;
-    int             i;
     
     totSize=0;
     
-    endslash = (*name && (name[strlen(name) - 1] == '/'));
-
     if(ini_lists()<0)
         return -1;
 
@@ -151,89 +114,46 @@ int doLs(char * name)
         return -1;
     }
     
-    i=0;
 
     while ((dp = readdir(dirp)) != NULL)
     {
-        /*if(dp->d_name[0]='\0')
-            continue;*/
-        /*int pos=0;*/
-        
-        /*if(dp->d_name[0] == '.' && dp->d_name[1] =='/')
-            pos+=2;*/
-            
+        if(dp->d_name[0]=='\0')
+            continue;            
+          
         if ((dp->d_name[0] == '.') && !SHOW_ALL)
-            continue;
-         
+            continue;            
 
         fullname[0] = '\0';
-
-        /*if ((*name != '.') || (name != '\0'))
-        {
-            strcpy(fullname, name);
-            if (!endslash)
-                strcat(fullname, "/");
-        }*/
-
         strcat(fullname, dp->d_name);
-
+        
         if (stat(dp->d_name, &statbuf) < 0)
         {
             fprintf(stderr, "[dols] error in stat\n");
-            perror(dp->d_name);
-            return -1;
+            //perror(dp->d_name);
+            continue;
         }
 
         if(S_ISDIR(statbuf.st_mode))
         {
-            if(add_dir(fullname)<0)
+            if(addEntry(fullname,TYPE_DIR,0)<0)
                 return -1;
+            nbDir++;
         }
         else
         {
-            totSize+=statbuf.st_size;
-            if(add_file(fullname)<0)
+            if(addEntry(fullname,TYPE_FILE,statbuf.st_size)<0)
                 return -1;
+            totSize+=statbuf.st_size;
+            nbFile++;
         }
-        i++;
     }
 
     closedir(dirp);
     
-    qsort((char *) dir_list, dir_listused, sizeof(char *), qNameSort);
-    qsort((char *) file_list, file_listused, sizeof(char *), qNameSort);
-
-    listused=dir_listused+file_listused;
+    qsort(list,listused,sizeof(struct dir_entry),qSortEntry);
     
-    nbFile=file_listused;
-    nbDir=dir_listused-2; /* removing the too dummy folders: . & .. */
-
-    list=(struct dir_entry*)malloc((sizeof(struct dir_entry))*listused);
-
-    if (list == NULL)
-    {
-        fprintf(stderr, "No memory for ls buffer\n");
-        return -1;
-    }
-
-    for(i=0;i<dir_listused;i++)
-    {
-        list[i].name=dir_list[i];
-        list[i].type=TYPE_DIR;
-    }
-
-    for(i=0;i<file_listused;i++)
-    {
-        list[dir_listused+i].name=file_list[i];
-        list[dir_listused+i].type=TYPE_FILE;
-    }
-
-    free(dir_list);
-    dir_listsize=0;
-    free(file_list);
-    file_listsize=0;   
-    
-    //printf("ls finished: %d files, %d folders tot size=%d\n",nbFile,nbDir,totSize);
-    
+   /* removing the too dummy folders: . & .. */
+    nbDir-=2;
+ 
     return 0;
 }

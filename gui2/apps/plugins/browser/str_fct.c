@@ -10,15 +10,11 @@
 * KIND, either express of implied.
 *
 */
+#include <stdlib.h>
 
 #include "ls_main.h"
 
 #define    toLower(chr)  ((chr>64 && chr<91)?chr+32:chr)
-
-int qNameSort(const void * a1,const void * a2)
-{
-    return namesort((char**) a1,(char**) a2);
-}
 
 int namesort(char **s1,char **s2)
 {
@@ -39,5 +35,32 @@ void strlwr(char *s)
     {
         *s = toLower(*s);
         s++;
+    }
+}
+
+void createSizeString(char * str,int Isize)
+{
+    char * unit;
+    float size=Isize;
+    if(str!=NULL)
+    {
+        if(size/1024>1)
+        {
+            size/=1024;
+            unit="Kb";
+            if(size/1024>1)
+            {
+                size/=1024;
+                unit="Mb";
+                if(size/1024>1)
+                {
+                    size/=1024;
+                    unit="Gb";
+                }
+            }
+        }
+        else 
+            unit = "b";
+        sprintf(str,"%.02f %s",size,unit);
     }
 }

@@ -91,7 +91,6 @@ void hideArrow(int type)
 
 int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
 {
-    //struct stat     statbuf;
     int             color;
     char *          cp;
     int             w = 0;
@@ -135,7 +134,10 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
     }
 
     if(selected)
+    {
         cops->putS(color, COLOR_BLUE,x, y, dEntry->name);
+        draw_file_size(dEntry);
+    }
     else
         cops->putS(color, COLOR_WHITE,x, y, dEntry->name);
     return 1;
@@ -171,31 +173,33 @@ void printAName(int pos, int nselect, int clear, int selected)
     printName(&list[pos],FILE_X_OFFSET,2 + nselect*(h+1)+ h+6+MENU_SHADOW,clear,selected);    
 }
 
+int x=320;
+
+void draw_file_size(struct dir_entry * entry)
+{
+    int h,w;
+    char tmpS[15];
+    
+    /* erase previsous drawing */
+
+    cops->fillRect(COLOR_WHITE,x, 230,320-x,10);
+    if(entry->type == TYPE_FILE)
+    {
+        createSizeString(tmpS,entry->size);
+        cops->getStringS(tmpS,&w,&h);
+        x=320-w;
+        cops->putS(COLOR_BLUE, COLOR_WHITE,x, 230, tmpS);
+    }
+}
+
 void draw_bottom_status(void)
 {
-    char tmp[PATHLEN+100];
-    char * unit;
-    float size=totSize;
+    char tmp[100];
+    char tmpS[15];
     char pwd[PATHLEN];
     int len=0;   
     
-    if(size/1024>1)
-    {
-        size/=1024;
-        unit="Kb";
-        if(size/1024>1)
-        {
-            size/=1024;
-            unit="Mb";
-            if(size/1024>1)
-            {
-                size/=1024;
-                unit="Gb";
-            }
-        }
-    }
-    else 
-        unit = "b";
+    createSizeString(tmpS,totSize);
         
     cops->fillRect(COLOR_WHITE,2, 220,316,20);
         
@@ -209,7 +213,7 @@ void draw_bottom_status(void)
         cops->putS(COLOR_BLUE, COLOR_WHITE,2, 220, pwd);  
     }
 
-    snprintf(tmp,100,"%d %s, %d %s, %.02f %s",nbFile,nbFile>0?"files":"file",nbDir,nbDir>0?"folders":"folders",size,unit);
+    snprintf(tmp,100,"%d %s, %d %s, %s",nbFile,nbFile>0?"files":"file",nbDir,nbDir>0?"folders":"folders",tmpS);
     fprintf(stderr,"%s\n",tmp);
     
     cops->putS(COLOR_BLUE, COLOR_WHITE,2, 230, tmp);    
