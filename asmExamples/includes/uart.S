@@ -21,29 +21,33 @@
 
 .text
 
+        uartBase    =   0x30300     @ av300 UART1
+
         .thumb
 
 @ uartGetchT returns r0=chr or -1 if none
 @
 uartGetchT:
-        push {r1, r2}
-        ldr r0, =(-1)           @ assume failure...
-        ldr r2, =0x30300
+        push {r1, r2, r3, lr}
+        ldr r2, =uartBase
+        mov r1, #0
         ldrh r1, [r2, #6]
+        
+        ldr r0, =(-1)           @ assume failure...
         lsl r1, #26
         beq uartNon
         mov r0, #0
         ldrh r0, [r2, #0]
 uartNon:
-        pop {r1, r2}
-        bx lr
+        pop {r1, r2, r3}
+        pop {r1}
+        bx r1
 
-        
 @ uartOutchT r0=chr to output to UART1
 @
 uartOutchT:
         push {r1, r2}
-        ldr r1, =0x30300        @ UART1 base
+        ldr r1, =uartBase
 uartWait1:
         ldrh r2, [r1, #0xc]
         lsr r2, r2, #11

@@ -18,6 +18,7 @@
 @ lcdPlotT (r0=x, r1=y, r2=color)
 @ lcdGetPixelT (r0=x, r1=y)     returns color in r0
 @ lcdInitT ()
+@ lcdScrollUpT (r0=lines, r1=color)
 
 .text
         .thumb
@@ -25,8 +26,39 @@
 lcdVideoBuffer  = 0x3fc6940
 lcdWidth        = 320
 lcdHeight       = 240
+
+@ lcdScrollUpT r0=lines, r1=color
+@
+lcdScrollUpT:
+        push {r0, r1, r2, r3, r4}
+        cmp r0, #0
+        beq noneed
+        ldr r2, =(lcdWidth*2)
+        mul r2, r0
+        ldr r3, =lcdVideoBuffer
+        ldr r4, =(lcdWidth*lcdHeight*2)
+        sub r4, r2
         
-@ lcd_puts r0=x, r1=y, r2->string, r3=color
+        @ r2 = count for last bit clear (+src offset)
+        @ r4 = count for main scroll
+        @ r3 -> dest
+lcdLoop0:
+        ldrh r0, [r3, r2]
+        strh r0, [r3]               @ copy pixel accross
+        add r3, #2
+        sub r4, #2
+        bne lcdLoop0
+lcdLoop0a:
+        strh r1, [r3]
+        add r3, #2
+        sub r2, #2
+        bne lcdLoop0a
+noneed:
+        pop {r0, r1, r2, r3, r4}
+        bx lr
+        
+        
+@ lcdPutsT r0=x, r1=y, r2->string, r3=color
 @
 lcdPutsT:
         push {r4, r5, r6, r7, lr}
@@ -74,8 +106,15 @@ lcdDone1:
 
 lcdPutchT:
         push {r2, r3, r4, r5, r6, lr}  
-        mov r5, r2
+        ldr r5, =0xff
+        and r5, r2
         ldr r4, =font1_20       @ assume space
+        cmp r5, #0x61           @ 'a'
+         blt lcdNotb
+        cmp r5, #0x7a           @ 'z'
+         bgt lcdNotb
+        sub r5, #0x20           @ *** convert to upper case for now ***
+lcdNotb:
         cmp r5, #0x20           @ ' '?
          blt lcdNota
         cmp r5, #0x5a           @ 'Z'
@@ -85,7 +124,7 @@ lcdPutchT:
         lsl r5, r5, #2
         add r5, r4, r5
         ldr r4, [r5, #0]        @ get address of sprite for it...
-lcdNota:    
+lcdNota:
         mov r2, #6
         mov r5, r3
         mov r3, #6

@@ -23,15 +23,18 @@ loop1:
         
         .thumb
 
+        callThumb r0, lcdInitT
+        
 mloop:
         callThumb r1, uartGetchT
         ldr r1, =(-1)
         cmp r0, r1
         beq mloop               @ no input!
         
-        callThumb r1, uartOutchT
-
+        callThumb r4, terminalPutchT
+        
         b mloop
 
 .include "../includes/uart.S"
-
+.include "../includes/lcd.S"
+.include "../includes/terminal.S"
