@@ -41,6 +41,9 @@ struct client_operations * cops;
 /* the cursor coordinates */
 int x=0,y=0;
 int matrixSize = 0;
+double erg = 0;           // Zwischen- bzw. Endergebnis
+char strCurrentNumber[20]; // ahl die gerade eingeben wird als String
+int operation = 0;        // 1 = + ; 2 = - ; 3 = * ; 4 = /           0 undefined
 
 static unsigned char pair0[PIECE_DIM][PIECE_DIM] = // identifier = 0
 { {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
@@ -432,8 +435,8 @@ static unsigned char pairX[PIECE_DIM][PIECE_DIM] = // identifier = 12   X
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
-  {00,00,00,00,00,00,00,00,00,10,10,10,00,00,00,00,00,00,10,10,10,00,00,00,00,00,00,00,00,00},
-  {00,00,00,00,00,00,00,00,00,10,10,10,00,00,00,00,00,00,10,10,10,00,00,00,00,00,00,00,00,00},
+  {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
+  {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,10,10,10,00,00,00,00,10,10,10,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,10,10,10,00,00,00,00,10,10,10,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,10,10,10,00,00,10,10,10,00,00,00,00,00,00,00,00,00,00,00},
@@ -450,8 +453,8 @@ static unsigned char pairX[PIECE_DIM][PIECE_DIM] = // identifier = 12   X
   {00,00,00,00,00,00,00,00,00,00,00,10,10,10,00,00,10,10,10,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,10,10,10,00,00,00,00,10,10,10,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,10,10,10,00,00,00,00,10,10,10,00,00,00,00,00,00,00,00,00,00},
-  {00,00,00,00,00,00,00,00,00,10,10,10,00,00,00,00,00,00,10,10,10,00,00,00,00,00,00,00,00,00},
-  {00,00,00,00,00,00,00,00,00,10,10,10,00,00,00,00,00,00,10,10,10,00,00,00,00,00,00,00,00,00},
+  {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
+  {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
@@ -495,8 +498,8 @@ static unsigned char pairDiv[PIECE_DIM][PIECE_DIM] = // identifier = 14  /
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
-  {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,10,10,10,10,00,00,00,00,00,00,00,00},
-  {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,10,10,10,10,00,00,00,00,00,00,00,00},
+  {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
+  {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,10,10,10,10,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,10,10,10,10,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,10,10,10,10,00,00,00,00,00,00,00,00,00,00},
@@ -515,8 +518,8 @@ static unsigned char pairDiv[PIECE_DIM][PIECE_DIM] = // identifier = 14  /
   {00,00,00,00,00,00,00,00,00,00,10,10,10,10,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,10,10,10,10,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,10,10,10,10,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
-  {00,00,00,00,00,00,00,00,10,10,10,10,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
-  {00,00,00,00,00,00,00,00,10,10,10,10,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
+  {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
+  {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
   {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00},
@@ -591,6 +594,9 @@ typedef struct coord {
 } coord;
 
 void display();
+void setCursor(int del);
+void output(char* tmp);
+void calculate();
 
 void delay(int value)
 {
@@ -634,13 +640,17 @@ void init(void){
     y = 0;
 
     cops->clearScreen(COLOR_GREEN);
-/*
-    cops->setFont(STD8X13);
-    cops->putS(COLOR_WHITE, COLOR_GREEN, 50,5, "Sliding Puzzle by Schoki");
-    cops->setFont(STD6X9);
-*/
 
-    output();
+    cops->setFont(STD6X9);
+    cops->putS(COLOR_WHITE, COLOR_GREEN, 80,5, "Calculator by Schoki");
+    cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
+    cops->putS(COLOR_BLACK, COLOR_GREEN, 271,152, "Select");
+    cops->putS(COLOR_BLACK, COLOR_GREEN, 271,210, "Clear");
+    cops->setFont(STD8X13);
+
+
+    setCursor(0);
+    output("0");
     display();
 }
 
@@ -656,26 +666,34 @@ int eventHandler(int evt)
 
                 /* move cursor left */
             case BTN_LEFT:
+                setCursor(1);
                 if(x-1 >= 0)
                     x--;
+                setCursor(0);
                 break;
 
                 /* move cursor right */
             case BTN_RIGHT:
+                setCursor(1);
                 if(x+1 < width)
                     x++;
+                setCursor(0);
                 break;
 
                 /* move cursor down */
             case BTN_DOWN:
+                setCursor(1);
                 if(y+1 < height)
                     y++;
+                setCursor(0);
                 break;
 
                 /* move cursor up */
             case BTN_UP:
+                setCursor(1);
                 if(y-1 >= 0)
                     y--;
+                setCursor(0);
                 break;
 
             case BTN_F2:
@@ -683,22 +701,173 @@ int eventHandler(int evt)
 
                 /* toggle flag under cursor */
             case BTN_F1:
+                calculate();
                 break;
 
             case BTN_ON: // new game
                 break;
 
             case BTN_F3: // settings
+                erg = 0;
+                operation = 0;
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+                output(strCurrentNumber);
                 break;
     }
 }
 
-void output()
+void setCursor(int del)
 {
-    cops->drawRect(COLOR_BLUE, X_OFFSET, Y_OFFSET + OUTPUT_OFFSET, 100, 20);
-    cops->fillRect(COLOR_WHITE, X_OFFSET+1, Y_OFFSET+1 + OUTPUT_OFFSET, 98, 18);
-    cops->putS(COLOR_BLACK, COLOR_WHITE, X_OFFSET+1,Y_OFFSET+1 + OUTPUT_OFFSET, "Error");
+    char tmp[10];
+    int ident = 0;
 
+    if(del)
+    {
+	    cops->drawRect(COLOR_GREEN, X_OFFSET+x*PIECE_DIM+x*CURSORFRAME, Y_OFFSET+y*PIECE_DIM+y*CURSORFRAME, PIECE_DIM+(2*CURSORFRAME), PIECE_DIM+(2*CURSORFRAME));
+	    cops->drawRect(COLOR_GREEN, X_OFFSET+x*PIECE_DIM+x*CURSORFRAME+1, Y_OFFSET+y*PIECE_DIM+y*CURSORFRAME+1, PIECE_DIM+(2*CURSORFRAME)-2, PIECE_DIM+(2*CURSORFRAME)-2);
+    }
+    else
+    {
+	    cops->drawRect(COLOR_RED, X_OFFSET+x*PIECE_DIM+x*CURSORFRAME, Y_OFFSET+y*PIECE_DIM+y*CURSORFRAME, PIECE_DIM+(2*CURSORFRAME), PIECE_DIM+(2*CURSORFRAME));
+	    cops->drawRect(COLOR_RED, X_OFFSET+x*PIECE_DIM+x*CURSORFRAME+1, Y_OFFSET+y*PIECE_DIM+y*CURSORFRAME+1, PIECE_DIM+(2*CURSORFRAME)-2, PIECE_DIM+(2*CURSORFRAME)-2);
+    }
+}
+
+void output(char* tmp)
+{
+    cops->drawRect(COLOR_BLUE, X_OFFSET, Y_OFFSET + OUTPUT_OFFSET, 150, 20);
+    cops->fillRect(COLOR_WHITE, X_OFFSET+1, Y_OFFSET+1 + OUTPUT_OFFSET, 148, 18);
+    cops->putS(COLOR_BLACK, COLOR_WHITE, X_OFFSET+2,Y_OFFSET+4 + OUTPUT_OFFSET, tmp);
+
+}
+
+void calculate()
+{
+//double erg = 0;           // Zwischen- bzw. Endergebnis
+//char strCurrentNumber[20]; // als String
+//int operation = 0;        // 1 = + ; 2 = - ; 3 = * ; 4 = /           0 undefined
+    char tmp[20];
+
+    if(field[y][x] == 0)
+    {
+        strcat(strCurrentNumber, "0");
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 1)
+    {
+        strcat(strCurrentNumber, "1");
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 2)
+    {
+        strcat(strCurrentNumber, "2");
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 3)
+    {
+        strcat(strCurrentNumber, "3");
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 4)
+    {
+        strcat(strCurrentNumber, "4");
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 5)
+    {
+        strcat(strCurrentNumber, "5");
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 6)
+    {
+        strcat(strCurrentNumber, "6");
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 7)
+    {
+        strcat(strCurrentNumber, "7");
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 8)
+    {
+        strcat(strCurrentNumber, "8");
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 9)
+    {
+        strcat(strCurrentNumber, "9");
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 10)
+    {
+        strcat(strCurrentNumber, ".");
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 11) // =
+    {
+        if((erg > 0) && (atof(strCurrentNumber) > 0) )
+        {
+            if(operation == 1)
+            {
+                erg = erg + atof(strCurrentNumber);
+            }
+            else if(operation == 2)
+            {
+                erg = erg - atof(strCurrentNumber);
+            }
+            else if(operation == 3)
+            {
+                erg = erg * atof(strCurrentNumber);
+            }
+            else if(operation == 4)
+            {
+                erg = erg / atof(strCurrentNumber);
+            }
+        }
+
+        operation = 0;
+
+        memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+        sprintf(tmp, "%f", erg);
+        output(tmp);
+    }
+    else if(field[y][x] == 12)
+    {
+        erg = atof(strCurrentNumber);
+        operation = 3; // x
+        memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 13)
+    {
+        erg = atof(strCurrentNumber);
+        operation = 1; // +
+        memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 14)
+    {
+        erg = atof(strCurrentNumber);
+        operation = 4;  // /
+        memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+        output(strCurrentNumber);
+    }
+    else if(field[y][x] == 15)
+    {
+        if(strlen(strCurrentNumber) == 0)
+        {
+            // Minuszeichen vor die erste Zahl
+            strcat(strCurrentNumber, "-");
+        }
+        else
+        {
+            erg = atof(strCurrentNumber);
+            operation = 2; // -
+            memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+        }
+
+        output(strCurrentNumber);
+    }
 }
 
 void display()
@@ -757,7 +926,7 @@ int main(int argc,char * * argv)
     /* end of plugin init */
 
 	cops->disableMenu();
-    cops->setFont(STD6X9);
+    cops->setFont(STD8X13);
 
     init();
 
