@@ -83,8 +83,10 @@ graphics16Sprite:
         lsl r7, #2
         ldr r6, =graphics16SpriteRoutines
         ldr r7, [r6, r7]
-        mov lr, pc
-        mov pc, r7
+        mov r6, #1
+        mov lr, r6
+        add lr, pc
+        bx r7
         pop {r6, r7, pc}
 
 
@@ -135,7 +137,9 @@ g16s1n:
         sub r6, #1
         cmp r6, #0
          bne g16s1y
-        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
+        pop {r0, r1, r2, r3, r4, r5, r6, r7}
+        pop {r1}
+        bx r1
 
 
 @ ------------------------------------------------------------------------------
@@ -185,7 +189,9 @@ g16s2n:
         sub r6, #1
         cmp r6, #0
          bne g16s2y
-        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
+        pop {r0, r1, r2, r3, r4, r5, r6, r7}
+        pop {r1}
+        bx r1
 
         
 @ ------------------------------------------------------------------------------
@@ -235,7 +241,9 @@ g16s4n:
         sub r6, #1
         cmp r6, #0
          bne g16s4y
-        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
+        pop {r0, r1, r2, r3, r4, r5, r6, r7}
+        pop {r1}
+        bx r1
         
         
 @ ------------------------------------------------------------------------------
@@ -276,7 +284,9 @@ g16s8nd:
         sub r6, #1
         cmp r6, #0
          bne g16s8y
-        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
+        pop {r0, r1, r2, r3, r4, r5, r6, r7}
+        pop {r1}
+        bx r1
 
         
 @ ------------------------------------------------------------------------------
@@ -314,7 +324,9 @@ g16s16nd:
         sub r6, #1
         cmp r6, #0
          bne g16s16y
-        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
+        pop {r0, r1, r2, r3, r4, r5, r6, r7}
+        pop {r1}
+        bx r1
 
         
 @ ------------------------------------------------------------------------------
@@ -327,7 +339,7 @@ graphics16Sprite32:
         @ DIFFICULT - REQUIRES LOTS OF WORK...
         mov pc, lr
 
-
+        .align 4
 graphics16SpriteRoutines:   .word graphics16Sprite1, graphics16Sprite2
                             .word graphics16Sprite4, graphics16Sprite8
                             .word graphics16Sprite16,graphics16Sprite32
