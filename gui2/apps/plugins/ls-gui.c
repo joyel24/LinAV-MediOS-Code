@@ -29,6 +29,10 @@
 #define    LISTSIZE   256
 #define    PATHLEN    256
 #define    MAXPOS     21
+#define    FILE_X_OFFSET 10
+
+#define    UP_ARROW     0
+#define    DOWN_ARROW   1
 
 #define    toLower(chr)  ((chr>64 && chr<91)?chr+32:chr)
 
@@ -45,6 +49,14 @@ char **s2;
     }
 
     return (toLower(*st1) - toLower(*st2));
+}
+
+void strlwr(char *s)
+{
+        while (*s)
+        {       *s = tolower(*s);
+                s++;
+        }
 }
 
 char            **dir_list;
@@ -91,12 +103,101 @@ unsigned char dwArrow[9][9] =
       {21,21,21,00,00,00,21,21,21},
       {21,21,21,21,00,21,21,21,21},
     };
-    
-BITMAP upBitmap = {(unsigned int) upArrow, 9, 9, 0, 0};
-BITMAP dwBitmap = {(unsigned int) dwArrow, 9, 9, 0, 0};
 
-#define UP_ARROW     0
-#define DOWN_ARROW   1
+unsigned char dir[8][8] =
+    { {15,00,00,00,15,15,15,15},
+      {15,00,00,00,15,15,15,15},
+      {15,00,00,00,00,00,00,15},
+      {15,00, 9, 9, 9, 9,00,15},
+      {15,00, 9, 9, 9, 9,00,15},
+      {15,00, 9, 9, 9, 9,00,15},
+      {15,00, 9, 9, 9, 9,00,15},
+      {15,00,00,00,00,00,00,15},
+    };
+
+unsigned char mp3[8][8] =
+    { {15,15,15,15,00,15,15,15},
+      {15,15,15,15,00,00,15,15},
+      {15,15,15,15,00,15,00,15},
+      {15,15,15,15,00,15,15,15},
+      {15,15,15,15,00,15,15,15},
+      {15,15,15,00,00,15,15,15},
+      {15,15,00,00,00,15,15,15},
+      {15,15,15,00,15,15,15,15},
+    };
+
+unsigned char text[8][8] =
+    { {15,00,00,00,00,00,00,15},
+      {15,00,15,15,15,15,00,15},
+      {15,00,15,00,00,15,00,15},
+      {15,00,15,15,15,15,00,15},
+      {15,00,15,00,15,15,00,15},
+      {15,00,15,15,00,15,00,15},
+      {15,00,15,15,15,15,00,15},
+      {15,00,00,00,00,00,00,15},
+    };
+
+unsigned char image[8][8] =
+    { {00, 00, 00, 00, 00, 00, 00,00},
+      {00, 14, 14, 14, 14, 14, 14,00},
+      {00, 14, 14, 14, 14, 14, 14,00},
+      {00, 14, 14, 12, 12, 14, 14,00},
+      {00, 14, 12, 12, 12, 12, 14,00},
+      {00,  9,  9,  9,  9,  9,  9,00},
+      {00,  9,  9,  9,  9,  9,  9,00},
+      {00, 00, 00, 00, 00, 00, 00,00},
+    };
+
+BITMAP upBitmap    = {(unsigned int) upArrow, 9, 9, 0, 0};
+BITMAP dwBitmap    = {(unsigned int) dwArrow, 9, 9, 0, 0};
+
+BITMAP dirBitmap   = {(unsigned int) dir, 8, 8, 0, 0};
+BITMAP mp3Bitmap   = {(unsigned int) mp3, 8, 8, 0, 0};
+BITMAP textBitmap  = {(unsigned int) text, 8, 8, 0, 0};
+BITMAP imageBitmap = {(unsigned int) image, 8, 8, 0, 0};
+
+int is_script_type(char *extension)
+{
+    strlwr(extension);
+    return strcmp(extension, ".sh") == 0;
+}
+
+int is_image_type(char *extension)
+{
+    strlwr(extension);
+    return strcmp(extension, ".jpg") == 0
+        || strcmp(extension, ".gif") == 0
+        || strcmp(extension, ".bmp") == 0;
+}
+
+int is_mp3_type(char *extension)
+{
+    strlwr(extension);
+    return strcmp(extension, ".mp3") == 0;
+}
+
+int is_text_type(char * extension)
+{
+   int retVal = 0;
+
+    strlwr(extension);
+   if(strcmp(extension, ".txt") == 0)
+       retVal = 1;
+   else if(strcmp(extension, ".cfg") == 0)
+       retVal = 1;
+   else if(strcmp(extension, ".c") == 0)
+       retVal = 1;
+   else if(strcmp(extension, ".cpp") == 0)
+       retVal = 1;
+   else if(strcmp(extension, ".h") == 0)
+       retVal = 1;
+   else if(strcmp(extension, ".ini") == 0)
+       retVal = 1;
+   else if(strcmp(extension, ".csv") == 0)
+       retVal = 1;
+
+    return retVal;
+}
 
 void showArrow(int type)
 {
@@ -307,6 +408,7 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
     char *          cp;
     int             w = 0;
     int             h = 10;
+    char *ext;
 
    cops->getStringS("M", &w, &h);
 
@@ -323,12 +425,32 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
 
     /*if(S_ISDIR(statbuf.st_mode))*/
     if(dEntry->type == TYPE_DIR)
+    {
         color=COLOR_RED;
+        cops->drawBITMAP (&dirBitmap, 2, y);
+    }
     else
+    {
         color=COLOR_BLACK;
 
+        ext = strrchr(dEntry->name, '.');
+        if (ext == 0)
+        {
+            // no extension
+            cops->fillRect(COLOR_WHITE, 2, y, 8, 8);
+        }
+        else if (is_mp3_type(ext))
+            cops->drawBITMAP (&mp3Bitmap, 2, y);
+        else if(is_text_type(ext))
+            cops->drawBITMAP (&textBitmap, 2, y);
+        else if(is_image_type(ext))
+            cops->drawBITMAP (&imageBitmap, 2, y);
+        else
+            cops->fillRect(COLOR_WHITE, 2, y, 8, 8);
+    }
+
     if(clear)
-        cops->fillRect(COLOR_WHITE,x, y , 3055, h+1);
+        cops->fillRect(COLOR_WHITE, 0, y , 320, h+1);
 
     if(selected)
         cops->putS(color, COLOR_BLUE,x, y, dEntry->name);
@@ -346,12 +468,12 @@ void printAllName(int pos,int nselect)
 
     for (i = pos; i < listused && i < pos+MAXPOS; i++)
     {
-        cops->fillRect(COLOR_WHITE,5, 2+(i-pos)*(h+1)+ h+6+MENU_SHADOW , 305,(h+1));
-        printName(&list[i],5, 2 + (i-pos)*(h+1)+ h+6+MENU_SHADOW,0,(i-pos)==nselect);
+        cops->fillRect(COLOR_WHITE,1, 2+(i-pos)*(h+1)+ h+6+MENU_SHADOW , 305,(h+1));
+        printName(&list[i],FILE_X_OFFSET, 2 + (i-pos)*(h+1)+ h+6+MENU_SHADOW,0,(i-pos)==nselect);
     }
 
     for(;i<pos+MAXPOS;i++)
-        cops->fillRect(COLOR_WHITE,5, (i-pos)*(h+1)+ h+6+MENU_SHADOW , 305,(h+1));
+        cops->fillRect(COLOR_WHITE,0, (i-pos)*(h+1)+ h+6+MENU_SHADOW , 320,(h+1));
 }
 
 void printAName(int pos, int nselect, int clear, int selected)
@@ -361,7 +483,7 @@ void printAName(int pos, int nselect, int clear, int selected)
 
     cops->getStringS("M", &w, &h);
     
-    printName(&list[pos],5,2 + nselect*(h+1)+ h+6+MENU_SHADOW,clear,selected);
+    printName(&list[pos],FILE_X_OFFSET,2 + nselect*(h+1)+ h+6+MENU_SHADOW,clear,selected);
 }
 
 void cleanList()
@@ -372,48 +494,10 @@ void cleanList()
         free(list[i].name);
         free(&list[i]);
     }
-    
+
     listused=0;
 }
 
-int is_script_type(char *extension)
-{
-    return strcmp(extension, ".sh") == 0;
-}
-
-int is_image_type(char *extension)
-{
-    return strcmp(extension, ".jpg") == 0
-        || strcmp(extension, ".gif") == 0
-        || strcmp(extension, ".bmp") == 0;
-}
-
-int is_mp3_type(char *extension)
-{
-    return strcmp(extension, ".mp3") == 0;
-}
-
-int is_text_type(char * extension)
-{
-   int retVal = 0;
-
-   if(strcmp(extension, ".txt") == 0)
-       retVal = 1;
-   else if(strcmp(extension, ".cfg") == 0)
-       retVal = 1;
-   else if(strcmp(extension, ".c") == 0)
-       retVal = 1;
-   else if(strcmp(extension, ".cpp") == 0)
-       retVal = 1;
-   else if(strcmp(extension, ".h") == 0)
-       retVal = 1;
-   else if(strcmp(extension, ".ini") == 0)
-       retVal = 1;
-   else if(strcmp(extension, ".csv") == 0)
-       retVal = 1;
-
-    return retVal;
-}
 
 #define MAXargs 31
 
@@ -424,7 +508,7 @@ int execBin(char * path, ...)
     va_list ap;
     char *array [MAXargs];
     int argno=0;
-    
+
     cops->clearEventQueue();
     pid = vfork();
     if (pid == 0)
@@ -444,7 +528,7 @@ int execBin(char * path, ...)
             int status;
             cops->closeScreen();            
             waitpid(pid, &status, 0);
-            cops->openScreen();         
+            cops->openScreen();
         }
         else
         {
