@@ -22,7 +22,7 @@ void docmd();
     struct graphicsBuffer screenBitmap;
     char data[512];
     struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, &pal16, &pal32};
-    struct graphicsBuffer sprite7_13 = {0, 1, 7, 13, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
+    struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, -1, 0, 0, 0, 0, &pal16, &pal32};
     int addr= 0xd0;             // 0x3c, 0x90, 0xd0
     char dispAddr[] = "xx";
     
@@ -85,6 +85,8 @@ int main() {
     }
 }
 
+    char timeSt[] = "xx:xx:xx.xx";
+
 void docmd() {
     int c;
     
@@ -98,6 +100,13 @@ void docmd() {
     if (addr==0xd0) {
         data[0x0c] &= ~0x40;
         i2cWrite(addr, 0x0c, data+0x0c, 1);
+        stringPutHex(timeSt+9, data[0], 2);
+        stringPutHex(timeSt+6, data[1], 2);
+        stringPutHex(timeSt+3, data[2], 2);
+        stringPutHex(timeSt, data[3], 2);
+        pal16[1] = 0x0202;
+        graphicsString(&screenBitmap, 160-(5*14)-7, 120, &spriteShadow, &shadow_, 14, 0,
+                    timeSt);
     }
     
     if (c==0) uartOuts("Returned 0\n");
