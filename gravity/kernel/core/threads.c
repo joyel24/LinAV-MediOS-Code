@@ -31,6 +31,10 @@ __IRAM_CODE KERNEL_ERROR_CODE kinit_tcb ()
 	g_pSystemCtrlPipe->nReceiver = 0;
 	g_pSystemCtrlPipe->nSender = 0;
 
+	g_pGFXManagerPipe = kmalloc (sizeof(PIPE));
+	g_pGFXManagerPipe->nReceiver = 0;
+	g_pGFXManagerPipe->nSender = 0;
+
 	return eOK;
 }
 
@@ -70,12 +74,12 @@ __IRAM_CODE void kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackS
 		*pszTarget++ = *pszTaskName++;
 	*pszTarget++ = *pszTaskName++;
 
-	pTCB->pMessagePipe = 0;
-	pTCB->pContext     = 0;
-	pTCB->pTaskCode    = 0;
-	pTCB->pEntry       = 0;
-	pTCB->nPriority     = 10;
-	pTCB->nCurrentScore = 10;
+	pTCB->pMessagePipe   = 0;
+	pTCB->pMemoryContext = 0;
+	pTCB->pTaskCode      = 0;
+	pTCB->pEntry         = 0;
+	pTCB->nPriority      = 10;
+	pTCB->nCurrentScore  = 10;
 }
 
 __IRAM_CODE unsigned long* kInitialiseStack (unsigned long* pxTopOfStack, void* pvCode, void *pvParameters)

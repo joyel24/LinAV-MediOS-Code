@@ -61,6 +61,7 @@ extern void ini_debugOnScreen(void);
 extern void avwm(void);
 
 extern int kmemory_manager (void* pvParameters);
+extern int kgfx_manager    (void* pvParameters);
 
 extern void API_BKT(void);
 
@@ -105,7 +106,8 @@ void kernel_start (void)
 
 ///////////////////////////////////////////////////
 /// TODO: This code gows to kinit_tcb ()...
-    kadd_tcb (&g_pTaskRing, kcreate_tcb (kmemory_manager, TASK_STACK_SIZE,   0, "MEMMGR"));
+    kadd_tcb (&g_pTaskRing, kcreate_tcb (kmemory_manager,       TASK_STACK_SIZE,   0, "MEMMGR"));
+    kadd_tcb (&g_pTaskRing, kcreate_tcb (kgfx_manager,          TASK_STACK_SIZE,   0, "GFXMGR"));
     kadd_tcb (&g_pTaskRing, kcreate_tcb (kernel_startup_thread, TASK_STACK_SIZE, 0, "USER"));
 
 #if 0

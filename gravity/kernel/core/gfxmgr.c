@@ -1,5 +1,5 @@
 /* 
-*   kernel/memmgr.c
+*   kernel/gfxmgr.c
 *
 *   AMOS project
 *
@@ -19,37 +19,10 @@
 #include <kernel/swi.h>
 #include <api.h>
 
-__IRAM_DATA MEMORY_CONTEXT g_MainMemoryContext;
-
-__IRAM_CODE void init_malloc (void * beg, long size)
-{
-	init_memory_context (&g_MainMemoryContext);
-	bpool (&g_MainMemoryContext, beg, size);
-	printk("[init] malloc\n");
-}
-
-__IRAM_CODE void* kmalloc (int nBytes)
-{
-	void* ptr = (void*)bget (&g_MainMemoryContext, nBytes);
-	return ptr;
-}
-
-__IRAM_CODE void kfree (void* ptr)
-{
-	brel (&g_MainMemoryContext, ptr);
-}
-
-__IRAM_CODE unsigned long kmemavail ()
-{
-   long nAllocatedBytes, nFreeBytes, nMaxFree, nAllocCount, nFreeCount;
-   bstats (&g_MainMemoryContext, &nAllocatedBytes, &nFreeBytes, &nMaxFree, &nAllocCount, &nFreeCount);
-   return nFreeBytes;
-}
-
-// Memory manager runs as separate thread
-// This thread serializes calls to memory allocation/free routines
+// GFX manager runs as separate thread
+// This thread serializes calls to commit changes on common screen area,
 // Made from diffrent threads.
-__IRAM_CODE int kmemory_manager (void* pvParameters)
+__IRAM_CODE int kgfx_manager (void* pvParameters)
 {
 /*
 	register long _r7 asm("r7");
@@ -59,20 +32,21 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
 	asm volatile ( "mrs r7, cpsr");
 	asm volatile ( "mov r8, lr");
 	__cli ();
-	printk("*** kmemory_manager *** [CPSR:%08x, R12:%08x, SP:%08x, LR:%08x]\n", _r7, _r12, _r13, _r8);
+	printk("*** kgfx_manager *** [CPSR:%08x, R12:%08x, SP:%08x, LR:%08x]\n", _r7, _r12, _r13, _r8);
 	__sti ();
 */
 
-	SYSTEM_CTRL_COMMAND SysCtrl;
+	SYSTEM_CTRL_COMMAND GfxCtrl;
 	TASK_INFO* pTCB = 0;
 
 	while (1)
 	{
-		pTCB = 0;
-
-		API_PIPE_RECV ((HPIPE)g_pSystemCtrlPipe, &SysCtrl, sizeof(SYSTEM_CTRL_COMMAND));
+		API_PIPE_RECV ((HPIPE)g_pGFXManagerPipe, &GfxCtrl, sizeof(SYSTEM_CTRL_COMMAND));
 
 /*
+      pSysCtrl = 0;
+      pTCB = 0;
+
       __cli ();
       if (g_pSystemCtrlPipe->nReceiver != g_pSystemCtrlPipe->nSender)
       {
@@ -80,29 +54,28 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
          g_pSystemCtrlPipe->nReceiver = (g_pSystemCtrlPipe->nReceiver + sizeof(SYSTEM_CTRL_COMMAND)) & PIPE_SIZE_MASK;
       };
       __sti ();
-*/
 
-//      if (pSysCtrl)
-//      {
-         switch (SysCtrl.nCmdId)
+      if (pSysCtrl)
+      {
+         switch (pSysCtrl->nCmdId)
          {
             case nAPI_MALLOC:
-               *((void**)SysCtrl.nCmdParam1) = kmalloc (SysCtrl.nCmdParam2);
+               *((void**)pSysCtrl->nCmdParam1) = kmalloc (pSysCtrl->nCmdParam2);
                break;
 
             case nAPI_FREE:
-               kfree ((void*)SysCtrl.nCmdParam1);
+               kfree ((void*)pSysCtrl->nCmdParam1);
                break;
 
             case nAPI_MEMAVAIL:
-               *((unsigned long*)SysCtrl.nCmdParam1) = kmemavail ();
+               *((unsigned long*)pSysCtrl->nCmdParam1) = kmemavail ();
                break;
 
             case nAPI_TASK_TERMINATE:
 
-//               printk ("[memmgr] TERMINATE\n");
+               printk ("[memmgr] TERMINATE\n");
 
-               pTCB = SysCtrl.pSenderThread;
+               pTCB = pSysCtrl->pSenderThread;
 
                // Remove task from task ring...
                __cli ();
@@ -141,19 +114,20 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
                // We should never get here...
                break;
          }
-//      }
+      }
 
       /// Unblock calling task...
       __cli ();
-      SysCtrl.pSenderThread->nBlockingState = TASK_BLOCKED_BY_NONE;
-      SysCtrl.pSenderThread->nBlockingValue = 0;
+      pSysCtrl->pSenderThread->nBlockingState = TASK_BLOCKED_BY_NONE;
+      pSysCtrl->pSenderThread->nBlockingValue = 0;
 
-//      API_TASK_YIELD ();
+      API_TASK_YIELD ();
       __sti ();
+*/
 	};
 
 //	__cli ();
-//	printk ("*** MEMORY MANAGER EXITED ***\n");
+//	printk ("*** GFX MANAGER EXITED ***\n");
 //	__sti ();
 
 	return 0;

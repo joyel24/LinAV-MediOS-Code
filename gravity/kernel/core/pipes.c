@@ -17,6 +17,7 @@
 
 PIPE* g_pKernelCtrlPipe __IRAM_DATA = 0;
 PIPE* g_pSystemCtrlPipe __IRAM_DATA = 0;
+PIPE* g_pGFXManagerPipe __IRAM_DATA = 0;
 
 __IRAM_CODE void kpipe_write  (PIPE* pPipe, void* _pData, unsigned long nBytes)
 {

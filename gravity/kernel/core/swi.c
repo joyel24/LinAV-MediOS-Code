@@ -38,11 +38,11 @@ __IRAM_CODE int kcswi_handler (
 	case nAPI_TASK_CREATE:      //(void* pvCode, void* pParam, HTASK* phTask)                     { SAVE; asm("swi 1"); LOAD; }
 	{
 		TASK_INFO* pTCB = 0;
-		API_MALLOC (&pTCB, sizeof(TASK_INFO));
+		API_MALLOC ((void**)&pTCB, sizeof(TASK_INFO));
 		if (!pTCB)
 			return ERR_NOMEMORY;
 
-		API_MALLOC (&pTCB->pStack, 16384);
+		API_MALLOC ((void**)&pTCB->pStack, 16384);
 
 		kInitialiseTCBVariables (pTCB, 16384, "USER");
 		unsigned char* pTopOfStack = (unsigned char*)pTCB->pStack;
@@ -349,6 +349,68 @@ __IRAM_CODE int kcswi_handler (
 	}
 	break;
 
+	case nAPI_RUN_GRV:          //(const char* pGRVPath, HTASK* phTask)
+	{
+		TASK_INFO* pTCB = 0;
+
+		API_MALLOC (&pTCB, sizeof(TASK_INFO));
+		if (!pTCB)
+			return ERR_NOMEMORY;
+
+		kInitialiseTCBVariables (pTCB, 16384 , "USER");
+
+		ERROR_CODE code = load_bflat ((const char *)nParam1, pTCB);
+
+		API_MALLOC (&pTCB->pStack, 16384);//nStackSize
+
+		unsigned char* pTopOfStack = (unsigned char*)pTCB->pStack;
+		pTopOfStack += pTCB->nStackSize - 4;
+		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, pTCB->pEntry, 0);
+		API_MALLOC (&pTCB->pMessagePipe, sizeof(PIPE));
+		pTCB->pMessagePipe->nReceiver = 0;
+		pTCB->pMessagePipe->nSender = 0;
+
+		*((TASK_INFO**)nParam2) = pTCB;
+
+		printk ("TASK READY TO START. INCLUDING IN TASK RING...\n");
+
+		// Include new task in task ring...
+		__cli ();
+		pTCB->pPrevTask = g_pTaskRing;
+		pTCB->pNextTask = g_pTaskRing->pNextTask;
+		pTCB->pNextTask->pPrevTask = pTCB;
+		g_pTaskRing->pNextTask = pTCB;
+		__sti ();
+
+		return code;
+	}
+	break;
+
+	case nAPI_CREATE_CONTEXT:   //(int nWidth, int nHeight, int nFlags);
+	{
+		TASK_INFO* pTask = 0;
+		__cli ();
+		pTask = g_pTaskRing;
+		__sti ();
+
+		GFX_DATA* pCtx = 0;
+		API_MALLOC (&pCtx, sizeof(GFX_DATA));
+
+		pCtx->w = nParam1;
+		pCtx->h = nParam2;
+		pCtx->x = 0;
+		pCtx->y = 0;
+		pCtx->direction = 0;
+		pTask->pMemoryContext = pCtx;
+	}
+	break;
+
+	case nAPI_GFX_COMMIT:       //(GFX_RECT* pArea);
+	{
+		// TO DO:
+	}
+	break;
+
 	case nAPI_GFX_FASTBLIT:     //(GFX_DATA* pDst, GFX_DATA* pSrc, GFX_POINT* pOrigin);
 	{
 		GFX_DATA* pDst     = (GFX_DATA*)nParam1;
@@ -432,44 +494,6 @@ __IRAM_CODE int kcswi_handler (
 		for (org.y=0;org.y<pDst->h+pSrc->h;org.y+=pSrc->h)
 		for (org.x=0;org.x<pDst->w+pSrc->w;org.x+=pSrc->w)
 			kcswi_handler (nAPI_GFX_FASTBLIT, nParam2, (unsigned long)&org, nParam1);
-	}
-	break;
-
-	case nAPI_RUN_GRV:          //(const char* pGRVPath, HTASK* phTask)
-	{
-		TASK_INFO* pTCB = 0;
-
-		API_MALLOC (&pTCB, sizeof(TASK_INFO));
-		if (!pTCB)
-			return ERR_NOMEMORY;
-
-		kInitialiseTCBVariables (pTCB, 16384 , "USER");
-
-		ERROR_CODE code = load_bflat ((const char *)nParam1, pTCB);
-
-		API_MALLOC (&pTCB->pStack, 16384);//nStackSize
-
-		unsigned char* pTopOfStack = (unsigned char*)pTCB->pStack;
-		pTopOfStack += pTCB->nStackSize - 4;
-		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, pTCB->pEntry, 0);
-		API_MALLOC (&pTCB->pMessagePipe, sizeof(PIPE));
-		pTCB->pMessagePipe->nReceiver = 0;
-		pTCB->pMessagePipe->nSender = 0;
-
-                *((TASK_INFO**)nParam2) = pTCB;
-
-		printk ("TASK READY TO START. INCLUDING IN TASK RING...\n");
-
-		// Include new task in task ring...
-		__cli ();
-		pTCB->pPrevTask = g_pTaskRing;
-		pTCB->pNextTask = g_pTaskRing->pNextTask;
-		pTCB->pNextTask->pPrevTask = pTCB;
-		g_pTaskRing->pNextTask = pTCB;
-		__sti ();
-
-                
-		return code;
 	}
 	break;
 

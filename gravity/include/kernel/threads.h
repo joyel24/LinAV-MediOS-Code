@@ -32,7 +32,7 @@ typedef struct _TASK_INFO
 	unsigned long      nBlockingState;
 	unsigned long      nBlockingValue;
 	PIPE*              pMessagePipe;
-	GFX_DATA*          pContext;
+	GFX_DATA*          pMemoryContext;
 	char               cName [8];
 	unsigned long      nPriority;
 	unsigned long      nCurrentScore;
