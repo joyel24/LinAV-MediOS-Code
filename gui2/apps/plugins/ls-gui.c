@@ -11,19 +11,18 @@
 *
 */
 
-#include   <stdlib.h>
-#include   <stdarg.h>
-#include   <stdio.h>
-#include   <sys/stat.h>
-#include   <dirent.h>
-
-#include   "graphics.h"
-#include   "events.h"
-#include   "colordef.h"
-#include   "font.h"
-
-#include   "cops.h"
-#include   "avevents.h"
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include "graphics.h"
+#include "events.h"
+#include "colordef.h"
+#include "font.h"
+#include "cops.h"
+#include "avevents.h"
+#include "icons.h"
 
 #define    false 0
 #define    true  1
@@ -83,85 +82,6 @@ struct dir_entry {
 struct dir_entry * list;
 int                listused;
 int pos,nselect;
-
-unsigned char upArrow[9][9] =
-    { {21,21,21,21,00,21,21,21,21},
-      {21,21,21,00,00,00,21,21,21},
-      {21,21,00,21,00,21,00,21,21},
-      {21,00,21,21,00,21,21,00,21},
-      {21,21,21,21,00,21,21,21,21},
-      {21,21,21,21,00,21,21,21,21},
-      {21,21,21,21,00,21,21,21,21},
-      {21,21,21,21,00,21,21,21,21},
-      {21,21,21,21,00,21,21,21,21},
-    };
-
-unsigned char dwArrow[9][9] =
-    { {21,21,21,21,00,21,21,21,21},
-      {21,21,21,21,00,21,21,21,21},
-      {21,21,21,21,00,21,21,21,21},
-      {21,21,21,21,00,21,21,21,21},
-      {21,21,21,21,00,21,21,21,21},
-      {21,00,21,21,00,21,21,00,21},
-      {21,21,00,21,00,21,00,21,21},
-      {21,21,21,00,00,00,21,21,21},
-      {21,21,21,21,00,21,21,21,21},
-    };
-
-unsigned char dir[8][8] =
-    { {15,00,00,00,15,15,15,15},
-      {15,00,00,00,15,15,15,15},
-      {15,00,00,00,00,00,00,15},
-      {15,00, 9, 9, 9, 9,00,15},
-      {15,00, 9, 9, 9, 9,00,15},
-      {15,00, 9, 9, 9, 9,00,15},
-      {15,00, 9, 9, 9, 9,00,15},
-      {15,00,00,00,00,00,00,15},
-    };
-
-unsigned char mp3[8][8] =
-    { {15,15,15,15,00,15,15,15},
-      {15,15,15,15,00,00,15,15},
-      {15,15,15,15,00,15,00,15},
-      {15,15,15,15,00,15,15,15},
-      {15,15,15,15,00,15,15,15},
-      {15,15,15,00,00,15,15,15},
-      {15,15,00,00,00,15,15,15},
-      {15,15,15,00,15,15,15,15},
-    };
-
-unsigned char text[8][8] =
-    { {15,00,00,00,00,00,00,15},
-      {15,00,15,15,15,15,00,15},
-      {15,00,15,00,00,15,00,15},
-      {15,00,15,15,15,15,00,15},
-      {15,00,15,00,15,15,00,15},
-      {15,00,15,15,00,15,00,15},
-      {15,00,15,15,15,15,00,15},
-      {15,00,00,00,00,00,00,15},
-    };
-
-unsigned char image[8][8] =
-    { {00, 00, 00, 00, 00, 00, 00,00},
-      {00, 14, 14, 14, 14, 14, 14,00},
-      {00, 14, 14, 14, 14, 14, 14,00},
-      {00, 14, 14, 12, 12, 14, 14,00},
-      {00, 14, 12, 12, 12, 12, 14,00},
-      {00,  9,  9,  9,  9,  9,  9,00},
-      {00,  9,  9,  9,  9,  9,  9,00},
-      {00, 00, 00, 00, 00, 00, 00,00},
-    };
-
-BITMAP upBitmap    = {(unsigned int) upArrow, 9, 9, 0, 0};
-BITMAP dwBitmap    = {(unsigned int) dwArrow, 9, 9, 0, 0};
-
-BITMAP dirBitmap   = {(unsigned int) dir, 8, 8, 0, 0};
-BITMAP mp3Bitmap   = {(unsigned int) mp3, 8, 8, 0, 0};
-BITMAP textBitmap  = {(unsigned int) text, 8, 8, 0, 0};
-BITMAP imageBitmap = {(unsigned int) image, 8, 8, 0, 0};
-
-
-
 
 int mode=1;
 
@@ -255,18 +175,18 @@ struct menu_item menu4;
 void DeleteChar(char* src, char* dest, int index)
 {
    int cnt = 0;
-	int dstindex = 0;
+    int dstindex = 0;
 
-	for( cnt = 0; cnt < strlen(src); cnt++)
-	{
-	   if(cnt != index)
-		{
-	      dest[dstindex] = src[cnt];
-			dstindex++;
-		}
-	}
+    for( cnt = 0; cnt < strlen(src); cnt++)
+    {
+       if(cnt != index)
+        {
+          dest[dstindex] = src[cnt];
+            dstindex++;
+        }
+    }
 
-	dest[dstindex] = '\0';
+    dest[dstindex] = '\0';
 }
 
 // Bereiche in folgender Reihenfolge:
@@ -285,26 +205,26 @@ int NextAscii(int lastAscii)
 
    if(lastAscii == 32) // Space
       ascii = 64; // auf @ und Grossbuchstaben springen
-	else if(lastAscii == 90)
+    else if(lastAscii == 90)
       ascii = 97;
-	else if(lastAscii == 122)
-	   ascii = 192;
-	else if(lastAscii == 255)
+    else if(lastAscii == 122)
+       ascii = 192;
+    else if(lastAscii == 255)
       ascii = 33;
-	else if(lastAscii == 44)
-	   ascii = 58;
-	else if(lastAscii == 63)
+    else if(lastAscii == 44)
+       ascii = 58;
+    else if(lastAscii == 63)
       ascii = 91;
-	else if(lastAscii == 96)
+    else if(lastAscii == 96)
       ascii = 123;
-	else if(lastAscii == 126)
+    else if(lastAscii == 126)
       ascii = 45;
-	else if(lastAscii == 57)
+    else if(lastAscii == 57)
       ascii = 32;
-	else
+    else
       ascii = lastAscii+1;
 
-	return ascii;
+    return ascii;
 }
 
 int PrevAscii(int lastAscii)
@@ -312,27 +232,27 @@ int PrevAscii(int lastAscii)
    int ascii = ASCII_DEFAULT;
 
    if(lastAscii == 33)
-	   ascii = 255;
-	else if(lastAscii == 192)
+       ascii = 255;
+    else if(lastAscii == 192)
       ascii = 122;
-	else if(lastAscii == 97)
-	   ascii = 90;
-	else if(lastAscii == 64)
+    else if(lastAscii == 97)
+       ascii = 90;
+    else if(lastAscii == 64)
       ascii = 32;
-	else if(lastAscii == 32)
+    else if(lastAscii == 32)
       ascii = 57;
-	else if(lastAscii == 45)
+    else if(lastAscii == 45)
       ascii = 126;
-	else if(lastAscii == 123)
+    else if(lastAscii == 123)
       ascii = 96;
-	else if(lastAscii == 91)
+    else if(lastAscii == 91)
       ascii = 63;
-	else if(lastAscii == 58)
+    else if(lastAscii == 58)
       ascii = 44;
-	else
+    else
       ascii = lastAscii-1;
 
-	return ascii;
+    return ascii;
 }
 
 int is_script_type(char *extension)
@@ -489,7 +409,7 @@ int add_file(char * name)
     }
     file_listused++;
     return 0;
-    
+
 }
 
 int doLs(char * name)
@@ -525,7 +445,7 @@ int doLs(char * name)
             if (!endslash)
                 strcat(fullname, "/");
         }
-        
+
         strcat(fullname, dp->d_name);
 
         if (stat(dp->d_name, &statbuf) < 0)
@@ -543,7 +463,7 @@ int doLs(char * name)
         {
             if(add_file(fullname)<0)
                 return -1;
-        }        
+        }
     }
 
     closedir(dirp);
@@ -595,7 +515,7 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
         cp++;
     else
         cp = dEntry->name;
-        
+
     if(clear)
         cops->fillRect(COLOR_WHITE, 0, y , 320, h+1);
 
@@ -654,7 +574,7 @@ void printAName(int pos, int nselect, int clear, int selected)
     int h = 10;
 
     cops->getStringS("M", &w, &h);
-    
+
     printName(&list[pos],FILE_X_OFFSET,2 + nselect*(h+1)+ h+6+MENU_SHADOW,clear,selected);
 }
 
@@ -691,14 +611,14 @@ int execBin(char * path, ...)
         execv(path, array);
 
         fprintf(stderr, "exec failed!\n");
-        _exit(1);        
+        _exit(1);
     }
     else
     {
         if (pid > 0)
         {
             int status;
-            cops->closeScreen();            
+            cops->closeScreen();
             waitpid(pid, &status, 0);
             cops->openScreen();
         }
@@ -720,7 +640,7 @@ void launchSoundPlayer(char *name)
     char rep[5];
     sprintf(vol, "%d",70);
     sprintf(rep, "%d",0);
-    
+
     execBin("/mnt/avwm/apps/play", "play", name, vol, rep, (char*)0);
 }
 
@@ -1023,7 +943,7 @@ int main(int argc,char * * argv)
             showArrow(DOWN_ARROW);
 
         PACK(cops,NULL);
-        
+
         cleanList();
 //        STOPME(cops);
         return 0;
