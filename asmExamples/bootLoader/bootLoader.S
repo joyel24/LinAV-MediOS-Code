@@ -14,6 +14,8 @@
 @
         .include "../includes/common.S"
 
+        doimage = 1
+        
 .text
 
         add r0, pc, #1
@@ -75,7 +77,22 @@ overusbW:
          beq nowarn1
         callThumb2 r5, terminalPutsCT, msgwarn, 0xffff
 nowarn1:
+      
+        ldr r0, =0x02600200
+        mov r1, #0
+        ldrh r1, [r0]
+        ldr r0, =debug1h
+        callThumb r2, hex4T
+        callThumb2 r5, terminalPutsCT, debug1, 0xffff
+
+        ldr r0, =0x02600300
+        mov r1, #0
+        ldrh r1, [r0]
+        ldr r0, =debug2h
+        callThumb r2, hex4T
+        callThumb2 r5, terminalPutsCT, debug2, 0xffff
         
+
         callThumb2 r5, terminalPutsCT, msg2, 0xffff
         callThumb r5, ataInitT
         callThumb2 r5, terminalPutsCT, msgDONE, 0xfbfb
@@ -174,9 +191,11 @@ loopsp:
         .ltorg
         
 oval1:
-        
+
         callThumb r0, lcdClsT      @ Clear screen...
 
+.ifdef doimage
+        
         ldr r3, =lcdVideoBuffer2
         ldr r4, =sprite
         ldr r5, =(320*240)
@@ -198,6 +217,8 @@ lcop:   mov r0, #0
         
         callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
         callThumb2 r3, osdSetMainConfigT, 0x14, 0xdd      
+        
+.endif
         
         mov r0, #4
         mov r1, #6
@@ -495,6 +516,8 @@ part4Size:  .word   0
 
 timeoutC:   .word   0x100
 timeoutMax: .word   0x100
+dirCurrentScroll:   .word   0
+dirCurrentCursor:   .word   0
 
 cursorUpT:
         push {r1, r2, r3, r4, r7}
@@ -605,94 +628,6 @@ runClus:    .word   0
 runFile:    .ascii  "IMAGE   AVS"
         
         .align 4
-
-dirCurrentScroll:   .word   0
-dirCurrentCursor:   .word   0
-        
-processDirT:
-        push {lr}
-        push {r4, r5, r6, r7}
-        ldr r7, =bufferx
-        mov r6, #0
-loppd:
-        mov r0, r7
-        add r0, r6
-        ldrb r1, [r0, #11]
-
-        cmp r1, #0x0f                                      @ long filename?
-        beq dshow
-
-        ldr r0, =(msg400 + 32)
-        callThumb r4, hex2T
-        
-        mov r0, r7
-        add r0, r6
-        mov r1, #0
-        ldrb r1, [r0]
-        cmp r1, #0xe5
-        beq dshow                                          @ Do not show this
-        cmp r1, #0
-        beq dquit                                          @ Do not show +quit
-        
-        ldr r1, =(msg400 + 1)
-        mov r2, #11
-        callThumb r4, memMoveT
-
-        mov r0, r7
-        add r0, r6
-        add r0, #28
-        callThumb r4, read4T
-        mov r1, r0
-        ldr r0, =(msg400 + 18)
-        callThumb r4, hex8T
-
-        mov r0, r7
-        add r0, r6
-        add r0, #20
-        callThumb r4, read2T
-        mov r5, r0
-        lsl r5, #16
-        mov r0, r7
-        add r0, r6
-        add r0, #26
-        callThumb r4, read2T
-        orr r5, r0
-
-        mov r1, r5
-        ldr r0, =(msg400 + 41)
-        callThumb r4, hex8T
-
-        callThumb2 r4, terminalPutsCT, msg400, 0xfdfd
-        
-        ldr r1, =runFile
-        mov r0, r7
-        add r0, r6
-        mov r2, #11
-        mov r3, #0
-        mov r4, #0
-lcmpf:  ldrb r3, [r1]
-        ldrb r4, [r0]
-        cmp r3, r4
-        bne ncmpf
-        add r1, #1
-        add r0, #1
-        sub r2, #1
-        bne lcmpf
-
-        ldr r0, =runClus
-        str r5, [r0]        
-ncmpf:
-
-dshow:
-        add r6, #32
-        ldr r4, =fatClusterSize
-        ldr r4, [r4]
-        cmp r6, r4
-        blt loppd
-dquit:  pop {r4, r5, r6, r7}
-        pop {r1}
-        bx r1
-        
         
 memMoveT:
         push {r0, r1, r2, r3}
@@ -760,6 +695,11 @@ msg_001:.asciz " -- avOs BootLoader Version 0.2a (c)2004 DoGgEr -- "
 dirLine:.asciz "xxxxxxxx.xxx"
 dirEmpt:.asciz "            "
 
+debug1: .ascii "02600200 = "
+debug1h:.asciz "xxxx\n"
+debug2: .ascii "02600200 = "
+debug2h:.asciz "xxxx\n"
+
         .align 4
 .include "../includes/hex.S"
 .include "../includes/buttons.S"
@@ -776,5 +716,7 @@ fatbuffLBA: .word 0
 fatbuff:    .space 512, 0
 bufferx:    .space 512, 0
 
+.ifdef doimage
 sprite:
 .incbin     "image.rgb"
+.endif
