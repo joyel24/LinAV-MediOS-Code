@@ -30,6 +30,7 @@ void graphics8_4bit_Sprite (char * src, int width, int height, int bpline, PALET
 
 void graphics8_DrawHorizLine (int color, unsigned int bigColor, int width,char * offset);
 void graphics8_DrawString    (struct graphicsFont * font, int color,int bg_color, int x, int y, char * s, struct graphicsBuffer * buff);
+int graphics8_GetStringSize(struct graphicsFont * font, const unsigned char *str, int *w, int *h);
 
 struct graphics_operations g8ops =  {
 	drawPixel         : graphics8_DrawPixel,
@@ -41,7 +42,8 @@ struct graphics_operations g8ops =  {
 	drawBITMAP        : graphics8_DrawBITMAP,
 	drawString        : graphics8_DrawString,
 	scrollWindowVert  : graphics8_ScrollWindowVert,
-	scrollWindowHoriz : graphics8_ScrollWindowHoriz
+	scrollWindowHoriz : graphics8_ScrollWindowHoriz,
+	getStringSize     : graphics8_GetStringSize
 };
 
 #endif

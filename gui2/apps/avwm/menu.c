@@ -15,8 +15,9 @@
 #define	PATHLEN         256
 
 #define MAXPOS       10
+#define TITLE_OFFSET  2
 
-#define FONT_HEIGHT  10
+//#define FONT_HEIGHT  10 // now using graphic function for that
 
 struct cfg_menu * cfgMenu=NULL;;
 struct menu_item * rootMenu=NULL;
@@ -132,16 +133,16 @@ void cfgCleanMenu(struct cfg_menu * cfg)
 		ptr=cfg->nxt;
 		free(cfg);
 		cfg=ptr;
-	}	
+	}
 }
 
 int do_parse(struct cfg_menu ** cfg,char * filename)
 {
     char *item=item_buff;
-    char *value=value_buff; 
-     
+    char *value=value_buff;
+
     openFile(filename);
-    
+
     while (1) {
 	if (!nxt_cfg(item,value)) break;
 	if(!strcmp(item,"name"))
@@ -159,7 +160,7 @@ int do_parse(struct cfg_menu ** cfg,char * filename)
 		{
 			strcpy(current_item->parent,value);
 		}
-		
+
 	}
 	else if(!strcmp(item,"link"))
 	{
@@ -187,7 +188,7 @@ int do_parse(struct cfg_menu ** cfg,char * filename)
 		fprintf(stderr,"unknown item type: %s on line %d\n",item,cfg_line_num);
     }
     closeFile();
-    return 0;    
+    return 0;
 }
 
 int loadMenu(void)
@@ -222,8 +223,11 @@ char tmp[MAX_TOKEN+5];
 int printName(struct menu_item * item,int x,int y,int clear,int selected)
 {
 	int color;
-	
-	
+   int w = 0;
+	int h = 0;
+
+   getStringS("M", &w, &h);
+
 	if(item->sub)
 	{
 		sprintf(tmp,"> %s",item->data->name);
@@ -236,10 +240,10 @@ int printName(struct menu_item * item,int x,int y,int clear,int selected)
 	}
 		
 	if(clear)
-		fillRect(COLOR_WHITE,x, y , 310, FONT_HEIGHT);
-		
-	
-		
+		fillRect(COLOR_WHITE,x, y , 310, h+1);
+
+
+
 	if(selected)
 		putS(color, COLOR_BLUE,x, y, tmp);
 	else
@@ -250,32 +254,47 @@ void printAllName(struct menu_item * pos,int nselect)
 {
 	struct menu_item * i;
 	int nbAff=0;
+   int w = 0;
+	int h = 0;
+
+   getStringS("M", &w, &h);
+
 	for (i = pos; i !=NULL && nbAff < MAXPOS; i=i->nxt) {
-		printName(i,5,nbAff*FONT_HEIGHT+20,0,nbAff==nselect);
+		printName(i,5,TITLE_OFFSET + nbAff*(h+1) + h+6+MENU_SHADOW,0,nbAff==nselect);
 		nbAff++;
 	}
 }
 
 void printAName(struct menu_item * pos, int posY, int clear, int selected)
 {
-	printName(pos,5,posY*FONT_HEIGHT+20,clear,selected);
+   int w = 0;
+	int h = 0;
+
+   getStringS("M", &w, &h);
+
+	printName(pos,5,TITLE_OFFSET + posY*(h+1)+ h+6+MENU_SHADOW,clear,selected);
 }
 
 extern int stopWM;
 
 int eventHandler(int evt)
 {
+   int w = 0;
+	int h = 0;
+
+   getStringS("M", &w, &h);
+
 	switch(evt) {
-		case BTN_UP:			
+		case BTN_UP:
 			if(nselect==0) // moving out of current window
 			{
 				if(!pos->prev) // we are at the beg => nothing to change
 					break; // to do rolling menu code to change is here
-					
+
 				pos=pos->prev;
 				pselect=pos;
-				
-				scrollWindowVert(COLOR_WHITE, 5, 20, 315, FONT_HEIGHT*MAXPOS, FONT_HEIGHT,0);	
+
+				scrollWindowVert(COLOR_WHITE, 5, h+6+MENU_SHADOW, 315, (h+1)*MAXPOS, h+1,0);
 			}
 			else // just going up
 			{
@@ -288,7 +307,7 @@ int eventHandler(int evt)
 		case BTN_DOWN:
 			if(!pselect->nxt) // we are at the end => can't go down anymore
 				break;
-		
+
 			if(nselect==MAXPOS-1) // moving out of the window
 			{
 				if(!pos->nxt) // we are at the end => can't go down anymore
@@ -297,7 +316,7 @@ int eventHandler(int evt)
 				pos=pos->nxt;
 				pselect=pos;
 				
-				scrollWindowVert(COLOR_WHITE, 5, 20, 315, FONT_HEIGHT*MAXPOS, FONT_HEIGHT,1);
+				scrollWindowVert(COLOR_WHITE, 5, h+6+MENU_SHADOW, 315, (h+1)*MAXPOS, h+1,1);
 			}
 			else
 			{
@@ -313,7 +332,7 @@ int eventHandler(int evt)
 				pos=pselect->sub;
 				nselect=0;
 				pselect=pos;
-				fillRect(COLOR_WHITE,5, 20 , 315,FONT_HEIGHT*MAXPOS);
+				fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
 				printAllName(pos,nselect);
 				clearEventQueue();
 			}
@@ -345,7 +364,7 @@ int eventHandler(int evt)
 						pos=rootMenu;
 					nselect=0;
 					pselect=pos;
-					fillRect(COLOR_WHITE,5, 20 , 315,FONT_HEIGHT*MAXPOS);
+					fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
 					printAllName(pos,nselect);
 					clearEventQueue();
 				}
@@ -364,16 +383,20 @@ extern int timerOn;
 void doDraw()
 {
 	int evt;
-	
+   int w = 0;
+	int h = 0;
+
+   getStringS("M", &w, &h);
+
 	pos=rootMenu;
 	pselect=rootMenu;
 	nselect=0;
 	stop=0;
-	
-	fillRect(COLOR_WHITE,5, 20 , 315,FONT_HEIGHT*MAXPOS);
+
+	fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW/*20*/, 315,(h+1)*MAXPOS);
 	printAllName(pos,nselect);
-		
-		
+
+
 	while(!stop) /*wait */
 	{
 		evt=waitEvent();
@@ -381,8 +404,8 @@ void doDraw()
 		{
 			processTimeOut();
 		}
-		
-		eventHandler(evt);		
+
+		eventHandler(evt);
 	}
 }
 

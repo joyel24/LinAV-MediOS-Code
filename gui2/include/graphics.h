@@ -93,6 +93,8 @@ void (*drawBITMAP)       (BITMAP * bitmap, unsigned int trsp, int x, int y, stru
 void (*drawString)       (struct graphicsFont * font, int color,int bg_color, int x, int y, char * s, struct graphicsBuffer * buff);
 void (*scrollWindowVert) (int bgColor, int x, int y, int width, int height, int scroll, int UP, struct graphicsBuffer * buff);
 void (*scrollWindowHoriz)(int bgColor, int x, int y, int width, int height, int scroll, int RIGHT, struct graphicsBuffer * buff);
+int  (*getStringSize)    (struct graphicsFont * font, const unsigned char *str, int *w, int *h);
+
 };
 
 struct graphics_context {
@@ -128,6 +130,7 @@ void fillRect         (int color, int x, int y, int width, int height);
 void drawLine         (int color, int x1, int y1, int x2, int y2);
 void putS             (int color, int bg_color,int x, int y, char *s);
 void putC             (int color, int bg_color,int x, int y, char s);
+int  getStringS       (const unsigned char *str, int *w, int *h);
 void drawSprite       (PALETTE * palette, SPRITE * sprite, int x, int y);
 void drawBITMAP       (BITMAP * bitmap, int x, int y);
 void scrollWindowVert (int bgColor, int x, int y, int width, int height, int scroll, int UP);

@@ -14,7 +14,7 @@
 #ifndef __AVWM_H
 #define __AVWM_H
 
-
+#define MENU_SHADOW 2 // height of small shadow under the title
 
 #define EVT_REDRAW  0x0100
 #define EVT_QUIT    0x0101
@@ -45,6 +45,7 @@ struct client_operations {
 	int  (*closeScreen)       (void);
 	void (*openScreen)        (void);
 	void (*setFont)           (int font);
+   int  (*getStringS)        (const unsigned char *str, int *w, int *h);
 };
 
 struct menu_item {
@@ -70,5 +71,6 @@ int    launchPlugin     (char * path,char * param);   // launch a plugin
 void   wmPutS           (int color, int bg_color,int x, int y, char *s);
 void   wmPutC           (int color, int bg_color,int x, int y, char s);
 void   wmSetFont        (int font);
+void   wmgetStringS(const unsigned char *str, int *w, int *h);
 
 #endif

@@ -47,6 +47,7 @@ struct client_operations cops={
 	drawLine           : drawLine,
 	putS               : wmPutS,
 	putC               : wmPutC,
+	getStringS         : wmgetStringS,
 	//drawSprite         : drawSprite,
 	//drawBITMAP         : drawBITMAP,
 	scrollWindowVert   : scrollWindowVert,
@@ -146,9 +147,9 @@ void draw_batt_status()
    else
    	color = COLOR_GREEN;
 
-	fillRect(COLOR_BLACK,289,1,22,11);
-	fillRect(COLOR_BLACK,311,3,3,7);
-	fillRect(color,290,2,20,9);
+	fillRect(COLOR_BLACK,289,2,22,11);
+	fillRect(COLOR_BLACK,311,4,3,7);
+	fillRect(color,290,3,20,9);
 }
 
 
@@ -205,8 +206,8 @@ int main(int argc,char * * argv)
 {
 	int i;
 	ini_graphics();
-	setFont(std6x9);
-	plugin_font=std6x9;
+	setFont(std6x12);
+	plugin_font=std6x12;
 	iniFont();
 
 	set_mouseParam(6, 3);
@@ -239,10 +240,16 @@ int main(int argc,char * * argv)
 
 void drawGui(void)
 {
+   int w = 0;
+	int h = 0;
+
+   getStringS("M", &w, &h);
+
 	fillRect(COLOR_WHITE,0 , 0, 320, 240);
-	fillRect(COLOR_LIGHT_BLUE,0,0,320,13);
-	fillRect(COLOR_BLACK,0,13,320,2);
+	fillRect(COLOR_LIGHT_BLUE,0,0,320,h+6);
+	fillRect(COLOR_BLACK,0,h+6,320,MENU_SHADOW);
 	putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,2,2,"AvWm");
+
 	drawTime();
    draw_batt_status();
 }
@@ -282,9 +289,14 @@ void getTime(char * timeSt)
 void drawMenu(void)
 {
 	int evt,status;
+   int w = 0;
+	int h = 0;
+
+   getStringS("M", &w, &h);
+
 	if(currentHandler)
 		currentHandler(EVT_SUSPEND);
-	fillRect(COLOR_WHITE,5 , 15, 315, 225);
+	fillRect(COLOR_WHITE,5 , h+6+MENU_SHADOW, 315, 240-h-6-MENU_SHADOW);
 	doDraw();
 }
 
@@ -354,6 +366,19 @@ void processTimeOut()
 	}
 	else
       batteryRefresh++;
+}
+
+void wmgetStringS(const unsigned char *str, int *w, int *h)
+{
+	FONT_ID font=getFont();
+	if(font != plugin_font)
+	{
+		setFont(plugin_font);
+		getStringS(str,w,h);
+		setFont(font);
+	}
+	else
+		getStringS(str,w,h);
 }
 
 void wmPutS(int color, int bg_color,int x, int y, char *s)

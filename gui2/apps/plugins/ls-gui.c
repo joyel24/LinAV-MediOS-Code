@@ -25,15 +25,15 @@ int             listused;
 struct client_operations * cops;
 
 int doLs(char * name)
-{	
+{
 	DIR             *dirp;
 	struct dirent   *dp;
 	char            fullname[PATHLEN];
 	int             endslash;
-	char            **newlist;	
+	char            **newlist;
 	int             i;
 	char            *cp;
-	
+
 	endslash = (*name && (name[strlen(name) - 1] == '/'));
 
 	if (listsize == 0) {
@@ -45,15 +45,15 @@ int doLs(char * name)
 		listsize = LISTSIZE;
 	}
 	listused = 0;
-	
+
 	dirp = opendir(name);
 	if (dirp == NULL) {
 		perror(name);
 		return -1;
 	}
-	
-	
-	
+
+
+
 	while ((dp = readdir(dirp)) != NULL) {
 		if ((dp->d_name[0] == '.') && !SHOW_ALL)
 			continue;
@@ -102,7 +102,7 @@ int doLs(char * name)
 #define BLUE         32
 #define RED          77
 
-#define FONT_HEIGHT  10
+//#define FONT_HEIGHT  10
 
 needFont(std6x9);
 
@@ -111,26 +111,30 @@ int printName(char * name,int x,int y,int clear,int selected)
 	struct stat     statbuf;
 	int             color;
 	char *          cp;
-	
+   int w = 0;
+	int h = 10;
+
+   cops->getStringS("M", &w, &h);
+
 	cp = strrchr(name, '/');
 	if (cp)
 		cp++;
 	else
 		cp = name;
-		
+
 	if (stat(name, &statbuf) < 0) {
 		perror(name);
 		return;
 	}
-	
+
 	if(S_ISDIR(statbuf.st_mode))
 		color=RED;
 	else
 		color=BLACK;
-		
+
 	if(clear)
-		cops->fillRect(WHITE,x, y , 315, 10);
-		
+		cops->fillRect(WHITE,x, y , 315, h+1);
+
 	if(selected)
 		cops->putS(color, BLUE,x, y, name);
 	else
@@ -139,15 +143,25 @@ int printName(char * name,int x,int y,int clear,int selected)
 
 void printAllName(int pos,int nselect)
 {
+   int w = 0;
+	int h = 10;
 	int i;
+
+   cops->getStringS("M", &w, &h);
+
 	for (i = pos; i < listused && i < pos+MAXPOS; i++) {
-		printName(list[i],5,(i-pos)*FONT_HEIGHT+15,0,(i-pos)==nselect);
+		printName(list[i],5, 2 + (i-pos)*(h+1)+ h+6+MENU_SHADOW,0,(i-pos)==nselect);
 	}
 }
 
 void printAName(int pos, int nselect, int clear, int selected)
 {
-	printName(list[pos],5,nselect*FONT_HEIGHT+15,clear,selected);
+   int w = 0;
+	int h = 10;
+
+   cops->getStringS("M", &w, &h);
+
+	printName(list[pos],5,2 + nselect*(h+1)+ h+6+MENU_SHADOW,clear,selected);
 }
 
 void cleanList()
@@ -345,7 +359,11 @@ int eventHandler(int evt)
 	/*char tmp[50];
 	sprintf(tmp,"in handler (%d)",evt);
 	cops->putS(BLACK, WHITE,0, 220, tmp);*/
-	
+   int w = 0;
+	int h = 10;
+
+   cops->getStringS("M", &w, &h);
+
 	switch(evt) {
 		case BTN_UP:
 			nselect--;
@@ -357,7 +375,7 @@ int eventHandler(int evt)
 					pos=0;
 				else // not going up, scrolling
 				{
-					cops->scrollWindowVert(WHITE, 5, 15, 315, FONT_HEIGHT*MAXPOS, FONT_HEIGHT,0);
+					cops->scrollWindowVert(WHITE, 5, 2  + h+6+MENU_SHADOW, 315, (h+1)*MAXPOS, h+1,0);
 					printAName(pos+nselect+1,nselect+1,1,0);
 					printAName(pos+nselect,nselect,1,1);
 				}
@@ -380,7 +398,7 @@ int eventHandler(int evt)
 					pos=listused-MAXPOS-1;
 				else // not going down, scrolling
 				{
-					cops->scrollWindowVert(WHITE, 5, 15, 315, FONT_HEIGHT*MAXPOS, FONT_HEIGHT,1);
+					cops->scrollWindowVert(WHITE, 5, 2  + h+6+MENU_SHADOW, 315, (h+1)*MAXPOS, h+1,1);
 					printAName(pos+nselect-1,nselect-1,1,0);
 					printAName(pos+nselect,nselect,1,1);
 				}
@@ -402,7 +420,7 @@ int eventHandler(int evt)
 			}
 			pos=0;
 			nselect=0;
-			cops->fillRect(WHITE,5, 15 , 315,FONT_HEIGHT*MAXPOS);
+			cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
 			printAllName(pos,nselect);
 			cops->clearEventQueue();
 			break;
@@ -417,7 +435,7 @@ int eventHandler(int evt)
 			}
 			pos=0;
 			nselect=0;
-			cops->fillRect(WHITE,5, 15 , 315,FONT_HEIGHT*MAXPOS);
+			cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
 			printAllName(pos,nselect);
 			cops->clearEventQueue();
 			break;
@@ -426,7 +444,7 @@ int eventHandler(int evt)
 			stop=1;
 			break;
 		case EVT_REDRAW:
-			cops->fillRect(WHITE,5, 15 , 315,225);
+			cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,225);
 			printAllName(pos,nselect);
 			break;
 	}
@@ -435,37 +453,42 @@ int eventHandler(int evt)
 int main(int argc,char * * argv)
 {
 	int evt;
+   int w = 0;
+	int h = 10;
+
 	REGISTER(cops,eventHandler);
-	
+
 	pos=0;
 	nselect=0;
 	stop=0;
-	
+
 	if(argc>0)
 	{
 		listused = 0;
-		
+
 		chdir(argv[1]);
-		
+
 		if(doLs("./")<0)
 		{
 			listused = 0;
 			return -1;
 		}
-		cops->fillRect(WHITE,5, 15 , 320,225);
-		printAllName(pos,nselect);
-		
 		PACK(cops);
+
+      cops->getStringS("M", &w, &h);
+		cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 320,225);
+		printAllName(pos,nselect);
+
 		while(!stop) /*wait */
 		{
 			//while((evt=cops->nxtEvent())==NO_EVENT) /* wait */;
 			//eventHandler(evt);
-			
+
 		}
-		
+
 		cleanList();
 		return 0;
 	}
-	
+
 	return -1;
 }

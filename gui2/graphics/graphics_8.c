@@ -143,7 +143,7 @@ void graphics8_ScrollWindowVert(int bgColor, int x, int y, int width, int height
 		return;
 		
 	src=getOffset(x,y,buff,char);
-		
+
 	if(UP)
 	{
 		inc=1;
@@ -267,6 +267,24 @@ void graphics8_DrawChar(struct graphicsFont * font, int color,int bg_color, int 
 		graphics8_1bit_Sprite(src,font->width,font->height,font->bpline,palette,-1,x,y,buff);
 }
 
+int graphics8_GetStringSize(struct graphicsFont * font, const unsigned char *str, int *w, int *h)
+{
+    int ch;
+    int width = 0;
+
+    while((ch = *str++))
+	 {
+        width += font->width;
+    }
+
+    if ( w )
+        *w = width;
+    if ( h )
+        *h = font->height;
+
+    return width;
+}
+
 void graphics8_DrawString(struct graphicsFont * font, int color,int bg_color, int x, int y, char * s, struct graphicsBuffer * buff)
 {
 	int i,val,j,k;
@@ -288,7 +306,7 @@ void graphics8_DrawString(struct graphicsFont * font, int color,int bg_color, in
 		color_table[i] |= (i&0x2?color:bg_color) << 16 ;
 		color_table[i] |= (i&0x1?color:bg_color) << 24;
 	}
-	
+
 	for(j=0;j<font->height;j++)
 	{
 		str=s;
@@ -430,7 +448,7 @@ void graphics8_4bit_Sprite(char * src, int width, int height, int bpline, PALETT
 {
 	int i,j,k,shift,index;
 	
-	char * dest=getOffset(x,y,buff,char);	
+	char * dest=getOffset(x,y,buff,char);
 	if(trsp==-1)
 		for(j=0;j<height;j++)
 		{

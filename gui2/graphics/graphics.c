@@ -277,7 +277,7 @@ void fillRect(int color, int x, int y, int width, int height)
 }
 
 void drawLine(int color, int x1, int y1, int x2, int y2)
-{	
+{
     int numpixels;
     int i;
     int deltax, deltay;
@@ -286,8 +286,8 @@ void drawLine(int color, int x1, int y1, int x2, int y2)
     int y, yinc1, yinc2;
 
     tstXY(x1,y1);
-    tstXY(x2,y2);	
-    
+    tstXY(x2,y2);
+
     deltax = abs(x2 - x1);
     deltay = abs(y2 - y1);
 
@@ -354,9 +354,9 @@ void putS(int color, int bg_color, int x, int y, char *s)
 	FONT_ID font=default_font;
 	int len=strlen(s);
 	char c;
-	
+
 	tstXY(x,y);
-	
+
 	/*if(font->width*len>STRING_MAXSIZE)
 		s[STRING_MAXSIZE/font->width]=0;*/
 	if(len>30)
@@ -364,19 +364,26 @@ void putS(int color, int bg_color, int x, int y, char *s)
 		c=s[30];
 		s[30]=0;
 	}
-		
+
 	default_gc->gops->drawString(font,color,bg_color,x,y,s,default_gc->buffer);
-	
+
 	if(len>30)
 		s[30]=c;
+}
+
+int getStringS(const unsigned char *str, int *w, int *h)
+{
+	FONT_ID font=default_font;
+
+	return default_gc->gops->getStringSize(font,str,w,h);
 }
 
 void putC(int color, int bg_color, int x, int y, char s)
 {
 	FONT_ID font=default_font;
-	
+
 	tstXY(x,y);
-	
+
 	default_gc->gops->drawChar(font,color,bg_color,x,y,s,default_gc->buffer);
 }
 
@@ -416,7 +423,7 @@ void scrollWindowHoriz(int bgColor, int x, int y, int width, int height, int scr
 	}
 	else
 	{
-		if(x>320) x=320; if(x-scroll<0) x=scroll; if(y>240) y=240; if((y-scroll)<0) y=scroll;		
+		if(x>320) x=320; if(x-scroll<0) x=scroll; if(y>240) y=240; if((y-scroll)<0) y=scroll;
 		tstWH(x,y,width,height);
 		
 	}*/
