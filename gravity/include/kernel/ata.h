@@ -1,0 +1,73 @@
+/* 
+*   include/ata.h
+*
+*   AMOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*/
+
+#ifndef __ATA_H
+#define __ATA_H
+
+#include <kernel/hardware.h>
+//#include <kernel/disk.h>
+
+#define IDE_DATA                          (IDE_BASE+0x000)
+#define IDE_ERROR                         (IDE_BASE+0x080)
+#define IDE_NSECTOR                       (IDE_BASE+0x100)
+#define IDE_SECTOR                        (IDE_BASE+0x180)
+#define IDE_LCYL                          (IDE_BASE+0x200)
+#define IDE_HCYL                          (IDE_BASE+0x280)
+#define IDE_SELECT                        (IDE_BASE+0x300)
+#define IDE_CONTROL                       (IDE_BASE+0x340)
+#define IDE_STATUS                        (IDE_BASE+0x380)
+#define IDE_COMMAND                       (IDE_BASE+0x380)
+
+#define IDE_CMD_READ_SECTORS              0x20
+#define IDE_CMD_WRITE_SECTORS             0x30
+#define IDE_CMD_IDENTIFY                  0xec
+#define IDE_CMD_SLEEP                     0xe0
+
+#define IDE_STATUS_BSY                    0x80
+#define IDE_STATUS_RDY                    0x40
+#define IDE_STATUS_DF                     0x20
+#define IDE_STATUS_DRQ                    0x08
+#define IDE_STATUS_ERR                    0x01
+
+#define IDE_SEL_LBA                       0x40
+
+#define ATA_DO_READ                              0
+#define ATA_DO_WRITE                             1
+
+#define ATA_WITH_DMA                             1
+#define ATA_NO_DMA                               0
+
+#define WAIT_XFER_TIMEOUT                    0x200000
+#define WAIT_READY_TIMEOUT                   0x200000
+
+#define SECTOR_SIZE      512
+
+int  ata_RW_Sector     (unsigned int lba,int count,void * buffer,int direction);
+void ata_RW_Data       (void * buffer,int count,int direction,int use_dma);
+
+int  ata_identify      (char * buffer);
+
+int  ata_sleep         (void);
+
+int  ata_waitForXfer   (void);
+int  ata_waitForReady  (void);
+int  ata_status        (void);
+
+void ata_powerUp_HD    (void);
+void ata_powerDown_HD  (void);
+void ata_select_HD     (void);
+void ata_select_CF     (void);
+
+void ata_stop_HD       (void);
+
+
+#endif
