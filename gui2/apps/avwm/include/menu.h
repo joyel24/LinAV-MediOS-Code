@@ -24,6 +24,8 @@ struct menu_item {
 
 struct menu_data {
 	struct menu_item * root;
+        int  useOwnDisp;
+        int width;int height;int x;int y;
         void (*right_action) (void * data);
         void (*on_action)    (void * data);
         void (*off_action)   (void * data);
@@ -31,8 +33,11 @@ struct menu_data {
         void (*f2_action)   (void * data);
         void (*f3_action)   (void * data);
         void (*item_str)     (void * data,char * str);
-        void (*submenu_str)  (void * data,char * str);
+        void (*submenu_str)  (void * data,char * str);        
 };
+
+void stop_menu(void);
+void start_menu(struct menu_data * client_menu);
 
 void menuEvtHandler  (int evt);
 void doPrint         (struct menu_item * ptr,int level);

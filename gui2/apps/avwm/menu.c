@@ -14,6 +14,7 @@
 #include <stdlib.h>
 
 #include "graphics.h"
+#include "osd.h"
 #include "events.h"
 #include "cops.h"
 #include "menu.h"
@@ -23,6 +24,9 @@
 
 #define MAXPOS       10
 #define TITLE_OFFSET  2
+
+#define CHG_PLANE     {if(current_menu->useOwnDisp) setPlane(BMAP2);}
+#define RESTORE_PLANE  {if(current_menu->useOwnDisp) setPlane(BMAP1);}
 
 int nselect;
 struct menu_item *pos;
@@ -50,16 +54,17 @@ int printName(struct menu_item * item,int x,int y,int clear,int selected)
         current_menu->item_str(item->data,tmp);
         color=COLOR_BLACK; /* => item */
     }
-        
+    
+    CHG_PLANE
+       
     if(clear)
-        fillRect(COLOR_WHITE,x, y , 310, h+1);
-
-
+        fillRect(COLOR_WHITE,x, y , current_menu->width-x, h+1);
 
     if(selected)
         putS(color, COLOR_BLUE,x, y, tmp);
     else
         putS(color, COLOR_WHITE,x, y, tmp);
+    RESTORE_PLANE
 }
 
 void printAllName(struct menu_item * pos,int nselect)
@@ -82,8 +87,28 @@ void printAName(struct menu_item * pos, int posY, int clear, int selected)
 }
 
 void start_menu(struct menu_data * client_menu)
-{
+{    
     current_menu=client_menu;
+    if(current_menu->width==0)
+        current_menu->width=320;
+    if(current_menu->height==0)
+        current_menu->width=240;
+    if(current_menu->useOwnDisp)
+    {
+        setSize(BMAP2,current_menu->width,current_menu->height,8);
+        showPlane(BMAP2);
+             
+        setPlane(BMAP2);
+        clearScreen(COLOR_WHITE);
+        setPos(BMAP2,0x14 +2*current_menu->x,0x13+current_menu->y);
+        setPlane(BMAP1);
+    }
+}
+
+void stop_menu(void)
+{
+    if(current_menu->useOwnDisp)
+        hidePlane(BMAP2);
 }
 
 void menuEvtHandler(int evt)
@@ -103,7 +128,9 @@ void menuEvtHandler(int evt)
                 pos=pos->prev;
                 pselect=pos;
 
-                scrollWindowVert(COLOR_WHITE, 5, h+6+MENU_SHADOW, 315, (h+1)*MAXPOS, h+1,0);
+                CHG_PLANE
+                scrollWindowVert(COLOR_WHITE, 5, h+6+MENU_SHADOW, current_menu->width-5, (h+1)*MAXPOS, h+1,0);
+                RESTORE_PLANE
             }
             else // just going up
             {
@@ -124,8 +151,9 @@ void menuEvtHandler(int evt)
                 
                 pos=pos->nxt;
                 pselect=pos;
-                
-                scrollWindowVert(COLOR_WHITE, 5, h+6+MENU_SHADOW, 315, (h+1)*MAXPOS, h+1,1);
+                CHG_PLANE
+                scrollWindowVert(COLOR_WHITE, 5, h+6+MENU_SHADOW, current_menu->width-5, (h+1)*MAXPOS, h+1,1);
+                RESTORE_PLANE
             }
             else
             {
@@ -141,7 +169,9 @@ void menuEvtHandler(int evt)
                 pos=pselect->sub;
                 nselect=0;
                 pselect=pos;
-                fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
+                CHG_PLANE
+                fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , current_menu->width-5,(h+1)*MAXPOS);
+                RESTORE_PLANE
                 printAllName(pos,nselect);
                 clearEventQueue();
             }
@@ -161,14 +191,18 @@ void menuEvtHandler(int evt)
                         pos=current_menu->root;
                     nselect=0;
                     pselect=pos;
-                    fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
+                    CHG_PLANE
+                    fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , current_menu->width-5,(h+1)*MAXPOS);
+                    RESTORE_PLANE
                     printAllName(pos,nselect);
                     clearEventQueue();
                 }
             }
             break;
         case EVT_REDRAW:
-            fillRect(COLOR_WHITE,0 , h+6+MENU_SHADOW, 320, 240-h-6-MENU_SHADOW);
+            CHG_PLANE
+            fillRect(COLOR_WHITE,0 , h+6+MENU_SHADOW, current_menu->width-5, current_menu->height-h-6-MENU_SHADOW);
+            RESTORE_PLANE
             pos=current_menu->root;
             pselect=current_menu->root;
             nselect=0;

@@ -33,15 +33,16 @@ struct menu_item * rootMenu=NULL;
 struct cfg_menu * current_item=NULL;
 
 struct menu_data menu_cfg = {
-    root           :NULL,
-    right_action   :do_right,
-    on_action      :do_on,
-    off_action     :do_off,
-    f1_action      :do_F1,
-    f2_action      :do_F2,
-    f3_action      :do_F3,
-    item_str       :mk_item_str,
-    submenu_str    :mk_submenu_str
+    useOwnDisp     : 0,
+    root           : NULL,
+    right_action   : do_right,
+    on_action      : do_on,
+    off_action     : do_off,
+    f1_action      : do_F1,
+    f2_action      : do_F2,
+    f3_action      : do_F3,
+    item_str       : mk_item_str,
+    submenu_str    : mk_submenu_str
 };
 
 extern int cfg_line_num;

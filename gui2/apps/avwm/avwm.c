@@ -28,6 +28,8 @@
 #include "font.h"
 #include "plugin.h"
 
+#include "osd.h"
+
 #include "colordef.h"
 
 #define DO_DEBUG 1;
@@ -78,7 +80,7 @@ int main(int argc,char * * argv)
         return -1;
     }
 
-    clearScreen(COLOR_WHITE);
+    clearScreen(COLOR_WHITE);    
     
     ini_status_bar(&status_bar_plugin);
        

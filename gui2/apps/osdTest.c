@@ -134,7 +134,7 @@ int main() {
     
     setPlane(BMAP2);
     setFont(shadow);
-    putS(0x01, 0xff, 0, 0,"DOG");
+    putS(0x01, 0xff, 0, 0,"D");
     
     setPlane(VID1);
     printf("fill 4\n");

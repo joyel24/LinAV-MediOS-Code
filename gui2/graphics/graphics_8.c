@@ -326,7 +326,7 @@ void graphics8_DrawString(struct graphicsFont * font, unsigned int color,unsigne
     unsigned char * dest;
     char * tmp;
     int len;
-    char tmpLine[320+4];
+    unsigned char tmpLine[320+4];
     
     dest=getOffset(x,y,buff,unsigned char);
     len=strlen(s);
@@ -367,7 +367,7 @@ void graphics8_DrawString(struct graphicsFont * font, unsigned int color,unsigne
             str++;
         }
         memcpy(dest,tmpLine,font->width*len);
-        dest+=buff->width;
+        dest+=buff->width;        
     }     
 }
 
