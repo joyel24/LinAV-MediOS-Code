@@ -193,6 +193,7 @@ void lcd_update()
 
 void close_graphics()
 {
+    XCloseDisplay(dpy);
 }
 
 GC_ID createGC(int vplane)
