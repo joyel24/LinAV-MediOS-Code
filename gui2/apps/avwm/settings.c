@@ -518,6 +518,8 @@ void drawSettings(void)
 
     GetSettings();
 
+    LoadSettings();
+
     drawParameter();
 
     showPlane(BMAP2);
