@@ -71,13 +71,14 @@ __IRAM_CODE void dsp_interrupt(int irq)
         if(current_buffer->read==current_buffer->write) /* nothing in buffer */
         {
             disable_irq(IRQ_MAS_DATA);
+            printf("read == write => no more data to play\n");
             return;
         }
         
         if(current_buffer->read>current_buffer->write)   /* write before read => count only size till the end of buffer*/
             toSend=current_buffer->size-current_buffer->read;
         else                                             /* we have less than size-read in buffer */
-            toSend=current_buffer->size-current_buffer->read; 
+            toSend=current_buffer->write-current_buffer->read; 
         
         send=SEND_TO_MAS(current_buffer,toSend);
         
@@ -85,6 +86,7 @@ __IRAM_CODE void dsp_interrupt(int irq)
         
         if(current_buffer->read >= current_buffer->size)  /* we reached end of buffer => go back to start */
         {
+            printf("Roll\n");
             current_buffer->read=0;
             dsp_interrupt(IRQ_MAS_DATA);             /* retry to send data */
         }

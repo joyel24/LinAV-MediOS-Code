@@ -9,7 +9,7 @@ SRC2 = $(wildcard *.S)
 OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 
 
-SUBDIRS = init core lib driver gfx fs
+SUBDIRS = init core lib driver gfx fs add_ons
 
 TARGET = kernel.a
 

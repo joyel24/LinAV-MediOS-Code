@@ -10,6 +10,8 @@
 * KIND, either express of implied.
 */
 
+#include <sys_def/string.h>
+
 #include <kernel/malloc.h>
 
 #include <kernel/io.h>
@@ -183,6 +185,9 @@ void kernel_startup_thread (void)
 	__sti ();
 */
 
+    char * ptr1,*ptr2,*ptr3,*ptr4;
+    int i,count,j;
+
     /* driver init */
 
     init_uart();
@@ -212,6 +217,17 @@ void kernel_startup_thread (void)
     print_boot_info();
 
     printk("[init] END\n");
+    
+
+   
+    
+    //////////////////////////////////////////////////////////
+    //////////// MP3 PLAYER test
+    
+    start_mp3_player("/file.mp3");
+    
+    
+    ///////////////////////////////////////////////////////////
 
 	printk ("Accessing registry file /gravity.cnf...\n");
 	int fReg = kfopen ("/gravity.cnf",O_RDONLY);

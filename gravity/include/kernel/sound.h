@@ -35,7 +35,6 @@ typedef struct _SOUND_BUFFER
     unsigned int read;
     unsigned char * data;
     unsigned int size;
-    unsigned int size_mask;
 } sound_buffer_s;
 
 typedef struct _sound_api_param
