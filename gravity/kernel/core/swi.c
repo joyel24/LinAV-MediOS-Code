@@ -407,7 +407,7 @@ __IRAM_CODE int kcswi_handler (
 	}
 	break;
 
-	case nAPI_GFX_STRETCHBLIT: //GFX_DATA* pDst, GFX_DATA* pSrc
+	case nAPI_GFX_STRETCHBLIT: //GFX_DATA* pDst, GFX_DATA* pSrc, unsigned long* pWorkBuffer
 	{
 		GFX_DATA* pDst = (GFX_DATA*)nParam1;
 		GFX_DATA* pSrc = (GFX_DATA*)nParam2;
@@ -415,11 +415,11 @@ __IRAM_CODE int kcswi_handler (
 		if ((pSrc->pixel_size != 4) || (pDst->pixel_size != 4))
 			return ERR_INVALID_PARAM;
 
-/*		AlphaBilinearInterpolatedStretch (
+		AlphaBilinearInterpolatedStretch (
 			pDst,
 			pSrc,
 			(unsigned long*)nParam3,
-			(unsigned long*)nParam3 + pDst->w);*/
+			(unsigned long*)nParam3 + pDst->w);
 	}
 	break;
 
