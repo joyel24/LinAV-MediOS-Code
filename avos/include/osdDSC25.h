@@ -29,21 +29,21 @@ typedef unsigned long u32;
 #define        OSD_MAIN_VIDEO_SCALEXM  0x10
 #define        OSD_MAIN_SWAPRB         0x80
         
-#define        OSD_COMPONENT_ENABLE    0x0001
+#define        OSD_COMPONENT_ENABLE    0x0001       // Eanble the component
         
 #define        OSD_VIDEO_HALFHEIGHT    0x0002
-#define        OSD_VIDEO_ZY0           0x0000
-#define        OSD_VIDEO_ZY1           0x0004
-#define        OSD_VIDEO_ZY2           0x0008
-#define        OSD_VIDEO_ZX0           0x0000
-#define        OSD_VIDEO_ZX1           0x0010
-#define        OSD_VIDEO_ZX2           0x0020
+#define        OSD_VIDEO_ZY0           0x0000       // video normal zoom y
+#define        OSD_VIDEO_ZY1           0x0004       // video x2 zoom y
+#define        OSD_VIDEO_ZY2           0x0008       // video x4 zoom y
+#define        OSD_VIDEO_ZX0           0x0000       // video normal zoom x
+#define        OSD_VIDEO_ZX1           0x0010       // video x2 zoom x
+#define        OSD_VIDEO_ZX2           0x0020       // video x4 zoom x
 
 #define        OSD_BITMAP_HALFHEIGHT   0x0002
-#define        OSD_BITMAP_MERGEBACK    0x0000
-#define        OSD_BITMAP_0TRANS       0x0004
-
-#define        OSD_BITMAP_A_SHIFT      3
+#define        OSD_BITMAP_MERGEBACK    0x0000       // either alpha blend
+                                                    // with bground
+#define        OSD_BITMAP_0TRANS       0x0004       // or color 0 = transparent
+#define        OSD_BITMAP_A_SHIFT      3            // alpha blending level
 #define        OSD_BITMAP_A0           0x0000
 #define        OSD_BITMAP_A1           0x0008
 #define        OSD_BITMAP_A2           0x0010
@@ -53,19 +53,19 @@ typedef unsigned long u32;
 #define        OSD_BITMAP_A6           0x0030
 #define        OSD_BITMAP_A7           0x0038
         
-#define        OSD_BITMAP_1BIT         0x0000
-#define        OSD_BITMAP_2BIT         0x0040
-#define        OSD_BITMAP_4BIT         0x0080
-#define        OSD_BITMAP_8BIT         0x00c0
+#define        OSD_BITMAP_1BIT         0x0000       // bitmap is 2 color
+#define        OSD_BITMAP_2BIT         0x0040       // bitmap is 4 color
+#define        OSD_BITMAP_4BIT         0x0080       // bitmap is 16 color
+#define        OSD_BITMAP_8BIT         0x00c0       // bitmap is 256 color
         
-#define        OSD_BITMAP_ZY0          0x0000
-#define        OSD_BITMAP_ZY1          0x0100
-#define        OSD_BITMAP_ZY2          0x0200
-#define        OSD_BITMAP_ZX0          0x0000
-#define        OSD_BITMAP_ZX1          0x0400
-#define        OSD_BITMAP_ZX2          0x0800
+#define        OSD_BITMAP_ZY0          0x0000       // normal zoom y
+#define        OSD_BITMAP_ZY1          0x0100       // x2 zoom y
+#define        OSD_BITMAP_ZY2          0x0200       // x4 zoom y
+#define        OSD_BITMAP_ZX0          0x0000       // normal zoom x
+#define        OSD_BITMAP_ZX1          0x0400       // x2 zoom x
+#define        OSD_BITMAP_ZX2          0x0800       // x4 zoom x
 
-#define        OSD_BITMAP_RAMCLUT      0x1000
+#define        OSD_BITMAP_RAMCLUT      0x1000       // use the ram pallette
 
 #define        OSD_CURSOR1_RAMCLUT             0x0080
 #define        OSD_CURSOR1_BORDERHEIGHT_SHIFT  1
@@ -74,9 +74,9 @@ typedef unsigned long u32;
 
 #define        OSD_CURSOR2_HALFHEIGHT          0x0002
 #define        OSD_CURSOR2_RAMCLUT             0x0004
-#define        OSD_CURSOR2_COLORBANK0          0x0000
-#define        OSD_CURSOR2_COLORBANK1          0x0008   
-#define        OSD_CURSOR2_A_SHIFT             4
+#define        OSD_CURSOR2_COLORBANK0          0x0000   // use 16color bank0
+#define        OSD_CURSOR2_COLORBANK1          0x0008   // use 16color bank1
+#define        OSD_CURSOR2_A_SHIFT             4        // alpha blend level
 #define        OSD_CURSOR2_A0                  0x0000
 #define        OSD_CURSOR2_A1                  0x0010
 #define        OSD_CURSOR2_A2                  0x0020
@@ -95,7 +95,7 @@ typedef unsigned long u32;
 #define        OSD_CURSOR2_FLASH_SPEED1        0x1000
 #define        OSD_CURSOR2_FLASH_SPEED2        0x2000
 #define        OSD_CURSOR2_FLASH_SPEED3        0x3000
-#define        OSD_CURSOR2_FLASH_ENABLE        0x4000
+#define        OSD_CURSOR2_FLASH_ENABLE        0x4000   // enable flashing
 
 extern void osdSetComponentOffset(u32 component, u32 offset);
 extern void osdSetComponentSize(u32 component, u32 width, u32 height);
