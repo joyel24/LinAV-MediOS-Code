@@ -17,6 +17,7 @@
 @ lcdRectfT (r0=x, r1=y, r2=width, r3=height, r4=color)
 @ lcdPlotT (r0=x, r1=y, r2=color)
 @ lcdGetPixelT (r0=x, r1=y)     returns color in r0
+@ lcdInitT ()
 
 .text
         .thumb
@@ -247,7 +248,7 @@ lcdInitT:
         ldr r0, =0x30800
     
         ldr r1, =0x4071
-        strh r1, [r0, #0]
+        strh r1, [r0]
         ldr r1, =0x0f40
         strh r1, [r0, #0x2]
         ldr r1, =0x8100
@@ -335,15 +336,15 @@ lcdInitT:
         strh r1, [r0, #0x1c]
 
         ldr r0, =0x306d0
-        strh r2, [r0, #0]
+        strh r2, [r0]               @ 306d0 = 0
+        
         ldr r0, =0x30680
-    
         ldr r1, =0x00f9
-        strh r1, [r0, #0x4]
+        strh r1, [r0, #0x4]         @ 30684 = f9
         ldr r1, =0x0003
-        strh r1, [r0, #0x2]
+        strh r1, [r0, #0x2]         @ 30682 = 03
         ldr r1, =0x00f9
-        strh r1, [r0, #0x4]
+        strh r1, [r0, #0x4]         @ 30684 = f9
     
         ldr r0, =lcdVideoBuffer
         ldr r1, =(lcdWidth*lcdHeight*2)
@@ -370,33 +371,13 @@ font1tab:
         .word font1_34, font1_35, font1_36, font1_37
         .word font1_38, font1_39, font1_3a, font1_3b
         .word font1_3c, font1_3d, font1_3e, font1_3f
-        .word font1_40
-        .word font1a
-        .word font1b
-        .word font1c
-        .word font1d
-        .word font1e
-        .word font1f
-        .word font1g
-        .word font1h
-        .word font1i
-        .word font1j
-        .word font1k
-        .word font1l
-        .word font1m
-        .word font1n
-        .word font1o
-        .word font1p
-        .word font1q
-        .word font1r
-        .word font1s
-        .word font1t
-        .word font1u
-        .word font1v
-        .word font1w
-        .word font1x
-        .word font1y
-        .word font1z
+        .word font1_40, font1a,   font1b,   font1c
+        .word font1d,   font1e,   font1f,   font1g
+        .word font1h,   font1i,   font1j,   font1k
+        .word font1l,   font1m,   font1n,   font1o
+        .word font1p,   font1q,   font1r,   font1s
+        .word font1t,   font1u,   font1v,   font1w
+        .word font1x,   font1y,   font1z
     
 font1_20:
          .hword 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
