@@ -22,7 +22,7 @@ all: $(TARGET)
 	@$(MAKE) -C test/ all
 
 $(TARGET) : $(OBJS)
-	$(GCC) $@.o ../avwm/icons.o -o $@  $(LDFLAGS)   
+	$(GCC) $@.o -o $@  $(LDFLAGS)   
         
 clean:
 	@echo "**** Cleaning..."
