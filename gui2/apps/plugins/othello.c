@@ -70,6 +70,7 @@ int board[NB_CELL][NB_CELL];
 int allowedHuman[NB_CELL][NB_CELL];
 int nbPieces[2]={2,2};
 int endOfGame=0;
+int cursorMoveMode=0;
 
 unsigned char human_bmap[8][8]= {
 {00,00,00,15,15,00,00,00},
@@ -487,6 +488,20 @@ void iniCursorPos()
     selectCell(cursor_pos.x,cursor_pos.y);
 }
 
+void simpleMove(int dx,int dy)
+{
+    int offsetX=dx;
+    int offsetY=dy;
+    
+    while((cursor_pos.x+offsetX)>=0 && (cursor_pos.y+offsetY)>=0 && board[cursor_pos.x+offsetX][cursor_pos.y+offsetY]!=EMPTY)
+    {
+        offsetX+=dx;
+        offsetY+=dy;
+    }
+    if((cursor_pos.x+offsetX)>=0 && (cursor_pos.y+offsetY)>=0)
+        moveCursor(offsetX,offsetY);
+}
+
 int eventHandler(int evt)
 {
     if(!endOfGame)
@@ -494,14 +509,43 @@ int eventHandler(int evt)
         switch(evt)
         {
             case BTN_UP:
+                if(cursorMoveMode==0)
+                {
+                    simpleMove(0,-1);
+                    break;
+                }
             case BTN_LEFT:
-                nxtCursosPos(PREV_POS,DO_MOVE);
-                break;
+                if(cursorMoveMode==0)
+                {
+                    simpleMove(-1,0);
+                    break;
+                }
+                else
+                {
+                    nxtCursosPos(PREV_POS,DO_MOVE);
+                    break;
+                }
             case BTN_DOWN:
+                if(cursorMoveMode==0)
+                {
+                    simpleMove(0,1);
+                    break;
+                }
             case BTN_RIGHT:
-                nxtCursosPos(NXT_POS,DO_MOVE);
-                break;
+                if(cursorMoveMode==0)
+                {
+                    simpleMove(1,0);
+                    break;
+                }
+                else
+                {
+                    nxtCursosPos(NXT_POS,DO_MOVE);
+                    break;
+                }
             case BTN_F1:
+                if(cursorMoveMode==0 && allowedHuman[cursor_pos.x][cursor_pos.y]!=1)
+                    break;
+                                 
                 doMove(cursor_pos.x,cursor_pos.y);
                 computerMove();
                 drawNbPiece();
