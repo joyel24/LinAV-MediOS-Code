@@ -119,7 +119,11 @@ void do_right(void * data)
 
         if(buttonResult == MSGBOX_OK)
         {
-            remove(list[pos+nselect].name);
+            if(list[pos+nselect].type == TYPE_FILE)
+                unlink(list[pos+nselect].name);
+            else
+                rmdir(list[pos+nselect].name);
+
             reload = true;
         }
     }
