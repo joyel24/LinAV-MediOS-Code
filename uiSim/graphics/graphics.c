@@ -22,6 +22,7 @@
 
 int ini_graphics()
 {
+/* test*/
 }
 
 void close_graphics()
