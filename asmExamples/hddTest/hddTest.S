@@ -20,6 +20,8 @@ loop1:
         bx r0                       @ switch to thumb
         
         .thumb
+       
+        ldr r0, =bufferx
         
         ldr r0, =(lcdInitT+1)
         mov r1, #1
@@ -62,6 +64,36 @@ loop1:
         mov lr, r5
         add lr, pc
         bx r4
+
+        ldr r0, =ataRegSelect
+        ldr r1, =0x10
+        strh r1, [r0]                   @ select 0
+        
+        ldr r4, =(ataWaitForRDYT+1)
+        mov r5, #1
+        mov lr, r5
+        add lr, pc
+        bx r4
+
+        ldr r0, =ataRegCommand
+        ldr r1, =0xec
+        strh r1, [r0]                   @ ATA_COMMAND_IDENTIFY
+        
+        ldr r4, =(ataWaitForStartOfXferT+1)
+        mov r5, #1
+        mov lr, r5
+        add lr, pc
+        bx r4
+        
+        ldr r0, =256
+        ldr r1, =bufferx
+        ldr r2, =ataRegData
+loopxf: ldrh r3, [r2]
+        strh r3, [r1]
+        add r1, #2
+        sub r0, #1
+        bne loopxf
+
         
 loopr:
         
@@ -171,7 +203,6 @@ notmenu3:
         add lr, pc
         bx r2
         
-        
         mov r0, #4
         mov r1, #6
         ldr r2, =message1b
@@ -187,7 +218,7 @@ notmenu3:
         mov lr, r3
         add lr, pc
         bx r2
-        
+
         mov r1, r0
         ldr r0, =message2bh
         ldr r2, =(hex4T+1)
@@ -261,7 +292,7 @@ message1a:  .asciz " ------=====##### E X P L O D E R #####=====------  "
 message1b:  .ascii "BASE ADDRESS: "
 message1bh: .asciz "xxxxxxxx"
 
-message2b:  .ascii "VAL: "
+message2b:  .ascii "ATA STATUS: "
 message2bh: .asciz "xxxx"
 
 message1c:  .asciz "++ -00--02--04--06--08--0A--0C--0E- 0123456789ABCDEF"
@@ -339,13 +370,16 @@ good4:
         bx r0
 
         .ltorg
-        
-saoff:  .word 0x3000000
+
+saoff:  .word bufferx
 caoff:  .word 0
 cyoff:  .word 156
-        
         
 .include "../includes/hex.S"
 .include "../includes/buttons.S"
 .include "../includes/lcd.S"
 .include "../includes/ata.S"
+
+bufferx:
+        .word 0        
+

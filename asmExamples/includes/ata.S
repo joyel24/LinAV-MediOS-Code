@@ -12,14 +12,80 @@
 @ Author:   By DoggerMoore
 @
 @ ataInitT()
-@ ataGetStatusT()   returns ATA status in r0
+@ ataGetStatusT()           returns ATA status in r0
+@ ataWaitForRDYT()          Waits until ATA is ready...
+@ ataWaitForBSYT()          Waits until ATA is busy...
+@ ataWaitForStartOfXferT    Wait until start of xfer.
 @
-
 
 .text
 
-        .thumb
+ataStatus_BSY   =       0x80
+ataStatus_RDY   =       0x40
+ataStatus_DF    =       0x20
+ataStatus_DRQ   =       0x08
+ataStatus_ERR   =       0x01
 
+ataRegNSector   =       0x02400080
+ataRegSector    =       0x02400100
+ataRegLCyl      =       0x02400180
+ataRegHCyl      =       0x02400200
+ataRegSelect    =       0x02400280
+ataRegCommand   =       0x02400380
+ataRegStatus    =       0x02400380
+
+ataRegData      =       0x02400000
+
+
+        .thumb
+        
+@ ataWaitForStartOfXferT
+@
+ataWaitForStartOfXferT:
+        push {lr}
+        ldr r1, =(ataWaitForBSYT+1)
+        mov r2, #1
+        mov lr, r2
+        add lr, pc
+        bx r1
+        
+        @ TODO: CHECK ALT_STATUS
+        
+        pop {r0}
+        bx r0
+        
+@ ataWaitForRDYT
+@
+ataWaitForRDYT:
+        push {r1, r2, lr}
+notred: ldr r1, =(ataGetStatusT+1)
+        mov r2, #1
+        mov lr, r2
+        add lr, pc
+        bx r1
+        ldr r2, =ataStatus_RDY
+        tst r0, r2
+        beq notred
+        pop {r1, r2}
+        pop {r0}
+        bx r0
+
+@ ataWaitForBSYT
+@
+ataWaitForBSYT:
+        push {r1, r2, lr}
+notreb: ldr r1, =(ataGetStatusT+1)
+        mov r2, #1
+        mov lr, r2
+        add lr, pc
+        bx r1
+        ldr r2, =ataStatus_BSY
+        tst r0, r2
+        beq notreb
+        pop {r1, r2}
+        pop {r0}
+        bx r0
+        
 @ ataGetStatusT
 @
 ataGetStatusT:
