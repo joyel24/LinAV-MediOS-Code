@@ -14,6 +14,7 @@
 @
 @ terminalSetPosT r0=x, r1=y
 @ terminalPutchT r0=chr
+@ terminalPutsT r0->string
 @ terminalSetColorFT r0=color
 @
 
@@ -54,6 +55,25 @@ terminalSetPosT:
         pop {r2}
         bx lr
 
+@ terminalPutsT r0->string
+@
+terminalPutsT:
+        push {lr}
+        push {r2, r3}
+        mov r2, r0
+terminalL1:
+        mov r0, #0
+        ldrb r0, [r2]
+        add r2, #1
+        cmp r0, #0
+        beq terminalD1
+        callThumb r3, terminalPutchT
+        b terminalL1
+terminalD1:
+        pop {r2, r3}
+        pop {r0}
+        bx r0
+        
 @ terminalPutchT r0=chr
 @
 terminalPutchT:

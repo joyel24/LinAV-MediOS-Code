@@ -353,8 +353,8 @@ lcdInitT:
         @ OSD Setup...        
         callThumb1 r3, osdSetScreenConfigT, 0x2000
         callThumb2 r3, osdSetScreenPositionT, 0x79, 0x00
-        callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
-        callThumb2 r3, osdSetMainConfigT, 0x14, 0xd9      
+        callThumb2 r3, osdSetBackConfigT, 0x14, 0x02    @ 02
+        callThumb2 r3, osdSetMainConfigT, 0x14, 0xf9    @ d9      
         callThumb2 r3, osdSetBack2ConfigT, 0x14, 0x00
         callThumb2 r3, osdSetMain2ConfigT, 0x14, 0x00
         callThumb2 r3, osdSetBackPositionT, 0x14, 0x12

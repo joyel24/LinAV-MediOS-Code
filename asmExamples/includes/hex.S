@@ -25,7 +25,7 @@ hexInc = 1
 @
         .thumb
 hex2T:
-        push {r2, r3, r4}
+        push {r1, r2, r3, r4}
         ldr r4, =hextable
         mov r2, #0x0f
         mov r3, r1              @ save for later
@@ -36,13 +36,13 @@ hex2T:
         and r2, r3              @ r1 = LO
         ldrb r1, [r4, r2]       @ get 2nd byte
         strb r1, [r0, #1]       @ store it
-        pop {r2, r3, r4}
+        pop {r1, r2, r3, r4}
         bx lr
 
 @ hex4T  r0->dest, r1=value (A.B.C.D)
 @
 hex4T:
-        push {r2, r3, r4}
+        push {r1, r2, r3, r4}
         ldr r4, =hextable
         mov r2, #0x0f
         mov r3, r1              @ save for later
@@ -64,13 +64,16 @@ hex4T:
         and r2, r3              @ r1 = D
         ldrb r1, [r4, r2]       @ get 4th byte
         strb r1, [r0, #3]       @ store it
-        pop {r2, r3, r4}
+        pop {r1, r2, r3, r4}
         bx lr
+
+hextable:   .ascii "0123456789ABCDEF"
+        .ltorg
 
 @ hex8T  r0->dest, r1=value (A.B.C.D.E.F.G.H)
 @
 hex8T:
-        push {r2, r3, r4}
+        push {r1, r2, r3, r4}
         ldr r4, =hextable
         mov r2, #0x0f
     
@@ -114,12 +117,9 @@ hex8T:
         and r2, r3              @ r1 = H
         ldrb r1, [r4, r2]       @ get 8th byte
         strb r1, [r0, #7]       @ store it
-        pop {r2, r3, r4}
+        pop {r1, r2, r3, r4}
         bx lr
 
-        .align 4
-
-hextable:   .ascii "0123456789ABCDEF"
         .ltorg
         .arm
         

@@ -17,11 +17,18 @@
 @ ataWaitForBSYT()          Waits until ATA is busy...
 @ ataWaitForStartOfXferT    Wait until start of xfer.
 @
+@ ataIdentifyT  r0->buffer
+@ ataReadLBAT   r0->buffer r1=LBA, r2=n
 
 .ifndef ataInc
 ataInc = 1
 
 .text
+
+ataCommand_IDENTIFY         =   0xec
+ataCommand_READ_SECTORS     =   0x20
+ataCommand_READ_MULTIPLE    =   0xc4
+ataCommand_SET_MULTIPLE_MODE=   0xc6
 
 ataStatus_BSY   =       0x80
 ataStatus_RDY   =       0x40
@@ -29,30 +36,115 @@ ataStatus_DF    =       0x20
 ataStatus_DRQ   =       0x08
 ataStatus_ERR   =       0x01
 
+ataSelectLBA    =       0x40
+
 ataRegData      =       0x02400000
-ataRegNSector   =       0x02400080
-ataRegSector    =       0x02400100
-ataRegLCyl      =       0x02400180
-ataRegHCyl      =       0x02400200
-ataRegSelect    =       0x02400280
-ataRegCommand   =       0x02400300
-ataRegStatus    =       0x02400340
+ataRegError     =       0x02400080
+ataRegNSector   =       0x02400100
+ataRegSector    =       0x02400180
+ataRegLCyl      =       0x02400200
+ataRegHCyl      =       0x02400280
+ataRegSelect    =       0x02400300
+ataRegCommand   =       0x02400380
+ataRegStatus    =       0x02400380
 
 
         .thumb
+
+@ ataReadLBAT (r0->buffer, r1=lba, r2=n)
+@
+ataReadLBAT:
+        push {lr}
+        push {r1, r2, r3, r4, r5, r6}
+        mov r5, r0
+        mov r4, r1
+        mov r6, r2
+        callThumb r1, ataWaitForRDYT        
+
+        ldr r2, =ataRegSector
+        mov r1, r4
+        strb r1, [r2]
+        ldr r2, =ataRegLCyl
+        lsr r1, #8
+        strb r1, [r2]
+        ldr r2, =ataRegHCyl
+        lsr r1, #8
+        strb r1, [r2]
+
+        lsr r1, #8
+        ldr r3, =ataSelectLBA        
+        ldr r2, =ataRegSelect
+        orr r1, r3
+        strb r1, [r2]
+        
+        ldr r2, =ataRegCommand
+        ldr r1, =ataCommand_READ_SECTORS
+        strb r1, [r2]
+
+        callThumb r4, ataWaitForStartOfXferT
+
+        lsl r6, #8              @ * 256
+        
+        ldr r2, =ataRegData
+ataR2:  mov r1, #0
+        ldrh r1, [r2]
+        strh r1, [r5]
+        add r5, #2
+        sub r6, #1
+        bne ataR2
+        
+        pop {r1, r2, r3, r4, r5, r6}        
+        pop {r0}
+        bx r0
+
+@ ataIdentifyT (r0->buffer)
+@
+ataIdentifyT:
+        push {lr}
+        push {r1, r2, r3, r4, r5}
+        mov r5, r0
+        callThumb r1, ataWaitForRDYT        
+
+        ldr r2, =ataRegSelect
+        ldr r1, =0
+        strb r1, [r2]
+        
+        ldr r2, =ataRegCommand
+        ldr r1, =ataCommand_IDENTIFY
+        strb r1, [r2]
+
+        callThumb r4, ataWaitForStartOfXferT
+
+        ldr r3, =256
+        ldr r2, =ataRegData
+ataRl:  mov r1, #0
+        ldrh r1, [r2]
+        strh r1, [r5]
+        add r5, #2
+        sub r3, #1
+        bne ataRl
+        
+        pop {r1, r2, r3, r4, r5}        
+        pop {r0}
+        bx r0
         
 @ ataWaitForStartOfXferT
 @
 ataWaitForStartOfXferT:
         push {lr}
-        ldr r1, =(ataWaitForBSYT+1)
+
+notrea: ldr r1, =(ataGetStatusT+1)
         mov r2, #1
         mov lr, r2
         add lr, pc
         bx r1
-        
+        ldr r2, =(ataStatus_DRQ)
+        and r0, r2
+        cmp r0, r2
+        bne notrea
+
         @ TODO: CHECK ALT_STATUS
-        
+
         pop {r0}
         bx r0
         
@@ -92,7 +184,7 @@ notreb: ldr r1, =(ataGetStatusT+1)
 @
 ataGetStatusT:
         push {r1}
-        ldr r1, =0x02400380
+        ldr r1, =ataRegStatus
         mov r0, #0
         ldrh r0, [r1]
         pop {r1}
@@ -101,6 +193,7 @@ ataGetStatusT:
 @ ataInitT
 @
 ataInitT:
+        push {lr}
         push {r0, r1, r2, r3, r4}
         @ do hardware writes...
         
@@ -123,7 +216,8 @@ loophw: ldr r1, [r0]
         b loophw
 donehw:
         pop {r0, r1, r2, r3, r4}
-        bx lr
+        pop {r0}
+        bx r0
 
         .ltorg
 hardwrites:
