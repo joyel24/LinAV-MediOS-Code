@@ -44,9 +44,15 @@ void interruptsSetCauses2A(u32 bitmask);
 u32 interruptsGetCauses2A();
 
 void interruptsInitA(void* fun);
+
 u32 interruptsGetIRQEnabledA();
 void interruptsSetIRQEnabledA();
 void interruptsSetIRQDisabledA();
+
+u32 interruptsGetFIQEnabledA();
+void interruptsSetFIQEnabledA();
+void interruptsSetFIQDisabledA();
+
 void interruptsResetIRQA(u32 num);
 void interruptsResetMaskA(u32 num);
 

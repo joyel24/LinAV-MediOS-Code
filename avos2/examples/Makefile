@@ -1,4 +1,4 @@
-SUBDIRS = ataTest gioTest osdTest rtcTest timerTest exploder sysInfo remote
+SUBDIRS = powerTest palTest ataTest gioTest osdTest rtcTest timerTest exploder sysInfo remote
 
 all: subdirs
 

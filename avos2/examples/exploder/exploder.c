@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <gio.h>
 #include <interrupts.h>
+#include <timers.h>
 
 struct graphicsBuffer screenBitmap;
 static int pal16[2] = {0x0000, 0xffff};
@@ -15,6 +16,7 @@ void exploderButtons();
 void exploderInit();
 void updateInt(int i);
 void intsub();
+void fiqHandler();
 
 static char* saddr = (char*) 0x30000;
 static int vaddr = 0;
@@ -39,6 +41,10 @@ int main() {
     screenBitmap.bitsPerPixelShift = 4;
     screenBitmap.bitsPerPixel = 16;
 
+    interruptsInitFIQA(fiqHandler);
+    //interruptsSetFIQDisabledA();
+    //timersWDTConfigA(WDT_MODE_DISABLE, 1000, 1, WDT_EXTRESET_EXTONLY);
+    
     // Assume DVR for now...
     cpldSetModeA(4);
     cpldSetReg2A(0x0b);
@@ -153,10 +159,10 @@ void exploderShow() {
 }
 
 static int irqCounts[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static char hex4[] = "xxxx";
 
 void updateInt(int i) {
-    int x, y, op;  
+    int x, y, op;
+    char hex4[] = "xxxx";
     
     x = i & 7;
     y = i >> 3;
@@ -176,9 +182,13 @@ void intsub() {
     }
 
     irqCounts[i]++;
-
-//    updateInt(i);
+    debug("IRQ %d [%d]\n", i, irqCounts[i]);
+    
+    updateInt(i);
 
     interruptsResetIRQA(i);
 }
 
+void fiqHandler() {
+    debug("FIQ");    
+}

@@ -55,8 +55,8 @@ powerGetStatusA:
 powerGetStatus:
         push {r1, r2, r3, r4, r5, r6, r7, lr}
 
+        mov r1, r0               @ cmd
         mov r0, #0x90            @ 10010000
-        mov r1, #0x00            @ no idea if this is anything
         ldr r2, =pgs
         mov r3, #2
         bl i2cRead
@@ -73,6 +73,6 @@ powerGetStatus:
         bx r1
 
 pgs:    .word 0
-        
+
         .arm
         .ltorg

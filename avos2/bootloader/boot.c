@@ -236,7 +236,7 @@ startInit:
                     "[MEM]");
             }
 
-            b = powerGetStatusA();
+            b = powerGetStatusA(0);
             stringPutHexA(powerSt, b, 4);
 
             if (powerIsDCConnectedA()) {
@@ -254,7 +254,7 @@ startInit:
             graphicsStringA(&screenBitmap2, 320-(8*9)-2, 2, &sprite8_13, std8x13_, 9, 0,
                         timeSt);
 
-            b = powerGetStatusA();
+            b = powerGetStatusA(0);
             stringPutHexA(powerSt, b, 4);
 
             // Update file display window if needed,

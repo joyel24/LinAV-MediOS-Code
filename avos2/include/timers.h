@@ -23,10 +23,21 @@ typedef unsigned long u32;
 #define        TIMERS_TMCLK_ARM         0x00
 #define        TIMERS_TMCLK_EXT         0x01
 
-extern u32 timersGetValue(u32 timer);
-extern void timersTrigger(u32 timer);
-extern void timersConfig(u32 timer, u32 mode, u32 clockSelect, u32 divide, u32 maxVal);
+
+#define        WDT_MODE_DISABLE         0x00
+#define        WDT_MODE_ENABLE          0x01
+#define        WDT_MODE_INT             0x00
+#define        WDT_MODE_INTRESET        0x04
+        
+#define        WDT_EXTRESET_EXTONLY     0x00
+#define        WDT_EXTRESET_ANDMCU      0x01
+
 
 extern u32 timersGetValueA(u32 timer);
 extern void timersTriggerA(u32 timer);
 extern void timersConfigA(u32 timer, u32 mode, u32 clockSelect, u32 divide, u32 maxVal);
+
+extern void timersWDTConfigA(u32 mode, u32 divval, u32 maxval, u32 extresetmode);
+extern u32 timersWDTGetValueA();
+extern void timersWDTResetA();
+

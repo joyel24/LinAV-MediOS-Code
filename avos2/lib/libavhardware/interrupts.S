@@ -30,6 +30,33 @@ interruptsInc = 1
 .text
 
 @ ------------------------------------------------------------------------------
+@ interruptsGetFIQEnabled()
+.globl interruptsGetFIQEnabledA
+interruptsGetFIQEnabledA:
+        mrs r0, cpsr
+        mvn r0, r0, lsr #6
+        and r0, r0, #1
+        mov pc, lr
+
+@ ------------------------------------------------------------------------------
+@ interruptsSetFIQEnabled()
+.globl interruptsSetFIQEnabledA
+interruptsSetFIQEnabledA:
+        mrs r0, cpsr
+        bic r0, r0, #0x40
+        msr cpsr_c, r0
+        mov pc, lr
+        
+@ ------------------------------------------------------------------------------
+@ interruptsSetFIQDisabled()
+.globl interruptsSetFIQDisabledA
+interruptsSetFIQDisabledA:
+        mrs r0, cpsr
+        orr r0, r0, #0x40
+        msr cpsr_c, r0
+        mov pc, lr
+
+@ ------------------------------------------------------------------------------
 @ interruptsGetIRQEnabled()
 .globl interruptsGetIRQEnabledA
 interruptsGetIRQEnabledA:
@@ -46,7 +73,7 @@ interruptsSetIRQEnabledA:
         bic r0, r0, #0x80
         msr cpsr_c, r0
         mov pc, lr
-
+        
 @ ------------------------------------------------------------------------------
 @ interruptsSetIRQDisabled()
 .globl interruptsSetIRQDisabledA
@@ -70,6 +97,84 @@ interruptsInit:
         bx lr
 
 @ ------------------------------------------------------------------------------
+@ interruptsInitFIQ()
+.globl interruptsInitFIQA
+interruptsInitFIQA:
+        switchThumb
+.globl interruptsInitFIQ
+.thumb_func
+
+interruptsInitFIQ:
+        ldr r2, =0x38
+        ldr r0, =fiqHandle
+        str r0, [r2]            @ For the moment use original int startup code
+        bx lr
+        
+        .arm
+fiqHandle:
+	ldr     r8, =0x30502
+	ldrh    r9, [r8]
+	tst     r9, #0x800
+	 bne     avFIQout
+	ldrh    r8, [r8,#0x24]
+	tst     r8, #0x800
+	 beq     avFIQout		@ wrong FIQ or MASK => out
+	
+    ldr     r8, =0x3058A
+	ldrh    r9, [r8]
+	movs    r9, r9, lsr #0xD
+	 bcs     iniAvLoopVal2
+	ldr     r8, =.avLOOPval2
+	ldr     r8, [r9]
+	add     r8, r8, #1
+	str     r8, [r9]
+	ldr     r9, =0x138800
+	cmp     r8, r9
+	 ble		normalFIQ
+	mov     r9, #1
+	mov     r9, r9, lsl r8
+	ldr     r8,=0x30526    @ interrupt mask 1
+	ldrh    r10, [r8]
+	bic     r10, r10, r9
+	strh    r10, [r8]
+	@mov		r8,#0
+	@ldr		r9,=0x30a1a
+	@strh	r8,[r9]
+	b       endFiq
+iniAvLoopVal2:
+	mov     R8, #0
+	ldr     R9, =.avLOOPval2
+	str     r8, [r9]
+normalFIQ:
+	ldr		r8, =.avLOOPval1
+	ldr		r9,[r8]
+	add		r9,r9,#1
+	str		r9,[r8]
+	mov		r8,#1
+	add		r8,r8,r9
+	ldr     r9, =0x30a1a
+	strh    r8, [r9]
+	mov		r8,#1
+	ldr		r9,=0x30400
+	str		r8,[r9]
+endFiq:
+	@ ack the FIQ
+	mov		r9,	#0xb
+	mov     r8, #1
+	mov     r8, r8, lsl r9
+	ldr     r9, =0x30502
+	ldrh    r10, [r9]
+	orr     r10, r10, r8
+	strh    r10, [r9]
+avFIQout:
+	subs pc, lr, #4
+
+.avLOOPval1:	.word	0x0
+.avLOOPval2:	.word	0x0        
+        
+        .thumb
+        
+@ ------------------------------------------------------------------------------
 @ interruptsGetCauses()
 .globl interruptsGetCausesA
 interruptsGetCausesA:
@@ -78,12 +183,14 @@ interruptsGetCausesA:
 .thumb_func
 
 interruptsGetCauses:
+        push {r1, r2}
         ldr r2, =0x30504
         ldrh r0, [r2, #2]
         lsl r0, #16
         mov r1, #0
         ldrh r1, [r2]
         orr r0, r1
+        pop {r1, r2}
         bx lr
 
 @ ------------------------------------------------------------------------------
@@ -95,12 +202,12 @@ interruptsSetCausesA:
 .thumb_func
 
 interruptsSetCauses:
-        push {r0, r2}
-        ldr r2, =0x30504
-        strh r0, [r2]
+        push {r0, r1}
+        ldr r1, =0x30504
+        strh r0, [r1]
         lsr r0, #16
-        strh r0, [r2, #2]
-        pop {r0, r2}
+        strh r0, [r1, #2]
+        pop {r0, r1}
         bx lr
 
 @ ------------------------------------------------------------------------------
@@ -112,12 +219,14 @@ interruptsGetCauses2A:
 .thumb_func
 
 interruptsGetCauses2:
+        push {r1, r2}
         ldr r2, =0x30500
         ldrh r0, [r2, #2]
         lsl r0, #16
         mov r1, #0
         ldrh r1, [r2]
         orr r0, r1
+        pop {r1, r2}
         bx lr
 
 @ ------------------------------------------------------------------------------
@@ -129,12 +238,12 @@ interruptsSetCauses2A:
 .thumb_func
 
 interruptsSetCauses2:
-        push {r0, r2}
-        ldr r2, =0x30500
-        strh r0, [r2]
+        push {r0, r1}
+        ldr r1, =0x30500
+        strh r0, [r1]
         lsr r0, #16
-        strh r0, [r2, #2]
-        pop {r0, r2}
+        strh r0, [r1, #2]
+        pop {r0, r1}
         bx lr
         
 @ ------------------------------------------------------------------------------
@@ -218,6 +327,7 @@ interruptsResetIRQA:
 .thumb_func
 
 interruptsResetIRQ:
+        push {r0, r1, r2}
         cmp r0, #15
          bhi irhi
         mov r1, #1
@@ -229,11 +339,13 @@ interruptsResetIRQ:
         ldrh r2, [r0, #4]
         orr r2, r1
         strh r2, [r0, #4]
+        pop {r1, r2}
         bx lr
         
 irl2:   ldrh r2, [r0]
         orr r2, r1
         strh r2, [r0]
+        pop {r0, r1, r2}
         bx lr
 irhi:
         mov r1, #1
@@ -246,11 +358,13 @@ irhi:
         ldrh r2, [r0, #6]
         orr r2, r1
         strh r2, [r0, #6]
+        pop {r0, r1, r2}
         bx lr
 
 irl3:   ldrh r2, [r0, #2]
         orr r2, r1
         strh r2, [r0, #2]
+        pop {r0, r1, r2}
         bx lr
 
 @ ------------------------------------------------------------------------------
@@ -262,6 +376,7 @@ interruptsResetMaskA:
 .thumb_func
 
 interruptsResetMask:
+        push {r0, r1, r2}
         cmp r0, #15
          bhi irmhi
         ldr r2, =0x30524
@@ -275,6 +390,7 @@ irmhi:  ldr r2, =0x30526
 irmgo:  ldrh r0, [r2]
         bic r0, r1
         strh r0, [r2]
+        pop {r0, r1, r2}
         bx lr
         
         .arm

@@ -27,7 +27,20 @@ timersInc = 1
         TIMER1_BASE     =   0x30080
         TIMER2_BASE     =   0x30100
         TIMER3_BASE     =   0x30180
-
+        TIMERWDT_BASE   =   0x30400
+        
+        TIMERWDT_MODE   =   0x00
+        TIMERWDT_RESET  =   0x02
+        TIMERWDT_PS     =   0x04
+        TIMERWDT_COUNT  =   0x06
+        TIMERWDT_EXTRESET  =   0x08
+        
+        WDT_MODE_ENABLE = 0x01
+        WDT_MODE_INTRESET = 0x04
+        
+        WDT_EXTRESET_EXTONLY = 0x00
+        WDT_EXTRESET_ANDMCU = 0x01
+        
         TIMER_TMMD      =   0x00            @ Timer mode
         TIMER_TMCLK     =   0x02            @ Timer clock select
         TIMER_TMPS      =   0x04            @ Timer prescaler divide value
@@ -45,7 +58,59 @@ timersInc = 1
         TIMER_TMCLK_EXT     = 0x01          @ External MXO/MXI or SYSCLK input
 
 .text
-  
+
+@ ------------------------------------------------------------------------------
+@ timersWDTConfig(r0=mode, r1=divval, r2=max val, r3=extreset)
+@
+.globl timersWDTConfigA
+timersWDTConfigA:
+        switchThumb
+.globl timersWDTConfig
+.thumb_func
+
+timersWDTConfig:
+        push {r4, r5}
+        ldr r4, =TIMERWDT_BASE
+        strh r1, [r4, #TIMERWDT_PS]
+        strh r2, [r4, #TIMERWDT_COUNT]
+        strh r3, [r4, #TIMERWDT_EXTRESET]
+        strh r0, [r4, #TIMERWDT_MODE]
+        pop {r4, r5}
+        bx lr
+
+@ ------------------------------------------------------------------------------
+@ timersWDTGetValue()
+@
+.globl timersWDTGetValueA
+timersWDTGetValueA:
+        switchThumb
+.globl timersWDTGetValue
+.thumb_func
+
+timersWDTGetValue:
+        push {r4}
+        ldr r4, =TIMERWDT_BASE
+        ldrh r0, [r4, #TIMERWDT_COUNT]          @ Count
+        pop {r4}
+        bx lr
+
+@ ------------------------------------------------------------------------------
+@ timersWDTReset()
+@
+.globl timersWDTResetA
+timersWDTResetA:
+        switchThumb
+.globl timersWDTReset
+.thumb_func
+
+timersWDTReset:
+        push {r4}
+        ldr r4, =TIMERWDT_BASE
+        mov r0, #1
+        strh r0, [r4, #TIMERWDT_RESET]
+        pop {r4}
+        bx lr
+        
 @ ------------------------------------------------------------------------------
 @ timersConfig(r0=timer, r1=config, r2=clk, r3=divval, sp=max val)
 @

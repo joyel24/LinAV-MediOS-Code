@@ -25,7 +25,7 @@ static int pal16[2] = {0x0000, 0xffff};
 struct graphicsBuffer sprite5_8 = {0, 1, 5, 8, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, 0};
 
 static unsigned int buffmem[1];
-static char * mp3Buff = (void*)0x03600000;
+static char * mp3Buff = (void*)0x03500000;
 static int mp3ptr=0;
 static int fileSize;
 static int masReady=0;
@@ -53,7 +53,7 @@ int main(int argc, char * * argv) {
     osdSetComponentConfigA(OSD_CURSOR1, 0);
     osdSetComponentConfigA(OSD_CURSOR2, 0);
 
-    screenBitmap.offset = 0x03e00000;
+    screenBitmap.offset = 0x03f00000;
     screenBitmap.bytesPerLine = 320*2;
     screenBitmap.width = 320;
     screenBitmap.height = 240;
@@ -64,7 +64,7 @@ int main(int argc, char * * argv) {
 
     osdSetComponentSizeA(OSD_BITMAP1, 320*2, 240);
     osdSetComponentPositionA(OSD_BITMAP1, 0x14, 0x12);
-    osdSetComponentOffsetA(OSD_BITMAP1, 0x03e00000);
+    osdSetComponentOffsetA(OSD_BITMAP1, 0x03f00000);
     osdSetComponentSourceWidthA(OSD_BITMAP1, 0x14);
     osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT);
@@ -84,21 +84,19 @@ int main(int argc, char * * argv) {
 
 	int fileHandle;
 	fileHandle = fopen(argv[1], "r");
-
+    debug("Filehandle = %08x\n", fileHandle);
+    
 	if (fileHandle < 0) return -1;
 
 	fileSize = fsize(fileHandle);
-	if (fileSize > 0x00600000) return -1;
+    
+    debug("size = %08x\n", fileSize);
+	if (fileSize > 0x00800000) return -1;
 
     fread(fileHandle, mp3Buff, fileSize);
 	fclose(fileHandle);
 
     ataPowerDownHDDA();
-
-    //debug("Formatting data... [%d]\n", fileSize);
-    //ecrSwapBitsBufferA(mp3Buff, mp3Buff, fileSize);
-    //ecrSwapBytesBufferA(mp3Buff, mp3Buff, fileSize);
-
 
     masResetA();
     
@@ -215,6 +213,14 @@ int main(int argc, char * * argv) {
                 updateParam(cparam);
             }
         }
+
+        if (c & BUTTONS_AV300_MENU1) {
+            for (c=0xfd0;c<0xfd8;c++) {
+                masReadD0A(c, buffmem, 1);
+                debug("Mas %08x: %08x\n", c, buffmem[0]);
+                feedMas();
+            }
+        }
         
         for (c=0;c<20;c++) feedMas();
 
@@ -231,12 +237,6 @@ int main(int argc, char * * argv) {
         b = 250-v;
         if (b>0) graphicsBoxfA(&screenBitmap, 70 + v, 232, b, 6, 0x0000);
         if (v>0) graphicsBoxfA(&screenBitmap, 70, 232, v, 6, 0x0202);
-
-//        for (c=0xfd0;c<0xfd8;c++) {
-//            c = 0xfd0;
-//            masReadD0A(c, buffmem, 1);
-//            debug("Mas %08x: %08x\n", c, buffmem[0]);
-//        }
         
 //        debug("out L, R: %08x, %08x\n", masGetOutPeakLeft(), masGetOutPeakRight());
     }
@@ -281,7 +281,7 @@ void feedMas() {
         mp3ptr+=cnt;
         if (mp3ptr>=fileSize) mp3ptr=0;
     }
-    debug("masDataFed %d\n", cnt);
+    //debug("masDataFed %d\n", cnt);
 }
 
 void drawBar(int n) {
