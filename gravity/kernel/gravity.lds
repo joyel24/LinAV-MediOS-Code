@@ -39,6 +39,11 @@ SECTIONS
     .bss :
     {
         *(.bss)
+    } > DRAM
+    
+    .common :
+    {
+        *(.common)
         _end_kernel = . ;
     } > DRAM
 }

@@ -2,8 +2,9 @@ include ../../Makefile.conf
 
 GCCFLAGS=-I../../../include -I../../../include/kernel
 
-SRC = $(wildcard *.c)
-OBJS = $(SRC:%.c=%.o)
+@SRC = $(wildcard *.c)
+@OBJS = $(SRC:%.c=%.o)
+OBJS = 4x6.o
 
 all: $(OBJS)
 	@cp -f $(OBJS) ../
