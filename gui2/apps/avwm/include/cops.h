@@ -163,6 +163,9 @@ struct client_operations {
     void (*cleanList)           (struct browser_data * bdata);
     void (*chgSelect)           (struct browser_data *bdata,int num);
     int  (*nbSelected)          (struct browser_data * bdata);
+    struct dir_entry * (*nxtSelect) (struct browser_data * bdata,int * pos);
+    int  (*do_mv)               (char * src,char * dest);
+    int  (*do_cp)               (char * src,char * dest);
     
     int  (*powerOff_timer_on)          (void);
     int  (*powerOff_timer_off)         (void);

@@ -28,6 +28,7 @@
 #include "CF_handler.h"
 #include "helperMenu.h"
 #include "file_type.h"
+#include "file_handle_fct.h"
 
 #include <stdlib.h>
 
@@ -143,6 +144,9 @@ struct client_operations cops={
     cleanList          : cleanList,
     chgSelect          : chgSelect,
     nbSelected         : nbSelected,
+    nxtSelect          : nxtSelect,
+    do_cp              : do_cp,
+    do_mv              : do_mv,
     
     powerOff_timer_on         : powerOff_timer_on,
     powerOff_timer_off        : powerOff_timer_off,

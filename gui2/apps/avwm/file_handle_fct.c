@@ -117,7 +117,14 @@ int do_cp(char * src,char * dest)
     {
         perror(src);
         return 0;
-    }  
+    }
+    
+    if(isadir(src))
+    {
+        perror(src);
+        fprintf(stderr,"Can't copy a dir\n");
+        return 0;
+    }
                   
     if(isadir(dest))                /* if dest is just a folder => build the complete name */
         dest=buildname(dest,src);

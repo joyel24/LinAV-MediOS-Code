@@ -896,10 +896,9 @@ int putS(unsigned int color, unsigned int bg_color, int x, int y, unsigned char 
     
     if(x+w>SCREEN_WIDTH)
     {
-        
+        printf("!!!!!!!!!! string too long %s\n",s);
         c = s[(SCREEN_WIDTH-x)/font->width];
-        s[(SCREEN_WIDTH-x)/font->width]=0;
-        printf("!!!!!!!!!! string too long\n");        
+        s[(SCREEN_WIDTH-x)/font->width]=0;                
     }
 
     default_gc->gops->drawString(font,color,bg_color,x,y,s,default_gc->buffer);

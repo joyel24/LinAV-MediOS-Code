@@ -50,18 +50,22 @@ struct menu_item menu2;
 struct menu_item menu3;
 struct menu_item menu4;
 struct menu_item menu5;
+struct menu_item menu6;
 
 #define MENU_COPY      1
 #define MENU_DELETE    2
 #define MENU_RENAME    3
 #define MENU_NEW_DIR   4
 #define MENU_CF        5
+#define MENU_MOVE      6
 
-struct ls_item ls_item1 = { "New Dir" , MENU_NEW_DIR};
-struct ls_item ls_item2 = { "Delete"  , MENU_DELETE};
-struct ls_item ls_item3 = { "Rename"  , MENU_RENAME};
-struct ls_item ls_item4 = { "Copy"    , MENU_COPY};
-struct ls_item ls_item5 = { "CF"      , MENU_CF};
+
+struct ls_item ls_item1 = { "Copy"    , MENU_COPY};
+struct ls_item ls_item2 = { "Move"    , MENU_MOVE};
+struct ls_item ls_item3 = { "New Dir" , MENU_NEW_DIR};
+struct ls_item ls_item4 = { "Delete"  , MENU_DELETE};
+struct ls_item ls_item5 = { "Rename"  , MENU_RENAME};
+struct ls_item ls_item6 = { "CF"      , MENU_CF};
 
 struct browser_data browser2 = {
     path            : NULL,
@@ -91,6 +95,8 @@ struct browser_data browser2 = {
 };
 struct browser_data * bdata2;
 
+int copy_mode;
+
 extern int evt_mode;
 
 /*extern variables */
@@ -111,12 +117,14 @@ void ini_menu_struct(struct browser_data * bdata)
     ls_item3.bdata=bdata;
     ls_item4.bdata=bdata;
     ls_item5.bdata=bdata;
+    ls_item6.bdata=bdata;
 
     menu1.data=(void*)&ls_item1;
     menu2.data=(void*)&ls_item2;
     menu3.data=(void*)&ls_item3;
     menu4.data=(void*)&ls_item4;
     menu5.data=(void*)&ls_item5;
+    menu6.data=(void*)&ls_item6;
 
     menu1.prev=NULL;
     menu1.nxt=&menu2;
@@ -139,9 +147,14 @@ void ini_menu_struct(struct browser_data * bdata)
     menu4.up=NULL;
     
     menu5.prev=&menu4;
-    menu5.nxt=NULL;
+    menu5.nxt=&menu6;
     menu5.sub=NULL;
     menu5.up=NULL;
+    
+    menu6.prev=&menu5;
+    menu6.nxt=NULL;
+    menu6.sub=NULL;
+    menu6.up=NULL;
     
 }
 
@@ -155,7 +168,10 @@ void do_on(void * data)
 {
 }
 
-char * pwd=NULL;
+char pwd[PATHLEN];
+char pwd2[PATHLEN];
+
+int copyMode=0;
 
 void do_right(void * data)
 {
@@ -169,33 +185,28 @@ void do_right(void * data)
     cops->stop_menu();
     evt_mode=BRW_MODE;
 
-    if(pwd)
-        free(pwd);
-    pwd=NULL;
+    copy_mode=MODE_COPY;
     
     switch(item->num)
     {
+        case MENU_MOVE:
+            copy_mode=MODE_MOVE;
         case MENU_COPY:
-        #if 0
             if(cops->nbSelected(bdata)==0)
                 cops->msgBox("Warning - copy", "Select files first", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
             else
             {
                 /* saving current path */
-                if(!(pwd=getcwd(NULL,PATHLEN)))
+                if(!getcwd(pwd,PATHLEN))
                 {
                     cops->msgBox("Warning - copy", "Can't get current path", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
                     break;
-                }
-                else
-                    cops->msgBox("Info - copy", "Select destination", MSGBOX_TYPE_OK, MSGBOX_ICON_INFORMATION);
+                }                
                 
                 bdata2=&browser2;
                 evt_mode=CP_MV_MODE;
-                cops->viewNewDir(bdata2,pwd);               
-                
+                cops->viewNewDir(bdata2,pwd);                
             }
-        #endif
             break;
         case MENU_DELETE:
             buttonResult = cops->msgBox("Delete Warning", "Really delete it ?", MSGBOX_TYPE_OKCANCEL, MSGBOX_ICON_WARNING);
@@ -275,13 +286,42 @@ void mk_item_str(void * data,char * str)
 
 void cp_mv_evt(int evt)
 {
+    int pos_list=0;
+    char src[PATHLEN];
+    struct dir_entry * entry;
     evt=cops->browserEvt(evt,bdata2);
     switch(evt)
     {
-        case BTN_RIGHT:
+        //case BTN_RIGHT: dest has to be dir atm
         case BTN_ON:
             evt_mode=BRW_MODE;
-            cops->viewNewDir(bdata,pwd);
+            if(!getcwd(&pwd2,PATHLEN))
+            {
+                cops->msgBox("Warning - Copy§Move", "Can't get dest path", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
+                cops->viewNewDir(bdata,pwd);
+                break;
+            }
+            
+            if(!strcmp(pwd,pwd2))
+            {
+                cops->msgBox("Warning - Copy/Move", "dest==src", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
+                cops->viewNewDir(bdata,pwd);
+                break;
+            }
+                        
+            printf("copying from %s to %s\n",pwd,pwd2);
+            
+            while((entry=cops->nxtSelect(bdata,&pos_list))!=NULL)
+            {
+                fprintf(stderr,"- %s %s",entry->name,entry->type==TYPE_DIR?"folder":"file");
+                snprintf(src,PATHLEN,"%s/%s",pwd,entry->name);
+                if(copy_mode)
+                    if(!cops->do_mv(src,pwd2)) fprintf(stderr," - mv error\n"); else fprintf(stderr," - mv done\n");
+                else
+                    if(!cops->do_cp(src,pwd2)) fprintf(stderr," - cp error\n"); else fprintf(stderr," - cp done\n");                
+            }
+            cops->viewNewDir(bdata,pwd2);
+            break;
     }
 }
 
@@ -303,7 +343,7 @@ void draw_cp_mv_bottom(struct browser_data *bdata)
     else
     {
         len=strlen(pwd);        
-        snprintf(tmp,"%s - Copying/Move",pwd);
+        snprintf(tmp,100,"%s - Copying/Move",pwd);
         cops->putS(COLOR_BLUE, COLOR_WHITE,2, 220, tmp);  
     }
 

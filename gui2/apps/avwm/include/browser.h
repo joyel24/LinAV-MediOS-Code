@@ -75,6 +75,7 @@ int  addEntry    (struct browser_data * bdata,char * name,int type,int size);
 int  doLs        (struct browser_data * bdata,char * name);
 void chgSelect   (struct browser_data *bdata,int num);
 int  nbSelected  (struct browser_data * bdata);
+struct dir_entry * nxtSelect(struct browser_data * bdata,int * pos);
 
 /*****    evt_handle_fct    *****/
 int  browserEvt         (int evt,struct browser_data * bdata);

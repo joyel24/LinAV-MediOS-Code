@@ -31,6 +31,9 @@
 #define MENU_MODE   1
 #define CP_MV_MODE  2
 
+#define MODE_COPY   0
+#define MODE_MOVE   1
+
 int  eventHandler       (int evt);
 
 /*****    menu_fct    *****/

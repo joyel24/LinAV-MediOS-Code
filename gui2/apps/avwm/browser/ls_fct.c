@@ -201,3 +201,19 @@ int nbSelected(struct browser_data * bdata)
         nb+=bdata->list[i].selected;
     return nb;
 }
+
+struct dir_entry * nxtSelect(struct browser_data * bdata,int * pos)
+{
+    int i;
+    if(*pos<0 || *pos>bdata->listused)
+        return NULL;
+    for(i=*pos;i<bdata->listused;i++)
+    {
+        if(bdata->list[i].selected)
+        {
+            *pos=i+1;
+            return &bdata->list[i];
+        }
+    }
+    return NULL;
+}
