@@ -89,22 +89,66 @@ __IRAM_CODE int kcswi_handler (
 	}
 	break;
 
-	case nAPI_TASK_SENDMESSAGE: //(HTASK hTask, MESSAGE msg)                                      { SAVE; asm("swi 6"); LOAD; }
+	case nAPI_TASK_SENDMESSAGE: //(HTASK hTask, MESSAGE* pMsg)
 	{
+		__cli ();
+
+		PIPE* pPipe = ((TASK_INFO*)nParam1)->pMessagePipe;
+		MESSAGE* pMsg = (MESSAGE*)nParam2;
+
+		SYSTEM_CTRL_COMMAND* pSysCtrl = (SYSTEM_CTRL_COMMAND*)(pPipe->buffer + pPipe->nSender);
+		pSysCtrl->nCmdId        = pMsg->nMsg;
+		pSysCtrl->nCmdParam1    = pMsg->nParam1;
+		pSysCtrl->nCmdParam2    = pMsg->nParam2;
+		pSysCtrl->pSenderThread = g_pTaskRing;
+		pPipe->nSender = (pPipe->nSender + sizeof(SYSTEM_CTRL_COMMAND)) & PIPE_SIZE_MASK;
+
+		__sti ();
 	}
 	break;
 
-	case nAPI_TASK_PEEKMESSAGE: //()                                                              { SAVE; asm("swi 7"); LOAD; }
+	case nAPI_TASK_PEEKMESSAGE: //(MESSAGE* pMsg)
 	{
+		int nDataAvailable = 0;
+		__cli ();
+		if (g_pTaskRing->pMessagePipe->nReceiver != g_pTaskRing->pMessagePipe->nSender)
+			nDataAvailable = 1;
+		__sti ();
+
+		if (nDataAvailable)
+			API_TASK_WAITMESSAGE (nParam1);
+		else
+			return ERR_RECEIVER_EMPTY;
 	}
 	break;
 
-	case nAPI_TASK_WAITMESSAGE: //()
+	case nAPI_TASK_WAITMESSAGE: //(MESSAGE* pMsg)
 	{
+		__cli ();
+		PIPE* pPipe = g_pTaskRing->pMessagePipe;
+
+		if (pPipe->nReceiver == pPipe->nSender)
+		{
+			g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_PIPE;
+			g_pTaskRing->nBlockingValue = pPipe;
+			API_TASK_YIELD ();
+		}
+
+		__cli ();
+
+		SYSTEM_CTRL_COMMAND* pSysCtrl = (SYSTEM_CTRL_COMMAND*)(pPipe->buffer + pPipe->nReceiver);
+		MESSAGE* pMsg = (MESSAGE*)nParam1;
+		pMsg->nMsg    = pSysCtrl->nCmdId;
+		pMsg->nParam1 = pSysCtrl->nCmdParam1;
+		pMsg->nParam2 = pSysCtrl->nCmdParam2;
+		pPipe->nReceiver = (pPipe->nReceiver + sizeof(SYSTEM_CTRL_COMMAND)) & PIPE_SIZE_MASK;
+
+		__sti ();
 	}
 	break;
 
 /// Serialize critical API calls to memory manager
+	case nAPI_TASK_TERMINATE:   //()
 	case nAPI_MALLOC:   //void** ppvBuffer, unsigned long nBytes
 	case nAPI_FREE:     //void* pvBuffer
 	case nAPI_MEMAVAIL: //unsigned long* pnBytes
@@ -243,14 +287,52 @@ __IRAM_CODE int kcswi_handler (
 	}
 	break;
 
+	case nAPI_RUN_GRV:          //(const char* pGRVPath, HTASK* phTask)
+	{
+		TASK_INFO* pTCB = 0;
+
+		API_MALLOC (&pTCB, sizeof(TASK_INFO));
+		if (!pTCB)
+			return ERR_NOMEMORY;
+
+		ERROR_CODE code = load_bflat ((const char *)nParam1, pTCB);
+
+		API_MALLOC (&pTCB->pStack, 16384 /*nStackSize*/ );
+
+		kInitialiseTCBVariables (pTCB, 16384 /*nStackSize*/, "USER" /*pszTaskName*/);
+		unsigned char* pTopOfStack = (unsigned char*)pTCB->pStack;
+		pTopOfStack += pTCB->nStackSize - 4;
+		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, pTCB->pEntry /*pvTaskCode*/, 0 /*pParams*/);
+		API_MALLOC (&pTCB->pMessagePipe, sizeof(PIPE));
+		pTCB->pMessagePipe->nReceiver = 0;
+		pTCB->pMessagePipe->nSender = 0;
+
+		*((TASK_INFO**)nParam2) = pTCB;
+
+		// Include new task in task ring...
+		__cli ();
+		pTCB->pPrevTask = g_pTaskRing;
+		pTCB->pNextTask = g_pTaskRing->pNextTask;
+		pTCB->pNextTask->pPrevTask = pTCB;
+		g_pTaskRing->pNextTask = pTCB;
+		__sti ();
+
+		return code;
+	}
+	break;
+
         case nAPI_GFX:
             return gfx_swi_handler((int)nParam1,(GFX_DATA *)nParam2, (void *)nParam3);
+
         case nAPI_PRINTF:
             user_printf((const char *)nParam1, (va_list) nParam2);
             return 0;
+
         case nAPI_FILE:
             return fs_swi((int)nParam1,(void *)nParam2, (void *)nParam3);
+
       default:
+         printk("Unknown SWI call %d\n", nCmd);
          return 0;
    }
 

@@ -27,11 +27,13 @@ typedef struct _TASK_INFO
 	unsigned long      nTicks;
 	struct _TASK_INFO* pNextTask;
 	struct _TASK_INFO* pPrevTask;
+	void*              pTaskCode;
+	void*              pEntry;
 	unsigned long      nBlockingState;
 	unsigned long      nBlockingValue;
-	char               cName [8];
 	PIPE*              pMessagePipe;
 	GFX_DATA*          pContext;
+	char               cName [8];
 } TASK_INFO;
 
 typedef struct _CRITSEC_INFO

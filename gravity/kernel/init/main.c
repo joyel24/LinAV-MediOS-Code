@@ -107,22 +107,8 @@ void kernel_start (void)
 
 void kernel_startup_thread (void)
 {
-    int i;
-#if 0
-    while (1)
-    {
-	unsigned long nBytes = 0;
-	API_MEMAVAIL (&nBytes);
-
-        cli(); // for safe multithreaded printing
-        printk("[ FREE MEMORY: %08x bytes ]\n", nBytes);
-        sti();
-
-        for(i=0;i<0x10000;i++) /*nothing*/;
-    };
-#endif
     /* driver init */
-    
+
     init_cpld();
     init_HW_chk();
     
@@ -142,7 +128,7 @@ void kernel_startup_thread (void)
     //load_bflat("/test.grv");
     
     printk("[init] END\n");
-    
+
     while(1) /*nothing*/;
     //avwm();       
 }

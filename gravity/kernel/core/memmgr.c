@@ -41,16 +41,14 @@ __IRAM_CODE unsigned long kmemavail ()
 // Made from diffrent threads.
 __IRAM_CODE int kmemory_manager (void* pvParameters)
 {
-/*
-   while (1)
-   {
-      API_TASK_YIELD ();
-   };
-*/
+   SYSTEM_CTRL_COMMAND* pSysCtrl = 0;
+   TASK_INFO* pTCB = 0;
 
    while (1)
    {
-      SYSTEM_CTRL_COMMAND* pSysCtrl = 0;
+      pSysCtrl = 0;
+      pTCB = 0;
+
       __cli ();
       if (g_pSystemCtrlPipe->nReceiver != g_pSystemCtrlPipe->nSender)
       {
@@ -66,14 +64,37 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
             case nAPI_MALLOC:
                *((void**)pSysCtrl->nCmdParam1) = kmalloc (pSysCtrl->nCmdParam2);
                break;
+
             case nAPI_FREE:
                kfree ((void*)pSysCtrl->nCmdParam1);
                break;
+
             case nAPI_MEMAVAIL:
                *((unsigned long*)pSysCtrl->nCmdParam1) = kmemavail ();
                break;
+
             case nAPI_TASK_TERMINATE:
-               // TO DO:
+
+               printk ("[memmgr] TERMINATE\n");
+
+               pTCB = pSysCtrl->pSenderThread;
+
+               // Remove task from task ring...
+               __cli ();
+               pTCB->pPrevTask->pNextTask = pTCB->pNextTask;
+               pTCB->pNextTask->pPrevTask = pTCB->pPrevTask;
+               __sti ();
+
+               // Free task memory resources...
+               if (pTCB->pTaskCode)
+                  kfree (/*code memory*/ pTCB->pTaskCode);
+               if (pTCB->pMessagePipe)
+                  kfree (/*message pipe*/ pTCB->pMessagePipe);
+               kfree (/*stack*/ pTCB->pStack);
+               kfree (/*TCB record*/ pTCB);
+               API_TASK_YIELD ();
+
+               // We should never get here...
                break;
          }
       }

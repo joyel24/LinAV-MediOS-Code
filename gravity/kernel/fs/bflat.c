@@ -57,7 +57,7 @@
 #define FLAT_PRINT(s...)
 #endif
                    
-int load_bflat(const char * fname)
+ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
 {
     int fd_bflat;
     int ret,i;
@@ -117,7 +117,7 @@ int load_bflat(const char * fname)
                    
     printk("[load_bflat] flags: %08x\n",header.flags);
     
-    text_pos=kmalloc(text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
+    text_pos=malloc(text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
     
     if(!text_pos)
     {
@@ -139,7 +139,7 @@ int load_bflat(const char * fname)
     if(ret<text_len)
     {
         printk("[load_bflat] can't read text section (ret=%d)\n",ret);
-        kfree(text_pos);
+        free(text_pos);
         kfclose(fd_bflat);
         return -1;
     }
@@ -151,7 +151,7 @@ int load_bflat(const char * fname)
     if(ret<(data_len+header.reloc_count*sizeof(unsigned long)))
     {
         printk("[load_bflat] can't read data+remoc section (ret=%d)\n",ret);
-        kfree(text_pos);
+        free(text_pos);
         kfclose(fd_bflat);
         return -1;
     }
@@ -216,18 +216,14 @@ int load_bflat(const char * fname)
     }
        
     
-    run_flat=header.entry+text_pos;
-    
-    FLAT_PRINT("[load_bflat] about to launch: %08x\n",run_flat);
-   
-       
-    run_flat(0,NULL);
-    
-    
-    kfree(text_pos);
+//    run_flat=header.entry+text_pos;
+//    FLAT_PRINT("[load_bflat] about to launch: %08x\n",run_flat);
+//    run_flat(0,NULL);
+
+    pTCB->pTaskCode = text_pos;
+    pTCB->pEntry    = text_pos + header.entry;
+
+    free(text_pos);
     kfclose(fd_bflat);         
-    return 0;
-    
+    return ERR_OK;
 }
-
-

@@ -13,6 +13,9 @@
 #ifndef __BFLAT_H
 #define __BFLAT_H
 
+#include <kernel/errors.h>
+#include <kernel/threads.h>
+
 struct bflat_header {
 	char magic[4];
 	unsigned long rev;          /* version  */
@@ -35,5 +38,7 @@ struct bflat_header {
 	unsigned long build_date;   /* When the program/library was built */
 	unsigned long filler[5];    /* Reservered, set to zero */
 };
+
+ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB);
 
 #endif

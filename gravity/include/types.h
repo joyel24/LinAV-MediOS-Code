@@ -42,6 +42,12 @@ typedef struct _COUPLE_DATA
 typedef unsigned long HTASK;
 typedef unsigned long HPIPE;
 typedef unsigned long HCRITSEC;
-typedef unsigned long MESSAGE;
+
+typedef struct _MESSAGE
+{
+    unsigned long nMsg;
+    unsigned long nParam1;
+    unsigned long nParam2;
+} MESSAGE;
 
 #endif

@@ -33,8 +33,9 @@ ERROR_CODE API_TASK_SUSPEND     (HTASK hTask)                                   
 ERROR_CODE API_TASK_CONTINUE    (HTASK hTask)                                                   { swi_call(nAPI_TASK_CONTINUE); }
 ERROR_CODE API_TASK_GETHANDLE   (HTASK* phTask)                                                 { swi_call(nAPI_TASK_GETHANDLE); }
 ERROR_CODE API_TASK_SLEEP       (unsigned long nMilliseconds)                                   { swi_call(nAPI_TASK_SLEEP); }
-ERROR_CODE API_TASK_SENDMESSAGE (HTASK hTask, MESSAGE msg)                                      { swi_call(nAPI_TASK_SENDMESSAGE); }
-ERROR_CODE API_TASK_PEEKMESSAGE ()                                                              { swi_call(nAPI_TASK_PEEKMESSAGE); }
+ERROR_CODE API_TASK_SENDMESSAGE (HTASK hTask, MESSAGE* pMsg)                                    { swi_call(nAPI_TASK_SENDMESSAGE); }
+ERROR_CODE API_TASK_PEEKMESSAGE (MESSAGE* pMsg)                                                 { swi_call(nAPI_TASK_PEEKMESSAGE); }
+ERROR_CODE API_TASK_WAITMESSAGE (MESSAGE* pMsg)                                                 { swi_call(nAPI_TASK_WAITMESSAGE); }
 ERROR_CODE API_TASK_TERMINATE   ()                                                              { swi_call(nAPI_TASK_TERMINATE); }
 
 ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes)                        { swi_call(nAPI_MALLOC); }
@@ -57,6 +58,8 @@ ERROR_CODE API_CRITSEC_DELETE   (HCRITSEC hCritSec)                             
 ERROR_CODE API_CRITSEC_ENTER    (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_ENTER); }
 ERROR_CODE API_CRITSEC_LEAVE    (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_LEAVE); }
 ERROR_CODE API_CRITSEC_TRYENTER (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_TRYENTER); }
+
+ERROR_CODE API_RUN_GRV          (const char* pGRVPath, HTASK* phTask)                           { swi_call(nAPI_RUN_GRV); }
 
 ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData)                       { swi_call(nAPI_GFX); }
 

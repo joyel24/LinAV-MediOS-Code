@@ -17,23 +17,33 @@
 #include <kernel/pipes.h>
 #include <kernel/errors.h>
 #include <kernel/irq.h>
+#include <api.h>
 
 __IRAM_CODE KERNEL_ERROR_CODE kinit_tcb ()
 {
 	g_pTaskRing = 0;
+
+	g_pKernelCtrlPipe = kmalloc (sizeof(PIPE));
+	g_pKernelCtrlPipe->nReceiver = 0;
+	g_pKernelCtrlPipe->nSender = 0;
+
+	g_pSystemCtrlPipe = kmalloc (sizeof(PIPE));
+	g_pSystemCtrlPipe->nReceiver = 0;
+	g_pSystemCtrlPipe->nSender = 0;
+
 	return eOK;
 }
 
 __IRAM_CODE void kthread_final_trap (int nRetCode)
 {
-   __cli();
+//   __cli();
    printk("THREAD FINAL TRAP. RETCODE: %08x\n", nRetCode);
-   __sti();
+//   __sti();
 
    //TODO: Here we should delete thread control block and free resources...
    while (1);
 
-   AOS_TERMINATE ();
+//   API_TASK_TERMINATE ();
 }
 
 __IRAM_CODE void kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackSize, const char* pszTaskName)
@@ -53,6 +63,8 @@ __IRAM_CODE void kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackS
 
 	pTCB->pMessagePipe = 0;
 	pTCB->pContext     = 0;
+	pTCB->pTaskCode    = 0;
+	pTCB->pEntry       = 0;
 }
 
 __IRAM_CODE unsigned long* kInitialiseStack (unsigned long* pxTopOfStack, void* pvCode, void *pvParameters)

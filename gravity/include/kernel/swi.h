@@ -52,6 +52,8 @@
 #define nAPI_TIME              50
 #define nAPI_POWER             51
 
+#define nAPI_RUN_GRV           60
+
 #define nAPI_GFX              100
 #define nAPI_PRINTF           101
 #define nAPI_FILE             102
