@@ -2,7 +2,7 @@
 include ../../Makefile.conf
 
 # State the main target to build
-TARGET = gioTest.bin
+TARGET = abook.bin
 
 #LOCAL GCCFLAGS
 GCCFLAGS = -static-libgcc
