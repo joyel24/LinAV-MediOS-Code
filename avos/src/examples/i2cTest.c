@@ -70,9 +70,17 @@ int main() {
 
         b =buttonsGetStatus();
 
-        if (b & BUTTONS_AV300_RIGHT) addr+=2;
-        if (b & BUTTONS_AV300_LEFT) addr-=2;
-        
+        if (b & BUTTONS_AV300_RIGHT) {
+            addr+=2;
+            do {
+                b = buttonsGetStatus();
+            } while(b & BUTTONS_AV300_RIGHT);
+        } else if (b & BUTTONS_AV300_LEFT) {
+            addr-=2;
+            do {
+                b = buttonsGetStatus();
+            } while(b & BUTTONS_AV300_LEFT);
+        }
         
     }
 }
