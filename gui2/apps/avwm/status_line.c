@@ -58,7 +58,7 @@ int date_format=FORMAT_DDMMYYYY;
 int time_format=FORMAT_24;
 
 #define HOUR(HH)       (time_format==FORMAT_12?(HH<=12?HH:(HH-12)):HH)
-#define AMPM_ADD(HH)   time_format==FORMAT_12?HH<=12?"AM ":"PM ":""
+#define AMPM_ADD(HH)   time_format==FORMAT_12?HH<=12?"A":"P":""
 #define DATE1(DD,MM)   (date_format==FORMAT_DDMMYYYY?DD:MM)
 #define DATE2(DD,MM)   (date_format==FORMAT_DDMMYYYY?MM:DD)
 
@@ -72,7 +72,7 @@ void drawTime(void)
     {    
         fillRect(BG_COLOR,135,3,106,10);
         
-        sprintf(timeSt,"%s%02d:%02d %02d/%02d/%04d",AMPM_ADD(date_time.tm_hour),HOUR(date_time.tm_hour),date_time.tm_min,
+        sprintf(timeSt,"%02d%s:%02d %02d/%02d/%04d",HOUR(date_time.tm_hour),AMPM_ADD(date_time.tm_hour),date_time.tm_min,
                                                          DATE1(date_time.tm_mday,date_time.tm_mon),
                                                          DATE2(date_time.tm_mday,date_time.tm_mon),
                                                          date_time.tm_year);

@@ -135,6 +135,7 @@ static int is_leap_year(int yr)
  * relative to the given values */
 static int calc_weekday( struct shown *shown )
 {
+    shown->wday--;
     return ( shown->wday + 36 - shown->mday ) % 7 ;
 }
 
