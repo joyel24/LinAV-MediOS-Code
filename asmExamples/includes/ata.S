@@ -152,13 +152,13 @@ notrea: mov r0, #1
         sub r3, #1
          beq tout2
         callThumb r1, ataGetStatusT
-        ldr r2, =(ataStatus_DRQ)
+        ldr r2, =(ataStatus_DRQ | ataStatus_BSY)
+        ldr r1, =ataStatus_DRQ
         and r0, r2
-        cmp r0, r2
+        cmp r0, r1
          bne notrea
         mov r0, #0
 tout2:
-        @ TODO: CHECK ALT_STATUS
         pop {r2, r3}
         pop {r1}
         bx r1
@@ -173,9 +173,12 @@ notred: mov r0, #1
         sub r3, #1
          beq tout1
         callThumb r1, ataGetStatusT
+        ldr r2, =ataStatus_BSY
+        tst r0, r2
+         bne notred                 @ BSY flag is set!
         ldr r2, =ataStatus_RDY
         tst r0, r2
-        beq notred
+         beq notred                 @ Not ready though
         mov r0, #0  
 tout1:  pop {r2, r3}
         pop {r1}
@@ -192,7 +195,7 @@ notreb: ldr r1, =(ataGetStatusT+1)
         bx r1
         ldr r2, =ataStatus_BSY
         tst r0, r2
-        beq notreb
+         beq notreb
         pop {r1, r2}
         pop {r0}
         bx r0

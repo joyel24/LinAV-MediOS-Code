@@ -15,7 +15,7 @@
         .include "../includes/common.S"
         .include "../includes/av300.S"
 
-        doimage = 1
+        @doimage = 1
         
 .text
 
