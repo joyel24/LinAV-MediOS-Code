@@ -13,7 +13,7 @@ SUBDIRS = init core lib driver gfx fs
 
 TARGET = kernel.a
 
-all: builddir subdirs $(TARGET) 
+all: builddir subdirs $(TARGET) lib_gravity
 
 force: clean all        
 
@@ -27,5 +27,11 @@ clean:  clean-subdirs
 
 builddir:
 	@mkdir -p build
+        
+lib_gravity:
+	@make -C lib --no-print-directory -s all
+	@$(AR) -rc libgravity.a lib/*.o
+	@$(RANLIB) libgravity.a
+	@mv libgravity.a ../
         
 include ../default.rule

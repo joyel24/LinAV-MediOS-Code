@@ -135,5 +135,9 @@ void kernel_startup_thread (void)
 
     print_boot_info();
     
-    avwm();       
+    load_bflat("/a.out");
+    
+    
+    while(1) /*nothing*/;
+    //avwm();       
 }

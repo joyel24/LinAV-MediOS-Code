@@ -1,0 +1,231 @@
+/* 
+*   kernel/fs/bflat.c
+*
+*   AMOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*
+* Part of this code is from Rockbox project
+* Copyright (C) 2002 by Björn Stenberg
+*
+*/
+
+#include <sys_def/string.h>
+
+#include <kernel/kernel.h>
+#include <kernel/kfile.h>
+#include <kernel/bflat.h>
+
+#define swap_val(x) (                \
+            ((x>>24) & 0x000000FF) |   \
+            ((x>> 8) & 0x0000FF00) |   \
+            ((x<< 8) & 0x00FF0000) |   \
+            ((x<<24) & 0xFF000000)     \
+                    )
+                    
+#define GET_VAL_FLAT(ptr)                                       \
+    ({                                                          \
+        unsigned long __val;                                    \
+        unsigned char * __p=(unsigned char *)ptr;               \
+        __val = __p[0] | __p[1]<<8 | __p[2]<<16 | __p[3]<<24;   \
+        __val;                                                  \
+    })
+
+#define PUT_VAL_FLAT(ptr,val)                                   \
+    ({                                                          \
+        unsigned char * __p=(unsigned char *)ptr;               \
+        *__p++ = val;                                           \
+        *__p++ = val>>8;                                        \
+        *__p++ = val>>16;                                       \
+        *__p++ = val>>24;                                       \
+    })
+
+#define max(a,b)  (a<b?b:a)
+
+#define NB_LIB    1
+
+#define FLAT_FLAG_RAM       1
+#define FLAT_FLAG_PIC       2
+                   
+int load_bflat(const char * fname)
+{
+    int fd_bflat;
+    int ret,i;
+    struct bflat_header header;
+    
+    unsigned long text_pos,data_pos;
+    unsigned long text_len,data_len,bss_len,extra_len;
+    unsigned long start_code;
+    unsigned long * reloc_table;
+    
+    void (*run_flat)(void);
+    
+    
+    fd_bflat = kfopen(fname,O_RDONLY);
+    
+    if(fd_bflat<0)
+    {
+        printk("[load_bflat] Can't open file %s\n",fname);
+        return -1;
+    }
+    
+    if((ret=kread(fd_bflat,(void*)&header,sizeof(struct bflat_header)))<sizeof(struct bflat_header))
+    {
+        printk("[load_bflat] Can't read completly the header (read %d)\n",ret);
+        kfclose(fd_bflat);
+        return -1;
+    }
+    
+    if(strncmp(header.magic,"bFLT",4))
+    {
+        header.magic[4]=0;
+        printk("[load_bflat] Wrong magic (%s)\n",header.magic);
+        kfclose(fd_bflat);
+        return -1;
+    }
+        
+    /* Processing header data */
+    
+    header.rev          = swap_val(header.rev);
+    header.entry        = swap_val(header.entry);
+    header.data_start   = swap_val(header.data_start);
+    header.data_end     = swap_val(header.data_end);
+    header.bss_end      = swap_val(header.bss_end);
+    header.stack_size   = swap_val(header.stack_size);
+    header.reloc_start  = swap_val(header.reloc_start);
+    header.reloc_count  = swap_val(header.reloc_count);
+    header.flags        = swap_val(header.flags);
+    
+    text_len=header.data_start;
+    data_len=header.data_end-header.data_start;
+    bss_len=header.bss_end-header.data_end;
+    
+    extra_len = max(bss_len+header.stack_size,header.reloc_count*sizeof(unsigned long));
+    
+    printk("[load_bflat] loading %s: bFLAT:v%d text(%08x) data(%08x) bss(%08x) stack(%08x) relocs:%d\n",fname,header.rev,
+                   text_len, data_len,bss_len,header.stack_size,header.reloc_count);
+                   
+    printk("[load_bflat] flags: %08x\n",header.flags);
+    
+    text_pos=kmalloc(text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
+    
+    if(!text_pos)
+    {
+        printk("[load_bflat] can't alloc enough mem space (%08x needed)\n",text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
+        kfclose(fd_bflat);
+        return -1;
+    }
+    
+    data_pos=text_pos+header.data_start+NB_LIB*sizeof(unsigned long);
+    reloc_table=(unsigned long *)(text_pos+header.reloc_start+NB_LIB*sizeof(unsigned long));
+    start_code=text_pos+sizeof(struct bflat_header);
+    
+    printk("[load_bflat] text_pos=%08x start_code=%08x data_pos=%08x\n",text_pos,start_code,data_pos);
+    
+    klseek(fd_bflat, 0, SEEK_SET);
+    
+    ret = kread(fd_bflat,(void*)text_pos,text_len);
+    
+    if(ret<text_len)
+    {
+        printk("[load_bflat] can't read text section (ret=%d)\n",ret);
+        kfree(text_pos);
+        kfclose(fd_bflat);
+        return -1;
+    }
+    
+    klseek(fd_bflat, header.data_start, SEEK_SET);
+    
+    ret = kread(fd_bflat,(void*)data_pos,data_len+header.reloc_count*sizeof(unsigned long));
+    
+    if(ret<(data_len+header.reloc_count*sizeof(unsigned long)))
+    {
+        printk("[load_bflat] can't read data+remoc section (ret=%d)\n",ret);
+        kfree(text_pos);
+        kfclose(fd_bflat);
+        return -1;
+    }
+    
+    text_len -= sizeof(struct bflat_header);
+    
+    if(header.flags & FLAT_FLAG_PIC)
+    {
+        unsigned long * reloc_point;
+        unsigned long addr;
+        i=0;
+        printk("[load_bflat] GOTPIC relocations \n");
+        for(reloc_point=(unsigned long*)data_pos;(*reloc_point)!=0xFFFFFFFF;reloc_point++)
+        {
+            printk("%d-%08x: %08x",i,reloc_point,*reloc_point);
+            if(*reloc_point)
+            {
+                if(*reloc_point<text_len)
+                    addr=*reloc_point+start_code;
+                else
+                    addr=*reloc_point-text_len+data_pos;
+                *reloc_point=addr;
+                printk(" => %08x(%08x)",addr,*reloc_point);
+                print_data(addr,0x10);
+            }
+            printk("\n");
+        }
+    }
+    
+    printk("[load_bflat] std relocations \n");
+    
+    for(i=0;i<header.reloc_count;i++)
+    {
+        unsigned long addr,reloc_point;
+        reloc_point=swap_val(reloc_table[i]);
+        
+        printk("%d: rp=%08x",i,reloc_point);
+        
+        if(reloc_point<text_len)
+            reloc_point+=start_code;
+        else
+            reloc_point=reloc_point-text_len+data_pos;
+            
+        printk(" rp-real=%08x",reloc_point);
+        
+        addr=GET_VAL_FLAT(reloc_point);
+        
+        if(!(header.flags & FLAT_FLAG_PIC))
+            addr=swap_val(addr);
+            
+        printk(" val=%08x",addr);
+        
+        if(addr<text_len)
+            addr+=start_code;
+        else
+            addr=addr-text_len+data_pos;
+        
+        printk(" val-rp=%08x",addr);            
+            
+        PUT_VAL_FLAT(reloc_point,addr);
+        
+        printk(" (%08x)\n",*(unsigned long*)reloc_point);
+    }
+       
+    
+    run_flat=header.entry+text_pos;
+    
+    printk("[load_bflat] about to launch: %08x\n",run_flat);
+    
+    print_data(run_flat,0x50);
+    
+       
+    run_flat();
+    
+    printk("[load_bflat] back");
+    
+    kfree(text_pos);
+    kfclose(fd_bflat);         
+    return 0;
+    
+}
+
+

@@ -21,7 +21,7 @@
 .global memmove
 memcpy:
 memmove:
-#if 0
+#if 1
 	stmdb sp!, {r4, r5}
 	mov r5, #0
 	and r4, r0, #3
