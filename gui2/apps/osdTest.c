@@ -76,14 +76,17 @@ int main() {
     
     int x=32, y=32, cdir=0;
     
+    printf("in osdTest\n");
+    
     ini_graphics();
     
-    /*showPlane(VID1);
+    showPlane(VID1);
     
+        
     setSize(VID2,64,64,32);
-    showPlane(VID2);*/
+    showPlane(VID2);
     
-    setSize(BMAP1,150,100,8);
+    setSize(BMAP1,160,100,8);
     setState(BMAP1,AV3XX_OSD_BITMAP_8BIT
              | AV3XX_OSD_BITMAP_MERGEBACK
              | AV3XX_OSD_BITMAP_A4
@@ -97,9 +100,9 @@ int main() {
              | AV3XX_OSD_BITMAP_ZX1);
     showPlane(BMAP2);
     
-   /* osdSetComponentConfigA(AV3XX_OSD_CURSOR2, AV3XX_OSD_COMPONENT_ENABLE
-                                     | AV3XX_OSD_CURSOR2_A0
-                                     );*/
+    setState(CUR2,AV3XX_OSD_CURSOR2_A0);
+    showPlane(CUR2);
+   
 
  #ifdef AV_SCREEN                                    
     for (c=0;c<16;c++) {
@@ -110,18 +113,22 @@ int main() {
         osdSetCursor2Bitmap(c, cursor[c]);    
     }
 #endif    
-    /*setPlane(VID1);
+    setPlane(VID1);
+    printf("fill 1\n");
     fillRect(0x00000000, 0, 0, 320, 240);
+    printf("fill 2\n");
     fillRect(0x80800000, 0, 0, 160, 120);
+    printf("fill 3\n");
     fillRect(0xc0c0c000, 20, 120, 200, 100);
+   
     
     setPlane(VID2);
-    fillRect(0xf0f0d0e0, 0, 0, 64, 64);*/
+    fillRect(0xf0f0d0e0, 0, 0, 64, 64);
 
     setPlane(BMAP1);
-    fillRect(0x0000, 0, 0, 160, 120);
-    fillRect(0x0101, 20, 20, 120, 80);
-    fillRect(0x0404, 0, 0, 40, 32);
+    fillRect(0x00, 0, 0, 160, 100);
+    fillRect(0x01, 20, 20, 120, 80);
+    fillRect(0x04, 0, 0, 40, 32);
     setFont(std4x6);
     putS(0x01, 0xff, 2, 20,"abcdefghijklmnop");
     
@@ -129,16 +136,20 @@ int main() {
     setFont(shadow);
     putS(0x01, 0xff, 0, 0,"DOG");
     
-    /*setPlane(VID1);
+    setPlane(VID1);
+    printf("fill 4\n");
     fillRect(0xc0c0c000, 80, 60, 100, 100);
+    printf("setfont 1\n");
     setFont(shadow);
+    printf("putS 1\n");
     putS(0x8080c0e0, 0xffffffff, 2, 120,"ABC DEF GHI JKL MNOPQ");
+    printf("loop\n");
     setFont(std5x8);
     putS(0x8080c0e0, 0xffffffff, 2, 48," .,<>/?;':[]{}|=-+_)(*&^%$#@!");
     setFont(std7x13);
-    putS(0x8080c0e0, 0x50503020, 2, 48,"Font drawing!");
+    putS(0x8080c0e0, 0x50503020, 100, 30,"Font drawing!");
     setFont(cursive);
-    putS(0x8080c0e0, 0x202090a0, 2, 48,"BY OxyGen77");*/
+    putS(0x8080c0e0, 0x202090a0, 4, 20,"BY OxyGen77");
 
     while(1) {
         movec++;
@@ -146,7 +157,7 @@ int main() {
             movec=0;
             setPos(BMAP1,0x14 + (bx*2), 0x13 + by);
             setPos(BMAP2,0x14 + (bx*2)+ (bx2*2), 0x13 + by+ by2);
-            //setPos(VID2,0x14 + (vx*2), 0x13 + vy);
+            setPos(VID2,0x14 + (vx*2), 0x13 + vy);
             
             bx+=bdx;
             by+=bdy;
@@ -180,7 +191,7 @@ int main() {
                      | AV3XX_OSD_BITMAP_MERGEBACK
                      | (bdf << AV3XX_OSD_BITMAP_A_SHIFT)
                      | AV3XX_OSD_BITMAP_ZX1);
-            showPlane(BMAP1);            
+            showPlane(BMAP1);       
         }
 
         if (butslow==0)
@@ -221,25 +232,28 @@ int main() {
             /*if (!(c & BUTTONS_AV300_MENU3)) mvlatched=0;*/
             }                       
             if (butmax<30) butmax=30;
-        }
-        butslow--;
+        
+        
 
         if (cursorx<0) cursorx=0;
         if (cursory<0) cursory=0;
         if (cursorx>(318)) cursorx=318;
         if (cursory>(238)) cursory=238;
 
-        //osdSetComponentPositionA(AV3XX_OSD_CURSOR2, (cursorx<<1)+0x18, cursory+0x13);
+        setPos(CUR2,(cursorx<<1)+0x18, cursory+0x13);
+        }
+        
+        butslow--;
         
         cellc++;
         if (cellc==0x80) {
             cellc=0;
             setPlane(VID2);
-            //c = readPixel(x,y);
+            c = readPixel(x,y);
             if ((c&1)==0) cdir++; else cdir--;
             cdir = cdir & 3;
             c=c + 0x010305;
-            //drawPixel(c,x,y);
+            drawPixel(c,x,y);
         
             if (cdir==0) x++;
             else if (cdir==1) y++;

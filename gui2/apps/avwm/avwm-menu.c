@@ -37,6 +37,9 @@ struct menu_data menu_cfg = {
     right_action   :do_right,
     on_action      :do_on,
     off_action     :do_off,
+    f1_action      :do_F1,
+    f2_action      :do_F2,
+    f3_action      :do_F3,
     item_str       :mk_item_str,
     submenu_str    :mk_submenu_str
 };
@@ -74,6 +77,46 @@ void do_right(void * data)
         else
         {
             loadPlugin(cfg_data->link,NULL);
+        }
+    }
+}
+
+void do_F1(void * data)
+{
+
+}
+
+void do_F2(void * data)
+{
+
+}
+
+void do_F3(void * data) // switch to usb
+{
+    int pid,status; 
+    
+    pid = vfork();
+    
+    if (pid == 0)
+    {
+        
+        execl("/mnt/avwm/apps/enableUSB","/mnt/avwm/apps/enableUSB",(char *)0);
+        
+        fprintf(stderr, "exec failed!\n");
+        _exit(1);        
+    }
+    else
+    {
+        if (pid > 0)
+        {
+            int status;
+            close_graphics();            
+            waitpid(pid, &status, 0);
+            ini_graphics();      
+        }
+        else
+        {
+            fprintf(stderr, "vfork failed %d\n", pid);
         }
     }
 }

@@ -35,10 +35,11 @@ int osdRGB2Packed(int r, int g, int b)
 
 void osdSetCursor2Bitmap (int index, int data)
 {
-	OUTW(data,AV3XX_OSD_CURSOR2_DATA);           /* Setup data reg */
-
-	OUTW((((INW(AV3XX_OSD_CURSOR2_ADD_LATCH) & 0xFF) << 8) | index) | 0x80,
-			AV3XX_OSD_CURSOR2_ADD_LATCH);       /* Set the data... */
+    int val;
+    OUTW(data,AV3XX_OSD_CURSOR2_DATA);           /* Setup data reg */
+    val=INW(AV3XX_OSD_CURSOR2_ADD_LATCH) & 0xFF;
+    index=index<<8;
+    OUTW(val | index | 0x80,AV3XX_OSD_CURSOR2_ADD_LATCH);       /* Set the data... */
 }
 
 void osdSetBorderColor (int color)

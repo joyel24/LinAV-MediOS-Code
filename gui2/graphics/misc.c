@@ -158,7 +158,7 @@ int setUSB(int state)
     if (fd < 0)
     {
         printf("Can't open /dev/avusb\n");
-        return 0;
+        return -1;
     }
     
     if(state)
@@ -166,11 +166,11 @@ int setUSB(int state)
     else
         usb=AV_USB_IOC_DISABLE;
     
-    if(ioctl(fd,state,NULL)<0)
+    if(ioctl(fd,usb,NULL)<0)
     {
-        printf("Error getting power value\n");
+        printf("Error setting usb state:%d\n",state);
         close(fd);
-        return 0;
+        return -1;
     }
     
     close(fd);

@@ -14,7 +14,7 @@
 #ifndef __GRAPHICS_H
 #define __GRAPHICS_H
 
-#define getOffset(x,y,buffer,type) ((type*)(x*((buffer->bitsPerPixel)>>3)+y*buffer->width+buffer->offset))
+#define getOffset(x,y,buffer,type) ((type*)(x*((buffer->bitsPerPixel)>>3)+y*buffer->width*((buffer->bitsPerPixel)>>3)+buffer->offset))
 
 #define OUTB(val,addr)           (*(volatile char *)(addr) = (val))
 #define OUTW(val,addr)           (*(volatile unsigned short *)(addr) = (val))
@@ -28,6 +28,8 @@
 #define BMAP2   1
 #define VID1    2
 #define VID2    3
+#define CUR1    4
+#define CUR2    5
 
 // general constants
 #define USE_GC    -1

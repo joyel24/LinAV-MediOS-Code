@@ -27,6 +27,9 @@ struct menu_data {
         void (*right_action) (void * data);
         void (*on_action)    (void * data);
         void (*off_action)   (void * data);
+        void (*f1_action)   (void * data);
+        void (*f2_action)   (void * data);
+        void (*f3_action)   (void * data);
         void (*item_str)     (void * data,char * str);
         void (*submenu_str)  (void * data,char * str);
 };

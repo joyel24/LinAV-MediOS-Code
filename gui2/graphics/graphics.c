@@ -102,16 +102,42 @@ struct graphicsBuffer VIDEO_2 = {
     bitsPerPixel       : 32,
 };
 
-#define NB_BUFFER 4
+struct graphicsBuffer CURSOR_1 = {
+    offset             : 0,
+#ifdef AV_SCREEN
+    state              : 0 ,
+#endif
+    width              : 0,
+    height             : 0,
+    x                  : 0,
+    y                  : 0,
+    bitsPerPixel       : 0,   
+};
 
-struct graphicsBuffer buffers[NB_BUFFER];
+struct graphicsBuffer CURSOR_2 = {
+    offset             : 0,
+#ifdef AV_SCREEN
+    state              : 0 ,
+#endif
+    width              : 0,
+    height             : 0,
+    x                  : 0,
+    y                  : 0,
+    bitsPerPixel       : 0,   
+};
+
+#define NB_BUFFER 6
+
+struct graphicsBuffer * buffers[NB_BUFFER];
 
 #ifdef AV_SCREEN
 int buffers_comp[NB_BUFFER] = {
     AV3XX_OSD_BITMAP1,
     AV3XX_OSD_BITMAP2,
     AV3XX_OSD_VIDEO1,
-    AV3XX_OSD_VIDEO2
+    AV3XX_OSD_VIDEO2,
+    AV3XX_OSD_CURSOR1,
+    AV3XX_OSD_CURSOR2
 };
 #endif
 
@@ -129,10 +155,12 @@ int ini_graphics()
 {
     int x, y;
     
-    buffers[0]=BITMAP_1;
-    buffers[1]=BITMAP_2;
-    buffers[2]=VIDEO_1;
-    buffers[3]=VIDEO_2;
+    buffers[0]=&BITMAP_1;
+    buffers[1]=&BITMAP_2;
+    buffers[2]=&VIDEO_1;
+    buffers[3]=&VIDEO_2;
+    buffers[4]=&CURSOR_1;
+    buffers[5]=&CURSOR_2;
     
 #ifdef AV_SCREEN
     osdInit();
@@ -145,6 +173,7 @@ int ini_graphics()
     osdSetComponentConfig(AV3XX_OSD_CURSOR1, 0);
     osdSetComponentConfig(AV3XX_OSD_CURSOR2, 0);
     
+    /*setting up planes */    
     iniComponent(BMAP1,&BITMAP_1,(unsigned int)&screen_BMAP1); 
     iniComponent(BMAP2,&BITMAP_2,(unsigned int)&screen_BMAP2); 
     iniComponent(VID1,&VIDEO_1,(unsigned int)&screen_VID1);
@@ -358,7 +387,7 @@ void showPlane(int vplane)
 #ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
-        osdSetComponentConfig(buffers_comp[vplane],buffers[vplane].state|AV3XX_OSD_COMPONENT_ENABLE);
+        osdSetComponentConfig(buffers_comp[vplane],buffers[vplane]->state|AV3XX_OSD_COMPONENT_ENABLE);
     }
     else
     {
@@ -372,7 +401,7 @@ void setState(int vplane,int state)
 #ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
-        buffers[vplane].state=state;
+        buffers[vplane]->state=state;
     }
     else
     {
@@ -386,7 +415,7 @@ int getState(int vplane)
 #ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
-        return buffers[vplane].state;
+        return buffers[vplane]->state;
     }
     else
     {
@@ -401,9 +430,10 @@ void setSize(int vplane,int width,int height,int bitsPerPixel)
 #ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
-        buffers[vplane].width=width;
-        buffers[vplane].height=height;
-        buffers[vplane].bitsPerPixel=bitsPerPixel;
+        printf("processing setsize: %d,%d,%d for %d\n",width,height,bitsPerPixel,vplane);
+        buffers[vplane]->width=width;
+        buffers[vplane]->height=height;
+        buffers[vplane]->bitsPerPixel=bitsPerPixel;
         osdSetComponentSize(buffers_comp[vplane], 2*width, height);
         osdSetComponentSourceWidth(buffers_comp[vplane], ((width*bitsPerPixel)/32)/8);
     }
@@ -420,11 +450,11 @@ void getSize(int vplane,int * width,int * height,int * bitsPerPixel)
     if(vplane>=0 && vplane < NB_BUFFER)
     {
         if(width)
-            *width=buffers[vplane].width;
+            *width=buffers[vplane]->width;
         if(height)
-            *height=buffers[vplane].height;
+            *height=buffers[vplane]->height;
         if(bitsPerPixel)
-            *bitsPerPixel=buffers[vplane].bitsPerPixel;
+            *bitsPerPixel=buffers[vplane]->bitsPerPixel;
     }
     else
     {
@@ -438,8 +468,8 @@ void setPos(int vplane,int x,int y)
 #ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
-        buffers[vplane].x=x;
-        buffers[vplane].y=y;
+        buffers[vplane]->x=x;
+        buffers[vplane]->y=y;
         osdSetComponentPosition(buffers_comp[vplane],x,y);        
     }
     else
@@ -455,9 +485,9 @@ void getPos(int vplane,int * x,int * y)
     if(vplane>=0 && vplane < NB_BUFFER)
     {
         if(x)
-            *x=buffers[vplane].x;
+            *x=buffers[vplane]->x;
         if(y)
-            *y=buffers[vplane].y;
+            *y=buffers[vplane]->y;
     }
     else
     {

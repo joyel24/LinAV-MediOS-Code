@@ -68,7 +68,7 @@ void graphics32_FillRect(unsigned int color, int x, int y, int width, int height
     for(j=0;j<height;j++)
     {
         graphics32_DrawHorizLine(color, width, offset);    
-        offset+=buff->width;
+        offset+=buff->width;        
     }
     
 }
@@ -93,7 +93,9 @@ void graphics32_DrawVLine(unsigned int color, int x, int y, int height, struct g
 /* draw an horizontal line starting at (x,y) */ 
 void graphics32_DrawHorizLine(unsigned int color, int width,unsigned int * offset)
 {
-    memset((void*)offset,(unsigned int)color,width);
+    int i;
+    for(i=0;i<width;i++)   
+        OUTL(color,offset++);
 }
 
 void graphics32_DrawSprite(PALETTE * palette,SPRITE * sprite, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
@@ -155,7 +157,8 @@ void graphics32_DrawBITMAP(BITMAP * bitmap, unsigned int trsp, int x, int y, str
     {
         for(j=0;j<bitmap->height;j++)
         {
-            memcpy(dest,src,bitmap->width);
+            for(i=0;i<bitmap->width;i++)
+                OUTL(INL(src+i),dest+i);
             dest+=buff->width;
             src+=bitmap->width;
         }
@@ -164,7 +167,7 @@ void graphics32_DrawBITMAP(BITMAP * bitmap, unsigned int trsp, int x, int y, str
 
 void graphics32_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP, struct graphicsBuffer * buff)
 {
-    int j,inc;
+    int i,j,inc;
     
     unsigned int *src,*dest;
     
@@ -188,7 +191,8 @@ void graphics32_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, 
     
     for(j=0;j<(height-scroll);j++)
     {
-        memcpy(dest,src,width);
+        for(i=0;i<width;i++)
+           OUTL(INL(src+i),dest+i);
         dest=dest+inc*buff->width;
         src=src+inc*buff->width;
     }
@@ -208,7 +212,7 @@ void graphics32_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, 
 
 void graphics32_ScrollWindowHoriz(unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT, struct graphicsBuffer * buff)
 {
-    int j;
+    int i,j;
     unsigned int tmp[320];
     unsigned int *src,*dest,*offset;
     
@@ -224,8 +228,11 @@ void graphics32_ScrollWindowHoriz(unsigned int bgColor, int x, int y, int width,
             offset=src;
             for(j=0;j<height;j++)
             {
-                memcpy(tmp,src,width-scroll);
-                memcpy(dest,tmp,width-scroll);
+#warning optimization needed here in Scroll 32 horizontal - left
+                for(i=0;i<(width-scroll);i++)
+                    OUTL(INL(src+i),tmp+i);
+                for(i=0;i<(width-scroll);i++)
+                    OUTL(INL(tmp+i),dest+i);
                 graphics8_DrawHorizLine(bgColor,scroll,offset);
                 dest+=buff->width;
                 src+=buff->width;
@@ -241,7 +248,8 @@ void graphics32_ScrollWindowHoriz(unsigned int bgColor, int x, int y, int width,
             src=src+scroll;
             for(j=0;j<height;j++)
             {
-                memcpy(dest,src,width-scroll);
+                for(i=0;i<(width-scroll);i++)
+                    OUTL(INL(src+i),dest+i);
                 graphics8_DrawHorizLine(bgColor,scroll,offset);
                 dest+=buff->width;
                 src+=buff->width;
@@ -258,8 +266,11 @@ void graphics32_ScrollWindowHoriz(unsigned int bgColor, int x, int y, int width,
             offset=src;
             for(j=0;j<height;j++)
             {
-                memcpy(tmp,src,width-scroll);
-                memcpy(dest,tmp,width-scroll);                
+#warning optimization needed here in Scroll 32 horizontal -right
+                for(i=0;i<(width-scroll);i++)
+                    OUTL(INL(src+i),tmp+i);
+                for(i=0;i<(width-scroll);i++)
+                    OUTL(INL(tmp+i),dest+i);
                 dest+=buff->width;
                 src+=buff->width;
                 offset+=buff->width;
@@ -274,7 +285,8 @@ void graphics32_ScrollWindowHoriz(unsigned int bgColor, int x, int y, int width,
             src=src+scroll;
             for(j=0;j<height;j++)
             {
-                memcpy(dest,src,width-scroll);                
+                for(i=0;i<(width-scroll);i++)
+                    OUTL(INL(src+i),dest+i);               
                 dest+=buff->width;
                 src+=buff->width;
                 offset+=buff->width;
@@ -375,6 +387,7 @@ void graphics32_DrawString(struct graphicsFont * font, unsigned int color, unsig
     {
         graphics32_DrawChar(font,color,bg_color,x,y, *s, buff);
         x+=font->width;
+        s++;
     }
 }
 

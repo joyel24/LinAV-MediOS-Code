@@ -180,6 +180,15 @@ void menuEvtHandler(int evt)
         case BTN_ON:
             current_menu->on_action(pselect->data);
             break;
+        case BTN_F1:
+            current_menu->f1_action(pselect->data);
+            break;
+        case BTN_F2:
+            current_menu->f2_action(pselect->data);
+            break;
+        case BTN_F3:
+            current_menu->f3_action(pselect->data);
+            break;
     }
 }
 

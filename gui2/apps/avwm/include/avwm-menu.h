@@ -40,6 +40,9 @@ void                mk_item_str    (void * data,char * str);
 void                do_right       (void * data);
 void                do_on          (void * data);
 void                do_off         (void * data);
+void                do_F1          (void * data);
+void                do_F2          (void * data);
+void                do_F3          (void * data);
 
 #endif
 
