@@ -45,6 +45,8 @@
 
 #include <kernel/config.h>
 
+#include <sys_def/file.h>
+
 void print_boot_info(void)
 {
     printk("SP: %08x\n",get_sp());

@@ -55,6 +55,16 @@ ERROR_CODE API_CRITSEC_ENTER    (HCRITSEC hCritSec);
 ERROR_CODE API_CRITSEC_LEAVE    (HCRITSEC hCritSec);
 ERROR_CODE API_CRITSEC_TRYENTER (HCRITSEC hCritSec);
 
+ERROR_CODE API_TIME             (int cmd,struct av_tm * time_data);
+ERROR_CODE API_POWER            (int cmd,int * val);
+ERROR_CODE API_MIXER            (int cmd, int dir, void * arg);
+ERROR_CODE API_DSP              (int cmd, void * arg);
+ERROR_CODE API_EVT              (int cmd, void * arg, void * arg2);
+
+ERROR_CODE API_RUN_GRV          (const char* pGRVPath, HTASK* phTask);
+ERROR_CODE API_CREATE_CONTEXT   (int nWidth, int nHeight, int nFlags);
+
+ERROR_CODE API_GFX_COMMIT       (GFX_RECT* pArea);
 ERROR_CODE API_GFX_FASTBLIT     (GFX_DATA* pDst, GFX_DATA* pSrc, GFX_POINT* pOrigin);
 ERROR_CODE API_GFX_STRETCHBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc, unsigned long* pWorkBuffer);
 ERROR_CODE API_GFX_PATTERNBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc);
@@ -66,22 +76,11 @@ ERROR_CODE API_SOUND_STOP       ();
 ERROR_CODE API_VAR_GET          (const char* pVarName, char* pVarValue, int nBufferSize);
 ERROR_CODE API_VAR_SET          (const char* pVarName, const char* pVarValue);
 
-ERROR_CODE API_RUN_GRV          (const char* pGRVPath, HTASK* phTask);
-
 ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData);
 ERROR_CODE API_PRINTF           (const char * fmt, va_list args);
-
-ERROR_CODE API_TIME             (int cmd,struct av_tm * time_data);
-
 ERROR_CODE API_FILE             (int cmd,void * data1,void * data2);
 
-ERROR_CODE API_POWER            (int cmd,int * val);
 int        do_api_power         (int cmd);
-
-ERROR_CODE API_MIXER            (int cmd, int dir, void * arg);
-ERROR_CODE API_DSP              (int cmd, void * arg);
-
-ERROR_CODE API_EVT              (int cmd, void * arg, void * arg2);
 
 void       printf               (char *fmt, ...);
 

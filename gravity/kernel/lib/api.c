@@ -62,6 +62,16 @@ ERROR_CODE API_CRITSEC_ENTER    (HCRITSEC hCritSec)                             
 ERROR_CODE API_CRITSEC_LEAVE    (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_LEAVE); }
 ERROR_CODE API_CRITSEC_TRYENTER (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_TRYENTER); }
 
+ERROR_CODE API_TIME             (int cmd,struct av_tm * time_data)                              { swi_call(nAPI_TIME); }
+ERROR_CODE API_POWER            (int cmd,int * val)                                             { swi_call(nAPI_POWER); }
+ERROR_CODE API_MIXER            (int cmd, int dir, void * arg)                                  { swi_call(nAPI_MIXER); }
+ERROR_CODE API_DSP              (int cmd, void * arg)                                           { swi_call(nAPI_DSP); }
+ERROR_CODE API_EVT              (int cmd, void * arg, void * arg2)                              { swi_call(nAPI_EVT); }
+
+ERROR_CODE API_RUN_GRV          (const char* pGRVPath, HTASK* phTask)                           { swi_call(nAPI_RUN_GRV); }
+ERROR_CODE API_CREATE_CONTEXT   (int nWidth, int nHeight, int nFlags)                           { swi_call(nAPI_CREATE_CONTEXT); }
+
+ERROR_CODE API_GFX_COMMIT       (GFX_RECT* pArea)                                               { swi_call(nAPI_GFX_COMMIT); }
 ERROR_CODE API_GFX_FASTBLIT     (GFX_DATA* pDst, GFX_DATA* pSrc, GFX_POINT* pOrigin)            { swi_call(nAPI_GFX_FASTBLIT); }
 ERROR_CODE API_GFX_STRETCHBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc, unsigned long* pWorkBuffer)    { swi_call(nAPI_GFX_STRETCHBLIT); }
 ERROR_CODE API_GFX_PATTERNBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc)                                { swi_call(nAPI_GFX_PATTERNBLIT); }
@@ -73,22 +83,9 @@ ERROR_CODE API_SOUND_STOP       ()                                              
 ERROR_CODE API_VAR_GET          (const char* pVarName, char* pVarValue, int nBufferSize)        { swi_call(nAPI_VAR_GET); }
 ERROR_CODE API_VAR_SET          (const char* pVarName, const char* pVarValue)                   { swi_call(nAPI_VAR_SET); }
 
-ERROR_CODE API_RUN_GRV          (const char* pGRVPath, HTASK* phTask)                           { swi_call(nAPI_RUN_GRV); }
-
 ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData)                       { swi_call(nAPI_GFX); }
-
 ERROR_CODE API_PRINTF           (const char * fmt, va_list args)                                { swi_call(nAPI_PRINTF); }
-
-ERROR_CODE API_TIME             (int cmd,struct av_tm * time_data)                              { swi_call(nAPI_TIME); }
-
-ERROR_CODE API_POWER            (int cmd,int * val)                                             { swi_call(nAPI_POWER); }
-
 ERROR_CODE API_FILE             (int cmd,void * data1,void * data2)                             { swi_call(nAPI_FILE); }
-
-ERROR_CODE API_MIXER            (int cmd, int dir, void * arg)                                  { swi_call(nAPI_MIXER); }
-ERROR_CODE API_DSP              (int cmd, void * arg)                                           { swi_call(nAPI_DSP); }
-
-ERROR_CODE API_EVT              (int cmd, void * arg, void * arg2)                              { swi_call(nAPI_EVT); }
 
 void printf(char *fmt, ...)
 {

@@ -34,6 +34,12 @@ typedef struct _GFX_POINT
     long y;
 } GFX_POINT;
 
+typedef struct _GFX_RECT
+{
+    long x;
+    long y;
+} GFX_RECT;
+
 typedef struct _GFX_3DVERTEX
 {
 	long ix, iy, iz, iu, iv;

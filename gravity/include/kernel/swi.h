@@ -57,10 +57,12 @@
 #define nAPI_EVT               54
 
 #define nAPI_RUN_GRV           60
+#define nAPI_CREATE_CONTEXT    61
 
-#define nAPI_GFX_FASTBLIT      70
-#define nAPI_GFX_STRETCHBLIT   71
-#define nAPI_GFX_PATTERNBLIT   72
+#define nAPI_GFX_COMMIT        70
+#define nAPI_GFX_FASTBLIT      71
+#define nAPI_GFX_STRETCHBLIT   72
+#define nAPI_GFX_PATTERNBLIT   73
 
 #define nAPI_SOUND_PLAY        80
 #define nAPI_SOUND_PAUSE       81
