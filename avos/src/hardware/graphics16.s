@@ -320,7 +320,6 @@ g16s16y:
         mov r6, #0
 g16s16x:
         ldrh r2, [r1, r6]
-@        ldr r2, =0x0101
         cmp r2, r4
          beq g16s16nd
         strh r2, [r0, r6]
