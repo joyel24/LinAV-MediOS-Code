@@ -3,6 +3,7 @@
 #include "graphics.h"
 #include "colordef.h"
 
+/* premier programme de test */
 
 int main(int argc,char ** argv)
 {
