@@ -106,12 +106,14 @@ struct graphicsBuffer VIDEO_2 = {
 
 struct graphicsBuffer buffers[NB_BUFFER];
 
+#ifdef AV_SCREEN
 int buffers_comp[NB_BUFFER] = {
     AV3XX_OSD_BITMAP1,
     AV3XX_OSD_BITMAP2,
     AV3XX_OSD_VIDEO1,
     AV3XX_OSD_VIDEO2
 };
+#endif
 
 GC_ID   default_gc=NULL;
 FONT_ID default_font=GC_FONT;
@@ -365,7 +367,7 @@ void showPlane(int vplane)
 #endif          
 }
 
-void setSate(int vplane,int state)
+void setState(int vplane,int state)
 {
 #ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
@@ -379,7 +381,7 @@ void setSate(int vplane,int state)
 #endif          
 }
 
-int getSate(int vplane)
+int getState(int vplane)
 {
 #ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)

@@ -14,25 +14,8 @@
 #ifndef __SOUND_H
 #define __SOUND_H
 
-#ifdef AV_SCREEN
 #include "av3xx_common.h"
-#else
-struct mp3_play {
-/*	char * nxt;
-	char * cur;
-	char * tmp;
-	int needData;
-	int decRunning;*/
-	int size;
-	int finished;
-	char * filename;
-	int pos;
-};
-struct av_peak {
-	int left;
-	int right;
-};
-#endif
+
 
 int  ini_sound_connection(void);
 int  ini_mp3_playback   (struct mp3_play * mp3_p_data);

@@ -78,7 +78,7 @@ void osdSetPallette (int Y, int Cr, int Cb, int index)
         /* nothing */ ;
 }
 
-void osdSet16CPallete (int bankN, int index, int value)
+void osdSet16CPallette (int bankN, int index, int value)
 {
 	int val=INW(AV3XX_GET_BANK_ADDR(bankN,index));
 	val &= 0xFF00 >> AV3XX_GET_BANK_SHIFT(index);

@@ -223,7 +223,7 @@ void osdSetCursor2Bitmap (int index, int data);
 void osdSetMainConfig (int config);
 void osdSetMainShift (int horizontal,int vertical);
 void osdSetPallette (int Y, int Cr, int Cb, int index);
-void osdSet16CPallete (int bankN, int index, int value);
+void osdSet16CPallette (int bankN, int index, int value);
 void osdSetAltOffset (int address);
 void osdSetComponentOffset (int component, int address);
 void osdSetComponentSize (int component, int width, int height);
