@@ -84,8 +84,6 @@ int  browserEvt         (int evt,struct browser_data * bdata);
 /*****    gui_fct    *****/
 void iniBrowser         (void);
 int  viewNewDir         (struct browser_data *bdata,char *name);
-void showArrow          (int type,struct browser_data *bdata);
-void hideArrow          (int type,struct browser_data *bdata);
 int  printName          (struct dir_entry * dEntry,int pos,int clear,int selected,struct browser_data *bdata);
 void printAllName       (struct browser_data *bdata);
 void printAName         (struct browser_data *bdata,int pos, int nselect, int clear, int selected);
