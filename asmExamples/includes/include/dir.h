@@ -43,6 +43,5 @@ struct dirent* readDir(int dd);
 void iniDir();
 void dispDir(char * nameUP,void (*action[])(char * name),char * * ext,int nbExt);
 
-int addFile(int dir,char * fileN);
 
 #endif

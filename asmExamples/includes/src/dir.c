@@ -14,11 +14,6 @@
 
 static myDIR opendirs[MAX_OPEN_DIRS];
 
-int addFile(int dir,char * fileN)
-{
-
-}
-
 void iniDir()
 {
 	int dd;

@@ -14,12 +14,6 @@ void iniFile()
         openfiles[dd].busy=false;
 }
 
-int createFileinRoot(char * fileN)
-{
-	int dir=openDir("/");
-	return addFile(dir,fileN);
-}
-
 int launchFile(char * fileN)
 {
 	int curFile;
@@ -157,6 +151,9 @@ int read(int fd, void* buf, int count)
 		file=&(openfiles[fd]);
 		fat_ent=&file->fat_ent;
 
+		if(count+file->count>file->size)
+			count=file->size-file->count;
+
 		if(file->eof)
 			return -1;
 
@@ -190,5 +187,6 @@ int read(int fd, void* buf, int count)
 		return -1;
 	}
 
+	file->count+=pos;
 	return pos;
 }

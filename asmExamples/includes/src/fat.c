@@ -38,7 +38,7 @@ int nxtSector(struct fatent * fat_ent)
 	if(fat_ent->sectorNumber>=getFatSecPerCluT()) // need to change cluster
 	{
 		fat_ent->curCluster=fatTraceCCT(fat_ent->curCluster);
-		if(fat_ent->curCluster> 0x0ffffff8)
+		if(fat_ent->curCluster >= 0x0ffffff8)
 		{
 			fat_ent->eof_disk=true;
 		}

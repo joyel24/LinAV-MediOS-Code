@@ -26,6 +26,7 @@ struct fatent {
 	int sectorNumber;
 	int startCluster;
 	int curCluster;
+	int nxtCluster;
 	bool eof_disk;
 };
 
@@ -39,6 +40,7 @@ extern u32 getFatLBADATAT();
 extern u32 getFatLBAFAT();
 extern u32 getFatSecPerCluT();
 extern u32 getFatRootCluT();
+extern u32 getFatSize();
 
 int fatInit(int lba);
 int nxtSector(struct fatent * fat_ent);
