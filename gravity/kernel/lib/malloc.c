@@ -3,7 +3,7 @@
 #define BufDump     1	      
 /*#define BufValid    1	*/	      
 /*#define DumpData    1	*/	      
-/*#define BufStats    1	*/	      
+#define BufStats    1      
 /*#define FreeWipe    1	*/	      
 /*#define BestFit     1	*/	      
 /*#define BECtl	    1	*/	      

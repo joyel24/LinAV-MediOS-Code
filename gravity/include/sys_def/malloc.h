@@ -17,7 +17,7 @@ void   *bgetz	    (bufsize size);
 void   *bgetr	    (void *buffer, bufsize newsize);
 void	brel	    (void *buf);
 void	bpoold	    (void *pool, int dumpalloc, int dumpfree);
-
+void    bstats(bufsize *curalloc, bufsize *totfree, bufsize *maxfree,long * nget, long *nrel);
 /*
 
 PROVIDES:  equivalent functions to malloc, calloc, realloc, and free
