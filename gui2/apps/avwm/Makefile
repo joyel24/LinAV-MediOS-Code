@@ -11,6 +11,8 @@ ifeq ($(BUILD),X11)
 LDFLAGS += -L/usr/X11R6/lib -lX11
 endif
 
+LDFLAGS  += -lpthread
+
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
 	
@@ -19,6 +21,7 @@ TARGET = avwm
 force: clean all
 
 all: $(TARGET)
+	@$(MAKE) -C lib/ all
 	@mkdir -p ../../build/avwm
 	@rm -f ../../build/avwm/avwm
 	@mv $(TARGET) ../../build/avwm/
@@ -34,6 +37,7 @@ $(TARGET) : $(OBJS)
 
 clean:
 	@echo "**** Cleaning..."
+	@$(MAKE) -C lib/ clean
 	@rm -f *.o *.bak *~ *.gdb *..elf *.elf2flt $(TARGET) include/*~
 	@rm -Rf ../../build/avwm/
         

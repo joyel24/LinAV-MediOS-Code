@@ -28,6 +28,7 @@
 NEED_ICON(linavLogo);
 NEED_ICON(usbIcon);
 NEED_ICON(fwExtIcon);
+NEED_ICON(cfIcon);
 NEED_ICON(powerIcon);
 
 int batteryRefresh=0;
@@ -35,6 +36,7 @@ int batteryRefreshValue = 10;
 int pwrState=0;
 int usbState=0;
 int fwExtState=0;
+int cfState=0;
 int power = 0;
 int color = 0;
 int level = 0;
@@ -128,8 +130,19 @@ void drawBat(void)
 
 void drawStatus(void)
 {
+    if(fwExtState && cfState)
+    {
+        fwExtState=0;
+        cfState=0;
+    }
+    
     if(fwExtState)
         drawBITMAP(&fwExtIcon, 242, 4);
+    else
+        fillRect(BG_COLOR,242,4,15,6);
+        
+    if(cfState)
+        drawBITMAP(&cfIcon, 242, 4);
     else
         fillRect(BG_COLOR,242,4,15,6);
         
@@ -206,6 +219,12 @@ int statusEvtHandler(int evt)
             fwExtState=getFwExt();
             drawStatus();
             break;
+        case EVT_CF_IN:
+        case EVT_CF_OUT:
+            cfState=CF_mod_is_connected();
+            drawStatus();
+            break;
+        
     }
     return 1;
 }
@@ -215,5 +234,6 @@ void ini_status_bar(struct plugin * status_plugin)
     pwrState=getPwr();
     usbState=getUSB();
     fwExtState=getFwExt();
+    cfState=CF_mod_is_connected();
     doRegisterPlugin(status_plugin,statusEvtHandler,0);
 }

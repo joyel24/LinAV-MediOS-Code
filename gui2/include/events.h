@@ -17,7 +17,6 @@
 
 #include "av3xx_common.h"
 
-
 #define        NO_EVENT    0x0000
 #define        BTN_UP      0x0001
 #define        BTN_LEFT    0x0002
@@ -36,7 +35,8 @@
 #define        EVT_CF_IN   0x000f
 #define        EVT_CF_OUT  0x0010
 #define        EVT_FW_EXT  0x0011
-
+#define        BTN_FM      0x0012
+#define        BTN_REC     0x0013
 
 int  iniEvent(void);
 int  nxtEvent(void);

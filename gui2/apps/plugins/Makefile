@@ -6,6 +6,9 @@ ifeq ($(BUILD),X11)
 LDFLAGS  += -shared
 endif
 
+LDFLAGS  += -L../avwm/lib -lavwm
+LDFLAGS  += -lpthread
+
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
 TARGET = $(SRC:%.c=%)

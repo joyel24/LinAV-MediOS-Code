@@ -10,6 +10,7 @@
 * KIND, either express of implied.
 *
 */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -152,26 +153,73 @@ int fmSetVol(int val)
     return 1;
 }
 
-/*int processFM_cmd(int cmd,void * param)
+int fmSetTxt(char * txt)
 {
-    int fd;
-    fd=open("/dev/avfm",O_RDONLY | O_NONBLOCK);
-    if (fd < 0)
-    {
-        printf("Can't open /dev/avfm\n");
-        return 0;
-    }
-    
-    if(ioctl(fd,cmd,param)<0)
-    {
-        printf("Error getting tick value\n");
-        close(fd);
-        return 0;
-    }
-
-    close(fd);
+    doGenIoctl("/dev/avfm",AV_FM_SET_TXT,txt,"Error sending normal text to FM\n");
     return 1;
-}*/
+}
+
+int fmSetTmpTxt(char * txt,int iter)
+{
+    struct av_couple var;
+    var.v1=(void*)txt;
+    var.v2=(void*)&iter;
+    doGenIoctl("/dev/avfm",AV_FM_SET_TMP_TXT,&var,"Error sending tmp text to FM\n");
+    return 1;
+}
+
+int fmSetBackLight(int val)
+{
+    doGenIoctl("/dev/avfm",AV_FM_SET_BACK_LIGHT,&val,"Error setting backlight on FM\n");
+    return 1;
+}
+
+int fmGetBackLight(void)
+{
+    int val;
+    doGenIoctl("/dev/avfm",AV_FM_GET_BACK_LIGHT,&val,"Error getting backlight on FM\n");
+    return val;
+}
+
+int fmSetRecLight(int val)
+{
+    doGenIoctl("/dev/avfm",AV_FM_SET_REC_LIGHT,&val,"Error setting REC light on FM\n");
+    return 1;
+}
+
+int fmGetRecLight(void)
+{
+    int val;
+    doGenIoctl("/dev/avfm",AV_FM_GET_REC_LIGHT,&val,"Error getting REC light on FM\n");
+    return val;
+}
+
+int fmOnRadio(void)
+{
+    doGenIoctl("/dev/avfm",AV_FM_RADIO_ON,NULL,"Error turning on radio\n");
+    return 1;
+}
+
+int fmOffRadio(void)
+{
+    doGenIoctl("/dev/avfm",AV_FM_RADIO_OFF,NULL,"Error turning off radio\n");
+    return 1;
+}
+
+float fmGetFreq(void)
+{
+    int val;
+    doGenIoctl("/dev/avfm",AV_FM_GET_FREQ,&val,"Error getting freq from radio\n");
+    printf("received: %d\n",val);
+    return (float)val/1000;
+}
+
+int fmSetFreq(float freq)
+{
+    int val=(int)(freq*1000);
+    doGenIoctl("/dev/avfm",AV_FM_SET_FREQ,&val,"Error setting freq from radio\n");
+    return 1;
+}
 
 int set_lcd_TimeOutParam(int state, int value)
 {   

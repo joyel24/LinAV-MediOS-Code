@@ -40,6 +40,11 @@ struct mouseParam {
 	int repeated_press; // repeate rate
 };
 
+struct av_couple {
+        void * v1;
+        void * v2;
+};
+
 /* mp3 player */
 
 struct mp3_play {
@@ -172,7 +177,7 @@ struct timer_val {
 #define AV_CF_IS_CONNECTED     _IOR(AV_OP_IOC_MAGIC_STATE,24,int)
 
 #define AV_OP_IOC_MAGIC_FM     'g'
-#define AV_OP_IOC_MAXNR_FM     14
+#define AV_OP_IOC_MAXNR_FM     25
 #define AV_FM_SET_TXT          _IOW(AV_OP_IOC_MAGIC_FM,1,char) 
 #define AV_FM_GET_TXT          _IOR(AV_OP_IOC_MAGIC_FM,2,char)
 #define AV_FM_SCROLL_ON        _IO(AV_OP_IOC_MAGIC_FM,3)
@@ -187,6 +192,17 @@ struct timer_val {
 #define AV_FM_GET_VOL          _IOR(AV_OP_IOC_MAGIC_FM,12,int)
 #define AV_FM_IS_CONNECTED     _IOR(AV_OP_IOC_MAGIC_FM,13,int)
 #define AV_FM_INI_TXT          _IO(AV_OP_IOC_MAGIC_FM,14)
+#define AV_FM_SET_TMP_TXT      _IOW(AV_OP_IOC_MAGIC_FM,15,struct av_couple*)
+#define AV_FM_SET_BACK_LIGHT   _IOW(AV_OP_IOC_MAGIC_FM,16,int)
+#define AV_FM_SET_REC_LIGHT    _IOW(AV_OP_IOC_MAGIC_FM,17,int)
+#define AV_FM_GET_BACK_LIGHT   _IOR(AV_OP_IOC_MAGIC_FM,18,int)
+#define AV_FM_GET_REC_LIGHT    _IOR(AV_OP_IOC_MAGIC_FM,19,int)
+#define AV_FM_RADIO_ON         _IO(AV_OP_IOC_MAGIC_FM,20)
+#define AV_FM_RADIO_OFF        _IO(AV_OP_IOC_MAGIC_FM,21)
+#define AV_FM_MIC_ON           _IO(AV_OP_IOC_MAGIC_FM,22)
+#define AV_FM_MIC_OFF          _IO(AV_OP_IOC_MAGIC_FM,23)
+#define AV_FM_SET_FREQ         _IOW(AV_OP_IOC_MAGIC_FM,24,int)
+#define AV_FM_GET_FREQ         _IOR(AV_OP_IOC_MAGIC_FM,25,int)
 
 /* MAJOR / MINOR */
 

@@ -191,7 +191,7 @@ int eventHandler(int evt)
 /***************
  * Main function
  **************/
-void clock(void)
+void myClock(void)
 {
     cops->getTime(&current_time);
     hour = current_time.tm_hour;
@@ -253,7 +253,7 @@ int main(int argc,char * * argv)
 
     /* These two functions REQUIRED */
     /* Usage: PACK(cops, <main function>)*/
-    PACK(cops, clock);
+    PACK(cops, myClock);
     /* Stay here in the plugin */
     STOPME(cops);
     return 1;

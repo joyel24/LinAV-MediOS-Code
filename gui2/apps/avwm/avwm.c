@@ -35,6 +35,8 @@
 #include "avwm-menu.h"
 #include "status_line.h"
 #include "CF_handler.h"
+#include "fm.h"
+#include "helperMenu.h"
 
 #include "osd.h"
 
@@ -48,6 +50,7 @@ extern FONT_ID font_table[NBFONT];
 extern struct plugin cur_plugin;
 extern struct plugin menu_plugin;
 extern struct plugin status_bar_plugin;
+
 
 int stopWM;
 int maxChar;
@@ -81,11 +84,12 @@ int main(int argc,char * * argv)
     ini_settings();
     
     ini_CF_mount();
+    ini_FM();
 
     ini_sound_connection();
     
     iniMsgBox();
-    iniEditBox();
+    iniEditBox();    
 
     if(!ini_menu(path,&menu_plugin))
     {

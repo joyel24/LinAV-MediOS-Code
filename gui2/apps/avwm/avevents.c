@@ -23,6 +23,8 @@ extern struct plugin msg_box_plugin;
 extern struct plugin edit_box_plugin;
 extern struct plugin settings_plugin;
 extern struct plugin CF_mnt_plugin;
+extern struct plugin FM_plugin;
+extern struct plugin helper_menu_plugin;
 
 extern int stopWM;
 
@@ -87,9 +89,12 @@ void procNxtEvent(int evt)
         nxt_action.app=0;
         return;          
     }
+    
+    
+    sendEvt(&FM_plugin,evt);
         
     sendEvt(&CF_mnt_plugin,evt);
-
+    
     if(status_bar_plugin.handle_on)
         sendEvt(&status_bar_plugin,evt);
 

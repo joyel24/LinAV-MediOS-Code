@@ -15,6 +15,7 @@
 
 #include "ls_main.h"
 #include "msgBox.h"
+#include "helperMenu.h"
 
 int pos,nselect;
 
@@ -37,6 +38,7 @@ int eventHandler(int evt)
 
     if(menuOff)
     {
+        helperEvt(evt,BTN_JOY);
         switch(evt)
         {
             case BTN_UP:
@@ -149,6 +151,7 @@ int eventHandler(int evt)
             case BTN_F3:
                 menu_cfg.root=&menu1;
                 menuOff=0;
+                hideHelper();
                 cops->start_menu(&menu_cfg);
                 cops->menuEvtHandler(EVT_REDRAW);
                 break;

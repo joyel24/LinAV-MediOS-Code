@@ -26,6 +26,7 @@
 #include "avgraphics.h"
 #include "debug.h"
 #include "CF_handler.h"
+#include "helperMenu.h"
 
 #include <stdlib.h>
 
@@ -63,6 +64,8 @@ struct client_operations cops={
     hidePlane          : hidePlane,
     showPlane          : showPlane,
     cfgPlane           : cfgPlane,
+    setPos             : setPos,
+    setSize            : setSize,
     
     showSBar           : showSBar,
     hideSBar           : hideSBar,
@@ -127,5 +130,4 @@ struct client_operations cops={
     CF_is_mounted      : CF_is_mounted,
     mountCF            : mountCF,
     umountCF           : umountCF
-
 };

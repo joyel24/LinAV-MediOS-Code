@@ -6,6 +6,8 @@ ifeq ($(BUILD),X11)
 LDFLAGS  += -shared
 endif
 
+LDFLAGS  += -L../../avwm/lib -lavwm -lpthread
+
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
 TARGET = ls-gui

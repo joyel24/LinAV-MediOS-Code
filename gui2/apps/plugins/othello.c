@@ -12,7 +12,7 @@
 */
 
 #include <stdio.h>
-
+#include <pthread.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <math.h>
@@ -25,6 +25,7 @@
 
 #include "cops.h"
 #include "avevents.h"
+#include "helperMenu.h"
 
 
 struct client_operations * cops;
@@ -103,6 +104,24 @@ unsigned char av3xx_bmap[12][12]= {
 BITMAP hBitmap = {(unsigned int) human_bmap, 12, 12, 0, 0};
 BITMAP aBitmap = {(unsigned int) av3xx_bmap, 12, 12, 0, 0};
 
+struct helperMenu othelloMenu = {
+    ON_txt        : "New Game",
+    OFF_txt       : "Quit",
+    JOY_txt       : NULL,
+    F1_txt        : "Play",
+    F2_txt        : NULL,
+    F3_txt        : "Nav mode",
+    
+    helperDelay   :  1,
+    helperSpeed   :  300,
+    
+    bg_color      : COLOR_WHITE,
+    border_color  : COLOR_BLUE,
+    txt_color     : COLOR_BLACK,
+    
+    align         : ALIGN_RIGHT
+};
+
 #define PIECE_OFFSET (CELL_SIZE-PIECE_SIZE)/2+1
 
 void drawPiece(int x, int y, int player)
@@ -171,14 +190,14 @@ void drawMenu()
 {
     int w=0,h=0;
 
-    cops->getStringS("New game", &w, &h);
+    /*cops->getStringS("New game", &w, &h);
     cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,15, "New game");
 
     cops->getStringS("Quit", &w, &h);
     cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,45, "Quit");
 
     cops->getStringS("Play", &w, &h);
-    cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,150, "Play");
+    cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,150, "Play");*/
 
     cops->getStringS("Nav Mode:", &w, &h);
     cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,210, "Nav Mode:");
@@ -475,6 +494,7 @@ void simpleMove(int dx,int dy)
 
 int eventHandler(int evt)
 {
+    helperEvt(evt,BTN_JOY);
     switch(evt)
     {
         case BTN_UP:
@@ -555,6 +575,9 @@ int main(int argc,char ** argv)
     cops->setFont(STD8X13);
 
     iniBoard();
+    
+    drawhelperMenuBox(&othelloMenu);
+    
     computeAllowed(allowedHuman,HUMAN);
     eventHandler(EVT_REDRAW);
 

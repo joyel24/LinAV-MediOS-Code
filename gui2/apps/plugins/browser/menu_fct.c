@@ -70,6 +70,7 @@ extern struct client_operations * cops;
 extern int pos,nselect;
 extern struct dir_entry * list;
 extern int listused;
+extern struct helperMenu browserMenu;
 /************************/
 
 void ini_menu_struct(void)
@@ -169,9 +170,12 @@ void do_right(void * data)
             }
             break;
     }
-
+    
+    drawhelperMenuBox(&browserMenu);
+    
     if(reload == true)
         viewNewDir("./");
+    
 }
 
 void do_F1(void * data)

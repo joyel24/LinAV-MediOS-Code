@@ -28,6 +28,7 @@
 #include "avevents.h"
 #include "colordef.h"
 #include "settings.h"
+#include "helperMenu.h"
 
 char item_buff[MAX_TOKEN+1];
 char value_buff[MAX_TOKEN+1];
@@ -198,7 +199,7 @@ int ini_menu(char * path,struct plugin * plug)
 #ifdef DO_DEBUG
     printMenu();
 #endif
-
+    
     doRegisterPlugin(menu_plug,avwm_menuEvtHandler,0);
     
     free(tmpC);

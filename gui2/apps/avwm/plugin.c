@@ -26,7 +26,6 @@
 #include "avwm-menu.h"
 #include "avgraphics.h"
 
-
 #ifndef AV_SCREEN
     #include <dlfcn.h>
 #endif

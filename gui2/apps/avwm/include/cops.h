@@ -20,6 +20,7 @@
 #include "sound.h"
 #include "menu.h"
 #include "osd.h"
+#include "helperMenu.h"
 
 #define     MERGE_BACK              0x0000
 #define     BMAP_0TRANS             0x0004
@@ -90,6 +91,8 @@ struct client_operations {
     void (*hidePlane)         (int vplane);
     void (*showPlane)         (int vplane);
     void (*cfgPlane)          (int vplane,int state);
+    void (*setSize)           (int vplane,int width,int height,int bitsPerPixel);
+    void (*setPos)            (int vplane,int x,int y);
     
     int  (*ini_mp3_playback)    (struct mp3_play * mp3_p_data);
     void (*close_mp3_playback)  (void);

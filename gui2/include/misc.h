@@ -41,6 +41,16 @@ int   setUSB            (int state);
 int   fmIsConnected     (void);
 int   fmSetBat          (int val);
 int   fmSetVol          (int val);
+int   fmSetTxt          (char * txt);
+int   fmSetTmpTxt       (char * txt,int iter);
+int   fmSetBackLight    (int val);
+int   fmSetRecLight     (int val);
+int   fmGetBackLight    (void);
+int   fmGetRecLight     (void);
+int   fmOnRadio         (void);
+int   fmOffRadio        (void);
+float fmGetFreq         (void);
+int   fmSetFreq         (float freq);
 
 int   CF_mod_is_connected (void);
 int   CF_is_connected     (void);
