@@ -423,6 +423,7 @@ void menuEvtHandler(int evt)
             printAllName(pos,nselect);
             break;
         case BTN_OFF:
+            stopWM=1;
         /* to be done: call resume evt on plugin if it exists */
             break;
     }

@@ -24,9 +24,11 @@ void drawTime()
 {
     char timeSt[50];
     
-    getTimeS(timeSt);
-    fillRect(COLOR_LIGHT_BLUE,150,2,130,11);
-    putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,150,2,timeSt);
+    if(getTimeS(timeSt))
+    {
+    	fillRect(COLOR_LIGHT_BLUE,150,2,130,11);
+    	putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,150,2,timeSt);
+    }
 
 }
 
@@ -35,22 +37,23 @@ void drawBat()
     int power = 0;
     int color = 0;   
             
-    power=getBat();
-    
-    if(power < 1320)
-        color = COLOR_DARK_RED;
-    else if(power < 1380)
-        color = COLOR_RED;
-    else if(power < 1440)
-        color = COLOR_ORANGE2;
-    else if(power < 1500)
-        color = COLOR_LIGHT_YELLOW;
-    else
-        color = COLOR_GREEN;
-    
-    fillRect(COLOR_BLACK,289,2,22,11);
-    fillRect(COLOR_BLACK,311,4,3,7);
-    fillRect(color,290,3,20,9);
+    if(power=getBat())
+    {    
+        if(power < 1320)
+            color = COLOR_DARK_RED;
+        else if(power < 1380)
+            color = COLOR_RED;
+        else if(power < 1440)
+            color = COLOR_ORANGE2;
+        else if(power < 1500)
+            color = COLOR_LIGHT_YELLOW;
+        else
+            color = COLOR_GREEN;
+        
+        fillRect(COLOR_BLACK,289,2,22,11);
+        fillRect(COLOR_BLACK,311,4,3,7);
+        fillRect(color,290,3,20,9);
+    }
 
 }
 

@@ -18,7 +18,7 @@
 
 int getTimeS(char * timeSt)
 {    
-    struct tm date_time;
+    struct tm date_time={0,0,0,0,0,0,0,0};
 
     if(getTime(&date_time))
     	sprintf(timeSt, "%02d:%02d:%02d %02d/%02d/%04d", date_time.tm_hour,date_time.tm_min,date_time.tm_sec,
@@ -42,8 +42,9 @@ int getTime(struct tm * date_time)
         if(ioctl(fd,AV_RTC_GET_TIME_IOC,date_time)<0)
         {
             printf("Error getting time and date\n");
+            close(fd);
             return 0;
-        }        
+        }
         
         close(fd);
         
@@ -67,11 +68,12 @@ int set_mouseParam(int freq, int repeat)
     if(ioctl(fd,AV_SET_MOUSE_PARAM,&param)<0)
     {
       printf("Error setting mouse params\n");
-        return fd;
+      close(fd);
+      return 0;
    }
    close(fd);
 
-    return fd;
+    return 1;
 }
 int getBat(void)
 {
@@ -82,13 +84,14 @@ int getBat(void)
         if (fd < 0)
         {
             printf("Can't open /dev/avtsc\n");
-            return -1;
+            return 0;
         }
         
         if(ioctl(fd,AV_LEVEL_BAT0_IOC,&power)<0)
         {
             printf("Error getting power value\n");
-            return -1;
+            close(fd);
+            return 0;
         }
         
         close(fd);
