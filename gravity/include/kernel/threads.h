@@ -13,6 +13,8 @@
 #ifndef __THREADS_H
 #define __THREADS_H
 
+#include <kernel/errors.h>
+
 typedef struct _TASK_INFO
 {
 	unsigned long*     pTopOfStack;
@@ -48,5 +50,14 @@ typedef struct _TASK_INFO
 	/* correct address. */												\
 	asm volatile ( "SUBS	PC, LR, #4" );								\
 }
+
+extern KERNEL_ERROR_CODE kinit_tcb ();
+extern TASK_INFO* kcreate_tcb (void* pvTaskCode, unsigned long nStackSize, void* pParams, const char* pszTaskName);
+
+// Internal kernel functions to work with ring task lists:
+
+extern int klist_size (TASK_INFO* pList);
+extern KERNEL_ERROR_CODE kadd_tcb (TASK_INFO** pList, TASK_INFO* pTask);
+extern TASK_INFO* kremove_tcb  (TASK_INFO** pList);
 
 #endif
