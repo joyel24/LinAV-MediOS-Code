@@ -17,8 +17,13 @@ __IRAM_CODE int swi_snd_handler (
 {
 	switch (nCmd)
 	{
+        
+        
         case nAPI_MIXER:
             mixer_ctl((int)nParam1,(int)nParam2,(void *)nParam3);
+            return 0;
+        case nAPI_DSP:
+            dsp_ctl((int)nParam1,(void *)nParam2);
             return 0;
 	}
 

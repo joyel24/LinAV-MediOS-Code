@@ -48,9 +48,7 @@ __IRAM_CODE int swi_device_handler (
             }
             return 0;
 
-        case nAPI_DSP:
-            dsp_ctl((int)nParam1,(void *)nParam2);
-            return 0;
+        
 	}
 
 	return 0;
