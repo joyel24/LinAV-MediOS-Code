@@ -16,13 +16,6 @@
 typedef unsigned long u32;
 #endif
 
-extern u32 i2cWrite(u32 device, u32 address, void * buffer, u32 count);
-extern u32 i2cWriteRaw(u32 device, void * buffer, u32 count);
-extern u32 i2cRead(u32 device, u32 address, void * buffer, u32 count);
-extern u32 i2cOutb(u32 data);
-extern u32 i2cInb();
-extern u32 i2cGetAck();
-extern void i2cStop();
-extern void i2cStart();
-extern void i2cAck();
-extern void i2cAckEnd();
+extern void masReset();
+extern u32 masGetVersion();
+extern u32 masReadReg(u32 reg);

@@ -14,6 +14,7 @@
 @ Author:   By DoggerMoore
 @
 @ 
+@ i2cWriteRaw(device, buffer, count)
 @ i2cWrite(device, addr, buffer, count)
 @ i2cRead(device, addr, buffer, count)
 @ i2cOutb(data)
@@ -47,6 +48,7 @@ i2cDE:  sub r0, #1
 @-------------------------------------------------------------------------------
 @
 @
+.globl i2cAck
 .thumb_func
 i2cAck:
         push {r0, r1, r7, lr}
@@ -155,6 +157,7 @@ i2cStop:
 @-------------------------------------------------------------------------------
 @
 @
+.globl i2cAckEnd
 .thumb_func
 i2cAckEnd:
         push {r0, r1, r7, lr}
@@ -211,6 +214,7 @@ i2cVA2:
 @-------------------------------------------------------------------------------
 @
 @
+.globl i2cStart
 .thumb_func
 i2cStart:
         push {r0, r1, r7, lr}
@@ -290,7 +294,7 @@ i2cGA2:
         
         ldrh r0, [r7, #i2cRegIN]
         lsl r0, #28
-        lsr r4, r0, #31        
+        lsr r4, r0, #31
         
         bl i2cDelay
 
@@ -446,7 +450,7 @@ i2cW2:
         and r0, r1
         strh r0, [r7, #i2cRegDR]
 
-        bl i2cDelay        
+        bl i2cDelay       
          
         bl i2cGetAck
 
@@ -603,6 +607,68 @@ i2cWN:
         bx r1
 
 i2cWE:  mov r0, #0
+        sub r0, #1
+        pop {r1, r2, r3, r4, r5, r6, r7}
+        bx r1
+
+@-------------------------------------------------------------------------------
+@ i2cWriteRaw (r0=device, r1->buffer, r2=count)
+@
+.globl i2cWriteRaw
+.thumb_func
+
+i2cWriteRaw:
+        push {r1, r2, r3, r4, r5, r6, r7, lr}
+        mov r4, r0
+        
+        ldr r7, =i2cBaseAddress
+        ldrh r6, [r7, #i2cRegDR]
+        mov r5, #4
+        orr r6, r5
+        strh r6, [r7, #i2cRegDR]
+
+        ldrh r6, [r7, #i2cRegDR]
+        mov r5, #8
+        orr r6, r5
+        strh r6, [r7, #i2cRegDR]
+
+        ldrh r6, [r7, #i2cRegIN]
+        lsr r6, #3
+         bcc i2cWF
+
+        ldrh r6, [r7, #i2cRegIN]
+        lsr r6, #4
+         bcc i2cWF
+
+        mov r5, r1
+        bl i2cStart
+
+        lsl r0, #24
+        lsr r0, #25
+        lsl r0, #1
+        bl i2cOutb
+        cmp r0, #0
+         bne i2cWF
+         
+        cmp r2, #0
+         ble i2cWO
+i2cWM:  ldrb r0, [r1]
+        bl i2cOutb
+        cmp r0, #1
+         beq i2cWO
+        add r1, #1
+        sub r2, #1
+         bne i2cWM  
+i2cWO:
+
+        bl i2cStop
+
+        mov r0, #0
+        pop {r1, r2, r3, r4, r5, r6, r7}
+        pop {r1}
+        bx r1
+
+i2cWF:  mov r0, #0
         sub r0, #1
         pop {r1, r2, r3, r4, r5, r6, r7}
         bx r1
