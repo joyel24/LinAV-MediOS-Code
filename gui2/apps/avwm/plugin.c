@@ -76,6 +76,8 @@ int loadPlugin(char * path, char * param)
         waitpid(cur_plugin.pid, &status, 0);
         cur_plugin.pid=-1;
     }
+    /* setting font back to normal */
+    defaultFont();
     drawGui();
     return launchPlugin(path,param);
 }

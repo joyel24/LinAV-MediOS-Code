@@ -114,6 +114,11 @@ void wmSetFont(int font)
     plugin_font=font_table[font];
 }
 
+void defaultFont(void)
+{
+    plugin_font=getFont();
+    
+}
 
 
 static char debugmembuf[200];

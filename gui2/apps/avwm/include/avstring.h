@@ -19,6 +19,7 @@ void   wmPutS           (int color, int bg_color,int x, int y, char *s);
 void   wmPutC           (int color, int bg_color,int x, int y, char s);
 void   wmSetFont        (int font);
 void   wmgetStringS     (const unsigned char *str, int *w, int *h);
+void   defaultFont      (void);
 void   debug            (char *fmt, ...);
 
 #endif
