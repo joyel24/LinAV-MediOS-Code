@@ -14,6 +14,8 @@
 #ifndef __EDITBOX_H
 #define __EDITBOX_H
 
+    #define MAX_EDIT_CHARS 256
+
     void iniEditBox(void);
     char* editBox(unsigned char* caption, unsigned char* text, int text_color, int bk_color, int frame_color, int cursor_color);
 

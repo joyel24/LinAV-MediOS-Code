@@ -98,6 +98,7 @@ void do_on(void * data)
 void do_right(void * data)
 {
     char tmp[200];
+    char text[256];
     int reload = false;
     int buttonResult = 0;
 
@@ -128,12 +129,13 @@ void do_right(void * data)
     }
     else if(strcmp((char*)data, "Rename") == 0)
     {
-        cops->editBox("Rename this file","Test entry", COLOR_BLACK,COLOR_WHITE,COLOR_BLACK,COLOR_RED);
-//        cops->putS(COLOR_BLACK, COLOR_WHITE,5, 230, list[pos+nselect].name);
+        strcpy(text,cops->editBox("Rename this file",list[pos+nselect].name, COLOR_BLACK,COLOR_WHITE,COLOR_BLACK,COLOR_RED));
+//        cops->msgBox("Delete Warning", text, MSGBOX_TYPE_OKCANCEL, MSGBOX_ICON_WARNING);
     }
     else if(strcmp((char*)data, "New Dir") == 0)
     {
-        mkdir("New Dir", S_IRWXU);
+        strcpy(text,cops->editBox("Enter new dir name","", COLOR_BLACK,COLOR_WHITE,COLOR_BLACK,COLOR_RED));
+        mkdir(text, S_IRWXU);
         reload = true;
     }
 
@@ -823,10 +825,10 @@ int main(int argc,char * * argv)
         cops->disableMenu();
         cops->setFont(STD6X9);
 
-        menu1.data=(void*)"Rename";
+        menu1.data=(void*)"New Dir";
         menu2.data=(void*)"Delete";
-        menu3.data=(void*)"Copy";
-        menu4.data=(void*)"New Dir";
+        menu3.data=(void*)"Rename";
+        menu4.data=(void*)"Copy";
 
         menu1.prev=NULL;
         menu1.nxt=&menu2;
