@@ -1,5 +1,5 @@
 /*
- * memory.c
+ * calc.c
  * by Schoki 2004
  *
  * linav - http://linav.sourceforge.net
