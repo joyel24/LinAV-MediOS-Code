@@ -676,27 +676,33 @@ void putS(unsigned int color, unsigned int bg_color, int x, int y, unsigned char
     FONT_ID font=default_font;
     int len=strlen(s);
     int h=0,w=0;
-    unsigned char c;
+    unsigned char c=0;
 
     tstXY(x,y);
-    if(y+w>SCREEN_HEIGHT)
-        printf("!!!!!!!!!! str going out of screen\n");
+    
         
     getStringS(s,&w,&h);
     
+    if(y+h>SCREEN_HEIGHT)
+    {
+        printf("!!!!!!!!!! str going out of screen\n");
+        return 0;
+    }
+    
     if(x+w>SCREEN_WIDTH)
     {
-        /*c = s[SCREEN_WIDTH/font->width];
-        s[SCREEN_WIDTH/font->width]=0;*/
+        
+        c = s[(SCREEN_WIDTH-x)/font->width];
+        s[(SCREEN_WIDTH-x)/font->width]=0;
         printf("!!!!!!!!!! string too long\n");        
     }
 
     default_gc->gops->drawString(font,color,bg_color,x,y,s,default_gc->buffer);
 
-    /*if(font->width*len>SCREEN_WIDTH)
+    if(c!=0)
     {
-        s[SCREEN_WIDTH/font->width]=c;
-    }*/
+        s[(SCREEN_WIDTH-x)/font->width]=c;
+    }
   
     LCD_UPDATE(x,y,w,h)
 }

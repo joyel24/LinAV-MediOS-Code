@@ -322,7 +322,6 @@ int doLs(char * name)
     int             endslash;
     int             i;
 
-
     endslash = (*name && (name[strlen(name) - 1] == '/'));
 
     if(ini_lists()<0)
@@ -347,7 +346,7 @@ int doLs(char * name)
             if (!endslash)
                 strcat(fullname, "/");
         }
-
+        
         strcat(fullname, dp->d_name);
 
         if (stat(dp->d_name, &statbuf) < 0)
@@ -417,13 +416,10 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
         cp++;
     else
         cp = dEntry->name;
+        
+    if(clear)
+        cops->fillRect(COLOR_WHITE, 0, y , 320, h+1);
 
-    /*if (stat(name, &statbuf) < 0) {
-        perror(name);
-        return;
-    }*/
-
-    /*if(S_ISDIR(statbuf.st_mode))*/
     if(dEntry->type == TYPE_DIR)
     {
         color=COLOR_RED;
@@ -447,10 +443,7 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
             cops->drawBITMAP (&imageBitmap, 2, y);
         else
             cops->fillRect(COLOR_WHITE, 2, y, 8, 8);
-    }
-
-    if(clear)
-        cops->fillRect(COLOR_WHITE, 0, y , 320, h+1);
+    }   
 
     if(selected)
         cops->putS(color, COLOR_BLUE,x, y, dEntry->name);
@@ -468,7 +461,7 @@ void printAllName(int pos,int nselect)
 
     for (i = pos; i < listused && i < pos+MAXPOS; i++)
     {
-        cops->fillRect(COLOR_WHITE,1, 2+(i-pos)*(h+1)+ h+6+MENU_SHADOW , 305,(h+1));
+        cops->fillRect(COLOR_WHITE,0, 2+(i-pos)*(h+1)+ h+6+MENU_SHADOW , 320,(h+1));
         printName(&list[i],FILE_X_OFFSET, 2 + (i-pos)*(h+1)+ h+6+MENU_SHADOW,0,(i-pos)==nselect);
     }
 
@@ -691,7 +684,7 @@ int eventHandler(int evt)
                     }
                     else // not going down, scrolling
                     {
-                        cops->scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW, 3320, (h+1)*MAXPOS, h+1,1);
+                        cops->scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW, 320, (h+1)*MAXPOS, h+1,1);
                         printAName(pos+nselect-1,nselect-1,1,0);
                         printAName(pos+nselect,nselect,1,1);
                     }
@@ -785,6 +778,7 @@ int main(int argc,char * * argv)
 
     if(argc>0)
     {
+        cops->disableMenu();
         cops->setFont(STD6X9);
 
         listused = 0;
