@@ -21,10 +21,10 @@ extern int fs_swi(int cmd,void * data1, void * data2);
 extern void user_printf(const char * fmt, va_list args);
 
 __IRAM_CODE int kcswi_handler (
-	unsigned long nParam1,
+	unsigned long nCmd,
 	unsigned long nParam2,
 	unsigned long nParam3,
-	unsigned long nCmd)
+	unsigned long nParam1)
 {
    switch (nCmd)
    {

@@ -18,9 +18,9 @@
     ({                                   \
         register long _r0 asm("r0");     \
         asm volatile(                    \
-            "stmdb sp!, {r3-r12} \n"     \
+            "stmdb sp!, {r3-r5} \n"     \
             "swi %0\n"                   \
-            "ldmia sp!, {r3-r12}"        \
+            "ldmia sp!, {r3-r5}"        \
         :                                \
         : "i"(SWI_NUM)                   \
         : "memory");                     \
