@@ -28,9 +28,13 @@ extern struct plugin settings_plugin;
 needFont(std6x9);
 needFont(std7x13);
 
-#define SLIDER_OFFSET 110
+#define SLIDER_OFFSET 115
 
 int stopSettingsLoop = 0; /* global variable used to stop the private evt loop*/
+int activeTab = 0;
+
+void drawTabs();
+void drawParameter();
 
 struct SettingsDataT {
     int  tab;
@@ -45,12 +49,34 @@ struct SettingsDataT {
     int  changed;
 };
 
-#define CNT_SETTINGS_ENTRIES 4
+struct TabNamesT {
+    char* tabname;
+    int   tab;
+};
+
+#define CNT_SETTINGS_TABS 3
+struct TabNamesT tabData[CNT_SETTINGS_TABS] = { { "Screen", 0 },
+                                                { "Timeout",  1 },
+                                                { "Time/Date",   2 } };
+
+#define CNT_SETTINGS_ENTRIES 16
 /*                                                    tab, x,  y, label string,       min,max,inc,val,act,changed */
-struct SettingsDataT sData[CNT_SETTINGS_ENTRIES] = { {  0, 5, 30, "Key Repeat",         1, 10,  1,  5,  1, 0},
-                                                     {  0, 5, 44, "Key Freq",           0,  6,  1,  5,  0, 0},
-                                                     {  0, 5, 58, "LCD Bat Timeout",    1,180, 10,  1,  0, 0},
-                                                     {  0, 5, 72, "LCD DC Timeout",     1,180, 10,  1,  0, 0} };
+struct SettingsDataT sData[CNT_SETTINGS_ENTRIES] = { {  0, 5, 50, "Key Repeat",         1, 10,  1,  5,  1, 0},
+                                                     {  0, 5, 64, "Key Freq",           0,  6,  1,  5,  0, 0},
+                                                     {  0, 5, 92, "Contrast",           0,  6,  1,  5,  0, 0},
+                                                     {  1, 5, 50, "LCD Bat",            1,180, 10,  1,  0, 0},
+                                                     {  1, 5, 64, "LCD DC",             1,180, 10,  1,  0, 0},
+                                                     {  1, 5, 78, "Power Bat",          1,180, 10,  1,  0, 0},
+                                                     {  1, 5, 92, "Power DC ",          1,180, 10,  1,  0, 0},
+                                                     {  1, 5,106, "HD Bat",             1,180, 10,  1,  0, 0},
+                                                     {  1, 5,120, "HD DC",              1,180, 10,  1,  0, 0},
+                                                     {  2, 5, 50, "Day",                1, 31,  1,  1,  0, 0},
+                                                     {  2, 5, 64, "Month",              1, 12,  1,  1,  0, 0},
+                                                     {  2, 5, 78, "Year",            2004,2020,  1, 2004,  0, 0},
+                                                     {  2, 5, 92, "Hours",              1, 24,  1,  1,  0, 0},
+                                                     {  2, 5,106, "Minutes",            1, 60,  1,  1,  0, 0},
+                                                     {  2, 5,120, "Seconds",            1, 60,  1,  1,  0, 0},
+                                                     {  2, 5,134, "Format",             1, 2,   1,  1,  0, 0} };
 
 
 unsigned char SettingsSlider[13][2] =
@@ -121,6 +147,86 @@ void SetSettings(void)
         set_lcd_TimeOutParam(AV_TIMER_ON_DC, sData[3].value);
 }
 
+int GetNextValidParameter()
+{
+    int active = 0;
+    int oldActive = 0;
+
+    active = GetActiveSetting();
+    oldActive = active;
+
+    do
+    {
+        active++;
+
+        if(active >= CNT_SETTINGS_ENTRIES)
+            active = 0;
+    }
+    while(sData[active].tab != activeTab);
+
+    sData[oldActive].active = 0;
+
+    drawSlider(sData[oldActive].x,
+            sData[oldActive].y,
+            sData[oldActive].text,
+            sData[oldActive].min,
+            sData[oldActive].max,
+            sData[oldActive].value,
+            sData[oldActive].active);
+
+    sData[active].active = 1;
+
+    drawSlider(sData[active].x,
+            sData[active].y,
+            sData[active].text,
+            sData[active].min,
+            sData[active].max,
+            sData[active].value,
+            sData[active].active);
+
+    return active;
+}
+
+int GetPrevValidParameter()
+{
+    int active = 0;
+    int oldActive = 0;
+
+    active = GetActiveSetting();
+    oldActive = active;
+
+    do
+    {
+        active--;
+
+        if(active < 0)
+            active = CNT_SETTINGS_ENTRIES-1;
+     }
+    while(sData[active].tab != activeTab);
+
+    sData[oldActive].active = 0;
+
+    drawSlider(sData[oldActive].x,
+            sData[oldActive].y,
+            sData[oldActive].text,
+            sData[oldActive].min,
+            sData[oldActive].max,
+            sData[oldActive].value,
+            sData[oldActive].active);
+
+    sData[active].active = 1;
+
+    drawSlider(sData[active].x,
+            sData[active].y,
+            sData[active].text,
+            sData[active].min,
+            sData[active].max,
+            sData[active].value,
+            sData[active].active);
+
+    return active;
+}
+
 /* events */
 int settingsEvtHandler(int evt)
 {
@@ -132,60 +238,34 @@ int settingsEvtHandler(int evt)
         case EVT_TIMER:
             break;
 
+        case BTN_F1:
+            activeTab--;
+            if(activeTab < 0)
+                activeTab = CNT_SETTINGS_TABS-1;
+
+            drawTabs();
+            setNewActiveparam();
+            drawParameter();
+            break;
+
+        case BTN_F2:
+            activeTab++;
+            if(activeTab >= CNT_SETTINGS_TABS)
+                activeTab = 0;
+
+            drawTabs();
+            setNewActiveparam();
+            drawParameter();
+            break;
+
         case BTN_DOWN:
-            active = GetActiveSetting();
-            sData[active].active = 0;
-            drawSlider(sData[active].x,
-                       sData[active].y,
-                       sData[active].text,
-                       sData[active].min,
-                       sData[active].max,
-                       sData[active].value,
-                       sData[active].active);
 
-            if(active >= CNT_SETTINGS_ENTRIES-1)
-                active = 0;
-            else
-                active++;
-
-            sData[active].active = 1;
-
-            drawSlider(sData[active].x,
-                       sData[active].y,
-                       sData[active].text,
-                       sData[active].min,
-                       sData[active].max,
-                       sData[active].value,
-                       sData[active].active);
-
+            GetNextValidParameter();
             break;
 
         case BTN_UP:
-            active = GetActiveSetting();
-            sData[active].active = 0;
-            drawSlider(sData[active].x,
-                       sData[active].y,
-                       sData[active].text,
-                       sData[active].min,
-                       sData[active].max,
-                       sData[active].value,
-                       sData[active].active);
 
-            if(active == 0)
-                active = CNT_SETTINGS_ENTRIES-1;
-            else
-                active--;
-
-            sData[active].active = 1;
-
-            drawSlider(sData[active].x,
-                       sData[active].y,
-                       sData[active].text,
-                       sData[active].min,
-                       sData[active].max,
-                       sData[active].value,
-                       sData[active].active);
-
+            GetPrevValidParameter();
             break;
 
         case BTN_LEFT:
@@ -238,20 +318,20 @@ void drawSlider(int x, int y, char* text, int min, int max, int value, int activ
     setPlane(BMAP2);
     setFont(std6x9);
 
-	fillRect(COLOR_GREY, x, y-2, SCREEN_WIDTH-40, 13); // clear active settings range
+	fillRect(COLOR_LIGHT_GREY, x, y-2, SCREEN_WIDTH-40, 13); // clear active settings range
 
     if(active)
-        putS(COLOR_RED, COLOR_GREY, x, y, text);
+        putS(COLOR_RED, COLOR_LIGHT_GREY, x, y, text);
     else
-        putS(COLOR_BLACK, COLOR_GREY, x, y, text);
+        putS(COLOR_BLACK, COLOR_LIGHT_GREY, x, y, text);
 
 
     filler = ((int)(((value-min) * 128) / (max-min) ));
 
 	sprintf(tmp,"%d", min);
-    putS(COLOR_BLACK, COLOR_GREY, x+SLIDER_OFFSET-15, y, tmp);
+    putS(COLOR_BLACK, COLOR_LIGHT_GREY, x+SLIDER_OFFSET-25, y, tmp);
 	sprintf(tmp,"%d", max);
-    putS(COLOR_BLACK, COLOR_GREY, x+SLIDER_OFFSET+128+5, y, tmp);
+    putS(COLOR_BLACK, COLOR_LIGHT_GREY, x+SLIDER_OFFSET+128+5, y, tmp);
 
 	fillRect(COLOR_BLUE, x+SLIDER_OFFSET, y, 128, 9);
 
@@ -262,6 +342,66 @@ void drawSlider(int x, int y, char* text, int min, int max, int value, int activ
         putS(COLOR_BLACK, COLOR_BLUE, x+filler+SLIDER_OFFSET+7, y, tmp);
     else
         putS(COLOR_BLACK, COLOR_BLUE, x+filler+SLIDER_OFFSET-15, y, tmp);
+
+    setPlane(BMAP1);
+}
+
+void drawTabs()
+{
+    unsigned long i = 0;
+
+    setPlane(BMAP2);
+    setFont(std7x13);
+
+    for(i = 0; i < CNT_SETTINGS_TABS; i++)
+    {
+        if(activeTab == i)
+        {
+            fillRect(COLOR_RED, 5+80*i, 25, 80, 15);
+            putS(COLOR_BLACK, COLOR_RED, 5+80*i+2, 25, tabData[i].tabname);
+        }
+        else
+        {
+            fillRect(COLOR_GREY, 5+80*i, 25, 80, 15);
+            putS(COLOR_BLACK, COLOR_GREY, 5+80*i+2, 25, tabData[i].tabname);
+        }
+    }
+
+    setPlane(BMAP1);
+    setFont(std6x9);
+}
+
+void setNewActiveparam()
+{
+    unsigned long i = 0;
+    int active = 0;
+
+    active = GetActiveSetting();
+    sData[active].active = 0;
+
+    for(i = 0; i < CNT_SETTINGS_ENTRIES; i++)
+    {
+        if(activeTab == sData[i].tab)
+        {
+            sData[i].active = 1;
+            return;
+        }
+    }
+}
+
+void drawParameter()
+{
+    int i = 0;
+
+    setPlane(BMAP2);
+
+    fillRect(COLOR_LIGHT_GREY, 0, 45, 290, 140);
+
+    for(i = 0; i < CNT_SETTINGS_ENTRIES; i++)
+    {
+        if(activeTab == sData[i].tab)
+            drawSlider(sData[i].x, sData[i].y, sData[i].text, sData[i].min, sData[i].max, sData[i].value, sData[i].active);
+    }
 
     setPlane(BMAP1);
 }
@@ -291,12 +431,11 @@ void drawSettings(void)
     drawLine(COLOR_RED, 0, 18, SCREEN_WIDTH-40, 18);
     drawLine(COLOR_RED, 0, 20, SCREEN_WIDTH-40, 20);
 
+    drawTabs();
+
     GetSettings();
 
-    for(i = 0; i < CNT_SETTINGS_ENTRIES; i++)
-    {
-        drawSlider(sData[i].x, sData[i].y, sData[i].text, sData[i].min, sData[i].max, sData[i].value, sData[i].active);
-    }
+    drawParameter();
 
     showPlane(BMAP2);
     setPlane(BMAP1);
