@@ -36,7 +36,7 @@ struct menu_data * current_menu;
 
 char tmp[MAX_TOKEN+5];
 
-int printName(struct menu_item * item,int x,int y,int clear,int selected)
+int mprintName(struct menu_item * item,int x,int y,int clear,int selected)
 {
     int color;
     int w = 0;
@@ -67,23 +67,23 @@ int printName(struct menu_item * item,int x,int y,int clear,int selected)
     RESTORE_PLANE
 }
 
-void printAllName(struct menu_item * pos,int nselect)
+void mprintAllName(struct menu_item * pos,int nselect)
 {
     struct menu_item * i;
     int nbAff=0,w=0,h=0;
     getStringS("M", &w, &h);
 
     for (i = pos; i !=NULL && nbAff < MAXPOS; i=i->nxt) {
-        printName(i,5,TITLE_OFFSET + nbAff*(h+1) + h+6+MENU_SHADOW,0,nbAff==nselect);
+        mprintName(i,5,TITLE_OFFSET + nbAff*(h+1) + h+6+MENU_SHADOW,0,nbAff==nselect);
         nbAff++;
     }
 }
 
-void printAName(struct menu_item * pos, int posY, int clear, int selected)
+void mprintAName(struct menu_item * pos, int posY, int clear, int selected)
 {
     int w=0,h=0;
     getStringS("M", &w, &h);
-    printName(pos,5,TITLE_OFFSET + posY*(h+1)+ h+6+MENU_SHADOW,clear,selected);
+    mprintName(pos,5,TITLE_OFFSET + posY*(h+1)+ h+6+MENU_SHADOW,clear,selected);
 }
 
 void start_menu(struct menu_data * client_menu)
@@ -137,8 +137,8 @@ void menuEvtHandler(int evt)
                 nselect--;
                 pselect=pselect->prev;
             }
-            printAName(pselect->nxt,nselect+1,1,0);
-            printAName(pselect,nselect,1,1);
+            mprintAName(pselect->nxt,nselect+1,1,0);
+            mprintAName(pselect,nselect,1,1);
             break;
         case BTN_DOWN:
             if(!pselect->nxt) // we are at the end => can't go down anymore
@@ -160,8 +160,8 @@ void menuEvtHandler(int evt)
                 nselect++;
                 pselect=pselect->nxt;
             }
-            printAName(pselect->prev,nselect-1,1,0);
-            printAName(pselect,nselect,1,1);
+            mprintAName(pselect->prev,nselect-1,1,0);
+            mprintAName(pselect,nselect,1,1);
             break;
         case BTN_RIGHT:
             if(pselect->sub) // submenu
@@ -172,7 +172,7 @@ void menuEvtHandler(int evt)
                 CHG_PLANE
                 fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , current_menu->width-5,(h+1)*MAXPOS);
                 RESTORE_PLANE
-                printAllName(pos,nselect);
+                mprintAllName(pos,nselect);
                 clearEventQueue();
             }
             else // launch plugin
@@ -194,7 +194,7 @@ void menuEvtHandler(int evt)
                     CHG_PLANE
                     fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , current_menu->width-5,(h+1)*MAXPOS);
                     RESTORE_PLANE
-                    printAllName(pos,nselect);
+                    mprintAllName(pos,nselect);
                     clearEventQueue();
                 }
             }
@@ -206,7 +206,7 @@ void menuEvtHandler(int evt)
             pos=current_menu->root;
             pselect=current_menu->root;
             nselect=0;
-            printAllName(pos,nselect);
+            mprintAllName(pos,nselect);
             break;
         case BTN_OFF:
             current_menu->off_action(pselect->data);            

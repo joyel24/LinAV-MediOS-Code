@@ -18,6 +18,7 @@
 #include "parse_cfg.h"
 #include "misc.h"
 #include "sound.h"
+#include "menu.h"
 
 #define REGISTER(ops,event,flag)    {ops=(struct client_operations*)atoi(argv[argc-1]);ops->registerPlugin(event,flag);}
 #define PACK(ops,loop)              {ops->pack(loop);}
@@ -112,6 +113,10 @@ struct client_operations {
     int  (*getTick)             (void);
     int  (*getTime)             (struct av_tm * date_time);
     int  (*getTimeS)            (char * timeSt);
+    
+    void (*stop_menu)           (void);
+    void (*start_menu)          (struct menu_data * client_menu);
+    void (*menuEvtHandler)      (int evt);
     
 };
 

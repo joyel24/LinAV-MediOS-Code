@@ -41,9 +41,9 @@ void start_menu(struct menu_data * client_menu);
 
 void menuEvtHandler  (int evt);
 void doPrint         (struct menu_item * ptr,int level);
-void printAName      (struct menu_item * pos, int posY, int clear, int selected);
-void printAllName    (struct menu_item * pos,int nselect);
-int  printName       (struct menu_item * item,int x,int y,int clear,int selected);
+void mprintAName     (struct menu_item * pos, int posY, int clear, int selected);
+void mprintAllName   (struct menu_item * pos,int nselect);
+int  mprintName      (struct menu_item * item,int x,int y,int clear,int selected);
 
 #endif
 

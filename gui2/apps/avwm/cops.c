@@ -94,6 +94,10 @@ struct client_operations cops={
     
     getTick            : getTick,
     getTime            : getTime,
-    getTimeS           : getTimeS
+    getTimeS           : getTimeS,
+    
+    stop_menu          : stop_menu,
+    start_menu         : start_menu,
+    menuEvtHandler     : menuEvtHandler
 
 };
