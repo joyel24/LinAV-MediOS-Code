@@ -15,7 +15,7 @@
         .include "../includes/common.S"
         .include "../includes/av300.S"
 
-        doimage = 1
+@        doimage = 1
         
 .text
 
@@ -70,12 +70,27 @@ waitUsb:
         b waitUsb
 overusbW:
 
+tryLoop:
         callThumb2 r5, terminalPutsCT, msg2, 0xffff
         callThumb r5, ataInitT
         callThumb2 r5, terminalPutsCT, msgDONE, 0xfbfb
 
         callThumb2 r4, terminalPutsCT, msg3, 0xffff
         callThumb1 r4, ataIdentifyT, bufferx
+        cmp r0, #0
+         beq ntryLoop
+
+        mov r1, r0
+        ldr r0, =msg3e1h
+        callThumb r4, hex2T
+        callThumb2 r4, terminalPutsCT, msg3e1, 0xffff
+
+        ldr r0, =0x10000
+lwait1: sub r0, #1
+         bne lwait1
+        b tryLoop
+        
+ntryLoop:
         callThumb2 r4, terminalPutsCT, msgDONE, 0xfbfb
 
         ldr r0, =(bufferx + 20)
@@ -645,6 +660,9 @@ read2T:
 msg1:   .asciz " -- avOS BootLoader version 0.2a (c)2004 DoGgEr -- \n\n"
 msg2:   .asciz "Initialising ATA...                        "
 msg3:   .asciz "Identifying hard drive...                  "
+msg3e1: .ascii "\nError "
+msg3e1h:.asciz "xx\n"
+
 msg4:   .asciz " Serial:    xxxxxxxxxxxxxxxxxxxx\n"
 msg5:   .asciz " Firmware:  xxxxxxxx            \n"
 msg6:   .asciz " Model:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"

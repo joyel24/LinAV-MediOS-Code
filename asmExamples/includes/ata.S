@@ -106,8 +106,12 @@ ataIdentifyT:
         mov r1, #8
         strh r1, [r0]                        @ Spin up the HDD Please...        
 
-        callThumb r1, ataWaitForRDYT        
-
+        callThumb r1, ataWaitForRDYT
+        mov r1, r0
+        mov r0, #1
+        cmp r1, #0
+         bne ataRT
+        
         ldr r2, =ataRegSelect
         ldr r1, =0
         strb r1, [r2]
@@ -117,6 +121,10 @@ ataIdentifyT:
         strb r1, [r2]
 
         callThumb r4, ataWaitForStartOfXferT
+        mov r1, r0
+        mov r0, #2
+        cmp r1, #0
+         bne ataRT
 
         ldr r3, =256
         ldr r2, =ataRegData
@@ -126,46 +134,52 @@ ataRl:  mov r1, #0
         add r5, #2
         sub r3, #1
         bne ataRl
-        
+      
+        mov r0, #0          @ ok...
+ataRT:
         pop {r1, r2, r3, r4, r5}        
-        pop {r0}
-        bx r0
+        pop {r1}
+        bx r1
         
 @ ataWaitForStartOfXferT
 @
 ataWaitForStartOfXferT:
         push {lr}
+        push {r2, r3}
 
-notrea: ldr r1, =(ataGetStatusT+1)
-        mov r2, #1
-        mov lr, r2
-        add lr, pc
-        bx r1
+        ldr r3, =0x100000
+notrea: mov r0, #1
+        sub r3, #1
+         beq tout2
+        callThumb r1, ataGetStatusT
         ldr r2, =(ataStatus_DRQ)
         and r0, r2
         cmp r0, r2
-        bne notrea
-
+         bne notrea
+        mov r0, #0
+tout2:
         @ TODO: CHECK ALT_STATUS
-
-        pop {r0}
-        bx r0
+        pop {r2, r3}
+        pop {r1}
+        bx r1
         
 @ ataWaitForRDYT
 @
 ataWaitForRDYT:
-        push {r1, r2, lr}
-notred: ldr r1, =(ataGetStatusT+1)
-        mov r2, #1
-        mov lr, r2
-        add lr, pc
-        bx r1
+        push {lr}
+        push {r2, r3}
+        ldr r3, =0x100000
+notred: mov r0, #1
+        sub r3, #1
+         beq tout1
+        callThumb r1, ataGetStatusT
         ldr r2, =ataStatus_RDY
         tst r0, r2
         beq notred
-        pop {r1, r2}
-        pop {r0}
-        bx r0
+        mov r0, #0  
+tout1:  pop {r2, r3}
+        pop {r1}
+        bx r1
 
 @ ataWaitForBSYT
 @
@@ -212,7 +226,7 @@ ataInitT:
         strh r1, [r0]        
         
         ldr r0, =0x02600300
-        mov r1, #8
+        mov r1, #0x0a
         strh r1, [r0]                        @ Spin up the HDD Please...        
 
         ldr r0, =0x02600100

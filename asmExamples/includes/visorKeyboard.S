@@ -33,7 +33,9 @@ visorConvertToAscii:
 
         mov r2, #0x1a
         ldr r3, =kShift
-        callThumb r4, visorUpdateShift
+        callThumb r5, visorUpdateShift
+        cmp r4, #1
+         beq visor1
         
         cmp r1, #0x80
          bge visor1
@@ -53,20 +55,23 @@ visor1:
         bx r1
 
 @ visorUpdateShift (0, key, cmpVal, ->var)
-@
+@           Returns in r4 1 if its the shift
 visorUpdateShift:
         push {r0}
+        mov r4, #0
         cmp r1, r2
          bne visorn1
         mov r0, #1
         str r0, [r3]
+        mov r4, #1
         b visorn2
 visorn1:mov r0, #0x80
         orr r2, r0
         cmp r1, r2
          bne visorn2
         mov r0, #0
-        str r0, [r3]        
+        str r0, [r3]
+        mov r4, #1        
 visorn2:
         pop {r0}
         bx lr
