@@ -17,6 +17,8 @@
         .include "../includes/av300.S"
         
         doimage = 1
+		@uartDebug = 1 @ send debug info on UART
+		doTimeOut = 1 @ turn on the autorun of DEFAULT.BIN after time out
         
 .text
 
@@ -107,19 +109,19 @@ ntryLoop:
         ldr r0, =(bufferx + 20)
         ldr r1, =(msg4 + 12)
         mov r2, #20
-        callThumb r3, memMoveT
+        callThumb r3, memSwapT
         callThumb2 r4, terminalPutsCT, msg4, 0xfdfd
 
         ldr r0, =(bufferx + 46)
         ldr r1, =(msg5 + 12)
         mov r2, #8
-        callThumb r3, memMoveT
+        callThumb r3, memSwapT
         callThumb2 r4, terminalPutsCT, msg5, 0xfdfd
 
         ldr r0, =(bufferx + 54)
         ldr r1, =(msg6 + 12)
         mov r2, #40
-        callThumb r3, memMoveT
+        callThumb r3, memSwapT
         callThumb2 r4, terminalPutsCT, msg6, 0xfdfd
 
 
@@ -503,11 +505,12 @@ notm1:
 
         b launchFile                @ Launch the file...
 notm2:
-
         ldr r0, timeoutC
         cmp r0, #0
          bne noovf
-
+.ifndef doTimeOut
+		b errt
+.endif
         ldr r0, runClus
         cmp r0, #0
          beq errt
@@ -677,7 +680,7 @@ runFile:    .ascii  "DEFAULT BIN"
         .align 4
 
 @ ------------------------------------------------------------------------------
-        
+
 memMoveT:
         push {r0, r1, r2, r3}
 lopMove:ldrb r3, [r0]
@@ -687,6 +690,23 @@ lopMove:ldrb r3, [r0]
         sub r2, #1
         bne lopMove
         pop {r0, r1, r2, r3}
+        bx lr
+
+@ ------------------------------------------------------------------------------
+
+memSwapT:
+        push {r0, r1, r2, r3, r4}
+lopS:	ldrb r3, [r0]
+		add r0, #1
+		ldrb r4, [r0]
+        strb r4, [r1]
+		add r1, #1
+		strb r3, [r1]
+        add r0, #1
+        add r1, #1
+        sub r2, #2
+        bne lopS
+        pop {r0, r1, r2, r3, r4}
         bx lr
 
 @ ------------------------------------------------------------------------------
