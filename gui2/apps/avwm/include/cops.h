@@ -161,6 +161,7 @@ struct client_operations {
     int  (*viewNewDir)          (struct browser_data *bdata,char *name);
     void (*cleanList)           (struct browser_data * bdata);
     void (*chgSelect)           (struct browser_data *bdata,int num);
+    int  (*nbSelected)          (struct browser_data * bdata);
 };
 
 #endif

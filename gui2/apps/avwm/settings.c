@@ -12,16 +12,23 @@
 */
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "colordef.h"
-#include "cops.h"
-#include "version.h"
 #include "avevents.h"
 #include "events.h"
 #include "plugin.h"
 #include "icons.h"
 #include "av3xx_common.h"
 #include "settings.h"
+#include "parse_cfg.h"
+#include "msgBox.h"
+#include "graphics.h"
+#include "font.h"
+#include "misc.h"
+#include "avstring.h"
+
+#define SETTING_FILE_NAME "avwm.cfg"
 
 extern struct plugin settings_plugin;
 
@@ -48,6 +55,8 @@ struct SettingsDataT {
     int  value;
     int  active;
     int  changed;
+    char * cfg_name;
+    int do_save;
 };
 
 struct TabNamesT {
@@ -60,24 +69,26 @@ struct TabNamesT tabData[CNT_SETTINGS_TABS] = { { "Screen", 0 },
                                                 { "Timeout",  1 },
                                                 { "Time/Date",   2 } };
 
-#define CNT_SETTINGS_ENTRIES 16
+#define CNT_SETTINGS_ENTRIES 17
 /*                                                    tab, x,  y, label string,       min,max,inc,val,act,changed */
-struct SettingsDataT sData[CNT_SETTINGS_ENTRIES] = { {  0, 5, 50, "Key Repeat",         1, 10,  1,  5,  1, 0},
-                                                     {  0, 5, 64, "Key Freq",           0,  6,  1,  5,  0, 0},
-                                                     {  0, 5, 92, "Contrast",           1, 10,  1,  5,  0, 0},
-                                                     {  1, 5, 50, "LCD Bat",            1,180, 10,  1,  0, 0},
-                                                     {  1, 5, 64, "LCD DC",             1,180, 10,  1,  0, 0},
-                                                     {  1, 5, 78, "Power Bat",          1,180, 10,  1,  0, 0},
-                                                     {  1, 5, 92, "Power DC ",          1,180, 10,  1,  0, 0},
-                                                     {  1, 5,106, "HD Bat",             1,180, 10,  1,  0, 0},
-                                                     {  1, 5,120, "HD DC",              1,180, 10,  1,  0, 0},
-                                                     {  2, 5, 50, "Day",                1, 31,  1,  1,  0, 0},
-                                                     {  2, 5, 64, "Month",              1, 12,  1,  1,  0, 0},
-                                                     {  2, 5, 78, "Year",            2004,2020,  1, 2004,  0, 0},
-                                                     {  2, 5, 92, "Hours",              1, 24,  1,  1,  0, 0},
-                                                     {  2, 5,106, "Minutes",            1, 60,  1,  1,  0, 0},
-                                                     {  2, 5,120, "Seconds",            1, 60,  1,  1,  0, 0},
-                                                     {  2, 5,134, "Format",             1, 2,   1,  1,  0, 0} };
+struct SettingsDataT sData[CNT_SETTINGS_ENTRIES] = {
+{  0, 5, 50, "Key Repeat",         1, 10,  1,  5,  1, 0, "key_repeat"    , 1},   /* 0 */
+{  0, 5, 64, "Key Freq",           0,  6,  1,  5,  0, 0, "key_freq"      , 1},   /* 1 */
+{  0, 5, 92, "Contrast",           1, 10,  1,  5,  0, 0, "contrast"      , 1},   /* 2 */
+{  1, 5, 50, "LCD Bat",            1,180, 10,  1,  0, 0, "lcd_bat"       , 1},   /* 3 */
+{  1, 5, 64, "LCD DC",             1,180, 10,  1,  0, 0, "lcd_dc"        , 1},   /* 4 */
+{  1, 5, 78, "Power Bat",          1,180, 10,  1,  0, 0, "power_bat"     , 1},   /* 5 */
+{  1, 5, 92, "Power DC ",          1,180, 10,  1,  0, 0, "power_dc"      , 1},   /* 6 */
+{  1, 5,106, "HD Bat",             1,180, 10,  1,  0, 0, "hd_bat"        , 1},   /* 7 */
+{  1, 5,120, "HD DC",              1,180, 10,  1,  0, 0, "hd_dc"         , 1},   /* 8 */
+{  2, 5, 50, "Day",                1, 31,  1,  1,  0, 0, "day"           , 0},   /* 9 */
+{  2, 5, 64, "Month",              1, 12,  1,  1,  0, 0, "month"         , 0},   /* 10 */
+{  2, 5, 78, "Year",            2004,2020,  1, 2004,  0, 0, "year"       , 0},/* 11 */
+{  2, 5, 92, "Hours",              1, 24,  1,  1,  0, 0, "hours"         , 0},   /* 12 */
+{  2, 5,106, "Minutes",            1, 60,  1,  1,  0, 0, "minutes"       , 0},   /* 13 */
+{  2, 5,120, "Seconds",            1, 60,  1,  1,  0, 0, "seconds"       , 0},   /* 14 */
+{  2, 5,134, "Date",               0, 1,   1,  1,  0, 0, "date_format"   , 1},   /* 15 */
+{  2, 5,148, "12/24",              0, 1,   1,  1,  0, 0, "time_format"   , 1} }; /* 16 */
 
 
 unsigned char SettingsSlider[13][2] =
@@ -123,32 +134,116 @@ void SettingsEvtLoop(void)
     settings_plugin.handle_on=0;
 }
 
-int LoadSettings()
+extern char * path;
+
+int SaveSettings(void)
 {
-    return 0;
+    char tmp[20];
+    int i;
+    char * fName;
+    
+    fName=(char*)malloc(sizeof(char)*(strlen(path)+1+strlen(SETTING_FILE_NAME)));
+    sprintf(fName,"%s/%s",path,SETTING_FILE_NAME);
+    
+    if(openFile(fName,CFG_WRITE)<0)
+    {
+       // msgBox("Setting", "Can't open file for writting", MSGBOX_TYPE_OK, MSGBOX_ICON_ERROR);
+       fprintf(stderr,"[LoadSettings] Can't open file for writting\n");
+        return 0;
+    }
+    
+    write_comment("Avwm Setting file");
+    add_line();
+    write_comment("Automaticaly generated by avwm");
+    add_line();
+    write_comment("Do not edit");
+    add_line();
+    add_line();
+    
+    for(i=0;i<CNT_SETTINGS_ENTRIES;i++)
+    {
+        if(sData[i].do_save)
+        {
+            sprintf(tmp,"%d",sData[i].value);
+            write_cfg(sData[i].cfg_name,tmp);                       
+        }
+    }
+    
+    closeFile();
+
+    return 1;
 }
 
-int SaveSettings()
+char item_buff[MAX_TOKEN+1];
+char value_buff[MAX_TOKEN+1];
+
+int LoadSettings(void)
 {
-    char strkey[20];
-    int i = 0;
-/*
-    openFile("setting.cfg",CFG_WRITE);
+    int i,val;
+    char *item=item_buff;
+    char *value=value_buff;   
+    char * fName;
+    
+    fName=(char*)malloc(sizeof(char)*(strlen(path)+1+strlen(SETTING_FILE_NAME)));
+    sprintf(fName,"%s/%s",path,SETTING_FILE_NAME);
+    
+    if(access(fName,F_OK)<0)
+    {
+        fprintf(stderr,"[LoadSettings] Can't find Setting file\n");
+        //msgBox("Setting", "Can't find Setting file", MSGBOX_TYPE_OK, MSGBOX_ICON_ERROR);
+        if(SaveSettings())
+        {
+            fprintf(stderr,"[LoadSettings] Default file created\n");
+            //msgBox("Setting", "Default file created", MSGBOX_TYPE_OK, MSGBOX_ICON_INFORMATION);
+            return 1;
+        }
+        else
+        {
+            fprintf(stderr,"[LoadSettings] Can't create default file\n");
+            //msgBox("Setting", "Can't create default file", MSGBOX_TYPE_OK, MSGBOX_ICON_ERROR);
+            return 0;
+        }
+    }
+    
+    if(openFile(fName,CFG_READ)<0)
+    {
+        fprintf(stderr,"[LoadSettings] Can't open file for reading\n");
+        //msgBox("Setting", "Can't open file for reading", MSGBOX_TYPE_OK, MSGBOX_ICON_ERROR);
+        return 0;
+    }
 
     while (1)
     {
-        sprintf(strkey, "%d", i);
-        if (!nxt_cfg(item,strkey)) break;
-        if(!strcmp(item,"name"))
+        if (!nxt_cfg(item,value)) break;
+        
+        strlwr(item);
+        
+        for(i=0;i<CNT_SETTINGS_ENTRIES;i++)
         {
-            addItem(cfg);
-            strcpy(current_item->name,value);
+            if(sData[i].do_save && !strcmp(item,sData[i].cfg_name))
+            {
+                val=atoi(value);
+                if(val>=sData[i].min && val<=sData[i].max)
+                    sData[i].value=val;
+                else
+                    fprintf(stderr,"[LoadSettings] warning, %s=%d is out range (%d-%d)\n",
+                            sData[i].cfg_name,val,sData[i].min,sData[i].max);
+                break;
+            }                
         }
+        
+        if(i==CNT_SETTINGS_ENTRIES)
+            fprintf(stderr,"[LoadSettings] warning, unknown setting: %s\n",item);
     }
+    
     closeFile();
-*/
-    return 0;
+                
+    return 1;    
 }
+
+extern int date_format;
+extern int time_format;
+void drawTime(void);
 
 void GetSettings(void)
 {
@@ -173,7 +268,8 @@ void GetSettings(void)
     sData[12].value = date_time_setting.tm_hour;
     sData[13].value = date_time_setting.tm_min;
     sData[14].value = date_time_setting.tm_sec;
-    sData[15].value = 1;
+    sData[15].value = date_format;
+    sData[16].value = time_format;
 
     set_mouseParam(6,3); // set to 6,3 for the settings screen only
 }
@@ -227,6 +323,12 @@ void SetSettings(void)
         setTime(&date_time_setting);
     }
 
+    date_format = sData[15].value;
+    time_format = sData[16].value;
+        
+    if(sData[15].changed || sData[16].changed) 
+        drawTime();
+        
     SaveSettings();
 }
 
@@ -491,7 +593,6 @@ void drawParameter()
 
 void drawSettings(void)
 {
-    int i = 0;
 
     setSize(BMAP2,SCREEN_WIDTH-40,SCREEN_HEIGHT-60, 8);
     setPos(BMAP2,0x14+40,0x13+20);
@@ -529,6 +630,15 @@ void drawSettings(void)
 
 void ini_settings(void)
 {
+    int i;
+    if(LoadSettings())
+    {
+        /* set all setting to changed */
+        for(i=0;i<CNT_SETTINGS_ENTRIES;i++)
+            if(sData[i].do_save)
+                sData[i].changed=1;
+        SetSettings();
+    }
     doRegisterPlugin(&settings_plugin,settingsEvtHandler,0);
 }
 

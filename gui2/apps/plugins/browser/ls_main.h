@@ -30,7 +30,7 @@
 int  eventHandler       (int evt);
 
 /*****    menu_fct    *****/
-void ini_menu_struct  (void);
+void ini_menu_struct  (struct browser_data *bdata);
 void do_off           (void * data);
 void do_on            (void * data);
 void do_right         (void * data);

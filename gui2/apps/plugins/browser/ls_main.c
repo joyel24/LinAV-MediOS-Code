@@ -161,7 +161,7 @@ int main(int argc,char * * argv)
         cops->disableMenu();
         cops->setFont(STD6X9);
 
-        ini_menu_struct();
+        ini_menu_struct(bdata);
         iniHelperMenu(&browserMenu);
         //openHelper();
         

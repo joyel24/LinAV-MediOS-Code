@@ -193,3 +193,11 @@ void chgSelect(struct browser_data *bdata,int num)
             printName(&bdata->list[num],num-bdata->pos,1,num-bdata->pos==bdata->nselect,bdata);
     }
 }
+
+int nbSelected(struct browser_data * bdata)
+{
+    int i,nb=0;
+    for(i=0;i<bdata->listused;i++)
+        nb+=bdata->list[i].selected;
+    return nb;
+}

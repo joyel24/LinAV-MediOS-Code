@@ -75,13 +75,19 @@ extern struct helperMenu browserMenu;
 
 /************************/
 
-void ini_menu_struct(void)
+void ini_menu_struct(struct browser_data * bdata)
 {
+    ls_item1.bdata=bdata;
+    ls_item2.bdata=bdata;
+    ls_item3.bdata=bdata;
+    ls_item4.bdata=bdata;
+    ls_item5.bdata=bdata;
+
     menu1.data=(void*)&ls_item1;
     menu2.data=(void*)&ls_item2;
     menu3.data=(void*)&ls_item3;
     menu4.data=(void*)&ls_item4;
-    menu4.data=(void*)&ls_item5;
+    menu5.data=(void*)&ls_item5;
 
     menu1.prev=NULL;
     menu1.nxt=&menu2;
@@ -99,7 +105,7 @@ void ini_menu_struct(void)
     menu3.up=NULL;
 
     menu4.prev=&menu3;
-    menu4.nxt=NULL;
+    menu4.nxt=&menu5;
     menu4.sub=NULL;
     menu4.up=NULL;
     
@@ -123,6 +129,7 @@ void do_on(void * data)
 void do_right(void * data)
 {
     char text[MAX_EDIT_CHARS];
+    char * pwd;
     char* ptext = NULL;
     int reload = false;
     int buttonResult = 0;
@@ -135,7 +142,20 @@ void do_right(void * data)
     switch(item->num)
     {
         case MENU_COPY:
-            buttonResult = cops->msgBox("Info", "Copy file not supported", MSGBOX_TYPE_OK, MSGBOX_ICON_INFORMATION);
+            if(cops->nbSelected(bdata)==0)
+                cops->msgBox("Warning - copy", "Select files first", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
+            else
+            {
+                /* saving current path */
+              /*  if(!(pwd=getpwd(NULL,PATH_LEN)))
+                {
+                    cops->msgBox("Warning - copy", "Can't get current path", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
+                    break;
+                }*/
+                
+                    
+                
+            }
             break;
         case MENU_DELETE:
             buttonResult = cops->msgBox("Delete Warning", "Really delete it ?", MSGBOX_TYPE_OKCANCEL, MSGBOX_ICON_WARNING);

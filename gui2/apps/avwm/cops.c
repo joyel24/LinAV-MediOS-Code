@@ -141,5 +141,6 @@ struct client_operations cops={
     browserEvt         : browserEvt,
     viewNewDir         : viewNewDir,
     cleanList          : cleanList,
-    chgSelect          : chgSelect
+    chgSelect          : chgSelect,
+    nbSelected         : nbSelected
 };

@@ -74,6 +74,7 @@ int  ini_lists   (struct browser_data * bdata);
 int  addEntry    (struct browser_data * bdata,char * name,int type,int size);
 int  doLs        (struct browser_data * bdata,char * name);
 void chgSelect   (struct browser_data *bdata,int num);
+int  nbSelected  (struct browser_data * bdata);
 
 /*****    evt_handle_fct    *****/
 int  browserEvt         (int evt,struct browser_data * bdata);

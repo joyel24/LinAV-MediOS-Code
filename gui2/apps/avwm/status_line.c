@@ -25,6 +25,12 @@
 #define TXT_COLOR COLOR_DARK_GREY
 #define TIME_COLOR COLOR_BLACK
 
+#define FORMAT_MMDDYYYY    0
+#define FORMAT_DDMMYYYY    1
+
+#define FORMAT_12          0
+#define FORMAT_24          1
+
 NEED_ICON(linavLogo);
 NEED_ICON(usbIcon);
 NEED_ICON(fwExtIcon);
@@ -48,6 +54,14 @@ void showSBar(void)  {status_bar_plugin.handle_on=1;sendEvt(&status_bar_plugin,E
 void hideSBar(void)  {status_bar_plugin.handle_on=0;}
 int  sBarStatus(void) {return status_bar_plugin.handle_on;}
 
+int date_format=FORMAT_DDMMYYYY;
+int time_format=FORMAT_24;
+
+#define HOUR(HH)       (time_format==FORMAT_12?(HH<=12?HH:(HH-12)):HH)
+#define AMPM_ADD(HH)   time_format==FORMAT_12?HH<=12?"AM ":"PM ":""
+#define DATE1(DD,MM)   (date_format==FORMAT_DDMMYYYY?DD:MM)
+#define DATE2(DD,MM)   (date_format==FORMAT_DDMMYYYY?MM:DD)
+
 /* draw the current time */
 void drawTime(void)
 {
@@ -55,11 +69,13 @@ void drawTime(void)
     struct av_tm  date_time;
     
     if(getTime(&date_time))
-    {
-        //fprintf(stderr,"%s\n",timeSt);
-        //putS(TIME_COLOR,BG_COLOR,135,3,timeSt);
-        sprintf(timeSt,"%02d:%02d %02d/%02d/%04d", date_time.tm_hour,date_time.tm_min,
-                                                         date_time.tm_mday,date_time.tm_mon,date_time.tm_year);
+    {    
+        fillRect(BG_COLOR,135,3,106,10);
+        
+        sprintf(timeSt,"%s%02d:%02d %02d/%02d/%04d",AMPM_ADD(date_time.tm_hour),HOUR(date_time.tm_hour),date_time.tm_min,
+                                                         DATE1(date_time.tm_mday,date_time.tm_mon),
+                                                         DATE2(date_time.tm_mday,date_time.tm_mon),
+                                                         date_time.tm_year);
         putS(TIME_COLOR,BG_COLOR,135,3,timeSt);
     }
 
