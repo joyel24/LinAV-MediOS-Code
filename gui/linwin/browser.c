@@ -277,7 +277,7 @@ static int browser_do_keystroke(GR_EVENT * event)
 	int ret = 0;
 
 	// Filter double Events
-	delay(15000);
+/*	delay(15000);
    GrPeekEvent(&nextevent);
 
 	do
@@ -291,7 +291,7 @@ static int browser_do_keystroke(GR_EVENT * event)
 		GrPeekEvent(&nextevent);
 	}
 	while(nextevent.type == GR_EVENT_TYPE_KEY_DOWN);
-
+*/
 	switch (event->keystroke.ch) {
 
 	case 'l':
@@ -365,7 +365,7 @@ static int browser_do_keystroke(GR_EVENT * event)
 	}
 
 	// Filter double Events
-	delay(15000);
+/*	delay(15000);
 	GrPeekEvent(&nextevent);
 
 	do
@@ -379,7 +379,7 @@ static int browser_do_keystroke(GR_EVENT * event)
 		GrPeekEvent(&nextevent);
 	}
 	while(nextevent.type == GR_EVENT_TYPE_KEY_DOWN);
-
+*/
 	return ret;
 }
 

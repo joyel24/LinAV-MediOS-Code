@@ -29,7 +29,7 @@ viewer: viewer.o
 	$(CC) viewer.o -o viewer  $(CFLAGS) $(LDFLAGS)
 	
 play: play.o
-	$(CC) play.o -o play  $(CFLAGS) -elf2flt #$(LDFLAGS)
+	$(CC) play.o -o play  $(CFLAGS) $(LDFLAGS)
 
 clean: 
 	$(RM) $(OBJS) *~ example example.gdb snow snow.gdb viewer viewer.gdb play play.gdb *.o

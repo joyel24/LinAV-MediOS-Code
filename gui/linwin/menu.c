@@ -256,7 +256,7 @@ static int menu_do_keystroke(GR_EVENT * event)
 //	int i = 0;
 //   int yPosDebug2 = 110;
 
-
+/*
 	// Filter double Events
 	GrPeekEvent(&nextevent);
 
@@ -271,7 +271,7 @@ static int menu_do_keystroke(GR_EVENT * event)
 		GrPeekEvent(&nextevent);
 	}
 	while(nextevent.type == GR_EVENT_TYPE_KEY_DOWN);
-
+*/
 
 	switch (event->keystroke.ch) {
 	case '1':
@@ -398,7 +398,7 @@ static int menu_do_keystroke(GR_EVENT * event)
 		}
 		break;
 	}
-
+/*
 	// Filter double Events
 	GrPeekEvent(&nextevent);
 
@@ -413,7 +413,7 @@ static int menu_do_keystroke(GR_EVENT * event)
 		GrPeekEvent(&nextevent);
 	}
 	while(nextevent.type == GR_EVENT_TYPE_KEY_DOWN);
-
+*/
 	return ret;
 }
 

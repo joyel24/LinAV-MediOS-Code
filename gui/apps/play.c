@@ -3,7 +3,10 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include "av3xx_common.h"
-
+#define MWINCLUDECOLORS
+#include "nano-X.h"
+#include "nxcolors.h"
+#include "av3xx_colordef.h"
 
 #define MP3_BUFF_SIZE (1020*100)
 
@@ -13,7 +16,10 @@ void usage(void)
 	printf("20/07/2004\n");
 	printf("usage: play file\n");
 }
-
+GR_GC_ID g_gcWhite;
+GR_GC_ID g_gcBlack;
+GR_GC_ID g_gcBlue;
+GR_WINDOW_ID g_main;
 // arg1 = file; arg2 = volume
 int main(int argc,char * * argv)
 {
@@ -28,7 +34,46 @@ int main(int argc,char * * argv)
 	int frame_cnt;
 	struct mp3_play data;
 	struct av_peak av_p;
+	char tmp[1000];
+	int old_r,old_l;
+	
+	GR_WM_PROPERTIES wmprops;
+	GR_EVENT event;
+	
+	if (GrOpen() < 0) {
+		fprintf(stderr, "Cannot open graphics\n");
+		exit(1);
+	}
 
+	g_main = GrNewWindow(GR_ROOT_WINDOW_ID, 0,0, 320, 240, 0, GR_COLOR_BLACK, 0);
+
+	if(g_main)
+	{
+		wmprops.flags = GR_WM_FLAGS_PROPS | GR_WM_FLAGS_TITLE;
+		wmprops.props = GR_WM_PROPS_APPWINDOW;
+		wmprops.title = "Mp3 play";
+		GrSetWMProperties(g_main, &wmprops);
+	}
+
+	GrSelectEvents(g_main, GR_EVENT_MASK_EXPOSURE|GR_EVENT_MASK_KEY_DOWN);
+
+
+	g_gcWhite = GrNewGC();
+	g_gcBlack = GrNewGC();
+	g_gcBlue = GrNewGC();
+
+	GrSetGCForegroundPixelVal(g_gcBlack, AV3XX_COLOR_BLACK);
+	GrSetGCBackgroundPixelVal(g_gcBlack, AV3XX_COLOR_BLACK);
+
+	GrSetGCForegroundPixelVal(g_gcWhite, AV3XX_COLOR_WHITE);
+	GrSetGCBackgroundPixelVal(g_gcWhite, AV3XX_COLOR_BLACK);
+	
+	GrSetGCForegroundPixelVal(g_gcBlue, AV3XX_COLOR_BLUE2);
+	GrSetGCBackgroundPixelVal(g_gcBlue, AV3XX_COLOR_BLACK);
+
+	
+
+	
 	printf("size=%d %d\n",size,MP3_BUFF_SIZE);
 
 	buff0=(char*)malloc(size);
@@ -95,6 +140,17 @@ int main(int argc,char * * argv)
 	wait=0;
 	end=0;
 	frame_cnt=0;
+	old_r=0;
+	old_l=0;
+	
+	GrMapWindow(g_main);
+	GrClearWindow(g_main,0);
+
+   	GrFillRect(g_main, g_gcBlack, 0, 0, 320, 240);
+	sprintf(tmp,"Playing:  %s",filename);
+	GrText(g_main, g_gcWhite, 10, 15, tmp, strlen(tmp), GR_TFASCII);
+	sprintf(tmp,"Vol:  %d",vol);
+	GrText(g_main, g_gcWhite, 10, 40, tmp, strlen(tmp), GR_TFASCII);
 
 	while(!data.finished)
 	{
@@ -133,46 +189,105 @@ int main(int argc,char * * argv)
 			}
 		}
 
-		if(ioctl(fd_mix,AV_SET_MIX_VOLUME,&vol)<0)
+				
+		
+		
+		while(GrCheckNextEvent(&event),event.type!=GR_EVENT_TYPE_NONE)
 		{
-			printf("unable to set vol\n");
-			break;
+			if(event.type == GR_EVENT_TYPE_KEY_DOWN)
+			{
+				switch (event.keystroke.ch)
+				{
+					/*case 'f': // off
+						GrDestroyGC(g_gcWhite);
+						GrDestroyGC(g_gcBlack);
+
+						GrClose();
+						goto out;*/
+					case 'u': //up volume
+						vol++;
+						if(vol>100)
+							vol=100;
+						if(ioctl(fd_mix,AV_SET_MIX_VOLUME,&vol)<0)
+						{
+							printf("unable to set vol\n");
+							break;
+						}
+						// displaying volume 
+						sprintf(tmp,"Vol:  %d",vol);
+						GrText(g_main, g_gcWhite, 10, 40, tmp, strlen(tmp), GR_TFASCII);
+						break;
+					case 'd': //down volume
+						vol--;
+						if(vol<0)
+							vol=0;
+						if(ioctl(fd_mix,AV_SET_MIX_VOLUME,&vol)<0)
+						{
+							printf("unable to set vol\n");
+							break;
+						}
+					sprintf(tmp,"Vol:  %d",vol);
+					GrText(g_main, g_gcWhite, 10, 40, tmp, strlen(tmp), GR_TFASCII);
+					break;
+				}
+			}
 		}
 		
-		wait++;
-		if(wait>50)
+		if(ioctl(fd_dsp,AV_DSP_OUT_PEAK_REAL,&av_p)<0)
 		{
-			wait=0;
-			if(ioctl(fd_dsp,AV_DSP_FRAME_CNT,&frame_cnt)<0)
-			{
-				printf("unable to get frame cnt\n");
-				break;
-			}
-			if(ioctl(fd_dsp,AV_DSP_OUT_PEAK,&av_p)<0)
-			{
-				printf("unable to get out peak\n");
-				break;
-			}
+			printf("unable to get out peak\n");
 			
-			
-			
-			//printf("frame = %d L=%d R=%d\n",frame_cnt,av_p.left,av_p.right);
 		}
+		else
+		{
+			av_p.left=(av_p.left*200)/0x7FFF;
+			av_p.right=(av_p.right*200)/0x7FFF;
+			if(old_l>av_p.left)
+				GrFillRect(g_main, g_gcBlack, 10+av_p.left, 60, old_l-av_p.left, 10);
+			else
+				GrFillRect(g_main, g_gcBlue, 10+old_l, 60, av_p.left-old_l, 10);
+				
+			if(old_r>av_p.right)
+				GrFillRect(g_main, g_gcBlack, 10+av_p.right, 70, old_r-av_p.right, 10);
+			else
+				GrFillRect(g_main, g_gcBlue, 10+old_r, 70, av_p.right-old_r, 10);
+			old_l=av_p.left;
+			old_r=av_p.right;
+			
+		}
+		
+		if(ioctl(fd_dsp,AV_DSP_FRAME_CNT,&frame_cnt)<0)
+		{
+			printf("unable to get frame cnt\n");
+			break;
+		}
+		else
+		{
+			sprintf(tmp,"Frame:  %d",frame_cnt);
+			GrText(g_main, g_gcWhite, 60, 40, tmp, strlen(tmp), GR_TFASCII);
+		}
+		
+		
 
 
 	}
+GrDestroyGC(g_gcWhite);
+	GrDestroyGC(g_gcBlack);
 
-	
-	
+	GrClose();
+
 	close(fd_dsp);
 	close(fd_mix);
+	printf("mixer closed\n");
 	close(fd_file);
-	free(buff0);
-	free(buff1);
+	//printf("file closed\n");
+	//free(buff0);
+	//printf("buff0 free\n");
+	//free(buff1);
 
 	printf("I'm out \n");
 	
-//	exit(0);
+	exit(0);
 
-	return 0;
+//	return 0;
 }

@@ -35,6 +35,11 @@ struct av3xx_pos {
 	int y;
 };
 
+struct mouseParam {
+	int freq; // amount of time between each check of buttons state
+	int repeated_press; // repeate rate
+};
+
 /* mp3 player */
 
 struct mp3_play {
@@ -98,12 +103,15 @@ struct av_peak {
 #define AV_DSP_START_MP3       _IOW(AV_OP_IOC_MAGIC,34, int)
 #define AV_DSP_STOP_MP3        _IOW(AV_OP_IOC_MAGIC,35, int)
 #define AV_DSP_FRAME_CNT       _IOR(AV_OP_IOC_MAGIC,36, int)
-#define AV_DSP_IN_PEAK         _IOW(AV_OP_IOC_MAGIC,37, int) /* normalized version range=0->100 */
-#define AV_DSP_OUT_PEAK        _IOW(AV_OP_IOC_MAGIC,38, int) /* normalized version range=0->100 */
-#define AV_DSP_IN_PEAK_REAL    _IOW(AV_OP_IOC_MAGIC,39, int) /* direct read: range=0->0x7FFF    */
-#define AV_DSP_OUT_PEAK_REAL   _IOW(AV_OP_IOC_MAGIC,40, int) /* direct read: range=0->0x7FFF    */
+#define AV_DSP_IN_PEAK         _IOW(AV_OP_IOC_MAGIC,37, struct av_peak) /* normalized version range=0->100 */
+#define AV_DSP_OUT_PEAK        _IOW(AV_OP_IOC_MAGIC,38, struct av_peak) /* normalized version range=0->100 */
+#define AV_DSP_IN_PEAK_REAL    _IOW(AV_OP_IOC_MAGIC,39, struct av_peak) /* direct read: range=0->0x7FFF    */
+#define AV_DSP_OUT_PEAK_REAL   _IOW(AV_OP_IOC_MAGIC,40, struct av_peak) /* direct read: range=0->0x7FFF    */
 
-#define AV_OP_IOC_MAXNR     40
+#define AV_SET_MOUSE_PARAM     _IOW(AV_OP_IOC_MAGIC,41, struct mouseParam)
+#define AV_GET_MOUSE_PARAM     _IOR(AV_OP_IOC_MAGIC,42, struct mouseParam)
+
+#define AV_OP_IOC_MAXNR        42
 
 /* MAJOR / MINOR */
 
