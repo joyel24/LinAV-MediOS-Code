@@ -34,7 +34,6 @@ char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
 
   Display* display;				/* display */	
   Window window;				/* Create a window */
-  char texte[] = "LinAV project";		/* for events  */
   GC gc;					/* Graphic Context */
   
 
@@ -118,67 +117,59 @@ int ini_graphics()
     setPlane(BMAP1);
     showPlane(BMAP1);
     
-    char* displayName = 0;
-    int screen; 					/* screen number */		
+    int screen;
  
- /*connect to X server */
- 
- display = XOpenDisplay(displayName);   
- 
- if(!display) 
- {
-	printf("connexion impossible au serveur X");
-	exit(1);
- }
-	      
- /*Graphics informations */
-
- screen = DefaultScreen(display);
- gc = DefaultGC(display, screen);
-
- /*window Creation*/
-
- window = XCreateSimpleWindow(
-	  display, 	        	   	/* Display */
-	  DefaultRootWindow(display),  		/* Main Window */
-	  0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 	/* Geometry */
-	  10,			                /* Width border */
-	  BlackPixel(display, screen), 		
-	  WhitePixel(display, screen)
-	  );
-	  
- if(!window) 
- {
-	printf("impossible de creer la fenetre");
-	exit(1);
- }
- 
-  /* Mise en place du titre */
-  
-  XStoreName(display, window, texte);
-
-  /* Affichage de la fenêtre */
-  
-  XMapWindow(display, window);
+    /*connect to X server */ 
+    display = XOpenDisplay(0);  
+    if(!display) 
+    {
+            printf("Error while connecting to X server");
+            exit(1);
+    }
+                
+    screen = DefaultScreen(display);
+    gc = DefaultGC(display, screen);
+    
+    /*window Creation*/
+    
+    window = XCreateSimpleWindow(
+            display,                               /* Display */
+            DefaultRootWindow(display),            /* Main Window */
+            0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,     /* Geometry */
+            10,                                    /* Width border */
+            BlackPixel(display, screen),	
+            WhitePixel(display, screen)
+            );            
+    if(!window) 
+    {
+            printf("Can't create the window");
+            exit(1);
+    }
+    
+    /* Adding Title */    
+    XStoreName(display, window, "LinAV project");
+    
+    /* Mapping window to display */    
+    XMapWindow(display, window);
          
   return 0;
 }
 
 void drawPixBuffer(char color, int x, int y)
 {
-	int blackColor = BlackPixel(display, DefaultScreen(display));
-        int whiteColor = WhitePixel(display, DefaultScreen(display));
-	
-	if(color== 0)
-	{
-	 XSetForeground(display, gc, whiteColor);
-	 XDrawPoint(display, window, gc, x, y);
-	}
-	else
-	{
-	 XSetForeground(display, gc, blackColor);
-	 XDrawPoint(display, window, gc, x, y);
-	}
+    int blackColor = BlackPixel(display, DefaultScreen(display));
+    int whiteColor = WhitePixel(display, DefaultScreen(display));
+    
+    if(color== 0)
+    {
+        XSetForeground(display, gc, whiteColor);
+        XDrawPoint(display, window, gc, x, y);
+    }
+    else
+    {
+        XSetForeground(display, gc, blackColor);
+        XDrawPoint(display, window, gc, x, y);
+    }
 }
 	 
 
