@@ -155,31 +155,18 @@ int getKey(int key)
 	break;
 	/*=============BATTERY +==========*/
 	case XK_w:
-	    if(stateBAT == BATMAX)
-	    {
-	       break;
-	       return stateBAT;
-	    }
-	    else
-	    {
 	       stateBAT = stateBAT+INCBAT;
-	       return stateBAT;
-	    }
+	       if(stateBAT > BATMAX)
+	         stateBAT = BATMAX;
 	break;
 	/*=============BATTERY -==========*/
 	case XK_x:
-	    if(stateBAT == BATMIN)
-	    {
-	       break;
-	       return stateBAT;
-	    }
-	    else
-	    {
 	       stateBAT = stateBAT-INCBAT;
-	       return stateBAT;
-	    }
+	       if(stateBAT < BATMIN)
+	         stateBAT = BATMIN;
 	break;
         }
+  return NO_EVENT;
 }
 
 int waitEvent(void)
