@@ -48,6 +48,7 @@ struct dirent {
     int startCluster;
 	int size;
 	int dirCluster;
+	int fatId;
 };
 
 #include "fat.h"
@@ -67,6 +68,7 @@ extern struct dirent* readdir(int dd);
 
 extern int removeEntry(int dir);
 extern int createEntry(const char * pathname,int type,struct dirent* ent);
+extern void closeAllDir(int fd);
 
 extern void inidir();
 

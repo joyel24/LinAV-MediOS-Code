@@ -18,7 +18,6 @@
 #include <stdbool.h>
 
 #define BUFFER_SIZE 512
-#define SECTOR_SIZE 512
 
 #ifndef u32_defined
 #define u32_defined yes
@@ -30,6 +29,8 @@ typedef unsigned long u32;
 #define FAT_ENTRY_SIZE	32
 #define NAME_SIZE 8
 #define EXT_SIZE 3
+
+#define MAX_DEVICE 2
 
 #define FAT_ATTR_READ_ONLY  0x01
 #define FAT_ATTR_HIDDEN     0x02
@@ -49,6 +50,7 @@ struct fatent {
 	bool eof_disk;
 	int dirCluster;
 	bool isRootDir;
+	int fatId;
 };
 
 struct dirEntry {
@@ -75,10 +77,37 @@ struct fatCache {
 	int lastFree;
 };
 
+struct fat_info {
+	int fatSize;
+	int rootSize;
+	int firstDataSector;
+	int fatStart;
+	int numFats;
+	int totSec;
+	int countOfClusters;
+	int fatType;
+	int LBAFat1;
+	int LBAFat2;
+	int secPerClu;
+	int LBAData;
+	int rootClu;
+	int rootLBA;
+	int maxCluster;
+	int sectorSize;
+
+	struct fatCache fat_cache;
+
+	bool busy;
+};
+
 #include "dirent.h"
 #include "ata.h"
 
 extern int fatInit(struct partInfo * partition);
+extern int fatInit_info(struct partInfo * partition);
+extern int closeFat(int fd);
+extern int selectFat(int fd);
+extern void inifatinfo();
 
 extern int fatReadCluster(int cluster, char* buffer);
 extern int fatTrace(int cluster);

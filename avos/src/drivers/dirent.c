@@ -74,9 +74,7 @@ int opendir(const char* name)
                 return -1;
           	}
 
-			printBuffer(entry,sizeof(struct dirent));
-
-            if ( (entry->attribute & FAT_ATTR_DIR) && (strcasecmp(part, entry->entryName) == 0))
+			if ( (entry->attribute & FAT_ATTR_DIR) && (strcasecmp(part, entry->entryName) == 0))
 			{
 				fatOpendir(&(opendirs[dd].fat_ent), entry->startCluster);
 				opendirs[dd].attribute=entry->attribute;
@@ -99,6 +97,7 @@ int opendir(const char* name)
 //******************************************************
 struct dirent* readdir(int dd)
 {
+	selectFat(opendirs[dd].fat_ent.fatId);
 	DIR* dir=&(opendirs[dd]);
 	struct fatent * fat_ent=&dir->fat_ent;
 	struct dirent * theent = &(dir->theent);
@@ -126,6 +125,7 @@ struct dirent* readdir(int dd)
 			{
 				fatGetData(theent,&entry);
 				theent->dirCluster=fat_ent->startCluster;
+				theent->fatId=fat_ent->fatId;
 			}
 		}
 	}
@@ -146,6 +146,14 @@ void closedir(int dd)
 {
 	DIR* dir=&(opendirs[dd]);
     dir->busy=false;
+}
+
+void closeAllDir(int fd)
+{
+	int f;
+	for(f=0;f<MAX_OPEN_DIRS;f++)
+		if(opendirs[f].busy)
+			closedir(f);
 }
 
 //******************************************************
@@ -185,6 +193,7 @@ int createEntry(const char * pathname, int type,struct dirent * ent) // no test 
 		createDosName(name,fatName);
 
 		int res=fatCreateEntry(&opendirs[dir].fat_ent,ent,fatName);
+		ent->fatId=opendirs[dir].fat_ent.fatId;
 
 		closedir(dir);
 

@@ -115,7 +115,10 @@ int fopen(const char* pathname,const char * mode)
 			file->fat_ent.eof_disk=false;
 			file->fat_ent.isRootDir=false;
 			file->fat_ent.dirCluster=entry2.dirCluster;
+			file->fat_ent.fatId=entry2.fatId;
 			file->eof=false;
+
+			selectFat(file->fat_ent.fatId);
 
 			//debug("file created: start=%d\n",file->fat_ent.startCluster);
 
@@ -134,8 +137,11 @@ int fopen(const char* pathname,const char * mode)
 		file->fat_ent.eof_disk=false;
 		file->fat_ent.isRootDir=false;
 		file->fat_ent.dirCluster=entry->dirCluster;
+		file->fat_ent.fatId=entry->fatId;
 		file->eof=false;
 		file->write_done=false;
+
+		selectFat(file->fat_ent.fatId);
 
 		//debug("file found: %x\n",file->fat_ent.startCluster);
 
@@ -231,8 +237,11 @@ int findFileEntry(const char* pathname,struct dirent ** entry,bool remove)
         return 0;
     }
 
+	debug("dir opened\n");
+
     // scan dir for name
-    while ((*entry = readdir(dir))!=NULL) {
+    while ((*entry = readdir(dir))!=NULL)
+	{
 		if (strcasecmp(name, (*entry)->entryName) == 0)
 		{
 			if(remove)
@@ -240,6 +249,7 @@ int findFileEntry(const char* pathname,struct dirent ** entry,bool remove)
 				struct fatent fat_ent;
 				fat_ent.curCluster =(*entry)->startCluster;
 				fat_ent.isRootDir=false;
+				fat_ent.fatId = (*entry)->fatId;
 
 				if(!fatTruncate(&fat_ent,true))
 				{
@@ -270,14 +280,33 @@ int findFileEntry(const char* pathname,struct dirent ** entry,bool remove)
 //******************************************************
 int fclose(int fd)
 {
-	if(openfiles[fd].flags & (F_WR | F_AP | F_RDP | F_RDP | F_APP))
-		if(!flush(&openfiles[fd]))
+	if(openfiles[fd].busy)
+	{
+		selectFat(openfiles[fd].fat_ent.fatId);
+		if(openfiles[fd].flags & (F_WR | F_AP | F_RDP | F_RDP | F_APP))
 		{
-			debug("[fclose] error flushing file (=>file not close)\n");
-			return 0;
+			if(!flush(&openfiles[fd]))
+			{
+				debug("[fclose] error flushing file (=>file not close)\n");
+				return 0;
+			}
 		}
-	openfiles[fd].busy=false;
-	return 1;
+		openfiles[fd].busy=false;
+		return 1;
+	}
+	else
+	{
+		debug("[fclose] file %d not open yet\n",fd);
+		return 0;
+	}
+}
+
+void closeAllFile(int fd)
+{
+	int f;
+	for(f=0;f<MAX_OPEN_FILES;f++)
+		if(openfiles[f].busy)
+			fclose(f);
 }
 
 //******************************************************
@@ -350,6 +379,7 @@ int ftruncate(int fd,int size)
 	{
 		if(openfiles[fd].flags & (F_WR | F_RDP | F_WRP))
 		{
+			selectFat(openfiles[fd].fat_ent.fatId);
 			FILE * file;
 			struct fatent * fat_ent;
 
@@ -403,6 +433,7 @@ int fflush(int fd)
 {
 	if(openfiles[fd].busy)
 	{
+		selectFat(openfiles[fd].fat_ent.fatId);
 		return flush(&openfiles[fd]);
 	}
 	else
@@ -422,6 +453,7 @@ int flush(FILE * file)
 {
 	if((file->flags & (F_WR | F_AP | F_RDP | F_WRP | F_APP)) && file->write_done)
 	{
+		selectFat(file->fat_ent.fatId);
 		file->write_done=false;
 		if(fatRWSector(&(file->fat_ent),true))
 		{
@@ -545,6 +577,8 @@ int fwrite(int fd, void* buf, int count)
 //******************************************************
 int freadwrite(int fd, char* buf, int count, int mode)
 {
+	selectFat(openfiles[fd].fat_ent.fatId);
+
 	FILE * file;
 	struct fatent * fat_ent;
 	int pos=0;
@@ -666,6 +700,7 @@ int nxtSector(FILE * file,int mode)
 //******************************************************
 int mySetPosF(int fd,long int pos)
 {
+	selectFat(openfiles[fd].fat_ent.fatId);
 	FILE * file=&(openfiles[fd]);
 	struct fatent * fat_ent=&file->fat_ent;
 

@@ -62,6 +62,7 @@ int main() {
 startInit:
 	inifile();
 	inidir();
+	inifatinfo();
 
     cursorpos = 0;
     dirpos = 0;
@@ -126,7 +127,7 @@ startInit:
                                      | OSD_BITMAP_8BIT);
 
 
-    // EUGH: TODO - Clean this rubbish up!
+	// EUGH: TODO - Clean this rubbish up!
     usbDisableA();
     for (c=0;c<0x14000;c++) {}
 //    ataPowerDownHDD();
@@ -143,13 +144,16 @@ startInit:
     usbDisableA();
     for (c=0;c<0x24000;c++) {}
 
-   	ataReadMBR();
+	ataReadMBR();
+
+	int fatHD=-1;
+	int fatCF=-1;
 
 	for(i=0;i<4;i++)
 		printPartInfo(i);
 
-    c = fatInit(getPartition(0));
-	debug("[fatTest.c] fatInit returned = %x\n",c);
+    fatHD = fatInit_info(getPartition(0));
+	debug("[fatTest.c] fatInit returned = %d\n",fatHD);
 
 	char nameCur[MAX_PATH]="/";
 	int dir;
@@ -410,19 +414,30 @@ startInit:
                 if (source==0) {
                     ataPowerUpHDDA();
                     ataSelectHDDA();
+					selectFat(fatHD);
                 } else {
                     ataPowerDownHDDA();
                     ataSelectMemoryCardA();
+					if(fatCF==-1)
+					{
+						ataReadMBR();
+
+						for(i=0;i<4;i++)
+							printPartInfo(i);
+
+						fatCF = fatInit_info(getPartition(0));
+						debug("[fatTest.c] fatInit returned = %d\n",fatCF);
+						if(fatCF>=0)
+							selectFat(fatCF);
+						else
+							selectFat(fatHD);
+					}
+					else
+						selectFat(fatCF);
+
                 }
 
-				ataReadMBR();
 
-				for(i=0;i<4;i++)
-					printPartInfo(i);
-
-
-                c = fatInit(getPartition(0));
-                debug("[fatTest.c] fatInit returned = %x\n",c);
 
                 nameCur[0]='/';
 				nameCur[1]=0;
@@ -439,7 +454,13 @@ startInit:
     }
     
     debug("All done!");
-    
+
+	if(fatHD!=-1)
+		closeFat(fatHD);
+
+	if(fatCF!=-1)
+		closeFat(fatCF);
+
     while(1) {}
 }
 

@@ -115,5 +115,6 @@ extern int nxtSector(FILE * file,int mode);
 extern int mySetPosF(int fd,long int pos);
 extern int fUpdateEntry(FILE * file);
 extern int getFlag(const char * mode);
+extern void closeAllFile(int fd);
 
 #endif
