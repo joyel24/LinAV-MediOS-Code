@@ -38,8 +38,10 @@
 #define SCL_OUT            outw(inw(GIO_DIRECTION1) & SCL_N_MASK,GIO_DIRECTION1);
 #define SCL                inw(GIO_BITSET1)&SCL_MASK
 
-#define ENA_INT            sti();
-#define DIS_INT            cli();
+#define ENA_INT            
+//sti();
+#define DIS_INT            
+//cli();
 
 #define DA_1               DIS_INT SDA_IN ENA_INT
 #define CL_1               DIS_INT SCL_IN ENA_INT 
