@@ -1,0 +1,114 @@
+td.sidebar
+{
+	background-color: #eeeeff;
+	width: 15%;
+	border-right-width: 1px;
+	border-right-color: #ff9999;
+	border-right-style: solid;
+}
+
+td.main
+{
+	width: 85%;
+	border-top-width: 1px;
+	border-top-color: #ff9999;
+	border-top-style: solid;
+}
+
+td.th {font-variant: small-caps; font-weight: bold;}
+td.t1 {white-space: nowrap; font-weight: bold; background-color: #ffffdd;}
+td.t2 {background-color: #ffffdd;}
+td.t3 {white-space: nowrap; font-weight: bold; background-color: #ffddff;}
+td.t4 {background-color: #ffddff;}
+
+a.sidebar
+{
+	line-height: 300%;
+	text-decoration: none;
+	border-top-width: 1px;
+	border-top-color: #eeeeff;
+	border-top-style: solid;
+	border-bottom-width: 1px;
+	border-bottom-color: #eeeeff;
+	border-bottom-style: solid;
+	border-left-width: 1px;
+	border-left-color: #eeeeff;
+	border-left-style: solid;
+	border-right-width: 1px;
+	border-right-color: #eeeeff;
+	border-right-style: solid;
+	padding: 3px;
+}
+
+a.sidebar:hover
+{
+	color: #0000ff;
+	line-height: 300%;
+	text-decoration: none;
+	background-color: #ffffff;
+	border-top-width: 1px;
+	border-top-color: #ff9999;
+	border-top-style: solid;
+	border-bottom-width: 1px;
+	border-bottom-color: #ff9999;
+	border-bottom-style: solid;
+	border-left-width: 1px;
+	border-left-color: #ff9999;
+	border-left-style: solid;
+	border-right-width: 1px;
+	border-right-color: #ff9999;
+	border-right-style: solid;
+	padding: 3px;
+}
+
+p.title
+{
+	color: #0000aa;
+	text-align: center;
+	font-size: x-large;
+	font-weight: bold;
+	background-color: #eeeeff;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+p.smalltitle
+{
+	color: #0000aa;
+	text-align: center;
+	font-size: medium;
+	font-weight: bold;
+	background-color: #eeeeff
+}
+
+p.transcript
+{
+	background-color: #eeeeff;
+	font-family: monospace;
+	margin-left: 15%;
+	margin-right: 15%;
+	border-top-color: #bbbbff;
+	border-top-width: 1px;
+	border-top-style: solid;
+	border-bottom-color: #bbbbff;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+	border-left-color: #bbbbff;
+	border-left-width: 1px;
+	border-left-style: solid;
+	border-right-color: #bbbbff;
+	border-right-width: 1px;
+	border-right-style: solid;
+	padding: 5px;
+	line-height: 200%;
+}
+
+p.screenshot
+{
+	margin-left: 2%;
+	border-bottom-width: 1px;
+	border-bottom-color: #ff9999;
+	border-bottom-style: solid;
+}
