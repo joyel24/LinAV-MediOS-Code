@@ -12,28 +12,110 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include <graphics.h>
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include <graphics.h>
+#include "events.h"
+#include "graphics_8.h"
+
+#define STRING_MAXSIZE 200
+
 #define tstXY(x,y)  {if(x>SCREEN_WIDTH) return; if(x<0) return; if(y>SCREEN_HEIGHT) return; if(y<0) return;}
 #define tstWH(x,y,w,h)  {if(x+w>SCREEN_WIDTH)return; if(x+w<0) return; if(y+h>SCREEN_HEIGHT) return; if(y+h<0) return;}
 
-/*
-** variables declarations for X
-*/
+char screen_BMAP1[SCREEN_WIDTH*SCREEN_HEIGHT+40];
+char screen_BMAP2[SCREEN_WIDTH*SCREEN_HEIGHT+40];
+char screen_VID1[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
+char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
+
+/*global variables */
 
   Display* display;				/* display */	
   Window window;				/* Create a window */
   char texte[] = "LinAV project";		/* for events  */
 
-int ini_graphics()
-{
+struct graphicsBuffer BITMAP_1 = {
+    offset             : 0,
+    /*component          : AV3XX_OSD_BITMAP1,*/
+    bytesPerLine       : SCREEN_WIDTH*2,
+    width              : SCREEN_WIDTH,
+    height             : SCREEN_HEIGHT,
+    x                  : 0x14,
+    y                  : 0x12,
+    bitsPerPixel       : 8,
+    bitsPerPixelShift  : 3,
+    SWidth             : 0xa,
+    /*enable             : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
+                    AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE*/
+};
 
- char* displayName = 0;
- int screen; 					/* screen number */
- GC gc;		
+struct graphicsBuffer BITMAP_2 = {
+    offset             : 0,
+    /*component          : AV3XX_OSD_BITMAP2,*/
+    bytesPerLine       : SCREEN_WIDTH*2,
+    width              : SCREEN_WIDTH,
+    height             : SCREEN_HEIGHT,
+    x                  : 0x14,
+    y                  : 0x12,
+    bitsPerPixel       : 8,
+    bitsPerPixelShift  : 3,
+    SWidth             : 0xa,
+    /*enable             : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
+                    AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE*/
+};        
+
+struct graphicsBuffer VIDEO_1 = {
+    offset             : 0,
+    /*component          : AV3XX_OSD_VIDEO1,*/
+    bytesPerLine       : SCREEN_WIDTH*2,
+    width              : SCREEN_WIDTH,
+    height             : SCREEN_HEIGHT,
+    x                  : 0x14,
+    y                  : 0x12,
+    bitsPerPixel       : 32,
+    bitsPerPixelShift  : 5,
+    SWidth             : 0x28,
+    /*enable             : AV3XX_OSD_COMPONENT_ENABLE*/
+};
+
+struct graphicsBuffer VIDEO_2 = {
+    offset             : 0,
+    /*component          : AV3XX_OSD_VIDEO2,*/
+    bytesPerLine       : SCREEN_WIDTH*2,
+    width              : SCREEN_WIDTH,
+    height             : SCREEN_HEIGHT,
+    x                  : 0x14,
+    y                  : 0x12,
+    bitsPerPixel       : 32,
+    bitsPerPixelShift  : 5,
+    SWidth             : 0x28,
+    /*enable             : AV3XX_OSD_COMPONENT_ENABLE*/
+};
+
+GC_ID   default_gc=NULL;
+FONT_ID default_font=GC_FONT;
+
+GC_ID   gc_bmap1,gc_bmap2,gc_vid1,gc_vid2;
+
+extern struct graphics_operations g8ops;
+
+int ini_graphics()
+{      
+    gc_bmap1=createGC(BMAP1);
+    gc_bmap2=createGC(BMAP2);
+    gc_vid1=createGC(VID1); 
+    gc_vid2=createGC(VID2);
+    
+    BITMAP_1.offset=(unsigned int)&screen_BMAP1;
+    BITMAP_2.offset=(unsigned int)&screen_BMAP2;
+    VIDEO_1.offset=(unsigned int)&screen_VID1;
+    VIDEO_2.offset=(unsigned int)&screen_VID2;
+    
+    char* displayName = 0;
+    int screen; 					/* screen number */
+    GC gc;		
  
  /*connect to X server */
  
@@ -76,63 +158,122 @@ int ini_graphics()
   XMapWindow(display, window);
   
   XFlush(display);
-  
+         
+  return 0;
 }
+
 
 void close_graphics()
 {
 }
+
+GC_ID createGC(int vplane)
+{
+    struct graphics_context * gc=(struct graphics_context *) malloc(sizeof(struct graphics_context));
+    
+    if(!gc)
+    {
+        fprintf(stderr,"can't allocate GC\n");
+        return NULL;
+    }
+    /* default ini of GC */
+    
+    gc->transparent=-1;
+    
+    switch(vplane) {
+        case BMAP1:
+            gc->gops=&g8ops;
+            gc->buffer=&BITMAP_1;
+            break;
+        case BMAP2:
+            gc->gops=&g8ops;
+            gc->buffer=&BITMAP_2;
+            break;
+        case VID1:
+            gc->gops=NULL;
+            gc->buffer=&VIDEO_1;
+            break;
+                case VID2:
+            gc->gops=NULL;
+            gc->buffer=&VIDEO_2;
+            break;
+        default:
+            fprintf(stderr,"wrong plane\n");
+            return NULL;
+    }
+            
+    return gc;
+}
+
+void destroyGC(GC_ID gc)
+{
+    if(gc!=NULL)
+        free(gc);
+}
+
+void setPlane(int vplane)
+{
+    switch(vplane) {
+        case BMAP1:
+            default_gc=gc_bmap1;
+            break;
+        case BMAP2:
+            default_gc=gc_bmap2;
+            break;
+        case VID1:
+            default_gc=gc_vid1;
+            break;
+                case VID2:
+            default_gc=gc_vid2;
+            break;
+        default:
+            fprintf(stderr,"wrong plane\n");
+    }
+}
+
+void hidePlane(int vplane)
+{
+}
+
+void showPlane(int vplane)
+{      
+}
+
 /* drawing functions */
 void clearScreen(int color)
 {
-   // default_gc->gops->fillRect(color,0,0,SCREEN_WIDTH,SCREEN_HEIGHT,default_gc->buffer);
+    default_gc->gops->fillRect(color,0,0,SCREEN_WIDTH,SCREEN_HEIGHT,default_gc->buffer);
 }
 
 void drawPixel(int color,int x, int y)
 {
     tstXY(x,y);
-    //default_gc->gops->drawPixel(color, x, y,default_gc->buffer);
+    default_gc->gops->drawPixel(color, x, y,default_gc->buffer);
 }
 
 int readPixel(int x, int y)
 {
     tstXY(x,y);
-    //return default_gc->gops->readPixel(x,y,default_gc->buffer);
+    return default_gc->gops->readPixel(x,y,default_gc->buffer);
 }
 
 void drawRect(int color, int x, int y, int width, int height)
 {
-    tstXY(x,y);		/* x,y, test */
-    tstWH(x,y,width,height); /* x,y,width,height */
-    printf("test");
-    
-    GC GCDrawRect;
-    
-    XGCValues gcv;
-    unsigned long gcm = GCForeground;
-    gcv.foreground = color;
-    GCDrawRect = XCreateGC(display, window, gcm, &gcv);		/* create a new GC */
-    
-    printf("test2");
-       
-    XDrawRectangle(display, window, GCDrawRect, x, y, width, height); /* XLib Function */
-    
-    XFlush(display);
-    
-    printf("test3");
- 
+    tstXY(x,y);
+    tstWH(x,y,width,height);
+    default_gc->gops->drawRect(color,x,y,width,height,default_gc->buffer);
 }
 
 void fillRect(int color, int x, int y, int width, int height)
 {
     tstXY(x,y);
     tstWH(x,y,width,height);
-    //default_gc->gops->fillRect(color,x,y,width,height,default_gc->buffer);
+    default_gc->gops->fillRect(color,x,y,width,height,default_gc->buffer);
 }
 
 void drawLine(int color, int x1, int y1, int x2, int y2)
 {
-   /* int numpixels;
+    int numpixels;
     int i;
     int deltax, deltay;
     int d, dinc1, dinc2;
@@ -167,9 +308,8 @@ void drawLine(int color, int x1, int y1, int x2, int y2)
         yinc1 = 1;
         yinc2 = 1;
     }
-    numpixels++;*/
-     /* include endpoints */
-/*
+    numpixels++; /* include endpoints */
+
     if(x1 > x2)
     {
         xinc1 = -xinc1;
@@ -201,12 +341,12 @@ void drawLine(int color, int x1, int y1, int x2, int y2)
             x += xinc2;
             y += yinc2;
         }
-    }*/
+    }
 }
 
 void putS(int color, int bg_color, int x, int y, char *s)
 {
-    /*FONT_ID font=default_font;
+    FONT_ID font=default_font;
     int len=strlen(s);
     char c;
 
@@ -223,21 +363,54 @@ void putS(int color, int bg_color, int x, int y, char *s)
     if(font->width*len>SCREEN_WIDTH)
     {
         s[SCREEN_WIDTH/font->width]=c;
-    }*/
+    }
 }
 
 int getStringS(const unsigned char *str, int *w, int *h)
 {
-    /*FONT_ID font=default_font;
+    FONT_ID font=default_font;
 
-    return default_gc->gops->getStringSize(font,str,w,h);*/
+    return default_gc->gops->getStringSize(font,str,w,h);
 }
 
 void putC(int color, int bg_color, int x, int y, char s)
 {
-   /* FONT_ID font=default_font;
+    FONT_ID font=default_font;
 
     tstXY(x,y);
 
-    default_gc->gops->drawChar(font,color,bg_color,x,y,s,default_gc->buffer);*/
+    default_gc->gops->drawChar(font,color,bg_color,x,y,s,default_gc->buffer);
+}
+
+void drawSprite(unsigned int * palette, SPRITE * sprite, int x, int y)
+{
+    tstXY(x,y);
+    default_gc->gops->drawSprite(palette,sprite,default_gc->transparent,x,y,default_gc->buffer);
+}
+
+void drawBITMAP(BITMAP * bitmap, int x, int y)
+{
+    tstXY(x,y);
+    default_gc->gops->drawBITMAP(bitmap,default_gc->transparent,x,y,default_gc->buffer);
+}
+
+void scrollWindowVert(int bgColor, int x, int y, int width, int height, int scroll, int UP)
+{
+    default_gc->gops->scrollWindowVert(bgColor,x,y,width,height,scroll,UP,default_gc->buffer);
+}
+
+void scrollWindowHoriz(int bgColor, int x, int y, int width, int height, int scroll, int RIGHT)
+{
+    default_gc->gops->scrollWindowHoriz(bgColor,x,y,width,height,scroll,RIGHT,default_gc->buffer);
+}
+
+/* font */
+void setFont(FONT_ID font)
+{
+    default_font=font;
+}
+
+FONT_ID getFont(void)
+{
+    return default_font;
 }
