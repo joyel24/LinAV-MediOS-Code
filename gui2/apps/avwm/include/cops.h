@@ -154,6 +154,7 @@ struct client_operations {
     void (*umountCF)            (void);
     
     int  (*get_file_type)       (char * filename);
+    void (*handle_type_other)   (char *filename);
     
     int  (*browserEvt)          (int evt,struct browser_data * bdata);
     int  (*viewNewDir)          (struct browser_data *bdata,char *name);

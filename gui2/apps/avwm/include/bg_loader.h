@@ -14,6 +14,6 @@
 #ifndef __BG_LOADER_H
 #define __BG_LOADER_H
 
-int load_bg(char * name);
+void load_bg(char * name);
 
 #endif

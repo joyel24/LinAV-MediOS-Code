@@ -135,6 +135,7 @@ struct client_operations cops={
     umountCF           : umountCF,
     
     get_file_type      : get_file_type,
+    handle_type_other  : handle_type_other,
     
     browserEvt         :browserEvt,
     viewNewDir         :viewNewDir,

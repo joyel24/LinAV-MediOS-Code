@@ -1,5 +1,5 @@
 /*
-* file_type.h
+* file_handle_fct.h
 *
 * linav - http://linav.sourceforge.net
 * Copyright (c) 2004 by Christophe THOMAS
@@ -11,18 +11,18 @@
 *
 */
 
-#ifndef __FILE_TYPE_H
-#define __FILE_TYPE_H
+#ifndef __FILE_HANDLE_FCT_H
+#define __FILE_HANDLE_FCT_H
 
-#define BIN_TYPE          0
-#define SCRIPT_TYPE       1
-#define IMG_TYPE          2
-#define MP3_TYPE          3
-#define TXT_TYPE          4
-#define UKN_TYPE          5
+int  do_mv     (char * src,char * dest);
+int  do_cp     (char * src,char * dest);
+int  execBin   (char * path, ...);
 
-int  get_file_type        (char * filename);
-void handle_type_other    (char *filename);
+/** Private functions **/
+int   isadir     (char *name);
+char* buildname  (char * dirname,char * filename);
+int   copyfile   (char * src,char * dest,int setmodes);
+
 
 #endif
 

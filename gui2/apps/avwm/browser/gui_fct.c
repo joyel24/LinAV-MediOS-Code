@@ -19,6 +19,7 @@
 #include "graphics.h"
 #include "colordef.h"
 #include "icons.h"
+#include "file_type.h"
 
 NEED_ICON(upBitmap)
 NEED_ICON(dwBitmap)
@@ -88,8 +89,6 @@ void hideArrow(int type,int max)
     }
 }
 
-
-
 int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
 {
     int             color;
@@ -97,7 +96,7 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
     char *          cp;
     int             w = 0;
     int             h = 10;
-    char *ext;
+    int             type;
 
     getStringS("M", &w, &h);
 
@@ -124,20 +123,25 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
         case TYPE_FILE:
             color=COLOR_BLACK;
             select_color=COLOR_BLUE;
-            ext = strrchr(dEntry->name, '.');
-            if (ext == 0)
-            {
-                // no extension
-                fillRect(COLOR_WHITE, 2, y, 8, 8);
+            type=get_file_type(dEntry->name);
+            switch(type)
+            {                
+                case IMG_TYPE:
+                    drawBITMAP (&imageBitmap, 2, y);
+                    break;
+                case MP3_TYPE:
+                    drawBITMAP (&mp3Bitmap, 2, y);
+                    break;
+                case TXT_TYPE:
+                    drawBITMAP (&textBitmap, 2, y);
+                    break; 
+                case BIN_TYPE:
+                case SCRIPT_TYPE:
+                case UKN_TYPE:
+                default: 
+                    fillRect(COLOR_WHITE, 2, y, 8, 8); /* no icon */
+                    break;               
             }
-            else if (is_mp3_type(ext))
-                drawBITMAP (&mp3Bitmap, 2, y);
-            else if(is_text_type(ext))
-                drawBITMAP (&textBitmap, 2, y);
-            else if(is_image_type(ext))
-                drawBITMAP (&imageBitmap, 2, y);
-            else
-                fillRect(COLOR_WHITE, 2, y, 8, 8);
             break;
     }
 

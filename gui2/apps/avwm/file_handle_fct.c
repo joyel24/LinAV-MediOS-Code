@@ -21,14 +21,15 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 
-#include "ls_main.h"
+#include "browser.h"
+#include "file_handle_fct.h"
+#include "graphics.h"
+#include "avevents.h"
+#include "events.h"
 
 
 #define MAXargs 31
 
-/*extern variables */
-extern struct client_operations * cops;
-/************************/
 
 /****************************************************************************** file launcher */
 
@@ -40,7 +41,7 @@ int execBin(char * path, ...)
     char *array [MAXargs];
     int argno=0;
 
-    cops->clearEventQueue();
+    clearEventQueue();
     pid = vfork();
     if (pid == 0)
     {
@@ -57,11 +58,11 @@ int execBin(char * path, ...)
         if (pid > 0)
         {
             int status;
-            cops->closeScreen();
+            close_graphics();
             fprintf(stderr, "vfork done now wainting for pid %d to stop\n", pid);
             waitpid(pid, &status, 0);
             fprintf(stderr, "pid %d stoped, restoring avwm\n", pid);
-            cops->openScreen();
+            ini_graphics();
         }
         else
         {
@@ -71,64 +72,6 @@ int execBin(char * path, ...)
     }
     return 1;
 }
-
-int launchBin(char * name)
-{
-    return execBin(name, name, (char*)0);
-}
-
-void launchSoundPlayer(char *name)
-{
-    char vol[5];
-    char rep[5];
-    sprintf(vol, "%d",70);
-    sprintf(rep, "%d",0);
-
-    execBin("/mnt/avwm/apps/play", "play", name, vol, rep, (char*)0);
-}
-
-void launchViewer(char *name)
-{
-    execBin("/mnt/avwm/apps/viewer", "viewer", name, (char*)0);
-}
-
-void launchTxtView(char *name)
-{
-    execBin("/mnt/avwm/apps/txtviewer", "txtviewer", name, (char*)0);
-}
-
-int launchScript(char * name)
-{
-    return execBin("/bin/sh", "sh", name, (char*)0);
-}
-
-void handle_type_other(char *filename)
-{   
-    int type=cops->get_file_type(filename);
-    printf("[handle_type_other]: %s, (type=%d)\n",filename,type);
-    
-    switch(type)
-    {
-        case BIN_TYPE:
-            launchBin(filename);
-            break;
-        case SCRIPT_TYPE:
-            launchScript(filename);
-            break;
-        case IMG_TYPE:
-            launchViewer(filename);
-            break;
-        case MP3_TYPE:
-            cops->playMp3(filename);
-            break;
-        case TXT_TYPE:
-            launchTxtView(filename);
-            break;
-        case UKN_TYPE:
-        default:
-            printf("[handle_type_other]: unknown type\n");
-    }
- }
 
 /***********************************************************************************************/
 

@@ -43,9 +43,24 @@ int stop_playback(void)
     return 0;
 }
 
+int start_peak(void)
+{
+    return 0;
+}
+
+int stop_peak(void)
+{
+    return 0;
+}
+
 int readPeak(struct av_peak * peak)
 {
     return 0;  
+}
+
+int readFrame(void)
+{
+    return 0;
 }
 
 int setVolume(int val)

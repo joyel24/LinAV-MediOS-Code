@@ -11,6 +11,7 @@
 *
 */
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
 
@@ -37,7 +38,6 @@ struct helperMenu browserMenu = {
     align         : ALIGN_RIGHT
 };
 
-struct browser_data * bdata;
 extern int menuOff;
 extern struct menu_item menu1;
 extern struct menu_data menu_cfg;
@@ -65,24 +65,41 @@ struct browser_data realData = {
     width           :0
 };
 
+struct browser_data * bdata;
+
+void printList(struct browser_data * bdata,int val)
+{
+    int i;
+    fprintf(stderr,"%d: Files:%d Dir:%d Size:%d ListUsed:%d\n",val,bdata->nbFile,bdata->nbDir,bdata->totSize,bdata->listused);
+    fprintf(stderr,"liste @:%x\n",(int)bdata->list);
+    for(i=0;i<bdata->listused;i++)
+        fprintf(stderr,"%d: (%s) %s\n",i,bdata->list[i].type==TYPE_FILE?"F":"D",bdata->list[i].name);
+    fprintf(stderr,"---------------------------- %d\n",val);
+}
+
 int eventHandler(int evt)
 {
     int w = 0;
     int h = 10;
-    char pwd[10];    
+    char pwd[10]; 
+    int savEvt=evt;   
 
     cops->getStringS("M", &w, &h);
 
     if(menuOff)
     {
+        //printList(bdata,1);
         helperEvt(evt,BTN_JOY);
+        //printList(bdata,2);
         evt=cops->browserEvt(evt,bdata);
+        //printList(bdata,3);
+        //fprintf(stderr,"[helperEvt] get:%x sav:%x\n",evt,savEvt);
         switch(evt)
         {
             case BTN_RIGHT:
                 if(bdata->list[bdata->pos+bdata->nselect].type==TYPE_FILE)
                 {                    
-                    handle_type_other(bdata->list[bdata->pos+bdata->nselect].name);                    
+                    cops->handle_type_other(bdata->list[bdata->pos+bdata->nselect].name);                    
                 }
                 break;
             case BTN_F1:
@@ -101,6 +118,7 @@ int eventHandler(int evt)
                 break;
             case BTN_OFF:
             case EVT_QUIT:
+                hideHelper();
                 RELEASE(cops)
                 break;
             case EVT_REDRAW:
@@ -137,8 +155,9 @@ int main(int argc,char * * argv)
         cops->setFont(STD6X9);
 
         ini_menu_struct();
-        drawhelperMenuBox(&browserMenu);
-
+        iniHelperMenu(&browserMenu);
+        //openHelper();
+        
         if(strlen(argv[1]) == 1)
         {
             if(argv[1][0] == '/')
@@ -150,7 +169,7 @@ int main(int argc,char * * argv)
             chdir(argv[1]);
 
         cops->viewNewDir(bdata,"./");       
-
+        
         PACK(cops,NULL);
 
         cops->cleanList(bdata);

@@ -29,22 +29,6 @@
 
 int  eventHandler       (int evt);
 
-
-/*****    file_handle_fct    *****/
-int   execBin            (char * path, ...);
-int   launchBin          (char * name);
-void  launchSoundPlayer  (char * name);
-void  launchViewer       (char * name);
-void  launchTxtView      (char * name);
-int   launchScript       (char * name);
-void  handle_type_other  (char * filename);
-int   do_mv              (char * src,char * dest);
-int   do_cp              (char * src,char * dest);
-int   isadir             (char * name);
-char* buildname          (char * dirname,char * filename);
-int   copyfile           (char * src,char * dest,int setmodes);
-
-
 /*****    menu_fct    *****/
 void ini_menu_struct  (void);
 void do_off           (void * data);

@@ -27,6 +27,8 @@ int browserEvt(int evt,struct browser_data * bdata)
     int h = 10;
     getStringS("M", &w, &h);
     
+    //fprintf(stderr,"[browserEvt] get:%x\n",evt);
+    
     switch(evt)
     {
         case BTN_UP:

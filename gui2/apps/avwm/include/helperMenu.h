@@ -38,12 +38,13 @@ struct helperMenu {
     int align;
 };
 
+void  chgState              (void);
 void  openHelper            (void);
 void  closeHelper           (void);
 void  hideHelper            (void);
 void  helperEvt             (int evt,int action_btn);
 
-void* openHelperMenu        (void* arg);
-void  drawhelperMenuBox     (struct helperMenu * menu);
+void* drawHelperMenu        (void* arg);
+void  iniHelperMenu         (struct helperMenu * menu);
 
 #endif

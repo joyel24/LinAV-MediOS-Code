@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "graphics.h"
 #include "osd.h"
@@ -22,7 +23,7 @@
 
 extern struct graphicsBuffer VIDEO_1;
 
-int load_bg(char * name)
+void load_bg(char * name)
 {
     int fd;int tot=0;int val;
     int state;
@@ -31,10 +32,10 @@ int load_bg(char * name)
     if (fd < 0)
     {
         perror(name);
-        return 0;
+        return ;
     }
     
-    while ((val=read(fd, VIDEO_1.offset + tot, 320)) > 0)
+    while ((val=read(fd,(int*)(VIDEO_1.offset + tot), 320)) > 0)
         tot+=val;
     fprintf(stderr,"Read: %d\n",tot);
     

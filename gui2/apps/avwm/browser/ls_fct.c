@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "browser.h"
+#include "avstring.h"
 
 #define LISTSIZE   256
 
@@ -31,6 +32,7 @@ int nbFile=0,nbDir=0,totSize=0;*/
 void cleanList(struct browser_data * bdata)
 {
     int i;
+    printf("[cleanList] %d entries\n",bdata->listused);
     for (i = 0; i < bdata->listused; i++)
         free(bdata->list[i].name);
     free(bdata->list);

@@ -109,6 +109,11 @@ int getUSB(void)
     return stateUSB;
 }
 
+int getFwExt(void)
+{
+    return 0;
+}
+
 int setUSB(int state)
 {
     return 0;
@@ -144,6 +149,77 @@ int fmSetBat(int val)
 int fmSetVol(int val)
 {
     return 1;
+}
+
+int fmSetTxt(char * txt)
+{
+    return 1;
+}
+
+int fmSetTmpTxt(char * txt,int iter)
+{
+    return 1;
+}
+
+int fmSetBackLight(int val)
+{
+    return 1;
+}
+
+int fmGetBackLight(void)
+{
+    return 0;
+}
+
+int fmSetRecLight(int val)
+{
+    return 1;
+}
+
+int fmGetRecLight(void)
+{
+    return 0;
+}
+
+int fmOnRadio(void)
+{
+    return 1;
+}
+
+int fmOffRadio(void)
+{
+    return 1;
+}
+
+float fmGetFreq(void)
+{
+    return 0;
+}
+
+int fmSetFreq(float freq)
+{
+    return 0;return 1;
+}
+
+int set_lcd_TimeOutParam(int state, int value)
+{   
+    return 0;
+    return 1;
+}
+
+int get_lcd_TimeOutParam(int state)
+{
+    return 0;
+}
+
+int CF_mod_is_connected(void)
+{
+    return 0;
+}
+
+int CF_is_connected(void)
+{
+    return 0;
 }
 
 void print_data(char * data,int length)

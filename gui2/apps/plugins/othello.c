@@ -576,7 +576,7 @@ int main(int argc,char ** argv)
 
     iniBoard();
     
-    drawhelperMenuBox(&othelloMenu);
+    iniHelperMenu(&othelloMenu);
     
     computeAllowed(allowedHuman,HUMAN);
     eventHandler(EVT_REDRAW);

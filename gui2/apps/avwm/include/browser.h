@@ -27,10 +27,6 @@ struct dir_entry {
 struct browser_data {
     char * path;
     
-    struct dir_entry * list;
-    int                listused;
-    int                listsize;
-    
     int pos;
     int nselect;
     
@@ -45,6 +41,12 @@ struct browser_data {
     int y_start;
     
     int width;
+    
+    struct dir_entry * list;
+    int                listused;
+    int                listsize;
+    
+    
 };
 
 #define MENU_SHADOW 2 // height of small shadow under the title
@@ -69,7 +71,6 @@ int  doLs        (struct browser_data * bdata,char * name);
 /*****    evt_handle_fct    *****/
 int  browserEvt         (int evt,struct browser_data * bdata);
 
-
 /*****    gui_fct    *****/
 int  viewNewDir         (struct browser_data *bdata,char *name);
 void showArrow          (int type,int max);
@@ -79,5 +80,6 @@ void printAllName       (struct browser_data *bdata);
 void printAName         (struct browser_data *bdata,int pos, int nselect, int clear, int selected);
 void draw_bottom_status (struct browser_data *bdata);
 void draw_file_size     (struct dir_entry * entry);
+void createSizeString   (char * str,int Isize);
 
 #endif

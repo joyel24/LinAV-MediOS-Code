@@ -11,9 +11,12 @@
 *
 */
 #include <string.h>
+#include <stdio.h>
 
 #include "file_type.h"
+#include "file_handle_fct.h"
 #include "avstring.h"
+#include "plugin.h"
 
 int is_script_type(char *extension)
 {
@@ -76,3 +79,61 @@ int get_file_type(char * filename)
     else
         return UKN_TYPE;
 }
+
+int launchBin(char * name)
+{
+    return execBin(name, name, (char*)0);
+}
+
+void launchSoundPlayer(char *name)
+{
+    char vol[5];
+    char rep[5];
+    sprintf(vol, "%d",70);
+    sprintf(rep, "%d",0);
+
+    execBin("/mnt/avwm/apps/play", "play", name, vol, rep, (char*)0);
+}
+
+void launchViewer(char *name)
+{
+    execBin("/mnt/avwm/apps/viewer", "viewer", name, (char*)0);
+}
+
+void launchTxtView(char *name)
+{
+    execBin("/mnt/avwm/apps/txtviewer", "txtviewer", name, (char*)0);
+}
+
+int launchScript(char * name)
+{
+    return execBin("/bin/sh", "sh", name, (char*)0);
+}
+
+void handle_type_other(char *filename)
+{   
+    int type=get_file_type(filename);
+    printf("[handle_type_other]: %s, (type=%d)\n",filename,type);
+    
+    switch(type)
+    {
+        case BIN_TYPE:
+            launchBin(filename);
+            break;
+        case SCRIPT_TYPE:
+            launchScript(filename);
+            break;
+        case IMG_TYPE:
+            launchViewer(filename);
+            break;
+        case MP3_TYPE:
+            playMp3(filename);
+            break;
+        case TXT_TYPE:
+            launchTxtView(filename);
+            break;
+        case UKN_TYPE:
+        default:
+            printf("[handle_type_other]: unknown type\n");
+    }
+ }

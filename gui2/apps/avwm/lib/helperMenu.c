@@ -31,20 +31,16 @@ pthread_t drawHelper_thread;
 
 extern struct client_operations * cops;
 
-int helperState=0;
 int helperDelay=0;
-int nbTout=0;
 int helperSpeed=200;
 
 void helperEvt(int evt,const int action_btn)
 {
+    //fprintf(stderr,"[helperEvt] get:%x wait:%x\n",evt,action_btn);
+    
     if(evt==action_btn)
     {
-        helperState=~helperState;
-        if(helperState)
-            openHelper();
-        else
-            closeHelper();
+        chgState();
         return;
     }
     
@@ -60,60 +56,56 @@ void helperEvt(int evt,const int action_btn)
         case BTN_JOY:
         case BTN_ON:
         case BTN_OFF:
-            helperState=0;
             closeHelper();
             break;
-        /*case EVT_TIMER:
-            nbTout++;
-            if(nbTout==helperDelay && helperState)
-                closeHelper();*/
     }    
 }
 
 void hideHelper(void)
 {
     stopHelper=1;    
-    if(inAction)
-        pthread_join(drawHelper_thread, NULL);
+    /*fprintf(stderr,"wait join after kill\n");
+    if (pthread_join(drawHelper_thread, NULL)!=0)
+        printf("Error, can't join\n");
+    fprintf(stderr,"kill done\n");*/
     cops->hidePlane(BMAP2);
     posX=320;
 }
 
+void chgState(void)
+{
+    isOpening=~isOpening;
+    fprintf(stderr,"chg opening\n");
+    /*if(!inAction)
+    {
+        fprintf(stderr,"wait join\n");
+        if (pthread_join(drawHelper_thread, NULL)!=0)
+            printf("Error, can't join\n");
+        fprintf(stderr,"launch\n");
+        if (pthread_create(&drawHelper_thread, NULL, drawHelperMenu, 0) != 0)
+            printf("Error, can't create draw thread\n");
+    }*/
+    drawHelperMenu(NULL);
+}
+
 void openHelper(void)
 {
-    if(posX>endPosX)
-    {
-        cops->showPlane(BMAP2);
-        isOpening=1;
-        if(!inAction)
-        {
-            if (pthread_create(&drawHelper_thread, NULL, openHelperMenu, 0) != 0)
-            {            
-                printf("Error, can't create read thread\n");
-            }
-        }
-    }
+    if(!isOpening)
+        chgState();
 }
 
 void closeHelper(void)
 {
-    if(posX<320)
-    {
-        isOpening=0;
-        if(!inAction)
-        {
-            if (pthread_create(&drawHelper_thread, NULL, openHelperMenu, 0) != 0)
-            {            
-                printf("Error, can't create read thread\n");
-            }
-        }
-   }
+    if(isOpening)
+        chgState();
 }
 
-void * openHelperMenu(void* arg)
+void * drawHelperMenu(void* arg)
 {    
     int i;    
     inAction=1;
+    fprintf(stderr,"IN thread\n");
+    cops->showPlane(BMAP2);
     
     while(1)
     {
@@ -137,14 +129,8 @@ void * openHelperMenu(void* arg)
     if(posX>=320)
         cops->hidePlane(BMAP2);
    
-    /*if(posX<=endPosX && helperDelay == 0)
-    {
-       nbTout=0;
-    }*/
-    
-    
     inAction=0;    
-    
+    fprintf(stderr,"OUT thread\n");
     return NULL;
 }
 
@@ -153,7 +139,7 @@ void * openHelperMenu(void* arg)
                                  cops->putS(menu->txt_color,menu->bg_color,_x,y,str);}}
 
 /* draw the edit box */
-void drawhelperMenuBox(struct helperMenu * menu)
+void iniHelperMenu(struct helperMenu * menu)
 {
     
     int h,w;
@@ -192,17 +178,11 @@ void drawhelperMenuBox(struct helperMenu * menu)
     drawString(menu->F2_txt,180);
     drawString(menu->F3_txt,210);
     
-    /*if(menu->ON_txt)  cops->putS(menu->txt_color,menu->bg_color,4,13,menu->ON_txt);
-    if(menu->OFF_txt) cops->putS(menu->txt_color,menu->bg_color,4,47,menu->OFF_txt);
-    if(menu->JOY_txt) cops->putS(menu->txt_color,menu->bg_color,4,97,menu->JOY_txt);
-    if(menu->F1_txt)  cops->putS(menu->txt_color,menu->bg_color,4,150,menu->F1_txt);
-    if(menu->F2_txt)  cops->putS(menu->txt_color,menu->bg_color,4,180,menu->F2_txt);
-    if(menu->F3_txt)  cops->putS(menu->txt_color,menu->bg_color,4,210,menu->F3_txt);*/
     cops->setPlane(BMAP1);
+    
     // hide Box
     endPosX = 320-maxW;
     posX=320;
-    helperState=0;
     stopHelper=0;
     isOpening=0;
     inAction=0;
