@@ -78,7 +78,7 @@ static int pal32[2] = {0x6c706c93, 0xffffffff};
 static int pal16[2] = {0x0000, COLOR_TXT};
 static struct graphicsBuffer sprite6_9 = {0, 1, 6, 9, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 static struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-void (*binCaller)()=(void (*)())0x03000000;
+void (*binCaller)(char * param)=(void (*)(char *))0x03000000;
 
 struct config_image cfg[MAX_CFG];
 struct config_gene cfgG;
@@ -258,7 +258,14 @@ loop:
                 if(launch)
                 {
                     debug("File loaded, now launching\n");
-                    binCaller();
+                    debug("append=%s\n",cfg[cursorPos].append);
+                    if(cfg[cursorPos].append[0])
+                    {
+                        snprintf(tmp_txt,100,"AV_Pinit=/bin/init_cust myinit=%s",cfg[cursorPos].append);
+                        binCaller(tmp_txt);
+                    }
+                    else
+                        binCaller(NULL);
                     while(1);
                 }
                 else
@@ -567,7 +574,14 @@ int processDefault(int key,int nbCfg)
             {
                 if(loadFile(cfg[pos].image,(char*)0x03000000,1))
                 {
-                    binCaller();
+                    debug("append=%s\n",cfg[pos].append);
+                    if(cfg[pos].append[0])
+                    {
+                        snprintf(tmp_txt,100,"AV_Pinit=/bin/init_cust myinit=%s",cfg[pos].append);
+                        binCaller(tmp_txt);
+                    }
+                    else
+                        binCaller(NULL);
                     err(1);
                     return -1;
                 }

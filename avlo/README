@@ -5,9 +5,8 @@
 ** irc: server= freenode - chan: #linav
 ** yahoo group: linav
 **
-** related projects: http://avos.sf.net , irc #avos
 
-This readme will help you install avlo to the av3xx. This bootloader features a config file based menu (a bt like LILO) loader. It is designed to be light and fast.
+This readme will help you install avlo to the av3xx. This bootloader features a config file based menu (a bit like LILO) loader. It is designed to be light and fast.
 Special features:
 	- use a config file to read the OS list and options
 	- default OS launched after a specified time-out
@@ -18,13 +17,11 @@ Special features:
 
 Navigation uses UP/DOWN, ON or RIGHT to launch an OS, F3 to enter USB mode and OFF to performa a safe shutdown.
 
-
-I've also provided a bin version of the avlo, if you want to test it without installing it. It's also a good way to test if the config file is good.
 ----------
 
         The installation process is the same as for the bootloader or winav. The main steps are:
 
-1. transform the cjbm.ajz to a bin file
+1. transform the cjbm.ajz to a bin file (if you want a faster load of archos firmware)
 2. backup the original firmware
 3. copy this binary and avlo to the HD
 4. update to avlo
@@ -36,12 +33,13 @@ I've also provided a bin version of the avlo, if you want to test it without ins
 1. transform the cjbm.ajz to a bin file
 
 go on rockbox project and grab their descrambler, use this tool to transform the cjbm.ajz you use to a binary file
+avlo can also launch ajz file, so you can always start archos firmware if you put back the original cjbm.ajz file after installing avlo
 
 2. backup the original firmware
 
 be sure to keep a copy of the cjbm.ajz file from archos on your computer
 
-3. copy this binary and avlo to the HD
+3. copy this binary and avlo to the av3xx HD
 
 rename avlo.ajz to cjbm.ajz and put it on the root folder of the av's HD
 copy the binary version of archos firmware to the same folder
@@ -49,11 +47,12 @@ copy the avlo.cfg to the same folder, don't forget to edit this file to match yo
 
 4. update to avlo
 
-boot the device and do an update. At reboot you'll be in avlo
+boot the device and do an update. At reboot you'll be in avlo (archos firmware can warn you that you have a bad cjbm.ajz file when you boot)
 
 5. put back the original ajz file
 
 for some reason you should put back the cjbm.ajz file from archos on the HD.
+
 ----------
 
         avlo.cfg format
@@ -63,6 +62,12 @@ Example: to add an OS which binary is /linux/kernel.bin and you want to named it
 image=/linux/kernel.bin
 label=Linav
 
+For the linux kernel you can add the append= param to specify the myinit you want to use. It is an optional parameter, if you don't use it, the default
+myinit (/mnt/myinit) will be used. the format of this param is append=..path to myinit.... So a valid config for linux kernel:
+image=/linux.bin
+label=Linav
+append=/mnt/myinit
+
 ==> quotes (") are required if you want to put spaces: to add archos FW: with the binary: /archos.bin and the label Archos FW
 image=/archos.bin
 label="Archos FW"
@@ -71,10 +76,4 @@ You can also add some general options:
 - default: the label (not the image) of the default OS to be launched
 - time-out: timeout before launching the default OS (if specifyed) => warning, this is not in seconds, numbers > 10000 should be used
 - repeat: repeat rate of key
-- key: passphrase used to decode ajz files
---------
 
-	Known problems
-
-- there can be some problem when pressing F3 to go in usb mode => fixed in this version
-- ajz decode is still a bit slow
