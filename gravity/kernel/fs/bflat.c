@@ -50,6 +50,12 @@
 
 #define FLAT_FLAG_RAM       1
 #define FLAT_FLAG_PIC       2
+
+#ifdef DEBUG_FLAT
+#define FLAT_PRINT(s...)   printk(a)
+#else
+#define FLAT_PRINT(s...)
+#endif
                    
 int load_bflat(const char * fname)
 {
@@ -62,7 +68,7 @@ int load_bflat(const char * fname)
     unsigned long start_code;
     unsigned long * reloc_table;
     
-    void (*run_flat)(void);
+    int (*run_flat)(int argc,char**argv);
     
     
     fd_bflat = kfopen(fname,O_RDONLY);
@@ -124,7 +130,7 @@ int load_bflat(const char * fname)
     reloc_table=(unsigned long *)(text_pos+header.reloc_start+NB_LIB*sizeof(unsigned long));
     start_code=text_pos+sizeof(struct bflat_header);
     
-    printk("[load_bflat] text_pos=%08x start_code=%08x data_pos=%08x\n",text_pos,start_code,data_pos);
+    FLAT_PRINT("[load_bflat] text_pos=%08x start_code=%08x data_pos=%08x\n",text_pos,start_code,data_pos);
     
     klseek(fd_bflat, 0, SEEK_SET);
     
@@ -157,10 +163,10 @@ int load_bflat(const char * fname)
         unsigned long * reloc_point;
         unsigned long addr;
         i=0;
-        printk("[load_bflat] GOTPIC relocations \n");
+        FLAT_PRINT("[load_bflat] GOTPIC relocations \n");
         for(reloc_point=(unsigned long*)data_pos;(*reloc_point)!=0xFFFFFFFF;reloc_point++)
         {
-            printk("%d-%08x: %08x",i,reloc_point,*reloc_point);
+            FLAT_PRINT("%d-%08x: %08x",i,reloc_point,*reloc_point);
             if(*reloc_point)
             {
                 if(*reloc_point<text_len)
@@ -168,59 +174,55 @@ int load_bflat(const char * fname)
                 else
                     addr=*reloc_point-text_len+data_pos;
                 *reloc_point=addr;
-                printk(" => %08x(%08x)",addr,*reloc_point);
-                print_data(addr,0x10);
+                FLAT_PRINT(" => %08x(%08x)",addr,*reloc_point);
             }
-            printk("\n");
+            FLAT_PRINT("\n");
         }
     }
     
-    printk("[load_bflat] std relocations \n");
+    FLAT_PRINT("[load_bflat] std relocations \n");
     
     for(i=0;i<header.reloc_count;i++)
     {
         unsigned long addr,reloc_point;
         reloc_point=swap_val(reloc_table[i]);
         
-        printk("%d: rp=%08x",i,reloc_point);
+        FLAT_PRINT("%d: rp=%08x",i,reloc_point);
         
         if(reloc_point<text_len)
             reloc_point+=start_code;
         else
             reloc_point=reloc_point-text_len+data_pos;
             
-        printk(" rp-real=%08x",reloc_point);
+        FLAT_PRINT(" rp-real=%08x",reloc_point);
         
         addr=GET_VAL_FLAT(reloc_point);
         
         if(!(header.flags & FLAT_FLAG_PIC))
             addr=swap_val(addr);
             
-        printk(" val=%08x",addr);
+        FLAT_PRINT(" val=%08x",addr);
         
         if(addr<text_len)
             addr+=start_code;
         else
             addr=addr-text_len+data_pos;
         
-        printk(" val-rp=%08x",addr);            
+        FLAT_PRINT(" val-rp=%08x",addr);            
             
         PUT_VAL_FLAT(reloc_point,addr);
         
-        printk(" (%08x)\n",*(unsigned long*)reloc_point);
+        FLAT_PRINT(" (%08x)\n",*(unsigned long*)reloc_point);
     }
        
     
     run_flat=header.entry+text_pos;
     
-    printk("[load_bflat] about to launch: %08x\n",run_flat);
-    
-    print_data(run_flat,0x50);
-    
+    FLAT_PRINT("[load_bflat] about to launch: %08x\n",run_flat);
+   
        
-    run_flat();
+    run_flat(0,NULL);
     
-    printk("[load_bflat] back");
     
     kfree(text_pos);
     kfclose(fd_bflat);         
