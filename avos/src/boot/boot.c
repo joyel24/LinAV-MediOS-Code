@@ -120,7 +120,10 @@ startInit:
 
     for (c=0;c<240;c++) {
         for (i=0;i<320;i++) {
-            a = ((int)bgimage[c][i*3]) | ((int)bgimage[c][i*3 + 1]<<8) | ((int)bgimage[c][i*3 + 2]<<16);
+            a = ((int)bgimage[c][i*3])
+              | ((int)bgimage[c][i*3 + 1]<<8)
+              | ((int)bgimage[c][i*3 + 2]<<16)
+              | ((int)bgimage[c][i*3 + 1]<<24);
             screenDirect[c*320 + i] = a;
         }
     }

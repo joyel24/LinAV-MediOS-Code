@@ -39,6 +39,7 @@ typedef unsigned long u32;
                                                     // back to low.
 #define         GIO_LINE_BACKLIGHT_POWER    0x17    // 0 = power
 #define         GIO_LINE_BUTTON_OFF         0x1c
+#define         GIO_LINE_EXT_VIDEO          0x1d
 #define         GIO_LINE_MAS_RTR            0x1e
 #define         GIO_LINE_MAS_PR             0x1f
 

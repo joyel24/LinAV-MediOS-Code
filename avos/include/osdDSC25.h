@@ -26,7 +26,7 @@ typedef unsigned long u32;
 #define        OSD_MAIN_BORDER_RAMCLUT 0x01
 #define        OSD_MAIN_VIDEO_SCALEX   0x04
 #define        OSD_MAIN_VIDEO_SCALEY   0x08
-#define        OSD_MAIN_VIDEO_SCALEXM  0x10
+#define        OSD_MAIN_VIDEO_SCALESM  0x10         // Smoother scaling
 #define        OSD_MAIN_SWAPRB         0x80
         
 #define        OSD_COMPONENT_ENABLE    0x0001       // Eanble the component
@@ -97,6 +97,10 @@ typedef unsigned long u32;
 #define        OSD_CURSOR2_FLASH_SPEED3        0x3000
 #define        OSD_CURSOR2_FLASH_ENABLE        0x4000   // enable flashing
 
+#define        OSD_VIDEOMODE_PAL               0x8000
+#define        OSD_VIDEOMODE_NTSC              0x0000
+               // Unknown flags - LCD = 4071
+               //                 VID = 407d
 
 extern void osdInit();
 extern void osdSetComponentOffset(u32 component, u32 offset);
@@ -129,6 +133,5 @@ extern void osdSetMainShiftA(u32 horizontal, u32 vertical);
 extern void osdSetMainConfigA(u32 config);
 extern void osdSetBorderColorA(u32 color);
 extern void osdSetAltOffsetA(u32 offset);
-extern void osdSetVideoOutOn();
-extern void osdSetVideoOutOff();
+extern void osdSetVideoMode(u32 mode);
 

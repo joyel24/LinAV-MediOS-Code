@@ -62,7 +62,7 @@ osdInc = 1
         OSD_MAIN_BORDER_RAMCLUT =   0x01
         OSD_MAIN_VIDEO_SCALEX   =   0x04
         OSD_MAIN_VIDEO_SCALEY   =   0x08
-        OSD_MAIN_VIDEO_SCALEXM  =   0x10
+        OSD_MAIN_VIDEO_SCALESM  =   0x10
         OSD_MAIN_SWAPRB         =   0x80
         
         OSD_COMPONENT_ENABLE    =   0x0001      @ 0000000000000001
@@ -212,7 +212,6 @@ osdSetMainConfigA:
 .thumb_func
 
 osdSetMainConfig:
-        push {r0, r1, r2}
         ldr r2, =0x30680
         ldrh r1, [r2]
         lsl r1, #24
@@ -220,8 +219,7 @@ osdSetMainConfig:
         lsl r0, #8
         orr r1, r0
         strh r1, [r2]
-        pop {r0, r1, r2}
-        bx r1
+        bx lr
 
                     
 @ ------------------------------------------------------------------------------
@@ -522,50 +520,60 @@ osdSetBacklightA:
 
 osdSetBacklight:
         ldr r1, =0x02600200
-        lsl r0, #2
+        lsl r0, #31
+        lsr r0, #29
         strh r0, [r1]
         bx lr
 
 @ ------------------------------------------------------------------------------
-@ osdSetVideoOutOn
+@ osdSetVideoMode
 @
-.globl osdSetVideoOutOnA
-osdSetVideoOutOnA:
+.globl osdSetVideoModeA
+osdSetVideoModeA:
         switchThumb
-.globl osdSetVideoOutOn
+.globl osdSetVideoMode
 .thumb_func
 
-osdSetVideoOutOn:
+osdSetVideoMode:
         ldr r1, =0x30800
-        ldrh r2, [r1]
-        mov r3, #4
-        orr r2, r3
-        strh r2, [r1]
-        ldr r1, =0x3058e
-        ldr r0, =0x2000
-        strh r0, [r1]
-        bx lr
-
-@ ------------------------------------------------------------------------------
-@ osdSetVideoOutOff
-@
-.globl osdSetVideoOutOffA
-osdSetVideoOutOffA:
-        switchThumb
-.globl osdSetVideoOutOff
-.thumb_func
-
-osdSetVideoOutOff:
-        ldr r1, =0x30800
-        ldrh r2, [r1]
-        ldr r3, =0xfffb
-        and r2, r3
-        strh r2, [r1]
-        ldr r1, =0x3058a
-        ldr r0, =0x2000
         strh r0, [r1]
         bx lr
         
+@ ------------------------------------------------------------------------------
+@ osdSetLCDOn
+@
+.globl osdSetLCDOnA
+osdSetLCDOnA:
+        switchThumb
+.globl osdSetLCDOn
+.thumb_func
+
+osdSetLCDOn:
+        ldr r1, =0x30804
+        ldrh r2, [r1]
+        mov r3, #1
+        lsl r3, #15
+        orr r2, r3
+        strh r2, [r1]
+        bx lr
+
+@ ------------------------------------------------------------------------------
+@ osdSetLCDOff
+@
+.globl osdSetLCDOffA
+osdSetLCDOffA:
+        switchThumb
+.globl osdSetLCDOff
+.thumb_func
+
+osdSetLCDOff:
+        ldr r1, =0x30804
+        ldrh r2, [r1]
+        ldr r3, =0x7fff
+        and r2, r3
+        strh r2, [r1]
+        bx lr
+
 @ ------------------------------------------------------------------------------
 @ UNCLEANED...
 @ ------------------------------------------------------------------------------        
