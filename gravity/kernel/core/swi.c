@@ -185,6 +185,36 @@ __IRAM_CODE int kcswi_handler (
 	break;
 /// Serialize critical API calls to memory manager
 
+        case nAPI_HEAP_CREATE:      //(HEAP* phHeap, unsigned long nBytes);
+	{
+		// TO DO:
+	}
+	break;
+
+        case nAPI_HEAP_DESTROY:     //(HEAP hHeap);
+	{
+		// TO DO:
+	}
+	break;
+
+        case nAPI_HEAP_MALLOC:      //(HEAP hHeap, void** ppvBuffer, unsigned long nBytes);
+	{
+		// TO DO:
+	}
+	break;
+
+        case nAPI_HEAP_FREE:        //(HEAP hHeap, void* pvBuffer);
+	{
+		// TO DO:
+	}
+	break;
+
+        case nAPI_HEAP_AVAIL:       //(HEAP hHeap, unsigned long* pnBytes);
+	{
+		// TO DO:
+	}
+	break;
+
         case nAPI_TIME:
             switch((int)nParam1) {
                 case 0x000:
@@ -307,6 +337,18 @@ __IRAM_CODE int kcswi_handler (
 			API_TASK_YIELD ();
 		}
 		__sti ();
+	}
+	break;
+
+	case nAPI_CRITSEC_TRYENTER: //(HCRITSEC hCritSec);
+	{
+		// TO DO:
+	}
+	break;
+
+	case nAPI_GFX_FASTBLIT:     //(GFX_DATA* pDst, GFX_DATA* pSrc, GFX_POINT* pOrigin);
+	{
+		// TO DO:
 	}
 	break;
 

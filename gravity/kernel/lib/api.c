@@ -39,15 +39,16 @@ ERROR_CODE API_TASK_SENDMESSAGE (HTASK hTask, MESSAGE* pMsg)                    
 ERROR_CODE API_TASK_PEEKMESSAGE (MESSAGE* pMsg)                                                 { swi_call(nAPI_TASK_PEEKMESSAGE); }
 ERROR_CODE API_TASK_WAITMESSAGE (MESSAGE* pMsg)                                                 { swi_call(nAPI_TASK_WAITMESSAGE); }
 ERROR_CODE API_TASK_TERMINATE   ()                                                              { swi_call(nAPI_TASK_TERMINATE); }
+ERROR_CODE API_TASK_SETPRIORITY (HTASK hTask, int nPriority)                                    { swi_call(nAPI_TASK_SETPRIORITY); }
 
 ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes)                        { swi_call(nAPI_MALLOC); }
 ERROR_CODE API_FREE             (void* pvBuffer)                                                { swi_call(nAPI_FREE); }
 ERROR_CODE API_MEMAVAIL         (unsigned long* pnBytes)                                        { swi_call(nAPI_MEMAVAIL); }
-ERROR_CODE API_HEAP_CREATE      ()                                                              { swi_call(nAPI_HEAP_CREATE); }
-ERROR_CODE API_HEAP_DESTROY     ()                                                              { swi_call(nAPI_HEAP_DESTROY); }
-ERROR_CODE API_HEAP_MALLOC      ()                                                              { swi_call(nAPI_HEAP_MALLOC); }
-ERROR_CODE API_HEAP_FREE        ()                                                              { swi_call(nAPI_HEAP_FREE); }
-ERROR_CODE API_HEAP_AVAIL       ()                                                              { swi_call(nAPI_HEAP_AVAIL); }
+ERROR_CODE API_HEAP_CREATE      (HEAP* phHeap, unsigned long nBytes)                            { swi_call(nAPI_HEAP_CREATE); }
+ERROR_CODE API_HEAP_DESTROY     (HEAP hHeap)                                                    { swi_call(nAPI_HEAP_DESTROY); }
+ERROR_CODE API_HEAP_MALLOC      (HEAP hHeap, void** ppvBuffer, unsigned long nBytes)            { swi_call(nAPI_HEAP_MALLOC); }
+ERROR_CODE API_HEAP_FREE        (HEAP hHeap, void* pvBuffer)                                    { swi_call(nAPI_HEAP_FREE); }
+ERROR_CODE API_HEAP_AVAIL       (HEAP hHeap, unsigned long* pnBytes)                            { swi_call(nAPI_HEAP_AVAIL); }
 
 ERROR_CODE API_PIPE_CREATE      (HPIPE* phPipe)                                                 { swi_call(nAPI_PIPE_CREATE); }
 ERROR_CODE API_PIPE_DELETE      (HPIPE hPipe)                                                   { swi_call(nAPI_PIPE_DELETE); }
@@ -60,6 +61,12 @@ ERROR_CODE API_CRITSEC_DELETE   (HCRITSEC hCritSec)                             
 ERROR_CODE API_CRITSEC_ENTER    (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_ENTER); }
 ERROR_CODE API_CRITSEC_LEAVE    (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_LEAVE); }
 ERROR_CODE API_CRITSEC_TRYENTER (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_TRYENTER); }
+
+ERROR_CODE API_GFX_FASTBLIT     (GFX_DATA* pDst, GFX_DATA* pSrc, GFX_POINT* pOrigin)            { swi_call(nAPI_GFX_FASTBLIT); }
+
+ERROR_CODE API_SOUND_PLAY       (void* pvBuffer, unsigned long nBytes, unsigned long nFlags)    { swi_call(nAPI_SOUND_PLAY); }
+ERROR_CODE API_SOUND_PAUSE      ()                                                              { swi_call(nAPI_SOUND_PAUSE); }
+ERROR_CODE API_SOUND_STOP       ()                                                              { swi_call(nAPI_SOUND_STOP); }
 
 ERROR_CODE API_RUN_GRV          (const char* pGRVPath, HTASK* phTask)                           { swi_call(nAPI_RUN_GRV); }
 

@@ -26,6 +26,12 @@ typedef struct _GFX_DATA
     unsigned int bg_color;
 } GFX_DATA;
 
+typedef struct _GFX_POINT
+{
+    long x;
+    long y;
+} GFX_POINT;
+
 typedef struct _PLANE_DATA
 {
     int vplane;
@@ -42,6 +48,7 @@ typedef struct _COUPLE_DATA
 typedef unsigned long HTASK;
 typedef unsigned long HPIPE;
 typedef unsigned long HCRITSEC;
+typedef unsigned long HEAP;
 
 typedef struct _MESSAGE
 {

@@ -58,6 +58,12 @@
 
 #define nAPI_RUN_GRV           60
 
+#define nAPI_GFX_FASTBLIT      70
+
+#define nAPI_SOUND_PLAY        80
+#define nAPI_SOUND_PAUSE       81
+#define nAPI_SOUND_STOP        82
+
 #define nAPI_GFX              100
 #define nAPI_PRINTF           101
 #define nAPI_FILE             102
