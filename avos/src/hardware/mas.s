@@ -16,6 +16,10 @@
 @ u32 masWriteReg(u32 reg, u32 val)
 @ u32 masReadCodecReg(u32 reg)
 @ u32 masWriteCodecReg(u32 reg, u32 val)
+@ u32 masReadD0(u32 addr, u32 buff, u32 size)
+@ u32 masReadD1(u32 addr, u32 buff, u32 size)
+@ u32 masWriteD0(u32 addr, u32 buff, u32 size)
+@ u32 masWriteD1(u32 addr, u32 buff, u32 size)
 @
 
 .macro switchThumb
@@ -61,7 +65,7 @@ masReset:
         ldr r1, =0x3058e
         mov r0, #1
         strh r0, [r1]
-        
+
         ldr r0, =0x20000
 masD1:  sub r0, #1
          bne masD1
@@ -186,6 +190,7 @@ mgvE:
         pop {r1}
         bx r1
 
+        .ltorg
         
 @ ------------------------------------------------------------------------------
 @ masReadReg(u32 reg)
@@ -341,6 +346,428 @@ masWriteReg:
 mwrE:
         mov r0, #0
         sub r0, #1
+        pop {r1}
+        bx r1
+
+@ ------------------------------------------------------------------------------
+@ masReadD0(u32 addr, u32 buffer, u32 size)
+@   
+.globl masReadD0A
+masReadD0A:
+        switchThumb
+.globl masReadD0
+.thumb_func
+
+masReadD0:
+        push {r4, r5, lr}
+        mov r3, r0
+        mov r4, r1
+        mov r5, r2
+        bl i2cStart
+    
+        mov r0, #MAS_DEV_WRITE
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd0E
+
+        mov r0, #MAS_DATA_WRITE               @ 68
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd0E
+
+        mov r0, #MAS_CMD_READ_D0
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd0E
+
+        mov r0, #0
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd0E
+         
+        mov r0, r5
+        lsr r0, #8
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd0E
+
+        mov r0, r5
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd0E
+
+        mov r0, r3
+        lsr r0, #8
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd0E
+
+        mov r0, r3
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd0E
+
+        bl i2cStop
+        
+        bl i2cStart
+        mov r0, #MAS_DEV_WRITE
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd0E
+
+        mov r0, #MAS_DATA_READ                @ 69
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd0E
+         
+        bl i2cStart
+        mov r0, #MAS_DEV_READ
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd0E
+        
+         
+        @ r4 -> buffer
+        @ r5 = n
+mrd0l:
+        bl i2cInb
+        strb r0, [r4]
+        add r4, #1
+        bl i2cAck
+        
+        bl i2cInb
+        strb r0, [r4]
+        add r4, #1
+        bl i2cAck
+    
+        bl i2cInb
+        strb r0, [r4]
+        add r4, #1
+        bl i2cAck
+
+        bl i2cInb
+        strb r0, [r4]
+        add r4, #1
+
+        sub r5, #1
+         beq mrd0d
+        bl i2cAck
+        b mrd0l
+mrd0d:
+        bl i2cAckEnd
+
+        bl i2cStop
+        mov r0, #0
+        pop {r4, r5}
+        pop {r1}
+        bx r1
+mrd0E:
+        mov r0, #0
+        sub r0, #1
+        pop {r4, r5}
+        pop {r1}
+        bx r1
+
+@ ------------------------------------------------------------------------------
+@ masWriteD0(u32 addr, u32 buffer, u32 size)
+@   
+.globl masWriteD0A
+masWriteD0A:
+        switchThumb
+.globl masWriteD0
+.thumb_func
+
+masWriteD0:
+        push {r4, r5, lr}
+        mov r3, r0
+        mov r4, r1
+        mov r5, r2
+        bl i2cStart
+    
+        mov r0, #MAS_DEV_WRITE
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd0E
+
+        mov r0, #MAS_DATA_WRITE               @ 68
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd0E
+
+        mov r0, #MAS_CMD_WRITE_D0
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd0E
+
+        mov r0, #0
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd0E
+         
+        mov r0, r5
+        lsr r0, #8
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd0E
+
+        mov r0, r5
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd0E
+
+        mov r0, r3
+        lsr r0, #8
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd0E
+
+        mov r0, r3
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd0E
+         
+        @ r4 -> buffer
+        @ r5 = n
+mwd0l:
+        ldrb r0, [r4]
+        add r4, #1
+        bl i2cOutb
+
+        ldrb r0, [r4]
+        add r4, #1
+        bl i2cOutb
+
+        ldrb r0, [r4]
+        add r4, #1
+        bl i2cOutb
+
+        ldrb r0, [r4]
+        add r4, #1
+        bl i2cOutb
+        
+        sub r5, #1
+        bne mwd0l
+
+        bl i2cStop
+        mov r0, #0
+        pop {r4, r5}
+        pop {r1}
+        bx r1
+mwd0E:
+        mov r0, #0
+        sub r0, #1
+        pop {r4, r5}
+        pop {r1}
+        bx r1
+        
+@ ------------------------------------------------------------------------------
+@ masReadD1(u32 addr, u32 buffer, u32 size)
+@   
+.globl masReadD1A
+masReadD1A:
+        switchThumb
+.globl masReadD1
+.thumb_func
+
+masReadD1:
+        push {r4, r5, lr}
+        mov r3, r0
+        mov r4, r1
+        mov r5, r2
+        bl i2cStart
+    
+        mov r0, #MAS_DEV_WRITE
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd1E
+
+        mov r0, #MAS_DATA_WRITE               @ 68
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd1E
+
+        mov r0, #MAS_CMD_READ_D1
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd1E
+
+        mov r0, #0
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd1E
+         
+        mov r0, r5
+        lsr r0, #8
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd1E
+
+        mov r0, r5
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd1E
+
+        mov r0, r3
+        lsr r0, #8
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd1E
+
+        mov r0, r3
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd1E
+
+        bl i2cStop
+        
+        bl i2cStart
+        mov r0, #MAS_DEV_WRITE
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd1E
+
+        mov r0, #MAS_DATA_READ                @ 69
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd1E
+         
+        bl i2cStart
+        mov r0, #MAS_DEV_READ
+        bl i2cOutb
+        cmp r0, #0
+         bne mrd1E
+        
+         
+        @ r4 -> buffer
+        @ r5 = n
+mrd1l:
+        bl i2cInb
+        strb r0, [r4]
+        add r4, #1
+        bl i2cAck
+        
+        bl i2cInb
+        strb r0, [r4]
+        add r4, #1
+        bl i2cAck
+    
+        bl i2cInb
+        strb r0, [r4]
+        add r4, #1
+        bl i2cAck
+
+        bl i2cInb
+        strb r0, [r4]
+        add r4, #1
+
+        sub r5, #1
+         beq mrd1d
+        bl i2cAck
+        b mrd1l
+mrd1d:
+        bl i2cAckEnd
+
+        bl i2cStop
+        mov r0, #0
+        pop {r4, r5}
+        pop {r1}
+        bx r1
+mrd1E:
+        mov r0, #0
+        sub r0, #1
+        pop {r4, r5}
+        pop {r1}
+        bx r1
+
+@ ------------------------------------------------------------------------------
+@ masWriteD1(u32 addr, u32 buffer, u32 size)
+@   
+.globl masWriteD1A
+masWriteD1A:
+        switchThumb
+.globl masWriteD1
+.thumb_func
+
+masWriteD1:
+        push {r4, r5, lr}
+        mov r3, r0
+        mov r4, r1
+        mov r5, r2
+        bl i2cStart
+    
+        mov r0, #MAS_DEV_WRITE
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd1E
+
+        mov r0, #MAS_DATA_WRITE               @ 68
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd1E
+
+        mov r0, #MAS_CMD_WRITE_D0
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd1E
+
+        mov r0, #0
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd1E
+         
+        mov r0, r5
+        lsr r0, #8
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd1E
+
+        mov r0, r5
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd1E
+
+        mov r0, r3
+        lsr r0, #8
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd1E
+
+        mov r0, r3
+        bl i2cOutb
+        cmp r0, #0
+         bne mwd1E
+         
+        @ r4 -> buffer
+        @ r5 = n
+mwd1l:
+        ldrb r0, [r4]
+        add r4, #1
+        bl i2cOutb
+
+        ldrb r0, [r4]
+        add r4, #1
+        bl i2cOutb
+
+        ldrb r0, [r4]
+        add r4, #1
+        bl i2cOutb
+
+        ldrb r0, [r4]
+        add r4, #1
+        bl i2cOutb
+        
+        sub r5, #1
+        bne mwd1l
+
+        bl i2cStop
+        mov r0, #0
+        pop {r4, r5}
+        pop {r1}
+        bx r1
+mwd1E:
+        mov r0, #0
+        sub r0, #1
+        pop {r4, r5}
         pop {r1}
         bx r1
         

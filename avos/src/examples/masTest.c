@@ -5,6 +5,7 @@
 #include <fonts.h>
 #include <ata.h>
 #include <mas.h>
+#include <uart.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -17,7 +18,7 @@
 
 char masVer[] = "Mas Version: xxxxxxxx";
 char masReg[] = "xxxxxxxx\n";
-    
+
 int main() {
     unsigned int c, v, b;
     
