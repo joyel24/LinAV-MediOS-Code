@@ -36,7 +36,7 @@ __IRAM_DATA int nb_pressed[NB_BUTTONS];
 __IRAM_DATA int nb_off_press;
 __IRAM_DATA int nb_debug_switch;
 
-int inHold;
+extern int inHold;
 
 __IRAM_DATA struct hw_chk_s btn_chker;
 
@@ -144,7 +144,6 @@ void init_buttons(void)
 {
     int btn;
     
-    inHold=0;
     mx_press = MAX_PRESSED;
     nb_off_press=0;
     nb_debug_switch=0;

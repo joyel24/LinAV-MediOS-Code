@@ -84,142 +84,32 @@ int key_evt_array[NB_KEY][2] = {
 void FM_remote_thread(PIPE * fm_remote_pipe)
 {
     char c;
-    
-    if(FM_connected)
-    {        
-        if(cur_txt==TMP_TXT)
-        {
-            tmp_iter--;
-            if(tmp_iter<0)
-            {
-                cur_txt=NORMAL_TXT;
-                FM_do_putText();
-            }            
+    printk("FM_remote_thread start\n");
+    while(1)
+    {
+        //printk("FM loop ");
+        if(FM_connected)
+        {        
+            API_PIPE_RECV(fm_remote_pipe,&c,1);
         }
-            
-        if(txt[cur_txt].scroll && txt_scroll_ctrl)
+        else
         {
-            txt_scroll_count++;
-            if(txt_scroll_count>15)
-            {
-                txt_scroll_count=0;
-                FM_do_putText();
-            }
-        }
-        
-        //test_icons();
-        if(fm_uart_getc(&c))
-        {
-            nbNonGet=0;
-            nbPingSend=0;
+            API_PIPE_RECV(fm_remote_pipe,&c,1);
+            printk("Read: %02x\n",c);
             switch(c)
             {
                 case 0xf8:
-                    //fm_uart_putc('v');
-                    FM_connected=0;
-                    minPongGet=0xFFFF;
-                    break;
-                case 'V':
-                    cmd=3;
-                    break;
-                case 'K':
-                    cmd=1;
-                    radio_index=0;
-                    break;
-                case 'R':
-                    cmd=2;
-                default:
-                    switch(cmd)
-                    {
-                        case 0:
-                            printk("[FM Remote] get unknown cmd: %x\n",c);
-                            break;
-                        case 1:
-                            if(c!=0)
-                            {
-                                //printk("[FM Remote] get key cmd: %x\n",c);
-                                processKey(c);
-                            }
-                            cmd=0;
-                            break;
-                        case 2:
-                            radio_param[radio_index++]=c;
-                            if(radio_index==5)
-                            {
-                                printk("[FM Remote] get radio cmd: %x%x%x%x%x\n",radio_param[0],radio_param[1]
-                                    ,radio_param[2],radio_param[3],radio_param[4]);
-                                cmd=0;
-                            }
-                            break;
-                        case 3:
-                            //printk("[FM Remote] get pong cmd: %x\n",c);
-                            cmd=0;                                    
-                        default:
-                            cmd=0;
-                            break;
-                    }
-                    break;
-            }
-            
-        }
-        else
-        {
-            nbNonGet++;
-            if(nbNonGet>MAX_NON_GET)
-            {
-                nbNonGet=0;
-                fm_uart_putc('v');
-                nbPingSend++;
-                if(nbPingSend>MAX_PING)
-                {
-                    FM_connected=0;
-                    minPongGet=0xFFFF;
-                    inHold=0;
-                    printk("[FM Remote] timeout\n");
-                    nbPingSend=0;
-                }
-            }
-        }
-    }
-    else
-    {
-        /* check if we get some data */
-        if(fm_uart_getc(&c))
-        {            
-            getPong=0;
-            switch(c)
-            {
-                case 0xf8:         
-                    getPong=1;                    
-                    pingSend=0;
-                    if(nbPongGet<minPongGet)
-                        minPongGet=nbPongGet;
-                    nbPongGet=0;
-                    
+                    printk("[FM Remote] send ping\n");
+                    uartOut('v',UART_1);
                     break;
                 case 'V':
                     FM_connected=1;
-                    minPongGet=0xFFFF;
-                    nbPingSend=0;                    
-                    cmd=3;                    
                     printk("[FM Remote] connected\n");
-                    FM_do_ini_call();
                     break;
-
+                default:
+                    printk("don't know what to do\n");
             }
         }
-        else
-        {
-            if(getPong)
-            {
-                nbPongGet++;
-                if(nbPongGet>minPongGet && !pingSend)
-                {
-                    fm_uart_putc('v');
-                    pingSend=1;
-                }
-            }            
-        }        
     }
 }
 
@@ -336,8 +226,8 @@ void FM_setLight(int type,int direction)
 
 void FM_do_setLight(void)
 {
-    fm_uart_putc('P');
-    fm_uart_putc(light_state&0xFF);
+    uartOut('P',UART_1);
+    uartOut(light_state&0xFF,UART_1);
 }
 
 int FM_getLight(int type)
@@ -436,8 +326,8 @@ void FM_do_putText(void)
 void FM_setContrast(int val)
 {
     contrast=val;
-    fm_uart_putc('C');
-    fm_uart_putc(contrast&0xFF); 
+    uartOut('C',UART_1);
+    uartOut(contrast&0xFF,UART_1);
 }
 
 int FM_getContrast(void)
@@ -629,29 +519,12 @@ void FM_do_ini_call(void)
 void FM_send_data(char cmd,char * data,int size)
 {
     int i;
-    fm_uart_putc(cmd);
+    uartOut(cmd,UART_1);
     for(i=0;i<size;i++)
-        fm_uart_putc(data[i]&0xFF);
+        uartOut(data[i]&0xFF,UART_1);
 }
 
-
-int fm_uart_getc(char * c)
-{
-    if(inw(UART1_BASE+UART_RFCR)&0xFF)
-    {
-        *c=inw(UART1_BASE+UART_DTRR)&0xFF;
-        return 1;
-    }
-    else
-       return 0;
-}
-
-void fm_uart_putc(char c)
-{
-    /* reading transmission triger status*/
-    while(!(inw(UART1_BASE+UART_SR)&0x0400)) /* nothing */;    
-    outw(c&0x00FF,UART1_BASE+UART_DTRR);
-}
+extern PIPE * UART_1_Pipe;
 
 void init_fm_remote(void)
 {
@@ -664,20 +537,21 @@ void init_fm_remote(void)
     
     /*setting up the UART1 port */
     outw(0x015F,UART1_BASE+UART_BRSR); /* 9600 BAUD */
-    outw(0x8000,UART1_BASE+UART_MSR);
-    outw(0x0000,UART1_BASE+UART_RFCR);
-    outw(0x0300,UART1_BASE+UART_TFCR);
+    //outw(0x8000,UART1_BASE+UART_MSR);
+    //outw(0x0000,UART1_BASE+UART_RFCR);
+    //outw(0x0300,UART1_BASE+UART_TFCR);
     
     /* initiale state */
+    
+    inHold=0;
+    FM_connected=0;
     
     light_state=0x1;
     FM_put_iniTxt();    
     contrast=0x00;
     
-    /* setting up a hw chker to watch FM state */     
-/*    fm_chker.action=chk_FM;
-    add_hw_chker(&fm_chker);*/
-   
+    API_TASK_CREATE (FM_remote_thread, UART_1_Pipe, NULL);
+       
     /* everything is ok */
     printk("[init] fm remote\n");
 }

@@ -69,8 +69,6 @@ struct cmd_line_s cmd_tab[] = {
 __IRAM_DATA unsigned char * cur_cmd;
 __IRAM_DATA int cur_pos;
 
-__IRAM_DATA struct hw_chk_s cmdline_chker;
-
 __IRAM_DATA unsigned char ** arg_list;
 
 __IRAM_CODE void cmd_line_task(PIPE * uart_pipe)

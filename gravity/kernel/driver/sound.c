@@ -126,13 +126,13 @@ int start_mp3_playback()
     {
         playing=1;
         in_pause=0;
-        dsp_interrupt();
+        dsp_interrupt(IRQ_MAS_DATA);
     }
     else
     {
         playing=1;
         enable_irq(IRQ_MAS_DATA);
-        dsp_interrupt();                
+        dsp_interrupt(IRQ_MAS_DATA);                
     }
     return 0;       
 }

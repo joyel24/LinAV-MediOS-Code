@@ -61,7 +61,7 @@ struct av_peak {
 
 /********************* DSP                    ***************************/
 /* dev functions */
-void    dsp_interrupt     (void);
+void    dsp_interrupt     (int irq);
 void    dsp_ctl           (unsigned int cmd,int dir, void * arg);
 
 /* mp3 functions */

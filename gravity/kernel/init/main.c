@@ -149,6 +149,8 @@ void kernel_startup_thread (void)
     init_rtc();
     init_usb_fw();
     
+    init_fm_remote();
+    
     init_ext_module();
     
     init_disk();
