@@ -270,7 +270,7 @@ void oscillograph(int l, int r)
 
 int main(int argc, char * * argv)
 {
-    printf("argc: %d\n", argc);
+    printf("[play] argc: %d\n", argc);
 
     if(argc<3)
        return 0; // Quit
