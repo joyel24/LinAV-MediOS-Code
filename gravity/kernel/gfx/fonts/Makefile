@@ -4,7 +4,7 @@ GCCFLAGS+=-I../../../include -I../../../include/kernel
 
 @SRC = $(wildcard *.c)
 @OBJS = $(SRC:%.c=%.o)
-OBJS = 4x6.o  6x9.o
+OBJS = 4x6.o  6x9.o 8x13.o
 
 OPT = $(OBJS:%.o=-D_std%)
 

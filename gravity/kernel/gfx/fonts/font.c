@@ -56,7 +56,7 @@ font_ini(std4x6)
     font_ini(std7x14)
 #endif
 #ifdef _std8x13
-    font_ini(std7x13)
+    font_ini(std8x13)
 #endif
 #ifdef _cursive_9x15
     font_ini(cursive)

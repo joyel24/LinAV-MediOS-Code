@@ -17,6 +17,7 @@
 #include <kernel/exit.h>
 
 #include <kernel/gio.h>
+#include <kernel/evt.h>
 
 #include <kernel/hw_chk.h>
 #include <kernel/bat_power.h>
@@ -142,9 +143,9 @@ __IRAM_CODE void chk_button(void)
                             lcd_launchTimer(); /* postpone the lcd timer */
                             
                         halt_launchTimer(); /* postpone the poweroff timer */
-
-                        //process_btn_evt(btn);                       
-                        printk("BTN %d pressed\n",btn);
+  
+                        send_evt(btn+1);
+                        //printk("BTN %d pressed\n",btn);
                     }
                     else
                     {

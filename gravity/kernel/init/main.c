@@ -169,10 +169,11 @@ void kernel_startup_thread (void)
 
     print_boot_info();
 
-    //load_bflat("/test.grv");
-
     printk("[init] END\n");
 
+    load_bflat("/othello.grv");
     
-    avwm();
+    //avwm();
+    
+    while(1) /*nothing*/;
 }

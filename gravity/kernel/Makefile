@@ -23,7 +23,7 @@ $(TARGET) :
 #	@$(RANLIB) $(TARGET)
 clean:  clean-subdirs
 	@echo '-----   cleaining kernel'
-	@rm -f *.o *.bak *~ build/*.o $(TARGET)
+	@rm -f *.o *.bak *~ build/*.o $(TARGET) ../libgravity.a
 
 builddir:
 	@mkdir -p build

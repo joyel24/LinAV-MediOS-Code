@@ -4,12 +4,14 @@ ASFLAGS  += -I../include
 #-mfpu=softfpa
 GCCFLAGS += -I../include
 
-LDFLAGS = -L../ -lgravity -Wl, -elf2flt
+TARGET = othello
+
+LDFLAGS = -L../ -lgravity -Wl, -elf2flt -lgcc
 #LDFLAGS = -L/home/christophe/gcc-3.3.x/toolchain_arm_nofpu/arm-linux/lib/ -lgcc
 
 all: 
-	$(GCC) -o test.grv test.c $(GCCFLAGS) $(LDFLAGS)
+	$(GCC) -o $(TARGET).grv $(TARGET).c $(GCCFLAGS) $(LDFLAGS)
 	@rm -f .elf *.gdb *.elf2flt
 clean:  
-	@rm -f *.o *.bak *~ *.elf *.elf2flt test.grv *.gdb
+	@rm -f *.o *.bak *~ *.elf *.elf2flt $(TARGET).grv *.gdb
 
