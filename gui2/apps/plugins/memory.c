@@ -991,11 +991,11 @@ typedef struct testpair {
 
 /* the height and width of the field */
 /* could be variable if malloc worked in the API :) */
-int height = (SCREEN_HEIGHT-10)/PIECE_DIM; // -10 um falsche Aufrundungen zu vermeiden
-int width = (SCREEN_WIDTH-80)/PIECE_DIM;
+int height = 7;
+int width = 8;
 
 /* the field */
-tile field[(SCREEN_HEIGHT-10)/PIECE_DIM][(SCREEN_WIDTH-80)/PIECE_DIM];
+tile field[7][8];
 
 int cntPairsLeft = 0;
 
@@ -1110,8 +1110,8 @@ void RefreshSettings()
 	if(matrixSize == 0)
 	{
         cops->putS(COLOR_RED, COLOR_GREEN, 5,30, "Matrix 8 x 7");
-        height = 8;
-        width  = 7;
+        height = 7;
+        width  = 8;
 	}
 	else
 	{
@@ -1298,19 +1298,14 @@ void init(void){
 
     srand(time);
 
+    cops->setFont(STD8X13);
+    cops->putS(COLOR_BLACK, COLOR_WHITE, 40,70, "Generating matrix...");
+    cops->setFont(STD6X9);
+
     cntPairsLeft = (height*width)/2;
     x = 0;
     y = 0;
     turns = 0;
-
-    showCntPairs();
-
-    cops->putS(COLOR_BLACK, COLOR_GREEN, 271,13, "New game");
-    cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
-    cops->putS(COLOR_WHITE, COLOR_GREEN, 274,90, "Memory");
-    cops->putS(COLOR_WHITE, COLOR_GREEN, 265,105, "by Schoki");
-    cops->putS(COLOR_BLACK, COLOR_GREEN, 271,150, "Pick up");
-    cops->putS(COLOR_BLACK, COLOR_GREEN, 271,210, "Settings");
 
     for(i=0;i<height;i++){
         for(j=0;j<width;j++){
@@ -1321,6 +1316,17 @@ void init(void){
     }
 
     GenerateField();
+
+    cops->clearScreen(COLOR_GREEN);
+    
+    cops->putS(COLOR_BLACK, COLOR_GREEN, 271,13, "New game");
+    cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
+    cops->putS(COLOR_WHITE, COLOR_GREEN, 274,90, "Memory");
+    cops->putS(COLOR_WHITE, COLOR_GREEN, 265,105, "by Schoki");
+    cops->putS(COLOR_BLACK, COLOR_GREEN, 271,150, "Pick up");
+    cops->putS(COLOR_BLACK, COLOR_GREEN, 271,210, "Settings");
+
+    showCntPairs();
     displayField(0);
     setCursor(0);
 }
@@ -1410,7 +1416,7 @@ int eventHandler(int evt)
 
                     test = testField(); // gibt es schon ein anderes auf test gesetzes Feld ?
 
-                    if( (test.x != x) || (test.y != y) ) // wurde 2 mal das gleiche Feld angeklickt ?
+                    if( ((test.x != x) || (test.y != y)) && (field[i][j].known == 0) ) // wurde 2 mal das gleiche Feld angeklickt ? Das aktuelle Feld darf auch noch nicht aufgedeckt sein !
                     {
                         field[y][x].test = 1;
                         displayField(0);
