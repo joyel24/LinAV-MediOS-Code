@@ -18,7 +18,7 @@
 #include <sys/ioctl.h>
 #include <osd.h>
 #define FBIO_INIT        _IO ('F', 0x26)
-#define LCD_UPDATE       {;}
+#define LCD_UPDATE(x,y,w,h)       {;}
 #else
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
