@@ -218,6 +218,8 @@ int findFileEntry(const char* pathname,struct dirent ** entry,bool remove)
 	int dir;
 	char* name;
 
+    //debug("findFileEntry %s\n", pathname);
+    
 	name=strrchr(pathname+1,'/');
     if ( name )
 	{
@@ -242,6 +244,9 @@ int findFileEntry(const char* pathname,struct dirent ** entry,bool remove)
     // scan dir for name
     while ((*entry = readdir(dir))!=NULL)
 	{
+        //debug("name=%s, entry=%s\n", name, (*entry)->entryName);
+        
+        
 		if (strcasecmp(name, (*entry)->entryName) == 0)
 		{
 			if(remove)
