@@ -16,6 +16,7 @@
 #include <types.h>
 #include <kernel/errors.h>
 #include <kernel/pipes.h>
+#include <kernel/kfont.h>
 
 #define TASK_STACK_SIZE 16384
 
@@ -33,9 +34,14 @@ typedef struct _TASK_INFO
 	unsigned long      nBlockingValue;
 	PIPE*              pMessagePipe;
 	GFX_CONTEXT*       pMemoryContext;
+	GFX_CONTEXT*       pDrawingContext;
 	char               cName [8];
 	unsigned long      nPriority;
 	unsigned long      nCurrentScore;
+	FONT_HEADER*       pFont;
+	short*             pRegionLeft;
+	short*             pRegionRight;
+	COLOR              nFontColor;
 } TASK_INFO;
 
 typedef struct _CRITSEC_INFO

@@ -70,12 +70,16 @@ __IRAM_CODE void kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackS
 		*pszTarget++ = *pszTaskName++;
 	*pszTarget++ = *pszTaskName++;
 
-	pTCB->pMessagePipe   = 0;
-	pTCB->pMemoryContext = 0;
-	pTCB->pTaskCode      = 0;
-	pTCB->pEntry         = 0;
-	pTCB->nPriority      = 10;
-	pTCB->nCurrentScore  = 10;
+	pTCB->pMessagePipe    = 0;
+	pTCB->pMemoryContext  = 0;
+	pTCB->pDrawingContext = 0;
+	pTCB->pTaskCode       = 0;
+	pTCB->pEntry          = 0;
+	pTCB->nPriority       = 10;
+	pTCB->nCurrentScore   = 10;
+	pTCB->pFont           = 0;
+	pTCB->pRegionLeft     = 0;
+	pTCB->pRegionRight    = 0;
 }
 
 __IRAM_CODE unsigned long* kInitialiseStack (unsigned long* pxTopOfStack, void* pvCode, void *pvParameters)

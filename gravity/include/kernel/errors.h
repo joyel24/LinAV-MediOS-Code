@@ -30,6 +30,7 @@ typedef enum _ERROR_CODE
 	ERR_END_OF_FILE     = 9,
 	ERR_RECEIVER_EMPTY  = 10,
 	ERR_NO_GFX_CONTEXT  = 11,
+	ERR_NO_FONT         = 12,
 } ERROR_CODE;
 
 #endif

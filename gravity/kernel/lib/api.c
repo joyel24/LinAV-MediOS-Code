@@ -86,6 +86,8 @@ ERROR_CODE API_GFX_CLOSE_GRAPHICS   ()                                          
 ERROR_CODE API_GFX_CREATE_CONTEXT   (int nWidth, int nHeight, int nFlags)                              { swi_call(nAPI_GFX_CREATE_CONTEXT); }
 ERROR_CODE API_GFX_GET_CONTEXT      (GFX_CONTEXT* pCtx)                                                { swi_call(nAPI_GFX_GET_CONTEXT); }
 ERROR_CODE API_GFX_GET_PHYS_CONTEXT (GFX_CONTEXT* pCtx)                                                { swi_call(nAPI_GFX_GET_PHYS_CONTEXT); }
+ERROR_CODE API_GFX_SET_DRAWING_RECT (GFX_RECT* pRect)                                                  { swi_call(nAPI_GFX_SET_DRAWING_RECT); }
+ERROR_CODE API_GFX_GET_DRAWING_RECT (GFX_RECT* pRect)                                                  { swi_call(nAPI_GFX_GET_DRAWING_RECT); }
 
 ERROR_CODE API_GFX_SET_PLANE        (int nPlane)                                                       { swi_call(nAPI_GFX_SET_PLANE); }
 ERROR_CODE API_GFX_GET_PLANE        (int* pnPlane)                                                     { swi_call(nAPI_GFX_GET_PLANE); }
@@ -103,6 +105,7 @@ ERROR_CODE API_GFX_FASTBLIT         (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, GFX_P
 ERROR_CODE API_GFX_BLENDBLIT        (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, GFX_BLENDPARAMS* pParams)   { swi_call(nAPI_GFX_BLENDBLIT); }
 ERROR_CODE API_GFX_STRETCHBLIT      (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, unsigned long* pWorkBuffer) { swi_call(nAPI_GFX_STRETCHBLIT); }
 ERROR_CODE API_GFX_PATTERNBLIT      (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc)                             { swi_call(nAPI_GFX_PATTERNBLIT); }
+ERROR_CODE API_GFX_CHARBLIT         (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, GFX_POINT* pOrigin)         { swi_call(nAPI_GFX_CHARBLIT); }
 
 ERROR_CODE API_GFX_DRAWPIXEL        (int nX, int nY, COLOR Color)                                      { swi_call(nAPI_GFX_DRAWPIXEL); }
 COLOR      API_GFX_READPIXEL        (int nX, int nY)                                                   { swi_call(nAPI_GFX_READPIXEL); }
@@ -116,6 +119,9 @@ ERROR_CODE API_PRINTF               (const char * fmt, va_list args)            
 ERROR_CODE API_SET_FONT             (HFONT hFont)                                                      { swi_call(nAPI_SET_FONT); }
 ERROR_CODE API_GET_FONT             (HFONT* phFont)                                                    { swi_call(nAPI_GET_FONT); }
 ERROR_CODE API_TEXT                 (const char* pszText, int x, int y)                                { swi_call(nAPI_TEXT); }
+ERROR_CODE API_GET_TEXT_RECT        (const char* pszText, GFX_RECT* pRect)                             { swi_call(nAPI_GET_TEXT_RECT); }
+ERROR_CODE API_SET_FONT_COLOR       (COLOR nColor)                                                     { swi_call(nAPI_SET_FONT_COLOR); }
+ERROR_CODE API_GET_FONT_COLOR       (COLOR* pnColor)                                                   { swi_call(nAPI_GET_FONT_COLOR); }
 
 ERROR_CODE API_RENDER_SCENE         ()                                                                 { swi_call(nAPI_RENDER_SCENE); }
 

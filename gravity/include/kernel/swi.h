@@ -119,6 +119,8 @@
 #define nAPI_GFX_CREATE_CONTEXT   (nAPI_GFX_section + 2)
 #define nAPI_GFX_GET_CONTEXT      (nAPI_GFX_section + 3)
 #define nAPI_GFX_GET_PHYS_CONTEXT (nAPI_GFX_section + 4)
+#define nAPI_GFX_SET_DRAWING_RECT (nAPI_GFX_section + 5)
+#define nAPI_GFX_GET_DRAWING_RECT (nAPI_GFX_section + 6)
 
 #define nAPI_GFX_SET_PLANE        (nAPI_GFX_section + 10)
 #define nAPI_GFX_GET_PLANE        (nAPI_GFX_section + 11)
@@ -136,6 +138,7 @@
 #define nAPI_GFX_BLENDBLIT        (nAPI_GFX_section + 31)
 #define nAPI_GFX_STRETCHBLIT      (nAPI_GFX_section + 32)
 #define nAPI_GFX_PATTERNBLIT      (nAPI_GFX_section + 33)
+#define nAPI_GFX_CHARBLIT         (nAPI_GFX_section + 34)
 
 #define nAPI_GFX_DRAWPIXEL        (nAPI_GFX_section + 40)
 #define nAPI_GFX_READPIXEL        (nAPI_GFX_section + 41)
@@ -149,6 +152,9 @@
 #define nAPI_SET_FONT             (nAPI_GFX_section + 51)
 #define nAPI_GET_FONT             (nAPI_GFX_section + 52)
 #define nAPI_TEXT                 (nAPI_GFX_section + 53)
+#define nAPI_GET_TEXT_RECT        (nAPI_GFX_section + 54)
+#define nAPI_SET_FONT_COLOR       (nAPI_GFX_section + 55)
+#define nAPI_GET_FONT_COLOR       (nAPI_GFX_section + 56)
 
 #define nAPI_RENDER_SCENE         (nAPI_GFX_section + 60)
 

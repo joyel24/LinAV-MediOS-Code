@@ -11,6 +11,8 @@
 #include <kernel/threads.h>
 #include <stdarg.h>
 
+#include <sys_def/colordef.h>
+
 #define MAX(a,b) (a>b?a:b)
 #define MIN(a,b) (a<b?a:b)
 
@@ -51,6 +53,7 @@ __IRAM_CODE int swi_gfx_handler (
 		pCtx->pixel_size = 4;
 
 		API_MALLOC (&pCtx->pixels, pCtx->w * pCtx->h * 4);
+		memset (pCtx->pixels, 0, pCtx->w * pCtx->h * 4);
 
 		pTask->pMemoryContext = pCtx;
 
@@ -79,6 +82,10 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_GET_CONTEXT:      //(GFX_CONTEXT* pCtx);
 	{
+		__cli ();
+		if (g_pTaskRing->pMemoryContext)
+			*((GFX_CONTEXT*)nParam1) = *g_pTaskRing->pMemoryContext;
+		__sti ();
 	}
 	break;
 
@@ -343,28 +350,305 @@ __IRAM_CODE int swi_gfx_handler (
 	}
 	break;
 
+	case nAPI_GFX_CHARBLIT:     //(GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, GFX_POINT* pt);
+	{
+		TASK_INFO* pTask = 0;
+		__cli ();
+		pTask = g_pTaskRing;
+		__sti ();
+
+		GFX_CONTEXT* pDst = (GFX_CONTEXT*)nParam1;
+		GFX_CONTEXT* pSrc = (GFX_CONTEXT*)nParam2;
+		GFX_POINT* ptOrig = (GFX_POINT*)nParam3;
+
+		unsigned char nSrcElementSize = pSrc->pixel_size;
+		unsigned char nDstElementSize = pDst->pixel_size;
+
+		int bDoReverse = 0;
+		if (pSrc->direction != pDst->direction)
+			bDoReverse = 1;
+
+//		printk ("dw=%d, dh=%d, sw=%d, sh=%d\n", pDst->w, pDst->h, pSrc->w, pSrc->h);
+
+		int xmin = MAX(ptOrig->x,0);
+		int ymin = MAX(ptOrig->y,0);
+		int xmax = MIN(pDst->w, pSrc->w + ptOrig->x);
+		int ymax = MIN(pDst->h, pSrc->h + ptOrig->y);
+		int dx = xmax - xmin;
+		int dy = ymax - ymin;
+
+//		printk ("xmin=%d, ymin=%d, xmax=%d, ymax=%d\n", xmin, ymin, xmax, ymax);
+
+		if ((!dx) || (!dy))
+			break;
+
+//		printk ("blitting [2]...\n");
+
+		int i,j;
+
+		long st = pSrc->delta;
+		long dt = pDst->delta;
+		unsigned char* sptr;
+		unsigned char* dptr = (unsigned char*)(pDst->pixels + dt*ymin + xmin*nDstElementSize);
+
+		if (bDoReverse)
+		{
+			if (ptOrig->y < 0)
+				sptr = (unsigned char*)(pSrc->pixels + MAX(0,-ptOrig->x)*nSrcElementSize + (dy-1)*st);
+			else
+				sptr = (unsigned char*)(pSrc->pixels + MAX(0,-ptOrig->x)*nSrcElementSize + (pSrc->h-1)*st);
+			st = -st;
+		}
+		else
+		{
+			sptr = (unsigned char*)(pSrc->pixels + MAX(0,-ptOrig->x)*nSrcElementSize + MAX(0,-ptOrig->y)*st);
+		}
+
+		unsigned long nForeColor = pTask->nFontColor;//0x80808080;
+		unsigned char* pForeColor = (unsigned char*)&nForeColor;
+
+		if ((nSrcElementSize == 1) && (nDstElementSize == 4))
+		{
+			int nRow = dx * nDstElementSize;
+			for (i=0;i<dy;i++)
+			{
+				for (j=0;j<nRow;j+=4)
+				{
+					unsigned long nC1 = sptr[j/4] + 1;
+					unsigned long nC2 = 256 - nC1;
+					dptr[j+0] = (dptr[j+0] * nC1 + pForeColor[0] * nC2) >> 8;
+					dptr[j+1] = (dptr[j+1] * nC1 + pForeColor[1] * nC2) >> 8;
+					dptr[j+2] = (dptr[j+2] * nC1 + pForeColor[2] * nC2) >> 8;
+					dptr[j+3] = (dptr[j+3] * nC1 + pForeColor[3] * nC2) >> 8;
+				}
+				dptr += dt;
+				sptr += st;
+			}
+		}
+		else
+			return ERR_INVALID_PARAM;
+	}
+	break;
+
 	case nAPI_GFX_DRAWPIXEL:        //(int nX, int nY, COLOR Color);
 	{
+		GFX_CONTEXT* pCtx = 0;
+		__cli ();
+		pCtx = g_pTaskRing->pMemoryContext;
+		__sti ();
+		if (pCtx)
+		{
+			graphics32_DrawPixel (nParam3, nParam1, nParam2, pCtx);
+		}
 	}
 	break;
 
 	case nAPI_GFX_READPIXEL:        //(int nX, int nY);
 	{
+		GFX_CONTEXT* pCtx = 0;
+		__cli ();
+		pCtx = g_pTaskRing->pMemoryContext;
+		__sti ();
+		if (pCtx)
+			return graphics32_ReadPixel (nParam1, nParam2, pCtx);
+		else
+			return 0;
 	}
 	break;
 
 	case nAPI_GFX_DRAWLINE:         //(GFX_POINT* pt1, GFX_POINT* pt2, COLOR Color);
 	{
+		GFX_CONTEXT* pCtx = 0;
+		__cli ();
+		pCtx = g_pTaskRing->pMemoryContext;
+		__sti ();
+		if (pCtx)
+		{
+			GFX_POINT* pt1 = (GFX_POINT*)nParam1;
+			GFX_POINT* pt2 = (GFX_POINT*)nParam2;
+//			graphics32_DrawLine (nParam3, pt1->x, pt1->y, pt2->x, pt2->y, pCtx);
+			graphics32_DrawAALine (pCtx, pt1->x, pt1->y, pt2->x, pt2->y, 255, nParam3, 1);
+		}
 	}
 	break;
 
 	case nAPI_GFX_DRAWRECT:         //(GFX_RECT* pRect, COLOR Color);
 	{
+		GFX_CONTEXT* pCtx = 0;
+		__cli ();
+		pCtx = g_pTaskRing->pMemoryContext;
+		__sti ();
+		if (pCtx)
+		{
+			GFX_RECT* pRect = (GFX_RECT*)nParam1;
+			graphics32_DrawRect (nParam2, pRect->x, pRect->y, pRect->w, pRect->h, pCtx);
+		}
 	}
 	break;
 
 	case nAPI_GFX_FILLRECT:         //(GFX_RECT* pRect, COLOR Color);
 	{
+		GFX_CONTEXT* pCtx = 0;
+		__cli ();
+		pCtx = g_pTaskRing->pMemoryContext;
+		__sti ();
+		if (pCtx)
+		{
+			GFX_RECT* pRect = (GFX_RECT*)nParam1;
+			graphics32_FillRect (nParam2, pRect->x, pRect->y, pRect->w, pRect->h, pCtx);
+		}
+	}
+	break;
+
+	case nAPI_GFX_SET_DRAWING_RECT: //(GFX_RECT* pRect);
+	{
+	}
+	break;
+
+	case nAPI_GFX_GET_DRAWING_RECT: //(GFX_RECT* pRect);
+	{
+	}
+	break;
+
+	case nAPI_PRINTF:
+	{
+		user_printf((const char *)nParam1, (va_list) nParam2);
+	}
+	break;
+
+	case nAPI_SET_FONT:             //(HFONT hFont);
+	{
+		__cli ();
+		g_pTaskRing->pFont = nParam1;
+		__sti ();
+	}
+	break;
+
+	case nAPI_GET_FONT:             //(HFONT* phFont);
+	{
+	}
+	break;
+
+	case nAPI_TEXT:                 //(const char* pszText, int x, int y);
+	{
+		printk ("We are inside nAPI_TEXT...\n");
+
+		TASK_INFO* pTask = 0;
+		__cli ();
+		pTask = g_pTaskRing;
+		__sti ();
+		if (!pTask->pFont)
+			return ERR_NO_FONT;
+
+		if (pTask->pFont->nFontType != eFNT_8BIT_VARY)
+			return ERR_INVALID_HANDLE;
+
+		unsigned char* pCharMap = ((unsigned char*)pTask->pFont) + sizeof(FONT_HEADER);
+		FONT_32BIT_VARY_HEADER* pVarMap = pCharMap + 256;
+
+		char* text = (char*)nParam1;
+		int x = nParam2;
+		int y = nParam3;
+
+		GFX_POINT char_pos;
+		GFX_CONTEXT char_ctx;
+
+		while (*text)
+		{
+			unsigned long nCharCode = *text;
+			unsigned char nSym = pCharMap[nCharCode];
+
+//			printk ("Printing symbol '%d' (%d x %d)...\n", nSym, pVarMap[nSym].w, pVarMap[nSym].h);
+
+//			canvas.Blit (&pChars[nSym].sprite, x + pChars[nSym].A - pChars[nSym].Xo, y - pChars[nSym].Yo);
+			char_pos.x = x + pVarMap[nSym].a;// - pVarMap[nSym].x;
+			char_pos.y = y - pVarMap[nSym].h + pTask->pFont->nSymHeight;// - pVarMap[nSym].y;
+
+			char_ctx.x = 0;
+			char_ctx.y = 0;
+			char_ctx.w = pVarMap[nSym].w;
+			char_ctx.h = pVarMap[nSym].h;
+			char_ctx.direction = 1;
+			char_ctx.pixel_size = 1;
+			char_ctx.pixels = ((unsigned char*)pTask->pFont) + pVarMap[nSym].offset;
+			char_ctx.delta = pVarMap[nSym].w * 1;
+			swi_gfx_handler (nAPI_GFX_CHARBLIT, pTask->pMemoryContext, &char_ctx, &char_pos);
+
+			x += pVarMap[nSym].a + pVarMap[nSym].b + pVarMap[nSym].c;
+
+			text ++;
+		}
+
+/*
+		if (pTask->pFont->nFontType != eFNT_32BIT_VARY)
+			return ERR_INVALID_HANDLE;
+
+		unsigned char* pCharMap = ((unsigned char*)pTask->pFont) + sizeof(FONT_HEADER);
+		FONT_32BIT_VARY_HEADER* pVarMap = pCharMap + 256;
+
+		char* text = (char*)nParam1;
+		int x = nParam2;
+		int y = nParam3;
+
+		GFX_POINT char_pos;
+		GFX_CONTEXT char_ctx;
+
+		while (*text)
+		{
+			unsigned long nCharCode = *text;
+			unsigned char nSym = pCharMap[nCharCode];
+
+//			printk ("Printing symbol '%d' (%d x %d)...\n", nSym, pVarMap[nSym].w, pVarMap[nSym].h);
+
+//			canvas.Blit (&pChars[nSym].sprite, x + pChars[nSym].A - pChars[nSym].Xo, y - pChars[nSym].Yo);
+			char_pos.x = x + pVarMap[nSym].a;// - pVarMap[nSym].x;
+			char_pos.y = y - pVarMap[nSym].h + pTask->pFont->nSymHeight;// - pVarMap[nSym].y;
+
+			char_ctx.x = 0;
+			char_ctx.y = 0;
+			char_ctx.w = pVarMap[nSym].w;
+			char_ctx.h = pVarMap[nSym].h;
+			char_ctx.direction = 1;
+			char_ctx.pixel_size = 4;
+			char_ctx.pixels = ((unsigned char*)pTask->pFont) + pVarMap[nSym].offset;
+			char_ctx.delta = pVarMap[nSym].w * 4;
+			swi_gfx_handler (nAPI_GFX_FASTBLIT, pTask->pMemoryContext, &char_ctx, &char_pos);
+
+			x += pVarMap[nSym].a + pVarMap[nSym].b + pVarMap[nSym].c;
+
+			text ++;
+		}
+*/
+	}
+	break;
+
+	case nAPI_SET_FONT_COLOR:       //(COLOR nColor)                                                     { swi_call(nAPI_SET_FONT_COLOR); }
+	{
+		__cli ();
+		g_pTaskRing->nFontColor = nParam1;
+		__sti ();
+	}
+	break;
+
+	case nAPI_GET_FONT_COLOR:       //(COLOR* pnColor)                                                   { swi_call(nAPI_GET_FONT_COLOR); }
+	{
+		__cli ();
+		*((COLOR*)nParam1) = g_pTaskRing->nFontColor;
+		__sti ();
+	}
+	break;
+
+	case nAPI_GET_TEXT_RECT: //(const char* pszText, GFX_RECT* pRect);
+	{
+		TASK_INFO* pTask = 0;
+		__cli ();
+		pTask = g_pTaskRing;
+		__sti ();
+		if (!pTask->pFont)
+			return ERR_NO_FONT;
+		else
+		{
+		}
 	}
 	break;
 
@@ -389,10 +673,6 @@ __IRAM_CODE int swi_gfx_handler (
 			(void*)nParam3);
 	}
 	break;
-
-        case nAPI_PRINTF:
-            user_printf((const char *)nParam1, (va_list) nParam2);
-            return 0;
 
 /// TMP !!!
 	}

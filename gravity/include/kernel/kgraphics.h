@@ -19,6 +19,8 @@
 
 #define getOffset(x,y,buffer,type) ((type*)(x*((buffer->bitsPerPixel)>>3)+y*buffer->width*((buffer->bitsPerPixel)>>3)+buffer->offset))
 
+#define getCtxOffset(x,y,ctx) ((COLOR*)pCtx->pixels + x + y * (pCtx->delta >> 2))
+
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
 

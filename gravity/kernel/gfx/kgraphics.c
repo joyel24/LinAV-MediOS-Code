@@ -265,8 +265,8 @@ void iniComponent(int vplane,struct graphicsBuffer * buff,unsigned int offset)
     osdSetComponentSourceWidth(buffers_comp[vplane], ((buff->width*buff->bitsPerPixel)/32)/8);
     if(buff->bitsPerPixel==8)
         buff->gops=&g8ops;
-    if(buff->bitsPerPixel==32)
-        buff->gops=&g32ops; 
+//    if(buff->bitsPerPixel==32)
+  //      buff->gops=&g32ops; 
 }
 
 void KdrawLine(unsigned int color, int x1, int y1, int x2, int y2,struct graphicsBuffer * buff)
