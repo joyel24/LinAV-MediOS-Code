@@ -21,13 +21,16 @@
 
 extern Display* display;
 extern Window window;	/*variable Event */
+int key;
+XEvent event;
 
 int nxtEvent(void)
 {   
-    XEvent event;
     XSelectInput(display, window, ExposureMask | KeyPressMask | KeyReleaseMask);
     /* next event */
     XNextEvent(display, &event);
+    KeySym keysym;
+    unsigned char c = 0;
     
     
     switch (event.type) 
@@ -36,7 +39,9 @@ int nxtEvent(void)
         lcd_update(FORCE_REDRAW,0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
       break;
       case KeyPress :
-        getKey(&event);
+	  XLookupString (event.xkey, &c, 1, &keysym, 0);
+          key = keysym;
+          getKey(key);
       break;
       case KeyRelease :
       break;
@@ -44,10 +49,9 @@ int nxtEvent(void)
     return 0; 
 }  
 
-int getKey(XEvent *event)
+int getKey(int key)
 {
-    int rep = event->type;
-    switch(rep)
+    switch(key)
     {
 	case XK_KP_Left:
 	case XK_Left:
