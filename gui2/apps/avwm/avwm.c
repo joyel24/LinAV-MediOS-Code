@@ -35,8 +35,6 @@
 #define DO_DEBUG 1;
 #define NB_ITEM 10;
 
-
-
 extern FONT_ID font_table[NBFONT];
 
 extern struct plugin cur_plugin;
@@ -49,55 +47,57 @@ char * path;
 
 char * getPath(char * str)
 {
-	char * tmpC;
-        char * res;
-        int pos;
-        tmpC=(char*)strrchr(str,'/');
-        pos=tmpC-str;
-        fprintf(stderr,"Pos: %d\n",pos);
-        res=(char*)malloc(sizeof(char)*(pos+1));
-        strncpy(res,str,pos);
-        res[pos]='\0';
-        return res;
+    char * tmpC;
+    char * res;
+    int pos;
+
+    tmpC=(char*)strrchr(str,'/');
+    pos=tmpC-str;
+    fprintf(stderr,"Pos: %d\n",pos);
+    res=(char*)malloc(sizeof(char)*(pos+1));
+    strncpy(res,str,pos);
+    res[pos]='\0';
+
+    return res;
 }
 
 int main(int argc,char * * argv)
 {
     fprintf(stderr,"Starting AvWm\n");
-    
-    path=getPath(argv[0]);    
-    
-    ini_graphics();    
+
+    path=getPath(argv[0]);
+
+    ini_graphics();
     ini_font(STD6X9);
     set_mouseParam(6, 3);
-    
+
     ini_sound_connection();
-    
+
     if(!ini_menu(path,&menu_plugin))
     {
-    	close_graphics();
+        close_graphics();
         free(path);
         return -1;
     }
 
-    clearScreen(COLOR_WHITE);    
-    
+    clearScreen(COLOR_WHITE);
+
     ini_status_bar(&status_bar_plugin);
-       
+
     setTimerFreq(10);
-    startTimer();    
-    
+    startTimer();
+
     stopWM=0;
-    
+
     showSBar();
     menu_plugin.handle_on=1;
     enableMenu();
     sendEvt(&menu_plugin,EVT_REDRAW);
-        
+
     eventLoop(); //main loop
-    
+
     close_graphics();
-    free(path);    
+    free(path);
     return 0;
 }
 
