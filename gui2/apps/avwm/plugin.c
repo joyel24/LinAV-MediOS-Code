@@ -38,6 +38,13 @@ struct plugin status_bar_plugin={
     flag:0
 };
 
+struct plugin settings_plugin={
+    handler:NULL,
+    pid:-1,
+    handle_on:0,
+    flag:0
+};
+
 struct plugin menu_plugin={
     handler:NULL,
     pid:-1,

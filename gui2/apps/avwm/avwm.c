@@ -70,7 +70,8 @@ int main(int argc,char * * argv)
     ini_graphics();
     ini_font(STD6X9);
     set_mouseParam(6, 3);
-   
+    ini_settings();
+
     ini_sound_connection();
     
     iniMsgBox();

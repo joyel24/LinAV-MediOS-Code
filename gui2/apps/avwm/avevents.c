@@ -20,6 +20,7 @@ extern struct plugin menu_plugin;
 extern struct plugin status_bar_plugin;
 extern struct plugin msg_box_plugin;
 extern struct plugin edit_box_plugin;
+extern struct plugin settings_plugin;
 
 extern int stopWM;
 
@@ -88,7 +89,13 @@ void procNxtEvent(int evt)
 
     if(status_bar_plugin.handle_on)
         sendEvt(&status_bar_plugin,evt);
-    
+
+    if(settings_plugin.handle_on)
+    {
+        sendEvt(&settings_plugin,evt);
+        return;
+    }
+
     if(msg_box_plugin.handle_on)
     {
         sendEvt(&msg_box_plugin,evt);
