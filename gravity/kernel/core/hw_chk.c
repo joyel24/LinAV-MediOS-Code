@@ -62,3 +62,19 @@ __IRAM_CODE void add_hw_chker(struct hw_chk_s * hw_chk_data)
     hw_chk_data->prev=NULL;
     hw_chk_head=hw_chk_data;
 }
+
+__IRAM_CODE void ini_hw_chker(struct hw_chk_s * hw_chk_data)
+{
+    hw_chk_data->prev=NULL;
+    hw_chk_data->nxt=NULL;
+    hw_chk_data->action=NULL;
+    hw_chk_data->name=NULL;    
+}
+
+void print_HW_chk(void)
+{
+    struct hw_chk_s * ptr;
+    int i=0;
+    for(ptr=hw_chk_head;ptr!=NULL;ptr=ptr->nxt)
+        printk("%d: %s, %s\n",i++,ptr->name!=NULL?ptr->name:"NO NAME",ptr->action!=NULL?"has action":"no action");
+}

@@ -10,7 +10,9 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#define DEBUG_UART              0
+#include <kernel/uart.h>
+
+#define DEBUG_UART              UART_0
 
 #define USE_DEBUG_ON_SCREEN     1
 

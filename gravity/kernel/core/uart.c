@@ -17,14 +17,14 @@
 
 __IRAM_DATA unsigned int uartAdrr[2]={
     UART0_BASE,
-    UART0_BASE
+    UART1_BASE
 };
 
-__IRAM_CODE int uartIn(unsigned char * data,int uartNum)  /* this one is probably buggy */
+__IRAM_CODE int uartIn(unsigned char * data,int uartNum) 
 {
     if(inw(uartAdrr[uartNum]+UART_SR)&0x0004) /* check if something is in the reception buffer */
     {
-        *data=(unsigned char)inw(uartAdrr[uartNum]+UART_DTRR);
+        *data=(unsigned char)(inw(uartAdrr[uartNum]+UART_DTRR)&0xFF);
         return 1;
     }
     else

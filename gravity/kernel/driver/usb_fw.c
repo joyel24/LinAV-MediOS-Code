@@ -71,6 +71,8 @@ void init_usb_fw(void)
     kusb_state=kusbIsConnected();
     kfw_state=kFWIsConnected();
     kusb_status=0;
+    ini_hw_chker(&usb_fw_chker);
+    usb_fw_chker.name="usb/fw";
     usb_fw_chker.action=chk_usb_fw;
     add_hw_chker(&usb_fw_chker);
     

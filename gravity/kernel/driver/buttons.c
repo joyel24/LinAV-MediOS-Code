@@ -154,7 +154,10 @@ void init_buttons(void)
     /* set GIO for ON/OFF to input */
     gio_dir(GIO_ON_BTN,GIO_IN);
     gio_dir(GIO_OFF_BTN,GIO_IN);
-            
+    
+    ini_hw_chker(&btn_chker);
+    
+    btn_chker.name="Btn";        
     btn_chker.action=chk_button;
     add_hw_chker(&btn_chker);
             

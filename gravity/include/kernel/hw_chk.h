@@ -20,6 +20,7 @@ struct hw_chk_s {
     void (*action)(void);
     struct hw_chk_s * nxt;
     struct hw_chk_s * prev;
+    char * name;
 };
 
 void init_HW_chk(void);

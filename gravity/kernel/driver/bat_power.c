@@ -255,7 +255,8 @@ void init_power(void)
     hd_launchTimer();
     
     kpwrState=kpowerConnected();
-    
+    ini_hw_chker(&dc_chker);
+    dc_chker.name="DC in";
     dc_chker.action=chk_DC_connector;
     add_hw_chker(&dc_chker);
       

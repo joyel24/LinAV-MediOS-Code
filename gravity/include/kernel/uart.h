@@ -14,6 +14,9 @@
 #ifndef __UART_H
 #define __UART_H
 
+#define UART_0        0
+#define UART_1        1
+
 #define UART_DTRR     0x00000000
 #define UART_BRSR     0x00000002
 #define UART_MSR      0x00000004

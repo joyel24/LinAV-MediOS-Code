@@ -45,6 +45,7 @@ void print_boot_info(void)
     printk("SP: %08x\n",get_sp());
     print_irq();
     print_timer();
+    print_HW_chk();
 }
 
 extern void kernel_startup_thread (void);
@@ -121,8 +122,11 @@ void kernel_startup_thread (void)
     };
 #endif
     /* driver init */
+    
     init_cpld();
     init_HW_chk();
+    
+    init_cmd_line();
 
     init_buttons();
     init_rtc();
@@ -135,8 +139,9 @@ void kernel_startup_thread (void)
 
     print_boot_info();
     
-    load_bflat("/test.grv");
+    //load_bflat("/test.grv");
     
+    printk("[init] END\n");
     
     while(1) /*nothing*/;
     //avwm();       
