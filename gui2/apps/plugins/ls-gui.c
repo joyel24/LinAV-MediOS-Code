@@ -27,15 +27,10 @@
 #define    SHOW_ALL   1
 #define    LISTSIZE   256
 #define    PATHLEN    256
+#define    MAXPOS     21
 
 #define    toLower(chr)  ((chr>64 && chr<91)?chr+32:chr)
-/*
-#define WHITE        16
-#define BLACK        1
-#define GRAY         21
-#define BLUE         32
-#define RED          77
-*/
+
 int namesort(s1,s2)
 char **s1;
 char **s2;
@@ -113,7 +108,8 @@ void showArrow(int type)
             cops->drawBITMAP(&upBitmap,310,h+MENU_SHADOW+1+6);
             break;
         case DOWN_ARROW:
-            cops->drawBITMAP(&dwBitmap,310,240-10);
+//            cops->drawBITMAP(&dwBitmap,310,SCREEN_HEIGHT-10);
+            cops->drawBITMAP(&dwBitmap,310,h+MENU_SHADOW+1+6+(MAXPOS+1)*h);
             break;
     }
 }
@@ -129,7 +125,8 @@ void hideArrow(int type)
             cops->fillRect(COLOR_WHITE,310,h+MENU_SHADOW+1+6,9,9);
             break;
         case DOWN_ARROW:
-            cops->fillRect(COLOR_WHITE,310,240-10,9,9);
+//            cops->fillRect(COLOR_WHITE,310,SCREEN_HEIGHT-10,9,9);
+            cops->fillRect(COLOR_WHITE,310,h+MENU_SHADOW+1+6+(MAXPOS+1)*h,9,9);
             break;
     }
 }
@@ -301,8 +298,6 @@ int doLs(char * name)
     
     return 0;
 }
-
-#define MAXPOS       22
 
 int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
 {
@@ -539,11 +534,11 @@ int eventHandler(int evt)
             nselect--;
             if(listused>MAXPOS)
                     showArrow(DOWN_ARROW);
-                    
+
             if(nselect<0)
             {
                 nselect=0;
-                pos--;                
+                pos--;
                 if(pos<0) // we are at the beg => do wrapping
                 {
                     pos=listused-MAXPOS-1;
