@@ -102,7 +102,7 @@ void do_F3(void * data) // switch to usb
 {
     int pid,status; 
     
-    if(getUSB())
+    if(getUSB() || getFwExt())
     {    
         pid = vfork();
         

@@ -27,12 +27,14 @@
 
 NEED_ICON(linavLogo);
 NEED_ICON(usbIcon);
+NEED_ICON(fwExtIcon);
 NEED_ICON(powerIcon);
 
 int batteryRefresh=0;
 int batteryRefreshValue = 10;
 int pwrState=0;
 int usbState=0;
+int fwExtState=0;
 int power = 0;
 int color = 0;
 int level = 0;
@@ -42,10 +44,14 @@ int chargeProgress = 0;
 void drawTime(void)
 {
     char timeSt[50];
-
-    if(getTimeS(timeSt))
+    struct av_tm  date_time;
+    
+    if(getTime(&date_time))
     {
         //fprintf(stderr,"%s\n",timeSt);
+        //putS(TIME_COLOR,BG_COLOR,135,3,timeSt);
+        sprintf(timeSt,"%02d:%02d %02d/%02d/%04d", date_time.tm_hour,date_time.tm_min,
+                                                         date_time.tm_mday,date_time.tm_mon,date_time.tm_year);
         putS(TIME_COLOR,BG_COLOR,135,3,timeSt);
     }
 
@@ -116,6 +122,11 @@ void drawBat(void)
 
 void drawStatus(void)
 {
+    if(fwExtState)
+        drawBITMAP(&fwExtIcon, 242, 4);
+    else
+        fillRect(BG_COLOR,242,4,15,6);
+        
     if(usbState)
         drawBITMAP(&usbIcon, 260, 4);
     else
@@ -185,6 +196,10 @@ int statusEvtHandler(int evt)
             usbState=getUSB();
             drawStatus();
             break;
+        case EVT_FW_EXT:
+            fwExtState=getFwExt();
+            drawStatus();
+            break;
     }
 }
 
@@ -192,5 +207,6 @@ void ini_status_bar(struct plugin * status_plugin)
 {
     pwrState=getPwr();
     usbState=getUSB();
+    fwExtState=getFwExt();
     doRegisterPlugin(status_plugin,statusEvtHandler,0);
 }

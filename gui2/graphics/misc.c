@@ -228,6 +228,29 @@ int getUSB(void)
     return usb;
 }
 
+int getFwExt(void)
+{
+    int fd,fw_ext;
+    fd=open("/dev/avusb",O_RDONLY | O_NONBLOCK);
+        
+    if (fd < 0)
+    {
+        printf("Can't open /dev/avusb\n");
+        return 0;
+    }
+    
+    if(ioctl(fd,AV_FW_EXT_IOC_STATE,&fw_ext)<0)
+    {
+        printf("Error getting power value\n");
+        close(fd);
+        return 0;
+    }
+    
+    close(fd);
+    
+    return fw_ext;
+}
+
 int setUSB(int state)
 {
     int fd,usb;

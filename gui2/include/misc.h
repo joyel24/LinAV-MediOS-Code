@@ -30,6 +30,9 @@ int   getBat            (void);
 int   getPwr            (void);
 
 int   getUSB            (void);
+
+int   getFwExt          (void);
+
 int   setUSB            (int state);
 
 int   fmIsConnected     (void);

@@ -74,10 +74,11 @@ struct timer_val {
 /* ioctl */
 
 #define AV_OP_IOC_MAGIC_USB    'a'
-#define AV_OP_IOC_MAXNR_USB    3
+#define AV_OP_IOC_MAXNR_USB    4
 #define AV_USB_IOC_STATE       _IOR(AV_OP_IOC_MAGIC_USB, 1, int)
 #define AV_USB_IOC_ENABLE      _IO (AV_OP_IOC_MAGIC_USB, 2 )
 #define AV_USB_IOC_DISABLE     _IO (AV_OP_IOC_MAGIC_USB, 3 )
+#define AV_FW_EXT_IOC_STATE    _IOR(AV_OP_IOC_MAGIC_USB, 4, int)
 
 
 #define AV_OP_IOC_MAGIC_POWER   'b'
@@ -168,7 +169,7 @@ struct timer_val {
 #define AV_LCD_GET_BRIGHT      _IOR(AV_OP_IOC_MAGIC_STATE,21,int)
 #define AV_LCD_SET_BRIGHT      _IOW(AV_OP_IOC_MAGIC_STATE,22,int)
 
-#define AV_OP_IOC_MAGIC_FM     'f'
+#define AV_OP_IOC_MAGIC_FM     'g'
 #define AV_OP_IOC_MAXNR_FM     14
 #define AV_FM_SET_TXT          _IOW(AV_OP_IOC_MAGIC_FM,1,char*) 
 #define AV_FM_GET_TXT          _IOR(AV_OP_IOC_MAGIC_FM,2,char*)

@@ -33,6 +33,9 @@
 #define        EVT_WKUP    0x000c
 #define        EVT_USB     0x000d
 #define        EVT_PWR     0x000e
+#define        EVT_CF_IN   0x000f
+#define        EVT_CF_OUT  0x0010
+#define        EVT_FW_EXT  0x0011
 
 
 int  iniEvent(void);
