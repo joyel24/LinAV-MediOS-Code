@@ -26,6 +26,17 @@ typedef unsigned long u32;
 #define        BUTTONS_AV300_JOYPRESS  0x0400
 #define        BUTTONS_AV300_ON        0x1000
 #define        BUTTONS_AV300_OFF       0x2000
+#define        BUTTONS_AV300_ANY       0x3777
+        
+#define        BUTTONS_JBMM_UP         0x0080
+#define        BUTTONS_JBMM_DOWN       0x0008
+#define        BUTTONS_JBMM_LEFT       0x0001
+#define        BUTTONS_JBMM_RIGHT      0x0004
+#define        BUTTONS_JBMM_MENU1      0x0010
+#define        BUTTONS_JBMM_MENU2      0x0020
+#define        BUTTONS_JBMM_MENU3      0x0040
+#define        BUTTONS_JBMM_PLAY       0x0002
+#define        BUTTONS_JBMM_ANY        0x00ff
 
 extern u32 buttonsGetStatus();
 

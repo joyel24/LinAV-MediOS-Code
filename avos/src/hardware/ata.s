@@ -33,7 +33,7 @@ ataWaitForXferTO            =   0x200000
 
 ataRegSelectSource          =   0x02600000          @ JBMM = 0x02400000
 ataRegPowerUpHDD            =   0x02600300          @ JBMM = 0x02400200
-ataValPowerUpHDD            =   0x08                @ JBMM = 0x04
+ataValPowerUpHDD            =   0x0a                @ JBMM = 0x04
 
 ataRegData                  =   0x02400000          @ JBMM = 0x04000800
 ataRegError                 =   0x02400080          @ JBMM = 0x04000900
