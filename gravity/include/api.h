@@ -35,6 +35,11 @@ ERROR_CODE API_TASK_TERMINATE   ();
 ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes);
 ERROR_CODE API_FREE             (void* pvBuffer);
 ERROR_CODE API_MEMAVAIL         (unsigned long* pnBytes);
+ERROR_CODE API_HEAP_CREATE      ();
+ERROR_CODE API_HEAP_DESTROY     ();
+ERROR_CODE API_HEAP_MALLOC      ();
+ERROR_CODE API_HEAP_FREE        ();
+ERROR_CODE API_HEAP_AVAIL       ();
 
 ERROR_CODE API_PIPE_CREATE      (HPIPE* phPipe);
 ERROR_CODE API_PIPE_DELETE      (HPIPE hPipe);

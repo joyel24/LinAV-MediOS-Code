@@ -72,6 +72,9 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
             case nAPI_MEMAVAIL:
                *((unsigned long*)pSysCtrl->nCmdParam1) = kmemavail ();
                break;
+            case nAPI_TASK_TERMINATE:
+               // TO DO:
+               break;
          }
       }
 

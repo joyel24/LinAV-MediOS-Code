@@ -41,6 +41,9 @@ __IRAM_CODE int kcswi_handler (
 		unsigned char* pTopOfStack = (unsigned char*)pTCB->pStack;
 		pTopOfStack += pTCB->nStackSize - 4;
 		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, nParam1 /*pvTaskCode*/, nParam2 /*pParams*/);
+		API_MALLOC (&pTCB->pMessagePipe, sizeof(PIPE));
+		pTCB->pMessagePipe->nReceiver = 0;
+		pTCB->pMessagePipe->nSender = 0;
 
 		__cli ();
 		if (nParam3)
@@ -92,6 +95,11 @@ __IRAM_CODE int kcswi_handler (
 	break;
 
 	case nAPI_TASK_PEEKMESSAGE: //()                                                              { SAVE; asm("swi 7"); LOAD; }
+	{
+	}
+	break;
+
+	case nAPI_TASK_WAITMESSAGE: //()
 	{
 	}
 	break;

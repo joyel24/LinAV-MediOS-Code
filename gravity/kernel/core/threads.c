@@ -32,6 +32,8 @@ __IRAM_CODE void kthread_final_trap (int nRetCode)
 
    //TODO: Here we should delete thread control block and free resources...
    while (1);
+
+   AOS_TERMINATE ();
 }
 
 __IRAM_CODE void kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackSize, const char* pszTaskName)
@@ -85,13 +87,17 @@ __IRAM_CODE TASK_INFO* kAllocateTCBAndStack (unsigned long nStackSize)
 __IRAM_CODE TASK_INFO* kcreate_tcb (void* pvTaskCode, unsigned long nStackSize, void* pParams, const char* pszTaskName)
 {
 	TASK_INFO* pTCB = kAllocateTCBAndStack (nStackSize);
-	if (pTCB)
-	{
-		kInitialiseTCBVariables (pTCB, nStackSize, pszTaskName);
-		unsigned char* pTopOfStack = (unsigned char*)pTCB->pStack;
-		pTopOfStack += pTCB->nStackSize - 4;
-		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, pvTaskCode, pParams);
-	}
+	if (!pTCB)
+		return 0;
+
+	kInitialiseTCBVariables (pTCB, nStackSize, pszTaskName);
+	unsigned char* pTopOfStack = (unsigned char*)pTCB->pStack;
+	pTopOfStack += pTCB->nStackSize - 4;
+	pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, pvTaskCode, pParams);
+
+	pTCB->pMessagePipe = kmalloc (sizeof(PIPE));
+	pTCB->pMessagePipe->nReceiver = 0;
+	pTCB->pMessagePipe->nSender = 0;
 
 	return pTCB;
 }

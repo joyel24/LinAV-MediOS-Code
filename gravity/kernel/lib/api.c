@@ -37,19 +37,28 @@ ERROR_CODE API_TASK_GETHANDLE   (HTASK* phTask)                                 
 ERROR_CODE API_TASK_SLEEP       (unsigned long nMilliseconds)                                   { swi_call(nAPI_TASK_SLEEP); }
 ERROR_CODE API_TASK_SENDMESSAGE (HTASK hTask, MESSAGE msg)                                      { swi_call(nAPI_TASK_SENDMESSAGE); }
 ERROR_CODE API_TASK_PEEKMESSAGE ()                                                              { swi_call(nAPI_TASK_PEEKMESSAGE); }
+ERROR_CODE API_TASK_TERMINATE   ()                                                              { swi_call(nAPI_TASK_TERMINATE); }
 
 ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes)                        { swi_call(nAPI_MALLOC); }
 ERROR_CODE API_FREE             (void* pvBuffer)                                                { swi_call(nAPI_FREE); }
 ERROR_CODE API_MEMAVAIL         (unsigned long* pnBytes)                                        { swi_call(nAPI_MEMAVAIL); }
+ERROR_CODE API_HEAP_CREATE      ()                                                              { swi_call(nAPI_HEAP_CREATE); }
+ERROR_CODE API_HEAP_DESTROY     ()                                                              { swi_call(nAPI_HEAP_DESTROY); }
+ERROR_CODE API_HEAP_MALLOC      ()                                                              { swi_call(nAPI_HEAP_MALLOC); }
+ERROR_CODE API_HEAP_FREE        ()                                                              { swi_call(nAPI_HEAP_FREE); }
+ERROR_CODE API_HEAP_AVAIL       ()                                                              { swi_call(nAPI_HEAP_AVAIL); }
 
 ERROR_CODE API_PIPE_CREATE      (HPIPE* phPipe)                                                 { swi_call(nAPI_PIPE_CREATE); }
 ERROR_CODE API_PIPE_DELETE      (HPIPE hPipe)                                                   { swi_call(nAPI_PIPE_DELETE); }
 ERROR_CODE API_PIPE_SEND        (HPIPE hPipe, void* pData, unsigned long nBytesToSend)          { swi_call(nAPI_PIPE_SEND); }
 ERROR_CODE API_PIPE_RECV        (HPIPE hPipe, void* pData, unsigned long nBytesToReceive)       { swi_call(nAPI_PIPE_RECV); }
+ERROR_CODE API_PIPE_TEST        (HPIPE hPipe)                                                   { swi_call(nAPI_PIPE_TEST); }
+
 ERROR_CODE API_CRITSEC_CREATE   (HCRITSEC* phCritSec)                                           { swi_call(nAPI_CRITSEC_CREATE); }
 ERROR_CODE API_CRITSEC_DELETE   (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_DELETE); }
 ERROR_CODE API_CRITSEC_ENTER    (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_ENTER); }
 ERROR_CODE API_CRITSEC_LEAVE    (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_LEAVE); }
+ERROR_CODE API_CRITSEC_TRYENTER (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_TRYENTER); }
 
 ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData)                       { swi_call(nAPI_GFX); }
 

@@ -31,6 +31,11 @@
 #define nAPI_MEMAVAIL          22
 #define nAPI_MEMSET            23
 #define nAPI_MEMCPY            24
+#define nAPI_HEAP_CREATE       25
+#define nAPI_HEAP_DESTROY      26
+#define nAPI_HEAP_MALLOC       27
+#define nAPI_HEAP_FREE         28
+#define nAPI_HEAP_AVAIL        29
 
 #define nAPI_PIPE_CREATE       30
 #define nAPI_PIPE_DELETE       31
