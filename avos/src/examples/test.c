@@ -23,7 +23,9 @@
 //
 //
 int main() {
-        
+    int bx=0, by=0, bdx=1, bdy=1;    
+    int delay;
+    
     osdInit();
     
     osdSetComponentConfig(OSD_VIDEO1, 0);
@@ -57,8 +59,8 @@ int main() {
 
     screenBitmap.offset = 0x03800000;
     screenBitmap.bytesPerLine = 320*2;
-    screenBitmap.width = 320;
-    screenBitmap.height = 120;
+    screenBitmap.width = 150;
+    screenBitmap.height = 100;
     screenBitmap.bitsPerPixelShift = 4;
     screenBitmap.bitsPerPixel = 16;
 
@@ -81,5 +83,15 @@ int main() {
     pal32[1] = 0x2090a0;
     graphicsString(&screenVideo, 4, 200, &spriteCursive, &cursive_, 10, 0, "BY DoggerMoore");
     
-    while(1) {}
+    while(1) {
+        osdSetComponentPosition(OSD_BITMAP1, 0x14 + (bx*2), 0x13 + by);
+        bx+=bdx;
+        by+=bdy;
+        if (bx<0) {bx=0;bdx=-bdx;}
+        if (by<0) {by=0;bdy=-bdy;}
+        if (bx>(319-150)) {bx=319-150;bdx=-bdx;}
+        if (by>(239-100)) {by=239-100;bdy=-bdy;}
+    
+        for (delay=0;delay<0x1000;delay++) {}
+    }
 }
