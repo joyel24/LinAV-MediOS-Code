@@ -1,5 +1,4 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
+/* uart.h
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy
@@ -16,14 +15,8 @@
 typedef unsigned long u32;
 #endif
 
-extern u32 uartGetch();
-extern void uartOutch(u32 data);
-extern void uartOuts(char* string);
-
 extern u32 uartGetchA();
 extern void uartOutchA(u32 data);
 extern void uartOutsA(char* string);
-
-extern void stringPutHex(char *buffer, u32 value, u32 num);
 extern void stringPutHexA(char *buffer, u32 value, u32 num);
 

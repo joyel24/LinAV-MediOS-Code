@@ -1,5 +1,4 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
+/* buttons.h
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy
@@ -37,8 +36,6 @@ typedef unsigned long u32;
 #define        BUTTONS_JBMM_MENU3      0x0040
 #define        BUTTONS_JBMM_PLAY       0x0002
 #define        BUTTONS_JBMM_ANY        0x00ff
-
-extern u32 buttonsGetStatus();
 
 extern u32 buttonsGetStatusA();
 

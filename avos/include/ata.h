@@ -1,5 +1,4 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
+/* ata.h
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy
@@ -34,23 +33,6 @@ struct partInfo {
 	int type;
 	char strType[20];
 };
-
-extern void ataSelect(u32 val);
-extern void ataSelectHDD();
-extern void ataSelectMemoryCard();
-extern void ataPowerUpHDD();
-extern void ataPowerDownHDD();
-extern void ataIdentify();
-extern u32 ataStatus();
-extern u32 ataWaitForReady();
-extern u32 ataWaitForXfer();
-extern void ataReadData(char *buffer, u32 numHalfWords);
-extern void ataWriteData(char *buffer, u32 numHalfWords);
-extern void ataRead(u32 lba, u32 count);
-extern void ataWrite(u32 lba, u32 count);
-extern u32 ataReadSectors(u32 lba, u32 count, char *buffer);
-extern u32 ataWriteSectors(u32 lba, u32 count, char *buffer);
-extern u32 ataIdentifyDevice(char *buffer);
 
 extern void ataSelectA(u32 val);
 extern void ataSelectHDDA();

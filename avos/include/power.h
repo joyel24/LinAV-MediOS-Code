@@ -1,5 +1,4 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
+/* power.h
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy
@@ -15,9 +14,6 @@
 #define u32_defined yes
 typedef unsigned long u32;
 #endif
-
-extern u32 powerGetStatus();
-extern u32 powerIsDCConnected();
 
 extern u32 powerGetStatusA();
 extern u32 powerIsDCConnectedA();

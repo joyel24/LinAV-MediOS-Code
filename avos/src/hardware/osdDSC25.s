@@ -593,6 +593,7 @@ osdInit:
         ldr r0, =0x2000
         ldr r1, =0x30680
         strh r0, [r1]
+        
         ldr r1, =0x306a0
         mov r2, #0
         mov r0, #0x79
@@ -647,7 +648,7 @@ osdInit:
         strh r2, [r0, #0x36]
         ldr r1, =0x0022
         strh r1, [r0, #0x38]
-        
+
         ldr r0, =0x02600200
         ldr r1, =0x4
         strh r1, [r0]

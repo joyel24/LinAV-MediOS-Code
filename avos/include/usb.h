@@ -1,5 +1,4 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
+/* usb.h
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy
@@ -15,10 +14,6 @@
 #define u32_defined yes
 typedef unsigned long u32;
 #endif
-
-extern u32 usbIsConnected();
-extern void usbEnable();
-extern void usbDisable();
 
 extern u32 usbIsConnectedA();
 extern void usbEnableA();

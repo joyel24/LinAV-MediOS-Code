@@ -1,5 +1,4 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
+/* timers.h
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy
@@ -22,10 +21,6 @@ typedef unsigned long u32;
 
 #define        TIMERS_TMCLK_ARM         0x00
 #define        TIMERS_TMCLK_EXT         0x01
-
-extern u32 timersGetValue(u32 timer);
-extern void timersTrigger(u32 timer);
-extern void timersConfig(u32 timer, u32 mode, u32 clockSelect, u32 divide, u32 maxVal);
 
 extern u32 timersGetValueA(u32 timer);
 extern void timersTriggerA(u32 timer);

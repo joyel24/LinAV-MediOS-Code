@@ -1,5 +1,4 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
+/* system.h
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy
@@ -16,9 +15,6 @@
 typedef unsigned long u32;
 #endif
 
-extern void systemRelocateMe();
 extern void systemRelocateMeA();
-
 extern void mvStackA();
-extern void mvStack();
 

@@ -1,5 +1,4 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
+/* interrupts.h
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy
@@ -41,7 +40,6 @@ void interruptsSetMask2A(u32 bitmask);
 u32 interruptsGetMask2A();
 void interruptsSetCauses2A(u32 bitmask);
 u32 interruptsGetCauses2A();
-
 void interruptsInitA(u32 fun);
 u32 interruptsGetIRQEnabledA();
 void interruptsSetIRQEnabledA();

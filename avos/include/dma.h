@@ -1,5 +1,4 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
+/* dma.h
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy

@@ -1,5 +1,4 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
+/* ecr.h
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy
@@ -15,11 +14,6 @@
 #define u32_defined yes
 typedef unsigned long u32;
 #endif
-
-extern u32 ecrSwapBytes(u32 value);
-extern u32 ecrSwapBits(u32 value);
-extern void ecrSwapBytes(char* bufferIn, char* bufferOut, u32 count);
-extern void ecrSwapBits(char* bufferIn, char* bufferOut, u32 count);
 
 extern u32 ecrSwapBytesA(u32 value);
 extern u32 ecrSwapBitsA(u32 value);
