@@ -547,7 +547,7 @@ int eventHandler(int evt)
                   GameMode = 1;
                   x=0;y=0;
                         cops->clearScreen(COLOR_GREEN);
-                        cops->putS(COLOR_BLACK, COLOR_GREEN, 1, 100, "You lose!");
+                        cops->putS(COLOR_BLACK, COLOR_GREEN, 120, 100, "You lose!");
                         cops->putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
                         cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
                         return;
