@@ -65,6 +65,8 @@ int launchPlugin(char * name)
 
 }
 
+int timerOn=0;
+
 int main(int argc,char * * argv)
 {
 	int i;
@@ -74,6 +76,9 @@ int main(int argc,char * * argv)
 	drawGui();
 	/*launchPlugin("/mnt/ls-gui");	
 	while(1);*/
+	setTimerFreq(10);
+	startTimer();
+	timerOn=1;
 	eventLoop();
 	close_graphics();
 	return 0;
@@ -81,21 +86,32 @@ int main(int argc,char * * argv)
 
 void drawGui(void)
 {
-	char timeSt[]="--:--:--";
-	
 	fillRect(COLOR_WHITE,0 , 0, 320, 240);
 	fillRect(COLOR_LIGHT_BLUE,0,0,320,13);
 	fillRect(COLOR_BLACK,0,13,320,2);
 	putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,2,2,"AvWm");
+	drawTime();
+}
+
+void drawTime()
+{
+	char timeSt[50];
 	getTime(timeSt);
-	putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,200,2,timeSt);
+	fillRect(COLOR_LIGHT_BLUE,150,2,170,11);	
+	putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,150,2,timeSt);
+}
+
+int convValue(int val)
+{
+	return ((((val>>4)&0xF)*10)+(val&0xF));
+	//return val;
 }
 
 void getTime(char * timeSt)
 {
 	int fd;
 	struct tm date_time;	
-	
+
 	fd=open("/dev/avrtc",O_RDONLY | O_NONBLOCK);
 	if (fd < 0)
 	{
@@ -111,7 +127,9 @@ void getTime(char * timeSt)
 	
 	close(fd);   
 
-	sprintf(timeSt, "%02x:%02x:%02x", date_time.tm_hour,date_time.tm_min,date_time.tm_sec);
+	sprintf(timeSt, "%02d:%02d:%02d %02d/%02d/%04d", convValue(date_time.tm_hour),convValue(date_time.tm_min),convValue(date_time.tm_sec),
+	                                                      convValue(date_time.tm_mday),convValue(date_time.tm_mon),2000+
+							      convValue(date_time.tm_year));
 }
 
 void drawMenu(void)
@@ -193,10 +211,18 @@ void eventLoop()
 {
 	int ret;
 	int evt;
+		
 	while(1)
 	{
 		//while((evt=nxtEvent())==NO_EVENT) /* wait */;
 		evt=waitEvent();
+		
+		
+		if(timerOn && evt==EVT_TIMER)
+		{
+			processTimeOut();
+		}
+		
 		if(evt==BTN_F3)
 		{
 			clearEventQueue();
@@ -208,6 +234,11 @@ void eventLoop()
 				currentHandler(evt);
 		}
 	}
+}
+
+void processTimeOut()
+{
+	drawTime();
 }
 
 static char debugmembuf[200];

@@ -50,4 +50,6 @@ void   addEventHandler  (void (*evtHandle));
 void   pack             (void);
 void   eventLoop        (void);
 void   debug            (char *fmt, ...);
+void   drawTime         (void);
+void   processTimeOut   (void);
 #endif
