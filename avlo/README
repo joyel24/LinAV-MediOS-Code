@@ -76,5 +76,5 @@ You can also add some general options:
 
 	Known problems
 
-- there can be some problem when pressing F3 to go in usb mode
+- there can be some problem when pressing F3 to go in usb mode => fixed in this version
 - ajz decode is still a bit slow

@@ -112,7 +112,7 @@ loop:
     debug("Gal opt:\n -default=%s,\n-key=%s,\n-repeat=%d,\n-time out=%d\n",cfgG.defBin,cfgG.key,maxRepeat,delayCnt);
         
     graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AVLO");    
-    graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader Version 0.6 by OxyGen");    
+    graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader Version 1.1 by OxyGen");    
         
     
     usbstate=!usbIsConnectedA();
@@ -170,9 +170,7 @@ loop:
                 else
                     debug("error loading %s\n",cfg[cursorPos].image);
                 redraw=1;
-            }
-            
-            
+            }           
             
             if(key & BUTTONS_AV300_MENU3)
             {
@@ -181,7 +179,11 @@ loop:
                     debug("disable usb\n");
                     usbenable=0;
                     usbDisableA();
+                    for(i=0;i<0x10000;i++); /* Nothing */
                     ataPowerUpHDDA();
+                    for(i=0;i<0x10000;i++); /* Nothing */
+                    ataSelectHDDA();
+                    for(i=0;i<0x10000;i++); /* Nothing */
                     redraw=1;
                     cleanUSBMsg=1;
                     waitKeyReleased();
@@ -198,9 +200,12 @@ loop:
                         pal32[1]=0xc476c491;
                         pal32[0] = 0x466c4696;
             graphicsStringA(&screenBitmap2,   65, 120, &sprite6_9, std6x9_, 6, 0,"USB Enable, PRESS F3 to resume");
-                        for(i=0;i<10000;i++); /* Nothing */
                         usbEnableA();
-                        for(i=0;i<10000;i++); /* Nothing */
+                        for(i=0;i<0x10000;i++); /* Nothing */
+                        ataPowerUpHDDA();
+                        for(i=0;i<0x10000;i++); /* Nothing */
+                        ataSelectHDDA();
+                        for(i=0;i<0x10000;i++); /* Nothing */
                     }
                 }
             }
@@ -261,10 +266,12 @@ void chkOFF(int key)
             pal32[0] = 0x466c4696;
     graphicsStringA(&screenBitmap2,   65, 120, &sprite6_9, std6x9_, 6, 0,"Shutting down NOW !!");    
             if(usbenable)
+            {
                 usbDisableA();
-            for(i=0;i<10000;i++); /* Nothing */
+            	for(i=0;i<0x14000;i++); /* Nothing */
+            }
             ataSleepCmdA();
-            for(i=0;i<10000;i++); /* Nothing */
+            for(i=0;i<0x14000;i++); /* Nothing */
             ataPowerDownHDDA();
             //for(i=0;i<1000;i++); /* Nothing */
             __clf();
@@ -283,8 +290,9 @@ void waitKeyReleased(void)
     while(key&BUTTONS_AV300_ANY && nbPressed < maxRepeat)
     {
         chkOFF(key);
+        if(key==BUTTONS_AV300_UP || key==BUTTONS_AV300_DOWN)
+        	nbPressed++;
         key=buttonsGetStatusA();
-        nbPressed++;
     }
 }
 
@@ -319,9 +327,9 @@ void iniGraph()
     osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
 }
 
-void iniHD()
+void iniHD(void)
 {
-    int fatHD;
+    int fatHD,c;
     
     graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"A");
     
@@ -330,9 +338,15 @@ void iniHD()
     inifatinfo();
     
     usbDisableA();
+    //for (c=0;c<0x100;c++) {}
     ataSelectHDDA();
+    //for (c=0;c<0x100;c++) {}
+    /*usbEnableA();
+    for (c=0;c<0x14000;c++) {}*/
     ataPowerUpHDDA();
-    usbDisableA();
+    for (c=0;c<0x100;c++) {}
+    /*usbDisableA();
+    for (c=0;c<0x14000;c++) {}*/
     ataReadMBR();
     
     
@@ -342,7 +356,7 @@ void iniHD()
     graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AV");
 }
 
-void affUSB()
+void affUSB(void)
 {
     if(usbstate != usbIsConnectedA())
     {
