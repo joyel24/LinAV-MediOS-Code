@@ -74,7 +74,12 @@ struct client_operations * cops;
 
 struct dir_entry {
     char *name;
-    int type;    
+    int type;
+};
+
+struct lsgui_menu_data {
+    char *name;
+    int index;
 };
 
 struct dir_entry * list;
@@ -171,6 +176,14 @@ void do_on(void * data)
 }
 void do_right(void * data)
 {
+    char str[70];
+    cops->stop_menu();
+    mode=1;
+
+    sprintf(str,"%s %d", (char*) ((struct lsgui_menu_data*)data)->name,(int) ((struct lsgui_menu_data*)data)->index);
+    cops->fillRect(COLOR_BLUE, 0, 229, 250,12);
+    cops->putS(COLOR_WHITE, COLOR_BLUE,5, 230, str);
+
 }
 void do_F1(void * data)
 {
@@ -184,7 +197,7 @@ void do_F3(void * data)
 
 void mk_item_str(void * data,char * str)
 {
-    sprintf(str,"%s",(char*) data);
+    sprintf(str,"%s",(char*) ((struct lsgui_menu_data*)data)->name);
 }
 
 struct menu_data menu_cfg = {
@@ -342,13 +355,13 @@ int add_dir(char * name)
     }
     dir_listused++;
     return 0;
-    
+
 }
 
 int add_file(char * name)
 {
     char            **newlist;
-    
+
     if (file_listused >= file_listsize)
     {
         newlist = malloc((sizeof(char **)) * (file_listsize + LISTSIZE));
@@ -845,6 +858,7 @@ int main(int argc,char * * argv)
     int evt;
     int w = 0;
     int h = 10;
+    struct lsgui_menu_data mdata;
 
     REGISTER(cops,eventHandler,0);
 
@@ -856,10 +870,23 @@ int main(int argc,char * * argv)
         cops->disableMenu();
         cops->setFont(STD6X9);
 
+        strcpy(mdata.name,"Rename");
+        mdata.index = 1;
+        memcpy(&menu1.data, (void*)&mdata, sizeof(mdata));
+
+        strcpy(mdata.name,"Delete");
+        mdata.index = 2;
+        memcpy(&menu2.data, (void*)&mdata, sizeof(mdata));
+
+        strcpy(mdata.name,"Add to Favorites");
+        mdata.index = 3;
+        memcpy(&menu3.data, (void*)&mdata, sizeof(mdata));
+//        menu3.data=(void*)&mdata;
+/*
         menu1.data=(void*)"Rename";
         menu2.data=(void*)"Delete";
         menu3.data=(void*)"Add to Favorites";
-
+*/
         menu1.prev=NULL;
         menu1.nxt=&menu2;
         menu1.sub=NULL;
