@@ -30,10 +30,26 @@
 
 
 ERROR_CODE API_TASK_YIELD       ()                                                              { swi_call(nAPI_TASK_YIELD); }
+ERROR_CODE API_TASK_CREATE      (void* pvCode, void* pParam, HTASK* phTask)                     { swi_call(nAPI_TASK_CREATE); }
+ERROR_CODE API_TASK_SUSPEND     (HTASK hTask)                                                   { swi_call(nAPI_TASK_SUSPEND); }
+ERROR_CODE API_TASK_CONTINUE    (HTASK hTask)                                                   { swi_call(nAPI_TASK_CONTINUE); }
+ERROR_CODE API_TASK_GETHANDLE   (HTASK* phTask)                                                 { swi_call(nAPI_TASK_GETHANDLE); }
+ERROR_CODE API_TASK_SLEEP       (unsigned long nMilliseconds)                                   { swi_call(nAPI_TASK_SLEEP); }
+ERROR_CODE API_TASK_SENDMESSAGE (HTASK hTask, MESSAGE msg)                                      { swi_call(nAPI_TASK_SENDMESSAGE); }
+ERROR_CODE API_TASK_PEEKMESSAGE ()                                                              { swi_call(nAPI_TASK_PEEKMESSAGE); }
 
 ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes)                        { swi_call(nAPI_MALLOC); }
 ERROR_CODE API_FREE             (void* pvBuffer)                                                { swi_call(nAPI_FREE); }
 ERROR_CODE API_MEMAVAIL         (unsigned long* pnBytes)                                        { swi_call(nAPI_MEMAVAIL); }
+
+ERROR_CODE API_PIPE_CREATE      (HPIPE* phPipe)                                                 { swi_call(nAPI_PIPE_CREATE); }
+ERROR_CODE API_PIPE_DELETE      (HPIPE hPipe)                                                   { swi_call(nAPI_PIPE_DELETE); }
+ERROR_CODE API_PIPE_SEND        (HPIPE hPipe, void* pData, unsigned long nBytesToSend)          { swi_call(nAPI_PIPE_SEND); }
+ERROR_CODE API_PIPE_RECV        (HPIPE hPipe, void* pData, unsigned long nBytesToReceive)       { swi_call(nAPI_PIPE_RECV); }
+ERROR_CODE API_CRITSEC_CREATE   (HCRITSEC* phCritSec)                                           { swi_call(nAPI_CRITSEC_CREATE); }
+ERROR_CODE API_CRITSEC_DELETE   (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_DELETE); }
+ERROR_CODE API_CRITSEC_ENTER    (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_ENTER); }
+ERROR_CODE API_CRITSEC_LEAVE    (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_LEAVE); }
 
 ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData)                       { swi_call(nAPI_GFX); }
 
@@ -46,5 +62,3 @@ void printf(char *fmt, ...)
     API_PRINTF(fmt,ap);
     va_end(ap);
 }
-
-

@@ -59,6 +59,12 @@ typedef struct _PLANE_DATA
 } PLANE_DATA;
 
 
+typedef unsigned long HTASK;
+typedef unsigned long HPIPE;
+typedef unsigned long HCRITSEC;
+typedef unsigned long MESSAGE;
+
+
 #define SAVE asm volatile ("stmdb sp!, {r3-r12}")
 #define LOAD asm volatile ("ldmia sp!, {r3-r12}")
 
@@ -67,10 +73,31 @@ typedef struct _PLANE_DATA
 // API definition
 
 ERROR_CODE API_TASK_YIELD       ();
+ERROR_CODE API_TASK_CREATE      (void* pvCode, void* pParam, HTASK* phTask);
+ERROR_CODE API_TASK_SUSPEND     (HTASK hTask);
+ERROR_CODE API_TASK_CONTINUE    (HTASK hTask);
+ERROR_CODE API_TASK_GETHANDLE   (HTASK* phTask);
+ERROR_CODE API_TASK_SLEEP       (unsigned long nMilliseconds);
+ERROR_CODE API_TASK_SENDMESSAGE (HTASK hTask, MESSAGE msg);
+ERROR_CODE API_TASK_PEEKMESSAGE ();
 
 ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes);
 ERROR_CODE API_FREE             (void* pvBuffer);
 ERROR_CODE API_MEMAVAIL         (unsigned long* pnBytes);
+
+ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes);
+ERROR_CODE API_FREE             (void* pvBuffer);
+ERROR_CODE API_MEMAVAIL         (unsigned long* pnBytes);
+
+ERROR_CODE API_PIPE_CREATE      (HPIPE* phPipe);
+ERROR_CODE API_PIPE_DELETE      (HPIPE hPipe);
+ERROR_CODE API_PIPE_SEND        (HPIPE hPipe, void* pData, unsigned long nBytesToSend);
+ERROR_CODE API_PIPE_RECV        (HPIPE hPipe, void* pData, unsigned long nBytesToReceive);
+ERROR_CODE API_CRITSEC_CREATE   (HCRITSEC* phCritSec);
+ERROR_CODE API_CRITSEC_DELETE   (HCRITSEC hCritSec);
+ERROR_CODE API_CRITSEC_ENTER    (HCRITSEC hCritSec);
+ERROR_CODE API_CRITSEC_LEAVE    (HCRITSEC hCritSec);
+
 ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData);
 ERROR_CODE API_PRINTF           (const char * fmt, va_list args);
 void printf                     (char *fmt, ...);

@@ -34,6 +34,11 @@ typedef struct _TASK_INFO
 	char               cName [8];
 } TASK_INFO;
 
+typedef struct _CRITSEC_INFO
+{
+	unsigned long nBlocked;
+} CRITSEC_INFO;
+
 typedef struct _SYSTEM_CTRL_COMMAND
 {
 	unsigned long nCmdId;
@@ -46,6 +51,8 @@ typedef struct _SYSTEM_CTRL_COMMAND
 #define KERNEL_CMD_SLEEP     1
 #define KERNEL_CMD_TERMINATE 2
 #define KERNEL_CMD_BLOCK     3
+#define KERNEL_CMD_SUSPEND   4
+#define KERNEL_CMD_CONTINUE  5
 
 extern TASK_INFO* g_pActiveTask; // pointer to current element in ring list
 extern TASK_INFO* g_pBlockedTask; // pointer to current element in ring list

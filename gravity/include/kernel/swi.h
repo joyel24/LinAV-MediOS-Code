@@ -15,11 +15,12 @@
 // swi numbers
 #define nAPI_TASK_YIELD       0
 #define nAPI_TASK_CREATE      1
-#define nAPI_TASK_REMOVE      2
-#define nAPI_TASK_SUSPEND     3
-#define nAPI_TASK_CONTINUE    4
-#define nAPI_TASK_GETHANDLE   5
-#define nAPI_SLEEP            6
+#define nAPI_TASK_SUSPEND     2
+#define nAPI_TASK_CONTINUE    3
+#define nAPI_TASK_GETHANDLE   4
+#define nAPI_TASK_SLEEP       5
+#define nAPI_TASK_SENDMESSAGE 6
+#define nAPI_TASK_PEEKMESSAGE 7
 
 #define nAPI_MALLOC          20
 #define nAPI_FREE            21
@@ -31,6 +32,10 @@
 #define nAPI_PIPE_DELETE     31
 #define nAPI_PIPE_SEND       32
 #define nAPI_PIPE_RECV       33
+#define nAPI_CRITSEC_CREATE  34
+#define nAPI_CRITSEC_DELETE  35
+#define nAPI_CRITSEC_ENTER   36
+#define nAPI_CRITSEC_LEAVE   37
 
 #define nAPI_GFX             100
 #define nAPI_PRINTF          101
