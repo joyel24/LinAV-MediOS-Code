@@ -108,6 +108,8 @@ startInit:
                                      | OSD_BITMAP_A6
                                      | OSD_BITMAP_8BIT);
 
+    usbDisable();
+
     ataPowerUpHDD();
     ataSelectHDD();
 
@@ -139,8 +141,6 @@ startInit:
                 dirBuffer[c].name[0] = 0;    
             }
 
-            usbDisable();
-        
             c = fatReadFile(cluster, (char*) dirBuffer);
             stringPutHex(hex82, c, 8);
             uartOuts("[fatTest.c] fatReadFile returned = ");
@@ -159,7 +159,6 @@ startInit:
                                      | OSD_BITMAP_8BIT);
         } else {
             osdSetComponentConfig(OSD_BITMAP2, 0);
-            usbEnable();
         }
             
         while(1) {
@@ -297,6 +296,20 @@ startInit:
                     c =buttonsGetStatus();
                 } while(c & BUTTONS_AV300_ANY);
                 cursorMoved=1;
+                if (mode==0) {
+                    usbDisable();
+                } else {
+                    usbEnable();    
+                }
+
+                if (source==0) {
+                    ataPowerUpHDD();
+                    ataSelectHDD();
+                } else {
+                    ataPowerDownHDD();
+                    ataSelectMemoryCard();
+                }
+                
                 break;
             } else if (c & BUTTONS_AV300_MENU1) {
                 source ^= 1;    
