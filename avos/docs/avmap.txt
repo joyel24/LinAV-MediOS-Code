@@ -1,0 +1,339 @@
+--------------------------------------------------------------------------------
+Timers                                 timers.h            Done afaik
+--------------------------------------------------------------------------------
+30000   Timer #0 mode
+30002   Timer #0 clock select
+30004   Timer #0 prescalar divide value
+30006   Timer #0 maximum counter value
+30008   Timer #0 trigger
+3000a   Timer #0 current count value
+30080   Timer #1 mode
+30082   Timer #1 clock select
+30084   Timer #1 prescalar divide value
+30086   Timer #1 maximum counter value
+30088   Timer #1 trigger
+3008a   Timer #1 current count value
+30100   Timer #2 mode
+30102   Timer #2 clock select
+30104   Timer #2 prescalar divide value
+30106   Timer #2 maximum counter value
+30108   Timer #2 trigger
+3010a   Timer #2 current count value
+30180   Timer #3 mode
+30182   Timer #3 clock select
+30184   Timer #3 prescalar divide value
+30186   Timer #3 maximum counter value
+30188   Timer #3 trigger
+3018a   Timer #3 current count value
+
+--------------------------------------------------------------------------------
+
+30200   ? Unknown serial port0?
+30280   ? Unknown serial port1?
+
+--------------------------------------------------------------------------------
+UART - uart ports                      uart.h              Lots to do
+--------------------------------------------------------------------------------
+30300   Uart #0 DTTR
+30302   Uart #0 BRSR
+30304   Uart #0 MSR
+30306   Uart #0 RFCR
+30308   Uart #0 TFCR
+3030a   Uart #0 LCR
+3030c   Uart #0 SR
+
+30380   Uart #1 DTTR
+30382   Uart #1 BRSR
+30384   Uart #1 MSR
+30386   Uart #1 RFCR
+30388   Uart #1 TFCR
+3038a   Uart #1 LCR
+3038c   Uart #1 SR
+
+--------------------------------------------------------------------------------
+
+30400   ? Unknown usb?
+30480   ? Unknown usb?
+
+--------------------------------------------------------------------------------
+IRQS - Interrupt handling              interrupts.h        Pretty much done
+--------------------------------------------------------------------------------
+30500   Interrupt causes2 HI
+30502   Interrupt causes2 LO
+30504   Interrupt causes HI
+30506   Interrupt causes LO
+
+30520   Interrupt mask2 HI
+30522   Interrupt mask2 LO
+30524   Interrupt mask HI
+30526   Interrupt mask LO
+
+--------------------------------------------------------------------------------
+GIO - General purpose input/output     gio.h               Pretty much done
+--------------------------------------------------------------------------------
+30580   Direction gio0-15
+30582   Direction gio16-31
+30584   Inverts gio0-15
+30586   Inverts gio16-31
+30588   BitSet gio0-15  Write: sets the output to 1. Read: gets input value
+3058a   BitSet gio16-31
+3058c   BitClear gio0-15  Write: sets the output to 0.
+3058e   BitClear gio16-31
+30590   Bits 0-7: 1=enable IRQ for this gio input.
+
+--------------------------------------------------------------------------------
+
+30600   ? Unknown
+
+--------------------------------------------------------------------------------
+OSD - On screen display                osdDSC25.h          Nearly all done
+--------------------------------------------------------------------------------
+30680   OSD Main config and border color
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+        |     | | |   | | | | | | | | |
+        |     | | |   | +-+-+-+-+-+-+-+- Border color
+        |     | | |   +----------------- 1 = use RAM pallette for border
+        |     | | +--------------------- 1 = Scale video X unknown ratio
+        |     | +----------------------- 1 = Scale video Y unknown ratio
+        |     +------------------------- 1 = Scale video better quality
+        +------------------------------- 1 = Swap red and blue output
+
+30682   Video0 and video1 config
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+            | | | | | |     | | | | | |
+            | | | | | |     | | | | | +- 1 = V0 enable
+            | | | | | |     | | | | +--- 1 = V0 halfheight
+            | | | | | |     | | +-+----- 00 V0 Zoom y normal
+            | | | | | |     | |          01 V0 Zoom y x2
+            | | | | | |     | |          10 V0 Zoom y x4
+            | | | | | |     +-+--------- 00 V0 Zoom x normal
+            | | | | | |                  01 V0 Zoom x x2
+            | | | | | |                  10 V0 Zoom x x4
+            | | | | | +----------------- 1 = V1 enable
+            | | | | +------------------- 1 = V1 halfheight
+            | | +-+--------------------- 00 V1 Zoom y normal
+            | |                          01 V1 Zoom y x2
+            | |                          10 V1 Zoom y x4
+            +-+------------------------- 00 V1 Zoom x normal
+                                         01 V1 Zoom x x2
+                                         10 V1 Zoom x x4
+30684   Bitmap0 config
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+              | | | | | | | | | | | | |
+              | | | | | | | | | | | | +- 1 = B0 enable
+              | | | | | | | | | | | +--- 1 = B0 halfheight
+              | | | | | | | | | | +----- 0 = Merge with video planes
+              | | | | | | | | | |        1 = color0=transparent
+              | | | | | | | +-+-+------- Transparency value
+              | | | | | +-+------------- 00 = 2 color map
+              | | | | |                  01 = 4 color map
+              | | | | |                  10 = 16 color map
+              | | | | |                  11 = 256 color map
+              | | | +-+----------------- 00 Zoom y normal
+              | | |                      01 Zoom y x2
+              | | |                      10 Zoom y x4
+              | +-+--------------------- 00 Zoom x normal
+              |                          01 Zoom x x2
+              |                          10 Zoom x x4
+              +------------------------- 1 = use RAM pallette instead of rom
+
+30686   Bitmap1 config
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+              | | | | | | | | | | | | |
+              | | | | | | | | | | | | +- 1 = B1 enable
+              | | | | | | | | | | | +--- 1 = B1 halfheight
+              | | | | | | | | | | +----- 0 = Merge with video planes
+              | | | | | | | | | |        1 = color0=transparent
+              | | | | | | | +-+-+------- Transparency value
+              | | | | | +-+------------- 00 = 2 color map
+              | | | | |                  01 = 4 color map
+              | | | | |                  10 = 16 color map
+              | | | | |                  11 = 256 color map
+              | | | +-+----------------- 00 Zoom y normal
+              | | |                      01 Zoom y x2
+              | | |                      10 Zoom y x4
+              | +-+--------------------- 00 Zoom x normal
+              |                          01 Zoom x x2
+              |                          10 Zoom x x4
+              +------------------------- 1 = use RAM pallette instead of rom
+
+30688   Cursor0 config
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+        | | | | | | | |   | | | | | | |
+        | | | | | | | |   | | | | | | +- 1 = Cursor0 enable
+        | | | | | | | |   | | | +-+-+--- height
+        | | | | | | | |   +-+-+--------- width
+        +-+-+-+-+-+-+-+----------------- color
+
+3068a   Cursor1 config
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+          | | | | | | |   | | | | | | +- 1 = Cursor1 enable
+          | | | | | | |   | | | | | +--- 1 = Cursor1 halfheight
+          | | | | | | |   | | | | +----- 1 = use RAM pallette
+          | | | | | | |   | | | +------- 0 = 16color bank 0
+          | | | | | | |   | | |          1 = 16color bank 1
+          | | | | | | |   +-+-+--------- Transparency value
+          | | | | | +-+----------------- 00 Zoom y normal
+          | | | | |                      01 Zoom y x2
+          | | | | |                      10 Zoom y x4
+          | | | +-+--------------------- 00 Zoom x normal
+          | | |                          01 Zoom x x2
+          | | |                          10 Zoom x x4
+          | +-+------------------------- Flash speed
+          +----------------------------- 1 = Flash enable
+
+3068c   Video0 buffer width
+3068e   Video1 buffer width
+30690   Bitmap0 buffer width
+30692   Bitmap1 buffer width
+30694   SDRAM offset HI Video0 | Video1
+30696   SDRAM offset video0
+30698   SDRAM offset video1
+3069a   SDRAM offset HI Bitmap0 | Bitmap1
+3069c   SDRAM offset Bitmap0
+3069e   SDRAM offset Bitmap1
+306a0   Main shift horizontal
+306a2   Main shift vertical
+306a4   Video0 X
+306a6   Video0 Y
+306a8   Video0 width
+306aa   Video0 height
+306ac   Video1 X
+306ae   Video1 Y
+306b0   Video1 width
+306b2   Video1 height
+306b4   Bitmap0 X
+306b6   Bitmap0 Y
+306b8   Bitmap0 width
+306ba   Bitmap0 height
+306bc   Bitmap1 X
+306be   Bitmap1 Y
+306c0   Bitmap1 width
+306c2   Bitmap1 height
+306c4   Cursor0 X
+306c6   Cursor0 Y
+306c8   Cursor0 width
+306ca   Cursor0 height
+306cc   Cursor1 X
+306ce   Cursor1 Y
+306d0   16c bank1 pallette #0 | #1
+306d2   16c bank1 pallette #2 | #3
+306d4   16c bank1 pallette #4 | #5
+306d6   16c bank1 pallette #6 | #7
+306d8   16c bank1 pallette #8 | #9
+306da   16c bank1 pallette #a | #b
+306dc   16c bank1 pallette #c | #d
+306de   16c bank1 pallette #e | #f
+306e0   16c bank2 pallette #0 | #1
+306e2   16c bank2 pallette #2 | #3
+306e4   16c bank2 pallette #4 | #5
+306e6   16c bank2 pallette #6 | #7
+306e8   16c bank2 pallette #8 | #9
+306ea   16c bank2 pallette #a | #b
+306ec   16c bank2 pallette #c | #d
+306ee   16c bank2 pallette #e | #f
+306f0   ? Unknown
+306f2   Cursor2 data
+306f4   Pallette access status | cursor2 address/latch
+306f6   Pallette data write
+306f8   Pallette index write
+306fc   Alternative video sdram offset LO
+306fe   Alternative video sdram offset HI
+
+--------------------------------------------------------------------------------
+
+30700   ? Unknown imaging?
+30780   ? Unknown imaging?
+
+--------------------------------------------------------------------------------
+Video                                  osdDSC25.h          Lots to do
+--------------------------------------------------------------------------------
+30800   Video mode config
+        4000 = 1=non interlaced,0=interlaced
+30804   Bit 15 - LCD enable
+
+30830   Low 8 bits = brightness, High 8 bits = contrast
+
+30880   ? Unknown more video/imaging?
+
+--------------------------------------------------------------------------------
+ECR - Endianness conversion register   ecr.h               Done
+--------------------------------------------------------------------------------
+30900   ECR input value
+30902   ECR output with bytes swapped
+30904   ECR output with bits swapped
+
+--------------------------------------------------------------------------------
+Unknown                                usb.h,power.h       Lots to do
+--------------------------------------------------------------------------------
+30a24   General purpose input
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+                          | |
+                          | +----------- 1 = Power adapter connected
+                          +------------- 1 = USB lead connected
+
+--------------------------------------------------------------------------------
+DMA - Direct memory access             dma.h               Done afaik
+--------------------------------------------------------------------------------
+30a38   DMA source address HI
+30a3a   DMA source address LO
+30a3c   DMA destination address HI
+30a3e   DMA destination address LO
+30a40   DMA data size (In 32bit words)
+30a42   DMA device select. Low nibble = destination, High nibble = source.
+        5=SDRAM, 1=ATA
+30a44   DMA start. Bit 0 - Write: Start DMA xfer. Read: Is DMA running/finished?
+        0x100 = endian_2301
+        0x200 = endian_0123
+
+--------------------------------------------------------------------------------
+ATA - Hard disk/memory card access     ata.h               Lots to do
+--------------------------------------------------------------------------------
+02400000    ATA data
+02400080    ATA error
+02400100    ATA NSector
+02400180    ATA Sector
+02400200    ATA LCyl
+02400280    ATA HCyl
+02400300    ATA Select
+02400340    ATA Status
+02400380    ATA Command
+
+--------------------------------------------------------------------------------
+CPLD - Misc hardware                   cpld.h,ata.h,buttons.h     Lots to do
+--------------------------------------------------------------------------------
+02600000    CPLD mode
+            0 = HDD access
+            1 = Compact flash card access
+            4 = video imput?
+            8 = Smart media reader
+            9 = multimedia card reader
+            
+02600100    Bit 1:  1=enable USB, disable av300 ata access
+                    0=disable USB, enable av300 ata access
+02600200    0x04 = Enable backlight/lcd
+02600300    0x0a = Power up the HDD
+
+--------------------------------------------------------------------------------
+Buttons input
+--------------------------------------------------------------------------------
+02600680    Buttons
+                        7 6 5 4 3 2 1 0
+                                    | |
+                                    | +- 0 = up
+                                    +--- 0 = left
+
+02600700    Buttons
+                        7 6 5 4 3 2 1 0
+                                  | | |
+                                  | | +- 0 = right
+                                  | +--- 0 = down
+                                  +----- 0 = menu3 pressed
+
+02600780    Buttons
+                        7 6 5 4 3 2 1 0
+                                  | | |
+                                  | | +- 0 = menu1 pressed
+                                  | +--- 0 = menu2 pressed
+                                  +----- 0 = joystick pressed / fast direction
+
