@@ -31,7 +31,7 @@ overb:
         lsl r0, #20     @ 03000000
 
         mov r1, #0x40
-        lsl r1, #8      @ 4000
+        lsl r1, #12     @ 40000
 
         mov r2, #0x34
         lsl r2, #20     @ 03400000
@@ -50,59 +50,68 @@ lrel:   ldr r3, [r0]
         bx r2           @ *** *** JUMP UP TO HIGH RAM
         
         
+        @ Wait for USB disconnect, or menu1
+        mov r4, #0
+waitUsb:
         callThumb r1, buttonsGetStatusT
-        ldr r1, =0x677                      @ menu1
+        ldr r1, =0x677                      @ menu1 to skip
         cmp r0, r1
          beq overusbW
-
-        @ Wait for USB disconnect... 
-waitUsb:
         callThumb r1, usbIsConnectedT
         cmp r0, #1
-         beq waitUsb
+         bne overusbW
+        mov r4, #1
+        b waitUsb
 overusbW:
 
-        ldr r0, =bufferx
-        
-        callThumb r0, lcdInitT
-        callThumb2 r4, terminalPutsCT, msg1, 0x0202
+                                @ r4 = 1 if USB
 
-        callThumb2 r4, terminalPutsCT, msg2, 0xffff
-        callThumb r4, ataInitT
-        callThumb2 r4, terminalPutsCT, msgDONE, 0x0202
+        callThumb r0, lcdInitT
+                
+        callThumb2 r5, terminalSetPosT, 0, 1
+        callThumb2 r5, terminalPutsCT, msg1, 0xfbfb
+
+        cmp r4, #0
+         beq nowarn1
+        callThumb2 r5, terminalPutsCT, msgwarn, 0xffff
+nowarn1:
+        
+        callThumb2 r5, terminalPutsCT, msg2, 0xffff
+        callThumb r5, ataInitT
+        callThumb2 r5, terminalPutsCT, msgDONE, 0xfbfb
 
         ldr r0, =0x100000
 waity:  sub r0, #1
         bne waity
-        
+
         callThumb2 r4, terminalPutsCT, msg3, 0xffff
         callThumb1 r4, ataIdentifyT, bufferx
-        callThumb2 r4, terminalPutsCT, msgDONE, 0x0202
+        callThumb2 r4, terminalPutsCT, msgDONE, 0xfbfb
 
         ldr r0, =(bufferx + 20)
         ldr r1, =(msg4 + 12)
         mov r2, #20
         callThumb r3, memMoveT
-        callThumb2 r4, terminalPutsCT, msg4, 0xfbfb
+        callThumb2 r4, terminalPutsCT, msg4, 0xfdfd
         
         ldr r0, =(bufferx + 46)
         ldr r1, =(msg5 + 12)
         mov r2, #8
         callThumb r3, memMoveT
-        callThumb2 r4, terminalPutsCT, msg5, 0xfbfb
+        callThumb2 r4, terminalPutsCT, msg5, 0xfdfd
 
         ldr r0, =(bufferx + 54)
         ldr r1, =(msg6 + 12)
         mov r2, #40
         callThumb r3, memMoveT
-        callThumb2 r4, terminalPutsCT, msg6, 0xfbfb
+        callThumb2 r4, terminalPutsCT, msg6, 0xfdfd
 
         callThumb2 r4, terminalPutsCT, msg100, 0xffff
         ldr r0, =bufferx
         mov r1, #1
         mov r2, #1
         callThumb r4, ataReadLBAT
-        callThumb2 r4, terminalPutsCT, msgDONE, 0x0202
+        callThumb2 r4, terminalPutsCT, msgDONE, 0xfbfb
 
         ldr r6, =(bufferx+510-0x40)
         mov r7, #4
@@ -132,7 +141,7 @@ loopsp:
         ldr r0, =(msg101 + 27)
         callThumb r2, hex8T
         
-        callThumb2 r4, terminalPutsCT, msg101, 0xfbfb
+        callThumb2 r4, terminalPutsCT, msg101, 0xfdfd
 
         add r5, #8
         add r6, #16
@@ -141,29 +150,59 @@ loopsp:
 
         callThumb2 r4, terminalPutsCT, msg200, 0xffff
         ldr r0, =bufferx
-        ldr r1, part1Start
+        ldr r1, =part1Start
+        ldr r1, [r1]
         mov r2, #1
         callThumb r4, ataReadLBAT
-        callThumb2 r4, terminalPutsCT, msgDONE, 0x0202
+        callThumb2 r4, terminalPutsCT, msgDONE, 0xfbfb
         
         ldr r0, =(bufferx + 3)
         ldr r1, =(msg201 + 12)
         mov r2, #8
         callThumb r4, memMoveT
         
-        callThumb2 r4, terminalPutsCT, msg201, 0xfbfb
+        callThumb2 r4, terminalPutsCT, msg201, 0xfdfd
 
-        ldr r0, part1Start
+        ldr r0, =part1Start
+        ldr r0, [r0]
         callThumb r2, fatInitT
 
         ldr r0, =fatRootClu
 
-        callThumb r0, lcdInitT      @ Clear screen...
+        b oval1
+        
+        .ltorg
+        
+oval1:
+        
+        callThumb r0, lcdClsT      @ Clear screen...
+
+        ldr r3, =lcdVideoBuffer2
+        ldr r4, =sprite
+        ldr r5, =(320*240)
+lcop:   mov r0, #0
+        mov r1, #0
+        mov r2, #0
+        ldrb r0, [r4]
+        ldrb r1, [r4, #1]
+        ldrb r2, [r4, #2]
+        add r4, #3
+        callThumb r6, colorRGB2YCbCrT
+        callThumb r6, colorPackYCbCrT
+
+        str r0, [r3]
+        
+        add r3, #4
+        sub r5, #1
+        bne lcop   
+        
+        callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
+        callThumb2 r3, osdSetMainConfigT, 0x14, 0xdd      
         
         mov r0, #4
         mov r1, #6
         ldr r2, =msg_001
-        ldr r3, =0x0202
+        ldr r3, =0xfbfb
         callThumb r4, lcdPutsT
         
         @ Gonna be our main kinda loop here...
@@ -210,8 +249,6 @@ lfval:  mov r0, #0
         b noshq
 noshp:  add r7, #32
         b lfval
-
-        .ltorg
          
 noshq:
         @ Now display it on screen, and wait for user navigation...
@@ -220,8 +257,8 @@ loopNV:
         ldr r7, =bufferx
         ldr r0, dirCurrentScroll
         add r7, r0
-        mov r6, #20             @ display 20 files max at a time...
-        mov r5, #24
+        mov r6, #18             @ display 18 files max at a time...
+        mov r5, #36
         mov r4, #0              @ cursor position in window...
 loopDV: 
         mov r0, #0
@@ -247,6 +284,7 @@ loopDV:
         mov r2, #3
         callThumb r3, memMoveT  @ Move ext
 
+        push {r4}
         ldr r1, =runFile
         mov r0, r7
         mov r2, #11
@@ -260,7 +298,7 @@ lcmpe:  ldrb r3, [r1]
         add r0, #1
         sub r2, #1
          bne lcmpe
-         
+        
         mov r0, r7
         add r0, #20
         callThumb r1, read2T
@@ -273,6 +311,7 @@ lcmpe:  ldrb r3, [r1]
         ldr r0, =runClus
         str r3, [r0]                @ save cluster # of autorun file...    
 ncmpe:
+        pop {r4}
 
         ldr r3, =0xffff
         ldr r0, =fontBG
@@ -288,7 +327,7 @@ ncmpe:
         ldr r1, =0x0404
         str r1, [r0]
 notCur:
-        mov r0, #10
+        mov r0, #220
         mov r1, r5
         ldr r2, =dirLine
         push {r4}
@@ -308,11 +347,11 @@ nosho2: cmp r6, #0
         ldr r1, =0x0000
         str r1, [r0]         
 ldel2:
-        mov r0, #10
+        mov r0, #220
         mov r1, r5
         ldr r2, =dirEmpt
         mov r3, #0
-        callThumb r4, lcdPutsT
+        callThumb r7, lcdPutsT
         add r5, #6
         sub r6, #1
         cmp r6, #0
@@ -330,13 +369,13 @@ nobot1:
         tst r7, r1
          bne notup
         ldr r0, =timeoutC
-        ldr r0, timeoutMax
+        ldr r1, timeoutMax
         str r1, [r0]
         ldr r0, =dirCurrentCursor
         callThumb r2, cursorUpT
         cmp r0, #0
          beq notup
-        cmp r4, #20
+        cmp r4, #18
          bne notup
         ldr r0, =dirCurrentScroll
         callThumb r2, cursorUpT
@@ -345,7 +384,7 @@ notup:  ldr r1, =0x0020
         tst r7, r1
          bne notdn
         ldr r0, =timeoutC
-        ldr r0, timeoutMax
+        ldr r1, timeoutMax
         str r1, [r0]
         ldr r0, =dirCurrentCursor
         callThumb r2, cursorDnT
@@ -377,11 +416,8 @@ notdn:
         ldrb r1, [r4, #11]          @ ATTR
         mov r2, #0x10
         tst r1, r2
-        bne isDir
-        
-        b launchFile
-        
-isDir:
+         beq notm1                  @ is it a dir?
+
         ldr r1, =dirCurrentCursor
         mov r2, #0
         str r2, [r1]
@@ -393,7 +429,33 @@ isDir:
 oklp:
         b loopRR
 notm1:
+        ldr r1, =0x200
+        tst r7, r1
+        bne notm2
         
+        ldr r0, dirCurrentCursor
+        ldr r4, =bufferx
+        add r4, r0
+                                    @ r4->file entry
+        mov r0, r4
+        add r0, #20
+        callThumb r5, read2T
+        mov r3, r0
+        lsl r3, #16
+        mov r0, r4
+        add r0, #26
+        callThumb r5, read2T
+        orr r0, r3
+
+        mov r1, #0
+        ldrb r1, [r4, #11]          @ ATTR
+        mov r2, #0x10
+        tst r1, r2
+         bne notm2                  @ is it (not a dir)?
+
+        b launchFile
+notm2:
+
         ldr r0, =0x10000
 wait6:  sub r0, #1
         bne wait6
@@ -600,7 +662,7 @@ loppd:
         ldr r0, =(msg400 + 41)
         callThumb r4, hex8T
 
-        callThumb2 r4, terminalPutsCT, msg400, 0xfbfb
+        callThumb2 r4, terminalPutsCT, msg400, 0xfdfd
         
         ldr r1, =runFile
         mov r0, r7
@@ -673,6 +735,7 @@ read2T:
         .ltorg
         
 msg1:   .asciz " -- avOS BootLoader version 0.2a (c)2004 DoGgGeR -- \n\n"
+msgwarn:.asciz "Warning: USB was used! I may need a cold boot now\n"
 msg2:   .asciz "Initialising ATA...                        "
 msg3:   .asciz "Identifying hard drive...                  "
 msg4:   .asciz " Serial:    xxxxxxxxxxxxxxxxxxxx\n"
@@ -706,9 +769,12 @@ dirEmpt:.asciz "            "
 .include "../includes/terminal.S"
 .include "../includes/uart.S"
 .include "../includes/usb.S" 
+.include "../includes/color.S"
 
         .align 4
 fatbuffLBA: .word 0
 fatbuff:    .space 512, 0
 bufferx:    .space 512, 0
 
+sprite:
+.incbin     "image.rgb"

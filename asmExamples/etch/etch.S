@@ -99,7 +99,31 @@ n_m1:   ldr r1, =0x200
         mov r1, #1
         ldr r2, =drawing
         str r1, [r2]
-n_m2:
+n_m2:   ldr r1, =0x040
+        tst r0, r1
+        bne n_m3
+        ldr r2, backon
+        mov r3, #1
+        eor r2, r3
+        ldr r1, =backon
+        str r2, [r1]
+        cmp r2, #0
+        bne b_on
+        
+        callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
+        callThumb2 r3, osdSetMainConfigT, 0x14, 0xd9      
+        
+        b wfn
+b_on:
+        
+        callThumb2 r3, osdSetBackConfigT, 0x14, 0x02
+        callThumb2 r3, osdSetMainConfigT, 0x14, 0xf9      
+wfn:    callThumb r3, buttonsGetStatusT
+        ldr r1, =0x777
+        cmp r0, r1
+         bne wfn                @ wait for no button...
+
+n_m3:
 
         ldr r0, posx
         ldr r1, oposx
@@ -154,6 +178,7 @@ oposy:  .word 120
 
 pencolor: .word 0x0101
 
+backon: .word 0
 drawing:.word 0             @ 1=draw
                             @ 0=move
 savedp: .word 0x0000        @ saved pixel.
