@@ -29,7 +29,18 @@ buttonsInc = 1
         BUTTONS_AV300_JOYPRESS  =   0x0400
         BUTTONS_AV300_ON        =   0x1000
         BUTTONS_AV300_OFF       =   0x2000
-
+        BUTTONS_AV300_ANY       =   0x3777
+        
+        BUTTONS_JBMM_UP         =   0x0080
+        BUTTONS_JBMM_DOWN       =   0x0008
+        BUTTONS_JBMM_LEFT       =   0x0001
+        BUTTONS_JBMM_RIGHT      =   0x0004
+        BUTTONS_JBMM_MENU1      =   0x0010
+        BUTTONS_JBMM_MENU2      =   0x0020
+        BUTTONS_JBMM_MENU3      =   0x0040
+        BUTTONS_JBMM_PLAY       =   0x0002
+        BUTTONS_JBMM_ANY        =   0x00ff
+        
 @ TODO: JBMM/AV100
         
 @ ------------------------------------------------------------------------------
@@ -70,7 +81,7 @@ buttonsGetStatus:
         and r1, r2
         orr r0, r1
         
-        ldr r2, =0x3777
+        ldr r2, =0x3fff
         eor r0, r2
 
         pop {r1, r2, r3, pc}

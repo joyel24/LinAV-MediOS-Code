@@ -21,7 +21,7 @@ int main() {
 
     uartOuts("\nSelecting Memory card...\n");
     ataSelectMemoryCard();
-    
+
     identify();
     
     while(1) {}
