@@ -27,6 +27,7 @@ extern int fade;
 extern int vol,bass,treb,bal,loud;
 extern int fade,peakmeters,scroll_osci,peak_decay,peak_levelcolor,peak_bgcolor,osci_levelcolor,osci_bgcolor;
 extern const char *colortext[];
+extern struct id3tag fTag;
 /*******************/
 
 int sound_cursor_position = 1;    /* cursor position at sound settings */
@@ -40,14 +41,14 @@ void refreshScreen(int window)
     {
         case MAIN_WIN:
             /* Print the version at the top */
-            sprintf(tmp,"--= MP3 Player v1.10 =--");
+            sprintf(tmp,"--= MP3 Player v2.00 =--");
             cops->putS(COLOR_WHITE, COLOR_BLACK, 65, 10, tmp);
             /* What's playing? */
             cops->setFont(STD7X13);
             sprintf(tmp,"Now Playing:");
             cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 40, tmp);
             sprintf(tmp,"%s",filename);
-            cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 55, tmp);
+            cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 55, tmp);            
             cops->setFont(STD6X9);
             /* fill in the peak meter background */
             if(peakmeters)

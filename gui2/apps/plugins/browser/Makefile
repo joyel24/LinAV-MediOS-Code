@@ -6,12 +6,9 @@ ifeq ($(BUILD),X11)
 LDFLAGS  += -shared
 endif
 
-LDFLAGS  += -lpthread
-
-
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
-TARGET = mp3_play
+TARGET = ls-gui
 
 all: $(TARGET)
 force: clean $(TARGET)

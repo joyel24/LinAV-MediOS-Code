@@ -50,7 +50,7 @@ void handleSettingsWin(int evt);
 void handleSoundWin(int evt);
 
 /* osc_peak_meter.c */
-void drawPeak(void);
+void * drawPeak(void * arg);
 void oscillograph(int l, int r);
 void peak_meters(int l, int r);
 void erase_peak(void);
@@ -59,10 +59,7 @@ void erase_peak(void);
 void pause_resume(void);
 
 /* file_reader.c */
-void mp3_read_more(int size);
-int  read_from_HD(int size);
-int  mp3_need_more(void);
-
+void * mp3_read_more(void * arg);
 
 void debug_info(char * filename,struct mp3entry * mp3);
 #endif

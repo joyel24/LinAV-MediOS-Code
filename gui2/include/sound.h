@@ -25,6 +25,7 @@ int  pause_playback     (void);
 int  stop_playback      (void);
 
 int  readPeak           (struct av_peak * peak);
+int  readFrame          (void);
 
 
 int  setVolume          (int val);

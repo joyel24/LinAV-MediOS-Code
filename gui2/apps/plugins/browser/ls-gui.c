@@ -622,8 +622,10 @@ int launchScript(char * name)
 void handle_type_other(char *filename)
 {
     char *ext;
-
+    
     ext = strrchr(filename, '.');
+    
+    printf("[handle_type_other]: %s, %s\n",filename,ext);
     if (ext == 0)
     {
       // no extension

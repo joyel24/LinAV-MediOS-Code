@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <pthread.h>
 #include "graphics.h"
 #include "events.h"
 #include "cops.h"
@@ -83,6 +84,10 @@ int window = MAIN_WIN;                   /* "1" = main, "2" = settings, "3" = so
 char * filename;                    /* current file location */
 #ifndef OLD_PLAYER
 FILE * fd;
+int file_size;
+pthread_t read_thread;
+pthread_t draw_thread;
+int stopThread=0;
 #endif
 /*******************
  * Other
@@ -115,10 +120,12 @@ int eventHandler(int evt)
 
 void mainLoop(void)
 {
-    int size;
-    if((size=mp3_need_more())!=0)
-        mp3_read_more(size);
-    drawPeak();
+    int size,frame;
+    //mp3_read_more();
+    //frame=cops->readFrame();
+    //printf("frame=%d time=%d\n",frame,(frame*26)/1000);
+    //printf("OUT: %d IN: %d\n",data.buffer_read,data.buffer_write);
+    //drawPeak();
 }
 
 struct id3tag fTag;
@@ -142,7 +149,12 @@ int main(int argc, char * * argv)
             fprintf(stderr,"Can't open file %s\n",filename);
             return -1;
     }
-    printf ("File opened\n");
+    
+    fseek(fd,0,SEEK_END);
+    file_size = ftell(fd);
+    fseek(fd,0,SEEK_SET);
+    
+    printf ("File opened size=%d\n",file_size);
 #endif
     
 #endif
@@ -162,18 +174,20 @@ int main(int argc, char * * argv)
     }
     else
         debug_info(filename,&(fTag.id3));
-    fseek(fd,fTag.id3.first_frame_offset,SEEK_SET);
+   // fseek(fd,fTag.id3.first_frame_offset,SEEK_SET);
     
     data.buffer_len=MP3_BUFF_SIZE;
     data.pos=0;
     data.finished=0;
     data.buffer_read=0;
     data.buffer_write=0;
+    data.endOfFile=0;
     
     data.buffer=(char*)malloc(data.buffer_len);
     if(!data.buffer)
     {
             fprintf(stderr,"Can't allocate buff (size=%d)\n",data.buffer_len);
+            fclose(fd);
             return -1;
     }
 
@@ -184,9 +198,23 @@ int main(int argc, char * * argv)
     	return 0;    
 #ifndef OLD_PLAYER
     printf("ini of mp3 driver done\n");
-    mp3_read_more(10200);
+    //mp3_read_more();
+    if (pthread_create(&read_thread, NULL, mp3_read_more, 0) != 0)
+    {
+        printf("Error, can't create read thread\n");
+        fclose(fd);
+        free(data.buffer);
+        return 0;         
+    }
     
-    printf("I've read 5100 bytes of data: %d %d\n",data.buffer_read,data.buffer_write);
+    if (pthread_create(&draw_thread, NULL, drawPeak, 0) != 0)
+    {
+        printf("Error, can't create draw thread\n");
+        fclose(fd);
+        free(data.buffer);
+        return 0;         
+    }
+    //printf("First read finished\nout_buf:%d in_buff:%d\n",data.buffer_read,data.buffer_write);
 #endif
     /* initialize the graphics and clear the lcd */
     cops->hideSBar();
@@ -202,7 +230,7 @@ int main(int argc, char * * argv)
 #ifdef OLD_PLAYER        
     PACK(cops,drawPeak);
 #else
-    PACK(cops,mainLoop);
+    PACK(cops,NULL);
     fclose(fd);
 #endif
     

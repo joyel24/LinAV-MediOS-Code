@@ -78,6 +78,7 @@ struct client_operations cops={
     stop_playback      : stop_playback,
     
     readPeak          : readPeak,
+    readFrame         : readFrame,
     
     setVolume          : setVolume,
     setBass            : setBass,

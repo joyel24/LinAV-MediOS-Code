@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #include "cops.h"
 #include "colordef.h"
@@ -30,6 +31,9 @@ extern int sound_cursor_position;
 extern int settings_cursor_position;
 extern int vol,bass,treb,bal,loud;
 extern int fade,peakmeters,scroll_osci,peak_decay,peak_levelcolor,peak_bgcolor,osci_levelcolor,osci_bgcolor;
+extern int stopThread;
+extern pthread_t read_thread;
+extern pthread_t draw_thread;
 /*******************/
 
 void handleMainWin(int evt)
@@ -52,15 +56,19 @@ void handleMainWin(int evt)
             pause_resume();
             break;
         case BTN_OFF: /* Exit player */
-        case EVT_QUIT:            
+        case EVT_QUIT:
+            stopThread=1;            
             if(fade)
                 while(vol > 35)
                 {
                     vol--;
                     apply_settings();
                 }
+            
             if(!cops->stop_playback()) fprintf(stderr,"error stopping\n");
-            cops->close_mp3_playback(); 
+            cops->close_mp3_playback();
+            pthread_join(read_thread, NULL);
+            pthread_join(draw_thread, NULL);
             RELEASE(cops);          
             break;
         case BTN_F2: /* go settings */            

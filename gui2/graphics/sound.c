@@ -78,6 +78,15 @@ int readPeak(struct av_peak * peak)
     return execDSP_ioctl(AV_DSP_OUT_PEAK_REAL,(unsigned int)peak);  
 }
 
+int readFrame(void)
+{
+    int ret;
+    if(execDSP_ioctl(AV_DSP_FRAME_CNT,&ret)<0)
+        return 0;
+    else
+        return ret;
+}
+
 int setVolume(int val)
 {
     return execMIX_ioctl(AV_SET_MIX_VOLUME,(unsigned int)&val);

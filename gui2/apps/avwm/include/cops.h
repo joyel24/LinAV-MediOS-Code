@@ -97,7 +97,8 @@ struct client_operations {
     int  (*pause_playback)      (void);
     int  (*stop_playback)       (void);
     
-    int  (*readPeak)           (struct av_peak * peak);
+    int  (*readPeak)            (struct av_peak * peak);
+    int  (*readFrame)           (void);
     
     int  (*setVolume)           (int val);
     int  (*setBass)             (int val);
