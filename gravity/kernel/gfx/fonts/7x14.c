@@ -225,13 +225,16 @@ std7x14_232, std7x14_233, std7x14_234, std7x14_235, std7x14_236, std7x14_237, st
 std7x14_240, std7x14_241, std7x14_242, std7x14_243, std7x14_244, std7x14_245, std7x14_246, std7x14_247, 
 std7x14_248, std7x14_249, std7x14_250, std7x14_251, std7x14_252, std7x14_253, std7x14_254, std7x14_255};
 
-#include "graphics.h"
+#include "kgraphics.h"
+#include "kfont.h"
+
 struct graphicsFont std7x14_o = {
 	(char**)&std7x14_,
 	7,
 	0,
 	7,
 	14,
-	1
+	1,
+        STD7X14
 };
 struct graphicsFont * std7x14 = &std7x14_o;

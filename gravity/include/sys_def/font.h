@@ -32,7 +32,7 @@
 #define SHADOW               0X0010
 #define SHADOWBOLD           0X0011
 
-#define needFont(name)     extern FONT_ID name;
+
 
 #endif
 

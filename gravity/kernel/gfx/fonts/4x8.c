@@ -161,13 +161,16 @@ std4x8_120, std4x8_121, std4x8_122, std4x8_123, std4x8_124, std4x8_125, std4x8_1
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0};
 
-#include "graphics.h"
+#include "kgraphics.h"
+#include "kfont.h"
+
 struct graphicsFont std4x8_o = {
 	(char**)&std4x8_,
 	4,
 	0,
 	4,
 	8,
-	1
+	1,
+        STD4X8
 };
 struct graphicsFont * std4x8 = &std4x8_o;

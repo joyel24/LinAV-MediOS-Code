@@ -1,14 +1,19 @@
 include ../../../Makefile.conf
 
-GCCFLAGS=-I../../../include -I../../../include/kernel
+GCCFLAGS+=-I../../../include -I../../../include/kernel
 
 @SRC = $(wildcard *.c)
 @OBJS = $(SRC:%.c=%.o)
-OBJS = 4x6.o
+OBJS = 4x6.o  6x9.o shadowBold_12x18.o
 
-all: $(OBJS)
+OPT = $(OBJS:%.o=-D_std%)
+
+all: $(OBJS) font
 	@cp -f $(OBJS) ../
 
+font:
+	$(GCC) $(GCCFLAGS) -c -o font.o font.c $(OPT)
+        
 clean: 
 	@rm -f *.o *.bak *~ *.gdb
 

@@ -28,6 +28,7 @@ struct graphicsFont {
     int      width;
     int      height;
     int      bpline;
+    int      num;
 };
 
 typedef struct graphicsFont *     FONT_ID;

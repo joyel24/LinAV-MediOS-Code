@@ -225,13 +225,16 @@ std6x13_232, std6x13_233, std6x13_234, std6x13_235, std6x13_236, std6x13_237, st
 std6x13_240, std6x13_241, std6x13_242, std6x13_243, std6x13_244, std6x13_245, std6x13_246, std6x13_247, 
 std6x13_248, std6x13_249, std6x13_250, std6x13_251, std6x13_252, std6x13_253, std6x13_254, std6x13_255};
 
-#include "graphics.h"
+#include "kgraphics.h"
+#include "kfont.h"
+
 struct graphicsFont std6x13_o = {
 	(char**)&std6x13_,
 	6,
 	0,
 	6,
 	13,
-	1
+	1,
+        STD6X13
 };
 struct graphicsFont * std6x13 = &std6x13_o;

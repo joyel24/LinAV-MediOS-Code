@@ -133,13 +133,16 @@ cursive_120, cursive_121, cursive_122, cursive_123, cursive_124, cursive_125, cu
 0, 0, 0, 0, cursive_244, cursive_245, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0};
 
-#include "graphics.h"
+#include "kgraphics.h"
+#include "kfont.h"
+
 struct graphicsFont cursive_o = {
 	(char**)&cursive_,
 	9,
 	0,
 	9,
 	15,
-	2
+	2,
+        CURSIVE
 };
 struct graphicsFont * cursive = &cursive_o;

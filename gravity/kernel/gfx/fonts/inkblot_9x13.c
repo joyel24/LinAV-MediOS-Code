@@ -129,13 +129,16 @@ inkblot_120, inkblot_121, inkblot_122, inkblot_123, inkblot_124, inkblot_125, in
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0};
 
-#include "graphics.h"
+#include "kgraphics.h"
+#include "kfont.h"
+
 struct graphicsFont inkblot_o = {
 	(char**)&inkblot_,
 	9,
 	0,
 	9,
 	13,
-	2
+	2,
+        INKBLOT
 };
 struct graphicsFont * inkblot = &inkblot_o;

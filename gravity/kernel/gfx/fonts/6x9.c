@@ -225,14 +225,17 @@ std6x9_232, std6x9_233, std6x9_234, std6x9_235, std6x9_236, std6x9_237, std6x9_2
 std6x9_240, std6x9_241, std6x9_242, std6x9_243, std6x9_244, std6x9_245, std6x9_246, std6x9_247, 
 std6x9_248, std6x9_249, std6x9_250, std6x9_251, std6x9_252, std6x9_253, std6x9_254, std6x9_255};
 
-#include "graphics.h"
+#include "kgraphics.h"
+#include "kfont.h"
+
 struct graphicsFont std6x9_o = {
 	(char**)&std6x9_,
 	6,
 	0,
 	6,
 	9,
-	1
+	1,
+        STD6X9
 };
 struct graphicsFont * std6x9 = &std6x9_o;
 

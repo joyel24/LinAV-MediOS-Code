@@ -226,12 +226,15 @@ std4x6_240, std4x6_241, std4x6_242, std4x6_243, std4x6_244, std4x6_245, std4x6_2
 std4x6_248, std4x6_249, std4x6_250, std4x6_251, std4x6_252, std4x6_253, std4x6_254, std4x6_255};
 
 #include "kgraphics.h"
+#include "kfont.h"
+
 struct graphicsFont std4x6_o = {
 	(char**)&std4x6_,
 	4,
 	0,
 	4,
 	6,
-	1
+	1,
+        STD4X6
 };
 struct graphicsFont * std4x6 = &std4x6_o;

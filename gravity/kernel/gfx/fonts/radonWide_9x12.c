@@ -128,13 +128,16 @@ radonWide_120, radonWide_121, radonWide_122, radonWide_123, radonWide_124, radon
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0};
 
-#include "graphics.h"
+#include "kgraphics.h"
+#include "kfont.h"
+
 struct graphicsFont radonWide_o = {
 	(char**)&radonWide_,
 	9,
 	0,
 	9,
 	12,
-	2
+	2,
+        RADONWIDE
 };
 struct graphicsFont * radonWide = &radonWide_o;

@@ -161,14 +161,17 @@ dagger_176, 0, dagger_178, dagger_179, 0, dagger_181, dagger_182, dagger_183,
 0, dagger_241, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, dagger_254, 0};
 
-#include "graphics.h"
+#include "kgraphics.h"
+#include "kfont.h"
+
 struct graphicsFont dagger_o = {
 	(char**)&dagger_,
 	9,
 	0,
 	9,
 	14,
-	2
+	2,
+        DAGGER
 };
 struct graphicsFont * dagger = &dagger_o;
 

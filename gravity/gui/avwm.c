@@ -13,6 +13,7 @@
 #include <graphics.h>
 #include <sys_def/colordef.h>
 #include <sys_def/time.h>
+#include <sys_def/font.h>
 #include <api.h>
 
 
@@ -22,7 +23,7 @@ void avwm(void)
     
     open_graphics();
     clearScreen(COLOR_WHITE);
-    
+    setFont(STD6X9);
     iniIcon();
     
     ini_status_bar();

@@ -15,6 +15,8 @@
 
 #include <sys_def/font.h>
 
+#define needFont(name)     extern FONT_ID name;
+
 #define NBFONT        0x16
 
 void ini_font(void);

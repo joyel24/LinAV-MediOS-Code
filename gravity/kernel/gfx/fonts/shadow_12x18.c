@@ -189,13 +189,16 @@ shadow_224, shadow_225, shadow_226, shadow_227, shadow_228, shadow_229, shadow_2
 shadow_240, shadow_241, 0, 0, 0, 0, 0, shadow_247, 
 shadow_248, 0, 0, 0, 0, shadow_253, shadow_254, shadow_255};
 
-#include "graphics.h"
+#include "kgraphics.h"
+#include "kfont.h"
+
 struct graphicsFont shadow_o = {
 	(char**)&shadow_,
 	12,
 	0,
 	12,
 	18,
-	2
+	2,
+        SHADOW
 };
 struct graphicsFont * shadow = &shadow_o;

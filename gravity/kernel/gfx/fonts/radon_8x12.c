@@ -223,13 +223,16 @@ radon_232, radon_233, radon_234, radon_235, radon_236, radon_237, radon_238, rad
 radon_240, radon_241, radon_242, radon_243, radon_244, radon_245, radon_246, radon_247, 
 radon_248, radon_249, radon_250, radon_251, radon_252, radon_253, radon_254, 0};
 
-#include "graphics.h"
+#include "kgraphics.h"
+#include "kfont.h"
+
 struct graphicsFont radon_o = {
 	(char**)&radon_,
 	8,
 	0,
 	8,
 	12,
-	1
+	1,
+        RADON
 };
 struct graphicsFont * radon = &radon_o;
