@@ -141,6 +141,7 @@ struct client_operations cops={
     
     browserEvt         : browserEvt,
     viewNewDir         : viewNewDir,
+    clearBrowser       : clearBrowser,
     cleanList          : cleanList,
     chgSelect          : chgSelect,
     nbSelected         : nbSelected,
@@ -156,4 +157,5 @@ struct client_operations cops={
     helperEvt         : helperEvt,
     hideHelper        : hideHelper,
     
+    draw_scrollBar    : draw_scrollBar,
 };

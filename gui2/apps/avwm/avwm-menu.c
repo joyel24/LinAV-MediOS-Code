@@ -59,7 +59,10 @@ struct menu_data menu_cfg = {
     submenu_str    : mk_submenu_str,
     getSubIcon     : mk_sub_icon,
     getItemIcon    : mk_item_icon,
-    isTxtMenu      : 0
+    isTxtMenu      : 0,
+    border_color   : COLOR_BLACK,
+    has_border     : 0,
+    title          : NULL,
 };
 
 struct helperMenu menuMenu = {
@@ -259,6 +262,8 @@ int ini_menu(char * path,struct plugin * plug)
     sub_icon=loadIcon("sub_icon.ico");
     back_icon=loadIcon("back_icon.ico");
     plugin_icon=loadIcon("plugin_icon.ico");
+    
+    putS(COLOR_WHITE,COLOR_BLACK,5,120,"[ini_menu] reading icons");
     
     free(tmpC);
     return 1;

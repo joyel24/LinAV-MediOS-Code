@@ -34,7 +34,7 @@ struct client_operations * cops;
 #define MWINCLUDECOLORS
 
 
-char buffer[MP3_BUFF_SIZE];
+//char buffer[MP3_BUFF_SIZE];
 
 /******************************
  * Color order for LCD printing
@@ -150,7 +150,13 @@ int main(int argc, char * * argv)
     data.freqPeakDraw=10;
     data.peakDraw=NULL;//drawPeak;
     
-    data.buffer=&buffer;
+    /*data.buffer=&buffer;*/
+    data.buffer=(char*)malloc(sizeof(char)*MP3_BUFF_SIZE);
+    if(!data.buffer)
+    {
+        fprintf(stderr,"Error, can't allocate buffer\n");
+        return 0;
+    }
  
 
     /* initialize the graphics and clear the lcd */

@@ -70,7 +70,11 @@ struct menu_data menu_cfg = {
     submenu_str    : mk_item_str,
     getSubIcon     : NULL,
     getItemIcon    : NULL,
-    isTxtMenu      : 1
+    isTxtMenu      : 1,
+    border_color   : COLOR_BLACK,
+    has_border     : 0,
+    title          : NULL,
+    
 };
 
 struct menu_item rootMenu;

@@ -24,10 +24,13 @@ struct menu_data menu_cfg = {
     useOwnDisp     : 1,
     x:200,y:120,width:8*16,height:100,
     dx:2,dy:2,
-    txt_color      : COLOR_WHITE,
-    bg_color       : COLOR_GREEN,
+    txt_color      : COLOR_BLACK,
+    bg_color       : COLOR_LIGHT_BLUE,
     select_color   : COLOR_BLUE,
     sub_color      : COLOR_RED,
+    border_color   : COLOR_BLACK,
+    has_border     : 0,
+    title          : NULL,
     root           : NULL,
     right_action   : do_right,
     on_action      : do_on,
@@ -80,7 +83,7 @@ struct browser_data browser2 = {
     pos             : 0,
     nselect         : 0,
    
-    scroll_pos      : RIGHT_SCROLL,
+    scroll_pos      : LEFT_SCROLL,
     
     show_dot_files  : 1,
 
@@ -89,15 +92,16 @@ struct browser_data browser2 = {
     totSize         : 0,
     
     nb_disp_entry   : 20,
-    x_start         : 0,
-    y_start         : 18,
+    x_start         : 20,
+    y_start         : 40,
     
-    width           : 320,
-    height          : 202,
+    width           : 300,
+    height          : 200,
     entry_height    : 10,
     
-    draw_bottom_status : draw_cp_mv_bottom,
-    draw_file_size     : draw_file_size
+    draw_bottom_status : NULL,
+    draw_file_size     : NULL,
+    clear_status       : NULL
 };
 struct browser_data * bdata2;
 
@@ -211,7 +215,11 @@ void do_right(void * data)
                 
                 bdata2=&browser2;
                 evt_mode=CP_MV_MODE;
-                cops->viewNewDir(bdata2,pwd);                
+                cops->clearBrowser(bdata);
+                cops->putS(COLOR_WHITE, COLOR_RED, 5,20, "Select the destination folder");
+                cops->drawRect(COLOR_BLACK,bdata2->x_start-1,bdata2->y_start-1,bdata2->width+2,bdata2->height+2);
+                if(!cops->viewNewDir(bdata2,pwd))
+                    stopLs();
             }
             break;
         case MENU_DELETE:
@@ -246,7 +254,6 @@ void do_right(void * data)
                 {
                     cops->mountCF();
                     reload=true;
-                    /*viewNewDir((bdata,"./");*/
                 }                    
             }
             break;
@@ -255,7 +262,8 @@ void do_right(void * data)
     cops->iniHelperMenu(&browserMenu);
     
     if(reload == true)
-        cops->viewNewDir(bdata,"./");
+        if(!cops->viewNewDir(bdata,"./"))
+            stopLs();
     
 }
 
@@ -300,18 +308,21 @@ void cp_mv_evt(int evt)
     {
         //case BTN_RIGHT: dest has to be dir atm
         case BTN_ON:
+            cops->clearBrowser(bdata2);
             evt_mode=BRW_MODE;
             if(!getcwd(&pwd2,PATHLEN))
             {
-                cops->msgBox("Warning - Copy§Move", "Can't get dest path", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
-                cops->viewNewDir(bdata,pwd);
+                cops->msgBox("Warning - Copy/Move", "Can't get dest path", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
+                if(!cops->viewNewDir(bdata,pwd))
+                    stopLs();
                 break;
             }
             
             if(!strcmp(pwd,pwd2))
             {
                 cops->msgBox("Warning - Copy/Move", "dest==src", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
-                cops->viewNewDir(bdata,pwd);
+                if(!cops->viewNewDir(bdata,pwd))
+                    stopLs();
                 break;
             }
                         
@@ -326,8 +337,14 @@ void cp_mv_evt(int evt)
                 else
                     if(!cops->do_cp(src,pwd2)) fprintf(stderr," - cp error\n"); else fprintf(stderr," - cp done\n");                
             }
-            cops->viewNewDir(bdata,pwd2);
+            if(!cops->viewNewDir(bdata,pwd2))
+                stopLs();
             break;
+         case BTN_OFF:
+             cops->clearBrowser(bdata2);
+             if(!cops->viewNewDir(bdata,pwd))
+                 stopLs();
+             break;
     }
 }
 

@@ -25,18 +25,19 @@ void draw_scrollBar(struct scroll_bar * scrollBar, int items, int min_shown,int 
     int start;
     int size;
     
-    int x,y,width,height,orientation,color,bg_color;
+    int x,y,width,height,orientation,color,bg_color,border_color;
     
     x=scrollBar->x;
     y=scrollBar->y;
     width=scrollBar->width;
     height=scrollBar-> height;
     color=scrollBar->fg_color;
+    border_color=scrollBar->border_color;
     bg_color=scrollBar->bg_color;
     orientation=scrollBar->orientation;
     
     /* draw box */
-    drawRect(color, x, y, width, height);
+    drawRect(border_color, x, y, width, height);
 
     /* clear edge pixels */
     drawPixel(bg_color, x, y);

@@ -16,6 +16,7 @@
 #define __SCROLLBAR_H
 
 struct scroll_bar {
+    int border_color;
     int bg_color;
     int fg_color;
     int x;

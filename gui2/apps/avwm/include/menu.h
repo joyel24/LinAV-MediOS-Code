@@ -30,10 +30,13 @@ struct menu_data {
         int isTxtMenu;
         int width;int height;int x;int y;
         int dx;int dy;
-        unsigned int txt_color;
-        unsigned int bg_color;
-        unsigned int select_color;
-        unsigned int sub_color;
+        int txt_color;
+        int bg_color;
+        int select_color;
+        int sub_color;
+        int border_color;
+        char * title;
+        int has_border;
         void (*right_action) (void * data);
         void (*on_action)    (void * data);
         void (*off_action)   (void * data);

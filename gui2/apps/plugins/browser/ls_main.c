@@ -69,7 +69,8 @@ struct browser_data realData = {
     entry_height    : 10,
     
     draw_bottom_status : draw_bottom_status,
-    draw_file_size     : draw_file_size
+    draw_file_size     : draw_file_size,
+    clear_status       : clear_status
 };
 
 struct browser_data * bdata;
@@ -82,6 +83,12 @@ void printList(struct browser_data * bdata,int val)
     for(i=0;i<bdata->listused;i++)
         fprintf(stderr,"%d: (%s) %s\n",i,bdata->list[i].type==TYPE_FILE?"F":"D",bdata->list[i].name);
     fprintf(stderr,"---------------------------- %d\n",val);
+}
+
+void stopLs(void)
+{
+    cops->hideHelper();
+    RELEASE(cops)
 }
 
 int eventHandler(int evt)
@@ -107,11 +114,13 @@ int eventHandler(int evt)
                     }
                     break;
                 case BTN_F1:
-                    cops->viewNewDir(bdata,"/mnt");                  
+                    if(!cops->viewNewDir(bdata,"/mnt"))
+                        stopLs();
                     break;
                 case BTN_F2:
                     if(cops->CF_is_mounted())
-                        cops->viewNewDir(bdata,"/cf");
+                        if(!cops->viewNewDir(bdata,"/cf"))
+                            stopLs();
                     break;
                 case BTN_F3:
                     menu_cfg.root=&menu1;
@@ -134,10 +143,12 @@ int eventHandler(int evt)
                     getcwd(pwd, 10);
                     pwd[10]='\0';
                     if(pwd[0]=='/' && pwd[1]=='c' && pwd[2]=='f' && (pwd[3]=='/'||pwd[3]=='\0'))
-                        cops->viewNewDir(bdata,"/mnt");
+                        if(!cops->viewNewDir(bdata,"/mnt"))
+                            stopLs();
                     break;
                 case EVT_CF_ADDED:
-                    cops->viewNewDir(bdata,"/cf");
+                    if(!cops->viewNewDir(bdata,"/cf"))
+                        stopLs();
                     break;
             }
             break;
@@ -178,7 +189,11 @@ int main(int argc,char * * argv)
         else
             chdir(argv[1]);
 
-        cops->viewNewDir(bdata,"./");       
+        if(!cops->viewNewDir(bdata,"./"))
+        {
+            STOPME(cops)
+            return -1;
+        }
         
         PACK(cops,NULL);
 
@@ -234,4 +249,9 @@ void draw_bottom_status(struct browser_data *bdata)
     fprintf(stderr,"%s\n",tmp);
     
     cops->putS(COLOR_BLUE, COLOR_WHITE,2, 230, tmp);    
+}
+
+void clear_status(struct browser_data *bdata)
+{
+    cops->fillRect(COLOR_WHITE,2, 220,316,20);
 }

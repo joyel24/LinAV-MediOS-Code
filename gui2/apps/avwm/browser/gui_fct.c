@@ -21,6 +21,7 @@
 #include "icons.h"
 #include "file_type.h"
 #include "scrollbar.h"
+#include "msgBox.h"
 
 BITMAP * gui_ls_upBitmap;
 BITMAP * gui_ls_dwBitmap;
@@ -34,9 +35,10 @@ BITMAP * gui_ls_imageBitmap;
 #define    FILE_X_OFFSET 10
 
 struct scroll_bar browser_scroll = {
-    fg_color    : COLOR_BLACK,
-    bg_color    : COLOR_WHITE,
-    orientation : VERTICAL
+    border_color : COLOR_BLACK,
+    fg_color     : COLOR_BLUE,
+    bg_color     : COLOR_WHITE,
+    orientation  : VERTICAL
 };
     
 
@@ -59,9 +61,10 @@ int viewNewDir(struct browser_data *bdata,char *name)
     }
 
     cleanList(bdata);
-    if(doLs(bdata,"./")<0)
+    if(!doLs(bdata,"./"))
     {
-        bdata->listused = 0;
+        cleanList(bdata);
+        msgBox("ERROR - Browser", "Can't load dir", MSGBOX_TYPE_OK, MSGBOX_ICON_ERROR);
         return 0;
     }
 
@@ -79,7 +82,15 @@ int viewNewDir(struct browser_data *bdata,char *name)
     return 1;
 }
 
-int printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct browser_data *bdata)
+void clearBrowser(struct browser_data *bdata)
+{
+    cleanList(bdata);
+    fillRect(COLOR_WHITE,bdata->x_start,bdata->y_start,bdata->width,bdata->height);
+    if(bdata->clear_status)
+        bdata->clear_status(bdata);
+}
+
+void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct browser_data *bdata)
 {
     int             color;
     int             select_color;
@@ -140,7 +151,8 @@ int printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct br
         if(dEntry->selected)
             select_color=COLOR_ORANGE2;
         putS(color, select_color,X+11, Y, dEntry->name);
-        bdata->draw_file_size(dEntry);
+        if(bdata->draw_file_size)
+            bdata->draw_file_size(dEntry);
     }
     else
     {
@@ -150,7 +162,6 @@ int printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct br
             select_color= COLOR_WHITE;
         putS(color, select_color,X+11, Y, dEntry->name);
     }
-    return 1;
 }
 
 void printAllName(struct browser_data *bdata)
@@ -170,8 +181,8 @@ void printAllName(struct browser_data *bdata)
     We should replace this with one call to fillRect !! */
     for(;i<pos+bdata->nb_disp_entry;i++)
         fillRect(COLOR_WHITE,X, Y+(i-pos)*H, W,H);
-
-    bdata->draw_bottom_status(bdata);
+    if(bdata->draw_bottom_status)
+        bdata->draw_bottom_status(bdata);
 }
 
 void printAName(struct browser_data *bdata,int pos, int nselect, int clear, int selected)

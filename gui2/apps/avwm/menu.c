@@ -176,6 +176,9 @@ void start_menu(struct menu_data * client_menu)
 
         setPlane(BMAP2);
         clearScreen(current_menu->bg_color);
+        if(current_menu->has_border)
+            drawRect(current_menu->border_color,0,0,current_menu->width,current_menu->height);
+        
         setPos(BMAP2,0x14 +2*current_menu->x,0x13+current_menu->y);
         setPlane(BMAP1);
     }

@@ -69,13 +69,12 @@ void drawTime(void)
     struct av_tm  date_time;
     
     if(getTime(&date_time))
-    {    
-        fillRect(BG_COLOR,135,3,106,10);
-        
+    {   
         sprintf(timeSt,"%02d:%02d%s %02d/%02d/%04d",HOUR(date_time.tm_hour),date_time.tm_min,AMPM_ADD(date_time.tm_hour),
                                                          DATE1(date_time.tm_mday,date_time.tm_mon),
                                                          DATE2(date_time.tm_mday,date_time.tm_mon),
                                                          date_time.tm_year);
+        fillRect(BG_COLOR,135,3,106,10);
         putS(TIME_COLOR,BG_COLOR,135,3,timeSt);
     }
 

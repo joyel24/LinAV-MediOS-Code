@@ -57,6 +57,7 @@ struct browser_data {
     
     void (*draw_bottom_status)  (struct browser_data *bdata);
     void (*draw_file_size)      (struct dir_entry * entry);
+    void (*clear_status)        (struct browser_data *bdata);
     
     
 };
@@ -89,11 +90,12 @@ int  browserEvt         (int evt,struct browser_data * bdata);
 /*****    gui_fct    *****/
 void iniBrowser         (void);
 int  viewNewDir         (struct browser_data *bdata,char *name);
-int  printName          (struct dir_entry * dEntry,int pos,int clear,int selected,struct browser_data *bdata);
+void  printName          (struct dir_entry * dEntry,int pos,int clear,int selected,struct browser_data *bdata);
 void printAllName       (struct browser_data *bdata);
 void printAName         (struct browser_data *bdata,int pos, int nselect, int clear, int selected);
 void draw_bottom_status (struct browser_data *bdata);
 void draw_file_size     (struct dir_entry * entry);
 void createSizeString   (char * str,int Isize);
+void clearBrowser       (struct browser_data *bdata);
 
 #endif

@@ -134,17 +134,29 @@ int browserEvt(int evt,struct browser_data * bdata)
             switch(bdata->list[bdata->pos+bdata->nselect].type)
             {
                 case TYPE_BACK:
-                    viewNewDir(bdata,"../");
+                    if(!viewNewDir(bdata,"../"))
+                    {
+                        evt=EVT_QUIT;
+                        break;
+                    }
                     evt=NO_EVENT; /* clear this event */
                     break;
                 case TYPE_DIR:
-                    viewNewDir(bdata,bdata->list[bdata->pos+bdata->nselect].name);
+                    if(!viewNewDir(bdata,bdata->list[bdata->pos+bdata->nselect].name))
+                    {
+                        evt=EVT_QUIT;
+                        break;
+                    }
                     evt=NO_EVENT; /* clear this event */
                     break;
             }
             break;
         case BTN_LEFT:
-            viewNewDir(bdata,"../");
+            if(!viewNewDir(bdata,"../"))
+            {
+                evt=EVT_QUIT;
+                break;
+            }
             evt=NO_EVENT; /* clear this event */
             break;
         case EVT_REDRAW:

@@ -51,3 +51,7 @@ void draw_cp_mv_bottom (struct browser_data *bdata);
 /**** drawings        ******/
 void draw_bottom_status  (struct browser_data *bdata);
 void draw_file_size      (struct dir_entry * entry);
+void clear_status        (struct browser_data *bdata);
+
+
+void stopLs        (void);
