@@ -158,7 +158,7 @@ void         clearScreen      (unsigned int color);
 void drawImage        (char * filename);
 
 /* Font */
-#define needFont(name)	 FONT_ID name;
+#define needFont(name)	 extern FONT_ID name;
 void setFont(FONT_ID font);
 FONT_ID getFont(void);
 

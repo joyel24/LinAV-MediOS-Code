@@ -26,6 +26,10 @@
 #define TIME_COLOR COLOR_BLACK
 #define BATTERY_REFRESH_VALUE 20
 
+NEED_ICONE(linavLogo)
+NEED_ICONE(usbIcon)
+NEED_ICONE(powerIcon)
+
 int batteryRefresh=0;
 int pwrState=0;
 int usbState=0;

@@ -443,8 +443,7 @@ void lcd_update(int type, int x_ini, int y_ini, int w, int h)
                                 break;
                         }
                         XDrawPoint(display, window, gc, default_gc->buffer->x+x-0x14, default_gc->buffer->y+y-0x12);
-                }
-                
+                }                
                 setSav(default_gc,x,y,color);
             }
         }

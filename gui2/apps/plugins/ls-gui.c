@@ -38,6 +38,13 @@
 
 #define    toLower(chr)  ((chr>64 && chr<91)?chr+32:chr)
 
+NEED_ICONE(upBitmap)
+NEED_ICONE(dwBitmap)
+NEED_ICONE(dirBitmap)
+NEED_ICONE(mp3Bitmap)
+NEED_ICONE(textBitmap)
+NEED_ICONE(imageBitmap)
+
 int namesort(s1,s2)
 char **s1;
 char **s2;
