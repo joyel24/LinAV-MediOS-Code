@@ -173,6 +173,14 @@ void do_right(void * data)
 {
     cops->stop_menu();
     mode=1;
+
+    if(strcmp((char*)data, "Copy") == 0)
+    {
+        // Copy the current selection
+//        list[pos+nselect].name
+        cops->putS(COLOR_BLACK, COLOR_WHITE,5, 230, "COPY");
+
+    }
 }
 void do_F1(void * data)
 {
@@ -186,7 +194,7 @@ void do_F3(void * data)
 
 void mk_item_str(void * data,char * str)
 {
-    sprintf(str,"%s",(char*) (char*)data);
+    sprintf(str,"%s",(char*)data);
 }
 
 struct menu_data menu_cfg = {
@@ -505,7 +513,7 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
             cops->drawBITMAP (&imageBitmap, 2, y);
         else
             cops->fillRect(COLOR_WHITE, 2, y, 8, 8);
-    }   
+    }
 
     if(selected)
         cops->putS(color, COLOR_BLUE,x, y, dEntry->name);
@@ -860,6 +868,7 @@ int main(int argc,char * * argv)
 
         menu1.data=(void*)"Rename";
         menu2.data=(void*)"Delete";
+        menu3.data=(void*)"Copy";
 
         menu1.prev=NULL;
         menu1.nxt=&menu2;
@@ -870,6 +879,11 @@ int main(int argc,char * * argv)
         menu2.nxt=&menu3;
         menu2.sub=NULL;
         menu2.up=NULL;
+
+        menu3.prev=&menu2;
+        menu3.nxt=NULL;
+        menu3.sub=NULL;
+        menu3.up=NULL;
 
         listused = 0;
 
