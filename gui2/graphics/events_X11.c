@@ -20,10 +20,12 @@
 #include "X11/keysym.h"
 #include "misc.h"
 
+/* Global variables */
 extern Display* display;
 extern Window window;	/*variable Event */
 int key;
 XEvent event;
+int stateUSB = 0;
 
 int nxtEvent(void)
 {   
@@ -117,8 +119,16 @@ int getKey(int key)
 	    
 	case XK_u:
 	case XK_U:
-	  getUSB();
-	  return EVT_USB;
+	  if(stateUSB == 0)
+	  {
+	    stateUSB = 1;
+	    return EVT_USB;
+	  }
+	  else
+	  {
+	    stateUSB = 0;
+	  }
+	  printf("%d\n", stateUSB);
 	break;
         }
 }
