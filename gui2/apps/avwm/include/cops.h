@@ -106,6 +106,8 @@ struct client_operations {
     
     void (*msgBox)              (char *);
     
+    int  (*getTick)             (void);
+    
 };
 
 #endif

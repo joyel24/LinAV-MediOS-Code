@@ -21,6 +21,7 @@
 #include "sound.h"
 #include "parse_cfg.h"
 #include "msgBox.h"
+#include "misc.h"
 
 #include <stdlib.h>
 
@@ -92,6 +93,8 @@ struct client_operations cops={
     newLine            : add_line,
     curLineNum         : curLineNum,
     
-    msgBox             : msgBox
+    msgBox             : msgBox,
+    
+    getTick            : getTick
 
 };

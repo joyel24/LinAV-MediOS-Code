@@ -63,6 +63,8 @@ struct position cursor_pos={3,2};
 #define NXT_POS     0
 #define PREV_POS    1
 
+#define SEARCH_DEPTH 4
+
 #define DEBUG
 
 int board[NB_CELL][NB_CELL];

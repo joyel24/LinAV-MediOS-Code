@@ -13,7 +13,6 @@ int main(int argc,char * * argv)
 	
 	setFont(std6x9);
 			
-	//fillColorRect(1, 14 , 0, 10, 10, gc);
 	
 	for(i=0;i<16;i++)
 	{
@@ -30,7 +29,6 @@ int main(int argc,char * * argv)
 	}
 		
 	
-	//for(i=0;i<1000000;i++);
 	while(1);
 	close_graphics();
 	return 0;
