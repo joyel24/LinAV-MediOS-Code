@@ -135,7 +135,7 @@ void kernel_startup_thread (void)
 
     print_boot_info();
     
-    load_bflat("/a.out");
+    load_bflat("/test.grv");
     
     
     while(1) /*nothing*/;
