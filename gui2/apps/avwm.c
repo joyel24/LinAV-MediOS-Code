@@ -101,12 +101,6 @@ void drawTime()
 	putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,150,2,timeSt);
 }
 
-int convValue(int val)
-{
-	return ((((val>>4)&0xF)*10)+(val&0xF));
-	//return val;
-}
-
 void getTime(char * timeSt)
 {
 	int fd;
@@ -127,9 +121,8 @@ void getTime(char * timeSt)
 	
 	close(fd);   
 
-	sprintf(timeSt, "%02d:%02d:%02d %02d/%02d/%04d", convValue(date_time.tm_hour),convValue(date_time.tm_min),convValue(date_time.tm_sec),
-	                                                      convValue(date_time.tm_mday),convValue(date_time.tm_mon),2000+
-							      convValue(date_time.tm_year));
+	sprintf(timeSt, "%02d:%02d:%02d %02d/%02d/%04d", date_time.tm_hour,date_time.tm_min,date_time.tm_sec,
+                                                         date_time.tm_mday,date_time.tm_mon,date_time.tm_year);
 }
 
 void drawMenu(void)

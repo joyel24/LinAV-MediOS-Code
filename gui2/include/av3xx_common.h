@@ -18,14 +18,14 @@
 
 /* rtc */
 struct tm {
-    unsigned char tm_ms;
-    unsigned char tm_sec;
-    unsigned char tm_min;
-    unsigned char tm_hour;
-    unsigned char tm_wday;
-    unsigned char tm_mday;
-    unsigned char tm_mon;
-    unsigned char tm_year;
+    int tm_ms;
+    int tm_sec;
+    int tm_min;
+    int tm_hour;
+    int tm_wday;
+    int tm_mday;
+    int tm_mon;
+    int tm_year;
 };
 
 /* buttons, joystick */
