@@ -38,7 +38,7 @@ struct client_operations * cops;
 /* the cursor coordinates */
 int x=0,y=0;
 int GameMode = 0;
-int settingParam = 0;
+int matrixSize = 0;
 int turns = 0;
 
 static unsigned char pair1[PIECE_DIM][PIECE_DIM] = // identifier = 1 - Raute
@@ -965,12 +965,6 @@ static BITMAP pair26B = {(unsigned int) pair26, PIECE_DIM, PIECE_DIM, 0, 0}; // 
 static BITMAP pair27B = {(unsigned int) pair27, PIECE_DIM, PIECE_DIM, 0, 0}; // identifier = 27
 static BITMAP pair28B = {(unsigned int) pair28, PIECE_DIM, PIECE_DIM, 0, 0}; // identifier = 28
 
-/* the tile struct
-if there is a mine, mine is true
-if tile is known by player, known is true
-if tile has a flag, flag is true
-neighbors is the total number of mines arround tile
-*/
 typedef struct tile {
     int identifier;  // eindeutige ID zur Identifizierung der Paare
     int known;       // schon sichtbare Päarchen
@@ -1021,8 +1015,9 @@ void delay(int value)
 
 void endOfGame()
 {
-    cops->fillRect(COLOR_GREEN, 4,227,95,13);
-    cops->putS(COLOR_WHITE, COLOR_GREEN, 5,228, "!!! Y O U  W I N !!!");
+    cops->setFont(STD8X13);
+    cops->putS(COLOR_BLACK, COLOR_WHITE, 40,90, "!!! Y O U  W I N !!!");
+    cops->setFont(STD6X9);
 }
 
 void showTurns()
@@ -1031,8 +1026,10 @@ void showTurns()
 
     cops->fillRect(COLOR_GREEN, 99,227,95,13);
 
+    cops->setFont(STD6X10);
     sprintf(tmp,"Turns: %ld", turns);
     cops->putS(COLOR_BLACK, COLOR_GREEN, 100,228, tmp);
+    cops->setFont(STD6X9);
 }
 
 void showCntPairs()
@@ -1041,8 +1038,10 @@ void showCntPairs()
 
     cops->fillRect(COLOR_GREEN, 4,227,95,13);
 
+    cops->setFont(STD6X10);
     sprintf(tmp,"Pairs left: %ld", cntPairsLeft);
     cops->putS(COLOR_BLACK, COLOR_GREEN, 5, 228, tmp);
+    cops->setFont(STD6X9);
 }
 
 void writeINI()
@@ -1105,64 +1104,52 @@ void readINI()
 
 void RefreshSettings()
 {
-/*
     char tmp[10];
     cops->fillRect(COLOR_GREEN, 0, 20, 160,80); // clear
 
-	sprintf(tmp,"%ld", p);
-
-	if(settingParam == 0)
+	if(matrixSize == 0)
 	{
-        sprintf(tmp,"%ld", width);
-        cops->putS(COLOR_RED, COLOR_GREEN, 5,30, "Width");
-        cops->putS(COLOR_RED, COLOR_GREEN, 100,30, tmp);
+        cops->putS(COLOR_RED, COLOR_GREEN, 5,30, "Matrix 8 x 7");
+        height = 8;
+        width  = 7;
 	}
 	else
 	{
-        sprintf(tmp,"%ld", width);
-        cops->putS(COLOR_BLACK, COLOR_GREEN, 5,30, "Width");
-        cops->putS(COLOR_BLACK, COLOR_GREEN, 100,30, tmp);
+        cops->putS(COLOR_BLACK, COLOR_GREEN, 5,30, "Matrix 8 x 7");
 	}
 
-	if(settingParam == 1)
+	if(matrixSize == 1)
 	{
-        sprintf(tmp,"%ld", height);
-        cops->putS(COLOR_RED, COLOR_GREEN, 5,50, "Height");
-        cops->putS(COLOR_RED, COLOR_GREEN, 100,50, tmp);
+        cops->putS(COLOR_RED, COLOR_GREEN, 5,50, "Matrix 6 x 6");
+        height = 6;
+        width  = 6;
     }
 	else
 	{
-        sprintf(tmp,"%ld", height);
-        cops->putS(COLOR_BLACK, COLOR_GREEN, 5,50, "Height");
-        cops->putS(COLOR_BLACK, COLOR_GREEN, 100,50, tmp);
+        cops->putS(COLOR_BLACK, COLOR_GREEN, 5,50, "Matrix 6 x 6");
 	}
 
-	if(settingParam == 2)
+	if(matrixSize == 2)
 	{
-        sprintf(tmp,"%ld", p);
-   	    cops->putS(COLOR_RED, COLOR_GREEN, 5,70, "Mines[%]");
-        cops->putS(COLOR_RED, COLOR_GREEN, 100,70, tmp);
+        cops->putS(COLOR_RED, COLOR_GREEN, 5,70, "Matrix 4 x 4");
+        height = 4;
+        width  = 4;
 	}
 	else
 	{
-        sprintf(tmp,"%ld", p);
-        cops->putS(COLOR_BLACK, COLOR_GREEN, 5,70, "Mines[%]");
-        cops->putS(COLOR_BLACK, COLOR_GREEN, 100,70, tmp);
+        cops->putS(COLOR_BLACK, COLOR_GREEN, 5,70, "Matrix 4 x 4");
 	}
 
-    g_changes = 1;
-*/
+//    g_changes = 1;
 }
 
 void init_settings_screen()
 {
-/*
     char tmp[10];
 
     cops->putS(COLOR_BLACK, COLOR_GREEN, 5,5, "S E T T I N G S");
 
     RefreshSettings();
-*/
 }
 
 static int GetTime()
@@ -1360,6 +1347,7 @@ int eventHandler(int evt)
     pair tmp;
     char buffer[40];
     int i=0,j=0;
+    int gameover = 0;
     testpair test;
 
     if(GameMode == 0)
@@ -1414,6 +1402,7 @@ int eventHandler(int evt)
 
 				case BTN_F2:
 //					displayField(1);
+//                    endOfGame();
 					break;
 
 					/* toggle flag under cursor */
@@ -1446,6 +1435,7 @@ int eventHandler(int evt)
                                 if(cntPairsLeft == 0)
                                 {
                                     endOfGame();
+                                    gameover = 1;
                                 }
                             }
                             else
@@ -1455,7 +1445,15 @@ int eventHandler(int evt)
 
                             field[tmp.y1][tmp.x1].test = 0;
                             field[tmp.y2][tmp.x2].test = 0;
-                            displayField(0);
+
+                            if(gameover == 0)
+                            {
+                                displayField(0);
+                            }
+                            else
+                            {
+                                gameover = 0;
+                            }
                         }
                     }
 					break;
@@ -1468,11 +1466,11 @@ int eventHandler(int evt)
 					break;
 
 				case BTN_F3: // settings
-/*
+
 					cops->clearScreen(COLOR_GREEN);
-					cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
-                    GameMode = 2;
-					init_settings_screen();*/
+					cops->putS(COLOR_BLACK, COLOR_GREEN, 287,47, "Leave");
+                    GameMode = 1;
+					init_settings_screen();
 					break;
 		}
 	}
@@ -1480,71 +1478,29 @@ int eventHandler(int evt)
 	{
 		switch (evt) {
 		   case BTN_UP:
-                if(settingParam == 0)
-				   settingParam = 2;
+                if(matrixSize == 0)
+				   matrixSize = 2;
 				else
-				   settingParam--;
+				   matrixSize--;
 
 				RefreshSettings();
-			   break;
+			    break;
 
 		   case BTN_DOWN:
-                if(settingParam == 2)
-				   settingParam = 0;
+                if(matrixSize == 2)
+				   matrixSize = 0;
 				else
-				   settingParam++;
+				   matrixSize++;
 
 				RefreshSettings();
 			   break;
-
-		   case BTN_LEFT:
-
-				if(settingParam == 0)
-				{
- 				    if(width > 10)
-					{
-                        width--;
-                        RefreshSettings();
-					}
-				}
-				else
-				{
-				    if(height > 10)
-					{
-                        height--;
-                        RefreshSettings();
-					}
-				}
-			    break;
-
-		   case BTN_RIGHT:
-			    if(settingParam == 0)
-				{
-				    if(width < (SCREEN_WIDTH-50)/PIECE_DIM)
-				    {
-                        width++;
-                        RefreshSettings();
-					}
-				}
-				else
-				{
-				    if(height < (SCREEN_HEIGHT/PIECE_DIM))
-					{
-                        height++;
-                        RefreshSettings();
-                    }
-                }
-			    break;
 
 			case BTN_OFF:
 			case EVT_QUIT:
                 writeINI();
 				cops->clearScreen(COLOR_GREEN);
                 GameMode = 0;
-                x=0;y=0;
 				init();
-				displayField(0);
-				setCursor(0);
 				break;
 		}
 
