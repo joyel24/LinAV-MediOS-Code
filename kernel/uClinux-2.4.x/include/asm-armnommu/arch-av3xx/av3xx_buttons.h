@@ -37,6 +37,9 @@
 #define        BUTTONS_AV300_ON            0x0008
 #define        BUTTONS_AV300_OFF           0x0009
 #define        EVT_AV300_TIMER             0x000a
+#define        EVT_AV300_WKUP              0x000b
+#define        EVT_AV300_USB               0x000c
+#define        EVT_AV300_PWR               0x000d
 
 #define        MAX_PRESSED                 3
 #define        AV_FREQ                     HZ/50
@@ -61,5 +64,8 @@ void av3xx_start_timer(void);
 void av3xx_stop_timer(void);
 int  av3xx_timer_state(void);
 void av3xx_set_timer_freq(int val);
+void av3xx_wakeup_evt(void);
+void av3xx_do_pause(void);
+void av3xx_release_app(void);
 
 #endif

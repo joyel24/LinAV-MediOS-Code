@@ -204,15 +204,15 @@ int av3xx_i2c_read(int device, int address, void * buffer, int count)
 	av3xx_i2c_start();
 
 	if(av3xx_i2c_outb(((device<<24)>>25)<<1) != 0)
-		return -1;
+		return -2;
 
 	if(av3xx_i2c_outb((address<<24)>>24) != 0)
-		return -1;
+		return -3;
 
 	av3xx_i2c_start();
 
 	if(av3xx_i2c_outb(((device<<24)>>24)|1) != 0)
-		return -1;
+		return -4;
 
 	for(i=0;i<count-1;i++)
 	{

@@ -116,7 +116,6 @@ int av_usb_ioctl(struct inode *inode, struct file *filp,
                  unsigned int cmd, unsigned long arg)
 {
 	int * ptr=(int *)arg;
-	printk("in av_usb_ioctl\n");
 	if (_IOC_TYPE(cmd) != AV_OP_IOC_MAGIC) return -ENOTTY;
 	
 	switch(cmd) {
@@ -187,7 +186,6 @@ int av_power_ioctl(struct inode *inode, struct file *filp,
                  unsigned int cmd, unsigned long arg)
 {
 	int * ptr=(int *)arg;
-	printk("in av_power_ioctl\n");
 	if (_IOC_TYPE(cmd) != AV_OP_IOC_MAGIC) return -ENOTTY;	 
 	
 	switch(cmd) {
@@ -248,7 +246,7 @@ int av_rtc_ioctl(struct inode *inode, struct file *filp,
                  unsigned int cmd, unsigned long arg)
 {
 	struct tm * ptrTm=(struct tm * )arg;
-	printk("in av_rtc_ioctl\n");
+        int * val=(int*)arg;
 	if (_IOC_TYPE(cmd) != AV_OP_IOC_MAGIC) return -ENOTTY;	 
 	
 	switch(cmd) {
@@ -256,6 +254,9 @@ int av_rtc_ioctl(struct inode *inode, struct file *filp,
 			return av3xx_rtc_getTime(ptrTm);
 		case AV_RTC_SET_TIME_IOC:
 			return av3xx_rtc_setTime(ptrTm);
+                case AV_RTC_GET_JIFFY_IOC:
+                        *val=jiffies;
+                        break;
 		default:
 			return -ENOTTY;
 	}
@@ -310,8 +311,6 @@ int av_tsc_ioctl(struct inode *inode, struct file *filp,
                  unsigned int cmd, unsigned long arg)
 {
 	int * ptr=(int *)arg;
-	
-	printk("in av_tsc_ioctl\n");
 	
 	if (_IOC_TYPE(cmd) != AV_OP_IOC_MAGIC) return -ENOTTY;	 
 	
@@ -369,6 +368,8 @@ int av_mouse_release(struct inode *inode, struct file *filp)
 	return 0;
 }
 
+extern void av_halt_system(void);
+
 int av_mouse_ioctl(struct inode *inode, struct file *filp,
                  unsigned int cmd, unsigned long arg)
 {
@@ -407,6 +408,18 @@ int av_mouse_ioctl(struct inode *inode, struct file *filp,
 		case AV_TIMER_STATE :
 			*ptr=av3xx_timer_state();
 			break;
+                case AV_DO_WAKEUP :
+                	av3xx_wakeup_evt();
+                        break;
+                case AV_HALT_DEVICE :
+                    av_halt_system();
+                    break;
+                case AV_PAUSE_APP :
+                    av3xx_do_pause();
+                    break;
+                case AV_RELEASE_APP :
+                    av3xx_release_app();
+                    break;
 		default:
 			return -ENOTTY;
 	}

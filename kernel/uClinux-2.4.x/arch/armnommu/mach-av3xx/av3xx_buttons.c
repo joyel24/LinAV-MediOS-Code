@@ -20,6 +20,8 @@
 #define BUFFER_SIZE      50
 
 DECLARE_WAIT_QUEUE_HEAD(button_queue);
+DECLARE_WAIT_QUEUE_HEAD(app_queue);
+
 
 struct timer_list av3xx_button_timer;
 
@@ -36,6 +38,8 @@ int mx_press = MAX_PRESSED;
 int timerState = 0;
 int timerMaxCnt=10;;
 int timerCnt=0;
+
+int usbState,pwrState;
 
 extern void av_halt_system(void);
 /*DECLARE_TASKLET(av_halt,av_halt_system,0);*/
@@ -89,78 +93,107 @@ int keys_code[NB_BUTTONS] ={
 
 int nb_pressed[NB_BUTTONS];
 int nb_off_press=0;
-
+int wakeUP=0;
 
 int av3xx_chk_button(unsigned long ptr)
 {
-	int i,val,fastDir;
-	int pressed=0;
-	
-	fastDir=0;
-	val=inw(0x2600680)&0x3;
-	val|=((inw(0x2600700)&0x7)<<2);
-	val|=((inw(0x2600780)&0x7)<<5);
-	val|=((inw(0x30588)&0x1)<<8);
-	val|=((inw(0x3058a)>>3)&0x200);
-	
-	for(i=0;i<NB_BUTTONS;i++)
-	{
-		if(keys_code[i]!=0)
-		{
-			if(val&(0x1<<i))
-			{
-				if(nb_pressed[i]!=0)
-					nb_pressed[i]=0;
-				if(i==9)
-					nb_off_press=0;
-			}
-			else
-			{	
-				if(i==9)
-					nb_off_press++;
-				if(!(i==4 && fastDir))
-				{
-					if(nb_pressed[i]==0)
-					{
-						av3xx_add_event(i);
-						handle_scancode(keys_code[i], 1);
-						nb_pressed[i]=mx_press;
-						pressed=1;
-					}
-					else
-						nb_pressed[i]--;
-					if(i<4)
-					{
-						fastDir=1;
-						//av3xx_move_mouse(i);
-					}
-				}
-				
-			}
-		}
-	}
-	
-	if(nb_off_press>MAX_OFF)
-		av_halt_system();
-		//tasklet_schedule(&av_halt);
-	
-	if(pressed)
-		wake_up_interruptible(&button_queue);
-		
-	if(timerState)
-	{
-		timerCnt++;
-		if(timerCnt>timerMaxCnt)
-		{
-			av3xx_add_event(EVT_AV300_TIMER);
-			wake_up_interruptible(&button_queue);
-			timerCnt=0;
-		}
-	}
-	
-	av3xx_button_timer.expires = jiffies + freq_rep; /* 1s timer */
-	add_timer(&av3xx_button_timer);
-	return 0;
+    int i,val,fastDir;
+    int doWake=0;
+    
+    fastDir=0;
+        
+    if(wakeUP)
+    {
+        wakeUP=0;
+        av3xx_clear_buffer();
+        av3xx_add_event(EVT_AV300_WKUP);
+        wake_up_interruptible(&button_queue);
+        av3xx_button_timer.expires = jiffies + freq_rep; /* 1s timer */
+        add_timer(&av3xx_button_timer);
+        return 0;
+    }
+        
+    val=inw(0x2600680)&0x3;
+    val|=((inw(0x2600700)&0x7)<<2);
+    val|=((inw(0x2600780)&0x7)<<5);
+    val|=((inw(0x30588)&0x1)<<8);
+    val|=((inw(0x3058a)>>3)&0x200);
+    
+    for(i=0;i<NB_BUTTONS;i++)
+    {
+        if(keys_code[i]!=0)
+        {
+            if(val&(0x1<<i))
+            {
+                if(nb_pressed[i]!=0)
+                    nb_pressed[i]=0;
+                if(i==9)
+                    nb_off_press=0;
+            }
+            else
+            {    
+                if(i==9)
+                    nb_off_press++;
+                if(!(i==4 && fastDir))
+                {
+                    if(nb_pressed[i]==0)
+                    {
+                        av3xx_add_event(i);
+                        //handle_scancode(keys_code[i], 1);
+                        nb_pressed[i]=mx_press;
+                        doWake=1;
+                    }
+                    else
+                        nb_pressed[i]--;
+                    if(i<4)
+                    {
+                        fastDir=1;
+                        //av3xx_move_mouse(i);
+                    }
+                }
+                
+            }
+        }
+    }
+    
+    if(nb_off_press>MAX_OFF)
+        av_halt_system();
+        //tasklet_schedule(&av_halt);
+     
+           
+    if(timerState)
+    {
+        timerCnt++;
+        if(timerCnt>timerMaxCnt)
+        {
+            av3xx_add_event(EVT_AV300_TIMER);
+            timerCnt=0;
+            doWake=1;
+        }
+    }
+    
+    if(usbConnected()!=usbState)
+    {
+        usbState=usbConnected();
+        av3xx_add_event(EVT_AV300_USB);
+        doWake=1;
+    }
+    
+    if(powerConnected()!=pwrState)
+    {
+        pwrState=powerConnected();
+        av3xx_add_event(EVT_AV300_PWR);
+        doWake=1;
+    }
+    
+    if(doWake)
+        wake_up_interruptible(&button_queue);
+        
+    doWake=0;
+    
+    av3xx_button_timer.expires = jiffies + freq_rep; /* 1s timer */
+    add_timer(&av3xx_button_timer);
+    return 0;
 }
 
 int x,y;
@@ -177,14 +210,29 @@ void av3xx_add_event(int evt)
 
 int av3xx_wait_event(void)
 {
-	if(tail->evt!=-1)
-		return av3xx_get_event();
-	else
-	{
-		while(tail->evt==-1)
-			interruptible_sleep_on(&button_queue);
-		return av3xx_get_event();
-	}
+    if(tail->evt!=-1)
+        return av3xx_get_event();
+    else
+    {
+        while(tail->evt==-1)
+            interruptible_sleep_on(&button_queue);
+        return av3xx_get_event();
+    }
+}
+
+void av3xx_wakeup_evt(void)
+{
+	wakeUP=1;
+}
+
+void av3xx_do_pause(void)
+{
+	interruptible_sleep_on(&app_queue);
+}
+
+void av3xx_release_app(void)
+{
+	wake_up_interruptible(&app_queue);
 }
 
 int av3xx_get_event(void)
@@ -336,6 +384,9 @@ int av3xx_button_init(void)
 	timerState = 0;
 	timerMaxCnt=10;;
 	timerCnt=0;
+        
+        usbState=usbConnected();
+        pwrState=powerConnected();
 		
 	init_timer(&av3xx_button_timer);
 	av3xx_button_timer.function = av3xx_chk_button;

@@ -424,7 +424,7 @@ int av3xx_mix_ioctl(struct inode *inode, struct file *filp,unsigned int cmd, uns
 {
 	int * val=(int*)arg;
 	int tmp;
-	switch(cmd)
+        switch(cmd)
 	{
 		case AV_SET_MIX_VOLUME:
 			av3xx_mas_control_config(MAS_SET,MAS_VOLUME,*val);
@@ -489,6 +489,7 @@ int av3xx_mix_ioctl(struct inode *inode, struct file *filp,unsigned int cmd, uns
 			*val=av3xx_mas_control_config(MAS_GET,MAS_ADC_R_GAIN,*val);
 			break;
 		default:
+                	printk("[ioctl MIX] bad ioctl\n");
 			return -ENOTTY;
 	}	
 	

@@ -26,11 +26,14 @@ unsigned char userToPv(int val)
 int av3xx_rtc_getTime(struct tm * valTime)
 {
 	struct tm_pv pv_dt;
+        int retVal;
+        
+        retVal=av3xx_i2c_read(AV3XX_RTC_DEVICE, 0, (void*)(&pv_dt), 8);
 		
-	if(av3xx_i2c_read(AV3XX_RTC_DEVICE, 0, (void*)(&pv_dt), 8)<0)
+	if(retVal<0)
 	{
-		printk("[I2C - rtc] Error, reading");
-		return -1;
+		printk("[I2C - rtc] Error, reading (err:%d)\n",retVal);
+		return retVal;
 	}
 	
 	pv_dt.tm_wday&=0x7;
