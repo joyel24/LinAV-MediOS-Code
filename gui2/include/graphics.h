@@ -139,6 +139,7 @@ void drawImage        (char * filename);
 /* Font */
 #define needFont(name)	 FONT_ID name;
 void setFont(FONT_ID font);
+FONT_ID getFont(void);
 
 /* Planes */
 void  setPlane        (int vplane);

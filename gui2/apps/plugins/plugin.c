@@ -2,15 +2,28 @@
 #include <stdlib.h>
 
 #include "avwm.h"
+#include "font.h"
+
+#define WHITE        0
+#define BLACK        1
+#define GRAY         21
+#define BLUE         32
+#define RED          77
+
 
 struct client_operations * cops;
 
 int main(int argc,char * * argv)
 {
-	printf("argc=%d, argv0:%s argv1:%s\n",argc,argv[0],argv[1]);
-	cops=atoi(argv[1]);
-	cops->putS(77, 1,12, 12, "hello world");
-	printf("in child: %x\n",cops);
+	REGISTER(cops,NULL);
+	
+	cops->fillRect(WHITE,5, 15 , 320,225);
+	cops->putS(BLACK, BLUE,10, 40, "string 1");
+	cops->setFont(STD8X13);
+	cops->putS(BLACK, BLUE,10, 60, "string 2");
+	cops->setFont(STD6X9);
+	cops->putS(BLACK, BLUE,10, 80, "string 3");
+	
 	while(1);
 	return 0;
 }

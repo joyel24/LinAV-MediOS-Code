@@ -11,11 +11,15 @@
 #include "colordef.h"
 #include "parse_cfg.h"
 #include "menu.h"
+#include "font.h"
 
 #define DO_DEBUG 1;
 #define NB_ITEM 10;
 
 needFont(std6x9);
+needFont(std8x13);
+
+FONT_ID font_table[NBFONT] ;
 
 struct client_operations cops={
 	drawPixel          : drawPixel,
@@ -23,8 +27,8 @@ struct client_operations cops={
 	drawRect           : drawRect,
 	fillRect           : fillRect,
 	drawLine           : drawLine,
-	putS               : putS,
-	putC               : putC,
+	putS               : wmPutS,
+	putC               : wmPutC,
 	//drawSprite         : drawSprite,
 	//drawBITMAP         : drawBITMAP,
 	scrollWindowVert   : scrollWindowVert,
@@ -36,11 +40,20 @@ struct client_operations cops={
 	pack               : pack,
 	drawImage          : drawImage,
 	openScreen         : ini_graphics,
-	closeScreen        : close_graphics
+	closeScreen        : close_graphics,
+	setFont            : wmSetFont
 };
 
 void (*currentHandler)(int evt)=NULL;
 void (*tmpHandler)(int evt)=NULL;
+
+FONT_ID plugin_font;
+
+void iniFont(void)
+{
+	font_table[0]=std6x9;
+	font_table[1]=std8x13;
+}
 
 void draw_batt_status()
 {
@@ -130,6 +143,8 @@ int main(int argc,char * * argv)
 	int i;
 	ini_graphics();	
 	setFont(std6x9);
+	plugin_font=std6x9;
+	iniFont();
 	fillRect(COLOR_BLACK,0 , 0, 320, 240);
 	
 	putS(COLOR_WHITE,COLOR_BLACK,5,110,"Reading menu file ....");
@@ -265,6 +280,37 @@ void eventLoop()
 void processTimeOut()
 {
 	drawTime();
+}
+
+void wmPutS(int color, int bg_color,int x, int y, char *s)
+{
+	FONT_ID font=getFont();
+	if(font != plugin_font)
+	{
+		setFont(plugin_font);
+		putS(color,bg_color,x,y,s);
+		setFont(font);
+	}
+	else
+		putS(color,bg_color,x,y,s);
+}
+
+void wmPutC(int color, int bg_color,int x, int y, char s)
+{
+	FONT_ID font=getFont();
+	if(font != plugin_font)
+	{
+		setFont(plugin_font);
+		putC(color,bg_color,x,y,s);
+		setFont(font);
+	}
+	else
+		putC(color,bg_color,x,y,s);
+}
+
+void wmSetFont(int font)
+{
+	plugin_font=font_table[font];
 }
 
 static char debugmembuf[200];

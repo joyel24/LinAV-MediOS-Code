@@ -506,6 +506,11 @@ void setFont(FONT_ID font)
 	default_font=font;
 }
 
+FONT_ID getFont(void)
+{
+	return default_font;
+}
+
 /**  graphics 8 **/
 
 #include "graphics_8.c"

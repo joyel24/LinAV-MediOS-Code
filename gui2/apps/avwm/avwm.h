@@ -14,6 +14,8 @@
 #ifndef __AVWM_H
 #define __AVWM_H
 
+
+
 #define EVT_REDRAW  0x0100
 #define EVT_QUIT    0x0101
 #define EVT_SUSPEND 0x0102
@@ -40,8 +42,9 @@ struct client_operations {
 	void (*processEvent)      (int evt);
 	void (*addEventHandler)   (void (*evtHandle));
 	void (*pack)              (void);
-	void (*closeScreen)       (void);
+	int  (*closeScreen)       (void);
 	void (*openScreen)        (void);
+	void (*setFont)           (int font);
 };
 
 struct menu_item {
@@ -64,5 +67,8 @@ void   drawTime         (void);
 void   processTimeOut   (void);
 int    loadPlugin       (char * path, char * param);  // prepare env to load a new plugin
 int    launchPlugin     (char * path,char * param);   // launch a plugin
+void   wmPutS           (int color, int bg_color,int x, int y, char *s);
+void   wmPutC           (int color, int bg_color,int x, int y, char s);
+void   wmSetFont        (int font);
 
 #endif
