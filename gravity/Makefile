@@ -30,7 +30,7 @@ $(TARGET) : subdirs
 #@$(RM) -f $(TARGET).elf
 clean:  clean-subdirs
 	@echo '-----   cleaining MAIN'
-	@rm -f *.o *.bak *~ $(TARGET).bin $(TARGET).elf include/*~ include/kernel/*~ include/sys_def/*~  *.map
+	@rm -f *.o *.bak *~ $(TARGET).bin $(TARGET).elf include/*~ include/kernel/*~ include/sys_def/*~  include/gui/*~ *.map
 
 
         

@@ -10,6 +10,8 @@
 * KIND, either express of implied.
 */
 
+#include <sys_def/stddef.h>
+
 #include <kernel/kfont.h>
 #include <kernel/kgraphics.h>
 
@@ -20,7 +22,7 @@ FONT_ID font_table[NBFONT] ;
 void ini_font(void)
 {
     int i;
-    for(i=0;i<NB_FONT;i++)
+    for(i=0;i<NBFONT;i++)
         font_table[i]=NULL;
 
 #ifdef _std4x6

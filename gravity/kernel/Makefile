@@ -17,9 +17,8 @@ all: builddir subdirs $(TARGET)
 
 force: clean all        
 
-$(TARGET) : $(OBJS)
+$(TARGET) :
 	@echo '-----   building kernel'
-	@cp -f $(OBJS) build/
 #	@$(AR) -rc $(TARGET) build/*.o
 #	@$(RANLIB) $(TARGET)
 clean:  clean-subdirs

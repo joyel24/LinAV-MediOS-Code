@@ -13,6 +13,7 @@ all: $(OBJS) font
 
 font:
 	$(GCC) $(GCCFLAGS) -c -o font.o font.c $(OPT)
+	@cp -f font.o ../
         
 clean: 
 	@rm -f *.o *.bak *~ *.gdb
