@@ -14,35 +14,19 @@
 #include <power.h>
 #include <uart.h>
 #include <debug.h>
+#include <mathASM.h>
 
 int launchFile(char * fileN);
 int pluginFile(char * fileN, char * ext);
-
 int exeFile(char * fileN, char * arg);
-void (*codeCaller)(int argc, char * argv[])=(void (*)(int argc, char * argv[]))0x03000000;
 
 static int pal32[2] = {0x8080c0e0, 0xffffffff};
 static int pal16[2] = {0x0000, 0xffff};
-static int pal16b[4] = {0x1717, 0x3131, 0x0000, 0x0000};
+static int pal16b[5] = {0x1717, 0x3131, 0x0000, 0x1414, 0xcece};
 
-struct graphicsBuffer screenBitmap;
-struct graphicsBuffer screenBitmap2;
-struct graphicsBuffer sprite5_7 = {0, 1, 5, 7, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-
-struct dispDir {
-	char name[14];
-	char filename[14];
-	int attr;
-	char ext[4];
-};
-
-struct tm* ourTime;
-char timeSt[] = "xx:xx:xx.xx";
-char powerSt[] = "xxxx+";
-
-// 12x6
+static struct graphicsBuffer screenBitmap;
+static struct graphicsBuffer screenBitmap2;
+static struct graphicsBuffer sprite5_7 = {0, 1, 5, 7, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 static char usbOut[7][13]
     = {{0x00,0x00,0x00,0x02,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
        {0x00,0x00,0x00,0x02,0x02,0x02,0x02,0x00,0x00,0x00,0x00,0x00,0x00},
@@ -51,7 +35,6 @@ static char usbOut[7][13]
        {0x00,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x02,0x00,0x02,0x00},
        {0x00,0x00,0x00,0x00,0x02,0x02,0x02,0x02,0x02,0x00,0x00,0x00,0x00},
        {0x00,0x00,0x00,0x00,0x02,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00}};
-struct graphicsBuffer usbOutB = {usbOut, 13, 13, 7, 8, 3, -1, 0, 0, 0, 0, (int**) &pal16b, 0};
 static char usbIn[7][13]
     = {{0x00,0x00,0x00,0x01,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
        {0x00,0x00,0x00,0x01,0x01,0x01,0x01,0x00,0x00,0x00,0x00,0x00,0x00},
@@ -60,7 +43,27 @@ static char usbIn[7][13]
        {0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0x01,0x00},
        {0x00,0x00,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x00,0x00,0x00,0x00},
        {0x00,0x00,0x00,0x00,0x01,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00}};
-struct graphicsBuffer usbInB = {usbIn, 13, 13, 7, 8, 3, -1, 0, 0, 0, 0, (int**) &pal16b, 0};
+static char scrollBar[6][6]
+    = {{0x03,0x03,0x03,0x03,0x03,0x03},
+       {0x03,0x04,0x04,0x04,0x04,0x03},
+       {0x03,0x04,0x04,0x04,0x04,0x03},
+       {0x03,0x04,0x04,0x04,0x04,0x03},
+       {0x03,0x04,0x04,0x04,0x04,0x03},
+       {0x03,0x03,0x03,0x03,0x03,0x03}};
+static struct graphicsBuffer usbOutB = {(u32) usbOut, 13, 13, 7, 8, 3, -1, 0, 0, 0, 0, (int**) &pal16b, 0};
+static struct graphicsBuffer usbInB = {(u32) usbIn, 13, 13, 7, 8, 3, -1, 0, 0, 0, 0, (int**) &pal16b, 0};
+static struct graphicsBuffer scrollBarB = {(u32) scrollBar, 6, 6, 6, 8, 3, -1, 0, 0, 0, 0, (int**) &pal16b, 0};
+
+struct dispDir {
+	char name[14];
+	char filename[14];
+	int attr;
+	char ext[4];
+};
+
+static struct tm* ourTime;
+static char timeSt[] = "xx:xx:xx.xx";
+static char powerSt[] = "xxxx+";
 
 static int source = 0;             // 0 = HDD, 1 = memCard
 static int mode = 0;               // 0 = normal, 1 = usb
@@ -72,8 +75,7 @@ static struct dispDir dirBuffer[1000];
 static char nameCur[MAX_PATH] = "/";
 
 int main() {
-	mvStackA();
-
+    unsigned int a;
     int c, b, i, totalEntries;
     int cursorpos=0;
     int dirpos=0;
@@ -175,7 +177,7 @@ startInit:
 	ataReadMBR();
 
 	int fatHD=-1;
-	int fatCF=-1;
+    int fatCF=-1;
 
 	for(i=0;i<4;i++) {
         debug("Partition %d\n", i);
@@ -190,7 +192,7 @@ startInit:
 
     while(1) {
         if (mode==0) {
-            graphicsBoxfA(&screenBitmap, 2, 2, 92, 128, 0xcece);    
+            graphicsBoxfA(&screenBitmap, 2, 2, 86, 128, 0xcece);    
 
             debug("Listing contents of '%s'\n", nameCur);
             if((dir=opendir(nameCur))<0)
@@ -284,6 +286,14 @@ startInit:
             // Update file display window if needed,
             
             if (mode==0 && cursorMoved==1) {
+                // Update scrollbar...
+                graphicsBoxfA(&screenBitmap, 88, 2, 6, 128, 0x1717);    
+                
+                a = (dirpos+cursorpos) * (128-6);
+                if (totalEntries>1) a = mathDivLUA(0, a, totalEntries-1);
+                graphicsSpriteA(&screenBitmap, 88, 2 + a, &scrollBarB);
+
+
                 for (c=0;c<16;c++) {
                     if ((dirpos+c)>=totalEntries) break;
 
@@ -293,7 +303,7 @@ startInit:
                     if (c==cursorpos) {
                         pal16[0] = 0x0000;
                     } else {
-                        pal16[0] = 0xcece;  
+                        pal16[0] = 0xcece;
                     }
     
                     graphicsStringA(&screenBitmap, 3, 3 + c*8, &sprite5_7, std5x7_, 5, 0,
@@ -399,7 +409,6 @@ startInit:
                         char fileN[MAX_PATH];
 						strcpy(fileN, nameCur);
 						strcat(fileN, dirBuffer[dirpos+cursorpos].filename);
-						int i;
 
                         if (strcmp(dirBuffer[dirpos+cursorpos].ext, "BIN")==0) {
                             // Launch it...
@@ -466,12 +475,10 @@ startInit:
     
                     do {
                     } while(buttonsGetStatusA() & BUTTONS_AV300_ANY);
-                    cursorMoved=1;
-                    break;
+                    goto startInit;
                 }
             }
             for (i=0;i<loopDelay;i++) {}          // Little delay...
-
         }
     }
     
@@ -508,8 +515,11 @@ int pluginFile(char * fileN, char * ext) {
 
 int exeFile(char * fileN, char * arg)
 {
-	if(loadFile(fileN)) {
-        strcpy(callArg1, fileN);
+    void (*codeCaller)(int argc, char * argv[])=(void (*)(int argc, char * argv[]))0x03000000;
+    strcpy(callArg1, fileN);
+    debug("exeFile '%s','%s','%s'\n", fileN, arg, callArg1);
+    
+	if(loadFile(callArg1)) {
 		int argc=1;
 
 		if(arg!=NULL) {
@@ -517,6 +527,7 @@ int exeFile(char * fileN, char * arg)
 			argc++;
 		}
 
+        debug("Calling file now...\n");
 		codeCaller(argc, callArgs);
 		return 1;
 	} else {

@@ -37,6 +37,8 @@ int main() {
     osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT);
     
+    c = 0;
+                                     
     for (y=0;y<240;y+=15) {
         for (x=0;x<320;x+=20) {
     graphicsBoxfA(&screenBitmap, x, y, 20, 15, c);

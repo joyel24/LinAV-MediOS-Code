@@ -16,8 +16,8 @@
 typedef unsigned long u32;
 #endif
 
-extern u32 mathDivLU(u32 x, u32 y);
-extern u32 mathModLU(u32 x, u32 y);
+extern u32 mathDivLU(u32 x, u32 y, u32 z);
+extern u32 mathModLU(u32 x, u32 y, u32 z);
 
-extern u32 mathDivLUA(u32 x, u32 y);
-extern u32 mathModLUA(u32 x, u32 y);
+extern u32 mathDivLUA(u32 x, u32 y, u32 z);
+extern u32 mathModLUA(u32 x, u32 y, u32 z);

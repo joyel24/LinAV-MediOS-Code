@@ -54,6 +54,7 @@ mathL1: lsr r4, r0, #31
 mathL2: add r3, #1
         cmp r3, #33
          bne mathL1
+        mov r0, r1
         pop {r1, r2, r3, r4, r5}
         bx lr
 
@@ -85,7 +86,6 @@ mathL3: lsr r4, r0, #31
 mathL4: add r3, #1
         cmp r3, #33
          bne mathL3
-        mov r0, r1
         pop {r1, r2, r3, r4, r5}
         bx lr
         

@@ -80,4 +80,4 @@ boot: src/boot/boot.c
 	arm-linux-objcopy -O binary boot.elf boot.bin
 	rm -f boot.elf boot.o
 	mv boot.bin dist/
-    
+

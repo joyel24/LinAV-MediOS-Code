@@ -16,7 +16,7 @@
 #include <uart.h>
 
 
-static char debugmembuf[100];
+static char debugmembuf[200];
 
 void debug(char *fmt, ...)
 {
