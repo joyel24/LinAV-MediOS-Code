@@ -1416,7 +1416,7 @@ int eventHandler(int evt)
 
                     test = testField(); // gibt es schon ein anderes auf test gesetzes Feld ?
 
-                    if( ((test.x != x) || (test.y != y)) && (field[i][j].known == 0) ) // wurde 2 mal das gleiche Feld angeklickt ? Das aktuelle Feld darf auch noch nicht aufgedeckt sein !
+                    if( ((test.x != x) || (test.y != y)) && (field[y][x].known == 0) ) // wurde 2 mal das gleiche Feld angeklickt ? Das aktuelle Feld darf auch noch nicht aufgedeckt sein !
                     {
                         field[y][x].test = 1;
                         displayField(0);
