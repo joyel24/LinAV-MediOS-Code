@@ -66,83 +66,27 @@ void printList(struct browser_data * bdata,int val)
     printf("---------------------------- %d\n",val);
 }
 
-void stopLs(void)
-{
-    //hideHelper();
-}
-
 void bwseventHandler(int evt)
 {
-    int w = 0;
-    int h = 10;
     char path[PATHLEN];  
 
-    getStringS("M", &w, &h);
-
-    
-            //helperEvt(evt,BTN_JOY);
-            evt=browserEvt(evt,bdata);
-            switch(evt)
-            {
-                case BTN_RIGHT:
-                    if(bdata->list[bdata->pos+bdata->nselect].type==TYPE_FILE)
-                    {     
-//                        browser_listener.enable=0;
-                        sprintf(path,"%s%s",bdata->path,bdata->list[bdata->pos+bdata->nselect].name);
-                        handle_type_other(path);                        
-                    }
-                    break;
-                case BTN_F1:
-#warning need to code action: go to root of HD
-/*
-                    if(!viewNewDir(bdata,"/mnt"))
-                        stopLs();*/
-                    break;
-                case BTN_F2:
-#warning need to code CF specific actions 
-/*                    if(CF_is_mounted())
-                        if(!viewNewDir(bdata,"/cf"))
-                            stopLs();*/
-                    break;
-                case BTN_F3:
-#warning need to code action: show fct menu
-/*
-                    menu_cfg.root=&menu1;
-                    evt_mode=MENU_MODE;
-                    hideHelper();
-                    start_menu(&menu_cfg);
-                    menuEvtHandler(EVT_REDRAW);
-                    */
-                    break;
-                case BTN_ON:
-                    chgSelect(bdata,bdata->pos+bdata->nselect);
-                    break;
-                case BTN_OFF:
-                case EVT_QUIT:
-                    //hideHelper();
-                    //cleanList(bdata);
-                    //browser_listener.enable=0;
-                    //restore_menu();
-                    break;
-                case EVT_REDRAW:
-                    viewNewDir(bdata,NULL);
-                    break;
-#if 0                
-                case EVT_CF_REMOVED:
-#warning need to code CF specific actions                
-                    /*getcwd(pwd, 10);
-                    pwd[10]='\0';
-                    if(pwd[0]=='/' && pwd[1]=='c' && pwd[2]=='f' && (pwd[3]=='/'||pwd[3]=='\0'))
-                        if(!viewNewDir(bdata,"/mnt"))
-                            stopLs();*/
-                    break;
-                case EVT_CF_ADDED:
-#warning need to code CF specific actions 
-                    /*if(!viewNewDir(bdata,"/cf"))
-                        stopLs();*/
-                    break;
-#endif                    
+    evt=browserEvt(evt,bdata);
+    switch(evt)
+    {
+        case BTN_RIGHT:
+            if(bdata->list[bdata->pos+bdata->nselect].type==TYPE_FILE)
+            {     
+                sprintf(path,"%s%s",bdata->path,bdata->list[bdata->pos+bdata->nselect].name);
+                handle_type_other(path);                        
             }
+            break;
+        case BTN_ON:
+            chgSelect(bdata,bdata->pos+bdata->nselect);
+            break;
+        case EVT_REDRAW:
+            viewNewDir(bdata,NULL);
+            break;
+    }
 }
 
 void ini_file_browser(void)
@@ -151,22 +95,12 @@ void ini_file_browser(void)
     iniBrowser();
 }
 
-void browse_root(void)
-{
-    start_browser("/");
-}
 
 int start_browser(char * path)
 {      
-    //iniHelperMenu(&browserMenu);
-
     if(!viewNewDir(bdata,path))
-    {
         return 0;
-    }
-        
     return 1;
-
 }
 
 int x=320;
@@ -192,22 +126,15 @@ void draw_bottom_status(struct browser_data *bdata)
 {
     char tmp[100];
     char tmpS[15];
-//    char pwd[PATHLEN];
-//    int len=0;   
+
+    int len=0;   
     
     createSizeString(tmpS,bdata->totSize);
         
     fillRect(COLOR_WHITE,2, 220,316,20);
-#warning code to get pwd        
-    /*if (!getcwd(pwd, PATHLEN))
-    {
-        printf( "Cannot get current directory\n");        
-    }
-    else
-    {
-        len=strlen(pwd);        
-        putS(COLOR_BLUE, COLOR_WHITE,2, 220, pwd);  
-    }*/
+          
+    putS(COLOR_BLUE, COLOR_WHITE,2, 220,bdata->path);  
+    
 
     snprintf(tmp,100,"%d %s, %d %s, %s",bdata->nbFile,bdata->nbFile>0?"files":"file",
             bdata->nbDir,bdata->nbDir>0?"folders":"folders",tmpS);
@@ -223,29 +150,48 @@ void clear_status(struct browser_data *bdata)
 
 void createSizeString(char * str,int Isize)
 {
-    //char * unit;
-    //float size=Isize;
+    char * unit;
+    int a,b;
+    int tmp=Isize;
     if(str!=NULL)
     {
-        /*if(size/1024>=1)
+        if((tmp=(tmp>>10))!=0)
         {
-            size/=1024;
-            unit="Kb";
-            if(size/1024>=1)
+            if((tmp=(tmp>>10))!=0)
             {
-                size/=1024;
-                unit="Mb";
-                if(size/1024>=1)
+                Isize=Isize>>10;                
+                if((tmp=(tmp>>10))!=0)
                 {
-                    size/=1024;
+                    Isize=Isize>>10;
+                    tmp=(Isize*100)>>10;
+                    a=Isize>>10;
+                    b=tmp-a*100;
                     unit="Gb";
                 }
+                else
+                {
+                    tmp=(Isize*100)>>10;
+                    a=Isize>>10;
+                    b=tmp-a*100;
+                    unit="Mb";
+                }
+            }
+            else
+            {
+                tmp=(Isize*100)>>10;
+                a=Isize>>10;
+                b=tmp-a*100;           
+                unit="Kb";            
             }
         }
-        else 
-            unit = "b";   */
-#warning need FPU     
-           
-        sprintf(str,"%d b",(int)Isize);
+        else
+        {
+            a=Isize;
+            b=0;
+            unit = "b";
+        }
+     
+        sprintf(str,"%d.%d %s",a,b,unit);   
+        
     }
 }

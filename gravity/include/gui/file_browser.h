@@ -100,9 +100,7 @@ void draw_bottom_status  (struct browser_data *bdata);
 void draw_file_size      (struct dir_entry * entry);
 void clear_status(struct browser_data *bdata);
 
-void stopLs            (void);
 int  start_browser     (char * path);
-void browse_root       (void);
 void ini_file_browser  (void);
 
 

@@ -13,16 +13,11 @@
 #include <sys_def/string.h>
 #include <api.h>
 
-
 #include <fs_io.h>
 
 #include <gui/file_browser.h>
-//#include <gui/avstring.h>
-
 
 #define LISTSIZE   256
-
-#define    toLower(chr)  ((chr>64 && chr<91)?chr+32:chr)
 
 int namesort(char **s1,char **s2)
 {
@@ -126,7 +121,6 @@ int doLs(struct browser_data * bdata)
     struct dirent   *dp=NULL;
 
     char            fullname[PATHLEN];
-    //char            tmpP[4];
     
     bdata->totSize=0;
     bdata->nbFile=0;

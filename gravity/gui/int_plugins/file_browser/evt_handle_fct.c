@@ -20,7 +20,6 @@
 #include <gui/scrollbar.h>
 
 extern struct scroll_bar browser_scroll;
-extern struct client_operations * cops;
 
 int browserEvt(int evt,struct browser_data * bdata)
 {
