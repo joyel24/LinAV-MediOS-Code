@@ -303,27 +303,21 @@ int printName(struct menu_item * item,int x,int y,int clear,int selected)
 
 void printAllName(struct menu_item * pos,int nselect)
 {
-	struct menu_item * i;
-	int nbAff=0;
-   int w = 0;
-	int h = 0;
+    struct menu_item * i;
+    int nbAff=0,w=0,h=0;
+    getStringS("M", &w, &h);
 
-   getStringS("M", &w, &h);
-
-	for (i = pos; i !=NULL && nbAff < MAXPOS; i=i->nxt) {
-		printName(i,5,TITLE_OFFSET + nbAff*(h+1) + h+6+MENU_SHADOW,0,nbAff==nselect);
-		nbAff++;
-	}
+    for (i = pos; i !=NULL && nbAff < MAXPOS; i=i->nxt) {
+        printName(i,5,TITLE_OFFSET + nbAff*(h+1) + h+6+MENU_SHADOW,0,nbAff==nselect);
+        nbAff++;
+    }
 }
 
 void printAName(struct menu_item * pos, int posY, int clear, int selected)
 {
-   int w = 0;
-	int h = 0;
-
-   getStringS("M", &w, &h);
-
-	printName(pos,5,TITLE_OFFSET + posY*(h+1)+ h+6+MENU_SHADOW,clear,selected);
+    int w=0,h=0;
+    getStringS("M", &w, &h);
+    printName(pos,5,TITLE_OFFSET + posY*(h+1)+ h+6+MENU_SHADOW,clear,selected);
 }
 
 extern int stopWM;
@@ -422,7 +416,7 @@ void menuEvtHandler(int evt)
             }
             break;
         case BTN_OFF:
-            stopWM=1;
+//            stopWM=1;
             break;
         case EVT_REDRAW:
             fillRect(COLOR_WHITE,0 , h+6+MENU_SHADOW, 320, 240-h-6-MENU_SHADOW);

@@ -28,15 +28,13 @@ static BITMAP testB = {(unsigned int) test, 7, 7, 0, 0};
 
 int eventHandler(int evt)
 {
-    int i = 0;
-
-        switch (evt) {
-            case BTN_OFF:
-	         case EVT_QUIT:
-                /* get out of here */
-          		 stop=1;
-                break;
-        }
+    switch (evt) {
+        case BTN_OFF:
+        case EVT_QUIT:
+            /* get out of here */
+            stop=1;
+            break;
+    }
 }
 
 /* called function from outside */
@@ -44,21 +42,19 @@ int main(int argc,char * * argv)
 {
     int w, h, i;
 
-	 REGISTER(cops,eventHandler,0);
-         cops->hideSBar();
-         
-    	 PACK(cops);
+    REGISTER(cops,eventHandler,0);
+    cops->hideSBar();
+    
+    PACK(cops);
 
-	 cops->clearScreen(WHITE);
+    cops->clearScreen(WHITE);
 
-	 for(w = 0; w < SCREEN_WIDTH; w+=7)
-   	 for(h = 0; h < SCREEN_HEIGHT; h+=7)
-         cops->drawBITMAP (&testB, w, h);
+    for(w = 0; w < SCREEN_WIDTH; w+=7)
+        for(h = 0; h < SCREEN_HEIGHT; h+=7)
+            cops->drawBITMAP (&testB, w, h);
 
-    while (!stop)
- 	 {
-	 }
+    while (!stop) /* NOTHING */;
 
-    return ;
+    return 1;
 }
 

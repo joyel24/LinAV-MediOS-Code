@@ -14,6 +14,7 @@ LIB_CONTENT= \
         graphics_8.o \
 	osd.o \
 	events.o \
+        sound.o \
         misc.o
 
 TARGET = libGraphics.a

@@ -69,7 +69,8 @@ int loadPlugin(char * path, char * param)
     return launchPlugin(path,param);
 }
 
-extern int menu_on;
+
+extern int stopWM;
 
 int launchPlugin(char * path,char * param)
 {

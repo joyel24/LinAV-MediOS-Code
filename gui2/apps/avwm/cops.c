@@ -18,6 +18,7 @@
 #include "avstring.h"
 #include "avevents.h"
 #include "plugin.h"
+#include "sound.h"
 
 #include <stdlib.h>
 
@@ -47,5 +48,34 @@ struct client_operations cops={
     clearScreen        : clearScreen,
     setPlane           : setPlane,
     hidePlane          : hidePlane,
-    showPlane          : showPlane
+    showPlane          : showPlane,
+    enableMenu         : enableMenu,
+    disableMenu        : disableMenu,
+    menuStatus         : menuStatus,
+    
+    ini_mp3_playback   : ini_mp3_playback,
+    close_mp3_playback : close_mp3_playback,
+    start_playback     : start_playback,
+    pause_playback     : pause_playback,
+    stop_playback      : stop_playback,
+    
+    readPeack          : readPeack,
+    
+    setVolume          : setVolume,
+    setBass            : setBass,
+    setTreble          : setTreble,
+    setLoudness        : setLoudness,
+    setBalance         : setBalance,
+    
+    getVolume          : getVolume,
+    getBass            : getBass,
+    getTreble          : getTreble,
+    getLoudness        : getLoudness,
+    getBalance         : getBalance,
+    
+    execDSP_ioctl      : execDSP_ioctl,
+    execMIX_ioctl      : execMIX_ioctl,
+    
+    debug              : debug
+
 };

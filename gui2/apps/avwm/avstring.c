@@ -10,10 +10,14 @@
 * KIND, either express of implied.
 *
 */
-
+#include <stdlib.h>
+#include <stdarg.h>
 #include "font.h"
 #include "graphics.h"
 #include "avstring.h"
+#include "colordef.h"
+
+#define DO_DEBUG 1
 
 needFont(std6x9);
 needFont(std8x13);

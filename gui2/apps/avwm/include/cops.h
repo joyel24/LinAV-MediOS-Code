@@ -14,6 +14,7 @@
 #ifndef __COPS_H
 #define __COPS_H
 
+#include "av3xx_common.h"
 #include "graphics.h"
 
 #define REGISTER(ops,event,flag)    {ops=(struct client_operations*)atoi(argv[argc-1]);ops->registerPlugin(event,flag);}
@@ -52,11 +53,40 @@ struct client_operations {
     
     void (*showSBar)          (void);
     void (*hideSBar)          (void);
-    int  (*sBarStatus)        (void); 
+    int  (*sBarStatus)        (void);
+    
+    void (*enableMenu)        (void);
+    void (*disableMenu)       (void);
+    int  (*menuStatus )       (void); 
     
     void (*setPlane)          (int vplane);
     void (*hidePlane)         (int vplane);
     void (*showPlane)         (int vplane);
+    
+    int  (*ini_mp3_playback)    (struct mp3_play * mp3_p_data);
+    void (*close_mp3_playback)  (void);
+    int  (*start_playback)      (void);
+    int  (*pause_playback)      (void);
+    int  (*stop_playback)       (void);
+    
+    int  (*readPeack)           (struct av_peak * peack); 
+    
+    int  (*setVolume)           (int val);
+    int  (*setBass)             (int val);
+    int  (*setTreble)           (int val);
+    int  (*setLoudness)         (int val);
+    int  (*setBalance)          (int val);
+    
+    int  (*getVolume)           (void);
+    int  (*getBass)             (void);
+    int  (*getTreble)           (void);
+    int  (*getLoudness)         (void);
+    int  (*getBalance)          (void);
+    
+    int  (*execDSP_ioctl)       (int ioctl_call,unsigned int val);
+    int  (*execMIX_ioctl)       (int ioctl_call,unsigned int val);
+
+    void (*debug)               (char *fmt, ...);
     
 };
 

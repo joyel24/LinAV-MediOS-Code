@@ -17,6 +17,7 @@
 struct plugin {
 	void (*handler)(int evt);
         int handle_on;
+        int allowed;
         int pid;
         int flag;
 };

@@ -41,7 +41,7 @@ void eventLoop()
             sendEvt(&menu_plugin,evt);
         else
         {        
-            if(evt==BTN_F3)
+            if(evt==BTN_F3 && menuStatus() )
             {
                 clearEventQueue();
                 sendEvt(&cur_plugin,EVT_SUSPEND);

@@ -20,5 +20,8 @@ void   showSBar         (void);
 void   hideSBar         (void);
 int    sBarStatus       (void);
 
+void   enableMenu       (void);
+void   disableMenu      (void);
+int    menuStatus       (void);
 
 #endif

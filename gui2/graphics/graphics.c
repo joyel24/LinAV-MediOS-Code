@@ -29,6 +29,11 @@
 #define tstXY(x,y)  {if(x>SCREEN_WIDTH) return; if(x<0) return; if(y>SCREEN_HEIGHT) return; if(y<0) return;}
 #define tstWH(x,y,w,h)  {if(x+w>SCREEN_WIDTH)return; if(x+w<0) return; if(y+h>SCREEN_HEIGHT) return; if(y+h<0) return;}
 
+char screen_BMAP1[SCREEN_WIDTH*SCREEN_HEIGHT+40];
+char screen_BMAP2[SCREEN_WIDTH*SCREEN_HEIGHT+40];
+char screen_VID1[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
+char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
+
 struct graphicsBuffer BITMAP_1 = {
     offset             : 0,
     component          : AV3XX_OSD_BITMAP1,
@@ -96,227 +101,233 @@ extern struct graphics_operations g8ops;
 
 int ini_graphics()
 {
-	int diff;
-	/* reset everything */
-	osdSetComponentConfig(AV3XX_OSD_VIDEO1,  0);
-	osdSetComponentConfig(AV3XX_OSD_VIDEO2,  0);
-	osdSetComponentConfig(AV3XX_OSD_BITMAP1, 0);
-	osdSetComponentConfig(AV3XX_OSD_BITMAP2, 0);
-	osdSetComponentConfig(AV3XX_OSD_CURSOR1, 0);
-	osdSetComponentConfig(AV3XX_OSD_CURSOR2, 0);
-	
-	iniComponent(&BITMAP_1);	
-	gc_bmap1=createGC(BMAP1);
+    int diff;
+    /* reset everything */
+    osdSetComponentConfig(AV3XX_OSD_VIDEO1,  0);
+    osdSetComponentConfig(AV3XX_OSD_VIDEO2,  0);
+    osdSetComponentConfig(AV3XX_OSD_BITMAP1, 0);
+    osdSetComponentConfig(AV3XX_OSD_BITMAP2, 0);
+    osdSetComponentConfig(AV3XX_OSD_CURSOR1, 0);
+    osdSetComponentConfig(AV3XX_OSD_CURSOR2, 0);
+    
+    iniComponent(&BITMAP_1,(unsigned int)&screen_BMAP1);    
+    gc_bmap1=createGC(BMAP1);
 
-	iniComponent(&BITMAP_2);	
-	gc_bmap2=createGC(BMAP2);
+    iniComponent(&BITMAP_2,(unsigned int)&screen_BMAP2);    
+    gc_bmap2=createGC(BMAP2);
 
-	iniComponent(&VIDEO_1);	
-	gc_vid1=createGC(VID1);
+    iniComponent(&VIDEO_1,(unsigned int)&screen_VID1);    
+    gc_vid1=createGC(VID1);
         
-        iniComponent(&VIDEO_2);	
-	gc_vid2=createGC(VID2);
-	
-	if(iniEvent()<0)
-		return -1;
+    iniComponent(&VIDEO_2,(unsigned int)&screen_VID2);    
+    gc_vid2=createGC(VID2);
+    
+    if(iniEvent()<0)
+        return -1;
 
-        setPalette(gui_pal,256);
-                
-        setPlane(BMAP1);
-        showPlane(BMAP1);
+    setPalette(gui_pal,256);
+            
+    setPlane(BMAP1);
+    showPlane(BMAP1);
         
-	return 0;
+    return 0;
 }
 
 void setPalette(int palette[256][3],int size)
 {
-	int i=0;
-	int y,cr,cb;
-	for(i=0;i<size;i++)
-	{
-		y = (306*palette[i][0] + 601*palette[i][1] + 117*palette[i][2]) >> 10 ; 
-		cb = ((-173*palette[i][0] -339*palette[i][1] + 512*palette[i][2]) >> 10) + 128;
-		cr = ((512*palette[i][0] - 429*palette[i][1] - 83*palette[i][2]) >> 10) + 128;
-	
-		osdSetPallette (y, cr, cb, i);
-	}
+    int i=0;
+    int y,cr,cb;
+    for(i=0;i<size;i++)
+    {
+        y = (306*palette[i][0] + 601*palette[i][1] + 117*palette[i][2]) >> 10 ; 
+        cb = ((-173*palette[i][0] -339*palette[i][1] + 512*palette[i][2]) >> 10) + 128;
+        cr = ((512*palette[i][0] - 429*palette[i][1] - 83*palette[i][2]) >> 10) + 128;
+    
+        osdSetPallette (y, cr, cb, i);
+    }
 }
 
 void close_graphics()
 {
-	int fd=open("/dev/fb0",O_WRONLY);
-	if(fd<0)
-		printf("error opening /dev/fb\n");
-	if(ioctl(fd,FBIO_INIT,NULL)<0)
-		fprintf(stderr,"error sending init ioctl\n");
+    int fd=open("/dev/fb0",O_WRONLY);
+    if(fd<0)
+        printf("error opening /dev/fb\n");
+    if(ioctl(fd,FBIO_INIT,NULL)<0)
+        fprintf(stderr,"error sending init ioctl\n");
 }
 
 GC_ID createGC(int vplane)
 {
-	struct graphics_context * gc=(struct graphics_context *) malloc(sizeof(struct graphics_context));
-	
-	if(!gc)
-	{
-		fprintf(stderr,"can't allocate GC\n");
-		return NULL;
-	}
-	/* default ini of GC */
-	
-	gc->transparent=-1;
-	
-	switch(vplane) {
-		case BMAP1:
-			gc->gops=&g8ops;
-			gc->buffer=&BITMAP_1;
-			break;
-		case BMAP2:
-			gc->gops=&g8ops;
-			gc->buffer=&BITMAP_2;
-			break;
-		case VID1:
-			gc->gops=NULL;
-			gc->buffer=&VIDEO_1;
-			break;
+    struct graphics_context * gc=(struct graphics_context *) malloc(sizeof(struct graphics_context));
+    
+    if(!gc)
+    {
+        fprintf(stderr,"can't allocate GC\n");
+        return NULL;
+    }
+    /* default ini of GC */
+    
+    gc->transparent=-1;
+    
+    switch(vplane) {
+        case BMAP1:
+            gc->gops=&g8ops;
+            gc->buffer=&BITMAP_1;
+            break;
+        case BMAP2:
+            gc->gops=&g8ops;
+            gc->buffer=&BITMAP_2;
+            break;
+        case VID1:
+            gc->gops=NULL;
+            gc->buffer=&VIDEO_1;
+            break;
                 case VID2:
-			gc->gops=NULL;
-			gc->buffer=&VIDEO_2;
-			break;
-		default:
-			fprintf(stderr,"wrong plane\n");
-			return NULL;
-	}
-			
-	return gc;
+            gc->gops=NULL;
+            gc->buffer=&VIDEO_2;
+            break;
+        default:
+            fprintf(stderr,"wrong plane\n");
+            return NULL;
+    }
+            
+    return gc;
 }
 
 void destroyGC(GC_ID gc)
 {
-	if(gc!=NULL)
-		free(gc);
+    if(gc!=NULL)
+        free(gc);
 }
 
 void setPlane(int vplane)
 {
-	switch(vplane) {
-		case BMAP1:
-			default_gc=gc_bmap1;
-			break;
-		case BMAP2:
-			default_gc=gc_bmap2;
-			break;
-		case VID1:
-			default_gc=gc_vid1;
-			break;
+    switch(vplane) {
+        case BMAP1:
+            default_gc=gc_bmap1;
+            break;
+        case BMAP2:
+            default_gc=gc_bmap2;
+            break;
+        case VID1:
+            default_gc=gc_vid1;
+            break;
                 case VID2:
-			default_gc=gc_vid2;
-			break;
-		default:
-			fprintf(stderr,"wrong plane\n");
-	}
+            default_gc=gc_vid2;
+            break;
+        default:
+            fprintf(stderr,"wrong plane\n");
+    }
 }
 
 void hidePlane(int vplane)
 {
-	switch(vplane) {
-		case BMAP1:
-			osdSetComponentConfig(AV3XX_OSD_BITMAP1, 0);
-			break;
-		case BMAP2:
-			osdSetComponentConfig(AV3XX_OSD_BITMAP2, 0);
-			break;
-		case VID1:
-			osdSetComponentConfig(AV3XX_OSD_VIDEO1, 0);
-			break;
+    switch(vplane) {
+        case BMAP1:
+            osdSetComponentConfig(AV3XX_OSD_BITMAP1, 0);
+            break;
+        case BMAP2:
+            osdSetComponentConfig(AV3XX_OSD_BITMAP2, 0);
+            break;
+        case VID1:
+            osdSetComponentConfig(AV3XX_OSD_VIDEO1, 0);
+            break;
                 case VID2:
-			osdSetComponentConfig(AV3XX_OSD_VIDEO2, 0);
-			break;
-		default:
-			fprintf(stderr,"wrong plane\n");
-	}
+            osdSetComponentConfig(AV3XX_OSD_VIDEO2, 0);
+            break;
+        default:
+            fprintf(stderr,"wrong plane\n");
+    }
 }
 
 void showPlane(int vplane)
 {
-	switch(vplane) {
-		case BMAP1:
-                	tstPlane(&BITMAP_1);
-			osdSetComponentConfig(AV3XX_OSD_BITMAP1,BITMAP_1.enable);
-			break;
-		case BMAP2:
-                	tstPlane(&BITMAP_2);
-			osdSetComponentConfig(AV3XX_OSD_BITMAP2,BITMAP_2.enable);
-			break;
-		case VID1:
-                	tstPlane(&VIDEO_1);
-			osdSetComponentConfig(AV3XX_OSD_VIDEO1,VIDEO_1.enable);
-			break;
-                case VID2:
-                	tstPlane(&VIDEO_2);
-			osdSetComponentConfig(AV3XX_OSD_VIDEO2,VIDEO_2.enable);
-			break;
-		default:
-			fprintf(stderr,"wrong plane\n");
-	}			
+    switch(vplane) {
+        case BMAP1:
+            //tstPlane(&BITMAP_1);
+            osdSetComponentConfig(AV3XX_OSD_BITMAP1,BITMAP_1.enable);
+            break;
+        case BMAP2:
+            //tstPlane(&BITMAP_2);
+            osdSetComponentConfig(AV3XX_OSD_BITMAP2,BITMAP_2.enable);
+            break;
+        case VID1:
+            //tstPlane(&VIDEO_1);
+            osdSetComponentConfig(AV3XX_OSD_VIDEO1,VIDEO_1.enable);
+            break;
+        case VID2:
+            //tstPlane(&VIDEO_2);
+            osdSetComponentConfig(AV3XX_OSD_VIDEO2,VIDEO_2.enable);
+            break;
+        default:
+            fprintf(stderr,"wrong plane\n");
+    }            
 }
 
-void tstPlane(struct graphicsBuffer * plane)
+/*void tstPlane(struct graphicsBuffer * plane)
 {
-	int diff;
-	if(plane->offset == 0)
-        {
-        	plane->offset=(unsigned int)malloc(sizeof(char)*(SCREEN_WIDTH*SCREEN_HEIGHT*(plane->bitsPerPixel>>3)+40));
-                if(plane->offset)
-                {
-                	diff=plane->offset % 32;
-                        if(diff)
-                                plane->offset+=(32-diff);
-                        osdSetComponentOffset(plane->component, plane->offset);
-                }
-                else
-                {
-                	fprintf(stderr,"Can't allocate buffer for new Plane");
-                        _exit(0);
-                }
-        }
+    int diff;
+    if(plane->offset == 0)
+    {
+        plane->offset=(unsigned int)malloc(sizeof(char)*(SCREEN_WIDTH*SCREEN_HEIGHT*(plane->bitsPerPixel>>3)+40));
+            if(plane->offset)
+            {
+                diff=plane->offset % 32;
+                if(diff)
+                        plane->offset+=(32-diff);
+                osdSetComponentOffset(plane->component, plane->offset);
+            }
+            else
+            {
+                fprintf(stderr,"Can't allocate buffer for new Plane");
+                _exit(0);
+            }
+    }
 }
+*/
 
-void iniComponent(struct graphicsBuffer * buff)
-{	
-	osdSetComponentSize(buff->component, buff->bytesPerLine, buff->height);
-	osdSetComponentPosition(buff->component,buff->x, buff->y);
-	osdSetComponentSourceWidth(buff->component, buff->SWidth);
+void iniComponent(struct graphicsBuffer * buff,unsigned int offset)
+{    
+    int diff=offset % 32;
+    if(diff)
+        offset+=(32-diff);
+    buff->offset=offset;
+    osdSetComponentOffset(buff->component,offset);
+    osdSetComponentSize(buff->component, buff->bytesPerLine, buff->height);
+    osdSetComponentPosition(buff->component,buff->x, buff->y);
+    osdSetComponentSourceWidth(buff->component, buff->SWidth);
 }
 
 /* drawing functions */
 void clearScreen(int color)
 {
-	default_gc->gops->fillRect(color,0,0,SCREEN_WIDTH,SCREEN_HEIGHT,default_gc->buffer);
+    default_gc->gops->fillRect(color,0,0,SCREEN_WIDTH,SCREEN_HEIGHT,default_gc->buffer);
 }
 
 void drawPixel(int color,int x, int y)
 {
-	tstXY(x,y);
-	default_gc->gops->drawPixel(color, x, y,default_gc->buffer);
+    tstXY(x,y);
+    default_gc->gops->drawPixel(color, x, y,default_gc->buffer);
 }
 
 int readPixel(int x, int y)
 {
-	tstXY(x,y);
-	return default_gc->gops->readPixel(x,y,default_gc->buffer);
+    tstXY(x,y);
+    return default_gc->gops->readPixel(x,y,default_gc->buffer);
 }
 
 void drawRect(int color, int x, int y, int width, int height)
 {
-	tstXY(x,y);
-	tstWH(x,y,width,height);
-	default_gc->gops->drawRect(color,x,y,width,height,default_gc->buffer);
+    tstXY(x,y);
+    tstWH(x,y,width,height);
+    default_gc->gops->drawRect(color,x,y,width,height,default_gc->buffer);
 }
 
 void fillRect(int color, int x, int y, int width, int height)
 {
-	tstXY(x,y);
-	tstWH(x,y,width,height);
-	default_gc->gops->fillRect(color,x,y,width,height,default_gc->buffer);
+    tstXY(x,y);
+    tstWH(x,y,width,height);
+    default_gc->gops->fillRect(color,x,y,width,height,default_gc->buffer);
 }
 
 void drawLine(int color, int x1, int y1, int x2, int y2)
@@ -394,148 +405,148 @@ void drawLine(int color, int x1, int y1, int x2, int y2)
 
 void putS(int color, int bg_color, int x, int y, char *s)
 {
-	FONT_ID font=default_font;
-	int len=strlen(s);
-	char c;
+    FONT_ID font=default_font;
+    int len=strlen(s);
+    char c;
 
-	tstXY(x,y);
+    tstXY(x,y);
 
-	if(font->width*len>SCREEN_WIDTH)
-	{
-		s[SCREEN_WIDTH/font->width]=0;
-		c = s[SCREEN_WIDTH/font->width];
-	}
+    if(font->width*len>SCREEN_WIDTH)
+    {
+        s[SCREEN_WIDTH/font->width]=0;
+        c = s[SCREEN_WIDTH/font->width];
+    }
 
-	default_gc->gops->drawString(font,color,bg_color,x,y,s,default_gc->buffer);
+    default_gc->gops->drawString(font,color,bg_color,x,y,s,default_gc->buffer);
 
-	if(font->width*len>SCREEN_WIDTH)
-	{
-		s[SCREEN_WIDTH/font->width]=c;
-	}
+    if(font->width*len>SCREEN_WIDTH)
+    {
+        s[SCREEN_WIDTH/font->width]=c;
+    }
 }
 
 int getStringS(const unsigned char *str, int *w, int *h)
 {
-	FONT_ID font=default_font;
+    FONT_ID font=default_font;
 
-	return default_gc->gops->getStringSize(font,str,w,h);
+    return default_gc->gops->getStringSize(font,str,w,h);
 }
 
 void putC(int color, int bg_color, int x, int y, char s)
 {
-	FONT_ID font=default_font;
+    FONT_ID font=default_font;
 
-	tstXY(x,y);
+    tstXY(x,y);
 
-	default_gc->gops->drawChar(font,color,bg_color,x,y,s,default_gc->buffer);
+    default_gc->gops->drawChar(font,color,bg_color,x,y,s,default_gc->buffer);
 }
 
 void drawSprite(unsigned int * palette, SPRITE * sprite, int x, int y)
 {
-	tstXY(x,y);
-	default_gc->gops->drawSprite(palette,sprite,default_gc->transparent,x,y,default_gc->buffer);
+    tstXY(x,y);
+    default_gc->gops->drawSprite(palette,sprite,default_gc->transparent,x,y,default_gc->buffer);
 }
 
 void drawBITMAP(BITMAP * bitmap, int x, int y)
 {
-	tstXY(x,y);
-	default_gc->gops->drawBITMAP(bitmap,default_gc->transparent,x,y,default_gc->buffer);
+    tstXY(x,y);
+    default_gc->gops->drawBITMAP(bitmap,default_gc->transparent,x,y,default_gc->buffer);
 }
 
 void scrollWindowVert(int bgColor, int x, int y, int width, int height, int scroll, int UP)
 {
-	default_gc->gops->scrollWindowVert(bgColor,x,y,width,height,scroll,UP,default_gc->buffer);
+    default_gc->gops->scrollWindowVert(bgColor,x,y,width,height,scroll,UP,default_gc->buffer);
 }
 
 void scrollWindowHoriz(int bgColor, int x, int y, int width, int height, int scroll, int RIGHT)
 {
-	default_gc->gops->scrollWindowHoriz(bgColor,x,y,width,height,scroll,RIGHT,default_gc->buffer);
+    default_gc->gops->scrollWindowHoriz(bgColor,x,y,width,height,scroll,RIGHT,default_gc->buffer);
 }
 
 /* images */
 
 void drawImage(char * filename)
 {
-	struct jpeg_decompress_struct cinfo;
-	struct jpeg_error_mgr jerr;
-	FILE * img_file;
-	char * offset;
-	struct graphicsBuffer * buff=&VIDEO_1;
-	JSAMPROW rowptr[1];
-	int scale[]={2,4,8};
-	int i,j,x,y;
-	unsigned int * screenDirect;
-	
-	/* Initialize the JPEG decompression object with default error handling. */
-	cinfo.err = jpeg_std_error(&jerr);
-	jpeg_create_decompress(&cinfo);
-	
-	if ((img_file = fopen(filename, "rb")) == NULL)
-	{
-		fprintf(stderr, "drawImage: can't open %s\n", filename);
-		exit(EXIT_FAILURE);
-	}
-	
-	jpeg_stdio_src(&cinfo, img_file);
-	
-	jpeg_read_header(&cinfo,TRUE);
-	
-	cinfo.out_color_space=JCS_CUST;
-	
-	if(cinfo.image_width > SCREEN_WIDTH || cinfo.image_height > SCREEN_HEIGHT)
-	{
-		for(i=0;i<3;i++)
-			if((cinfo.image_width/scale[i])<SCREEN_WIDTH && (cinfo.image_height/scale[i])<SCREEN_HEIGHT)
-				break;
-		if(i==3)
-		{
-			fprintf(stderr, "drawImage: image too big %s\n", filename);
-			exit(EXIT_FAILURE);
-		}
-		else
-			cinfo.scale_denom=scale[i];
-	}
-	
-	
-	jpeg_start_decompress(&cinfo);
-	
-	
-	
-	//cinfo.out_color_components=4;
-	
-	hidePlane(BMAP1);
-	hidePlane(BMAP2);
-	showPlane(VID1);
-	
-	screenDirect=(unsigned int *)buff->offset;
-	for (j=0;j<SCREEN_HEIGHT;j++)
-        	for (i=0;i<SCREEN_WIDTH;i++)
-            		screenDirect[j*SCREEN_WIDTH + i] = 0x00800080;
-	
-	x=(SCREEN_WIDTH-cinfo.output_width)/2;
-	y=(SCREEN_HEIGHT-cinfo.output_height)/2;
-	offset=(char*)(buff->offset+x*4+y*buff->width*4);
-	
-	while(cinfo.output_scanline < cinfo.output_height)
-	{
-		rowptr[0] = (JSAMPROW)offset;
-		if(jpeg_read_scanlines(&cinfo, rowptr,1))
-			offset+=buff->width*4;
-	}
-	
-	
-	
-	jpeg_destroy_decompress(&cinfo);
-	fclose(img_file);
+    struct jpeg_decompress_struct cinfo;
+    struct jpeg_error_mgr jerr;
+    FILE * img_file;
+    char * offset;
+    struct graphicsBuffer * buff=&VIDEO_1;
+    JSAMPROW rowptr[1];
+    int scale[]={2,4,8};
+    int i,j,x,y;
+    unsigned int * screenDirect;
+    
+    /* Initialize the JPEG decompression object with default error handling. */
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_decompress(&cinfo);
+    
+    if ((img_file = fopen(filename, "rb")) == NULL)
+    {
+        fprintf(stderr, "drawImage: can't open %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
+    
+    jpeg_stdio_src(&cinfo, img_file);
+    
+    jpeg_read_header(&cinfo,TRUE);
+    
+    cinfo.out_color_space=JCS_CUST;
+    
+    if(cinfo.image_width > SCREEN_WIDTH || cinfo.image_height > SCREEN_HEIGHT)
+    {
+        for(i=0;i<3;i++)
+            if((cinfo.image_width/scale[i])<SCREEN_WIDTH && (cinfo.image_height/scale[i])<SCREEN_HEIGHT)
+                break;
+        if(i==3)
+        {
+            fprintf(stderr, "drawImage: image too big %s\n", filename);
+            exit(EXIT_FAILURE);
+        }
+        else
+            cinfo.scale_denom=scale[i];
+    }
+    
+    
+    jpeg_start_decompress(&cinfo);
+    
+    
+    
+    //cinfo.out_color_components=4;
+    
+    hidePlane(BMAP1);
+    hidePlane(BMAP2);
+    showPlane(VID1);
+    
+    screenDirect=(unsigned int *)buff->offset;
+    for (j=0;j<SCREEN_HEIGHT;j++)
+            for (i=0;i<SCREEN_WIDTH;i++)
+                    screenDirect[j*SCREEN_WIDTH + i] = 0x00800080;
+    
+    x=(SCREEN_WIDTH-cinfo.output_width)/2;
+    y=(SCREEN_HEIGHT-cinfo.output_height)/2;
+    offset=(char*)(buff->offset+x*4+y*buff->width*4);
+    
+    while(cinfo.output_scanline < cinfo.output_height)
+    {
+        rowptr[0] = (JSAMPROW)offset;
+        if(jpeg_read_scanlines(&cinfo, rowptr,1))
+            offset+=buff->width*4;
+    }
+    
+    
+    
+    jpeg_destroy_decompress(&cinfo);
+    fclose(img_file);
 }
 
 /* font */
 void setFont(FONT_ID font)
 {
-	default_font=font;
+    default_font=font;
 }
 
 FONT_ID getFont(void)
 {
-	return default_font;
+    return default_font;
 }

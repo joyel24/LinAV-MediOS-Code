@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
 #include "av3xx_common.h"
 #include "graphics.h"
 #include "events.h"
 #include "cops.h"
 #include "avevents.h"
+#include "font.h"
 
 struct client_operations * cops;
 int stop=0;
@@ -60,12 +59,6 @@ COLOR_YELLOW,
 COLOR_ORANGE
 };
 
-/************
- * Fonts used
- ***********/
-needFont(std6x9);
-needFont(std7x13);
-
 /*************************
  * Ints for PLAYBACK/SOUND
  ************************/
@@ -73,7 +66,6 @@ needFont(std7x13);
 int vol, bass = 50, treb = 50, bal = 50, loud = 0;
 int oldvol;                  /* used for pause/resume */
 int wait, end;               /* used for playback */
-int fd_dsp, fd_file, fd_mix; /* used for playback */
 int pause = 0;               /* 1 if paused */
 int settings_applied = 0;    /* "1" if settings have been applied */
 int evt;                     /* button reading */
@@ -267,11 +259,20 @@ void draw_settings(void)
  *******************/
 void apply_settings(void)
 {
-    ioctl(fd_mix,AV_SET_MIX_VOLUME,&vol);
-    ioctl(fd_mix,AV_SET_MIX_BASS,&bass);
-    ioctl(fd_mix,AV_SET_MIX_TREBLE,&treb);
-    ioctl(fd_mix,AV_SET_MIX_BALANCE,&bal);
-    ioctl(fd_mix,AV_SET_MIX_LOUDNESS,&loud);
+    int err=0;   
+    
+    if(!cops->setVolume(vol))
+    	err++;
+    if(!cops->setBass(bass))
+    	err++;
+    if(!cops->setTreble(treb))
+    	err++;
+    if(!cops->setLoudness(loud))
+    	err++;
+    if(!cops->setBalance(bal))
+    	err++;
+
+    cops->debug("applying settings (err=%d)",err);
 }
 
 /**************************
@@ -348,7 +349,7 @@ void pause_resume(void)
 {
     if(pause) /* let's resume */
     {
-        ioctl(fd_dsp,AV_DSP_START_MP3,NULL);
+        cops->start_playback();
         pause=0;
 
         if(fade) /* fade in */
@@ -375,7 +376,7 @@ void pause_resume(void)
             vol = oldvol;
         }
 
-        ioctl(fd_dsp,AV_DSP_PAUSE_MP3,NULL);
+        cops->pause_playback();
         pause=1;
     }
     main_drawn = 0; /* update window */
@@ -444,10 +445,10 @@ int eventHandler(int evt)
 {    
             switch(evt)
             {
-            	case EVT_TIMER:
+            	/*case EVT_TIMER:
                 	if(data.finished)
                         	stop=1;
-                        break;
+                        break;*/
                 case BTN_UP: /* settings_cursor up */
                     if(window == 1)
                     {
@@ -641,7 +642,7 @@ int eventHandler(int evt)
                                 apply_settings();
                             }
                         }
-                        if(ioctl(fd_dsp,AV_DSP_STOP_MP3,NULL)<0)
+                        if(!cops->stop_playback())
                         {
                             fprintf(stderr,"error stopping\n");
                             return -1;
@@ -698,12 +699,12 @@ int eventHandler(int evt)
                 cops->putS(COLOR_WHITE, COLOR_BLACK, 65, 10, tmp);
 
                 /* What's playing? */
-                cops->setFont(std7x13);
+                cops->setFont(STD7X13);
                 sprintf(tmp,"Now Playing:");
                 cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 40, tmp);
                 sprintf(tmp,"%s",filename);
                 cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 55, tmp);
-                cops->setFont(std6x9);
+                cops->setFont(STD6X9);
 
                 /* fill in the peak meter background */
                 if(peakmeters)
@@ -718,7 +719,7 @@ int eventHandler(int evt)
             }
 
             /* read peaks */
-            ioctl(fd_dsp,AV_DSP_OUT_PEAK_REAL,&av_p);
+            cops->readPeack(&av_p);            
 
             /* get peak values */
             av_p.left=(av_p.left*200)/0x7FFF;
@@ -807,53 +808,44 @@ int main(int argc, char * * argv)
     
     filename="/mnt/file.mp3";
     vol=70;
+    wait=0;
+    end=0;
     
     REGISTER(cops,eventHandler,0);
     
-    fprintf(stderr,"In soundTest\n");
-
-    fd_dsp=open("/dev/dsp",O_WRONLY);
-    if (fd_dsp < 0)
-    {
-        fprintf(stderr,"Can't open /dev/dsp\n");
-        return -1;
-    }
-
-    fd_mix=open("/dev/mixer",O_WRONLY);
-    if (fd_mix < 0)
-    {
-        fprintf(stderr,"Can't open /dev/mixer\n");
-        return -1;
-    }
+    fprintf(stderr,"In play\n");    
 
     data.size=MP3_BUFF_SIZE;
     data.filename=filename;
     data.pos=0;
     data.finished=0;
 
-    ioctl(fd_dsp,AV_DSP_INI_MP3,&data);
-
-    wait=0;
-    end=0;
+    /* initialize mp3 playback */
+    if(!cops->ini_mp3_playback(&data))  
+    	return 0;    
 
     /* initialize the graphics and clear the lcd */
     cops->hideSBar();
+    cops->disableMenu();
     cops->fillRect(COLOR_BLACK, 0, 0, 320, 240);
 
     /* set standard font */
-    cops->setFont(std6x9);
-
-    PACK(cops);
+    cops->setFont(STD6X9);
+    eventHandler(-1); // initial draw !!    
+    
+    cops->debug("Before start");
     
     /* start mp3 */
-    ioctl(fd_dsp,AV_DSP_START_MP3,NULL);
-    eventHandler(-1); // initial draw !!
+    cops->start_playback();
+        
+    PACK(cops);
     
     while(!stop) /*nothing*/;
 
+    cops->debug("I'm out");
     /* shut down everything used */
-    close(fd_dsp);
-    close(fd_mix);
+    
+    cops->close_mp3_playback();
     
     return 0;
 }

@@ -119,7 +119,7 @@ typedef struct graphics_context * GC_ID;
 
 int   ini_graphics   (void);
 void  close_graphics (void);
-void  iniComponent   (struct graphicsBuffer * buff);
+void  iniComponent   (struct graphicsBuffer * buff,unsigned int offset);
 void  tstPlane       (struct graphicsBuffer * plane);
 GC_ID createGC       (int vplane);
 void  destroyGC      (GC_ID gc);

@@ -12,7 +12,6 @@
 */
 
 #include <stdio.h>
-#include <stdarg.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -68,6 +67,8 @@ int main(int argc,char * * argv)
     ini_font(STD8X13);
     set_mouseParam(6, 3);
     
+    ini_sound_connection();
+    
     if(!ini_menu(path,&menu_plugin))
     {
     	close_graphics();
@@ -86,6 +87,7 @@ int main(int argc,char * * argv)
     
     showSBar();
     menu_plugin.handle_on=1;
+    enableMenu();
     sendEvt(&menu_plugin,EVT_REDRAW);
         
     eventLoop(); //main loop
@@ -98,3 +100,7 @@ int main(int argc,char * * argv)
 void showSBar(void)  {status_bar_plugin.handle_on=1;sendEvt(&status_bar_plugin,EVT_REDRAW);}
 void hideSBar(void)  {status_bar_plugin.handle_on=0;}
 int  sBarStatus(void) {return status_bar_plugin.handle_on;}
+
+void enableMenu(void)  {menu_plugin.allowed=1;}
+void disableMenu(void) {menu_plugin.allowed=0;}
+int  menuStatus(void)  {return menu_plugin.allowed;}
