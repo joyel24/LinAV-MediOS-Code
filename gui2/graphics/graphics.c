@@ -13,26 +13,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef GTYPE
-#warning GTYPE not declared
-#endif
-
 #ifdef AV_SCREEN
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <osd.h>
 #define FBIO_INIT        _IO ('F', 0x26)
 #define LCD_UPDATE       {;}
-#warning in AV_SCREEN
 #else
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#define LCD_UPDATE       {lcd_update();}
+#define LCD_UPDATE(x,y,w,h)       {lcd_update(UPDATE_ONLY,x,y,w,h);}
 Display* display;
 Window window;
 GC gc;
 int screen;
-colorTab[256];
+int colorTab[256];
 #endif
 
 #include <graphics.h>
@@ -53,6 +48,10 @@ char screen_BMAP1[SCREEN_WIDTH*SCREEN_HEIGHT+40];
 char screen_BMAP2[SCREEN_WIDTH*SCREEN_HEIGHT+40];
 char screen_VID1[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
 char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
+
+#ifndef AV_SCREEN
+char screen_BMAP1_SAV[SCREEN_WIDTH*SCREEN_HEIGHT+40];
+#endif
 
 struct graphicsBuffer BITMAP_1 = {
     offset             : 0,
@@ -129,8 +128,6 @@ extern struct graphics_operations g8ops;
 
 int ini_graphics()
 {
-    
-
 #ifdef AV_SCREEN
     osdInit();
     
@@ -149,6 +146,8 @@ int ini_graphics()
     
     setPalette(gui_pal,256);
 #else
+    int x, y;
+    
     BITMAP_1.offset=(unsigned int)&screen_BMAP1;
     BITMAP_2.offset=(unsigned int)&screen_BMAP2;
     VIDEO_1.offset=(unsigned int)&screen_VID1;
@@ -183,6 +182,15 @@ int ini_graphics()
     
     setPalette(gui_pal,256);
     
+    /* initializing the tmp buffer and the screen */
+    for(y=0; y<SCREEN_HEIGHT; y++)
+        for(x=0; x<SCREEN_WIDTH; x++)
+        {
+            screen_BMAP1_SAV[y*SCREEN_WIDTH+x]=0;
+            XSetForeground(display, gc, colorTab[0]);
+            XDrawPoint(display, window, gc, x, y);
+        }            
+    
     XMapWindow(display, window);
 #endif  
           
@@ -202,18 +210,22 @@ int ini_graphics()
 }
 
 #ifndef AV_SCREEN
-void lcd_update(void)
+void lcd_update(int type, int x_ini, int y_ini, int w, int h)
 {
     int x, y;
     unsigned char color;
     
-    for(y=0; y<SCREEN_HEIGHT; y++)
-        for(x=0; x<SCREEN_WIDTH; x++)
+    for(y=y_ini; y<(y_ini+h); y++)
+        for(x=x_ini; x<(x_ini+w); x++)
         {
-            color=screen_BMAP1[y*SCREEN_WIDTH+x];
-            XSetForeground(display, gc, colorTab[color]);
-            XDrawPoint(display, window, gc, x, y);
-        }   /*drawPixBuffer(screen_BMAP1[y*SCREEN_WIDTH+x], x, y);*/
+            if(screen_BMAP1[y*SCREEN_WIDTH+x]!=screen_BMAP1_SAV[y*SCREEN_WIDTH+x] || type == FORCE_REDRAW)
+            {
+                color=screen_BMAP1[y*SCREEN_WIDTH+x];
+                XSetForeground(display, gc, colorTab[color]);
+                XDrawPoint(display, window, gc, x, y);
+                screen_BMAP1_SAV[y*SCREEN_WIDTH+x]=screen_BMAP1[y*SCREEN_WIDTH+x];
+            }
+        }
 }
 #endif
 
@@ -391,21 +403,20 @@ void iniComponent(struct graphicsBuffer * buff,unsigned int offset)
 void clearScreen(int color)
 {
     default_gc->gops->fillRect(color,0,0,SCREEN_WIDTH,SCREEN_HEIGHT,default_gc->buffer);
-    LCD_UPDATE
+    LCD_UPDATE(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
 }
 
 void drawPixel(int color,int x, int y)
 {
     tstXY(x,y);
     default_gc->gops->drawPixel(color, x, y,default_gc->buffer);
-    LCD_UPDATE
+    LCD_UPDATE(x,y,1,1)
 }
 
 int readPixel(int x, int y)
 {
     tstXY(x,y);
     return default_gc->gops->readPixel(x,y,default_gc->buffer);
-    LCD_UPDATE
 }
 
 void drawRect(int color, int x, int y, int width, int height)
@@ -413,7 +424,7 @@ void drawRect(int color, int x, int y, int width, int height)
     tstXY(x,y);
     tstWH(x,y,width,height);
     default_gc->gops->drawRect(color,x,y,width,height,default_gc->buffer);
-    LCD_UPDATE
+    LCD_UPDATE(x,y,width,height)
 }
 
 void fillRect(int color, int x, int y, int width, int height)
@@ -421,7 +432,7 @@ void fillRect(int color, int x, int y, int width, int height)
     tstXY(x,y);
     tstWH(x,y,width,height);
     default_gc->gops->fillRect(color,x,y,width,height,default_gc->buffer);
-    LCD_UPDATE
+    LCD_UPDATE(x,y,width,height)
 }
 
 void drawLine(int color, int x1, int y1, int x2, int y2)
@@ -445,6 +456,7 @@ void drawLine(int color, int x1, int y1, int x2, int y2)
             y2=i;
         }
         default_gc->gops->drawVLine(color,x1,y1,y2-y1+1,default_gc->buffer);
+        LCD_UPDATE(x1,y1,1,y2-y1+1)
         return;        
     }
     
@@ -457,6 +469,7 @@ void drawLine(int color, int x1, int y1, int x2, int y2)
             x2=i;
         }
         default_gc->gops->drawHLine(color,x1,y1,x2-x1+1,default_gc->buffer);
+        LCD_UPDATE(x1,y1,x2-x1+1,1)
         return;
     }
 
@@ -519,13 +532,39 @@ void drawLine(int color, int x1, int y1, int x2, int y2)
             y += yinc2;
         }
     }
-    LCD_UPDATE
+    
+#ifndef AV_SCREEN
+    if(x1 > x2)
+    {
+        xinc1=x1;
+        xinc2=x2;
+    }
+    else
+    {
+        xinc1=x2;
+        xinc2=x1;
+    }
+    
+    if(y1 > y2)
+    {
+        yinc1=y1;
+        yinc2=y2;
+    }
+    else
+    {
+        yinc1=y2;
+        yinc2=y1;
+    }
+    
+    LCD_UPDATE(xinc1,yinc1,xinc2-xinc1+1,yinc2-yinc1+1)
+#endif    
 }
 
 void putS(int color, int bg_color, int x, int y, char *s)
 {
     FONT_ID font=default_font;
     int len=strlen(s);
+    int h,w;
     char c;
 
     tstXY(x,y);
@@ -542,7 +581,11 @@ void putS(int color, int bg_color, int x, int y, char *s)
     {
         s[SCREEN_WIDTH/font->width]=c;
     }
-    LCD_UPDATE
+    
+#ifndef AV_SCREEN
+    getStringS(s,&w,&h);
+    LCD_UPDATE(x,y,w,h)
+#endif
 }
 
 int getStringS(const unsigned char *str, int *w, int *h)
@@ -555,37 +598,51 @@ int getStringS(const unsigned char *str, int *w, int *h)
 void putC(int color, int bg_color, int x, int y, char s)
 {
     FONT_ID font=default_font;
+    int h,w;
 
     tstXY(x,y);
 
     default_gc->gops->drawChar(font,color,bg_color,x,y,s,default_gc->buffer);
-    LCD_UPDATE
+#ifndef AV_SCREEN
+    getStringS("W",&w,&h);
+    LCD_UPDATE(x,y,w,h)
+#endif
 }
 
 void drawSprite(unsigned int * palette, SPRITE * sprite, int x, int y)
 {
     tstXY(x,y);
     default_gc->gops->drawSprite(palette,sprite,default_gc->transparent,x,y,default_gc->buffer);
-    LCD_UPDATE
+    LCD_UPDATE(x,y,sprite->width,sprite->height);
 }
 
 void drawBITMAP(BITMAP * bitmap, int x, int y)
 {
     tstXY(x,y);
     default_gc->gops->drawBITMAP(bitmap,default_gc->transparent,x,y,default_gc->buffer);
-    LCD_UPDATE
+    LCD_UPDATE(x,y,bitmap->width,bitmap->height);
 }
 
 void scrollWindowVert(int bgColor, int x, int y, int width, int height, int scroll, int UP)
 {
     default_gc->gops->scrollWindowVert(bgColor,x,y,width,height,scroll,UP,default_gc->buffer);
-    LCD_UPDATE
+#ifndef AV_SCREEN
+    if(UP)
+        LCD_UPDATE(x,y-scroll,width,height)
+    else
+        LCD_UPDATE(x,y,width,height+scroll)
+#endif
 }
 
 void scrollWindowHoriz(int bgColor, int x, int y, int width, int height, int scroll, int RIGHT)
 {
     default_gc->gops->scrollWindowHoriz(bgColor,x,y,width,height,scroll,RIGHT,default_gc->buffer);
-    LCD_UPDATE
+#ifndef AV_SCREEN
+    if(RIGHT)
+        LCD_UPDATE(x,y,width+scroll,height)
+    else
+        LCD_UPDATE(x-scroll,y,width,height)
+#endif
 }
 
 /* images */
