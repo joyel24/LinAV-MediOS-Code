@@ -1,5 +1,5 @@
 /*
-* clock
+* clock.c
 *
 * linav - http://linav.sourceforge.net
 * Copyright (c) 2004 by Zakk Roberts
@@ -29,6 +29,16 @@ struct client_operations * cops;
  ********/
 #define LCD_WIDTH 320
 #define LCD_HEIGHT 240
+#define TRUE 1
+#define FALSE 0
+
+#define MODE_ANALOG 1
+#define MODE_DIGITAL 2
+#define MODE_LCD 3
+#define MODE_FULLSCREEN 4
+#define MODE_BINARY 5
+#define MODE_SETTINGS 6
+#define MODE_SELECTOR 7
 
 /******
  * INTS
@@ -38,6 +48,8 @@ int i;
 int done = 0;
 int event;
 int pos2 = 0;
+int cursorpos = 1;
+int old_mode;
 
 /***********
  * TIME INTS
@@ -52,6 +64,7 @@ int hour2;
 struct av_tm current_time;
 char modayyr[10];
 char time[10];
+char settings_text[50];
 
 /***********************************
  * This is saved to default_filename
@@ -94,7 +107,7 @@ struct saved_settings
 void reset_settings(void)
 {
     /* general */
-    settings.clock = 1; /* 1: analog, 2: digital, 3: lcd, 4: full, 5: binary */
+    settings.clock = MODE_ANALOG; /* 1: analog, 2: digital, 3: lcd, 4: full, 5: binary */
     settings.backlight_on = 1;
     settings.save_mode = 1; /* 1: on exit, 2: automatically, 3: manually */
     settings.display_counter = 1;
@@ -222,7 +235,8 @@ void draw_analog(void)
     /* clear hourhand trails */
     if(hour != last_h)
     {
-        cops->drawLine(COLOR_BLACK, LCD_WIDTH/2, LCD_HEIGHT/2, xhour[pos2], yhour[pos2]);
+        cops->drawLine(COLOR_BLACK, LCD_WIDTH/2, LCD_HEIGHT/2, xhour[pos2],
+                            yhour[pos2]);
         cops->drawLine(COLOR_BLACK, LCD_WIDTH/2-1, LCD_HEIGHT/2-1,
                             xhour[pos2], yhour[pos2]);
         cops->drawLine(COLOR_BLACK, LCD_WIDTH/2+1, LCD_HEIGHT/2+1,
@@ -234,7 +248,7 @@ void draw_analog(void)
     }
 
     /* draw circle */
-    for(i=0; i < 60; i++)
+    for(i=0; i<60; i++)
     {
         cops->drawPixel(COLOR_WHITE, xminute[i], yminute[i]);
         if(i < (60/5))
@@ -242,7 +256,7 @@ void draw_analog(void)
     }
 
     /* draw cover */
-    cops->drawLine(COLOR_WHITE, (LCD_WIDTH/2)-1, (LCD_HEIGHT/2)+3,
+    cops->drawLine(COLOR_WHITE, (LCD_WIDTH/2)-1 , (LCD_HEIGHT/2)+3,
                         (LCD_WIDTH/2)+1, (LCD_HEIGHT/2)+3);
     cops->drawLine(COLOR_WHITE, (LCD_WIDTH/2)-3, (LCD_HEIGHT/2)+2,
                         (LCD_WIDTH/2)+3, (LCD_HEIGHT/2)+2);
@@ -254,8 +268,31 @@ void draw_analog(void)
                         (LCD_WIDTH/2)+4, (LCD_HEIGHT/2)-1);
     cops->drawLine(COLOR_WHITE, (LCD_WIDTH/2)-3, (LCD_HEIGHT/2)-2,
                         (LCD_WIDTH/2)+3, (LCD_HEIGHT/2)-2);
-    cops->drawLine(COLOR_WHITE, (LCD_WIDTH/2)-1, (LCD_HEIGHT/2)-3,
+    cops->drawLine(COLOR_WHITE, (LCD_WIDTH/2)-1 , (LCD_HEIGHT/2)-3,
                         (LCD_WIDTH/2)+1, (LCD_HEIGHT/2)-3);
+
+    sprintf(time, "%02d:%02d:%02d", hour, minute, second);
+    cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 10, time);
+}
+
+void mode_selector(void)
+{
+    cops->putS(COLOR_WHITE, COLOR_BLACK, LCD_WIDTH/2-(13*13/2), 10, "MODE SELECTOR");
+    cops->putS(COLOR_WHITE, COLOR_BLACK, 300, 10, "Go");
+    cops->putS(COLOR_WHITE, COLOR_BLACK, 270, 40, "Cancel");
+
+    if(cursorpos == 1)
+        cops->putS(COLOR_RED, COLOR_BLACK, 10, 50, "Analog Clock");
+    else
+        cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 50, "Analog Clock");
+    if(cursorpos == 2)
+        cops->putS(COLOR_RED, COLOR_BLACK, 10, 70, "Digital Clock");
+    else
+        cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 70, "Digital Clock");
+    if(cursorpos == 3)
+        cops->putS(COLOR_RED, COLOR_BLACK, 10, 90, "LCD-style Clock");
+    else
+        cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 90, "LCD-style Clock");
 }
 
 void clock(void)
@@ -266,17 +303,302 @@ void clock(void)
     minute = current_time.tm_min;
     second = current_time.tm_sec;
 
-    if(settings.clock == 1)
-        draw_analog();
+    if(settings.clock == MODE_DIGITAL || settings.clock == MODE_LCD)
+    {
+        if(last_m != minute || last_h != hour)
+        {
+            cops->fillRect(COLOR_BLACK, 0, 0, 320, 120);
+        }
+    }
 
-    cops->putS(COLOR_WHITE, COLOR_BLACK, 275, 45, "Quit");
+    switch(settings.clock)
+    {
+        case MODE_ANALOG:
+            draw_analog();
+            break;
 
-    sprintf(time, "%02d:%02d:%02d", hour, minute, second);
-    cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 10, time);
+        case MODE_DIGITAL:
+            draw_7seg_time(hour, minute, LCD_WIDTH/2-(32*5)/2, 16, 32, 64, TRUE, FALSE);
+            break;
+
+        case MODE_LCD:
+            draw_7seg_time(hour, minute, LCD_WIDTH/2-(32*5)/2, 16, 32, 64, TRUE, TRUE);
+            break;
+
+        case MODE_SELECTOR:
+            mode_selector();
+            break;
+    }
 
     last_s = second;
     last_m = minute;
     last_h = hour;
+}
+
+/*************************************************************
+ * 7-Segment LED/LCD imitation code, by Linus Nielsen Feltzing
+ ************************************************************/
+/*
+       a     0    b
+        #########c
+       #         #`
+       #         #
+      1#         #2
+       #         #
+       #    3    #
+      c ######### d
+       #         #
+       #         #
+      4#         #5
+       #         #
+       #    6    #
+      e ######### f
+*/
+static unsigned int point_coords[6][2] =
+{
+    {0, 0}, /* a */
+    {1, 0}, /* b */
+    {0, 1}, /* c */
+    {1, 1}, /* d */
+    {0, 2}, /* e */
+    {1, 2}  /* f */
+};
+
+/********************************************
+ * The end points (a-f) for each segment line
+ *******************************************/
+static unsigned int seg_points[7][2] =
+{
+    {0,1}, /* a to b */
+    {0,2}, /* a to c */
+    {1,3}, /* b to d */
+    {2,3}, /* c to d */
+    {2,4}, /* c to e */
+    {3,5}, /* d to f */
+    {4,5}  /* e to f */
+};
+
+/**********************************************************************
+ * Lists that tell which segments (0-6) to enable for each digit (0-9),
+ * the list is terminated with -1
+ *********************************************************************/
+static int digit_segs[10][8] =
+{
+    {0,1,2,4,5,6, -1},   /* 0 */
+    {2,5, -1},           /* 1 */
+    {0,2,3,4,6, -1},     /* 2 */
+    {0,2,3,5,6, -1},     /* 3 */
+    {1,2,3,5, -1},       /* 4 */
+    {0,1,3,5,6, -1},     /* 5 */
+    {0,1,3,4,5,6, -1},   /* 6 */
+    {0,2,5, -1},         /* 7 */
+    {0,1,2,3,4,5,6, -1}, /* 8 */
+    {0,1,2,3,5,6, -1}    /* 9 */
+};
+
+/***********************************
+ * Draws one segment - LED imitation
+ **********************************/
+void draw_seg_led(int seg, int x, int y, int width, int height)
+{
+    int p1 = seg_points[seg][0];
+    int p2 = seg_points[seg][1];
+    int x1 = point_coords[p1][0];
+    int y1 = point_coords[p1][1];
+    int x2 = point_coords[p2][0];
+    int y2 = point_coords[p2][1];
+
+    /* It draws parallel lines of different lengths for thicker segments */
+    if(seg == 0 || seg == 3 || seg == 6)
+    {
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 1, y + y1 * height / 2,
+                         x + x2 * width - 1 , y + y2 * height / 2);
+
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 2, y + y1 * height / 2 - 1,
+                         x + x2 * width - 2, y + y2 * height / 2 - 1);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 2, y + y1 * height / 2 + 1,
+                         x + x2 * width - 2, y + y2 * height / 2 + 1);
+
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 3, y + y1 * height / 2 - 2,
+                         x + x2 * width - 3, y + y2 * height / 2 - 2);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 3, y + y1 * height / 2 + 2,
+                         x + x2 * width - 3, y + y2 * height / 2 + 2);
+    }
+    else
+    {
+        cops->drawLine(COLOR_WHITE, x + x1 * width, y + y1 * height / 2 + 1,
+                         x + x2 * width , y + y2 * height / 2 - 1);
+
+        cops->drawLine(COLOR_WHITE, x + x1 * width - 1, y + y1 * height / 2 + 2,
+                         x + x2 * width - 1, y + y2 * height / 2 - 2);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 1, y + y1 * height / 2 + 2,
+                         x + x2 * width + 1, y + y2 * height / 2 - 2);
+
+        cops->drawLine(COLOR_WHITE, x + x1 * width - 2, y + y1 * height / 2 + 3,
+                         x + x2 * width - 2, y + y2 * height / 2 - 3);
+
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 2, y + y1 * height / 2 + 3,
+                         x + x2 * width + 2, y + y2 * height / 2 - 3);
+    }
+}
+
+/***********************************
+ * Draws one segment - LCD imitation
+ **********************************/
+void draw_seg_lcd(int seg, int x, int y, int width, int height)
+{
+    int p1 = seg_points[seg][0];
+    int p2 = seg_points[seg][1];
+    int x1 = point_coords[p1][0];
+    int y1 = point_coords[p1][1];
+    int x2 = point_coords[p2][0];
+    int y2 = point_coords[p2][1];
+
+    if(seg == 0)
+    {
+        cops->drawLine(COLOR_WHITE, x + x1 * width,     y + y1 * height / 2 - 1,
+                         x + x2 * width,     y + y2 * height / 2 - 1);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 1, y + y1 * height / 2,
+                         x + x2 * width - 1, y + y2 * height / 2);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 2, y + y1 * height / 2 + 1,
+                         x + x2 * width - 2, y + y2 * height / 2 + 1);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 3, y + y1 * height / 2 + 2,
+                         x + x2 * width - 3, y + y2 * height / 2 + 2);
+    }
+    else if(seg == 3)
+    {
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 1, y + y1 * height / 2,
+                         x + x2 * width - 1, y + y2 * height / 2);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 2, y + y1 * height / 2 - 1,
+                         x + x2 * width - 2, y + y2 * height / 2 - 1);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 2, y + y1 * height / 2 + 1,
+                         x + x2 * width - 2, y + y2 * height / 2 + 1);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 3, y + y1 * height / 2 - 2,
+                         x + x2 * width - 3, y + y2 * height / 2 - 2);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 3, y + y1 * height / 2 + 2,
+                         x + x2 * width - 3, y + y2 * height / 2 + 2);
+    }
+    else if(seg == 6)
+    {
+        cops->drawLine(COLOR_WHITE, x + x1 * width,     y + y1 * height / 2 + 1,
+                         x + x2 * width,     y + y2 * height / 2 + 1);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 1, y + y1 * height / 2,
+                         x + x2 * width - 1, y + y2 * height / 2);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 2, y + y1 * height / 2 - 1,
+                         x + x2 * width - 2, y + y2 * height / 2 - 1);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 3, y + y1 * height / 2 - 2,
+                         x + x2 * width - 3, y + y2 * height / 2 - 2);
+
+    }
+    else if(seg == 1 || seg == 4)
+    {
+        cops->drawLine(COLOR_WHITE, x + x1 * width - 1, y + y1 * height / 2,
+                         x + x2 * width - 1, y + y2 * height / 2);
+        cops->drawLine(COLOR_WHITE, x + x1 * width,     y + y1 * height / 2 + 1,
+                         x + x2 * width,     y + y2 * height / 2 - 1);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 1, y + y1 * height / 2 + 2,
+                         x + x2 * width + 1, y + y2 * height / 2 - 2);
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 2, y + y1 * height / 2 + 3,
+                         x + x2 * width + 2, y + y2 * height / 2 - 3);
+    }
+    else if(seg == 2 || seg == 5)
+    {
+        cops->drawLine(COLOR_WHITE, x + x1 * width + 1, y + y1 * height / 2,
+                         x + x2 * width + 1, y + y2 * height / 2);
+        cops->drawLine(COLOR_WHITE, x + x1 * width,     y + y1 * height / 2 + 1,
+                         x + x2 * width,     y + y2 * height / 2 - 1);
+        cops->drawLine(COLOR_WHITE, x + x1 * width - 1, y + y1 * height / 2 + 2,
+                         x + x2 * width - 1, y + y2 * height / 2 - 2);
+        cops->drawLine(COLOR_WHITE, x + x1 * width - 2, y + y1 * height / 2 + 3,
+                         x + x2 * width - 2, y + y2 * height / 2 - 3);
+    }
+}
+
+/*****************
+ * Draws one digit
+ ****************/
+void draw_7seg_digit(int digit, int x, int y, int width, int height, int lcd_display)
+{
+    int i;
+    int c;
+
+    for(i = 0; digit_segs[digit][i] >= 0; i++)
+    {
+        c = digit_segs[digit][i];
+
+        if(!lcd_display)
+            draw_seg_led(c, x, y, width, height);
+        else
+            draw_seg_lcd(c, x, y, width, height);
+    }
+}
+
+/*****************************************************
+ * Draws the entire 7-segment hour-minute time display
+ ****************************************************/
+void draw_7seg_time(int hour, int minute, int x, int y, int width, int height,
+int colon, int lcd)
+{
+    int xpos = x;
+
+    /* Now change to 12H mode if requested */
+    if(settings.clock == MODE_DIGITAL)
+    {
+        if(settings.digital_12h)
+        {
+            if(hour > 12)
+                hour -= 12;
+            if(hour == 0)
+                hour = 12;
+        }
+    }
+    else
+    {
+        if(settings.lcd_12h)
+        {
+            if(hour > 12)
+                hour -= 12;
+            if(hour == 0)
+                hour = 12;
+        }
+    }
+
+    draw_7seg_digit(hour / 10, xpos, y, width, height, lcd);
+    xpos += width + 10;
+    draw_7seg_digit(hour % 10, xpos, y, width, height, lcd);
+    xpos += width + 10;
+
+    if(colon)
+    {
+        cops->drawLine(COLOR_WHITE, xpos, y + height/3 + 2,
+                         xpos, y + height/3 + 2);
+        cops->drawLine(COLOR_WHITE, xpos+1, y + height/3 + 1,
+                         xpos+1, y + height/3 + 3);
+        cops->drawLine(COLOR_WHITE, xpos+2, y + height/3,
+                         xpos+2, y + height/3 + 4);
+        cops->drawLine(COLOR_WHITE, xpos+3, y + height/3 + 1,
+                         xpos+3, y + height/3 + 3);
+        cops->drawLine(COLOR_WHITE, xpos+4, y + height/3 + 2,
+                         xpos+4, y + height/3 + 2);
+
+        cops->drawLine(COLOR_WHITE, xpos, y + height-height/3 + 2,
+                         xpos, y + height-height/3 + 2);
+        cops->drawLine(COLOR_WHITE, xpos+1, y + height-height/3 + 1,
+                         xpos+1, y + height-height/3 + 3);
+        cops->drawLine(COLOR_WHITE, xpos+2, y + height-height/3,
+                         xpos+2, y + height-height/3 + 4);
+        cops->drawLine(COLOR_WHITE, xpos+3, y + height-height/3 + 1,
+                         xpos+3, y + height-height/3 + 3);
+        cops->drawLine(COLOR_WHITE, xpos+4, y + height-height/3 + 2,
+                         xpos+4, y + height-height/3 + 2);
+    }
+
+    xpos += 12;
+
+    draw_7seg_digit(minute / 10, xpos, y, width, height, lcd);
+    xpos += width + 10;
+    draw_7seg_digit(minute % 10, xpos, y, width, height, lcd);
+    xpos += width + 10;
 }
 
 /***************
@@ -288,8 +610,39 @@ int eventHandler(int evt)
     {
         case BTN_OFF:
         case EVT_QUIT:
-            RELEASE(cops); /* we're done */
+            if(settings.clock == MODE_SELECTOR)
+            {
+                cops->clearScreen(COLOR_BLACK);
+                settings.clock = old_mode;
+            }
+            else
+                RELEASE(cops); /* we're done */
             break;
+
+        case BTN_ON:
+            if(settings.clock != MODE_SELECTOR || settings.clock == MODE_SETTINGS)
+            {
+                cops->clearScreen(COLOR_BLACK);
+                cursorpos = old_mode = settings.clock;
+                settings.clock = MODE_SELECTOR;
+            }
+            else if(settings.clock == MODE_SELECTOR)
+            {
+                cops->clearScreen(COLOR_BLACK);
+                settings.clock = cursorpos;
+            }
+            break;
+
+        case BTN_UP:
+            if(settings.clock == MODE_SELECTOR)
+                cursorpos > 1 ? (cursorpos--) : (cursorpos = 3);
+            break;
+
+        case BTN_DOWN:
+            if(settings.clock == MODE_SELECTOR)
+                cursorpos < 3 ? (cursorpos++) : (cursorpos = 1);
+            break;
+
     }
 }
 
