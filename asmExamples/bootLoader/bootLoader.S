@@ -206,31 +206,63 @@ waitScr:
          bne waitScr
 
 @ ------------------------------------------------------------------------------
+@ Find files
+@ ------------------------------------------------------------------------------
+
+		ldr r0, =fatRootClu             @ Start at root dir.
+        ldr r0, [r0]
+		ldr r1, =bufferx
+		callThumb r4, getNxtFile
+
+        ldr r7, =bufferx
+        ldr r0, dirCurrentScroll
+        add r7, r0
+loopSF:
+        mov r0, #0
+        ldrb r0, [r7, #11]
+        cmp r0, #0xf
+         beq endSF1
+        mov r1, #8
+        tst r0, r1
+         bne endSF1
+        ldrb r0, [r7]
+        cmp r0, #0xe5
+         beq endSF1
+        cmp r0, #0x00
+         beq endSF
+
+		mov r0, r7
+		ldr r1, =runFile
+		ldr r2, =runClus
+		callThumb r3, getFileCluT
+
+		mov r0, r7
+		ldr r1, =imgFile
+		ldr r2, =imgClus
+		callThumb r3, getFileCluT
+
+endSF1:
+        add r7, #32
+		b loopSF
+endSF:
+
+@ ------------------------------------------------------------------------------
 @ Init program selection screen
 @ ------------------------------------------------------------------------------
 
-        callThumb r0, lcdClsT      @ Clear screen...
-
 .ifdef doimage
-        ldr r3, =lcdVideoBuffer2
-        ldr r4, =sprite
-        ldr r5, =(320*240)
-lcop:   mov r0, #0
-        mov r1, #0
-        mov r2, #0
-        ldrb r0, [r4]
-        ldrb r1, [r4, #1]
-        ldrb r2, [r4, #2]
-        add r4, #3
-        callThumb r6, colorRGB2YCbCrT
-        callThumb r6, colorPackYCbCrT
-        str r0, [r3]
-        add r3, #4
-        sub r5, #1
-         bne lcop   
+		ldr r0, imgClus
+		cmp r0, #0
+		beq noFimg
+		callThumb	r4, loadImg
+		b endImg
+noFimg:
+		callThumb r0, lcdClsT      @ Clear screen...
+		callThumb2 r4, terminalSetPosT, 0, 25
+		callThumb2 r4, terminalPutsCT, msg783, 0xffff  @ no image found
+		callThumb2 r4, terminalSetPosT, 0, 0
 
-        callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
-        callThumb2 r3, osdSetMainConfigT, 0x14, 0xdd
+endImg:
 .endif
 
         mov r0, #4
@@ -239,7 +271,6 @@ lcop:   mov r0, #0
         ldr r3, =0xfbfb
         callThumb r4, lcdPutsT
 
-@ ------------------------------------------------------------------------------
 @ Main loop
 @ ------------------------------------------------------------------------------
 
@@ -248,46 +279,8 @@ lcop:   mov r0, #0
 
         @ r0 = LBA of dir...
 loopRR:
-        ldr r6, =bufferx
-        mov r7, r0
-loopRE: mov r0, r7
-        mov r1, r6
-        callThumb r2, fatReadCT
-        ldr r0, =fatClusterSize
-        ldr r0, [r0]
-        add r6, r0
-        mov r0, r7
-        callThumb r2, fatTraceCCT
-        mov r7, r0
-        ldr r0, =0x0ffffff8
-        cmp r7, r0
-         blt loopRE
-
-        mov r2, #0
-        ldr r7, =bufferx
-lfval:  mov r0, #0
-        ldrb r0, [r7, #11]
-        cmp r0, #0xf
-         beq noshp
-        mov r1, #8
-        tst r0, r1
-         bne noshp
-        ldrb r0, [r7]
-        cmp r0, #0xe5
-         beq noshp
-        cmp r0, #0x00
-         beq noshq              @ ERROR!
-        ldr r0, =bufferx
-        sub r7, r0
-        ldr r0, =dirCurrentScroll
-        ldr r1, =dirCurrentCursor
-        str r7, [r0]
-        str r7, [r1]
-        b noshq
-noshp:  add r7, #32
-        b lfval
-         
-noshq:
+		ldr r1, =bufferx
+		callThumb r4, getNxtFile
 
 @ ------------------------------------------------------------------------------
 @ Display it on screen and process user navigation
@@ -324,35 +317,6 @@ loopDV:
         mov r2, #3
         callThumb r3, memMoveT  @ Move ext
 
-        push {r4}
-        ldr r1, =runFile
-        mov r0, r7
-        mov r2, #11
-        mov r3, #0
-        mov r4, #0
-lcmpe:  ldrb r3, [r1]
-        ldrb r4, [r0]
-        cmp r3, r4
-         bne ncmpe
-        add r1, #1
-        add r0, #1
-        sub r2, #1
-         bne lcmpe
-        
-        mov r0, r7
-        add r0, #20
-        callThumb r1, read2T
-        mov r3, r0
-        lsl r3, #16
-        mov r0, r7
-        add r0, #26
-        callThumb r1, read2T
-        orr r3, r0       
-        ldr r0, =runClus
-        str r3, [r0]                @ save cluster # of autorun file...    
-ncmpe:
-        pop {r4}
-
         ldr r3, =0xffff
         ldr r0, =fontBG
         ldr r1, =0x0000
@@ -373,7 +337,7 @@ notCur:
         push {r4}
         callThumb r4, lcdPutsT
         pop {r4}
-        
+
         add r5, #6
         sub r6, #1
 nosho:
@@ -385,7 +349,7 @@ nosho2: cmp r6, #0
 
         ldr r0, =fontBG
         ldr r1, =0x0000
-        str r1, [r0]         
+        str r1, [r0]
 ldel2:
         mov r0, #220
         mov r1, r5
@@ -514,11 +478,13 @@ notm2:
 .endif
         ldr r0, runClus
         cmp r0, #0
-         beq errt
+        beq errt2
         callThumb2 r4, terminalSetPosT, 0, 35
         callThumb2 r4, terminalPutsCT, msg780, 0x0101
         ldr r0, runClus
         b launchFile                @ Lauch the default file...
+errt2:
+		callThumb1 r4, uartOutsT, msg781 @ error message send to UART
 errt:   ldr r0, timeoutMax
 
 noovf:  sub r0, #1
@@ -549,6 +515,20 @@ timeoutC:           .word   0x100
 timeoutMax:         .word   0x100
 dirCurrentScroll:   .word   0
 dirCurrentCursor:   .word   0
+
+@ ------------------------------------------------------------------------------
+
+        .ltorg
+
+runClus:    .word   0
+runFile:    .ascii  "DEFAULT BIN"
+		.align 4
+imgClus:    .word   0
+imgFile:	.ascii  "IMAGE   RGB"
+affData: .asciz "xxxxxxxxxxxxxxxxxxxxxx\n"
+
+        .align 4
+
 
 @ ------------------------------------------------------------------------------
 
@@ -618,7 +598,7 @@ errorDn:mov r0, #0
 launchFile:
         mov r7, r0
 
-        callThumb2 r4, terminalSetPosT, 0, 36        
+        callThumb2 r4, terminalSetPosT, 0, 36
         callThumb2 r4, terminalPutsCT, msg600, 0xffff
 
         ldr r6, =ramStart
@@ -641,6 +621,173 @@ loopLE:
 
         ldr r0, =ramStart
         bx r0                           @ EXECUTE IT!
+
+@ ------------------------------------------------------------------------------
+@ r0 -> LBAbuffer r1->file name r2->cluster save
+@ ------------------------------------------------------------------------------
+
+getFileCluT:
+		push {r0, r1, r2, r3, r4, r5, r6, r7, lr}
+
+		mov r7, r0
+		mov r6, r1
+		mov r5, r2
+        mov r2, #11
+        mov r3, #0
+        mov r4, #0
+lcmpe1: ldrb r3, [r1]
+        ldrb r4, [r0]
+        cmp r3, r4
+        bne ncmpe1
+        add r1, #1
+        add r0, #1
+        sub r2, #1
+        bne lcmpe1
+
+.ifdef uartDebug
+	mov r0, r6					@@@ send debug info on UART
+	ldr r1, =(msg782+12)
+	mov r2, #11
+	callthumb r4, memMoveT
+	callthumb1 r4, uartOutsT, msg782
+.endif
+
+        mov r0, r7
+        add r0, #20
+        callThumb r1, read2T
+        mov r3, r0
+        lsl r3, #16
+        mov r0, r7
+        add r0, #26
+        callThumb r1, read2T
+        orr r3, r0
+		mov r1, r5
+        str r3, [r1]		@ save cluster # of file...
+
+		pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
+ncmpe1:
+		pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
+
+@ ------------------------------------------------------------------------------
+@ r0=LBA of dir... r1->bufferx update dirCurrentScroll, dirCurrentCursor
+@ ------------------------------------------------------------------------------
+
+getNxtFile:
+		push {r0, r1, r2, r4, lr}
+		mov r4, r1
+		mov r6, r1
+        mov r7, r0
+loopRE1: mov r0, r7
+        mov r1, r6
+        callThumb r2, fatReadCT
+        ldr r0, =fatClusterSize
+        ldr r0, [r0]
+        add r6, r0
+        mov r0, r7
+        callThumb r2, fatTraceCCT
+        mov r7, r0
+        ldr r0, =0x0ffffff8
+        cmp r7, r0
+        blt loopRE1
+
+        mov r2, #0
+		mov r7, r4
+lfval1:  mov r0, #0
+        ldrb r0, [r7, #11]
+        cmp r0, #0xf
+         beq noshp1
+        mov r1, #8
+        tst r0, r1
+         bne noshp1
+        ldrb r0, [r7]
+        cmp r0, #0xe5
+         beq noshp1
+        cmp r0, #0x00
+         beq noshq1              @ ERROR!
+        mov r0, r4
+        sub r7, r0
+        ldr r0, =dirCurrentScroll
+        ldr r1, =dirCurrentCursor
+        str r7, [r0]
+        str r7, [r1]
+        b noshq1
+noshp1:  add r7, #32
+        b lfval1
+noshq1:
+		pop {r0, r1, r2, r4, pc}
+
+
+@ ------------------------------------------------------------------------------
+@ r0 -> cluster of the img
+@ ------------------------------------------------------------------------------
+
+loadImg:
+		push {r0, r1, r2, r3, r4, r5, r6, r7, lr}
+		mov r7, r0
+
+		callThumb2 r3, terminalPutsCT, msg600, 0xfdfd
+
+        ldr r3, =lcdVideoBuffer2
+        ldr r5, =(320*240)
+
+		ldr r1, =bufferImg
+		mov r0, r7
+		callthumb r4, fatReadCT
+		ldr r4, =bufferImg
+lcop:
+		mov r0, #0
+        mov r1, #0
+        mov r2, #0
+        ldrb r0, [r4]
+		add r4, #1
+		callThumb r6, nxtClust
+        ldrb r1, [r4]
+		add r4, #1
+		callThumb r6, nxtClust
+        ldrb r2, [r4]
+		add r4, #1
+		callThumb r6, nxtClust
+        callThumb r6, colorRGB2YCbCrT
+        callThumb r6, colorPackYCbCrT
+        str r0, [r3]
+        add r3, #4
+        sub r5, #1
+        bne lcop
+
+		callThumb r0, lcdClsT      @ Clear screen...
+        callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
+        callThumb2 r3, osdSetMainConfigT, 0x14, 0xdd
+		pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
+
+
+@ ------------------------------------------------------------------------------
+@ r4=position in bufferImg, r7=cluster
+@ ------------------------------------------------------------------------------
+
+nxtClust:
+		push {r0, r1, r2, lr}
+		mov r2, r4
+		ldr r0, =fatClusterSize
+		ldr r0, [r0]
+		ldr r1, =bufferImg
+		add r0, r1
+		sub r2, r0
+		bne outNxtClust
+		callThumb2 r2, terminalPutsCT, msg601, 0xfdfd
+		mov r0, r7
+		callThumb r2, fatTraceCCT
+		mov r7, r0
+		ldr r0, =0x0ffffff8
+		cmp r7, r0
+		blt getNxtClust
+outNxtClust:
+		pop {r0, r1, r2, pc}
+getNxtClust:
+		mov r0, r7
+		ldr r1, =bufferImg
+		callThumb r4, fatReadCT
+		ldr r4, =bufferImg
+		pop {r0, r1, r2, pc}
 
 @ ------------------------------------------------------------------------------
 
@@ -670,15 +817,6 @@ nreadtry:
         pop {r1, r2, r3, r4, r5, r6}
         pop {r0}
         bx r0
-
-@ ------------------------------------------------------------------------------
-
-        .ltorg
-
-runClus:    .word   0
-runFile:    .ascii  "DEFAULT BIN"
-
-        .align 4
 
 @ ------------------------------------------------------------------------------
 
@@ -764,12 +902,18 @@ msg600: .asciz "Loading image...                           \n"
 msg601: .asciz "."
 msg700: .asciz "\nRunning image...                           \n"
 msg780: .asciz "Timed out!                                 \n"
+msg781: .asciz "Error: no default file\n"
+msg782: .asciz "Found file: xxxxxxxxxxx\n"
+msg783: .asciz "\nError: no image found (image.rgb)\n"
+
 msgDONE:  .asciz "[ DONE ]\n"
 
 msg_001:.asciz " -- avOs BootLoader Version 0.4a (c)2004 DoGgEr -- "
 
 dirLine:.asciz "xxxxxxxx.xxx"
 dirEmpt:.asciz ".           "
+
+
 
         .align 4
 .include "../includes/hex.S"
@@ -786,8 +930,4 @@ dirEmpt:.asciz ".           "
 fatbuffLBA: .word 0
 fatbuff:    .space 512, 0
 bufferx:    .space 512, 0
-
-.ifdef doimage
-sprite:
-.incbin     "image.rgb"
-.endif
+bufferImg:  .space 512, 0
