@@ -13,10 +13,10 @@
     struct graphicsBuffer screenVideo;
     struct graphicsBuffer screenBitmap;
 
-    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
+    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, &pal16, &pal32};
     struct graphicsBuffer sprite5_8 = {0, 1, 5, 8, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
     struct graphicsBuffer sprite7_13 = {0, 1, 7, 13, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
-    struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
+    struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, 1, 0, 0, 0, 0, &pal16, &pal32};
     
 //
 //
