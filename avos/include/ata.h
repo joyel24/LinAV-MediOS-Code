@@ -29,6 +29,7 @@ extern void ataSelectHDD();
 extern void ataSelectMemoryCard();
 extern void ataPowerUpHDD();
 extern void ataPowerDownHDD();
+extern void ataIdentify();
 extern u32 ataStatus();
 extern u32 ataWaitForReady();
 extern u32 ataWaitForXfer();

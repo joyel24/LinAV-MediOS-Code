@@ -3,6 +3,7 @@
 #include <string.h>    
 
 void showBuffer(char *source);
+void identify();
 
 //
 //
@@ -10,14 +11,47 @@ void showBuffer(char *source);
     char data[512];
 
 int main() {
-    int c;
 
+    uartOuts("\nSelecting HDD...\n");
     ataSelectHDD();
+    uartOuts("Making sure HDD has power...\n");
     ataPowerUpHDD();
+    
+    identify();
 
-    showBuffer(data);
+    uartOuts("\nSelecting Memory card...\n");
+    ataSelectMemoryCard();
+    
+    identify();
     
     while(1) {}
+
+}
+    
+void identify() {
+    int c;
+    int delay;
+    do {
+        c = ataWaitForReady();
+        if (c!=0) {
+            uartOuts("ATA Says not ready!\n");
+            for (delay=0;delay<0x1000;delay++) {}
+        }
+    } while(c!=0);
+        
+        ataIdentify();
+    
+    do {
+        c = ataWaitForXfer();
+        if (c!=0) {
+            uartOuts("ATA Says no xfer!\n");
+            for (delay=0;delay<0x1000;delay++) {}
+        }
+    } while(c!=0);
+        
+    ataReadData(data, 256);
+    
+    showBuffer(data);
     
 }
 

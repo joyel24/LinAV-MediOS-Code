@@ -20,6 +20,7 @@
 @ u32 ataWaitForXfer()
 @ void ataWriteData(r0->buffer, r1=#halfwords)
 @ void ataReadData(r0->buffer, r1=#halfwords)
+@ void ataIdentify()
 @
 
 .ifndef ataInc
@@ -58,6 +59,23 @@ ataSelectLBA                =   0x40
 
         .thumb
 
+@ ------------------------------------------------------------------------------
+@ ataIdentify()
+@
+.globl ataIdentify
+.thumb_func
+
+ataIdentify:
+        push {r1, r2, lr}
+        ldr r2, =ataRegSelect
+        mov r1, #0
+        strb r1, [r2]
+        ldr r2, =ataRegCommand
+        mov r1, #ataCommand_IDENTIFY
+        strb r1, [r2]
+        pop {r1, r2, pc}
+        
+        
 @ ------------------------------------------------------------------------------
 @ ataReadData(r0->buffer, r1=#halfwords)
 @
