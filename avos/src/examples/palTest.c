@@ -11,9 +11,11 @@
     struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, 0};
     
 int main() {    
-    int x, y, c;
+    int x, y, c = 0;
     osdInitA();
 
+    osdSetVideoOutOnA();
+    
     osdSetComponentConfigA(OSD_VIDEO1, 0);
     osdSetComponentConfigA(OSD_VIDEO2, 0);
     osdSetComponentConfigA(OSD_BITMAP1, 0);
@@ -37,7 +39,6 @@ int main() {
     osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT);
     
-    c = 0;
                                      
     for (y=0;y<240;y+=15) {
         for (x=0;x<320;x+=20) {

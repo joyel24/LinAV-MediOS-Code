@@ -21,7 +21,7 @@ int launchFile(char * fileN);
 int pluginFile(char * fileN, char * ext);
 int exeFile(char * fileN, char * arg);
 
-static int pal32[2] = {0x706c93, 0xffffffff};
+static int pal32[2] = {0x6c706c93, 0xffffffff};
 static int pal16[2] = {0x0000, 0xffff};
 static int pal16b[5] = {0x1717, 0x3131, 0x0000, 0x1414, 0xcece};
 
@@ -166,7 +166,7 @@ startInit:
 
     while(1) {
         if (mode==0) {
-            graphicsBoxfA(&screenBitmap2, 21, 52, 96, 152, 0x6c4696);    
+            graphicsBoxfA(&screenBitmap2, 21, 52, 96, 152, 0x466c4696);    
 
             debug("Listing contents of '%s'\n", nameCurHDD);
             if((dir=opendir(nameCurHDD))<0)
@@ -203,8 +203,8 @@ startInit:
             
         while(1) {
             c = usbIsConnectedA();
-            pal32[0] = 0x6c4696;
-            pal32[1] = 0x80ff80;
+            pal32[0] = 0x466c4696;
+            pal32[1] = 0xff80ff80;
             if (c) {
                 graphicsStringA(&screenBitmap2, 2, 2, &sprite8_13, std8x13_, 8, 0,
                     "[USB]");
@@ -222,7 +222,7 @@ startInit:
                     "          ");
             }
 
-            pal32[0] = 0x706c93;
+            pal32[0] = 0x6c706c93;
             if (source==0) {
                 graphicsStringA(&screenBitmap2, 2 + 19*8, 2, &sprite8_13, std8x13_, 8, 0,
                     "[HDD]");
@@ -257,7 +257,7 @@ startInit:
             
             if (mode==0 && cursorMoved==1) {
                 // Update scrollbar (Now on VIDEO plane)...
-                graphicsBoxfA(&screenBitmap2, 124, 57, 11, 141, 0x808080);   
+                graphicsBoxfA(&screenBitmap2, 124, 57, 11, 141, 0x80808080);   
 
 // 134, 197
 // 124, 57
@@ -270,21 +270,21 @@ startInit:
                 for (c=0;c<16;c++) {
                     if ((dirposHDD+c)>=totalEntries) break;
 
-                    pal32[1] = 0x80ff80;
+                    pal32[1] = 0xff80ff80;
                     if (dirBufferHDD[dirposHDD+c].attr & FAT_ATTR_DIR)
-                        pal32[1] = 0x76c491;
+                        pal32[1] = 0xc476c491;
                     if (c==cursorposHDD) {
-                        pal32[0] = 0x800080;
+                        pal32[0] = 0x00800080;
                     } else {
-                        pal32[0] = 0x6c4696;
+                        pal32[0] = 0x466c4696;
                     }
     
                     graphicsStringA(&screenBitmap2, 21, 52 + c*9, &sprite6_9, std6x9_, 6, 0,
                         dirBufferHDD[dirposHDD+c].name);
                 }
 
-				pal32[1] = 0x80ff80;
-				pal32[0] = 0x6c4696;
+				pal32[1] = 0xff80ff80;
+				pal32[0] = 0x466c4696;
 
 				for(;c<16;c++)
 					graphicsStringA(&screenBitmap2, 21, 52 + c*9, &sprite6_9, std6x9_, 6, 0,

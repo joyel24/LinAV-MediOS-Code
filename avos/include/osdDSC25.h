@@ -129,4 +129,6 @@ extern void osdSetMainShiftA(u32 horizontal, u32 vertical);
 extern void osdSetMainConfigA(u32 config);
 extern void osdSetBorderColorA(u32 color);
 extern void osdSetAltOffsetA(u32 offset);
+extern void osdSetVideoOutOn();
+extern void osdSetVideoOutOff();
 
