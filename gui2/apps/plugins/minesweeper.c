@@ -31,6 +31,9 @@
    in the plugin */
 struct client_operations * cops;
 
+void displayMineField(void);
+
+
 int GameMode = 0;
 
 int tiles_left = 0;
@@ -195,8 +198,8 @@ typedef struct tile {
 
 /* the height and width of the field */
 /* could be variable if malloc worked in the API :) */
-const int height = SCREEN_HEIGHT/PIECE_DIM;
-const int width = (SCREEN_WIDTH-50)/PIECE_DIM;
+int height = SCREEN_HEIGHT/PIECE_DIM;
+int width = (SCREEN_WIDTH-50)/PIECE_DIM;
 
 int settingParam = 0;
 
@@ -237,7 +240,6 @@ void RefreshSettings()
     char tmp[10];
     cops->fillRect(COLOR_GREEN, 0, 20, 160,80); // clear
 
-	 sprintf(tmp,"%ld", width);
 	 sprintf(tmp,"%ld", p);
 
 	 if(settingParam == 0)
@@ -356,8 +358,6 @@ void minesweeper_init(void){
     mine_num = 0;
 
 	 time = GetTime();
-//	 sprintf(tmp,"%ld", time);
-//    cops->putS(COLOR_ORANGE, COLOR_GREEN, 268,100, tmp);
 
     srand(time);
 
@@ -470,7 +470,6 @@ int eventHandler(int evt)
 					/* move cursor left */
 				case BTN_LEFT:
 					setCursor(1);
-					//x = (x + width - 1)%width;
                if(x-1 >= 0)
 					   x--;
 					else
@@ -482,7 +481,6 @@ int eventHandler(int evt)
 					/* move cursor right */
 				case BTN_RIGHT:
 					setCursor(1);
-//					x = (x + 1)%width;
                if(x+1 >= width)
 					   x = 0;
 					else
@@ -493,7 +491,6 @@ int eventHandler(int evt)
 					/* move cursor down */
 				case BTN_DOWN:
 					setCursor(1);
-//					y = (y + 1)%height;
                if(y+1 >= height)
 					   y = 0;
 					else
@@ -504,7 +501,6 @@ int eventHandler(int evt)
 					/* move cursor up */
 				case BTN_UP:
 					setCursor(1);
-//					y = (y + height - 1)%height;
                if(y-1 >= 0)
 					   y--;
 					else
@@ -565,6 +561,7 @@ int eventHandler(int evt)
 
 				case BTN_F3: // settings
 					cops->clearScreen(COLOR_GREEN);
+					cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
                GameMode = 2;
 					init_settings_screen();
 					break;
@@ -612,11 +609,23 @@ int eventHandler(int evt)
 
 		   case BTN_LEFT:
 
-			   if(settingParam == 0)
+				if(settingParam == 0)
 				{
+				   if(width > 10)
+					{
+                  width--;
+                  RefreshSettings();
+//                  writeMinesINI();
+					}
 				}
 				else if(settingParam == 1)
 				{
+				   if(height > 10)
+					{
+                  height--;
+                  RefreshSettings();
+//                  writeMinesINI();
+					}
 				}
 				else
 				{
@@ -632,9 +641,21 @@ int eventHandler(int evt)
 		   case BTN_RIGHT:
 			   if(settingParam == 0)
 				{
+				   if(width < (SCREEN_WIDTH-50)/PIECE_DIM)
+					{
+                  width++;
+                  RefreshSettings();
+//                  writeMinesINI();
+					}
 				}
 				else if(settingParam == 1)
 				{
+				   if(height < (SCREEN_HEIGHT/PIECE_DIM))
+					{
+                  height++;
+                  RefreshSettings();
+//                  writeMinesINI();
+               }
 				}
 				else
 				{
