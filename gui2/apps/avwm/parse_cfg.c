@@ -125,13 +125,13 @@ int openFile(char * filename,int mode)
             file_mode="w";
             break;
     }
-    
-    if ((file = fopen(filename,file_mode))<0)
+    if ((file = fopen(filename,file_mode))==NULL)
     {
         fprintf(stderr,"error reading config file %s (%s)\n",filename,file_mode);
         return -1;
     }
     cfg_line_num=1;
+    return 0;
 }
 
 void closeFile(void)
