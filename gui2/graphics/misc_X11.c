@@ -70,6 +70,11 @@ int getTime(struct av_tm * date_time)
     date_time->tm_year  = timeinfo->tm_year+1900;
     date_time->tm_ms    = 0;
     date_time->tm_wday  = timeinfo->tm_wday;
+    if(date_time->tm_wday==0)
+        date_time->tm_wday=7;
+    date_time->tm_wday--;
+    
+    //printf("today: %d/%d/%d wday:%d\n",date_time->tm_mday,date_time->tm_mon,date_time->tm_year,date_time->tm_wday);
    
     return 1;
 }

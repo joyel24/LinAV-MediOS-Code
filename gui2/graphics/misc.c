@@ -56,6 +56,29 @@ int getTime(struct av_tm * date_time)
         return 1;
 }
 
+int setTime(struct av_tm * date_time)
+{
+	int fd;
+        
+	fd=open("/dev/avrtc",O_RDONLY | O_NONBLOCK);
+        if (fd < 0)
+        {
+            printf("Can't open /dev/avrtc\n");
+            return 0;
+        }
+                
+        if(ioctl(fd,AV_RTC_SET_TIME_IOC,date_time)<0)
+        {
+            printf("Error getting time and date\n");
+            close(fd);
+            return 0;
+        }
+        
+        close(fd);
+        
+        return 1;
+}
+
 int set_mouseParam(int freq, int repeat)
 {
    int fd = 0;
