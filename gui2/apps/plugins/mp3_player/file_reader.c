@@ -57,7 +57,7 @@ void * mp3_read_more(void * arg)
             if(nb_read<0)
             {
                 fprintf(stderr,"ERROR reading file\n");
-                return;
+                return NULL;
             }
             
             data.buffer_write+=nb_read;

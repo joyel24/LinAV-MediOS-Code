@@ -42,6 +42,8 @@ CBrick box[BOX_BRICKS_X][BOX_BRICKS_Y];
 
 /* Function prototypes from other source files */
 void StartGameOverAnimation();
+void ClearRect(int x, int y, int w, int h);
+void ClearBox(void);
 
 /*=========================================================================
 // Name: InitBox()
@@ -353,7 +355,7 @@ int FullLine(int y)
 int CheckFullLine()
 {
 	int counter = 0; /* Number of the killed lines */
-	int x, y, newX, newY;
+	int y, newX, newY;
 
 
 	for (y=BOX_BRICKS_Y-1; y>0; y--)

@@ -1,31 +1,17 @@
-/***************************************************************************
- *
- *             __________               __   ___.
- *   Open      \______   \ ____   ____ |  | _\_ |__   _______  ___
- *   Source     |       _//  _ \_/ ___\|  |/ /| __ \ /  _ \  \/  /
- *   Jukebox    |    |   (  <_> )  \___|    < | \_\ (  <_> > <  <
- *   Firmware   |____|_  /\____/ \___  >__|_ \|___  /\____/__/\_ \
- *                     \/            \/     \/    \/            \/
- *
- *
- * Copyright (C) 2002 Gilles Roux, 2003 Garrett Derner
- *
- * All files in this archive are subject to the GNU General Public License.
- * See the file COPYING in the source tree root for full license agreement.
- *
- * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
- * KIND, either express or implied.
- *
- ****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <string.h>
 #include <sys/ioctl.h>
+#include <ctype.h>
+#include <unistd.h>
+
 #define MWINCLUDECOLORS
 #include "graphics.h"
 #include "events.h"
 #include "alias.h"
 #include "colordef.h"
+#include "misc.h"
 
 #define true 1
 #define false 0
@@ -98,14 +84,13 @@ enum {
     SB_ON,
     SCROLLBAR_MODES
 } scrollbar_mode[VIEW_MODES] = {SB_OFF, SB_ON};
-static unsigned char *scrollbar_mode_str[] = {"off", "on", "scrollbar"};
+
 static int need_scrollbar;
 enum {
     NO_OVERLAP=0,
     OVERLAP,
     PAGE_MODES
 } page_mode = 0;
-static unsigned char *page_mode_str[] = {"don't overlap", "overlap", "pages"};
 
 void DrawStatusLine(int type)
 {
@@ -180,7 +165,7 @@ static unsigned char* find_next_line(const unsigned char* cur_line)
     const unsigned char *next_line = NULL;
     int size, i, j, k, chop_len, search_len, spaces, newlines, draw_columns;
     unsigned char c;
-	 char tmp[20];
+
 
     if BUFFER_OOB(cur_line)
         return NULL;
@@ -198,13 +183,11 @@ static unsigned char* find_next_line(const unsigned char* cur_line)
 
     size = BUFFER_OOB(cur_line+search_len) ? buffer_end-cur_line : search_len;
 
-//    sprintf(tmp,"%ld %ld", size,search_len);
-//    lcd_putsxy(COLOR_BLACK, COLOR_BLUE, 220, 225, tmp);
 
     if (line_mode == JOIN) {
         /* Need to scan ahead and possibly increase search_len and size,
          or possibly set next_line at second hard return in a row. */
-//        lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 50, 200, "JOIN");
+
         next_line = NULL;
         for (j=k=spaces=newlines=0; j < size; j++) {
             if (k == MAX_COLUMNS)
@@ -221,7 +204,6 @@ static unsigned char* find_next_line(const unsigned char* cur_line)
 						  {
                         size = j;
                         next_line = cur_line + size - spaces - 1;
-//                        lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 150, 200, next_line);
                         if (next_line != cur_line)
                             return (unsigned char*) next_line;
                         break;
@@ -370,15 +352,8 @@ static void fill_buffer(long pos, unsigned char* buf, unsigned size)
     /* To minimize disk access, always read on sector boundaries */
     unsigned numread, i;
     int found_CR = false;
-	 char tmp[20];
-    int xPos = 5;
     lseek(fd, pos, SEEK_SET);
     numread = read(fd, buf, size);
-//    while (rb->button_get(false)); /* clear button queue */
-
-//      sprintf(tmp,"%d", numread);
-//		lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 5, yDebug, tmp);
-//		yDebug+=10;
 
 
 	 for(i = 0; i < numread; i++)
@@ -463,12 +438,13 @@ static void viewer_scroll_up(void)
         screen_top_ptr = p;
 }
 
-static void viewer_scrollbar(void) {
-  int w=TEXT_WIDTH,h=TEXT_HEIGHT;
+static void viewer_scrollbar(void)
+{
+
   int items, min_shown, max_shown;
 
-//    cops->getStringS("M", &w, &h);
-    items = (int) file_size;  /* (SH1 int is same as long) */
+
+    items = (int) file_size;  
     min_shown = (int) file_pos + (screen_top_ptr - buffer);
 
     if (next_screen_ptr == NULL)
@@ -476,7 +452,6 @@ static void viewer_scrollbar(void) {
     else
         max_shown = min_shown + (next_screen_ptr - screen_top_ptr);
 
-//xxx    rb->scrollbar(0, 0, w-1, LCD_HEIGHT, items, min_shown, max_shown, VERTICAL);
 }
 
 static void viewer_draw(int col)
@@ -486,44 +461,31 @@ static void viewer_draw(int col)
     unsigned char *line_end;
     unsigned char c;
     unsigned char scratch_buffer[MAX_COLUMNS + 1];
-    char tmp[20];
     char text[200];
 
     /* If col==-1 do all calculations but don't display */
     if (col != -1)
 	 {
-//xxx        left_col = need_scrollbar? 1:0; // solange es keine scrollbars gibt raus
         lcd_fillrect(COLOR_WHITE, 0, 0, 320, 240);
     }
 
     max_line_len = 0;
     line_begin = line_end = screen_top_ptr;
-//    lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 5, yDebug, line_begin);
-//	 yDebug+=10;
-
     for (i = 0; i < display_lines; i++) {
         if (BUFFER_OOB(line_end))
 		  {
-//            lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 5, yDebug, "break");
-//				yDebug+=10;
             break;  /* Happens after display last line at BUFFER_EOF() */
         }
 
         line_begin = line_end;
         line_end = find_next_line(line_begin);
 
-//        lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 5, yDebug, line_end);
-//   	  yDebug+=10;
 
         if (line_end == NULL)
 		  {
-//            lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 5, yDebug, "line_end == NULL");
-//				yDebug+=10;
 
             if (BUFFER_EOF())
 				{
-//                lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 5, yDebug, "BUFFER_EOF()");
-//   				 yDebug+=10;
                 if (i < display_lines - 1 && !BUFFER_BOF())
 					 {
                     if (col != -1)
@@ -544,8 +506,6 @@ static void viewer_draw(int col)
             }
             else
 				{
-//                lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 5, yDebug, "read_and_synch");
-//    				 yDebug+=10;
 
                 resynch_move = read_and_synch(1); /* Read block & move ptrs */
                 line_begin -= resynch_move;
@@ -558,11 +518,6 @@ static void viewer_draw(int col)
             }
         }
         line_len = line_end - line_begin;
-/*
-		  memset(tmp, 0, sizeof(tmp));
-		  sprintf(tmp,"%d Col: %d",line_len, col);
-        lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 200, 225, tmp);
-*/
         if (line_mode == JOIN)
 		  {
             if (line_begin[0] == 0) {
@@ -599,10 +554,10 @@ static void viewer_draw(int col)
 					 {
                     scratch_buffer[k] = 0;
 
-						  memset(&text, 0, sizeof(text));
-						  strncpy(&text, scratch_buffer + col, k);
+						  memset(text, 0, sizeof(text));
+						  strncpy(text,scratch_buffer + col, k);
                     lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, text);
-//                    lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, scratch_buffer + col);
+
                 }
         }
         else
@@ -614,18 +569,16 @@ static void viewer_draw(int col)
                     c = line_end[0];
                     line_end[0] = 0;
 
-						  memset(&text, 0, sizeof(text));
-						  strncpy(&text, line_begin + col, line_len);
+						  memset(text, 0, sizeof(text));
+						  strncpy(text, line_begin + col, line_len);
                     lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, text);
-//                    lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, line_begin + col);
+
                     line_end[0] = c;
                 }
 			   }
         }
         if (line_len > max_line_len)
 		  {
-//            lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 5, yDebug, "line_len > max_line_len");
-//				yDebug+=10;
             max_line_len = line_len;
 		  }
 
@@ -643,14 +596,10 @@ static void viewer_draw(int col)
     if (need_scrollbar)
         viewer_scrollbar();
 
-//xxx    if (col != -1)
-//xxx        rb->lcd_update();
 }
 
 static void viewer_top(void)
 {
-    int i = 0;
-	 int xPos = 5;
 
     /* Read top of file into buffer
       and point screen pointer to top */
@@ -658,36 +607,6 @@ static void viewer_top(void)
     buffer_end = BUFFER_END();  /* Update whenever file_pos changes */
     screen_top_ptr = buffer;
     fill_buffer(0, buffer, BUFFER_SIZE);
-
-/*
-	 for( i = 0; i <  60; i++)
-	 {
-        lcd_putsxy(COLOR_BLACK, COLOR_WHITE, xPos, yDebug, &buffer[i]);
-		  xPos += 7;
-		  if((i == 20) || (i == 40))
-		  {
-		     yDebug+=15;
-			  xPos = 5;
-		  }
-	 }
-   yDebug+=15;
-
-	xPos = 5;
-	 for( i = 0; i <  60; i++)
-	 {
-        lcd_putsxy(COLOR_BLACK, COLOR_WHITE, xPos, yDebug, &screen_top_ptr[i]);
-		  xPos += 7;
-		  if((i == 20) || (i == 40))
-		  {
-		     yDebug+=15;
-			  xPos = 5;
-		  }
-	 }
-   yDebug+=15;
-
-	lcd_putsxy(COLOR_BLACK, COLOR_WHITE, 5, yDebug, screen_top_ptr);
-	yDebug+=10;
-*/
 }
 
 static void viewer_bottom(void)
@@ -776,81 +695,6 @@ static int col_limit(int col)
 
 static int viewer_recorder_on_button(int col)
 {
-    int recorder_exit = false;
-/*
-    while (!exit) {
-        switch (rb->button_get(true)) {
-            case BUTTON_ON | BUTTON_F1:
-                // Page-overlap mode
-                if (++page_mode == PAGE_MODES)
-                    page_mode = 0;
-
-                rb->splash(HZ, true, "%s %s",
-                           page_mode_str[page_mode],
-                           page_mode_str[PAGE_MODES]);
-
-                viewer_draw(col);
-                break;
-
-            case BUTTON_ON | BUTTON_F3:
-                // Show-scrollbar mode for current view-width mode
-                if (!(ONE_SCREEN_FITS_ALL())) {
-                    if (++scrollbar_mode[view_mode] == SCROLLBAR_MODES)
-                        scrollbar_mode[view_mode] = 0;
-
-                    init_need_scrollbar();
-                    viewer_draw(col);
-
-                    rb->splash(HZ, true, "%s %s (%s %s)",
-                               scrollbar_mode_str[SCROLLBAR_MODES],
-                               scrollbar_mode_str[scrollbar_mode[view_mode]],
-                               view_mode_str[view_mode],
-                               view_mode_str[VIEW_MODES]);
-                }
-                viewer_draw(col);
-                break;
-
-            case BUTTON_ON | BUTTON_UP:
-            case BUTTON_ON | BUTTON_UP | BUTTON_REPEAT:
-                // Scroll up one line
-                viewer_scroll_up();
-                viewer_draw(col);
-                break;
-
-            case BUTTON_ON | BUTTON_DOWN:
-            case BUTTON_ON | BUTTON_DOWN | BUTTON_REPEAT:
-                // Scroll down one line
-                if (next_screen_ptr != NULL)
-                    screen_top_ptr = next_line_ptr;
-
-                viewer_draw(col);
-                break;
-
-            case BUTTON_ON | BUTTON_LEFT:
-            case BUTTON_ON | BUTTON_LEFT | BUTTON_REPEAT:
-                // Scroll left one column
-                col--;
-                col = col_limit(col);
-                viewer_draw(col);
-                break;
-
-            case BUTTON_ON | BUTTON_RIGHT:
-            case BUTTON_ON | BUTTON_RIGHT | BUTTON_REPEAT:
-                // Scroll right one column
-                col++;
-                col = col_limit(col);
-                viewer_draw(col);
-                break;
-
-            case BUTTON_ON | BUTTON_REL:
-            case BUTTON_ON | BUTTON_DOWN | BUTTON_REL:
-            case BUTTON_ON | BUTTON_UP | BUTTON_REL:
-                // Drop out of this loop (when ON btn released)
-                exit = true;
-                break;
-        }
-    }
-	 */
     return col;
 }
 

@@ -60,8 +60,7 @@ void osdSetMainShift (int horizontal,int vertical)
 
 void osdSetPallette (int Y, int Cr, int Cb, int index)
 {
-	int val;
-        Y&=0xFF;
+	Y&=0xFF;
         Cr&=0xFF;
         Cb&=0xFF;
 	while((INW(AV3XX_OSD_PAL_ACCESS_STATUS)&0x1) != 0)

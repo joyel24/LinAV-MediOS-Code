@@ -1028,7 +1028,7 @@ void showTurns()
     cops->fillRect(COLOR_GREEN, 99,227,95,13);
 
     cops->setFont(STD6X10);
-    sprintf(tmp,"Turns: %ld", turns);
+    sprintf(tmp,"Turns: %d", turns);
     cops->putS(COLOR_BLACK, COLOR_GREEN, 100,228, tmp);
     cops->setFont(STD6X9);
 }
@@ -1040,15 +1040,15 @@ void showCntPairs()
     cops->fillRect(COLOR_GREEN, 4,227,95,13);
 
     cops->setFont(STD6X10);
-    sprintf(tmp,"Pairs left: %ld", cntPairsLeft);
+    sprintf(tmp,"Pairs left: %d", cntPairsLeft);
     cops->putS(COLOR_BLACK, COLOR_GREEN, 5, 228, tmp);
     cops->setFont(STD6X9);
 }
 
 void writeINI()
 {
-    char tmp[250];
 /*
+    char tmp[250];
     if(g_changes == 1)
     {
         cops->openCfg("/mnt/avwm/plugins/minesweeper.ini",CFG_WRITE);
@@ -1105,80 +1105,56 @@ void readINI()
 
 void RefreshSettings()
 {
-    char tmp[10];
     cops->fillRect(COLOR_GREEN, 0, 20, 160,80); // clear
 
-	if(matrixSize == 0)
-	{
+    if(matrixSize == 0)
+    {
         cops->putS(COLOR_RED, COLOR_GREEN, 5,30, "Matrix 8 x 7");
         height = 7;
         width  = 8;
-	}
-	else
-	{
+    }
+    else
+    {
         cops->putS(COLOR_BLACK, COLOR_GREEN, 5,30, "Matrix 8 x 7");
-	}
+    }
 
-	if(matrixSize == 1)
-	{
+    if(matrixSize == 1)
+    {
         cops->putS(COLOR_RED, COLOR_GREEN, 5,50, "Matrix 6 x 6");
         height = 6;
         width  = 6;
     }
-	else
-	{
+    else
+    {
         cops->putS(COLOR_BLACK, COLOR_GREEN, 5,50, "Matrix 6 x 6");
-	}
+    }
 
-	if(matrixSize == 2)
-	{
+    if(matrixSize == 2)
+    {
         cops->putS(COLOR_RED, COLOR_GREEN, 5,70, "Matrix 4 x 4");
         height = 4;
         width  = 4;
-	}
-	else
-	{
+    }
+    else
+    {
         cops->putS(COLOR_BLACK, COLOR_GREEN, 5,70, "Matrix 4 x 4");
-	}
-
-//    g_changes = 1;
+    }
 }
 
 void init_settings_screen()
 {
-    char tmp[10];
-
     cops->putS(COLOR_BLACK, COLOR_GREEN, 5,5, "S E T T I N G S");
 
     RefreshSettings();
 }
 
-/*
-static int GetTime()
-{
-    struct av_tm tm;
-    int fd;
-	int seconds = 0;
-    char tmp[0];
-
-    cops->getTime(&tm);
-
-	sprintf(tmp, "%02d",tm.tm_hour);
-    seconds = atoi(tmp)*3600;
-	sprintf(tmp, "%02d",tm.tm_min);
-    seconds += atoi(tmp)*60;
-	sprintf(tmp, "%02d",tm.tm_sec);
-    seconds += atoi(tmp);
-
-	return seconds;
-}
-*/
 
 /* check surrounding if an identical card is already there */
 int id_card_found(int pos, int new_card )
 {
-    int x, y;
 /*
+    int x, y;
+
     y = pos / PIECE_DIM;//pairs->width;
     x = pos % PIECE_DIM;//pairs->width;
 
@@ -1282,12 +1258,8 @@ void GenerateField()
 /* init not mine related elements of the mine field */
 void init(void){
     int i,j;
-	int time = 0;
-	char tmp[20];
 
     readINI();
-
-    //time = GetTime();
 
     srand(cops->getTick());
 
@@ -1326,26 +1298,29 @@ void init(void){
 
 void setCursor(int del)
 {
-    char tmp[10];
-    int ident = 0;
-
     if(del)
     {
-	    cops->drawRect(COLOR_GREEN, x*PIECE_DIM+x*CURSORFRAME, y*PIECE_DIM+y*CURSORFRAME, PIECE_DIM+(2*CURSORFRAME), PIECE_DIM+(2*CURSORFRAME));
-	    cops->drawRect(COLOR_GREEN, x*PIECE_DIM+x*CURSORFRAME+1, y*PIECE_DIM+y*CURSORFRAME+1, PIECE_DIM+(2*CURSORFRAME)-2, PIECE_DIM+(2*CURSORFRAME)-2);
+	    cops->drawRect(COLOR_GREEN,
+                x*PIECE_DIM+x*CURSORFRAME, y*PIECE_DIM+y*CURSORFRAME,
+                PIECE_DIM+(2*CURSORFRAME), PIECE_DIM+(2*CURSORFRAME));
+	    cops->drawRect(COLOR_GREEN,
+                x*PIECE_DIM+x*CURSORFRAME+1, y*PIECE_DIM+y*CURSORFRAME+1,
+                PIECE_DIM+(2*CURSORFRAME)-2, PIECE_DIM+(2*CURSORFRAME)-2);
     }
     else
     {
-	    cops->drawRect(COLOR_RED, x*PIECE_DIM+x*CURSORFRAME, y*PIECE_DIM+y*CURSORFRAME, PIECE_DIM+(2*CURSORFRAME), PIECE_DIM+(2*CURSORFRAME));
-	    cops->drawRect(COLOR_RED, x*PIECE_DIM+x*CURSORFRAME+1, y*PIECE_DIM+y*CURSORFRAME+1, PIECE_DIM+(2*CURSORFRAME)-2, PIECE_DIM+(2*CURSORFRAME)-2);
+	    cops->drawRect(COLOR_RED,
+                x*PIECE_DIM+x*CURSORFRAME, y*PIECE_DIM+y*CURSORFRAME,
+                PIECE_DIM+(2*CURSORFRAME), PIECE_DIM+(2*CURSORFRAME));
+	    cops->drawRect(COLOR_RED,
+                x*PIECE_DIM+x*CURSORFRAME+1, y*PIECE_DIM+y*CURSORFRAME+1,
+                PIECE_DIM+(2*CURSORFRAME)-2, PIECE_DIM+(2*CURSORFRAME)-2);
     }
 }
 
 int eventHandler(int evt)
 {
     pair tmp;
-    char buffer[40];
-    int i=0,j=0;
     int gameover = 0;
     testpair test;
 
@@ -1504,6 +1479,7 @@ int eventHandler(int evt)
 		}
 
 	}
+        return 1;
 }
 
 testpair testField()
@@ -1534,8 +1510,6 @@ pair getPair()
 {
     pair tmp;
     int i=0,j=0;
-    int ident1 = 0;
-    int ident2 = 0;
     int count = 0;
 
 	for(i=0;i<height;i++)

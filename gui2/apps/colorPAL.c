@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "graphics.h"
+#include "events.h"
 
 needFont(std6x9);
 

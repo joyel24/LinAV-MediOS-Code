@@ -285,6 +285,7 @@ int eventHandler(int evt)
                 }
                 break;
     }
+    return 1;
 }
 
 void mainloop(void)

@@ -12,8 +12,6 @@ struct client_operations * cops;
 
 int eventHandler(int evt)
 {
-    int i = 0;
-
         switch (evt) {
             case BTN_OFF:
             case EVT_QUIT:
@@ -23,6 +21,7 @@ int eventHandler(int evt)
                    RELEASE(cops)
                 break;
         }
+        return 1;
 }
 
 int cnt,x,y;

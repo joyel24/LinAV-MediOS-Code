@@ -164,4 +164,5 @@ int eventHandler(int evt)
     {
         cops->menuEvtHandler(evt);
     }
+    return 1;
 }

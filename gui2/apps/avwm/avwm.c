@@ -12,6 +12,7 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -27,6 +28,12 @@
 #include "avevents.h"
 #include "font.h"
 #include "plugin.h"
+#include "avstring.h"
+#include "settings.h"
+#include "msgBox.h"
+#include "editBox.h"
+#include "avwm-menu.h"
+#include "status_line.h"
 
 #include "osd.h"
 
@@ -105,11 +112,3 @@ int main(int argc,char * * argv)
     
     return 0;
 }
-
-void showSBar(void)  {status_bar_plugin.handle_on=1;sendEvt(&status_bar_plugin,EVT_REDRAW);}
-void hideSBar(void)  {status_bar_plugin.handle_on=0;}
-int  sBarStatus(void) {return status_bar_plugin.handle_on;}
-
-void enableMenu(void)  {menu_plugin.allowed=1;}
-void disableMenu(void) {menu_plugin.allowed=0;}
-int  menuStatus(void)  {return menu_plugin.allowed;}

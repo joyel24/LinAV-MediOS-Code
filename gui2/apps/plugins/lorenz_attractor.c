@@ -78,7 +78,6 @@ void lorenz(void)
 void startup(void)
 {
     int w,h;
-    int i;
 
     cops->setFont(STD8X13);
     cops->getStringS("Lorenz Attractor", &w, &h);
@@ -132,6 +131,7 @@ int eventHandler(int evt)
             }
             break;
     }
+    return 1;
 }
 
 int main(int argc,char * * argv)

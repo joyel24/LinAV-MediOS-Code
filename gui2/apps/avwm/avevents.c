@@ -14,6 +14,7 @@
 #include "events.h"
 #include "plugin.h"
 #include "avevents.h"
+#include "avwm.h"
 
 extern struct plugin cur_plugin;
 extern struct plugin menu_plugin;

@@ -12,10 +12,6 @@ needFont(std8x13);
 
 int main(int argc,char ** argv)
 {
-    int evt;
-    char tmp[10];
-    extern int stateBAT;
-    
     ini_graphics();
     
     setFont(std8x13);  
@@ -28,9 +24,7 @@ int main(int argc,char ** argv)
     
  while(1)
   {         
-       /*evt=waitEvent();
-       sprintf(tmp,"evt=%04x tick=%d",evt,getTick());
-       printf(tmp);*/
+       
        
   }
 }

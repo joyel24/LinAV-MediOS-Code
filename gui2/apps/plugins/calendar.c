@@ -84,7 +84,6 @@ static void calendar_init();
 static void draw_headers(void);
 static void calendar_draw();
 
-static int start = 0;
 
 static void next_month(struct shown *shown, int step);
 static void prev_month(struct shown *shown, int step);
@@ -93,42 +92,35 @@ static void prev_day(struct shown *shown, int step);
 
 int eventHandler(int evt)
 {
-	switch (evt)
-	{
-
-	case BTN_LEFT:
-			prev_month(&shown, 0);
-			break;
-
-   case BTN_RIGHT:
-	      next_month(&shown, 0);
-			break;
-
-   case BTN_F1:
-   		// Jump to actual day
-	   	calendar_init(&today, &shown);
-		   calendar_draw();
-			break;
-
-	case BTN_OFF:
-	case EVT_QUIT:
-		RELEASE(cops)
-		break;
-
-	case BTN_DOWN:
-		next_day(&shown, 1);
-		break;
-
-	case BTN_UP:
-
-		prev_day(&shown, 1);
-		break;
-
-	case EVT_REDRAW:
-      ClearCalendar();
-	   calendar_draw();
-		break;
-	}
+    switch (evt)
+    {    
+        case BTN_LEFT:
+            prev_month(&shown, 0);
+            break;
+        case BTN_RIGHT:
+            next_month(&shown, 0);
+            break;
+        case BTN_F1:
+            // Jump to actual day
+            calendar_init(&today, &shown);
+            calendar_draw();
+            break;
+        case BTN_OFF:
+        case EVT_QUIT:
+            RELEASE(cops)
+            break;
+        case BTN_DOWN:
+            next_day(&shown, 1);
+            break;
+        case BTN_UP:
+            prev_day(&shown, 1);
+            break;
+        case EVT_REDRAW:
+            ClearCalendar();
+            calendar_draw();
+            break;
+    }
+    return 1;
 }
 
 
@@ -149,34 +141,8 @@ static int calc_weekday( struct shown *shown )
 
 static void calendar_init()
 {
-   int w,h;
    struct av_tm tm;
-   int fd;
-	char tmp[100];
-
-   /*fd=open("/dev/avrtc",O_RDONLY | O_NONBLOCK);
-   if (fd < 0)
-	{
-      printf("Can't open /dev/avrtc\n");
-   }
-
-	if(ioctl(fd,AV_RTC_GET_TIME_IOC,&tm)<0)
-	{
-      printf("Error getting time and date\n");
-   }
-   close(fd);*/
-   
    cops->getTime(&tm);
-
-/*	sprintf(tmp, "%02d",tm.tm_wday);
-   today.wday = atoi(tmp);
-	sprintf(tmp, "%04d",tm.tm_year);
-   today.year = atoi(tmp);//%100;
-	sprintf(tmp, "%02d",tm.tm_mon);
-   today.mon = atoi(tmp);
-	sprintf(tmp, "%02d",tm.tm_mday);
-   today.mday = atoi(tmp);
-*/
 
 
    shown.mday = today.mday = tm.tm_mday;
@@ -205,33 +171,21 @@ static void calendar_draw()
 {
     int ws,row,pos,days_per_month,j;
     char buffer[9];
-    char tmp[100];
-	 int color;
 
-    char *Monthname[] = {
-                          "Jan",
-                          "Feb",
-                          "Mar",
-                          "Apr",
-                          "May",
-                          "Jun",
-                          "Jul",
-                          "Aug",
-                          "Sep",
-                          "Oct",
-                          "Nov",
-                          "Dec"
-                        };
+    int color;
+
+    char *Monthname[] = {"Jan","Feb","Mar","Apr","May","Jun",
+                            "Jul","Aug","Sep","Oct","Nov","Dec"};
     ClearCalendar();
 
-	 cops->fillRect(COLOR_WHITE,XCALENDARPOS, YCALENDARPOS, 170, 2*WeekSpace);
+    cops->fillRect(COLOR_WHITE,XCALENDARPOS, YCALENDARPOS, 170, 2*WeekSpace);
 
     snprintf(buffer,9,"%s %04d",Monthname[shown.mon-1],shown.year);
-	 cops->putS(COLOR_BLACK, COLOR_WHITE, XCALENDARPOS+2, YCALENDARPOS+1,buffer);
+    cops->putS(COLOR_BLACK, COLOR_WHITE, XCALENDARPOS+2, YCALENDARPOS+1,buffer);
 
     draw_headers();
 
-	 if (shown.firstday > 6)
+    if (shown.firstday > 6)
         shown.firstday -= 7;
 
     row = 1;

@@ -65,7 +65,6 @@ void eventHandler(int evt)
 
 int main(int argc,char * * argv)
 {
-    int evt;
     REGISTER(cops,eventHandler,0);	
     stop=0;
     blocked=0;

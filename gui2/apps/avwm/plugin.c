@@ -12,11 +12,20 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 #include "avevents.h"
+#include "events.h"
 #include "cops.h"
 #include "plugin.h"
+#include "status_line.h"
+#include "avstring.h"
+#include "avwm-menu.h"
+#include "avgraphics.h"
+
 
 #ifndef AV_SCREEN
     #include <dlfcn.h>
@@ -126,10 +135,10 @@ int launchPlugin(char * path,char * param)
     if (pid == 0)
     { // child
         if(param!=NULL)
-            err = execl(path, path,param,cops_a,(char *)0);
+            err = execl(path, path,param,cops_a,(char *)NULL);
         else
-            err = execl(path, path,cops_a,(char *)0);
-        fprintf(stderr, "exec failed!%s %d %ld\n", path, err, errno);
+            err = execl(path, path,cops_a,(char *)NULL);
+        fprintf(stderr, "exec failed!%s %d %d\n", path, err, errno);
         _exit(1);
     }
     else {
@@ -171,8 +180,9 @@ extern struct wkUP_evt nxt_action;
 
 int playMp3(char * filename)
 {
-	fprintf(stderr,"[playMP3] name:%s\n",filename);
-        nxt_action.app=APP_MP3;
-        strcpy(nxt_action.arg,filename);
-	wakeUP();
+    fprintf(stderr,"[playMP3] name:%s\n",filename);
+    nxt_action.app=APP_MP3;
+    strcpy(nxt_action.arg,filename);
+    wakeUP();
+    return 1;
 }

@@ -1,9 +1,11 @@
+
+#include <stdio.h>
+
 #include "graphics.h"
 #include "events.h"
 #include "osd.h"
 
-    static int pal32[2] = {0x8080c0e0, 0xffffffff};
-    static int pal16[2] = {0x0101, 0xffff};
+    
 
 
  /************
@@ -15,13 +17,7 @@ needFont(std7x13);
 needFont(shadow);
 needFont(cursive);
      
- /*   static struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-    static struct graphicsBuffer sprite5_8 = {0, 1, 5, 8, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-    static struct graphicsBuffer sprite7_13 = {0, 1, 7, 13, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-    static struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-    static struct graphicsBuffer spriteCursive = {0, 2, 9, 15, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-*/
-    int cursor[256] = {
+     int cursor[256] = {
         0xbb00, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
         0xbbbb, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
         0xbbaa, 0xbb00, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -71,9 +67,7 @@ int main() {
     int c;
     int evt;
     
-    int mvzoom = 0;
-    int mvlatched = 0;
-    
+     
     int x=32, y=32, cdir=0;
     
     printf("in osdTest\n");
@@ -229,7 +223,7 @@ int main() {
                 /*nothing to do => returning */
                     return 0;            
             
-            /*if (!(c & BUTTONS_AV300_MENU3)) mvlatched=0;*/
+            
             }                       
             if (butmax<30) butmax=30;
         

@@ -38,12 +38,12 @@
 
 
 static void NewGame(void);
-static void MainMenu_Loop(void);
+//static void MainMenu_Loop(void);
 static void Game_Loop(void);
 static void DrawScene(void);
 void StartGameOverAnimation(void);
 static void GameOverAnimation(void);
-
+void ClearCluster(void);
 
 
 int lines, score;       /* Line counter and score */
@@ -60,10 +60,7 @@ int x,y;         /* Current explosion coordinates */
 
 struct client_operations * cops;
 
-static void tetris_do_draw()
-{
-	
-}
+
 
 int evt=-1;
 

@@ -45,8 +45,6 @@ PALETTE pal2[4] = {0xB9, 0xFF, 0x00, 0x01};
 
 int eventHandler(int evt)
 {
-    int i = 0;
-
         switch (evt) {
             case BTN_OFF:
              case EVT_QUIT:
@@ -54,6 +52,7 @@ int eventHandler(int evt)
                    RELEASE(cops)
                 break;
         }
+        return 1;
 }
 
 /* called function from outside */

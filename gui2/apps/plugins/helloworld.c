@@ -46,6 +46,7 @@ int eventHandler(int evt)
             RELEASE(cops); /* we're done */
             break;
     }
+    return 1;
 }
 
 int main(int argc,char * * argv)

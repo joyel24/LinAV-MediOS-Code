@@ -41,7 +41,7 @@ unsigned int graphics32_ReadPixel(int x, int y, struct graphicsBuffer * buff)
 
 void graphics32_DrawRect(unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff)
 {
-    int i,j,k;
+    int i;
 
     unsigned int * offset=getOffset(x,y,buff,unsigned int);
     
@@ -49,7 +49,7 @@ void graphics32_DrawRect(unsigned int color, int x, int y, int width, int height
             
     offset+=buff->width;
     
-    for(j=1;j<height-1;j++)
+    for(i=1;i<height-1;i++)
     {
         OUTL(color,offset);
         OUTL(color,offset+width-1);        
@@ -202,7 +202,7 @@ void graphics32_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, 
     { // clear the freed zone
         for(j=0;j<scroll;j++)
         {
-            graphics8_DrawHorizLine(bgColor,width,dest);
+            graphics32_DrawHorizLine(bgColor,width,dest);
             dest+=inc*buff->width;
         }
     
@@ -234,7 +234,7 @@ void graphics32_ScrollWindowHoriz(unsigned int bgColor, int x, int y, int width,
                     OUTL(INL(src+i),tmp+i);
                 for(i=0;i<(width-scroll);i++)
                     OUTL(INL(tmp+i),dest+i);
-                graphics8_DrawHorizLine(bgColor,scroll,offset);
+                graphics32_DrawHorizLine(bgColor,scroll,offset);
                 dest+=buff->width;
                 src+=buff->width;
                 offset+=buff->width;
@@ -251,7 +251,7 @@ void graphics32_ScrollWindowHoriz(unsigned int bgColor, int x, int y, int width,
             {
                 for(i=0;i<(width-scroll);i++)
                     OUTL(INL(src+i),dest+i);
-                graphics8_DrawHorizLine(bgColor,scroll,offset);
+                graphics32_DrawHorizLine(bgColor,scroll,offset);
                 dest+=buff->width;
                 src+=buff->width;
                 offset+=buff->width;

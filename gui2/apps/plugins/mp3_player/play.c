@@ -120,7 +120,7 @@ int eventHandler(int evt)
 
 void mainLoop(void)
 {
-    int size,frame;
+    //int size,frame;
     //mp3_read_more();
     //frame=cops->readFrame();
     //printf("frame=%d time=%d\n",frame,(frame*26)/1000);

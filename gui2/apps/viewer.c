@@ -10,7 +10,7 @@ needFont(std6x9);
 
 int main(int argc,char * * argv)
 {
-	int i,j,fg;
+
    int evt;                       // button reading
    char *filename;  // current file location
 

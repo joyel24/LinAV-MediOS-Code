@@ -43,6 +43,9 @@ void                do_off         (void * data);
 void                do_F1          (void * data);
 void                do_F2          (void * data);
 void                do_F3          (void * data);
+void                enableMenu     (void);
+void                disableMenu    (void);
+int                 menuStatus     (void);
 
 #endif
 

@@ -42,8 +42,8 @@ int colorTab[256];
 
 #define STRING_MAXSIZE 200
 
-#define tstXY(x,y)  {if(x>SCREEN_WIDTH) return; if(x<0) return; if(y>SCREEN_HEIGHT) return; if(y<0) return;}
-#define tstWH(x,y,w,h)  {if(x+w>SCREEN_WIDTH)return; if(x+w<0) return; if(y+h>SCREEN_HEIGHT) return; if(y+h<0) return;}
+#define tstXY(x,y)  {if(x>SCREEN_WIDTH) return 0; if(x<0) return 0; if(y>SCREEN_HEIGHT) return 0; if(y<0) return 0;}
+#define tstWH(x,y,w,h)  {if(x+w>SCREEN_WIDTH)return 0; if(x+w<0) return 0; if(y+h>SCREEN_HEIGHT) return 0; if(y+h<0) return 0;}
 
 char screen_BMAP1[SCREEN_WIDTH*SCREEN_HEIGHT+40];
 char screen_BMAP2[SCREEN_WIDTH*SCREEN_HEIGHT+40];
@@ -177,8 +177,10 @@ extern struct graphics_operations g32ops;
 
 int ini_graphics()
 {
-    int x, y;
-    
+#ifndef AV_SCREEN
+    int x,y;
+#endif
+
     buffers[0]=&BITMAP_1;
     buffers[1]=&BITMAP_2;
     buffers[2]=&VIDEO_1;
@@ -717,11 +719,12 @@ void clearScreen(unsigned int color)
     LCD_UPDATE(0,0,default_gc->buffer->width,default_gc->buffer->height);
 }
 
-void drawPixel(unsigned int color,int x, int y)
+int drawPixel(unsigned int color,int x, int y)
 {
     tstXY(x,y);
     default_gc->gops->drawPixel(color, x, y,default_gc->buffer);
     LCD_UPDATE(x,y,1,1)
+    return 1;
 }
 
 unsigned int readPixel(int x, int y)
@@ -730,23 +733,25 @@ unsigned int readPixel(int x, int y)
     return default_gc->gops->readPixel(x,y,default_gc->buffer);
 }
 
-void drawRect(unsigned int color, int x, int y, int width, int height)
+int drawRect(unsigned int color, int x, int y, int width, int height)
 {
     tstXY(x,y);
     tstWH(x,y,width,height);
     default_gc->gops->drawRect(color,x,y,width,height,default_gc->buffer);
     LCD_UPDATE(x,y,width,height)
+    return 1;
 }
 
-void fillRect(unsigned int color, int x, int y, int width, int height)
+int fillRect(unsigned int color, int x, int y, int width, int height)
 {
     tstXY(x,y);
     tstWH(x,y,width,height);
     default_gc->gops->fillRect(color,x,y,width,height,default_gc->buffer);
     LCD_UPDATE(x,y,width,height)
+    return 1;
 }
 
-void drawLine(unsigned int color, int x1, int y1, int x2, int y2)
+int drawLine(unsigned int color, int x1, int y1, int x2, int y2)
 {
     int numpixels;
     int i;
@@ -768,7 +773,7 @@ void drawLine(unsigned int color, int x1, int y1, int x2, int y2)
         }
         default_gc->gops->drawVLine(color,x1,y1,y2-y1+1,default_gc->buffer);
         LCD_UPDATE(x1,y1,1,y2-y1+1)
-        return;        
+        return 1;        
     }
     
     if(y1==y2)
@@ -781,7 +786,7 @@ void drawLine(unsigned int color, int x1, int y1, int x2, int y2)
         }
         default_gc->gops->drawHLine(color,x1,y1,x2-x1+1,default_gc->buffer);
         LCD_UPDATE(x1,y1,x2-x1+1,1)
-        return;
+        return 1;
     }
 
     deltax = abs(x2 - x1);
@@ -868,25 +873,25 @@ void drawLine(unsigned int color, int x1, int y1, int x2, int y2)
     }
     
     LCD_UPDATE(xinc1,yinc1,xinc2-xinc1+1,yinc2-yinc1+1)
-#endif    
+#endif 
+     return 1;  
 }
 
-void putS(unsigned int color, unsigned int bg_color, int x, int y, unsigned char *s)
+int putS(unsigned int color, unsigned int bg_color, int x, int y, unsigned char *s)
 {
     FONT_ID font=default_font;
-    int len=strlen(s);
+    //int len=strlen(s);
     int h=0,w=0;
     unsigned char c=0;
 
-    tstXY(x,y);
-    
+    tstXY(x,y);    
         
     getStringS(s,&w,&h);
     
     if(y+h>SCREEN_HEIGHT)
     {
         printf("!!!!!!!!!! str going out of screen\n");
-        return 0;
+        //return 0;
     }
     
     if(x+w>SCREEN_WIDTH)
@@ -905,6 +910,7 @@ void putS(unsigned int color, unsigned int bg_color, int x, int y, unsigned char
     }
   
     LCD_UPDATE(x,y,w,h)
+    return 1;
 }
 
 void getStringS(unsigned char *str, int *w, int *h)
@@ -921,10 +927,12 @@ void getStringS(unsigned char *str, int *w, int *h)
         *h = font->height;
 }
 
-void putC(unsigned int color, unsigned int bg_color, int x, int y, unsigned char s)
+int putC(unsigned int color, unsigned int bg_color, int x, int y, unsigned char s)
 {
     FONT_ID font=default_font;
+#ifndef AV_SCREEN
     int h,w;
+#endif
 
     tstXY(x,y);
 
@@ -933,20 +941,23 @@ void putC(unsigned int color, unsigned int bg_color, int x, int y, unsigned char
     getStringS("W",&w,&h);
     LCD_UPDATE(x,y,w,h)
 #endif
+    return 1;
 }
 
-void drawSprite(unsigned int * palette, SPRITE * sprite, int x, int y)
+int drawSprite(unsigned int * palette, SPRITE * sprite, int x, int y)
 {
     tstXY(x,y);
     default_gc->gops->drawSprite(palette,sprite,default_gc->transparent,x,y,default_gc->buffer);
     LCD_UPDATE(x,y,sprite->width,sprite->height);
+    return 1;
 }
 
-void drawBITMAP(BITMAP * bitmap, int x, int y)
+int drawBITMAP(BITMAP * bitmap, int x, int y)
 {
     tstXY(x,y);
     default_gc->gops->drawBITMAP(bitmap,default_gc->transparent,x,y,default_gc->buffer);
     LCD_UPDATE(x,y,bitmap->width,bitmap->height);
+    return 1;
 }
 
 void scrollWindowVert(unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP)

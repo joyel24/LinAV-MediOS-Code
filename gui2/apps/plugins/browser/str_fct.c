@@ -11,7 +11,14 @@
 *
 */
 
+#include "ls_main.h"
+
 #define    toLower(chr)  ((chr>64 && chr<91)?chr+32:chr)
+
+int qNameSort(const void * a1,const void * a2)
+{
+    return namesort((char**) a1,(char**) a2);
+}
 
 int namesort(char **s1,char **s2)
 {
@@ -30,7 +37,7 @@ void strlwr(char *s)
 {
     while (*s)
     {
-        *s = tolower(*s);
+        *s = toLower(*s);
         s++;
     }
 }

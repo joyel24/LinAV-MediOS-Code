@@ -144,16 +144,16 @@ void lcd_update(int type, int x_ini, int y_ini, int w, int h);
 
 /* drawings */
 
-void         drawPixel        (unsigned int color, int x, int y);
+int          drawPixel        (unsigned int color, int x, int y);
 unsigned int readPixel        (int x, int y);
-void         drawRect         (unsigned int color, int x, int y, int width, int height);
-void         fillRect         (unsigned int color, int x, int y, int width, int height);
-void         drawLine         (unsigned int color, int x1, int y1, int x2, int y2);
-void         putS             (unsigned int color, unsigned int bg_color,int x, int y, unsigned char *s);
-void         putC             (unsigned int color, unsigned int bg_color,int x, int y, unsigned char s);
+int          drawRect         (unsigned int color, int x, int y, int width, int height);
+int          fillRect         (unsigned int color, int x, int y, int width, int height);
+int          drawLine         (unsigned int color, int x1, int y1, int x2, int y2);
+int          putS             (unsigned int color, unsigned int bg_color,int x, int y, unsigned char *s);
+int          putC             (unsigned int color, unsigned int bg_color,int x, int y, unsigned char s);
 void         getStringS       (unsigned char *str, int *w, int *h);
-void         drawSprite       (PALETTE * palette, SPRITE * sprite, int x, int y);
-void         drawBITMAP       (BITMAP * bitmap, int x, int y);
+int          drawSprite       (PALETTE * palette, SPRITE * sprite, int x, int y);
+int          drawBITMAP       (BITMAP * bitmap, int x, int y);
 void         scrollWindowVert (unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP);
 void         scrollWindowHoriz(unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT);
 void         clearScreen      (unsigned int color);
@@ -172,8 +172,8 @@ int   getPlane        (void);
 void  hidePlane       (int vplane);
 void  showPlane       (int vplane);
 int   isShown         (int vplane);
-void  setSate         (int vplane,int state);
-int   getSate         (int vplane);
+void  setState        (int vplane,int state);
+int   getState        (int vplane);
 void  setSize         (int vplane,int width,int height,int bitsPerPixel);
 void  getSize         (int vplane,int * width,int * height,int * bitsPerPixel);
 void  setPos          (int vplane,int x,int y);

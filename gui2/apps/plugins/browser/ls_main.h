@@ -39,6 +39,7 @@ struct dir_entry {
 #define PATHLEN    256
 
 /*****    str_fct   *****/
+int  qNameSort   (const void * a1,const void * a2);
 int  namesort    (char **s1,char **s2);
 void strlwr      (char *s);
 

@@ -13,6 +13,7 @@
 */
 
 #include "stdlib.h"
+#include "stdio.h"
 
 #include "graphics.h"
 #include "events.h"
@@ -104,7 +105,7 @@ int eventHandler(int evt)
 /* called function from outside */
 int main(int argc,char * * argv)
 {
-    int w, h, c,i,j;    
+    int i,j;    
     
     REGISTER(cops,eventHandler,0);
     cops->hideSBar();

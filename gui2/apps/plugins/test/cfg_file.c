@@ -82,6 +82,7 @@ int doParse()
         else
             fprintf(stderr,"unknown item type: %s on line %d\n",item,cops->curLineNum());
     }
+    return 1;
 }
 
 /****************************************************************************
@@ -113,6 +114,7 @@ int doSave(void)
     cops->newLine();
     cops->newLine();
     cops->putComment("************** End *****************");
+    return 1;
 }
 
 int eventHandler(int evt)
@@ -166,6 +168,7 @@ if you forget to close the file, its content might not be saved
             }
             break;
     }
+    return 1;
 }
 
 /* called function from outside */

@@ -191,6 +191,7 @@ int eventHandler(int evt)
             RELEASE(cops);
             break;
     }
+    return 1;
 }
 
 int main(int argc,char * * argv)

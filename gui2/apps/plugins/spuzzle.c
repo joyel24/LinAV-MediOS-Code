@@ -610,7 +610,7 @@ void showTurns()
     cops->fillRect(COLOR_GREEN, 104,194,95,13);
 
     cops->setFont(STD8X13);
-    sprintf(tmp,"Turns: %ld", turns);
+    sprintf(tmp,"Turns: %d", turns);
     cops->putS(COLOR_BLACK, COLOR_GREEN, 105,195, tmp);
     cops->setFont(STD6X9);
 }
@@ -752,11 +752,7 @@ int checkOrder()
 
 /* init*/
 void init(void){
-    int i,j;
-    int time = 0;
-    char tmp[20];
 
-//	time = GetTime();
 
     srand(cops->getTick());
 
@@ -785,12 +781,8 @@ void init(void){
 
 int eventHandler(int evt)
 {
-    char buffer[40];
-    int i=0,j=0;
-    int gameover = 0;
     int oldx = x;
     int oldy = y;
-    int oldIdent = 0;
 
     switch (evt) {
         case BTN_OFF:
@@ -876,6 +868,7 @@ int eventHandler(int evt)
             case BTN_F3: // settings
                 break;
     }
+    return 1;
 }
 
 void displayField()

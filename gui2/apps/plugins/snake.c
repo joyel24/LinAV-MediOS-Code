@@ -40,7 +40,8 @@ static int dir,frames,apple,level=1,dead=0;
 
 void die(void)
 {
-    char pscore[5],hscore[17];
+    char pscore[5];
+    /*char hscore[17];*/
 
     sprintf(pscore,"Your Score: %d",score);
     cops->putS(COLOR_WHITE, COLOR_BLACK, 3, 10, "Oops!");
@@ -214,7 +215,8 @@ void game(void)
 void game_init(void)
 {
     int x,y;
-    char plevel[10],phscore[20];
+    char plevel[10];
+    /*char phscore[20];*/
 
     for (x=0; x<80; x++)
         for (y=0; y<56; y++)
@@ -316,6 +318,7 @@ int eventHandler(int evt)
                 if(dir!=1) dir=3;
             break;
     }
+    return 1;
 }
 
 void snake(void)
@@ -344,4 +347,5 @@ int main(int argc,char * * argv)
     PACK(cops,snake);
     /* Stay here in the plugin */
     STOPME(cops);
+    return 1;
 }

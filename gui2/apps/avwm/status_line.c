@@ -40,6 +40,12 @@ int color = 0;
 int level = 0;
 int chargeProgress = 0;
 
+extern struct plugin status_bar_plugin;
+
+void showSBar(void)  {status_bar_plugin.handle_on=1;sendEvt(&status_bar_plugin,EVT_REDRAW);}
+void hideSBar(void)  {status_bar_plugin.handle_on=0;}
+int  sBarStatus(void) {return status_bar_plugin.handle_on;}
+
 /* draw the current time */
 void drawTime(void)
 {
@@ -201,6 +207,7 @@ int statusEvtHandler(int evt)
             drawStatus();
             break;
     }
+    return 1;
 }
 
 void ini_status_bar(struct plugin * status_plugin)

@@ -12,9 +12,14 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <unistd.h>
 
+#include "misc.h"
+#include "graphics.h"
 #include "plugin.h"
 #include "parse_cfg.h"
 #include "menu.h"
@@ -22,6 +27,7 @@
 #include "avwm.h"
 #include "avevents.h"
 #include "colordef.h"
+#include "settings.h"
 
 char item_buff[MAX_TOKEN+1];
 char value_buff[MAX_TOKEN+1];
@@ -58,6 +64,12 @@ extern int cfg_line_num;
 #define PATHLEN         256
 
 #define MENU_FILE_NAME "menu.cfg"
+
+extern struct plugin menu_plugin;
+
+void enableMenu(void)  {menu_plugin.allowed=1;}
+void disableMenu(void) {menu_plugin.allowed=0;}
+int  menuStatus(void)  {return menu_plugin.allowed;}
 
 extern int stopWM;
 void do_off(void * data)
@@ -118,7 +130,6 @@ void do_F3(void * data) // switch to usb
         {
             if (pid > 0)
             {
-                int status;
                 close_graphics();            
                 waitpid(pid, &status, 0);
                 ini_graphics();      

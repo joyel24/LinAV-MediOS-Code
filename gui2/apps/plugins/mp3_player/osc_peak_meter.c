@@ -48,7 +48,7 @@ struct av_peak av_p;  /* left/right levels */
 void * drawPeak(void * arg)
 {
     int cnt=0;
-    int sec=0,old_sec=0;
+    //int sec=0,old_sec=0;
     while(!stopThread)
     {
         cnt++;
@@ -99,6 +99,7 @@ void * drawPeak(void * arg)
             }
         }
     }
+    return NULL;
 }
 
 void drawTime(int sec)
@@ -109,7 +110,7 @@ void drawTime(int sec)
     sec%=3600;
     m=sec/60;
     s%=60;
-    sprintf(tmp,"%02d:%02d:%02d");
+    sprintf(tmp,"%02d:%02d:%02d",h,m,s);
     cops->fillRect(COLOR_BLACK,10,70,100,15);
     cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 70, tmp);
 }

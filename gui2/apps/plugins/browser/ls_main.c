@@ -11,6 +11,7 @@
 *
 */
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "ls_main.h"
 
@@ -23,10 +24,6 @@ extern int listused;
 
 int main(int argc,char * * argv)
 {
-    int evt;
-    int w = 0;
-    int h = 10;
-
     REGISTER(cops,eventHandler,0);
 
     pos=0;

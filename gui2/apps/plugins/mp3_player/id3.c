@@ -719,7 +719,7 @@ static int getid3v2len(FILE * fd)
     int offset;
 	
     /* Make sure file has a ID3 tag */
-    if((-1 == lseek(fd, 0, SEEK_SET)) ||
+    if((-1 == fseek(fd, 0, SEEK_SET)) ||
        (fread(buf, 1, 6, fd) != 6) ||
        (strncmp(buf, "ID3", strlen("ID3")) != 0))
         offset = 0;

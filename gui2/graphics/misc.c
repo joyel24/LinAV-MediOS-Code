@@ -11,9 +11,11 @@
 *
 */
 #include <stdlib.h>
+#include <stdio.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 
 #include "misc.h"
 

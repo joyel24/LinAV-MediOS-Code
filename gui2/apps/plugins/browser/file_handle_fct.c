@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <utime.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 
 #include "ls_main.h"
 
@@ -110,13 +111,15 @@ int execBin(char * path, ...)
         else
         {
             fprintf(stderr, "vfork failed %d\n", pid);
+            return 0;
         }
     }
+    return 1;
 }
 
 int launchBin(char * name)
 {
-    execBin(name, name, (char*)0);
+    return execBin(name, name, (char*)0);
 }
 
 void launchSoundPlayer(char *name)
@@ -141,7 +144,7 @@ void launchTxtView(char *name)
 
 int launchScript(char * name)
 {
-    execBin("/bin/sh", "sh", name, (char*)0);
+    return execBin("/bin/sh", "sh", name, (char*)0);
 }
 
 void handle_type_other(char *filename)
@@ -181,7 +184,7 @@ void handle_type_other(char *filename)
 
 /***********************************************************************************************/
 
-/*/************************************************************************ file basic command */
+/************************************************************************** file basic command */
 
 int do_mv(char * src,char * dest)
 {

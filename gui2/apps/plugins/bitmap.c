@@ -49,12 +49,13 @@ int eventHandler(int evt)
             RELEASE(cops)
             break;
     }
+    return 1;
 }
 
 /* called function from outside */
 int main(int argc,char * * argv)
 {
-    int w, h, i;
+    int w, h;
 
     REGISTER(cops,eventHandler,0);
     cops->hideSBar();   

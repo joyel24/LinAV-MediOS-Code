@@ -13,6 +13,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "ls_main.h"
 
@@ -137,6 +138,7 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
         cops->putS(color, COLOR_BLUE,x, y, dEntry->name);
     else
         cops->putS(color, COLOR_WHITE,x, y, dEntry->name);
+    return 1;
 }
 
 void printAllName(int pos,int nselect)

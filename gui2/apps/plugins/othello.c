@@ -157,7 +157,6 @@ void unSelectCell(int x, int y)
 void drawNbPiece()
 {
     char tmp[10];
-    int w=0,h=0;
 
     sprintf(tmp,"You: %02d",nbPieces[HUMAN]);
     cops->putS(TXT_COLOR, BG_COLOR, 20, 220, tmp);

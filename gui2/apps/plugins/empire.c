@@ -27,6 +27,7 @@
 /////////////////////////////////////////////////////////////////////
 
 #include "stdlib.h"
+#include "stdio.h"
 
 #include "colordef.h"
 #include "graphics.h"
@@ -369,8 +370,6 @@ static void move_position(int evt)
 *********************************************************/
 int eventHandler(int evt)
 {
-   int i;
-
 	switch (evt) {
         case EVT_TIMER:
             cntToggle++;
@@ -420,6 +419,7 @@ int eventHandler(int evt)
             move_position(evt);
             break;
 	}
+    return 1;
 }
 
 /*********************************************************

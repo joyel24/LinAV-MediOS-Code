@@ -496,7 +496,6 @@ void setCursor(int position, int state)
 
 void drawPieces()
 {
-    char tmp[70];
     if(piece == 0)
     {
         cops->drawBITMAP (&redB, X_OFFSET + LENGTH + X_OFFSET_BALLS + (pos+1)*LENGTH, Y_OFFSET + turns*Y_STEP);
@@ -653,6 +652,7 @@ int eventHandler(int evt)
                     break;
         }
     }
+    return 1;
 }
 
 /* plugin entry point */

@@ -19,6 +19,7 @@
 #include "events.h"
 #include "osd.h"
 #include "editBox.h"
+#include "misc.h"
 
 extern struct plugin edit_box_plugin;
 
@@ -457,7 +458,6 @@ int PrevAscii(int lastAscii)
 
 int SetUnderlinedCursor(int x, int y, int ascii, int fSet)
 {
-   char tmp[20];
    int w = 0;
    int h = 0;
    char temp[2];

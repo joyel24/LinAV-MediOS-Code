@@ -8,8 +8,6 @@ needFont(std6x9);
 
 int main(int argc,char * * argv)
 {
-	int i,j,fg;
-	char tmp[10];
 	ini_graphics();
 	
 	setFont(std6x9);

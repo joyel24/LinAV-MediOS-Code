@@ -12,6 +12,7 @@
 */
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "graphics.h"
 #include "osd.h"
@@ -65,6 +66,7 @@ int mprintName(struct menu_item * item,int x,int y,int clear,int selected)
     else
         putS(color, current_menu->bg_color,x, y, tmp);
     RESTORE_PLANE
+    return 1;
 }
 
 void mprintAllName(struct menu_item * pos,int nselect)

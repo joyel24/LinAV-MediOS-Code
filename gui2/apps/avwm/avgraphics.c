@@ -13,6 +13,8 @@
 #include "graphics.h"
 #include "colordef.h"
 #include "osd.h"
+#include "avgraphics.h"
+#include "avstring.h"
 
 #define CHK_PLANE     int savPlane=getPlane(); if(savPlane!=plugPlane) setPlane(plugPlane);
 #define RESTORE_PLANE if(savPlane!=plugPlane) setPlane(savPlane);
@@ -32,6 +34,7 @@ unsigned int wmReadPixel(int x, int y)
     CHK_PLANE
     ret=readPixel(x,y);
     RESTORE_PLANE
+    return ret;
 }
 
 void wmDrawRect(unsigned int color, int x, int y, int width, int height)

@@ -41,7 +41,7 @@ unsigned int graphics8_ReadPixel(int x, int y, struct graphicsBuffer * buff)
 
 void graphics8_DrawRect(unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff)
 {
-    int i,j,k;
+    int i;
 
     unsigned char * offset=getOffset(x,y,buff,unsigned char);
     
@@ -49,7 +49,7 @@ void graphics8_DrawRect(unsigned int color, int x, int y, int width, int height,
             
     offset+=buff->width;
     
-    for(j=1;j<height-1;j++)
+    for(i=1;i<height-1;i++)
     {
         OUTB(color,offset);
         OUTB(color,offset+width-1);        
@@ -324,7 +324,6 @@ void graphics8_DrawString(struct graphicsFont * font, unsigned int color,unsigne
     char * src;
     char * str;
     unsigned char * dest;
-    char * tmp;
     int len;
     unsigned char tmpLine[320+4];
     

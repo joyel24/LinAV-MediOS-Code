@@ -185,6 +185,7 @@ int eventHandler(int evt)
             }
             break;
     }
+    return 1;
 }
 
 /***************
@@ -255,4 +256,5 @@ int main(int argc,char * * argv)
     PACK(cops, clock);
     /* Stay here in the plugin */
     STOPME(cops);
+    return 1;
 }

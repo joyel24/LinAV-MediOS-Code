@@ -12,6 +12,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
@@ -156,7 +157,7 @@ int doLs(char * name)
     {
         /*if(dp->d_name[0]='\0')
             continue;*/
-        int pos=0;
+        /*int pos=0;*/
         
         /*if(dp->d_name[0] == '.' && dp->d_name[1] =='/')
             pos+=2;*/
@@ -180,7 +181,7 @@ int doLs(char * name)
         {
             fprintf(stderr, "[dols] error in stat\n");
             perror(dp->d_name);
-            return;
+            return -1;
         }
 
         if(S_ISDIR(statbuf.st_mode))
@@ -199,8 +200,8 @@ int doLs(char * name)
 
     closedir(dirp);
     
-    qsort((char *) dir_list, dir_listused, sizeof(char *), namesort);
-    qsort((char *) file_list, file_listused, sizeof(char *), namesort);
+    qsort((char *) dir_list, dir_listused, sizeof(char *), qNameSort);
+    qsort((char *) file_list, file_listused, sizeof(char *), qNameSort);
 
     listused=dir_listused+file_listused;
     

@@ -243,7 +243,6 @@ void readMinesINI()
     char value_buff[MAX_TOKEN+1];
     char *item=item_buff;
     char *value=value_buff;
-    char str1[MAX_TOKEN+1];
 
     if(cops->openCfg("/mnt/avwm/plugins/minesweeper.ini",CFG_READ)<0)
         return;
@@ -277,43 +276,43 @@ void RefreshSettings()
     char tmp[10];
     cops->fillRect(COLOR_GREEN, 0, 20, 160,80); // clear
 
-    sprintf(tmp,"%ld", p);
+    sprintf(tmp,"%d", p);
 
     if(settingParam == 0)
     {
-        sprintf(tmp,"%ld", width);
+        sprintf(tmp,"%d", width);
         cops->putS(COLOR_RED, COLOR_GREEN, 5,30, "Width");
         cops->putS(COLOR_RED, COLOR_GREEN, 100,30, tmp);
     }
     else
     {
-        sprintf(tmp,"%ld", width);
+        sprintf(tmp,"%d", width);
         cops->putS(COLOR_BLACK, COLOR_GREEN, 5,30, "Width");
         cops->putS(COLOR_BLACK, COLOR_GREEN, 100,30, tmp);
     }
 
     if(settingParam == 1)
     {
-        sprintf(tmp,"%ld", height);
+        sprintf(tmp,"%d", height);
         cops->putS(COLOR_RED, COLOR_GREEN, 5,50, "Height");
         cops->putS(COLOR_RED, COLOR_GREEN, 100,50, tmp);
     }
     else
     {
-        sprintf(tmp,"%ld", height);
+        sprintf(tmp,"%d", height);
         cops->putS(COLOR_BLACK, COLOR_GREEN, 5,50, "Height");
         cops->putS(COLOR_BLACK, COLOR_GREEN, 100,50, tmp);
     }
 
     if(settingParam == 2)
     {
-        sprintf(tmp,"%ld", p);
+        sprintf(tmp,"%d", p);
            cops->putS(COLOR_RED, COLOR_GREEN, 5,70, "Mines[%]");
         cops->putS(COLOR_RED, COLOR_GREEN, 100,70, tmp);
     }
     else
     {
-        sprintf(tmp,"%ld", p);
+        sprintf(tmp,"%d", p);
         cops->putS(COLOR_BLACK, COLOR_GREEN, 5,70, "Mines[%]");
         cops->putS(COLOR_BLACK, COLOR_GREEN, 100,70, tmp);
     }
@@ -323,8 +322,6 @@ void RefreshSettings()
 
 void init_settings_screen()
 {
-    char tmp[10];
-
     cops->putS(COLOR_BLACK, COLOR_GREEN, 5,5, "S E T T I N G S");
 
     RefreshSettings();
@@ -355,32 +352,10 @@ void discover(int x, int y){
     }
     return;
 }
-/*
-static int GetTime()
-{
-   struct av_tm tm;
-   int fd;
-    int seconds = 0;
-    char tmp[100];
-    cops->getTime(&tm);
-   
-
-    sprintf(tmp, "%02d",tm.tm_hour);
-    seconds = atoi(tmp)*3600;
-    sprintf(tmp, "%02d",tm.tm_min);
-    seconds += atoi(tmp)*60;
-    sprintf(tmp, "%02d",tm.tm_sec);
-    seconds += atoi(tmp);
-
-    return seconds;
-}
-*/
 
 /* init not mine related elements of the mine field */
 void minesweeper_init(void){
     int i,j;
-    int time = 0;
-    char tmp[20];
 
     readMinesINI();
 
@@ -421,7 +396,7 @@ void printNumberOfMines(void)
         }
 
         cops->fillRect(COLOR_GREEN, 265,79, 54, 15);
-        sprintf(tmp,"%ld Mines", mine_num-tiles_left);
+        sprintf(tmp,"%d Mines", mine_num-tiles_left);
         cops->putS(COLOR_WHITE, COLOR_GREEN, 266,80, tmp);
      }
 }
@@ -483,7 +458,6 @@ void setCursor(int del)
 
 int eventHandler(int evt)
 {
-    char buffer[40];
     int i=0,j=0;
 
     if(GameMode == 0)
@@ -551,7 +525,7 @@ int eventHandler(int evt)
                         cops->putS(COLOR_BLACK, COLOR_GREEN, 120, 100, "You lose!");
                         cops->putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
                         cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
-                        return;
+                        return 1;
                     }
                     tiles_left = 0;
                     for(i=0;i<height;i++){
@@ -567,7 +541,7 @@ int eventHandler(int evt)
                         cops->putS(COLOR_BLACK, COLOR_GREEN, 120, 100, "You win!");
                         cops->putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
                         cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
-                        return;
+                        return 1;
                     }
 
                     displayMineField();
@@ -703,6 +677,7 @@ int eventHandler(int evt)
         }
 
     }
+    return 1;
 }
 
 void displayMineField()
@@ -781,5 +756,5 @@ int main(int argc,char * * argv)
     setCursor(0);
 
     PACK(cops,NULL);
-
+    return 1;
 }

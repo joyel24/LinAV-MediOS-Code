@@ -42,6 +42,7 @@ int ini_sound_connection(void)
             return 0;
         }
     }
+    return 1;
 }
 
 int ini_mp3_playback(struct mp3_play * mp3_p_data)
@@ -81,7 +82,7 @@ int readPeak(struct av_peak * peak)
 int readFrame(void)
 {
     int ret;
-    if(execDSP_ioctl(AV_DSP_FRAME_CNT,&ret)<0)
+    if(execDSP_ioctl(AV_DSP_FRAME_CNT,(unsigned int)&ret)<0)
         return 0;
     else
         return ret;

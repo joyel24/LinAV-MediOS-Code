@@ -21,6 +21,7 @@
 #include "plugin.h"
 #include "icons.h"
 #include "av3xx_common.h"
+#include "settings.h"
 
 extern struct plugin settings_plugin;
 
@@ -70,7 +71,7 @@ unsigned char SettingsSlider[13][2] =
 BITMAP SettingsSliderBitmap = {(unsigned int) SettingsSlider, 2, 13, 0, 0};
 
 
-int GetActiveSetting()
+int GetActiveSetting(void)
 {
     int i = 0;
 
@@ -95,7 +96,7 @@ void SettingsEvtLoop(void)
     settings_plugin.handle_on=0;
 }
 
-void GetSettings()
+void GetSettings(void)
 {
     // get actual settings
     sData[0].value = get_mouseRepeat();
@@ -108,7 +109,7 @@ void GetSettings()
     set_mouseParam(6,3); // set to 6,3 for the settings screen only
 }
 
-void SetSettings()
+void SetSettings(void)
 {
     if((sData[0].changed) || (sData[1].changed))
         set_mouseParam(sData[1].value,sData[0].value);
@@ -226,6 +227,7 @@ int settingsEvtHandler(int evt)
             stopSettingsLoop=1;
             break;
     }
+    return 1;
 }
 
 void drawSlider(int x, int y, char* text, int min, int max, int value, int active)
@@ -264,7 +266,7 @@ void drawSlider(int x, int y, char* text, int min, int max, int value, int activ
     setPlane(BMAP1);
 }
 
-void drawSettings()
+void drawSettings(void)
 {
     int i = 0;
 
@@ -301,7 +303,7 @@ void drawSettings()
     setFont(std6x9);
 }
 
-void ini_settings()
+void ini_settings(void)
 {
     doRegisterPlugin(&settings_plugin,settingsEvtHandler,0);
 }
@@ -315,7 +317,7 @@ void eraseSettings(void)
 }
 
 /* main function */
-int SettingsScreen()
+int SettingsScreen(void)
 {
     drawSettings();
     SettingsEvtLoop();

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
@@ -136,7 +137,7 @@ int openFile(char * filename,int mode)
 
 void closeFile(void)
 {
-	fclose(file);
+    fclose(file);
 }
 
 int write_cfg(char * item,char * value)
@@ -159,6 +160,7 @@ int write_comment(char * cmt)
 int add_line(void)
 {
     fprintf(file,"\n");
+    return 1;
 }
 
 int curLineNum(void) {return cfg_line_num;}

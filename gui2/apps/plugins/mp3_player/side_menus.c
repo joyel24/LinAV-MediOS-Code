@@ -11,6 +11,7 @@
 * KIND, either express of implied.
 *
 */
+#include <stdio.h>
 
 #include "cops.h"
 #include "colordef.h"

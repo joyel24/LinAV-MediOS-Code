@@ -14,9 +14,15 @@
 #ifndef __EDITBOX_H
 #define __EDITBOX_H
 
-    #define MAX_EDIT_CHARS 256
+#define MAX_EDIT_CHARS 256
 
-    void iniEditBox(void);
-    char* editBox(unsigned char* caption, unsigned char* text, int text_color, int bk_color, int frame_color, int cursor_color);
+void  iniEditBox(void);
+char* editBox(unsigned char* caption, unsigned char* text, int text_color, int bk_color, int frame_color, int cursor_color);
 
+int   SetUnderlinedCursor(int x, int y, int ascii, int fSet);
+int   PrevAscii(int lastAscii);
+int   NextAscii(int lastAscii);
+void  SaveTempEntry(char* text, int indexChar, int ascii);
+int   GetCurrentAscii(char* text, int index, int oldascii);
+    
 #endif

@@ -13,6 +13,7 @@
 
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "ls_main.h"
 #include "msgBox.h"
@@ -118,7 +119,6 @@ void do_on(void * data)
 
 void do_right(void * data)
 {
-    char tmp[200];
     char text[MAX_EDIT_CHARS];
     char* ptext = NULL;
     int reload = false;
