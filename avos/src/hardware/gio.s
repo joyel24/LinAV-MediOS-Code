@@ -210,6 +210,7 @@ gioSetBit:
         push {r1, r2, lr}
         mov r1, #1
         lsl r1, r0
+        mov r0, r1
         bl gioSetAllBitsets
         pop {r1, r2}
         pop {r1}
@@ -228,6 +229,7 @@ gioClearBit:
         push {r1, r2, lr}
         mov r1, #1
         lsl r1, r0
+        mov r0, r1
         bl gioSetAllBitclears
         pop {r1, r2}
         pop {r1}
