@@ -4,22 +4,23 @@ GCC=$(TOOL)-gcc
 AR=$(TOOL)-ar
 RANLIB=$(TOOL)-ranlib
 
-GCCFLAGS=-I../../include -I../avwm
-LDFLAGS=-elf2flt
+GCCFLAGS=-I../../include
+LDFLAGS=-elf2flt -L../../lib -lGraphics -ljpeg
 
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
-TARGET = $(SRC:%.c=%)
+	
+TARGET = avwm
 
 all: $(TARGET)
 force: clean $(TARGET)
 
 $(TARGET) : $(OBJS)
-	$(GCC) $@.o -o $@  $(LDFLAGS)
+	$(GCC) $(OBJS) -o $@  $(LDFLAGS)
 
 clean:
 	@echo "**** Cleaning..."
-	@rm -f *.o *.bak *~ *.gdb $(TARGET)
+	@rm -f *.o *.bak *~ *.gdb *..elf *.elf2flt $(TARGET)
 
 .c.o:
 	$(GCC) $(GCCFLAGS) -c -o $@ $<

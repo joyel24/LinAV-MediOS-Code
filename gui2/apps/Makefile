@@ -14,16 +14,20 @@ TARGET = $(SRC:%.c=%)
 all: $(TARGET)
 force: clean $(TARGET)
 
-$(TARGET) : plugDir $(OBJS)
+$(TARGET) : plugDir avwmDir $(OBJS)
 	$(GCC) $@.o -o $@  $(LDFLAGS)
 
 plugDir:
 	@$(MAKE) -C plugins/ all
+
+avwmDir:
+	@$(MAKE) -C avwm/ all
 	
 clean:
 	@echo "**** Cleaning..."
-	@rm -f *.o *.bak *~ *.gdb $(TARGET)
+	@rm -f *.o *.bak *~ *.gdb *..elf *.elf2flt $(TARGET)
 	@$(MAKE) -C plugins/ clean
+	@$(MAKE) -C avwm/ clean
 
 .c.o:
 	$(GCC) $(GCCFLAGS) -c -o $@ $<

@@ -4,7 +4,7 @@
 
 #include "graphics.h"
 #include "events.h"
-#include "../avwm.h"
+#include "avwm.h"
 
 
 #define NUM_PARTICLES 320

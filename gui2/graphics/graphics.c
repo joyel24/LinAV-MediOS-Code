@@ -497,7 +497,7 @@ void drawImage(char * filename)
 	
 	
 	jpeg_destroy_decompress(&cinfo);
-	
+	fclose(img_file);
 }
 
 /* font */

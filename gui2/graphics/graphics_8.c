@@ -83,9 +83,7 @@ void graphics8_DrawHorizLine(int color, unsigned int bigColor, int width,char * 
 	
 	for(i=0;i<width;i++)
 		OUTB(color,offset+i);
-		
-	/*for(i=0;i<width;i++)
-		OUTB(color,offset+i);*/
+	
 }
 
 void graphics8_DrawSprite(SPRITE * sprite, PALETTE * palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../avwm.h"
+#include "avwm.h"
 
 struct client_operations * cops;
 

@@ -42,6 +42,14 @@ struct client_operations {
 	void (*pack)              (void);
 };
 
+struct menu_item {
+	struct cfg_item * data;
+	struct menu_item * nxt;
+	struct menu_item * prev;
+	struct menu_item * sub;
+	struct menu_item * up;
+};
+
 void   wmNxtEvent       (int evt);
 void   drawMenu         (void);
 void   drawGui          (void);
@@ -52,4 +60,6 @@ void   eventLoop        (void);
 void   debug            (char *fmt, ...);
 void   drawTime         (void);
 void   processTimeOut   (void);
+int    loadPlugin       (char * path, char * param);  // prepare env to load a new plugin
+int    launchPlugin     (char * path,char * param);   // launch a plugin
 #endif

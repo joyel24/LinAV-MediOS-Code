@@ -9,8 +9,11 @@
 #include "events.h"
 #include "avwm.h"
 #include "colordef.h"
+#include "parse_cfg.h"
+#include "menu.h"
 
 #define DO_DEBUG 1;
+#define NB_ITEM 10;
 
 needFont(std6x9);
 
@@ -39,7 +42,23 @@ void (*tmpHandler)(int evt)=NULL;
 
 int plugin_pid=-1;
 
-int launchPlugin(char * name,char * param)
+int loadPlugin(char * path, char * param)
+{
+	int status;
+	fprintf(stderr,"load plug: %s\n",path);
+	if(currentHandler)
+	{
+		currentHandler(EVT_RESUME);
+		currentHandler(EVT_QUIT);
+		currentHandler=NULL;
+		waitpid(plugin_pid, &status, 0);
+		plugin_pid=-1;
+	}
+	drawGui();
+	return launchPlugin(path,param);
+}
+
+int launchPlugin(char * path,char * param)
 {
 	int pid,err;
 	char cops_a[15];
@@ -49,10 +68,10 @@ int launchPlugin(char * name,char * param)
 	if (pid == 0)
 	{ // child
 		if(param!=NULL)
-			err = execl(name, name,param,cops_a,(char *)0);
+			err = execl(path, path,param,cops_a,(char *)0);
 		else
-			err = execl(name, name,cops_a,(char *)0);
-		fprintf(stderr, "exec failed!%s %d %ld\n", name, err, errno);
+			err = execl(path, path,cops_a,(char *)0);
+		fprintf(stderr, "exec failed!%s %d %ld\n", path, err, errno);
 		_exit(1);
 	}
 	else {
@@ -74,14 +93,27 @@ int main(int argc,char * * argv)
 	int i;
 	ini_graphics();	
 	setFont(std6x9);
-	fillRect(1,0 , 0, 320, 240);
-	drawGui();
-	/*launchPlugin("/mnt/ls-gui");	
-	while(1);*/
+	fillRect(COLOR_BLACK,0 , 0, 320, 240);
+	
+	putS(COLOR_WHITE,COLOR_BLACK,5,110,"Reading menu file ....");
+	if(loadMenu()<0)
+	{
+		putS(COLOR_RED,COLOR_BLACK,5,120,"Error reading menu => stoping");
+		for(i=0;i<10000;i++) /* nothing */
+		close_graphics();
+		return -1;
+	}
+	
+	fillRect(COLOR_BLACK,5 , 110, 315, 10);
+#ifdef DO_DEBUG
+	printMenu();
+#endif	
+	drawGui();	
 	setTimerFreq(10);
 	startTimer();
 	timerOn=1;
 	stopWM=0;
+	drawMenu();
 	eventLoop();
 	close_graphics();
 	return 0;
@@ -133,61 +165,8 @@ void drawMenu(void)
 	int evt,status;
 	if(currentHandler)
 		currentHandler(EVT_SUSPEND);
-	fillRect(COLOR_WHITE,110 , 70, 100, 100);
-	drawRect(COLOR_LIGHT_GREY,110 , 70, 100, 100);
-	putS(COLOR_DARK_GREY,COLOR_WHITE,110+32,70+5,"Browse");
-	putS(COLOR_DARK_GREY,COLOR_WHITE,110+5,70+45,"Back");
-	putS(COLOR_DARK_GREY,COLOR_WHITE,110+70,70+45,"Snow");
-	while(1)
-	{
-		evt=waitEvent();
-		switch(evt) {
-			case BTN_UP:
-				if(currentHandler)
-				{
-					currentHandler(EVT_RESUME);
-					currentHandler(EVT_QUIT);
-					currentHandler=NULL;
-					waitpid(plugin_pid, &status, 0);
-					plugin_pid=-1;
-				}
-				drawGui();
-				launchPlugin("/mnt/ls-gui","/");
-				return;
-			case BTN_RIGHT:
-				if(currentHandler)
-				{
-					currentHandler(EVT_QUIT);
-					currentHandler=NULL;
-					waitpid(plugin_pid, &status, 0);
-					plugin_pid=-1;
-				}
-				drawGui();
-				launchPlugin("/mnt/snow",NULL);
-				return;
-			case BTN_DOWN:
-				if(currentHandler)
-				{
-					currentHandler(EVT_QUIT);
-					currentHandler=NULL;
-					waitpid(plugin_pid, &status, 0);
-					plugin_pid=-1;
-				}
-				drawGui();
-				launchPlugin("/mnt/calendar", NULL);
-				return;
-			case BTN_LEFT:
-				if(currentHandler)
-				{
-					currentHandler(EVT_RESUME);
-					currentHandler(EVT_REDRAW);
-				}
-				return;
-			case BTN_OFF:
-				stopWM=1;;
-		}
-	}
-	
+	fillRect(COLOR_WHITE,5 , 15, 310, 230);
+	doDraw();
 }
 
 void wmNxtEvent(int evt)
@@ -203,7 +182,6 @@ void wmNxtEvent(int evt)
 		if(currentHandler)
 			currentHandler(evt);
 	}
-	return 0;
 }
 
 void addEventHandler(void (*evtHandle))
@@ -235,6 +213,7 @@ void eventLoop()
 		if(evt==BTN_F3)
 		{
 			clearEventQueue();
+			fillRect(COLOR_WHITE,5 , 15, 310, 230);
 			drawMenu();
 		}
 		else

@@ -20,7 +20,7 @@
 
 #include "graphics.h"
 #include "events.h"
-#include "../avwm.h"
+#include "avwm.h"
 
 #define LCD_WIDTH  320
 #define LCD_HEIGHT 240

@@ -5,7 +5,7 @@
 
 #include "graphics.h"
 #include "events.h"
-#include "../avwm.h"
+#include "avwm.h"
 
 #define SHOW_ALL        1
 #define	LISTSIZE        256
@@ -213,6 +213,21 @@ int eventHandler(int evt)
 			break;
 		case BTN_RIGHT:
 			if(chdir(list[pos+nselect])<0)
+				break;
+			cleanList();
+			if(doLs("./")<0)
+			{
+				listused = 0;
+				return -1;
+			}
+			pos=0;
+			nselect=0;
+			cops->fillRect(WHITE,5, 15 , 315,FONT_HEIGHT*MAXPOS);
+			printAllName(pos,nselect);
+			cops->clearEventQueue();
+			break;
+		case BTN_LEFT:
+			if(chdir("../")<0)
 				break;
 			cleanList();
 			if(doLs("./")<0)
