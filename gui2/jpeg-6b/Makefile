@@ -36,9 +36,17 @@ LN= $(CC)
 # file deletion command
 RM= rm -f
 # library (.a) file creation command
+ifeq ($(BUILD),AV)
 AR= arm-elf-ar rc
+else
+AR= ar rc
+endif
 # second step in .a creation (use "touch" if not needed)
+ifeq ($(BUILD),AV)
 AR2= arm-elf-ranlib
+else
+AR2= ranlib
+endif
 
 # End of configurable options.
 
