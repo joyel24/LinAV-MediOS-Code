@@ -43,6 +43,8 @@ struct mouseParam {
 /* mp3 player */
 
 struct mp3_play {
+	int size;
+	
         char * buffer;
         int endOfFile;
         int buffer_read;

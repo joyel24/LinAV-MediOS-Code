@@ -22,6 +22,8 @@ all: $(TARGET)
 	@$(MAKE) -C test/ all
 	@$(MAKE) -C mp3_player/ all
 	@mv -f mp3_player/mp3_play ../../build/avwm/plugins/play
+	@$(MAKE) -C clock/ all
+	@mv -f clock/clock ../../build/avwm/plugins/clock
 
 $(TARGET) : $(OBJS)
 	$(GCC) $@.o -o $@  $(LDFLAGS)   
@@ -33,6 +35,7 @@ clean:
 	@$(MAKE) -C bluecube/ clean
 	@$(MAKE) -C test/ clean
 	@$(MAKE) -C mp3_player/ clean
+	@$(MAKE) -C clock/ clean
         
 
 .c.o:
