@@ -20,39 +20,57 @@
 
 int batteryRefresh=0;
 
-void drawTime()
+/* draw the current time */
+void drawTime(void)
 {
     char timeSt[50];
-    
+
     if(getTimeS(timeSt))
     {
-    	fillRect(COLOR_LIGHT_BLUE,150,2,130,11);
-    	putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,150,2,timeSt);
+        fillRect(COLOR_LIGHT_BLUE,150,2,130,11);
+        putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,150,3,timeSt);
     }
 
 }
 
-void drawBat()
+void drawBat(void)
 {
     int power = 0;
-    int color = 0;   
-            
+    int color = 0;
+    int level = 0;
+
+    /* get batt levels and draw a meter */
     if(power=getBat())
-    {    
+    {
         if(power < 1320)
+        {
             color = COLOR_DARK_RED;
+            level = 4;
+        }
         else if(power < 1380)
+        {
             color = COLOR_RED;
+            level = 8;
+        }
         else if(power < 1440)
+        {
             color = COLOR_ORANGE2;
+            level = 12;
+        }
         else if(power < 1500)
+        {
             color = COLOR_LIGHT_YELLOW;
+            level = 16;
+        }
         else
+        {
             color = COLOR_GREEN;
-        
-        fillRect(COLOR_BLACK,289,2,22,11);
-        fillRect(COLOR_BLACK,311,4,3,7);
-        fillRect(color,290,3,20,9);
+            level = 20;
+        }
+
+        drawRect(COLOR_BLACK,289,2,22,10);
+        fillRect(COLOR_BLACK,311,4,3,6);
+        fillRect(color,290,3,level,8);
     }
 
 }
@@ -61,23 +79,29 @@ void drawGui(void)
 {
     int w = 0;
     int h = 0;
-    
+
     char myName[]="AvWm xx.xx";
 
     getStringS("M", &w, &h);
 
-    fillRect(COLOR_WHITE,0 , 0, 320, h+6+MENU_SHADOW);
+    /* blue background */
     fillRect(COLOR_LIGHT_BLUE,0,0,320,h+6);
-    fillRect(COLOR_BLACK,0,h+6,320,MENU_SHADOW);
-    
-    sprintf(myName,"AvWm %d.%d",MAJOR_V,MINOR_V);
-    
-    putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,2,2,myName);
 
+    /* nice little shadow */
+    drawLine(COLOR_BLACK,0,h+5,319,h+5);
+    drawLine(COLOR_DARK_GREY,0,h+6,319,h+6);
+    drawLine(COLOR_LIGHT_GREY,0,h+7,319,h+7);
+
+    /* show version */
+    sprintf(myName,"AvWm %d.%d",MAJOR_V,MINOR_V);
+    putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,2,3,myName);
+
+    /* and time, and battery */
     drawTime();
     drawBat();
 }
 
+/* events */
 int statusEvtHandler(int evt)
 {
     switch (evt) {
@@ -92,12 +116,12 @@ int statusEvtHandler(int evt)
                 batteryRefresh = 0;
             }
             else
-            	batteryRefresh++;
+                batteryRefresh++;
             break;
     }
 }
 
 void ini_status_bar(struct plugin * status_plugin)
 {
-	doRegisterPlugin(status_plugin,statusEvtHandler,0);
+    doRegisterPlugin(status_plugin,statusEvtHandler,0);
 }
