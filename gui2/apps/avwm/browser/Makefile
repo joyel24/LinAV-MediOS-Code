@@ -5,12 +5,10 @@ GCCFLAGS += -I../../../include -I../include/
 
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
-	
-
-
-force: clean all
 
 all: $(OBJS)
+
+force: clean all
 
 clean:
 	@echo "**** Cleaning..."

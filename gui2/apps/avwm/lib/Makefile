@@ -7,12 +7,12 @@ OBJS = $(SRC:%.c=%.o)
 
 TARGET = libavwm.a
 
-force: clean all
-
 all: $(OBJS)
 	$(AR) -rc $(TARGET) $(OBJS)
 	$(RANLIB) $(TARGET)
 	@rm -f *.gdb
+
+force: clean all
 
 clean:
 	@echo "**** Cleaning..."

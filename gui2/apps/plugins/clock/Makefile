@@ -15,6 +15,9 @@ force: clean $(TARGET)
 
 $(TARGET) : $(OBJS)
 	$(GCC) $(OBJS) -o $@  $(LDFLAGS)
+ifeq ($(HOST),CYGWIN)
+	@mv $@.elf.bflt $@
+endif
 	@rm -f *.gdb
 
 clean:

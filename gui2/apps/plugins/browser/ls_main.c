@@ -38,7 +38,7 @@ struct helperMenu browserMenu = {
     align         : ALIGN_RIGHT
 };
 
-extern int menuOff;
+int evt_mode=BRW_MODE;
 extern struct menu_item menu1;
 extern struct menu_data menu_cfg;
 
@@ -90,60 +90,60 @@ int eventHandler(int evt)
 
     cops->getStringS("M", &w, &h);
 
-    if(menuOff)
+    switch(evt_mode)
     {
-        //printList(bdata,1);
-        cops->helperEvt(evt,BTN_JOY);
-        //printList(bdata,2);
-        evt=cops->browserEvt(evt,bdata);
-        //printList(bdata,3);
-        //fprintf(stderr,"[helperEvt] get:%x sav:%x\n",evt,savEvt);
-        switch(evt)
-        {
-            case BTN_RIGHT:
-                if(bdata->list[bdata->pos+bdata->nselect].type==TYPE_FILE)
-                {                    
-                    cops->handle_type_other(bdata->list[bdata->pos+bdata->nselect].name);                    
-                }
-                break;
-            case BTN_F1:
-                cops->viewNewDir(bdata,"/mnt");                  
-                break;
-            case BTN_F2:
-                if(cops->CF_is_mounted())
+        case BRW_MODE:
+            cops->helperEvt(evt,BTN_JOY);
+            evt=cops->browserEvt(evt,bdata);
+            switch(evt)
+            {
+                case BTN_RIGHT:
+                    if(bdata->list[bdata->pos+bdata->nselect].type==TYPE_FILE)
+                    {                    
+                        cops->handle_type_other(bdata->list[bdata->pos+bdata->nselect].name);                    
+                    }
+                    break;
+                case BTN_F1:
+                    cops->viewNewDir(bdata,"/mnt");                  
+                    break;
+                case BTN_F2:
+                    if(cops->CF_is_mounted())
+                        cops->viewNewDir(bdata,"/cf");
+                    break;
+                case BTN_F3:
+                    menu_cfg.root=&menu1;
+                    evt_mode=MENU_MODE;
+                    cops->hideHelper();
+                    cops->start_menu(&menu_cfg);
+                    cops->menuEvtHandler(EVT_REDRAW);
+                    break;
+                case BTN_ON:
+                    cops->chgSelect(bdata,bdata->pos+bdata->nselect);
+                    break;
+                case BTN_OFF:
+                case EVT_QUIT:
+                    cops->hideHelper();
+                    RELEASE(cops)
+                    break;
+                case EVT_REDRAW:
+                    break;
+                case EVT_CF_REMOVED:
+                    getcwd(pwd, 10);
+                    pwd[10]='\0';
+                    if(pwd[0]=='/' && pwd[1]=='c' && pwd[2]=='f' && (pwd[3]=='/'||pwd[3]=='\0'))
+                        cops->viewNewDir(bdata,"/mnt");
+                    break;
+                case EVT_CF_ADDED:
                     cops->viewNewDir(bdata,"/cf");
-                break;
-            case BTN_F3:
-                menu_cfg.root=&menu1;
-                menuOff=0;
-                cops->hideHelper();
-                cops->start_menu(&menu_cfg);
-                cops->menuEvtHandler(EVT_REDRAW);
-                break;
-            case BTN_ON:
-                cops->chgSelect(bdata,bdata->pos+bdata->nselect);
-                break;
-            case BTN_OFF:
-            case EVT_QUIT:
-                cops->hideHelper();
-                RELEASE(cops)
-                break;
-            case EVT_REDRAW:
-                break;
-            case EVT_CF_REMOVED:
-                getcwd(pwd, 10);
-                pwd[10]='\0';
-                if(pwd[0]=='/' && pwd[1]=='c' && pwd[2]=='f' && (pwd[3]=='/'||pwd[3]=='\0'))
-                    cops->viewNewDir(bdata,"/mnt");
-                break;
-            case EVT_CF_ADDED:
-                cops->viewNewDir(bdata,"/cf");
-                break;
-        }
-    }
-    else
-    {
-        cops->menuEvtHandler(evt);
+                    break;
+            }
+            break;
+        case MENU_MODE:
+            cops->menuEvtHandler(evt);
+            break;
+        case CP_MV_MODE:
+            cp_mv_evt(evt);
+            break;
     }
     return 1;
 }

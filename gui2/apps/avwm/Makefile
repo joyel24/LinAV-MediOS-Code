@@ -18,10 +18,7 @@ OBJS = $(SRC:%.c=%.o)
 	
 TARGET = avwm
 
-force: clean all
-
 all: $(TARGET)
-	@$(MAKE) -C lib/ all
 	@mkdir -p ../../build/avwm
 	@rm -f ../../build/avwm/avwm
 	@mv $(TARGET) ../../build/avwm/
@@ -32,12 +29,22 @@ else
 endif
 	@rm -f *.gdb
 
-$(TARGET) : $(OBJS) browser_dir
+
+force: clean all        
+        
+$(TARGET) : $(OBJS) browser_dir lib_dir
 	$(GCC) $(OBJS) browser/*.o -o $@  $(LDFLAGS)
+ifeq ($(HOST),CYGWIN)
+	@mv $@.elf.bflt $@
+endif
+	rm $@.gdb
 
 browser_dir:
 	@$(MAKE) -C browser/ all
-        
+
+lib_dir:
+	@$(MAKE) -C lib/ all
+
 clean:
 	@echo "**** Cleaning..."
 	@$(MAKE) -C lib/ clean

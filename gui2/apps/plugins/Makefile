@@ -12,8 +12,6 @@ SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
 TARGET = $(SRC:%.c=%)
 
-force: clean all
-
 all: $(TARGET)
 	@mkdir -p ../../build/avwm/plugins
 	@rm -f ../../build/avwm/plugins/*
@@ -31,7 +29,13 @@ all: $(TARGET)
 
 $(TARGET) : $(OBJS)
 	$(GCC) $@.o -o $@  $(LDFLAGS)   
-        
+ifeq ($(HOST),CYGWIN)
+	@mv $@.elf.bflt $@
+endif
+	@rm $@.gdb
+
+force: clean all
+                
 clean:
 	@echo "**** Cleaning..."
 	@rm -f *.o *.bak *~ *.gdb $(TARGET)

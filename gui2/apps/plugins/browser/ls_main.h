@@ -27,17 +27,23 @@
 #define PATHLEN    256
 #define MAX_CHAR   100;
 
+#define BRW_MODE    0
+#define MENU_MODE   1
+#define CP_MV_MODE  2
+
 int  eventHandler       (int evt);
 
 /*****    menu_fct    *****/
-void ini_menu_struct  (struct browser_data *bdata);
-void do_off           (void * data);
-void do_on            (void * data);
-void do_right         (void * data);
-void do_F1            (void * data);
-void do_F2            (void * data);
-void do_F3            (void * data);
-void mk_item_str      (void * data,char * str);
+void ini_menu_struct   (struct browser_data *bdata);
+void do_off            (void * data);
+void do_on             (void * data);
+void do_right          (void * data);
+void do_F1             (void * data);
+void do_F2             (void * data);
+void do_F3             (void * data);
+void mk_item_str       (void * data,char * str);
+void cp_mv_evt         (int evt);
+void draw_cp_mv_bottom (struct browser_data *bdata);
 
 /**** drawings        ******/
 void draw_bottom_status  (struct browser_data *bdata);

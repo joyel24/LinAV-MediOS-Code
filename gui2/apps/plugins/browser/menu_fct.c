@@ -12,6 +12,7 @@
 */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -62,9 +63,35 @@ struct ls_item ls_item3 = { "Rename"  , MENU_RENAME};
 struct ls_item ls_item4 = { "Copy"    , MENU_COPY};
 struct ls_item ls_item5 = { "CF"      , MENU_CF};
 
+struct browser_data browser2 = {
+    path            : NULL,
+    
+    list            : NULL,
+    listused        : 0,
+    listsize        : 0,
+    
+    pos             : 0,
+    nselect         : 0,
+   
+    show_dot_files  : 1,
 
+    nbFile          : 0,
+    nbDir           : 0,
+    totSize         : 0,
+    
+    nb_disp_entry   : 20,
+    x_start         : 0,
+    y_start         : 18,
+    
+    width           : 310,
+    entry_height    : 10,
+    
+    draw_bottom_status : draw_cp_mv_bottom,
+    draw_file_size     : draw_file_size
+};
+struct browser_data * bdata2;
 
-int menuOff=1;
+extern int evt_mode;
 
 /*extern variables */
 extern struct client_operations * cops;
@@ -72,6 +99,8 @@ extern int pos,nselect;
 extern struct dir_entry * list;
 extern int listused;
 extern struct helperMenu browserMenu;
+
+extern struct browser_data * bdata;
 
 /************************/
 
@@ -119,43 +148,54 @@ void ini_menu_struct(struct browser_data * bdata)
 void do_off(void * data)
 {
     cops->stop_menu();
-    menuOff=1;
+    evt_mode=BRW_MODE;
 }
 
 void do_on(void * data)
 {
 }
 
+char * pwd=NULL;
+
 void do_right(void * data)
 {
     char text[MAX_EDIT_CHARS];
-    char * pwd;
     char* ptext = NULL;
     int reload = false;
     int buttonResult = 0;
     struct ls_item * item=(struct ls_item*)data;
-    struct browser_data * bdata=item->bdata;
+    //struct browser_data * bdata=item->bdata;
     
     cops->stop_menu();
-    menuOff=1;
+    evt_mode=BRW_MODE;
 
+    if(pwd)
+        free(pwd);
+    pwd=NULL;
+    
     switch(item->num)
     {
         case MENU_COPY:
+        #if 0
             if(cops->nbSelected(bdata)==0)
                 cops->msgBox("Warning - copy", "Select files first", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
             else
             {
                 /* saving current path */
-              /*  if(!(pwd=getpwd(NULL,PATH_LEN)))
+                if(!(pwd=getcwd(NULL,PATHLEN)))
                 {
                     cops->msgBox("Warning - copy", "Can't get current path", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
                     break;
-                }*/
+                }
+                else
+                    cops->msgBox("Info - copy", "Select destination", MSGBOX_TYPE_OK, MSGBOX_ICON_INFORMATION);
                 
-                    
+                bdata2=&browser2;
+                evt_mode=CP_MV_MODE;
+                cops->viewNewDir(bdata2,pwd);               
                 
             }
+        #endif
             break;
         case MENU_DELETE:
             buttonResult = cops->msgBox("Delete Warning", "Really delete it ?", MSGBOX_TYPE_OKCANCEL, MSGBOX_ICON_WARNING);
@@ -233,4 +273,43 @@ void mk_item_str(void * data,char * str)
     }
 }
 
+void cp_mv_evt(int evt)
+{
+    evt=cops->browserEvt(evt,bdata2);
+    switch(evt)
+    {
+        case BTN_RIGHT:
+        case BTN_ON:
+            evt_mode=BRW_MODE;
+            cops->viewNewDir(bdata,pwd);
+    }
+}
 
+void draw_cp_mv_bottom(struct browser_data *bdata)
+{
+    char tmp[100];
+    char tmpS[15];
+    char pwd[PATHLEN];
+    int len=0;   
+    
+    cops->createSizeString(tmpS,bdata->totSize);
+        
+    cops->fillRect(COLOR_WHITE,2, 220,316,20);
+        
+    if (!getcwd(pwd, PATHLEN))
+    {
+        fprintf(stderr, "Cannot get current directory\n");        
+    }
+    else
+    {
+        len=strlen(pwd);        
+        snprintf(tmp,"%s - Copying/Move",pwd);
+        cops->putS(COLOR_BLUE, COLOR_WHITE,2, 220, tmp);  
+    }
+
+    snprintf(tmp,100,"%d %s, %d %s, %s",bdata->nbFile,bdata->nbFile>0?"files":"file",
+            bdata->nbDir,bdata->nbDir>0?"folders":"folders",tmpS);
+    fprintf(stderr,"%s\n",tmp);
+    
+    cops->putS(COLOR_BLUE, COLOR_WHITE,2, 230, tmp);    
+}

@@ -16,17 +16,20 @@ SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
 TARGET = $(SRC:%.c=%)
 
-force: clean all
-
 all:   avwmDir $(TARGET) plugDir
 	@mkdir -p ../build/avwm/apps
 	@rm -f ../build/avwm/apps/*
 	@mv $(TARGET) ../build/avwm/apps
 	@rm -f *.gdb
 
+force: clean all
 
 $(TARGET) : $(OBJS)
 	$(GCC) $@.o -o $@  $(LDFLAGS)
+ifeq ($(HOST),CYGWIN)
+	@mv $@.elf.bflt $@
+endif
+	@rm $@.gdb
 
 plugDir:
 	@$(MAKE) -C plugins/ all
