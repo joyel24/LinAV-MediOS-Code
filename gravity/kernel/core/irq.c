@@ -17,9 +17,52 @@
 #include <kernel/irq.h>
 #include <kernel/kernel.h>
 
-__IRAM_DATA struct irq_data_s irq_data[NR_IRQS];
+/* irq driven driver includes */
+#include <kernel/sound.h>
+#include <kernel/timer.h>
+#include <kernel/uart.h>
+
+
 __IRAM_DATA int cli_var=0;
 __IRAM_DATA int clf_var=0;
+
+__IRAM_DATA struct irq_data_s irq_table[] = {
+    {
+        irq     : IRQ_MAS_DATA,
+        enable  : 0,
+        action  : dsp_interrupt,
+        name    : "MAS",
+        nb_irq  : 0
+    },
+    {
+        irq     : IRQ_TMR_0,
+        enable  : 0,
+        action  : main_timer_action,
+        name    : "Tick_timer",
+        nb_irq  : 0
+    },
+    {
+        irq     : IRQ_UART0,
+        enable  : 0,
+        action  : uart_intr_action,
+        name    : "UART0 intr",
+        nb_irq  : 0
+    },
+    {
+        irq     : IRQ_UART1,
+        enable  : 0,
+        action  : uart_intr_action,
+        name    : "UART1 intr",
+        nb_irq  : 0
+    },
+    {
+        irq     : -1,
+        enable  : 0,
+        action  : NULL,
+        name    : NULL,
+        nb_irq  : 0
+    }
+};
 
 __IRAM_CODE void sti(void)
 {
@@ -62,78 +105,28 @@ __IRAM_CODE void __clf(void)
 }
 
 
-__IRAM_CODE void do_IRQ(int irq, struct pt_regs *regs)
+__IRAM_CODE void do_IRQ(void)
 {
-    struct irq_data_s * desc;
-    mask_ack_irq(irq); 
-    desc=&irq_data[irq];
-    desc->nb_irq++;    
-    if(desc->enable==1 && desc->action!=NULL)
+    int i,irq;
+    unsigned int mask;
+    for(i=0;irq_table[i].irq!=-1;i++)
     {
-        desc->action(irq);
-        unmask_irq(irq);
+        irq=irq_table[i].irq;
+        mask=0x1 << INTC_IRQ_SHIFT(irq);
+        
+        if(((~inw(INTC_IRQ_STATUS(irq))) & mask) && (inw(INTC_IRQ_ENABLE(irq)) & mask))
+        {
+            irq_table[i].nb_irq++;
+            irq_ack(irq);
+            irq_table[i].action(irq); 
+        }
     }
+    
+    
 }
-
-/* Acknowlede the IRQ. */
-#if 0
-static inline void irq_ack(unsigned int irq, struct pt_regs * regs)
-{
-    outw((1<<INTC_IRQ_SHIFT(irq)), INTC_IRQ_STATUS(irq));
-}
-
-/* Acknowledge the FIQ. */
-
-static inline void fiq_ack(unsigned int irq)
-{
-    outw((1<<INTC_FIQ_SHIFT(irq)), INTC_FIQ_STATUS(irq));
-}
-
-/* Mask the IRQ. */
-
-__IRAM_CODE void mask_irq(unsigned int irq)
-{
-    unsigned int eint;
-    int mask;
-
-    eint = INTC_IRQ_ENABLE(irq);
-    mask = inw(eint);
-    mask &= ~(1<<INTC_IRQ_SHIFT(irq));
-    outw(mask, eint);
-}
-
-/* Unmask the IRQ. */
-
-__IRAM_CODE void unmask_irq(unsigned int irq)
-{
-    unsigned int eint;
-    int mask;
-
-    eint = INTC_IRQ_ENABLE(irq);
-    mask = inw(eint);
-    mask |= (1<<INTC_IRQ_SHIFT(irq));
-    outw(mask, eint);
-}
-
-/* Mask the IRQ and acknowledge it. */
-
-__IRAM_CODE void mask_ack_irq(unsigned int irq)
-{
-    unsigned int eint;
-    int mask;
-
-    eint = INTC_IRQ_ENABLE(irq);
-    mask = inw(eint);
-    mask &= ~(1<<INTC_IRQ_SHIFT(irq));
-    outw(mask, eint);
-
-    outw((1<<INTC_IRQ_SHIFT(irq)), INTC_IRQ_STATUS(irq));
-}
-#endif
 
 void init_irq(void)
 {
-    int irq;
     /* disable all irqs */
     outw(0x0000, INTC_IRQ0_ENABLE);
     outw(0x0800, INTC_IRQ1_ENABLE);
@@ -149,77 +142,37 @@ void init_irq(void)
     outw(0xffff, INTC_IRQ1_STATUS);
     
     /* init the irq struct */
-    for(irq=0;irq<NR_IRQS;irq++)
-    {
-        irq_data[irq].enable=0;
-        irq_data[irq].action=NULL;
-        irq_data[irq].name=NULL;
-        irq_data[irq].nb_irq=0;
-        
-    }
+    
     
     printk("[init] irq\n");    
-}
-
-__IRAM_CODE void add_irq_handler(int irq,void(*action)(int irqnr),char * name)
-{
-    if(irq>=0 && irq<NR_IRQS && action != NULL)
-    {
-        irq_data[irq].action=action;
-        irq_data[irq].name=name;
-    }
-}
-
-__IRAM_CODE void del_irq_handler(int irq)
-{
-    if(irq>=0 && irq<NR_IRQS)
-    {
-        irq_data[irq].action=NULL;
-        irq_data[irq].name=NULL;
-        irq_data[irq].enable=0;
-    }
 }
 
 __IRAM_CODE void disable_irq(int irq)
 {
     if(irq>=0 && irq<NR_IRQS)
-    {
-        irq_data[irq].enable=0;
         mask_irq(irq);
-    }
 }
 
 __IRAM_CODE void enable_irq(int irq)
 {
     if(irq>=0 && irq<NR_IRQS)
     {
-        irq_data[irq].enable=1;
         unmask_irq(irq);
+        irq_ack(irq);
     }
 }
 
-__IRAM_CODE int irq_state(int irq)
-{
-    if(irq>=0 && irq<NR_IRQS)
-        return irq_data[irq].enable;
-    else
-        return 0;
-}
 
 
 void print_irq(void)
 {
-    int irq,irqnr=0;
+    int i;
     printk("IRQ handler list:\n");
-    for(irq=0;irq<NR_IRQS;irq++)
+    for(i=0;irq_table[i].irq!=-1;i++)
     {
-        if(irq_data[irq].action!=NULL || irq_data[irq].nb_irq !=0)
-        {            
-            printk("%d: irq:%d %s, %s (%d irqs)\n",
-                irqnr,irq,irq_data[irq].name!=NULL?irq_data[irq].name:"UNDEF",
-                irq_data[irq].enable==1?"enable":"disable",
-                irq_data[irq].nb_irq);
-            irqnr++;
-        }
+        printk("%d: irq:%d %s, %s (%d irqs)\n",
+            i,irq_table[i].irq,irq_table[i].name!=NULL?irq_table[i].name:"UNDEF",
+            irq_table[i].enable==1?"enable":"disable",
+            irq_table[i].nb_irq);
     }
 }

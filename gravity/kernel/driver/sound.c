@@ -345,9 +345,6 @@ void init_sound(void)
     playing=0;
     in_pause=0;
 
-    disable_irq(IRQ_MAS_DATA);
-    
-    add_irq_handler(IRQ_MAS_DATA,dsp_interrupt,"MAS");        
 
     disable_irq(IRQ_MAS_DATA);
     

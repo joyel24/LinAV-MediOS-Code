@@ -67,9 +67,7 @@ __IRAM_CODE void uartOutString(unsigned char * data,int uartNum)
 
 void init_uart(void)
 {
-    add_irq_handler(IRQ_UART0,uart_intr_action,"UART0 intr");
-    add_irq_handler(IRQ_UART1,uart_intr_action,"UART1 intr");
-    
+        
     UART_0_Pipe=&UART_PIPES[0];
     UART_1_Pipe=&UART_PIPES[1];
     

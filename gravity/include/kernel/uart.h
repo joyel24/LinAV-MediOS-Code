@@ -25,6 +25,8 @@
 #define UART_LCR      0x0000000a
 #define UART_SR       0x0000000c
 
+void uart_intr_action(int irq);
+
 int  uartIn         (unsigned char * data,int uartNum);
 void uartOut        (unsigned char data,int uartNum);
 void uartOutString  (unsigned char * data,int uartNum);

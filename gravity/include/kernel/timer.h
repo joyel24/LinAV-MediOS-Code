@@ -19,6 +19,8 @@ struct timer_s {
     char * name;
 };
 
+extern void main_timer_action(int irq);
+
 extern void setup_timer(struct timer_s * timer_data,char * name);
 extern void rm_timer(struct timer_s * timer_data);
 extern void start_timer(struct timer_s * timer_data);

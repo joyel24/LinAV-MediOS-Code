@@ -176,6 +176,7 @@ extern void mask_ack_irq(unsigned int irq);
 #endif
 
 struct irq_data_s {
+    int irq;
     int enable;
     void (*action)(int irqnr);
     char * name;

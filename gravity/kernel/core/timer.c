@@ -106,8 +106,7 @@ void init_timer(void)
     /* freerun */
     outw(TMR_MODE_FREERUN, TIMER0_BASE+TIMER_MODE);
        
-    /* adding the timer action in irq struct */
-    add_irq_handler(IRQ_TMR_0,main_timer_action,"Tick_timer");
+    /* enable timer irq */
     enable_irq(IRQ_TMR_0);
     
     printk("[init] timer\n");
