@@ -67,31 +67,47 @@ __trap_addrexcptn_ptr:  .word do_trap_addrexcptn
 .align	5
 .global trap_irq
 trap_irq:
-    @
-    @ save mode specific registers
-    @
-    ldr    r13, .LCsirq
-    sub    lr, lr, #4
-    str    lr, [r13]                @ save lr_IRQ
-    mrs    lr, spsr
-    str    lr, [r13, #4]            @ save spsr_IRQ
-    @
-    @ now branch to the relevent MODE handling routine
-    @
-    mrs    r13, spsr            @ switch to SVC_32 mode
-    bic    r13, r13, #0x1f      @ preserve F and T bits
-    orr    r13, r13, #0x13
-    orr    r13, r13, #0x80
-    msr    spsr_c, r13            @ switch to SVC_32 mode
-    
-    @and    lr, lr, #15
-    ldr    lr, [pc]
-    movs   pc, lr                @ Changes mode and branches
-__trap_irq_ptr:  .word __irq_trap
+	stmdb sp!, {r0, r1, r2} @// Store temp registers...
+	mrs r1, cpsr            @// Remember current CPU state...
+	orr r1, r1, #0xC0
+	msr cpsr_c, r1          @// Disable all interrupts...
+	mrs r0, spsr            @// Get user's process state word...
+	subs r2, lr, #4         @// Remember address we came from...
+	orr r0, r0, #0xC0       @// Disable all interrupts in user's state...
+	bic r0, r0, #0x20       @// We want ARM mode...
+	msr cpsr_c, r0          @// switch to user's mode...
+
+	@// Saving context in user's stack
+	@// Push order:
+	@// pc, lr, r12, r11, ... (sp must not be stored !!!)
+	stmdb sp!, {r2}         @// Store "came from" address as new pc...
+	stmdb sp!, {r3-r12, lr}
+	mov r12, sp             @// Now r12 is our user-mode stack pointer :)
+	msr cpsr_c, r1          @// Switch back to IRQ mode...
+
+	@// Store user registers r0, r1, r2
+	mrs r4, spsr            @// r4 = SPSR...
+	ldmia sp!, {r0, r1, r2} @// Load temp user registers back...
+	stmdb r12!, {r0, r1, r2}@// Store user registers in user stack...
+	stmdb r12!, {r4}        @// Store user SPSR...
+	ldr r1, .LCactive       @// r1 contains now address of active TCB...
+	str r12, [r1]           @// User's top of stack stored in TCB...
+
+	bl kset_next_ready_task
+	bl __irq_trap
+
+	ldr r1, .LCactive       @// r1 = address of new active TCB...
+	ldr r12, [r1]           @// Get user's top of stack from TCB...
+	ldmia r12!, {r4}        @// Get user SPSR...
+	msr spsr_cfsx, r4
+	bic r4, r4, #0x20       @// We want ARM mode...
+	msr cpsr_cfsx, r4       @// switch to user's mode...
+	mov sp, r12
+	ldmia sp!, {r0-r12, lr, pc}^
 
 .align 5
-.LCsirq:	 .word __temp_irq
-                
+.LCactive:	 .word g_pActiveTask
+
 .align	5
 .global trap_fiq
 trap_fiq:
@@ -224,4 +240,3 @@ __irq_svc1:
 __temp_irq:	.word	0				@ saved lr_irq
 		.word	0				@ saved spsr_irq
 		.word	-1				@ old_r0
-                

@@ -167,3 +167,8 @@ __IRAM_CODE TASK_INFO* kremove_tcb  (TASK_INFO** pList)
 
 	return pDeleted;
 }
+
+__IRAM_CODE void kset_next_ready_task ()
+{
+	g_pActiveTask = g_pActiveTask->pNextTask;
+}

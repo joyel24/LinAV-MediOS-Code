@@ -161,6 +161,10 @@ __IRAM_CODE int irq_state(int irq)
         return 0;
 }
 
+__IRAM_CODE void irq_handler ()
+{
+}
+
 void print_irq(void)
 {
     int irq,irqnr=0;
