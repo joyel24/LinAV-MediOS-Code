@@ -39,18 +39,6 @@ extern int inHold;
 
 __IRAM_DATA struct hw_chk_s btn_chker;
 
-char * btn_str[NB_BUTTONS] = {
-"UP",
-"LEFT",
-"RIGHT",
-"DOWN",
-"MENU3",
-"MENU1",
-"MENU2",
-"JOYPRESS",
-"ON",
-"OFF" };
-
 __IRAM_CODE void chk_button(void)
 {
     int btn,val,fastDir=0;
