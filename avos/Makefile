@@ -12,7 +12,7 @@
 
 
 libavos:
-	arm-elf-gcc -c -mthumb -mcallee-super-interworking -nostdlib -nodefaultlibs src/fonts/*.c
+	arm-elf-gcc -c -mthumb -mcallee-super-interworking -fno-zero-initialized-in-bss -nostdlib -nodefaultlibs src/fonts/*.c
 	arm-elf-as -o lib/libavos.o src/hardware/*.s
 	mv *.o lib
 
@@ -22,7 +22,7 @@ clean:
 
 examples: src/examples/*.c
 	@for i in src/examples/*.c;do\
-	arm-elf-gcc -c -mthumb -mcallee-super-interworking -nostdlib -nodefaultlibs -Iinclude/ $$i;\
+	arm-elf-gcc -c -mthumb -mcallee-super-interworking -fno-zero-initialized-in-bss -nostdlib -nodefaultlibs -Iinclude/ $$i;\
 	arm-elf-ld -Ttext 0x03000000 -e main -o `basename $$i .c`.elf `basename $$i .c`.o lib/*.o;\
 	arm-elf-objcopy -O binary `basename $$i .c`.elf `basename $$i .c`.bin;\
 	rm -f `basename $$i .c`.elf `basename $$i .c`.o;\
