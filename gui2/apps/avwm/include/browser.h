@@ -18,6 +18,9 @@
 #define TYPE_FILE   2
 #define TYPE_BACK   0
 
+#define LEFT_SCROLL  0
+#define RIGHT_SCROLL 1
+
 struct dir_entry {
     char * name;
     int type;
@@ -32,6 +35,8 @@ struct browser_data {
     int nselect;
     
     int show_dot_files;
+    
+    int scroll_pos;
 
     int nbFile;
     int nbDir;

@@ -80,6 +80,8 @@ struct browser_data browser2 = {
     pos             : 0,
     nselect         : 0,
    
+    scroll_pos      : RIGHT_SCROLL,
+    
     show_dot_files  : 1,
 
     nbFile          : 0,
@@ -90,7 +92,8 @@ struct browser_data browser2 = {
     x_start         : 0,
     y_start         : 18,
     
-    width           : 310,
+    width           : 320,
+    height          : 202,
     entry_height    : 10,
     
     draw_bottom_status : draw_cp_mv_bottom,

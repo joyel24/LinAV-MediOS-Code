@@ -15,10 +15,19 @@
 #ifndef __SCROLLBAR_H
 #define __SCROLLBAR_H
 
+struct scroll_bar {
+    int bg_color;
+    int fg_color;
+    int x;
+    int y;
+    int width;
+    int height;
+    int orientation;
+};
+
 #define VERTICAL   0
 #define HORIZONTAL 1
 
-void scrollbar(int color, int bg_color, int x, int y, int width, int height, int items, int min_shown,
-               int max_shown, int orientation);
+void draw_scrollBar(struct scroll_bar * scrollBar, int items, int min_shown,int max_shown);
 
 #endif

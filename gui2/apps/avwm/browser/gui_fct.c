@@ -33,8 +33,15 @@ BITMAP * gui_ls_imageBitmap;
 
 #define    FILE_X_OFFSET 10
 
+struct scroll_bar browser_scroll = {
+    fg_color    : COLOR_BLACK,
+    bg_color    : COLOR_WHITE,
+    orientation : VERTICAL
+};
+    
+
 void iniBrowser(void)
-{
+{   
     gui_ls_upBitmap=&getIcon("upBitmap")->bmap_data;
     gui_ls_dwBitmap=&getIcon("dwBitmap")->bmap_data;
     gui_ls_dirBitmap=&getIcon("dirBitmap")->bmap_data;
@@ -60,12 +67,15 @@ int viewNewDir(struct browser_data *bdata,char *name)
 
     fillRect(COLOR_WHITE,bdata->x_start,bdata->y_start,bdata->width,bdata->height);
 
+    browser_scroll.x=bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?1:bdata->width-10);
+    browser_scroll.y=bdata->y_start;
+    browser_scroll.width=8;    
+    browser_scroll.height=bdata->height;
+    
     bdata->pos=0;
     bdata->nselect=0;
     printAllName(bdata);
-    scrollbar(COLOR_BLACK, COLOR_WHITE, bdata->x_start+bdata->width, bdata->y_start,
-              8, bdata->height-bdata->y_start, bdata->listused, bdata->pos,
-              bdata->nb_disp_entry+bdata->pos, VERTICAL);
+    draw_scrollBar(&browser_scroll, bdata->listused, bdata->pos,bdata->nb_disp_entry+bdata->pos);
     return 1;
 }
 
@@ -76,7 +86,7 @@ int printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct br
     char *          cp;
     int             type;
     int             H=bdata->entry_height;
-    int             X=bdata->x_start;
+    int             X=bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0);
     int             Y=bdata->y_start+pos*H;
     int             W=bdata->width-10;
 
@@ -149,7 +159,7 @@ void printAllName(struct browser_data *bdata)
     int pos=bdata->pos;
     int nselect=bdata->nselect;
     int H=bdata->entry_height;
-    int X=bdata->x_start;
+    int X=bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0);
     int Y=bdata->y_start+pos*H;
     int W=bdata->width-10;
 

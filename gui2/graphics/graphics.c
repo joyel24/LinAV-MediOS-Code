@@ -468,8 +468,12 @@ void setPalette(int palette[256][3],int size)
     {
         y = (306*palette[i][0] + 601*palette[i][1] + 117*palette[i][2]) >> 10 ; 
         cb = ((-173*palette[i][0] -339*palette[i][1] + 512*palette[i][2]) >> 10) + 128;
-        cr = ((512*palette[i][0] - 429*palette[i][1] - 83*palette[i][2]) >> 10) + 128;
+        cr = ((512*palette[i][0] - 428*palette[i][1] - 84*palette[i][2]) >> 10) + 128;
     
+        /*printf("[setPalette] (%03d) RGB=(%03d,%03d,%03d) YCrCb=(%03d,%03d,%03d)\n",i,
+                    palette[i][0],palette[i][1],palette[i][2],
+                    y,cr,cb);*/
+        
         osdSetPallette (y, cr, cb, i);
     }
 #else

@@ -21,6 +21,8 @@
 #include "helperMenu.h"
 #include "scrollbar.h"
 
+extern struct scroll_bar browser_scroll;
+
 int browserEvt(int evt,struct browser_data * bdata)
 {
     int w = 0;
@@ -56,15 +58,13 @@ int browserEvt(int evt,struct browser_data * bdata)
                 }
                 else // not going up, scrolling
                 {
-                    scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW,
+                    scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
                                 bdata->width-10, (h+1)*bdata->nb_disp_entry, h+1,0);
                     printAName(bdata,bdata->pos+bdata->nselect+1,bdata->nselect+1,1,0);
                     printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);
                 }
 
-                scrollbar(COLOR_BLACK, COLOR_WHITE, bdata->x_start+bdata->width, bdata->y_start,
-                        8, bdata->height-bdata->y_start, bdata->listused, bdata->pos,
-                        bdata->nb_disp_entry+bdata->pos, VERTICAL);
+                draw_scrollBar(&browser_scroll, bdata->listused, bdata->pos,bdata->nb_disp_entry+bdata->pos);
             }
             else // just going up
             {
@@ -95,9 +95,7 @@ int browserEvt(int evt,struct browser_data * bdata)
                     printAllName(bdata);
                 }
 
-                scrollbar(COLOR_BLACK, COLOR_WHITE, bdata->x_start+bdata->width, bdata->y_start,
-                        8, bdata->height-bdata->y_start, bdata->listused, bdata->pos,
-                        bdata->nb_disp_entry+bdata->pos, VERTICAL);
+                draw_scrollBar(&browser_scroll, bdata->listused, bdata->pos,bdata->nb_disp_entry+bdata->pos);
             }
             else
             {
@@ -113,15 +111,13 @@ int browserEvt(int evt,struct browser_data * bdata)
                     }
                     else // not going down, scrolling
                     {
-                        scrollWindowVert(COLOR_WHITE, 0, 1  + h+6+MENU_SHADOW,
+                        scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
                                 bdata->width-10, (h+1)*bdata->nb_disp_entry, h+1,1);
                         printAName(bdata,bdata->pos+bdata->nselect-1,bdata->nselect-1,1,0);
                         printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);
                     }
 
-                    scrollbar(COLOR_BLACK, COLOR_WHITE, bdata->x_start+bdata->width, bdata->y_start,
-                            8, bdata->height-bdata->y_start, bdata->listused, bdata->pos,
-                            bdata->nb_disp_entry+bdata->pos, VERTICAL);
+                    draw_scrollBar(&browser_scroll, bdata->listused, bdata->pos,bdata->nb_disp_entry+bdata->pos);
                 }
                 else
                 {

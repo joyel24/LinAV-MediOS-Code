@@ -3,35 +3,35 @@
 
 #include "../include/gui_pal.h"
 
-double dist_3D(unsigned char r,unsigned char g,unsigned char b,
+long dist_3D(unsigned char r,unsigned char g,unsigned char b,
                 unsigned char pr,unsigned char pg,unsigned char pb)
 {
-    double u,v,w,pu,pv,pw;
-    double res;
-    u=(double)r;
-    v=(double)g;
-    w=(double)b;
-    pu=(double)pr;
-    pv=(double)pg;
-    pw=(double)pb;
+    long R,G,B;
+    long res;
     
-    res=sqrt(abs(u-pu)*abs(u-pu)+abs(v-pv)*abs(v-pv)+abs(w-pw)*abs(w-pw));
+    R=abs(r-pr);
+    G=abs(g-pg);
+    B=abs(b-pb);
+    
+    res=R*R+G*G+B*B;
     return res;
 }
 
-void doPrint(int index,float val,unsigned char r,unsigned char g,unsigned char b,
+void doPrint(int index,long val,unsigned char r,unsigned char g,unsigned char b,
                 unsigned char pr,unsigned char pg,unsigned char pb)
 {
-    printf("i=%d dist=%f pix=[0x%02x,0x%02x,0x%02x] pal=[0x%02x,0x%02x,0x%02x]\n",index,val,
+    printf("i=%d dist=%d pix=[0x%02x,0x%02x,0x%02x] pal=[0x%02x,0x%02x,0x%02x]\n",index,val,
                 r,g,b,
                 pr,pg,pb);
 }
 
+int exact_match[256];
+
 int get_nearest(unsigned char r,unsigned char g,unsigned char b)
 {
     int min_index=0;
-    double min_val=500;
-    double new_val;
+    long min_val=0x7fffffffL;;
+    long new_val;
     int i;
     for(i=0;i<256;i++)
     {
@@ -40,6 +40,7 @@ int get_nearest(unsigned char r,unsigned char g,unsigned char b)
         {
             min_index=i;
             min_val=new_val;
+            exact_match[i]++;
             break;
         }
         if(new_val<min_val)
@@ -61,6 +62,9 @@ void outputStr(FILE * out,char * str)
     }
 }
 
+int color_used[256];
+
+
 int main(int argc, char* argv[]) {
     int w,h,i,j,c;
     int stop=0;    
@@ -71,6 +75,12 @@ int main(int argc, char* argv[]) {
     
     FILE* infile;
     FILE* outfile;
+    
+    for(i=0;i<256;i++)
+    {
+        color_used[i]=0;
+        exact_match[i]=0;
+    }
     
     if (argc != 7 || (argv[1][0]!='h' && argv[1][0]!='i'))
     {
@@ -149,6 +159,7 @@ int main(int argc, char* argv[]) {
             if (c != 3) {fprintf(stderr,"\nMismatch!\n\n");stop=1;break;}
             
             match_col=get_nearest(rgb[0],rgb[1],rgb[2]);
+            color_used[match_col]++;
             if(!binOut)
             {
                 if(!(j % 20)) fprintf(outfile,"\n    ");
@@ -169,6 +180,27 @@ int main(int argc, char* argv[]) {
         fprintf(outfile,"};\n\n");
         fprintf(outfile,"BITMAP %s = {(unsigned int) %s_da, %d, %d, 0, 0};\n\n",argv[4],argv[4],w,h);
     }
+    
+    j=0;c=0;
+    
+    printf("color used:\n");
+    
+    for(i=0;i<256;i++)
+        if(color_used[i])
+        {
+            printf("%03d : %04d (%03d,%03d,%03d)\n",i,color_used[i],gui_pal[i][0],gui_pal[i][1],gui_pal[i][2]);
+            j++;
+        }
+    printf("%d color used\n\n",j);
+    printf("Exact match:\n");
+    for(i=0;i<256;i++)    
+        if(exact_match[i])
+        {
+            printf("%03d : %04d\n",i,exact_match[i]);
+            c++;
+        }
+    printf("%d exact match\n",c);
+    
     fclose(infile);
     fclose(outfile);
     

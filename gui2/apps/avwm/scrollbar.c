@@ -13,21 +13,28 @@
 *
 */
 #include "graphics.h"
-
-#define VERTICAL   0
-#define HORIZONTAL 1
+#include "scrollbar.h"
 
 /*
  * Print a scroll bar
  */
-void scrollbar(int color, int bg_color, int x, int y, int width, int height, int items, int min_shown,
-               int max_shown, int orientation)
+void draw_scrollBar(struct scroll_bar * scrollBar, int items, int min_shown,int max_shown)
 {
     int min;
     int max;
     int start;
     int size;
-
+    
+    int x,y,width,height,orientation,color,bg_color;
+    
+    x=scrollBar->x;
+    y=scrollBar->y;
+    width=scrollBar->width;
+    height=scrollBar-> height;
+    color=scrollBar->fg_color;
+    bg_color=scrollBar->bg_color;
+    orientation=scrollBar->orientation;
+    
     /* draw box */
     drawRect(color, x, y, width, height);
 
