@@ -68,16 +68,11 @@ int main() {
 
         docmd();
 
-        do {
-            b =buttonsGetStatus();
-        } while(!(b & BUTTONS_AV300_ANY));
+        b =buttonsGetStatus();
 
         if (b & BUTTONS_AV300_RIGHT) addr+=2;
         if (b & BUTTONS_AV300_LEFT) addr-=2;
         
-        do {
-            b =buttonsGetStatus();
-        } while((b & BUTTONS_AV300_ANY));    
         
     }
 }
@@ -90,7 +85,13 @@ void docmd() {
     
     uartOuts("Getting data...\n");
 
-    c = i2cRead(addr, 0, data, 128);    
+    c = i2cRead(addr, 0, data, 64);
+
+    if (addr==0xd0) {
+        data[0x0c] &= ~0x40;
+        i2cWrite(addr, 0x0c, data+0x0c, 1);
+    }
+    
     if (c==0) uartOuts("Returned 0\n");
 
     showBuffer(data);
@@ -102,7 +103,7 @@ void showBuffer(char *source) {
     int i,j,y=0;
     char c;
 
-    for (j=0;j<512;j+=16) {
+    for (j=0;j<64;j+=16) {
         for (i=0;i<16;i++) {
             c = source[i+j];
             stringPutHex(p+(i*2), c, 2);
