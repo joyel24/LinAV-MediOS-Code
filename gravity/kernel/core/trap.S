@@ -63,10 +63,12 @@ trap_addrexcptn_loop:
     b      trap_addrexcptn_loop    
 .align 5
 __trap_addrexcptn_ptr:  .word do_trap_addrexcptn
-    
-.align	5
+
+.align	8
 .global trap_irq
 trap_irq:
+@	subs pc, r14, #4
+
 	stmdb sp!, {r0, r1, r2} @// Store temp registers...
 	mrs r1, cpsr            @// Remember current CPU state...
 	orr r1, r1, #0xC0
@@ -90,13 +92,14 @@ trap_irq:
 	ldmia sp!, {r0, r1, r2} @// Load temp user registers back...
 	stmdb r12!, {r0, r1, r2}@// Store user registers in user stack...
 	stmdb r12!, {r4}        @// Store user SPSR...
-	ldr r1, .LCactive       @// r1 contains now address of active TCB...
+	ldr r1, g_pActiveTask   @// r1 contains now address of active TCB...
 	str r12, [r1]           @// User's top of stack stored in TCB...
 
+	MSR CPSR_c, #0x92
 	bl kset_next_ready_task
 	bl __irq_trap
 
-	ldr r1, .LCactive       @// r1 = address of new active TCB...
+	ldr r1, g_pActiveTask   @// r1 = address of new active TCB...
 	ldr r12, [r1]           @// Get user's top of stack from TCB...
 	ldmia r12!, {r4}        @// Get user SPSR...
 	msr spsr_cfsx, r4
@@ -106,7 +109,9 @@ trap_irq:
 	ldmia sp!, {r0-r12, lr, pc}^
 
 .align 5
-.LCactive:	 .word g_pActiveTask
+.global g_pActiveTask
+g_pActiveTask:
+	.byte 0, 0, 0, 0
 
 .align	5
 .global trap_fiq
@@ -198,14 +203,6 @@ avFIQout:
 
 .align	5
 __irq_trap:
-    sub     sp, sp, #72
-    stmia   sp, {r0 - r12}			@ save r0 - r12
-    ldr     r7, .LCirq
-    add     r5, sp, #72
-    ldmia   r7, {r7 - r9}
-    add     r4, sp, #52
-    mov     r6, lr
-    stmia   r4, {r5, r6, r7, r8, r9}	@ save sp_SVC, lr_SVC, pc, cpsr, old_ro
     ldr     r0, =0x30506    
     ldrh    r0, [r0]
     mov     r0, r0, lsl  #16
@@ -227,16 +224,6 @@ irqsearch2:                                          @ EQ will be set if we reac
     @
     @ routine called with r0 = irq number, r1 = struct pt_regs *
     @
-    adrne   lr, __irq_svc1
+
     bne     do_IRQ
-__irq_svc1:
-    ldr     r0, [sp, #64]		@ irqs are already disabled
-    msr     spsr, r0
-    ldmia   sp, {r0 - pc}^			@ load r0 - pc, cpsr
-
-.align	5
-.LCirq:		.word	__temp_irq                
-
-__temp_irq:	.word	0				@ saved lr_irq
-		.word	0				@ saved spsr_irq
-		.word	-1				@ old_r0
+    mov pc, lr

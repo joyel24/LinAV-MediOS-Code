@@ -16,7 +16,7 @@
 #include <kernel/threads.h>
 #include <kernel/errors.h>
 
-TASK_INFO* g_pActiveTask  __IRAM_DATA = 0; // pointer to current element in ring list
+//TASK_INFO* g_pActiveTask  __IRAM_DATA = 0; // pointer to current element in ring list
 TASK_INFO* g_pBlockedTask __IRAM_DATA = 0; // pointer to current element in ring list
 
 __IRAM_CODE void* kmalloc (int nBytes)
@@ -170,5 +170,9 @@ __IRAM_CODE TASK_INFO* kremove_tcb  (TASK_INFO** pList)
 
 __IRAM_CODE void kset_next_ready_task ()
 {
-	g_pActiveTask = g_pActiveTask->pNextTask;
+    g_pActiveTask = g_pActiveTask->pNextTask;
+
+    printk("CURRENT TCB: %s\n", g_pActiveTask->cName);
+
+    asm volatile ("MSR CPSR_c, #0x92");
 }
