@@ -1,3 +1,16 @@
+/*
+* ls-gui.c
+*
+* linav - http://linav.sourceforge.net
+* Copyright (c) 2004 by Christophe THOMAS
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*
+*/
+
 #include   <stdlib.h>
 #include   <stdarg.h>
 #include   <stdio.h>
@@ -6,6 +19,7 @@
 
 #include   "graphics.h"
 #include   "events.h"
+#include   "colordef.h"
 
 #include "cops.h"
 #include "avevents.h"
@@ -52,6 +66,67 @@ struct dir_entry {
 struct dir_entry * list;
 int                listused;
 
+unsigned char upArrow[9][9] =
+    { {19,19,19,19,02,19,19,19,19},
+      {19,19,19,02,02,02,19,19,19},
+      {19,19,02,19,02,19,02,19,19},
+      {19,02,19,19,02,19,19,02,19},
+      {19,19,19,19,02,19,19,19,19},
+      {19,19,19,19,02,19,19,19,19},
+      {19,19,19,19,02,19,19,19,19},
+      {19,19,19,19,02,19,19,19,19},
+      {19,19,19,19,02,19,19,19,19},
+    };
+    
+unsigned char dwArrow[9][9] =
+    { {19,19,19,19,02,19,19,19,19},
+      {19,19,19,19,02,19,19,19,19},
+      {19,19,19,19,02,19,19,19,19},
+      {19,19,19,19,02,19,19,19,19},
+      {19,19,19,19,02,19,19,19,19},
+      {19,02,19,19,02,19,19,02,19},
+      {19,19,02,19,02,19,02,19,19},
+      {19,19,19,02,02,02,19,19,19},
+      {19,19,19,19,02,19,19,19,19},
+    };
+    
+BITMAP upBitmap = {(unsigned int) upArrow, 9, 9, 0, 0};
+BITMAP dwBitmap = {(unsigned int) dwArrow, 9, 9, 0, 0};
+
+#define UP_ARROW     0
+#define DOWN_ARROW   1
+
+void showArrow(int type)
+{
+    int h=0,w=0;
+    cops->getStringS("M", &w, &h);
+    
+    switch(type)
+    {
+        case UP_ARROW:
+            cops->drawBITMAP(&upBitmap,310,h+MENU_SHADOW+1+6);
+            break;
+        case DOWN_ARROW:
+            cops->drawBITMAP(&dwBitmap,310,240-10);
+            break;
+    }
+}
+
+void hideArrow(int type)
+{
+    int h=0,w=0;
+    cops->getStringS("M", &w, &h);
+    
+    switch(type)
+    {
+        case UP_ARROW:
+            cops->fillRect(COLOR_WHITE,310,h+MENU_SHADOW+1+6,9,9);
+            break;
+        case DOWN_ARROW:
+            cops->fillRect(COLOR_WHITE,310,240-10,9,9);
+            break;
+    }
+}
 
 int ini_lists(void)
 {
@@ -257,7 +332,7 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
         color=BLACK;
 
     if(clear)
-        cops->fillRect(WHITE,x, y , 315, h+1);
+        cops->fillRect(WHITE,x, y , 3055, h+1);
 
     if(selected)
         cops->putS(color, BLUE,x, y, dEntry->name);
@@ -458,15 +533,20 @@ int eventHandler(int evt)
     {
         case BTN_UP:
             nselect--;
+            if(listused>MAXPOS)
+                    showArrow(DOWN_ARROW);
+                    
             if(nselect<0)
             {
                 nselect=0;
-                pos--;
+                pos--;                
                 if(pos<0) // we are at the beg => can't go up anymore
+                {
                     pos=0;
+                }
                 else // not going up, scrolling
                 {
-                    cops->scrollWindowVert(WHITE, 5, 2  + h+6+MENU_SHADOW, 315, (h+1)*MAXPOS, h+1,0);
+                    cops->scrollWindowVert(WHITE, 5, 1  + h+6+MENU_SHADOW, 305, (h+1)*MAXPOS, h+1,0);
                     printAName(pos+nselect+1,nselect+1,1,0);
                     printAName(pos+nselect,nselect,1,1);
                 }
@@ -476,8 +556,14 @@ int eventHandler(int evt)
                 printAName(pos+nselect+1,nselect+1,0,0);
                 printAName(pos+nselect,nselect,0,1);
             }
+            
+            if(pos == 0 && nselect == 0)
+                hideArrow(UP_ARROW);
+            
             break;
         case BTN_DOWN:
+            if(listused>MAXPOS)
+                    showArrow(UP_ARROW);
             nselect++;
             if(nselect+pos>=listused)
                 nselect--;
@@ -486,10 +572,12 @@ int eventHandler(int evt)
                 nselect=MAXPOS-1;
                 pos++;
                 if(pos>=(listused-MAXPOS)) // we are at the end => can't go down anymore
+                {
                     pos=listused-MAXPOS-1;
+                }
                 else // not going down, scrolling
                 {
-                    cops->scrollWindowVert(WHITE, 5, 2  + h+6+MENU_SHADOW, 315, (h+1)*MAXPOS, h+1,1);
+                    cops->scrollWindowVert(WHITE, 5, 1  + h+6+MENU_SHADOW, 305, (h+1)*MAXPOS, h+1,1);
                     printAName(pos+nselect-1,nselect-1,1,0);
                     printAName(pos+nselect,nselect,1,1);
                 }
@@ -499,6 +587,9 @@ int eventHandler(int evt)
                 printAName(pos+nselect-1,nselect-1,0,0);
                 printAName(pos+nselect,nselect,0,1);
             }
+            
+            if(pos==(listused-MAXPOS-1) && nselect==(MAXPOS-1))
+                hideArrow(DOWN_ARROW);
             break;
         case BTN_RIGHT:
             if(chdir(list[pos+nselect].name)<0)
@@ -511,14 +602,18 @@ int eventHandler(int evt)
                     listused = 0;
                     return -1;
                 }
+                hideArrow(DOWN_ARROW);
+                hideArrow(UP_ARROW);
+                if(listused>MAXPOS)
+                    showArrow(DOWN_ARROW);
                 pos=0;
                 nselect=0;
-                cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
+                cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,(h+1)*MAXPOS);
                 printAllName(pos,nselect);
                 //cops->clearEventQueue();
             }
             break;
-        case BTN_LEFT:
+        case BTN_LEFT:            
             if(chdir("../")<0)
                 break;
             cleanList();
@@ -529,7 +624,11 @@ int eventHandler(int evt)
             }
             pos=0;
             nselect=0;
-            cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
+            cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,(h+1)*MAXPOS);
+            hideArrow(DOWN_ARROW);
+            hideArrow(UP_ARROW);
+            if(listused>MAXPOS)
+                showArrow(DOWN_ARROW);
             printAllName(pos,nselect);
             //cops->clearEventQueue();
             break;
@@ -538,7 +637,7 @@ int eventHandler(int evt)
             RELEASE(cops)
             break;
         case EVT_REDRAW:
-            cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,225);
+            cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 305,225);
             printAllName(pos,nselect);
             break;
     }
@@ -570,6 +669,9 @@ int main(int argc,char * * argv)
         cops->getStringS("M", &w, &h);
         cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,240-h-6-MENU_SHADOW);
         printAllName(pos,nselect);
+        
+        if(listused>MAXPOS)
+            showArrow(DOWN_ARROW);
 
         PACK(cops);
         
