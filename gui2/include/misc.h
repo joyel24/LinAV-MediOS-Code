@@ -28,6 +28,15 @@ int   get_mouseRepeat   ();
 int   set_lcd_TimeOutParam  (int state, int value);
 int   get_lcd_TimeOutParam  (int state);
 
+int   set_hd_TimeOutParam(int state, int value);
+int   get_hd_TimeOutParam(int state);
+
+int   set_halt_TimeOutParam(int state, int value);
+int   get_halt_TimeOutParam(int state);
+
+int   setBrightness(int val);
+int   getBrightness(void);
+
 int   getBat            (void);
 
 int   getPwr            (void);

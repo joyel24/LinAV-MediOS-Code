@@ -143,7 +143,7 @@ int fmIsConnected(void)
 
 int fmSetBat(int val)
 {
-    doGenIoctl("/dev/avfm",AV_FM_SET_BAT,&val,"Error setting bat. level on FM\n");    
+    doGenIoctl("/dev/avfm",AV_FM_SET_BAT,&val,"Error setting bat. level on FM\n");
     return 1;
 }
 
@@ -222,12 +222,12 @@ int fmSetFreq(float freq)
 }
 
 int set_lcd_TimeOutParam(int state, int value)
-{   
+{
     struct timer_val param;
     param.num = state;
-    param.val = value;    
-    doGenIoctl("/dev/avstate",AV_LCD_SET_TIMOUT,&param,"Error setting lcd timeout\n");  
-    //printf("SET lcd timeout : %d\n", param.val);  
+    param.val = value;
+    doGenIoctl("/dev/avstate",AV_LCD_SET_TIMOUT,&param,"Error setting lcd timeout\n");
+    //printf("SET lcd timeout : %d\n", param.val);
     return 1;
 }
 
@@ -235,8 +235,8 @@ int get_lcd_TimeOutParam(int state)
 {
     struct timer_val param;
     param.num = state;
-    param.val = 0;    
-    doGenIoctl("/dev/avstate",AV_LCD_GET_TIMOUT,&param,"Error getting lcd timeout\n");   
+    param.val = 0;
+    doGenIoctl("/dev/avstate",AV_LCD_GET_TIMOUT,&param,"Error getting lcd timeout\n");
     //printf("GET lcd timeout : %d\n", param.val);
     return param.val;
 }
@@ -272,4 +272,57 @@ int gen_ioctl(char * dev_name, int ioctl_cmd,void * param)
     }
     close(fd);
     return 0;
+}
+
+int set_hd_TimeOutParam(int state, int value)
+{
+    struct timer_val param;
+    param.num = state;
+    param.val = value;
+    doGenIoctl("/dev/avstate",AV_HD_SET_TIMOUT,&param,"Error setting hd timeout\n");
+    //printf("SET lcd timeout : %d\n", param.val);
+    return 1;
+}
+
+int get_hd_TimeOutParam(int state)
+{
+    struct timer_val param;
+    param.num = state;
+    param.val = 0;
+    doGenIoctl("/dev/avstate",AV_HD_GET_TIMOUT,&param,"Error getting hd timeout\n");
+    //printf("GET lcd timeout : %d\n", param.val);
+    return param.val;
+}
+
+int set_halt_TimeOutParam(int state, int value)
+{
+    struct timer_val param;
+    param.num = state;
+    param.val = value;
+    doGenIoctl("/dev/avstate",AV_HALT_SET_TIMOUT,&param,"Error setting halt timeout\n");
+    //printf("SET lcd timeout : %d\n", param.val);
+    return 1;
+}
+
+int get_halt_TimeOutParam(int state)
+{
+    struct timer_val param;
+    param.num = state;
+    param.val = 0;
+    doGenIoctl("/dev/avstate",AV_HALT_GET_TIMOUT,&param,"Error getting halt timeout\n");
+    //printf("GET lcd timeout : %d\n", param.val);
+    return param.val;
+}
+
+int getBrightness(void)
+{
+    int val;
+    doGenIoctl("/dev/avstate",AV_LCD_GET_BRIGHT,&val,"Error getting brightness\n");
+    return val;
+}
+
+int setBrightness(int val)
+{
+    doGenIoctl("/dev/avstate",AV_LCD_SET_BRIGHT,&val,"Error setting brightness\n");
+    return 1;
 }
