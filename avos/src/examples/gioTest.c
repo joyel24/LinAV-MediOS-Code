@@ -14,6 +14,7 @@ struct graphicsBuffer sprite5_8 = {0, 1, 5, 8, 1, 0, -1, 0, 0, 0, 0, (int**) &pa
 
 int main() {
     unsigned int a,b,c,d;
+    int cursor=0;
     
     osdInitA();
 
@@ -48,6 +49,11 @@ int main() {
         d = gioGetAllInvertsA();
         
         for (a=0;a<16;a++) {
+            if (cursor==a) {
+                pal[0] = 0x0404;
+            } else {
+                pal[0] = 0x0000;
+            }
             stringPutHexA(hex2, a, 2);
             graphicsStringA(&screenBitmap, 0, 10 + (a*9), &sprite5_8, std5x8_, 5, 0, hex2);
             b = gioGetBitA(a);
@@ -66,6 +72,11 @@ int main() {
             graphicsStringA(&screenBitmap, 50, 10 + (a*9), &sprite5_8, std5x8_, 5, 0, hex2);
             //
             //
+            if (cursor==(a+16)) {
+                pal[0] = 0x0404;
+            } else {
+                pal[0] = 0x0000;
+            }
             stringPutHexA(hex2, a+16, 2);
             graphicsStringA(&screenBitmap, 160, 10 + (a*9), &sprite5_8, std5x8_, 5, 0, hex2);
             b = gioGetBitA(a+16);
@@ -85,6 +96,24 @@ int main() {
         
         }
 
-        if (buttonsGetStatusA() & BUTTONS_AV300_MENU1) return;
+        a = buttonsGetStatusA();
+        if (a & BUTTONS_AV300_UP) {
+            if (cursor>0) cursor--;
+        } else if (a & BUTTONS_AV300_DOWN) {
+            if (cursor<31) cursor++;    
+        } else if (a & BUTTONS_AV300_LEFT) {
+            gioClearBitA(cursor);    
+        } else if (a & BUTTONS_AV300_RIGHT) {
+            gioSetBitA(cursor);                
+        } else if (a & BUTTONS_AV300_MENU1) {
+            b = gioGetAllDirections();
+            b ^= (1<<cursor);
+            gioSetAllDirections(b);
+        } else if (a & BUTTONS_AV300_MENU2) {
+            b = gioGetAllInverts();
+            b ^= (1<<cursor);
+            gioSetAllInverts(b);
+        }
+        if (a & BUTTONS_AV300_MENU3) return;
     }
 }
