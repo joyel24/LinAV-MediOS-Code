@@ -36,6 +36,8 @@ extern struct plugin edit_box_plugin;
 #define true  1
 #define false 0
 
+#define MAX_EDITTIMER 2
+
 needFont(std6x9);
 needFont(std7x13);
 
@@ -51,6 +53,7 @@ int fUpKey = false;
 int fDownKey = false;
 int fValidEntry = false;
 int indexChar = 0;
+int cntTimer = 0;
 
 int freq = 0;
 int repeat = 0;
@@ -86,6 +89,10 @@ void editBoxEvtHandler(int evt)
 
     switch(evt)
     {
+        case EVT_TIMER:
+            cntTimer++;
+            break;
+
         case BTN_ON:
             break;
 
@@ -99,14 +106,20 @@ void editBoxEvtHandler(int evt)
             setPlane(BMAP2);
             setFont(std6x9);
 
-            fDownKey = false;
+            if(fDownKey == true)
+            {
+                set_mouseParam(6,3);
+			    fDownKey = false;
+                cntTimer = 0;
+            }
+
             fValidEntry = true;
 
             current_ascii = NextAscii(current_ascii); // definierte Reihenfolge
 
             // Faster up and down
 
-			if(fUpKey == true)
+			if((fUpKey == true) && (cntTimer >= MAX_EDITTIMER))
                 set_mouseParam(6,0);
 			else
                 set_mouseParam(6,3);
@@ -117,14 +130,23 @@ void editBoxEvtHandler(int evt)
             break;
 
         case BTN_DOWN:
-			fUpKey = false;
+
+            setPlane(BMAP2);
+            setFont(std6x9);
+
+            if(fUpKey == true)
+            {
+                set_mouseParam(6,3);
+			    fUpKey = false;
+                cntTimer = 0;
+            }
 			fValidEntry = true;
 
 			current_ascii = PrevAscii(current_ascii);
 
             // Faster up and down
 
-			if(fDownKey == true)
+			if((fDownKey == true) && (cntTimer >= MAX_EDITTIMER))
                 set_mouseParam(6,0);
 			else
                 set_mouseParam(6,3);
@@ -138,6 +160,7 @@ void editBoxEvtHandler(int evt)
             fUpKey = false;
             fDownKey = false;
             fValidEntry = true;
+            cntTimer = 0;
 
             // ToDo: Add scrolling
 
@@ -161,6 +184,7 @@ void editBoxEvtHandler(int evt)
             fUpKey = false;
             fDownKey = false;
             fValidEntry = true;
+            cntTimer = 0;
 
             if(indexChar+1 < MAX_EDIT_CHARS-1)
             {
@@ -190,8 +214,6 @@ void editBoxEvtHandler(int evt)
             break;
 
         default:
-            fUpKey = false;
-            fDownKey = false;
             break;
     }
 }
