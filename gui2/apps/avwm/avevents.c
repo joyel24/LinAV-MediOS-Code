@@ -61,7 +61,7 @@ void eventLoop()
                 case NO_APP:
                     break;
                 case APP_MP3:
-                    loadPlugin("/mnt/avwm/plugins/play",NULL);
+                    loadPlugin("/mnt/avwm/plugins/play",nxt_action.arg);
                     menu_plugin.handle_on=0;
                     break;
             }

@@ -788,16 +788,16 @@ int eventHandler(int evt)
 
 int main(int argc, char * * argv)
 {
-    /*if(argc<2)
+   if(argc<2)
        return 0; 
     else
     {
         filename=argv[1];
-    }*/
+    }
     
     fprintf(stderr,"In play: %s\n",filename);
         
-    filename="/mnt/file.mp3";
+    //filename="/mnt/file.mp3";
     vol=70;
     wait=0;
     end=0;
