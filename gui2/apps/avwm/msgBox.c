@@ -17,6 +17,7 @@
 #include "colordef.h"
 #include "avevents.h"
 #include "events.h"
+#include "osd.h"
 
 extern struct plugin msg_box_plugin;
 
@@ -57,13 +58,19 @@ void iniMsgBox(void)
 /* draw the msg box */
 void drawMsgBox(void)
 {
-
+    // exmaple in osdtest
+    setSize(BMAP2,160,100,8);
+    setPos(BMAP2,0x14,0x13+20);
+    showPlane(BMAP2);
+    setPlane(BMAP2);
+    fillRect(COLOR_RED, 0, 0, 160, 100);
 }
 
 /* restore the previous state */
 void eraseMsgBox(void)
 {
-
+    hidePlane(BMAP2);
+    setPlane(BMAP1);
 }
 
 /* main function */

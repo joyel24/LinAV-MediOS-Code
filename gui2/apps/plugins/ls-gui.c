@@ -112,8 +112,10 @@ void do_right(void * data)
     }
     else if(strcmp((char*)data, "Delete") == 0)
     {
-        remove(list[pos+nselect].name);
-        reload = true;
+        cops->msgBox("Delete");
+
+//        remove(list[pos+nselect].name);
+//        reload = true;
     }
     else if(strcmp((char*)data, "Rename") == 0)
     {
