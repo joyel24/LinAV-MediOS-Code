@@ -23,7 +23,9 @@
 extern struct plugin edit_box_plugin;
 
 #define EDITBOX_HEIGHT 33
-#define EDITBOX_WIDTH  200
+#define EDITBOX_WIDTH  224 // must be a multiple of 32
+
+#define ASCII_DEFAULT 65
 
 needFont(std6x9);
 needFont(std7x13);
@@ -119,3 +121,87 @@ char* editBox(unsigned char* caption, unsigned char* text, int text_color, int b
     eraseEditBox();
     return strEdit;
 }
+
+void DeleteChar(char* src, char* dest, int index)
+{
+   int cnt = 0;
+    int dstindex = 0;
+
+    for( cnt = 0; cnt < strlen(src); cnt++)
+    {
+       if(cnt != index)
+        {
+          dest[dstindex] = src[cnt];
+            dstindex++;
+        }
+    }
+
+    dest[dstindex] = '\0';
+}
+
+// Bereiche in folgender Reihenfolge:
+// 33-44 Sonderzeichen
+// 58-63 Sonderzeichen
+// 91-96 Sonderzeichen
+// 123-126 Sonderzeichen
+// 45-57 Zahlen
+// 32 Space
+// 64-90 Grossbuchstaben
+// 97-122 Kleinbuchstaben
+// 192-255 Erweiterter Zeichensatz
+int NextAscii(int lastAscii)
+{
+   int ascii = ASCII_DEFAULT;
+
+   if(lastAscii == 32) // Space
+      ascii = 64; // auf @ und Grossbuchstaben springen
+    else if(lastAscii == 90)
+      ascii = 97;
+    else if(lastAscii == 122)
+       ascii = 192;
+    else if(lastAscii == 255)
+      ascii = 33;
+    else if(lastAscii == 44)
+       ascii = 58;
+    else if(lastAscii == 63)
+      ascii = 91;
+    else if(lastAscii == 96)
+      ascii = 123;
+    else if(lastAscii == 126)
+      ascii = 45;
+    else if(lastAscii == 57)
+      ascii = 32;
+    else
+      ascii = lastAscii+1;
+
+    return ascii;
+}
+
+int PrevAscii(int lastAscii)
+{
+   int ascii = ASCII_DEFAULT;
+
+   if(lastAscii == 33)
+       ascii = 255;
+    else if(lastAscii == 192)
+      ascii = 122;
+    else if(lastAscii == 97)
+       ascii = 90;
+    else if(lastAscii == 64)
+      ascii = 32;
+    else if(lastAscii == 32)
+      ascii = 57;
+    else if(lastAscii == 45)
+      ascii = 126;
+    else if(lastAscii == 123)
+      ascii = 96;
+    else if(lastAscii == 91)
+      ascii = 63;
+    else if(lastAscii == 58)
+      ascii = 44;
+    else
+      ascii = lastAscii-1;
+
+    return ascii;
+}
+
