@@ -84,7 +84,7 @@ void new_mp3_window(char *filename)
 	}
 
 	sprintf(tmp, "%s/linwin",PATH);
-	execl(tmp, "linwin", 1);
+	execl(tmp, "linwin", "1");
 	fprintf(stderr, "Cannot restart linwin!\n");
 	exit(1);
 }
