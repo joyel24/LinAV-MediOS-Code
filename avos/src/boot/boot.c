@@ -1,7 +1,9 @@
+#include "string.h"
+
 #include <ata.h>
 #include <fat.h>
 #include <uart.h>
-#include <string.h> 
+#include <file.h>
 #include <graphics.h>
 #include <osdDSC25.h>
 #include <buttons.h>
@@ -14,6 +16,14 @@
 #include <debug.h>
 
 int launchFile(char * fileN);
+int readTxt(char * fileN);
+
+int (*action[])(char * name) ={launchFile,readTxt};
+char * ext[]={"BIN","TXT"};
+int nbExt=2;
+
+
+int exeFile(char * fileN, char * arg);
 void (*codeCaller)(int argc, char * argv[])=(void (*)(int argc, char * argv[]))0x03000000;
 
 static int pal32[2] = {0x8080c0e0, 0xffffffff};
@@ -30,16 +40,11 @@ struct dispDir {
 	int attr;
 	char ext[4];
 };
-
 struct dispDir dirBuffer[10000];
-
-	int (*action[])(char * name) ={launchFile};
-	char * ext[]={"BIN"};
-	int nbExt=1;
 
 struct tm* ourTime;
 char timeSt[] = "xx:xx:xx.xx";
-    
+
 char powerSt[] = "xxxx+";
 
 int main() {
@@ -49,7 +54,7 @@ int main() {
     int c, b, i, totalEntries;
     int cursorpos=0;
     int dirpos=0;
-    unsigned int cluster=0, pcluster=0, parent=0;
+    unsigned int cluster=0, parent=0;
     int loopDelay = 0xc000;
     int source = 0;             // 0 = HDD, 1 = memCard
     int mode = 0;               // 0 = normal, 1 = usb
@@ -152,7 +157,7 @@ startInit:
 	for(i=0;i<4;i++)
 		printPartInfo(i);
 
-    fatHD = fatInit_info(getPartition(0));
+    fatHD = fatInit(getPartition(0));
 	debug("[fatTest.c] fatInit returned = %d\n",fatHD);
 
 	char nameCur[MAX_PATH]="/";
@@ -170,9 +175,14 @@ startInit:
 			}
 
 			int i=0;
+			int len;
 			while((entry=readdir(dir))!=NULL && i<20)
 			{
 				strcpy(dirBuffer[i].name,entry->entryName);
+
+				for(len=strlen(dirBuffer[i].name);len<11;len++)
+					dirBuffer[i].name[len]=' ';
+				dirBuffer[i].name[len]=0x0;
 				strcpy(dirBuffer[i].ext,entry->ext);
 				dirBuffer[i].attr=entry->attribute;
 				i++;
@@ -241,7 +251,8 @@ startInit:
             pal16[1] = 0xffff;
             graphicsStringA(&screenBitmap2, 4 + 35*6, 2, &sprite5_7, std5x7_, 6, 0,
                         powerSt);
-                       
+
+
             // Update file display window if needed,
             
             if (mode==0 && cursorMoved==1) {
@@ -260,6 +271,14 @@ startInit:
                     graphicsStringA(&screenBitmap, 3, 3 + c*8, &sprite5_7, std5x7_, 5, 0,
                         dirBuffer[dirpos+c].name);
                 }
+
+				pal16[1] = 0xffff;
+				pal16[0] = 0x1414;
+
+				for(;c<16;c++)
+					graphicsStringA(&screenBitmap, 3, 3 + c*8, &sprite5_7, std5x7_, 5, 0,
+                        "           ");
+
                 cursorMoved=0;
             }
                 
@@ -425,7 +444,7 @@ startInit:
 						for(i=0;i<4;i++)
 							printPartInfo(i);
 
-						fatCF = fatInit_info(getPartition(0));
+						fatCF = fatInit(getPartition(0));
 						debug("[fatTest.c] fatInit returned = %d\n",fatCF);
 						if(fatCF>=0)
 							selectFat(fatCF);
@@ -466,18 +485,39 @@ startInit:
 
 int launchFile(char * fileN)
 {
-	debug("loading:|%s|\n",fileN);
+	return exeFile(fileN,NULL);
+}
+
+int readTxt(char * fileN)
+{
+	if(!exeFile("/TXTREAD.BIN",fileN))
+		debug("[readTxt] error launching /TXTREAD.BIN %s\n",fileN);
+	return 1;
+}
+
+// general launching function
+
+int exeFile(char * fileN, char * arg)
+{
 	if(loadFile(fileN))
 	{
-		debug("File loaded at %x\n",0x03000000);
-
 		char * argv[MAX_PATH];
-		argv[0]=fileN;
 
-		codeCaller(1,argv);
+		int argc=1;
+
+		argv[0]=fileN;
+		if(arg!=NULL)
+		{
+			argv[1]=arg;
+			argc++;
+		}
+
+		codeCaller(argc,argv);
 		return 1;
 	}
 	else
 		return 0;
 
 }
+
+
