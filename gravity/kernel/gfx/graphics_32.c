@@ -14,7 +14,25 @@
 #include <sys_def/string.h>
 
 #include <kernel/graphics.h>
-#include <kernel/graphics_32.h>
+
+void         graphics32_DrawPixel         (unsigned int color, int x, int y, struct graphicsBuffer * buff);
+unsigned int graphics32_ReadPixel         (int x, int y, struct graphicsBuffer * buff);
+void         graphics32_DrawRect          (unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
+void         graphics32_FillRect          (unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
+void         graphics32_DrawChar          (struct graphicsFont * font, unsigned int color,unsigned int bg_color, int x, int y,
+                                                unsigned char c, struct graphicsBuffer * buff);
+void         graphics32_DrawSprite        (PALETTE * palette, SPRITE * sprite, unsigned int trsp,int x, int y,
+                                                struct graphicsBuffer * buff);
+void         graphics32_DrawBITMAP        (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+void         graphics32_ScrollWindowVert  (unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP,
+                                                struct graphicsBuffer * buff);
+void         graphics32_ScrollWindowHoriz (unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT,
+                                                struct graphicsBuffer * buff);
+void         graphics32_DrawHLine         (unsigned int color, int x, int y, int width, struct graphicsBuffer * buff);
+void         graphics32_DrawVLine         (unsigned int color, int x, int y, int height, struct graphicsBuffer * buff);
+void         graphics32_DrawHorizLine (unsigned int color, int width,unsigned int * offset);
+void         graphics32_DrawString    (struct graphicsFont * font, unsigned int color,unsigned int bg_color, int x, int y,
+                                            unsigned char * s, struct graphicsBuffer * buff);
 
 struct graphics_operations g32ops =  {
 	drawPixel         : graphics32_DrawPixel,

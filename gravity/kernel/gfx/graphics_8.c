@@ -14,7 +14,25 @@
 #include <sys_def/string.h>
 
 #include <kernel/graphics.h>
-#include <kernel/graphics_8.h>
+
+void         graphics8_DrawPixel         (unsigned int color, int x, int y, struct graphicsBuffer * buff);
+unsigned int graphics8_ReadPixel         (int x, int y, struct graphicsBuffer * buff);
+void         graphics8_DrawRect          (unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
+void         graphics8_FillRect          (unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
+void         graphics8_DrawChar          (struct graphicsFont * font, unsigned int color,unsigned int bg_color, int x, int y,
+                                            unsigned char c, struct graphicsBuffer * buff);
+void         graphics8_DrawSprite        (PALETTE * palette, SPRITE * sprite, unsigned int trsp,int x, int y, 
+                                            struct graphicsBuffer * buff);
+void         graphics8_DrawBITMAP        (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+void         graphics8_ScrollWindowVert  (unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP,
+                                            struct graphicsBuffer * buff);
+void         graphics8_ScrollWindowHoriz (unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT,
+                                            struct graphicsBuffer * buff);
+void         graphics8_DrawHLine         (unsigned int color, int x, int y, int width, struct graphicsBuffer * buff);
+void         graphics8_DrawVLine         (unsigned int color, int x, int y, int height, struct graphicsBuffer * buff);
+void         graphics8_DrawHorizLine (unsigned int color, int width,unsigned char * offset);
+void         graphics8_DrawString    (struct graphicsFont * font, unsigned int color,unsigned int bg_color, int x, int y,
+                                            unsigned char * s, struct graphicsBuffer * buff);
 
 struct graphics_operations g8ops =  {
 	drawPixel         : graphics8_DrawPixel,
