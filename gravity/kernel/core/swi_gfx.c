@@ -441,8 +441,8 @@ __IRAM_CODE int swi_gfx_handler (
 		{
 			GFX_POINT* pt1 = (GFX_POINT*)nParam1;
 			GFX_POINT* pt2 = (GFX_POINT*)nParam2;
-//			graphics32_DrawLine (nParam3, pt1->x, pt1->y, pt2->x, pt2->y, pCtx);
-			graphics32_DrawAALine (pCtx, pt1->x, pt1->y, pt2->x, pt2->y, 255, nParam3, 1);
+			graphics32_DrawLine (nParam3, pt1->x, pt1->y, pt2->x, pt2->y, pCtx);
+//			graphics32_DrawAALine (pCtx, pt1->x, pt1->y, pt2->x, pt2->y, 255, nParam3, 1);
 		}
 	}
 	break;
@@ -487,20 +487,19 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_SET_FONT:             //(HFONT hFont);
 	{
-		__cli ();
-		g_pTaskRing->pFont = nParam1;
-		__sti ();
+		lock_task()->pFont = nParam1;
 	}
 	break;
 
 	case nAPI_GET_FONT:             //(HFONT* phFont);
 	{
+		*((FONT_HEADER**)nParam1) = lock_task()->pFont;
 	}
 	break;
 
 	case nAPI_TEXT:                 //(const char* pszText, int x, int y);
 	{
-		printk ("We are inside nAPI_TEXT...\n");
+//		printk ("We are inside nAPI_TEXT...\n");
 
 		TASK_INFO* pTask = lock_task ();
 		if (!pTask->pFont)
@@ -590,7 +589,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_SET_FONT_COLOR:       //(COLOR nColor)                                                     { swi_call(nAPI_SET_FONT_COLOR); }
 	{
-		lock_task ()->nFontColor = nParam1;
+		lock_task()->nFontColor = nParam1;
 	}
 	break;
 

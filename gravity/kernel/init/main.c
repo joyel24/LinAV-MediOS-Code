@@ -49,6 +49,7 @@
 #include <kernel/config.h>
 
 #include <sys_def/file.h>
+#include <sys_def/colordef.h>
 
 extern char screen_VID2 [320 * 240 *4 + 40];
 
@@ -70,6 +71,80 @@ extern int kmemory_manager (void* pvParameters);
 extern void API_BKT(void);
 
 #if 1
+
+int seed = 1;
+int random ()
+{
+	seed *= 0x000343FD;
+	seed += 0x00269EC3;
+	return (seed >> 10) & 0x7FFF;
+}
+
+void SetSkin (int w, int h)
+{
+	TASK_INFO* pTI = 0;
+	API_TASK_GETHANDLE (&pTI);
+
+	pTI->pRegionLeft = 0;
+	API_MALLOC (&pTI->pRegionLeft, h * 4);
+	pTI->pRegionRight = 0;
+	API_MALLOC (&pTI->pRegionRight, h * 4);
+
+	int i;
+	for (i=0;i<h;i++)
+	{
+		pTI->pRegionLeft[i]  = 0;
+		pTI->pRegionRight[i] = 0;
+	}
+
+	pTI->pRegionLeft[0] = pTI->pRegionRight[0] = 9;
+	pTI->pRegionLeft[1] = pTI->pRegionRight[1] = 6;
+	pTI->pRegionLeft[2] = pTI->pRegionRight[2] = 4;
+	pTI->pRegionLeft[3] = pTI->pRegionRight[3] = 3;
+	pTI->pRegionLeft[4] = pTI->pRegionRight[4] = 2;
+	pTI->pRegionLeft[5] = pTI->pRegionRight[5] = 2;
+	pTI->pRegionLeft[6] = pTI->pRegionRight[6] = 1;
+	pTI->pRegionLeft[7] = pTI->pRegionRight[7] = 1;
+	pTI->pRegionLeft[8] = pTI->pRegionRight[8] = 1;
+
+	pTI->pRegionLeft[h-1-0] = pTI->pRegionRight[h-1-0] = 9;
+	pTI->pRegionLeft[h-1-1] = pTI->pRegionRight[h-1-1] = 6;
+	pTI->pRegionLeft[h-1-2] = pTI->pRegionRight[h-1-2] = 4;
+	pTI->pRegionLeft[h-1-3] = pTI->pRegionRight[h-1-3] = 3;
+	pTI->pRegionLeft[h-1-4] = pTI->pRegionRight[h-1-4] = 2;
+	pTI->pRegionLeft[h-1-5] = pTI->pRegionRight[h-1-5] = 2;
+	pTI->pRegionLeft[h-1-6] = pTI->pRegionRight[h-1-6] = 1;
+	pTI->pRegionLeft[h-1-7] = pTI->pRegionRight[h-1-7] = 1;
+	pTI->pRegionLeft[h-1-8] = pTI->pRegionRight[h-1-8] = 1;
+
+	API_GFX_CREATE_CONTEXT (w, h, 0);
+
+	GFX_RECT rc;
+	rc.x = 0;
+	rc.y = 0;
+	rc.w = w;
+	rc.h = h;
+
+	API_GFX_FILLRECT (&rc, random());
+
+/*
+	switch (random()%5)
+	{
+		case 0: API_GFX_FILLRECT (&rc, COLOR32_BLACK); break;
+		case 1: API_GFX_FILLRECT (&rc, COLOR32_RED); break;
+		case 2: API_GFX_FILLRECT (&rc, COLOR32_BLUE); break;
+		case 3: API_GFX_FILLRECT (&rc, COLOR32_GREEN); break;
+		case 4: API_GFX_FILLRECT (&rc, COLOR32_ORANGE); break;
+	}
+*/
+
+	rc.x = 3;
+	rc.y = 3;
+	rc.w = w-6;
+	rc.h = h-6;
+	API_GFX_SET_DRAWING_RECT (&rc);
+}
+
 typedef struct _SDBG
 {
 	GFX_POINT ptOrig;
@@ -77,15 +152,34 @@ typedef struct _SDBG
 	int nDelay;
 	int nStep;
 } SDBG;
+
 void win_thread (GFX_RECT* rc)
 {
-	API_GFX_CREATE_CONTEXT (rc->w, rc->h, 0);
+	SetSkin (rc->w, rc->h);
+//	API_GFX_CREATE_CONTEXT (rc->w, rc->h, 0);
+
 	GFX_POINT pt;
 	pt.x = rc->x;
 	pt.y = rc->y;
 	API_GFX_MOVE (&pt);
+
 	while (1)
-		API_TASK_SLEEP (10000);
+	{
+		API_TASK_SLEEP (50);
+
+		int i;
+		for (i=0;i<50;i++)
+		{
+			GFX_POINT pt1, pt2;
+			pt1.x = random() % rc->w;
+			pt1.y = random() % rc->h;
+			pt2.x = random() % rc->w;
+			pt2.y = random() % rc->h;
+			API_GFX_DRAWLINE (&pt1, &pt2, random());
+		}
+
+		API_GFX_UPDATE_RECT (0);
+	}
 }
 
 void debug_thread (SDBG* pS)
@@ -100,10 +194,20 @@ void debug_thread (SDBG* pS)
 	printk("*** debug_thread *** [CPSR:%08x, R12:%08x, SP:%08x, LR:%08x]\n", _r7, _r12, _r13, _r8);
 	__sti ();
 
-	API_GFX_CREATE_CONTEXT (pS->w, pS->h, 0);
+	SetSkin (pS->w, pS->h);
+//	API_GFX_CREATE_CONTEXT (pS->w, pS->h, 0);
 
 	TASK_INFO* pTask = 0;
 	API_TASK_GETHANDLE (&pTask);
+
+	API_TASK_SETPRIORITY (pTask, 13);
+
+	GFX_RECT rc;
+	rc.x = 0;
+	rc.y = 0;
+	rc.w = pS->w;
+	rc.h = pS->h;
+	API_GFX_FILLRECT (&rc, COLOR32_PINK);
 
 	GFX_POINT pt;
 
@@ -111,6 +215,8 @@ void debug_thread (SDBG* pS)
 
 	while (1)
 	{
+		API_TASK_SLEEP (50);
+
 		pt.x = pS->ptOrig.x + (i%140);
 		pt.y = pS->ptOrig.y + (i%85);
 
@@ -224,7 +330,7 @@ void kernel_startup_thread (void)
     //////////////////////////////////////////////////////////
     //////////// MP3 PLAYER test
     
-    start_mp3_player("/file.mp3");
+//    start_mp3_player("/file.mp3");
     
     
     ///////////////////////////////////////////////////////////
@@ -285,9 +391,9 @@ void kernel_startup_thread (void)
 	API_TASK_CREATE (win_thread, &rc3, 0);
 
 	GFX_RECT rc4;
-	rc4.x = 0;
-	rc4.y = 0;
-	rc4.w = 100;
+	rc4.x = 5;
+	rc4.y = 25;
+	rc4.w = 110;
 	rc4.h = 100;
 	API_TASK_CREATE (win_thread, &rc4, 0);
 

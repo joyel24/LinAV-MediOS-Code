@@ -19,7 +19,7 @@
 #include <kernel/irq.h>
 #include <api.h>
 
-__IRAM_CODE KERNEL_ERROR_CODE kinit_tcb ()
+KERNEL_ERROR_CODE kinit_tcb ()
 {
 	g_pTaskRing = 0;
 
@@ -34,7 +34,7 @@ __IRAM_CODE KERNEL_ERROR_CODE kinit_tcb ()
 	return eOK;
 }
 
-__IRAM_CODE void kthread_final_trap (int nRetCode)
+void kthread_final_trap (int nRetCode)
 {
 	TASK_INFO* pTCB;
 	__cli ();
@@ -55,7 +55,7 @@ __IRAM_CODE void kthread_final_trap (int nRetCode)
 	API_TASK_TERMINATE ();
 }
 
-__IRAM_CODE void kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackSize, const char* pszTaskName)
+kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackSize, const char* pszTaskName)
 {
 	pTCB->nStackSize = nStackSize;
 	pTCB->pPrevTask  = 0;
@@ -82,7 +82,7 @@ __IRAM_CODE void kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackS
 	pTCB->pRegionRight    = 0;
 }
 
-__IRAM_CODE unsigned long* kInitialiseStack (unsigned long* pxTopOfStack, void* pvCode, void *pvParameters)
+unsigned long* kInitialiseStack (unsigned long* pxTopOfStack, void* pvCode, void *pvParameters)
 {
 	printk ("TCB stack set to %08x\n", pxTopOfStack);
 
@@ -105,7 +105,7 @@ __IRAM_CODE unsigned long* kInitialiseStack (unsigned long* pxTopOfStack, void* 
 	return pxTopOfStack;
 }
 
-__IRAM_CODE TASK_INFO* kAllocateTCBAndStack (unsigned long nStackSize)
+TASK_INFO* kAllocateTCBAndStack (unsigned long nStackSize)
 {
 	TASK_INFO* pNewTCB = (TASK_INFO*)kmalloc(sizeof(TASK_INFO));
 	if (pNewTCB)
@@ -113,7 +113,7 @@ __IRAM_CODE TASK_INFO* kAllocateTCBAndStack (unsigned long nStackSize)
 	return pNewTCB;
 }
 
-__IRAM_CODE TASK_INFO* kcreate_tcb (void* pvTaskCode, unsigned long nStackSize, void* pParams, const char* pszTaskName)
+TASK_INFO* kcreate_tcb (void* pvTaskCode, unsigned long nStackSize, void* pParams, const char* pszTaskName)
 {
 	TASK_INFO* pTCB = kAllocateTCBAndStack (nStackSize);
 	if (!pTCB)
@@ -131,7 +131,7 @@ __IRAM_CODE TASK_INFO* kcreate_tcb (void* pvTaskCode, unsigned long nStackSize, 
 	return pTCB;
 }
 
-__IRAM_CODE int klist_size (TASK_INFO* pList)
+int klist_size (TASK_INFO* pList)
 {
 	if (!pList)
 		return 0;
@@ -149,7 +149,7 @@ __IRAM_CODE int klist_size (TASK_INFO* pList)
 	return nSize;
 }
 
-__IRAM_CODE KERNEL_ERROR_CODE kadd_tcb (TASK_INFO** pList, TASK_INFO* pTask)
+KERNEL_ERROR_CODE kadd_tcb (TASK_INFO** pList, TASK_INFO* pTask)
 {
 	if (!pTask)
 		return ePOINTER;
@@ -177,7 +177,7 @@ __IRAM_CODE KERNEL_ERROR_CODE kadd_tcb (TASK_INFO** pList, TASK_INFO* pTask)
 	return eOK;
 }
 
-__IRAM_CODE TASK_INFO* kremove_tcb  (TASK_INFO** pList)
+TASK_INFO* kremove_tcb  (TASK_INFO** pList)
 {
 	if (!pList)
 		return 0;

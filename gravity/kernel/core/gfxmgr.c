@@ -101,33 +101,10 @@ __IRAM_CODE void GFX_DestroySpanStructure (int nYmin, int nYmax)
 
 __IRAM_CODE void GFX_BuildSpanStructure (int nYmin, int nYmax)
 {
-//	int i = 0;
 	GFX_Z_RECT* pCtx = g_pZRectList;
 	while (pCtx)//for (i=0;i<m_stack.size();i++)
 	{
-		int nX = pCtx->ptLocation.x;//m_stack[i].x;
-		int nN = pCtx->pOwner->pMemoryContext->w;//m_stack[i].w;
-
-		if (nX >= SCR_WIDTH)
-			continue;
-
-		if (nX + nN <= 0)
-			continue;
-
-		unsigned long* pP = pCtx->pOwner->pMemoryContext->pixels;//m_stack[i].p;
 		unsigned long nStride = pCtx->pOwner->pMemoryContext->delta / 4;//m_stack[i].w;
-
-		if (nX < 0)
-		{
-			nN += nX;
-			pP -= nX;
-			nX = 0;
-		}
-
-		if (nX + nN > SCR_WIDTH)
-		{
-			nN = SCR_WIDTH - nX;
-		}
 
 		int j;
 		int stY = pCtx->ptLocation.y;
@@ -136,8 +113,37 @@ __IRAM_CODE void GFX_BuildSpanStructure (int nYmin, int nYmax)
 		{
 			if ((j < nYmin) || (j >= nYmax))
 			{
-				pP += nStride;
 				continue;
+			}
+
+			int nX = pCtx->ptLocation.x;//m_stack[i].x;
+			int nN = pCtx->pOwner->pMemoryContext->w;//m_stack[i].w;
+			unsigned long* pP = (unsigned long*)pCtx->pOwner->pMemoryContext->pixels;
+			pP += nStride * (j-stY);//m_stack[i].p;
+
+			if (pCtx->pOwner->pRegionLeft && pCtx->pOwner->pRegionRight)
+			{
+				nX += pCtx->pOwner->pRegionLeft[j-stY];
+				pP += pCtx->pOwner->pRegionLeft[j-stY];
+				nN -= pCtx->pOwner->pRegionLeft[j-stY] + pCtx->pOwner->pRegionRight[j-stY];
+			}
+
+			if (nX >= SCR_WIDTH)
+				continue;
+
+			if (nX + nN <= 0)
+				continue;
+
+			if (nX < 0)
+			{
+				nN += nX;
+				pP -= nX;
+				nX = 0;
+			}
+
+			if (nX + nN > SCR_WIDTH)
+			{
+				nN = SCR_WIDTH - nX;
 			}
 
 			GFX_SPAN* pNewSpan = (GFX_SPAN*)bget (g_SpanContext + j, sizeof(GFX_SPAN));//new GFX_SPAN ();
@@ -252,7 +258,6 @@ __IRAM_CODE void GFX_BuildSpanStructure (int nYmin, int nYmax)
 					}
 				}
 			}
-			pP += nStride;
 		}
 		pCtx = pCtx->pNext;
 //		i ++;
