@@ -22,7 +22,6 @@
 
         add r0, pc, #1
         bx r0                       @ switch to thumb
-
         .thumb
 
         b overb
@@ -67,14 +66,18 @@ lrel:   ldr r3, [r0]
         callThumb2 r5, terminalPutsCT, msg1, 0xfbfb
 
         @ Wait for USB disconnect, or menu1
+        callThumb r1, usbIsConnectedT
+        cmp r0, #1
+         bne overusbW
+        callThumb2 r5, terminalPutsCT, msg1a, 0xffff        
 waitUsb:
         callThumb r1, buttonsGetStatusT
-        ldr r1, =0x677                      @ menu1 to skip
+        ldr r1, =0x677                      @ menu1 to skip the USB wait...
         cmp r0, r1
          beq overusbW
         callThumb r1, usbIsConnectedT
         cmp r0, #1
-         bne overusbW 
+         bne overusbW
         b waitUsb
 overusbW:
 
@@ -96,7 +99,7 @@ tryLoop:
         ldr r0, =0x10000
 lwait1: sub r0, #1
          bne lwait1
-        b tryLoop
+        b tryLoop                   @ init ATA again, and try IDENTIFY again...
         
 ntryLoop:
         callThumb2 r4, terminalPutsCT, msgDONE, 0xfbfb
@@ -106,7 +109,7 @@ ntryLoop:
         mov r2, #20
         callThumb r3, memMoveT
         callThumb2 r4, terminalPutsCT, msg4, 0xfdfd
-        
+
         ldr r0, =(bufferx + 46)
         ldr r1, =(msg5 + 12)
         mov r2, #8
@@ -119,13 +122,18 @@ ntryLoop:
         callThumb r3, memMoveT
         callThumb2 r4, terminalPutsCT, msg6, 0xfdfd
 
+
+@ ------------------------------------------------------------------------------
+@ Display partition info
+@ ------------------------------------------------------------------------------
+
         callThumb2 r4, terminalPutsCT, msg100, 0xffff
         ldr r0, =bufferx
         mov r1, #1
         mov r2, #1
-        callThumb r4, ataReadLBAT
+        callThumb r4, readLBAT
         callThumb2 r4, terminalPutsCT, msgDONE, 0xfbfb
-
+        
         ldr r6, =(bufferx+510-0x40)
         mov r7, #4
         ldr r5, =partitionInfo
@@ -159,16 +167,20 @@ loopsp:
         add r5, #8
         add r6, #16
         sub r7, #1
-        bne loopsp
+         bne loopsp
+
+@ ------------------------------------------------------------------------------
+@ Read 1st partition
+@ ------------------------------------------------------------------------------
 
         callThumb2 r4, terminalPutsCT, msg200, 0xffff
         ldr r0, =bufferx
         ldr r1, =part1Start
         ldr r1, [r1]
         mov r2, #1
-        callThumb r4, ataReadLBAT
+        callThumb r4, readLBAT
         callThumb2 r4, terminalPutsCT, msgDONE, 0xfbfb
-        
+
         ldr r0, =(bufferx + 3)
         ldr r1, =(msg201 + 12)
         mov r2, #8
@@ -180,18 +192,17 @@ loopsp:
         ldr r0, [r0]
         callThumb r2, fatInitT
 
-        ldr r0, =fatRootClu
-
-        b oval1
-        
+        b oval1        
         .ltorg
-        
 oval1:
+
+@ ------------------------------------------------------------------------------
+@ Init program selection screen
+@ ------------------------------------------------------------------------------
 
         callThumb r0, lcdClsT      @ Clear screen...
 
 .ifdef doimage
-
         ldr r3, =lcdVideoBuffer2
         ldr r4, =sprite
         ldr r5, =(320*240)
@@ -204,41 +215,38 @@ lcop:   mov r0, #0
         add r4, #3
         callThumb r6, colorRGB2YCbCrT
         callThumb r6, colorPackYCbCrT
-
         str r0, [r3]
-        
         add r3, #4
         sub r5, #1
-        bne lcop   
-        
-        callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
-        callThumb2 r3, osdSetMainConfigT, 0x14, 0xdd      
+         bne lcop   
 
+        callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
+        callThumb2 r3, osdSetMainConfigT, 0x14, 0xdd
 .endif
-        
+
         mov r0, #4
         mov r1, #6
         ldr r2, =msg_001
         ldr r3, =0xfbfb
         callThumb r4, lcdPutsT
-        
-        @ Gonna be our main kinda loop here...
-                                    @ Load the file (dir)...
-        ldr r0, =fatRootClu
+@ ------------------------------------------------------------------------------
+@ Main loop
+@ ------------------------------------------------------------------------------
+
+        ldr r0, =fatRootClu             @ Start at root dir.
         ldr r0, [r0]
 loopRR:
         ldr r6, =bufferx
         mov r7, r0
 loopRE: mov r0, r7
         mov r1, r6
-        callThumb r2, fatReadCT
-        ldr r0, =fatClusterSize
-        ldr r0, [r0]
-        add r6, r0
+        ldr r2, =fatClusterSize
+        ldr r2, [r2]
+        callThumb r3, readLBAT
+        add r6, r2
         mov r0, r7
         callThumb r2, fatTraceCCT
         mov r7, r0
-@        callThumb r2, processDirT
         ldr r0, =0x0ffffff8
         cmp r7, r0
          blt loopRE
@@ -268,9 +276,13 @@ noshp:  add r7, #32
         b lfval
          
 noshq:
-        @ Now display it on screen, and wait for user navigation...
-loopNV:
 
+
+@ ------------------------------------------------------------------------------
+@ Display it on screen and process user navigation
+@ ------------------------------------------------------------------------------
+
+loopNV:
         ldr r7, =bufferx
         ldr r0, dirCurrentScroll
         add r7, r0
@@ -375,6 +387,10 @@ ldel2:
          bne ldel2
 nobot1:
 
+@ ------------------------------------------------------------------------------
+@ Get key input and process it
+@ ------------------------------------------------------------------------------
+
                                 @ clear out bottom entries if needed...        
                                 @ r4 = cursor position so we know
                                 @ if we can move up or down...
@@ -477,7 +493,7 @@ notm1:
         tst r1, r2
          bne notm2                  @ is it (not a dir)?
 
-        b launchFile
+        b launchFile                @ Launch the file...
 notm2:
 
         ldr r0, timeoutC
@@ -490,7 +506,7 @@ notm2:
         callThumb2 r4, terminalSetPosT, 0, 35
         callThumb2 r4, terminalPutsCT, msg780, 0x0101
         ldr r0, runClus
-        b launchFile
+        b launchFile                @ Lauch the default file...
 errt:   ldr r0, timeoutMax
 
 noovf:  sub r0, #1
@@ -499,26 +515,30 @@ noovf:  sub r0, #1
 
         ldr r0, =0x10000
 wait6:  sub r0, #1
-        bne wait6
-        
+         bne wait6
+
         b loopNV
 
         .ltorg
 
+@ ------------------------------------------------------------------------------
+        
 partitionInfo:
-part1Start: .word   0
-part1Size:  .word   0
-part2Start: .word   0
-part2Size:  .word   0
-part3Start: .word   0
-part3Size:  .word   0
-part4Start: .word   0
-part4Size:  .word   0
+part1Start:         .word   0
+part1Size:          .word   0
+part2Start:         .word   0
+part2Size:          .word   0
+part3Start:         .word   0
+part3Size:          .word   0
+part4Start:         .word   0
+part4Size:          .word   0
 
-timeoutC:   .word   0x100
-timeoutMax: .word   0x100
+timeoutC:           .word   0x100
+timeoutMax:         .word   0x100
 dirCurrentScroll:   .word   0
 dirCurrentCursor:   .word   0
+
+@ ------------------------------------------------------------------------------
 
 cursorUpT:
         push {r1, r2, r3, r4, r7}
@@ -549,6 +569,7 @@ errorUp:mov r0, #0
         pop {r1, r2, r3, r4, r7}
         bx lr
 
+@ ------------------------------------------------------------------------------
         
 cursorDnT:
         push {r1, r2, r3, r4, r7}
@@ -579,49 +600,75 @@ doneDn: str r1, [r0]
 errorDn:mov r0, #0
         pop {r1, r2, r3, r4, r7} 
         bx lr
-        
+
+@ ------------------------------------------------------------------------------
         
 launchFile:
-        cmp r0, #0
-        beq alldo
-
         mov r7, r0
 
         callThumb2 r4, terminalSetPosT, 0, 36        
         callThumb2 r4, terminalPutsCT, msg600, 0xffff
 
-        ldr r6, =0x03000000
+        ldr r6, =ramStart
 loopLE: 
         callThumb2 r4, terminalPutsCT, msg601, 0xffff
         mov r0, r7
         mov r1, r6
-        callThumb r2, fatReadCT
-        ldr r1, =fatClusterSize
-        ldr r1, [r1]
-        add r6, r1                      @ move to next cluster in mem...
+        ldr r2, =fatClusterSize
+        ldr r2, [r2]
+        callThumb r4, fatReadCT
+        add r6, r2                      @ move to next cluster in mem...
         mov r0, r7
         callThumb r2, fatTraceCCT
         mov r7, r0
         ldr r0, =0x0ffffff8
         cmp r7, r0
-        blt loopLE
+         blt loopLE
 
         callThumb2 r4, terminalPutsCT, msg700, 0xffff
 
-        ldr r0, =0x03000000
+        ldr r0, =ramStart
         bx r0                           @ EXECUTE IT!
-        
-alldo:
-        callThumb2 r4, terminalPutsCT, msg900, 0xffff        
-loopr:
-        b loopr
+
+@ ------------------------------------------------------------------------------
+
+readLBAT:
+        push {r3, r4, r5, r6, lr}
+        mov r4, r0
+        mov r5, r1
+        mov r6, r2
+readTry:
+        mov r0, r4
+        mov r1, r5
+        mov r2, r6
+        callThumb r3, ataReadLBAT
+        cmp r0, #0
+         beq nreadtry
+
+        mov r1, r0
+        ldr r0, =msg3e1h
+        callThumb r3, hex2T
+        callThumb2 r3, terminalPutsCT, msg3e1, 0xffff
+
+        ldr r0, =0x10000
+readw1: sub r0, #1
+         bne readw1
+        b readTry                   @ try again...
+nreadtry:
+        pop {r3, r4, r5, r6}
+        pop {r0}
+        bx r0
+
+@ ------------------------------------------------------------------------------
 
         .ltorg
 
 runClus:    .word   0
-runFile:    .ascii  "IMAGE   AVS"
-        
+runFile:    .ascii  "DEFAULT BIN"
+
         .align 4
+
+@ ------------------------------------------------------------------------------
         
 memMoveT:
         push {r0, r1, r2, r3}
@@ -633,6 +680,8 @@ lopMove:ldrb r3, [r0]
         bne lopMove
         pop {r0, r1, r2, r3}
         bx lr
+
+@ ------------------------------------------------------------------------------
 
 read4T:
         push {r1, r2}
@@ -650,6 +699,8 @@ read4T:
         pop {r1, r2}
         bx lr
 
+@ ------------------------------------------------------------------------------
+
 read2T:
         push {r1, r2}
         mov r1, #0
@@ -660,13 +711,17 @@ read2T:
         mov r0, r1
         pop {r1, r2}
         bx lr
-                
+
+@ ------------------------------------------------------------------------------
+
         .ltorg
         
-msg1:   .asciz " -- avOS BootLoader version 0.2a (c)2004 DoGgEr -- \n\n"
+msg1:   .asciz " -- avOS BootLoader version 0.4a (c)2004 DoGgEr -- \n\n"
+msg1a:  .asciz "USB Cable attached. Waiting for disconnect...\n"
 msg2:   .asciz "Initialising ATA...                        "
 msg3:   .asciz "Identifying hard drive...                  "
-msg3e1: .ascii "\nError "
+
+msg3e1: .ascii "\nATA Error! "
 msg3e1h:.asciz "xx\n"
 
 msg4:   .asciz " Serial:    xxxxxxxxxxxxxxxxxxxx\n"
@@ -678,12 +733,11 @@ msg200: .asciz "Reading BootSector (Partition 1)...        "
 msg201: .asciz " OEM:       xxxxxxxx\n"
 msg600: .asciz "Loading image...                           \n"
 msg601: .asciz "."
-msg700: .asciz "Running image...                           \n"
+msg700: .asciz "\nRunning image...                           \n"
 msg780: .asciz "Timed out!                                 \n"
-msg900: .asciz "ALL DONE\n"
 msgDONE:  .asciz "[ DONE ]\n"
 
-msg_001:.asciz " -- avOs BootLoader Version 0.3a (c)2004 DoGgEr -- "
+msg_001:.asciz " -- avOs BootLoader Version 0.4a (c)2004 DoGgEr -- "
 
 dirLine:.asciz "xxxxxxxx.xxx"
 dirEmpt:.asciz "            "
