@@ -76,6 +76,9 @@ int main() {
         
         v = powerGetStatus();
         y = v * 240 >> 14;
+        
+        if (y>239) y=239;
+        if (y<0) y=0;
         c = 0xffff;
         if (powerIsDCConnected()) c = 0x0404;
         
