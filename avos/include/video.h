@@ -1,4 +1,4 @@
-/* cpld.h
+/* video.h
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy
@@ -10,21 +10,24 @@
    even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.
 */
-#ifndef _CPLD_H
-#define _CPLD_H 1
+#ifndef _VIDEO_H
+#define _VIDEO_H 1
 
 #ifndef u32_defined
 #define u32_defined yes
 typedef unsigned long u32;
 #endif
 
-#define CPLD_MODE_DEFAULT               0
-#define CPLD_MODE_COMPACTFLASHCARD      1
-#define CPLD_MODE_DVR                   4       // Not tested yet
-#define CPLD_MODE_SMARTMEDIACARD        8       // Not tested yet
-#define CPLD_MODE_MULTIMEDIACARD        9       // Not tested yet
+#define VIDEO_MODE_PAL  0x8000
+#define VIDEO_MODE_NTSC 0x0000
+               // Unknown flags - LCD = 4071
+               //                 VID = 407d
 
-extern void cpldSetModeA(u32 mode);
+extern void videoLCDEnableA();
+extern void videoLCDDisableA();
+extern void videoSetBrightnessA(u32 v);
+extern void videoSetContrastA(u32 v);
+extern void videoSetModeA(u32 mode);
 
 #endif
 

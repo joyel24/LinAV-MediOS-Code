@@ -1,5 +1,6 @@
 #include <graphics.h>
 #include <osdDSC25.h>
+#include <video.h>
 #include <gio.h>
 #include <fonts.h>
 #include <buttons.h>
@@ -23,8 +24,8 @@ int main() {
     if (vmode==0) {
         gioSetBitA(GIO_LINE_EXT_VIDEO);
         gioClearBitA(GIO_LINE_BACKLIGHT_POWER);
-        osdSetVideoModeA(0x4071);
-        osdSetLCDOnA();
+        videoSetModeA(0x4071);
+        videoLCDEnableA();
         osdSetMainShiftA(0x79, 0x00);
         width=320;
         height=240;
@@ -32,8 +33,8 @@ int main() {
     } else if (vmode==1) {
         gioClearBitA(GIO_LINE_EXT_VIDEO);
         gioClearBitA(GIO_LINE_BACKLIGHT_POWER);
-        osdSetVideoModeA(0x407d | OSD_VIDEOMODE_NTSC);
-        osdSetLCDOffA();
+        videoSetModeA(0x407d | VIDEO_MODE_NTSC);
+        videoLCDDisableA();
         osdSetMainShiftA(0x78, 0x12);
         width=304;
         height=192;
@@ -41,8 +42,8 @@ int main() {
     } else if (vmode==2) {
         gioClearBitA(GIO_LINE_EXT_VIDEO);
         gioSetBitA(GIO_LINE_BACKLIGHT_POWER);
-        osdSetVideoModeA(0x407d | OSD_VIDEOMODE_PAL);
-        osdSetLCDOffA();
+        videoSetModeA(0x407d | VIDEO_MODE_PAL);
+        videoLCDDisableA();
         osdSetMainShiftA(0xae, 0x2d);
         width=304;
         height=240;        

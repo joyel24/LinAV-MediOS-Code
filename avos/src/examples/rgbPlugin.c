@@ -1,5 +1,6 @@
 #include <graphics.h>
 #include <osdDSC25.h>
+#include <video.h>
 #include <buttons.h>
 #include <ata.h>
 #include <gio.h>
@@ -71,24 +72,24 @@ int main(int argc, char * * argv) {
             if (vmode==0) {
                 gioSetBitA(GIO_LINE_EXT_VIDEO);
                 gioClearBitA(GIO_LINE_BACKLIGHT_POWER);
-                osdSetVideoModeA(0x4071);
-                osdSetLCDOnA();
+                videoSetModeA(0x4071);
+                videoLCDEnableA();
                 osdSetMainShiftA(0x79, 0x00);
                 osdSetComponentPositionA(OSD_VIDEO1, 0x14, 0x13);
                 osdSetComponentSizeA(OSD_VIDEO1, 2*320, 240);
             } else if (vmode==1) {
                 gioClearBitA(GIO_LINE_EXT_VIDEO);
                 gioClearBitA(GIO_LINE_BACKLIGHT_POWER);
-                osdSetVideoModeA(0x407d | OSD_VIDEOMODE_NTSC);
-                osdSetLCDOffA();
+                videoSetModeA(0x407d | VIDEO_MODE_NTSC);
+                videoLCDDisableA();
                 osdSetMainShiftA(0x78, 0x12);
                 osdSetComponentPositionA(OSD_VIDEO1, 0x3a, 0x18);
                 osdSetComponentSizeA(OSD_VIDEO1, 2*300, 192);
             } else if (vmode==2) {
                 gioClearBitA(GIO_LINE_EXT_VIDEO);
                 gioSetBitA(GIO_LINE_BACKLIGHT_POWER);
-                osdSetVideoModeA(0x407d | OSD_VIDEOMODE_PAL);
-                osdSetLCDOffA();
+                videoSetModeA(0x407d | VIDEO_MODE_PAL);
+                videoLCDDisableA();
                 osdSetMainShiftA(0xae, 0x2d);
                 osdSetComponentPositionA(OSD_VIDEO1, 0x14, 0x00);
                 osdSetComponentSizeA(OSD_VIDEO1, 2*300, 240);

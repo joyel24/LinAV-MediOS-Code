@@ -21,9 +21,6 @@
 @ void osdSetPallette (r0=Y, r1=Cr, r2=Cb, r3=index)
 @ void osdSet16CPallete (r0=bank0/1, r1=index, r2=value)
 @
-@ void osdSetBrightness (r0=0-255)
-@ void osdSetContrast (r0=0-255)
-@
 @ void osdSetMainShift (r0=horizontal, r1=vertical)
 @ void osdSetMainConfig (r0=config)
 @ void osdSetBorderColor (r0=color)
@@ -466,49 +463,6 @@ osdNV2: lsl r0, #1
         pop {r0, r2, r3}
         bx lr
 
-
-@ ------------------------------------------------------------------------------
-@ osdSetBrightness r0=(0-255)
-@
-.globl osdSetBrightnessA
-osdSetBrightnessA:
-        switchThumb
-.globl osdSetBrightness
-.thumb_func
-
-osdSetBrightness:
-        push {r0, r1, r2}
-        ldr r1, =0x30830
-        ldrh r2, [r1]
-        lsr r2, #8
-        lsl r2, #8
-        orr r2, r0
-        strh r2, [r1]
-        pop {r0, r1, r2}
-        bx lr
-
-
-@ ------------------------------------------------------------------------------
-@ osdSetContrast r0=(0-255)
-@
-.globl osdSetContrastA
-osdSetContrastA:
-        switchThumb
-.globl osdSetContrast
-.thumb_func
-
-osdSetContrast:
-        push {r0, r1, r2}
-        ldr r1, =0x30830
-        ldrh r2, [r1]
-        lsl r2, #24
-        lsr r2, #24
-        lsl r0, #8
-        orr r2, r0
-        strh r2, [r1]
-        pop {r0, r1, r2}
-        bx lr
-
 @ ------------------------------------------------------------------------------
 @ osdSetBacklight r0=on/off (0/1)
 @
@@ -523,55 +477,6 @@ osdSetBacklight:
         lsl r0, #31
         lsr r0, #29
         strh r0, [r1]
-        bx lr
-
-@ ------------------------------------------------------------------------------
-@ osdSetVideoMode
-@
-.globl osdSetVideoModeA
-osdSetVideoModeA:
-        switchThumb
-.globl osdSetVideoMode
-.thumb_func
-
-osdSetVideoMode:
-        ldr r1, =0x30800
-        strh r0, [r1]
-        bx lr
-        
-@ ------------------------------------------------------------------------------
-@ osdSetLCDOn
-@
-.globl osdSetLCDOnA
-osdSetLCDOnA:
-        switchThumb
-.globl osdSetLCDOn
-.thumb_func
-
-osdSetLCDOn:
-        ldr r1, =0x30804
-        ldrh r2, [r1]
-        mov r3, #1
-        lsl r3, #15
-        orr r2, r3
-        strh r2, [r1]
-        bx lr
-
-@ ------------------------------------------------------------------------------
-@ osdSetLCDOff
-@
-.globl osdSetLCDOffA
-osdSetLCDOffA:
-        switchThumb
-.globl osdSetLCDOff
-.thumb_func
-
-osdSetLCDOff:
-        ldr r1, =0x30804
-        ldrh r2, [r1]
-        ldr r3, =0x7fff
-        and r2, r3
-        strh r2, [r1]
         bx lr
 
 @ ------------------------------------------------------------------------------
