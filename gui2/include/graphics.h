@@ -27,6 +27,7 @@
 #define BMAP1   1
 #define BMAP2   2
 #define VID1    3
+#define VID2    4
 
 // general constants
 #define USE_GC    -1
@@ -119,6 +120,7 @@ typedef struct graphics_context * GC_ID;
 int   ini_graphics   (void);
 void  close_graphics (void);
 void  iniComponent   (struct graphicsBuffer * buff);
+void  tstPlane       (struct graphicsBuffer * plane);
 GC_ID createGC       (int vplane);
 void  destroyGC      (GC_ID gc);
 

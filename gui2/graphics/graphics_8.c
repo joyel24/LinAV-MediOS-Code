@@ -1,5 +1,5 @@
 /*
-* graphics.c
+* graphics_8.c
 *
 * linav - http://linav.sourceforge.net
 * Copyright (c) 2004 by Christophe THOMAS
@@ -11,7 +11,22 @@
 *
 */
 
-void (*graphics8_Sprite_routines[3]) = {graphics8_1bit_Sprite, graphics8_2bit_Sprite, graphics8_4bit_Sprite };
+#include "graphics.h"
+#include "graphics_8.h"
+
+struct graphics_operations g8ops =  {
+	drawPixel         : graphics8_DrawPixel,
+	readPixel         : graphics8_ReadPixel,
+	drawRect          : graphics8_DrawRect,
+	fillRect          : graphics8_FillRect,
+	drawSprite        : graphics8_DrawSprite,
+	drawChar          : graphics8_DrawChar,
+	drawBITMAP        : graphics8_DrawBITMAP,
+	drawString        : graphics8_DrawString,
+	scrollWindowVert  : graphics8_ScrollWindowVert,
+	scrollWindowHoriz : graphics8_ScrollWindowHoriz,
+	getStringSize     : graphics8_GetStringSize
+};
 
 void graphics8_DrawPixel(int color, int x, int y, struct graphicsBuffer * buff)
 {
@@ -63,36 +78,41 @@ void graphics8_DrawHorizLine(int color, int width,char * offset)
 }
 
 void graphics8_DrawSprite(PALETTE * palette,SPRITE * sprite, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
-{
-    /*void (*routine)(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
-    if(sprite->type == 8)
-    {
-        graphics8_DrawBITMAP  (sprite,trsp,x,y, buff);
-    }
-    else
-    {
-        routine=graphics8_Sprite_routines[sprite->type];
-        routine(sprite->data,sprite->width,sprite->height,sprite->bpline,palette,trsp,x,y,buff);
-    }*/
-    
+{    
     int i,j,index;
     char * dest=getOffset(x,y,buff,char);
     char * src=(char*)sprite->data;
-    
-    for(j=0;j<sprite->height;j++)
+    if(trsp != -1)
     {
-    	for(i=0;i<sprite->width;i++)
+        for(j=0;j<sprite->height;j++)
         {
-            index=INB(src+i);
-            OUTB(palette[index],dest+i);
+            for(i=0;i<sprite->width;i++)
+            {
+                index=INB(src+i);
+                if(palette[index]!=trsp)
+                	OUTB(palette[index],dest+i);
+            }
+            dest+=buff->width;
+            src+=sprite->width; 
         }
-        dest+=buff->width;
-        src+=sprite->width; 
+    }
+    else
+    {
+        for(j=0;j<sprite->height;j++)
+        {
+            for(i=0;i<sprite->width;i++)
+            {
+                index=INB(src+i);
+                OUTB(palette[index],dest+i);
+            }
+            dest+=buff->width;
+            src+=sprite->width; 
+        }    
     }
         
 }
 
-void graphics8_DrawBITMAP  (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
+void graphics8_DrawBITMAP(BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
 {
     int i,j,c;
     char * dest=getOffset(x,y,buff,char);
@@ -116,8 +136,6 @@ void graphics8_DrawBITMAP  (BITMAP * bitmap, unsigned int trsp, int x, int y, st
     {
         for(j=0;j<bitmap->height;j++)
         {
-            /*for(i=0;i<bitmap->width;i++)
-                OUTB(INB(src+i),dest+i);*/
             memcpy(dest,src,bitmap->width);
             dest+=buff->width;
             src+=bitmap->width;
@@ -248,12 +266,36 @@ void graphics8_ScrollWindowHoriz(int bgColor, int x, int y, int width, int heigh
 
 void graphics8_DrawChar(struct graphicsFont * font, int color,int bg_color, int x, int y, char c, struct graphicsBuffer * buff)
 {
+    int i,j,k,shift,index;
+    
     char * src=font->table[(int)c];
+    char * dest=getOffset(x,y,buff,char);
     
     unsigned int palette[2]={bg_color,color};
     
-    if(src!=0)    
-        graphics8_1bit_Sprite(src,font->width,font->height,font->bpline,palette,-1,x,y,buff);
+    if(src!=0) 
+    {
+    	for(j=0;j<font->height;j++)
+        {
+            shift=7;
+            k=0;
+            for(i=0;i<font->width;i++)
+            {
+                index=INB(src+k);
+                index=(index>>shift)&0x1;
+                OUTB(palette[index],dest+i);
+                shift--;
+                if(shift<0)
+                {
+                    shift=7;
+                    k++;
+                }
+            }
+                
+            dest+=buff->width;
+            src+=font->bpline;
+        }
+    }   
 }
 
 int graphics8_GetStringSize(struct graphicsFont * font, const unsigned char *str, int *w, int *h)
@@ -323,163 +365,8 @@ void graphics8_DrawString(struct graphicsFont * font, int color,int bg_color, in
             }
             str++;
         }
-        //tmp=(char*)tmpLine;
-        /*for(i=0;i<font->bpline*len;i++)
-            dest[i]=tmp[i];*/
         memcpy(dest,tmpLine,font->width*len);
         dest+=buff->width;
     }     
-}
-
-void graphics8_1bit_Sprite(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
-{
-    int i,j,k,shift,index;
-    
-    char * dest=getOffset(x,y,buff,char);
-            
-    if(trsp==-1)
-        for(j=0;j<height;j++)
-        {
-            shift=7;
-            k=0;
-            for(i=0;i<width;i++)
-            {
-                index=INB(src+k);
-                index=(index>>shift)&0x1;
-                OUTB(palette[index],dest+i);
-                shift--;
-                if(shift<0)
-                {
-                    shift=7;
-                    k++;
-                }
-            }
-                
-            dest+=buff->width;
-            src+=bpline;
-        }
-    else
-        for(j=0;j<height;j++)
-        {
-            shift=7;
-            k=0;
-            for(i=0;i<width;i++)
-            {
-                index=INB(src+k);
-                index=(index>>shift)&0x1;
-                if(trsp!=index)
-                    OUTB(palette[index],dest+i);
-                shift--;
-                if(shift<0)
-                {
-                    shift=7;
-                    k++;
-                }
-            }
-                
-            dest+=buff->width;
-            src+=bpline;
-        }
-}
-
-void graphics8_2bit_Sprite(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
-{
-    int i,j,k,shift,index;
-    
-    char * dest=getOffset(x,y,buff,char);
-            
-    if(trsp==-1)
-        for(j=0;j<height;j++)
-        {
-            shift=6;
-            k=0;
-            for(i=0;i<width;i++)
-            {
-                index=INB(src+k);
-                index=(index>>shift)&0x3;
-                OUTB(palette[index],dest+i);
-                shift-=2;
-                if(shift<0)
-                {
-                    shift=6;
-                    k++;
-                }
-            }
-                
-            dest+=buff->width;
-            src+=bpline;
-        }
-    else
-        for(j=0;j<height;j++)
-        {
-            shift=6;
-            k=0;
-            for(i=0;i<width;i++)
-            {
-                index=INB(src+k);
-                index=(index>>shift)&0x3;
-                if(trsp!=index)
-                    OUTB(palette[index],dest+i);
-                shift-=2;
-                if(shift<0)
-                {
-                    shift=6;
-                    k++;
-                }
-            }
-                
-            dest+=buff->width;
-            src+=bpline;
-        }
-}
-
-void graphics8_4bit_Sprite(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
-{
-    int i,j,k,shift,index;
-    
-    char * dest=getOffset(x,y,buff,char);
-    if(trsp==-1)
-        for(j=0;j<height;j++)
-        {
-            shift=4;
-            k=0;
-            for(i=0;i<width;i++)
-            {
-                index=INB(src+k);
-                index=(index>>shift)&0xF;
-                OUTB(palette[index],dest+i);
-                shift-=4;
-                if(shift<0)
-                {
-                    shift=4;
-                    k++;
-                }
-            }
-                
-            dest+=buff->width;
-            src+=bpline;
-        }
-    else
-        for(j=0;j<height;j++)
-        {
-            shift=4;
-            k=0;
-            for(i=0;i<width;i++)
-            {
-                index=INB(src+k);
-                index=(index>>shift)&0xF;
-                if(trsp!=index)
-                    OUTB(palette[index],dest+i);
-                shift-=4;
-                if(shift<0)
-                {
-                    shift=4;
-                    k++;
-                }
-            }
-                
-            dest+=buff->width;
-            src+=bpline;
-        }
 }
 

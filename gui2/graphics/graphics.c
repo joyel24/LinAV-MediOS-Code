@@ -29,17 +29,70 @@
 #define tstXY(x,y)  {if(x>SCREEN_WIDTH) return; if(x<0) return; if(y>SCREEN_HEIGHT) return; if(y<0) return;}
 #define tstWH(x,y,w,h)  {if(x+w>SCREEN_WIDTH)return; if(x+w<0) return; if(y+h>SCREEN_HEIGHT) return; if(y+h<0) return;}
 
-char screen1[SCREEN_WIDTH*SCREEN_HEIGHT+40];
-char screen2[SCREEN_WIDTH*SCREEN_HEIGHT+40];
-char screen3[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
-struct graphicsBuffer BITMAP_1;
-struct graphicsBuffer BITMAP_2;
-struct graphicsBuffer VIDEO_1;
+struct graphicsBuffer BITMAP_1 = {
+    offset             : 0,
+    component          : AV3XX_OSD_BITMAP1,
+    bytesPerLine       : SCREEN_WIDTH*2,
+    width              : SCREEN_WIDTH,
+    height             : SCREEN_HEIGHT,
+    x                  : 0x14,
+    y                  : 0x12,
+    bitsPerPixel       : 8,
+    bitsPerPixelShift  : 3,
+    SWidth             : 0xa,
+    enable             : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
+                    AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE
+};
+
+struct graphicsBuffer BITMAP_2 = {
+    offset             : 0,
+    component          : AV3XX_OSD_BITMAP2,
+    bytesPerLine       : SCREEN_WIDTH*2,
+    width              : SCREEN_WIDTH,
+    height             : SCREEN_HEIGHT,
+    x                  : 0x14,
+    y                  : 0x12,
+    bitsPerPixel       : 8,
+    bitsPerPixelShift  : 3,
+    SWidth             : 0xa,
+    enable             : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
+                    AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE
+};        
+
+struct graphicsBuffer VIDEO_1 = {
+    offset             : 0,
+    component          : AV3XX_OSD_VIDEO1,
+    bytesPerLine       : SCREEN_WIDTH*2,
+    width              : SCREEN_WIDTH,
+    height             : SCREEN_HEIGHT,
+    x                  : 0x14,
+    y                  : 0x12,
+    bitsPerPixel       : 32,
+    bitsPerPixelShift  : 5,
+    SWidth             : 0x28,
+    enable             : AV3XX_OSD_COMPONENT_ENABLE
+};
+
+struct graphicsBuffer VIDEO_2 = {
+    offset             : 0,
+    component          : AV3XX_OSD_VIDEO2,
+    bytesPerLine       : SCREEN_WIDTH*2,
+    width              : SCREEN_WIDTH,
+    height             : SCREEN_HEIGHT,
+    x                  : 0x14,
+    y                  : 0x12,
+    bitsPerPixel       : 32,
+    bitsPerPixelShift  : 5,
+    SWidth             : 0x28,
+    enable             : AV3XX_OSD_COMPONENT_ENABLE
+};
 
 GC_ID   default_gc=NULL;
 FONT_ID default_font=GC_FONT;
 
-GC_ID   gc_bmap1,gc_bmap2,gc_vid1;
+GC_ID   gc_bmap1,gc_bmap2,gc_vid1,gc_vid2;
+
+extern struct graphics_operations g8ops;
 
 int ini_graphics()
 {
@@ -51,77 +104,27 @@ int ini_graphics()
 	osdSetComponentConfig(AV3XX_OSD_BITMAP2, 0);
 	osdSetComponentConfig(AV3XX_OSD_CURSOR1, 0);
 	osdSetComponentConfig(AV3XX_OSD_CURSOR2, 0);
-		
-	BITMAP_1.offset            = (int)&screen1;
-	BITMAP_1.component         = AV3XX_OSD_BITMAP1;
-	BITMAP_1.bytesPerLine      = SCREEN_WIDTH*2;
-	BITMAP_1.width             = SCREEN_WIDTH;
-	BITMAP_1.height            = SCREEN_HEIGHT;
-	BITMAP_1.x                 = 0x14;
-	BITMAP_1.y                 = 0x12;
-	BITMAP_1.bitsPerPixel      = 8;
-	BITMAP_1.SWidth            = 0xa;
-	BITMAP_1.enable            = AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
-                                     AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE;
 	
-	diff=BITMAP_1.offset % 32;
-	if(diff)
-		BITMAP_1.offset+=(32-diff);	
-	
-	iniComponent(&BITMAP_1);
-	
+	iniComponent(&BITMAP_1);	
 	gc_bmap1=createGC(BMAP1);
-	setPlane(BMAP1);
 
-	BITMAP_2.offset            = (int)&screen2;
-	BITMAP_2.component         = AV3XX_OSD_BITMAP2;
-	BITMAP_2.bytesPerLine      = SCREEN_WIDTH*2;
-	BITMAP_2.width             = SCREEN_WIDTH;
-	BITMAP_2.height            = SCREEN_HEIGHT;
-	BITMAP_2.x                 = 0x14;
-	BITMAP_2.y                 = 0x12;
-	BITMAP_2.bitsPerPixel      = 8;
-	BITMAP_2.bitsPerPixelShift = 3;
-	BITMAP_2.SWidth            = 0xa;
-	BITMAP_2.enable            = AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
-                                     AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE;
-	
-	diff=BITMAP_2.offset % 32;
-	if(diff)
-		BITMAP_2.offset+=(32-diff);	
-	
-	iniComponent(&BITMAP_2);
-	
+	iniComponent(&BITMAP_2);	
 	gc_bmap2=createGC(BMAP2);
 
-	VIDEO_1.offset            = (int)&screen3;
-	VIDEO_1.component         = AV3XX_OSD_VIDEO1;
-	VIDEO_1.bytesPerLine      = SCREEN_WIDTH*2;
-	VIDEO_1.width             = SCREEN_WIDTH;
-	VIDEO_1.height            = SCREEN_HEIGHT;
-	VIDEO_1.x                 = 0x14;
-	VIDEO_1.y                 = 0x12;
-	VIDEO_1.bitsPerPixel      = 32;
-	VIDEO_1.bitsPerPixelShift = 5;
-	VIDEO_1.SWidth            = 0x28;
-	VIDEO_1.enable            = AV3XX_OSD_COMPONENT_ENABLE;
-	
-	diff=VIDEO_1.offset % 32;
-	if(diff)
-		VIDEO_1.offset+=(32-diff);	
-	
-	iniComponent(&VIDEO_1);
-	
+	iniComponent(&VIDEO_1);	
 	gc_vid1=createGC(VID1);
+        
+        iniComponent(&VIDEO_2);	
+	gc_vid2=createGC(VID2);
 	
 	if(iniEvent()<0)
 		return -1;
 
-	hidePlane(BMAP2);
-	hidePlane(VID1);
-	
-	setPalette(gui_pal,256);
-
+        setPalette(gui_pal,256);
+                
+        setPlane(BMAP1);
+        showPlane(BMAP1);
+        
 	return 0;
 }
 
@@ -145,7 +148,7 @@ void close_graphics()
 	if(fd<0)
 		printf("error opening /dev/fb\n");
 	if(ioctl(fd,FBIO_INIT,NULL)<0)
-		printf("error sending init ioctl\n");
+		fprintf(stderr,"error sending init ioctl\n");
 }
 
 GC_ID createGC(int vplane)
@@ -154,7 +157,7 @@ GC_ID createGC(int vplane)
 	
 	if(!gc)
 	{
-		printf("can't allocate GC\n");
+		fprintf(stderr,"can't allocate GC\n");
 		return NULL;
 	}
 	/* default ini of GC */
@@ -174,8 +177,12 @@ GC_ID createGC(int vplane)
 			gc->gops=NULL;
 			gc->buffer=&VIDEO_1;
 			break;
+                case VID2:
+			gc->gops=NULL;
+			gc->buffer=&VIDEO_2;
+			break;
 		default:
-			printf("wrong plane\n");
+			fprintf(stderr,"wrong plane\n");
 			return NULL;
 	}
 			
@@ -200,8 +207,11 @@ void setPlane(int vplane)
 		case VID1:
 			default_gc=gc_vid1;
 			break;
+                case VID2:
+			default_gc=gc_vid2;
+			break;
 		default:
-			printf("wrong plane\n");
+			fprintf(stderr,"wrong plane\n");
 	}
 }
 
@@ -217,8 +227,11 @@ void hidePlane(int vplane)
 		case VID1:
 			osdSetComponentConfig(AV3XX_OSD_VIDEO1, 0);
 			break;
+                case VID2:
+			osdSetComponentConfig(AV3XX_OSD_VIDEO2, 0);
+			break;
 		default:
-			printf("wrong plane\n");
+			fprintf(stderr,"wrong plane\n");
 	}
 }
 
@@ -226,26 +239,52 @@ void showPlane(int vplane)
 {
 	switch(vplane) {
 		case BMAP1:
+                	tstPlane(&BITMAP_1);
 			osdSetComponentConfig(AV3XX_OSD_BITMAP1,BITMAP_1.enable);
 			break;
 		case BMAP2:
+                	tstPlane(&BITMAP_2);
 			osdSetComponentConfig(AV3XX_OSD_BITMAP2,BITMAP_2.enable);
 			break;
 		case VID1:
+                	tstPlane(&VIDEO_1);
 			osdSetComponentConfig(AV3XX_OSD_VIDEO1,VIDEO_1.enable);
 			break;
+                case VID2:
+                	tstPlane(&VIDEO_2);
+			osdSetComponentConfig(AV3XX_OSD_VIDEO2,VIDEO_2.enable);
+			break;
 		default:
-			printf("wrong plane\n");
+			fprintf(stderr,"wrong plane\n");
 	}			
 }
 
-void iniComponent(struct graphicsBuffer * buff)
+void tstPlane(struct graphicsBuffer * plane)
 {
+	int diff;
+	if(plane->offset == 0)
+        {
+        	plane->offset=(unsigned int)malloc(sizeof(char)*(SCREEN_WIDTH*SCREEN_HEIGHT*(plane->bitsPerPixel>>3)+40));
+                if(plane->offset)
+                {
+                	diff=plane->offset % 32;
+                        if(diff)
+                                plane->offset+=(32-diff);
+                        osdSetComponentOffset(plane->component, plane->offset);
+                }
+                else
+                {
+                	fprintf(stderr,"Can't allocate buffer for new Plane");
+                        _exit(0);
+                }
+        }
+}
+
+void iniComponent(struct graphicsBuffer * buff)
+{	
 	osdSetComponentSize(buff->component, buff->bytesPerLine, buff->height);
 	osdSetComponentPosition(buff->component,buff->x, buff->y);
-	osdSetComponentOffset(buff->component, buff->offset);
 	osdSetComponentSourceWidth(buff->component, buff->SWidth);
-	osdSetComponentConfig(buff->component, buff->enable);
 }
 
 /* drawing functions */
@@ -365,20 +404,9 @@ void putS(int color, int bg_color, int x, int y, char *s)
 	{
 		s[SCREEN_WIDTH/font->width]=0;
 		c = s[SCREEN_WIDTH/font->width];
-   }
-
-/*
-	if(len>30)
-	{
-		c=s[30];
-		s[30]=0;
 	}
-*/
+
 	default_gc->gops->drawString(font,color,bg_color,x,y,s,default_gc->buffer);
-/*
-	if(len>30)
-		s[30]=c;
-*/
 
 	if(font->width*len>SCREEN_WIDTH)
 	{
@@ -416,32 +444,11 @@ void drawBITMAP(BITMAP * bitmap, int x, int y)
 
 void scrollWindowVert(int bgColor, int x, int y, int width, int height, int scroll, int UP)
 {
-	/*if(UP)
-	{
-		if(x>320) x=320; if(x<0) x=0; if(y>240) y=240; if((y-scroll)<0) y=scroll;
-		tstWH(x,y,width,height);
-	}
-	else
-	{
-		tstXY(x,y);
-		if(x+width>320) width=320-x; if(x+width<0) width=-x; if((y+height+scroll)>240) height=240-y-scroll; if(y+height<0) height=-y;
-	}*/
 	default_gc->gops->scrollWindowVert(bgColor,x,y,width,height,scroll,UP,default_gc->buffer);
 }
 
 void scrollWindowHoriz(int bgColor, int x, int y, int width, int height, int scroll, int RIGHT)
 {
-	/*if(RIGHT)
-	{
-		tstXY(x,y);
-		if((x+width+scroll)>320) width=320-x-scroll; if(x+width<0) width=-x; if((y+height)>240) height=240-y; if(y+height<0) height=-y;
-	}
-	else
-	{
-		if(x>320) x=320; if(x-scroll<0) x=scroll; if(y>240) y=240; if((y-scroll)<0) y=scroll;
-		tstWH(x,y,width,height);
-		
-	}*/
 	default_gc->gops->scrollWindowHoriz(bgColor,x,y,width,height,scroll,RIGHT,default_gc->buffer);
 }
 
@@ -532,7 +539,3 @@ FONT_ID getFont(void)
 {
 	return default_font;
 }
-
-/**  graphics 8 **/
-
-#include "graphics_8.c"

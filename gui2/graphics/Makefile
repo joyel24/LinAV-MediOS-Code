@@ -11,6 +11,7 @@ DEST=../lib
 
 LIB_CONTENT= \
 	graphics.o \
+        graphics_8.o \
 	osd.o \
 	events.o \
         misc.o
