@@ -17,6 +17,28 @@ static int fatCache[128];                     // 1 sector fatcache
 
 char hex8[] = "xxxxxxxx";
 
+int getRootClu() {
+    return rootClu;
+}
+
+int fatDirFilter(struct dirEntry dirIn[], struct dirEntry dirOut[], int n) {
+    int cpin=0,cpo=0;
+
+    for (cpin=0;cpin<n;cpin++) {
+        if (dirIn[cpin].name[0]==0) {
+            break;    
+        } else if (dirIn[cpin].name[0]!=0xe5) {
+            if (!(dirIn[cpin].attr & FAT_ATTR_VOLUME_ID) &&
+               (dirIn[cpin].attr!= FAT_ATTR_LONG_NAME)) {
+                dirOut[cpo++] = dirIn[cpin];
+            }
+        }
+        
+    }
+    return cpo;
+}
+
+
 int fatInit(u32 lba) {
     int c;
     
@@ -46,13 +68,14 @@ int fatInit(u32 lba) {
     uartOuts("\n");
 
     LBAFat1 = lba + rsvdSecCnt;
-    LBAData = LBAFat1 + (fatSize * numFats);
-    
+
     rootClu = bootRead(44, 4);
     stringPutHex(hex8, rootClu, 8);
     uartOuts("[fat.c] rootClu = ");
     uartOuts(hex8);
     uartOuts("\n");
+
+    LBAData = LBAFat1 + (fatSize * numFats);
     
     secPerClu = bootRead(13, 1);
     stringPutHex(hex8, secPerClu, 8);
@@ -74,7 +97,7 @@ int fatInit(u32 lba) {
 }
 
 int fatReadCluster(int cluster, char* buffer) {
-    int sec = LBAData + (cluster * secPerClu);
+    int sec = LBAData + ((cluster - 2) * secPerClu);
     return ataReadSectors(sec, secPerClu, buffer);
     
     // Use safe sector by sector mode for now (SLOW....) eugh need to fix multi

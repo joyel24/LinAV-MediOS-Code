@@ -36,14 +36,17 @@ struct dirEntry {
     short crtTime;
     short crtDate;
     short lstAccDate;
-    short fatCluHI;
+    unsigned short fatCluHI;
     short wrtTime;
     short wrtDate;
-    short fatCluLO;
+    unsigned short fatCluLO;
     int size;
-};
+};                              // SOFTWARE - 4B 30 90 2F [08 00] 93 1A 4B 30 [83 0E] <00 00 00 00>
+                                // reading cluster 00080e81
 
+extern int getRootClu();
 extern int fatInit(u32 lba);
 extern int fatReadCluster(int cluster, char* buffer);
 extern int fatTrace(int cluster);
 extern int fatReadFile(int cluster, char* buffer);
+extern int fatDirFilter(struct dirEntry dirIn[], struct dirEntry dirOut[], int num);
