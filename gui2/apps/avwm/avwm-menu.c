@@ -56,7 +56,8 @@ struct menu_data menu_cfg = {
     f2_action      : do_F2,
     f3_action      : do_F3,
     item_str       : mk_item_str,
-    submenu_str    : mk_submenu_str
+    submenu_str    : mk_submenu_str,
+    isTxtMenu      : 0
 };
 
 struct helperMenu menuMenu = {
@@ -359,7 +360,7 @@ int do_parse(struct cfg_menu ** cfg,char * filename)
         {
             if(current_item==NULL)
             {
-                fprintf(stderr,"'label' param before image\n");
+                fprintf(stderr,"'parent' param before name\n");
             }
             else
             {
@@ -371,7 +372,7 @@ int do_parse(struct cfg_menu ** cfg,char * filename)
         {
             if(current_item==NULL)
             {
-                fprintf(stderr,"'link' param before image\n");
+                fprintf(stderr,"'link' param before name\n");
             }
             else
             {
@@ -382,7 +383,7 @@ int do_parse(struct cfg_menu ** cfg,char * filename)
         {
             if(current_item==NULL)
             {
-                fprintf(stderr,"'param' param before image\n");
+                fprintf(stderr,"'param' param before name\n");
             }
             else
             {

@@ -7,14 +7,8 @@ GCC = gcc
 all:  $(TARGET)
 
 $(TARGET) : $(OBJS)
-	$(GCC) $@.o -o $@  $(LDFLAGS)
+	$(GCC) $@.o -o $@  -lm
 
-plugDir:
-	@$(MAKE) -C plugins/ all
-
-avwmDir:
-	@$(MAKE) -C avwm/ all
-	
 clean:
 	@echo "**** Cleaning..."
 	@rm -f *.o *.bak *~  $(TARGET)

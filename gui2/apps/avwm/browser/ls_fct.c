@@ -67,12 +67,22 @@ int qSortEntry(const void * a1,const void * a2)
     return namesort((char**) &e1->name,(char**) &e2->name);
 }
 
+#define DEBUG_DO_LS
+
 int addEntry(struct browser_data * bdata,char * name,int type,int size)
 {
     struct dir_entry * newlist;
-    
+
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[addEntry] in");
+#endif    
     if (bdata->listused >= bdata->listsize) /* do we need to increase the list size? */
     {
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[addEntry] need more");
+#endif 
         newlist = (struct dir_entry *) malloc((LISTSIZE+bdata->listsize) * sizeof(struct dir_entry));
         if (!newlist)
         {
@@ -83,11 +93,27 @@ int addEntry(struct browser_data * bdata,char * name,int type,int size)
 #endif
             return -1;
         }
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[addEntry] malloc done");
+#endif 
         memcpy(newlist, bdata->list, sizeof(struct dir_entry) * bdata->listsize);
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[addEntry] memcopy done");
+#endif 
         free(bdata->list);
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[addEntry] free done");
+#endif 
         bdata->list=newlist;
         bdata->listsize += LISTSIZE;
     }
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[addEntry] real add");
+#endif     
     bdata->list[bdata->listused].name = strdup(name);
     
     if (bdata->list[bdata->listused].name == NULL)
@@ -99,6 +125,10 @@ int addEntry(struct browser_data * bdata,char * name,int type,int size)
 #endif
         return -1;
     }
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[addEntry] name copy");
+#endif 
     bdata->list[bdata->listused].type=type;
     bdata->list[bdata->listused].size=size;
     bdata->list[bdata->listused].selected=0;
@@ -107,7 +137,7 @@ int addEntry(struct browser_data * bdata,char * name,int type,int size)
     return 0;
 }
 
-#define DEBUG_DO_LS
+
 
 int doLs(struct browser_data * bdata,char * name)
 {
@@ -157,7 +187,12 @@ int doLs(struct browser_data * bdata,char * name)
             
         fullname[0] = '\0';
         strcat(fullname, dp->d_name);
-        
+
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] strcat");
+#endif        
+                
         if (stat(dp->d_name, &statbuf) < 0)
         {
             fprintf(stderr, "[dols] error in stat\n");
@@ -168,37 +203,87 @@ int doLs(struct browser_data * bdata,char * name)
             //perror(dp->d_name);
             continue;
         }
+        
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] stat");
+#endif                
 
         if(S_ISDIR(statbuf.st_mode))
         {
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] is_dir");
+#endif  
             if(fullname[0]=='.' && fullname[1]=='\0')
                 continue;
             if(fullname[0]=='.' && fullname[1]=='.' && fullname[2]=='\0')
             {
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] .. entry");
+#endif
                 if(!isRoot)
                     if(addEntry(bdata,"<-Back",TYPE_BACK,0)<0)
                         return -1;
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] .. added");
+#endif                        
             }
             else
             {
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] norm entry");
+#endif    
                 if(addEntry(bdata,fullname,TYPE_DIR,0)<0)
                     return -1;
                 bdata->nbDir++;
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] norm entry added");
+#endif
             }
         }
         else
         {
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] is_file");
+#endif         
             if(addEntry(bdata,fullname,TYPE_FILE,statbuf.st_size)<0)
                 return -1;
             bdata->totSize+=statbuf.st_size;
             bdata->nbFile++;
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] file added");
+#endif
         }
     }
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] out add");
+#endif
+
 
     closedir(dirp);
+
     
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] dir closed");
+#endif    
+
+
     qsort(bdata->list,bdata->listused,sizeof(struct dir_entry),qSortEntry);
+   
     
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] qsort done");
+#endif    
    return 0;
 }
 

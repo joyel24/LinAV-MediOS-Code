@@ -16,6 +16,7 @@
 
 struct menu_item {
     void * data;
+    char * icon;
     struct menu_item * nxt;
     struct menu_item * prev;
     struct menu_item * sub;
@@ -24,7 +25,8 @@ struct menu_item {
 
 struct menu_data {
 	struct menu_item * root;
-        int  useOwnDisp;
+        int useOwnDisp;
+        int isTxtMenu;
         int width;int height;int x;int y;
         int dx;int dy;
         unsigned int txt_color;
@@ -44,11 +46,18 @@ struct menu_data {
 void stop_menu(void);
 void start_menu(struct menu_data * client_menu);
 
-void menuEvtHandler  (int evt);
-void doPrint         (struct menu_item * ptr,int level);
-void mprintAName     (struct menu_item * pos, int posY, int clear, int selected);
-void mprintAllName   (struct menu_item * pos,int nselect);
-int  mprintName      (struct menu_item * item,int x,int y,int clear,int selected);
+void menuEvtHandler   (int evt);
+void normMenu_handler (int evt);
+void iconMenu_handler (int evt);
+
+void doPrint          (struct menu_item * ptr,int level);
+
+void dispAName_norm   (struct menu_item * pos, int posY, int clear, int selected);
+void dispAllName_norm (struct menu_item * pos,int nselect);
+int  dispName_norm    (struct menu_item * item,int x,int y,int clear,int selected);
+
+void dispAllName_icon (struct menu_item * pos,int nselect);
+int  dispName_icon    (struct menu_item * item,int i,int j,int clear,int selected);
 
 #endif
 

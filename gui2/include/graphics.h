@@ -63,7 +63,7 @@
 struct spriteBuffer {
     unsigned int  data;
     int           width;
-        int           height;
+    int           height;
     int           type;
     int           bpline;
 };

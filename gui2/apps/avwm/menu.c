@@ -22,6 +22,9 @@
 #include "colordef.h"
 #include "avevents.h"
 #include "parse_cfg.h"
+#include "icons.h"
+
+#include "folder_icon.h"
 
 #define MAXPOS       10
 #define TITLE_OFFSET  2
@@ -37,7 +40,7 @@ struct menu_data * current_menu;
 
 char tmp[MAX_TOKEN+5];
 
-int mprintName(struct menu_item * item,int x,int y,int clear,int selected)
+int dispName_norm(struct menu_item * item,int x,int y,int clear,int selected)
 {
     int color;
     int w = 0;
@@ -69,23 +72,89 @@ int mprintName(struct menu_item * item,int x,int y,int clear,int selected)
     return 1;
 }
 
-void mprintAllName(struct menu_item * pos,int nselect)
+//NEED_ICON(dirBitmap)
+NEED_ICON(textBitmap)
+
+int item_width=70;
+int item_height=70;
+int space_btw_items=4;
+
+int dispName_icon(struct menu_item * item,int i,int j,int clear,int selected)
+{
+    int color;
+    int x,y;
+    
+    BITMAP * icon;
+    
+    x=current_menu->dx+i*(item_width+space_btw_items);
+    y=current_menu->dy+j*(item_height+space_btw_items);
+    
+    if(item->sub)
+    {
+        current_menu->submenu_str(item->data,tmp);
+        color=current_menu->sub_color; /* => submenu */
+        icon=&folder_icon;
+    }
+    else
+    {
+        current_menu->item_str(item->data,tmp);
+        color=current_menu->txt_color; /* => item */
+        icon=&textBitmap;
+    }
+    
+    CHG_PLANE
+       
+    if(clear)
+        fillRect(current_menu->bg_color,x, y , item_width, item_height);
+
+    drawBITMAP(icon,x+(item_width-icon->width)/2,y);
+        
+    if(selected)
+        putS(color, current_menu->select_color,x, y+icon->height+1, tmp);
+    else
+        putS(color, current_menu->bg_color,x, y+icon->height+1, tmp);
+    RESTORE_PLANE
+    return 1;
+}
+
+void dispAllName_norm(struct menu_item * pos,int nselect)
 {
     struct menu_item * i;
     int nbAff=0,w=0,h=0;
     getStringS("M", &w, &h);
 
     for (i = pos; i !=NULL && nbAff < MAXPOS; i=i->nxt) {
-        mprintName(i,current_menu->dx,TITLE_OFFSET + nbAff*(h+1) + current_menu->dy,0,nbAff==nselect);
+        dispName_norm(i,current_menu->dx,TITLE_OFFSET + nbAff*(h+1) + current_menu->dy,0,nbAff==nselect);
         nbAff++;
     }
 }
 
-void mprintAName(struct menu_item * pos, int posY, int clear, int selected)
+int MaxI=4;
+int MaxJ=3;
+
+void dispAllName_icon(struct menu_item * pos,int nselect)
+{
+    struct menu_item * ptr;
+    int nbAff=0;
+    int i=0,j=0;
+
+    for (ptr = pos; ptr !=NULL && j<MaxJ; ptr=ptr->nxt) {
+        dispName_icon(ptr,i,j,0,nbAff==nselect);
+        i++;
+        if(i>=MaxI)
+        {
+            i=0;
+            j++;
+        }
+        nbAff++;
+    }
+}
+
+void dispAName_norm(struct menu_item * pos, int posY, int clear, int selected)
 {
     int w=0,h=0;
     getStringS("M", &w, &h);
-    mprintName(pos,current_menu->dx,TITLE_OFFSET + posY*(h+1)+ current_menu->dy,clear,selected);
+    dispName_norm(pos,current_menu->dx,TITLE_OFFSET + posY*(h+1)+ current_menu->dy,clear,selected);
 }
 
 void start_menu(struct menu_data * client_menu)
@@ -112,6 +181,14 @@ void stop_menu(void)
 
 void menuEvtHandler(int evt)
 {
+    if(current_menu->isTxtMenu)
+        normMenu_handler(evt);
+    else    
+        iconMenu_handler(evt);
+}
+
+void normMenu_handler(int evt)
+{
    int w = 0;
    int h = 0;
 
@@ -137,8 +214,8 @@ void menuEvtHandler(int evt)
                 nselect--;
                 pselect=pselect->prev;
             }
-            mprintAName(pselect->nxt,nselect+1,1,0);
-            mprintAName(pselect,nselect,1,1);
+            dispAName_norm(pselect->nxt,nselect+1,1,0);
+            dispAName_norm(pselect,nselect,1,1);
             break;
         case BTN_DOWN:
             if(!pselect->nxt) // we are at the end => can't go down anymore
@@ -161,8 +238,8 @@ void menuEvtHandler(int evt)
                 nselect++;
                 pselect=pselect->nxt;
             }
-            mprintAName(pselect->prev,nselect-1,1,0);
-            mprintAName(pselect,nselect,1,1);
+            dispAName_norm(pselect->prev,nselect-1,1,0);
+            dispAName_norm(pselect,nselect,1,1);
             break;
         case BTN_RIGHT:
             if(pselect->sub) // submenu
@@ -174,7 +251,7 @@ void menuEvtHandler(int evt)
                 fillRect(current_menu->bg_color,current_menu->dx, current_menu->dy,
                              current_menu->width-current_menu->dx,(h+1)*MAXPOS);
                 RESTORE_PLANE
-                mprintAllName(pos,nselect);
+                dispAllName_norm(pos,nselect);
                 clearEventQueue();
             }
             else // launch plugin
@@ -197,7 +274,7 @@ void menuEvtHandler(int evt)
                     fillRect(current_menu->bg_color,current_menu->dx, current_menu->dy,
                                 current_menu->width-current_menu->dx,(h+1)*MAXPOS);
                     RESTORE_PLANE
-                    mprintAllName(pos,nselect);
+                    dispAllName_norm(pos,nselect);
                     clearEventQueue();
                 }
             }
@@ -210,7 +287,51 @@ void menuEvtHandler(int evt)
             pos=current_menu->root;
             pselect=current_menu->root;
             nselect=0;
-            mprintAllName(pos,nselect);
+            dispAllName_norm(pos,nselect);
+            break;
+        case BTN_OFF:
+            current_menu->off_action(pselect->data);            
+            break;
+        case BTN_ON:
+            current_menu->on_action(pselect->data);
+            break;
+        case BTN_F1:
+            current_menu->f1_action(pselect->data);
+            break;
+        case BTN_F2:
+            current_menu->f2_action(pselect->data);
+            break;
+        case BTN_F3:
+            current_menu->f3_action(pselect->data);
+            break;
+    }
+}
+
+void iconMenu_handler(int evt)
+{
+    int var;
+   switch(evt) {
+        case BTN_UP:
+            
+            break;
+        case BTN_DOWN:
+            
+            break;
+        case BTN_RIGHT:
+            
+            break;
+        case BTN_LEFT:
+            
+            break;
+        case EVT_REDRAW:        
+            CHG_PLANE
+            fillRect(current_menu->bg_color,0 , current_menu->dy,
+                        current_menu->width, current_menu->height-current_menu->dy);
+            RESTORE_PLANE
+            pos=current_menu->root;
+            pselect=current_menu->root;
+            nselect=0;
+            dispAllName_icon(pos,nselect);
             break;
         case BTN_OFF:
             current_menu->off_action(pselect->data);            
