@@ -104,7 +104,7 @@ uartEn1:pop {r1}
         .ltorg
         .arm
 
-uartBases:  .word 30300
-            .word 30380
+uartBases:  .word 0x30300
+            .word 0x30380
         
 .endif
