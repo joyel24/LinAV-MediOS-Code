@@ -10,6 +10,8 @@
 #include <rtc.h>
 #include <system.h>
 #include <power.h>
+#include <uart.h>
+#include <debug.h>
 
 int launchFile(char * fileN);
 void (*codeCaller)(int argc, char * argv[])=(void (*)(int argc, char * argv[]))0x03000000;
@@ -156,7 +158,7 @@ startInit:
 
             if((dir=opendir(nameCur))<0)
 			{
-				uartOuts("dir not found\n");
+				uartOutsA("dir not found\n");
 				break;
 			}
 
