@@ -37,7 +37,7 @@ void pack(void (*loopFct)(void))
     cur_plugin.handle_on=1;
     stopApp=0;
     
-    while(!stopApp)
+    while(!stopApp && !stopWM)
     {
         if(loopFct)
             evt=nxtEvent();

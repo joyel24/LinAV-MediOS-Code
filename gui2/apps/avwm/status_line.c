@@ -41,7 +41,7 @@ void drawTime(void)
 
     if(getTimeS(timeSt))
     {
-        //fillRect(BG_COLOR,150,2,130,11);
+        //fprintf(stderr,"%s\n",timeSt);
         putS(TIME_COLOR,BG_COLOR,135,3,timeSt);
     }
 

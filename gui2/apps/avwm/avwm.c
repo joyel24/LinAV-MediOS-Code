@@ -42,6 +42,7 @@ extern struct plugin menu_plugin;
 extern struct plugin status_bar_plugin;
 
 int stopWM;
+int maxChar;
 
 char * path;
 
@@ -53,7 +54,6 @@ char * getPath(char * str)
 
     tmpC=(char*)strrchr(str,'/');
     pos=tmpC-str;
-    fprintf(stderr,"Pos: %d\n",pos);
     res=(char*)malloc(sizeof(char)*(pos+1));
     strncpy(res,str,pos);
     res[pos]='\0';
@@ -70,7 +70,7 @@ int main(int argc,char * * argv)
     ini_graphics();
     ini_font(STD6X9);
     set_mouseParam(6, 3);
-
+   
     ini_sound_connection();
     
     iniMsgBox();
@@ -101,6 +101,7 @@ int main(int argc,char * * argv)
 
     close_graphics();
     free(path);
+    
     return 0;
 }
 

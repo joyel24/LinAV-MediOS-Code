@@ -19,7 +19,7 @@
 int getTimeS(char * timeSt)
 {    
     struct av_tm date_time={0,0,0,0,0,0,0,0};
-
+    
     if(getTime(&date_time))
     {
     	sprintf(timeSt, "%02d:%02d:%02d %02d/%02d/%04d", date_time.tm_hour,date_time.tm_min,date_time.tm_sec,
@@ -52,6 +52,13 @@ int getTime(struct av_tm * date_time)
         }
         
         close(fd);
+        
+        if(date_time->tm_hour<0 || date_time->tm_hour>23) date_time->tm_hour=0;
+        if(date_time->tm_min<0 || date_time->tm_min>59) date_time->tm_min=0;
+        if(date_time->tm_sec<0 || date_time->tm_sec>59) date_time->tm_sec=0;
+        if(date_time->tm_mday<0 || date_time->tm_mday>31) date_time->tm_mday=0;
+        if(date_time->tm_mon<0 || date_time->tm_mon>12) date_time->tm_mon=0;
+        //if(date_time->tm_year<0 || date_time->tm_year>999) date_time->tm_year=0;
         
         return 1;
 }
