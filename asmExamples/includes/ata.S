@@ -11,11 +11,12 @@
 @ Date:     09/01/2004
 @ Author:   By DoggerMoore
 @
-@ ataInitT()
-@ ataGetStatusT()           returns ATA status in r0
-@ ataWaitForRDYT()          Waits until ATA is ready...
-@ ataWaitForBSYT()          Waits until ATA is busy...
-@ ataWaitForStartOfXferT    Wait until start of xfer.
+@ ataInit                   Init stuff
+@ ataSetMode                0 - IDE / 1 - Memory card
+@ ataGetStatus              Returns ATA status in r0
+@ ataWaitForRDY             Waits until ATA is ready...
+@ ataWaitForBSY             Waits until ATA is busy...
+@ ataWaitForStartOfXfer     Wait until start of xfer.
 @
 @ ataIdentifyT  r0->buffer                  r0=0sucess, 1=failRDY, 2=failXfer
 @ ataReadLBAT   r0->buffer r1=LBA, r2=n     r0=0sucess, 1=failRDY, 2=failXfer
@@ -41,11 +42,11 @@ ataSelectLBA                =   0x40
 
         .thumb
 
-@ ataReadLBAT (r0->buffer, r1=lba, r2=n)
+@ ataReadLBA (r0->buffer, r1=lba, r2=n)
 @       return 0-success, 1-Failed on waitRDY, 2-Failed on waitXFer
-.globl ataReadLBAT
+.globl ataReadLBA
 .thumb_func
-ataReadLBAT:
+ataReadLBA:
         push {lr}
         push {r2, r3, r4, r5, r6}
         mov r5, r0
@@ -58,7 +59,7 @@ ataReadLBAT:
         strh r1, [r0]                        @ Spin up the HDD Please...        
         .endif
 
-        callThumb r1, ataWaitForRDYT        
+        callThumb r1, ataWaitForRDY        
         mov r1, r0
         mov r0, #1
         cmp r1, #0
@@ -87,7 +88,7 @@ ataReadLBAT:
         ldr r1, =ataCommand_READ_SECTORS
         strb r1, [r2]
 
-        callThumb r1, ataWaitForStartOfXferT
+        callThumb r1, ataWaitForStartOfXfer
         mov r1, r0
         mov r0, #2
         cmp r1, #0
@@ -109,11 +110,11 @@ ataRT2:
         pop {r1}
         bx r1
 
-@ ataIdentifyT (r0->buffer)
+@ ataIdentify (r0->buffer)
 @       return 0-success, 1-Failed on waitRDY, 2-Failed on waitXFer
-.globl ataIdentifyT
+.globl ataIdentify
 .thumb_func
-ataIdentifyT:
+ataIdentify:
         push {lr}
         push {r1, r2, r3, r4, r5}
         mov r5, r0
@@ -124,7 +125,7 @@ ataIdentifyT:
         strh r1, [r0]                        @ Spin up the HDD Please...        
         .endif
         
-        callThumb r1, ataWaitForRDYT
+        callThumb r1, ataWaitForRDY
         mov r1, r0
         mov r0, #1
         cmp r1, #0
@@ -138,7 +139,7 @@ ataIdentifyT:
         ldr r1, =ataCommand_IDENTIFY
         strb r1, [r2]
 
-        callThumb r4, ataWaitForStartOfXferT
+        callThumb r4, ataWaitForStartOfXfer
         mov r1, r0
         mov r0, #2
         cmp r1, #0
@@ -155,15 +156,15 @@ ataRl:  mov r1, #0
       
         mov r0, #0          @ ok...
 ataRT:
-        pop {r1, r2, r3, r4, r5}        
+        pop {r1, r2, r3, r4, r5}
         pop {r1}
         bx r1
-        
-@ ataWaitForStartOfXferT
+
+@ ataWaitForStartOfXfer
 @
-.globl ataWaitForStartOfXferT
+.globl ataWaitForStartOfXfer
 .thumb_func
-ataWaitForStartOfXferT:
+ataWaitForStartOfXfer:
         push {lr}
         push {r2, r3}
 
@@ -171,7 +172,7 @@ ataWaitForStartOfXferT:
 notrea: mov r0, #1
         sub r3, #1
          beq tout2
-        callThumb r1, ataGetStatusT
+        callThumb r1, ataGetStatus
         ldr r2, =(ataStatus_DRQ | ataStatus_BSY)
         ldr r1, =ataStatus_DRQ
         and r0, r2
@@ -183,18 +184,18 @@ tout2:
         pop {r1}
         bx r1
         
-@ ataWaitForRDYT
+@ ataWaitForRDY
 @
-.globl ataWaitForRDYT
+.globl ataWaitForRDY
 .thumb_func
-ataWaitForRDYT:
+ataWaitForRDY:
         push {lr}
         push {r2, r3}
         ldr r3, =0x100000
 notred: mov r0, #1
         sub r3, #1
          beq tout1
-        callThumb r1, ataGetStatusT
+        callThumb r1, ataGetStatus
         ldr r2, =ataStatus_BSY
         tst r0, r2
          bne notred                 @ BSY flag is set!
@@ -206,17 +207,13 @@ tout1:  pop {r2, r3}
         pop {r1}
         bx r1
 
-@ ataWaitForBSYT
+@ ataWaitForBSY
 @
-.globl ataWaitForBSYT
+.globl ataWaitForBSY
 .thumb_func
-ataWaitForBSYT:
+ataWaitForBSY:
         push {r1, r2, lr}
-notreb: ldr r1, =(ataGetStatusT+1)
-        mov r2, #1
-        mov lr, r2
-        add lr, pc
-        bx r1
+notreb: callThumb r1, ataGetStatus
         ldr r2, =ataStatus_BSY
         tst r0, r2
          beq notreb
@@ -224,11 +221,11 @@ notreb: ldr r1, =(ataGetStatusT+1)
         pop {r0}
         bx r0
         
-@ ataGetStatusT
+@ ataGetStatus
 @
-.globl ataGetStatusT
+.globl ataGetStatus
 .thumb_func
-ataGetStatusT:
+ataGetStatus:
         push {r1}
         ldr r1, =ataRegStatus
         mov r0, #0
@@ -236,27 +233,22 @@ ataGetStatusT:
         pop {r1}
         bx lr
         
-@ ataInitT
+@ ataInit
 @
-.globl ataInitT
+.globl ataInit
 .thumb_func
-ataInitT:
+ataInit:
         push {lr}
         push {r0, r1}
 
         .ifdef hardwareAV300
-        ldr r0, =0x02600000
-        mov r1, #0
-        strh r1, [r0]
-        strh r1, [r0]
-        strh r1, [r0]
-        strh r1, [r0]
-        strh r1, [r0]
+        mov r0, #0
+        bl ataSetMode
 
         ldr r0, =0x02600100
         mov r1, #1
-        strh r1, [r0]        
-        
+        strh r1, [r0]   
+
         ldr r0, =0x02600300
         mov r1, #0x0a
         strh r1, [r0]                        @ Spin up the HDD Please...        
@@ -264,6 +256,7 @@ ataInitT:
         ldr r0, =0x02600100
         mov r1, #0
         strh r1, [r0]                        @ ?        
+
         .endif
         
         .ifdef hardwareJBMM
@@ -288,7 +281,6 @@ ataInitT:
         strh r1, [r0]        
         mov r1, #0x04
         strh r1, [r0]        
-        
         .endif
         
         
@@ -296,6 +288,19 @@ ataInitT:
         pop {r0}
         bx r0
 
+@ ataSetMode(u32 mode)
+@
+.globl ataSetMode
+.thumb_func
+ataSetMode:
+        ldr r1, =0x02600000
+        strh r0, [r1]
+        strh r0, [r1]
+        strh r0, [r1]
+        strh r0, [r1]
+        strh r0, [r1]
+        mov pc, lr
+        
 @ ------------------------------------------------------------------------------
         .ltorg
         .arm

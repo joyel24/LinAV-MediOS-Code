@@ -88,7 +88,7 @@ tryLoop:
         callThumb2 r5, terminalPutsCT, msg2, 0xffff
         callThumb r5, ataInitT
         callThumb2 r5, terminalPutsCT, msgDONE, 0xfbfb
-
+        
         callThumb2 r4, terminalPutsCT, msg3, 0xffff
         callThumb1 r4, ataIdentifyT, bufferx
         cmp r0, #0
