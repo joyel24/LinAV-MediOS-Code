@@ -19,12 +19,12 @@ struct timer_s {
     char * name;
 };
 
-void init_timer(void);
-void setup_timer(struct timer_s * timer_data,char * name);
-void rm_timer(struct timer_s * timer_data);
-void start_timer(struct timer_s * timer_data);
-void stop_timer(struct timer_s * timer_data);
+extern void setup_timer(struct timer_s * timer_data,char * name);
+extern void rm_timer(struct timer_s * timer_data);
+extern void start_timer(struct timer_s * timer_data);
+extern void stop_timer(struct timer_s * timer_data);
 
+void init_timer(void);
 void print_timer(void);
 
 #endif

@@ -20,6 +20,7 @@ void print_data(char * data,int length);
 unsigned int get_sp(void);
 
 extern unsigned long tick;
+
 extern unsigned int _end_kernel;
 
 struct pt_regs {
@@ -30,5 +31,13 @@ struct pt_regs {
 
 #define SWAB16(x) (x)
 #define SWAB32(x) (x)
+
+/* section definition */
+
+#define __LOW_SEC_CODE    __attribute__ ((section(".core")))
+#define __LOW_SEC_DATA    __attribute__ ((section(".cored")))
+
+#define __SDRAM_SEC_CODE    __attribute__ ((section(".text")))
+#define __SDRAM_SEC_DATA    __attribute__ ((section(".data")))
 
 #endif
