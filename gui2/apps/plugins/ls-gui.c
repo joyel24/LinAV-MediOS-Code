@@ -22,14 +22,17 @@
 #include   "colordef.h"
 #include   "font.h"
 
-#include "cops.h"
-#include "avevents.h"
+#include   "cops.h"
+#include   "avevents.h"
 
+#define    false 0
+#define    true  1
 #define    SHOW_ALL   1
 #define    LISTSIZE   256
 #define    PATHLEN    256
 #define    MAXPOS     21
 #define    FILE_X_OFFSET 10
+#define    ASCII_DEFAULT 65
 
 #define    UP_ARROW     0
 #define    DOWN_ARROW   1
@@ -79,6 +82,7 @@ struct dir_entry {
 
 struct dir_entry * list;
 int                listused;
+int pos,nselect;
 
 unsigned char upArrow[9][9] =
     { {21,21,21,21,00,21,21,21,21},
@@ -171,15 +175,41 @@ void do_on(void * data)
 }
 void do_right(void * data)
 {
+    char tmp[200];
+    int reload = false;
     cops->stop_menu();
     mode=1;
 
     if(strcmp((char*)data, "Copy") == 0)
     {
         // Copy the current selection
-//        list[pos+nselect].name
-        cops->putS(COLOR_BLACK, COLOR_WHITE,5, 230, "COPY");
+//        sprintf(tmp,"cp %s CopyOf_%s",list[pos+nselect].name,list[pos+nselect].name);
+//        system(tmp);
+        cops->putS(COLOR_BLACK, COLOR_WHITE,5, 230, list[pos+nselect].name);
 
+    }
+    else if(strcmp((char*)data, "Delete") == 0)
+    {
+        remove(list[pos+nselect].name);
+        reload = true;
+    }
+    else if(strcmp((char*)data, "Rename") == 0)
+    {
+        cops->putS(COLOR_BLACK, COLOR_WHITE,5, 230, list[pos+nselect].name);
+    }
+    else if(strcmp((char*)data, "New Dir") == 0)
+    {
+        mkdir("New Dir", S_IRWXU);
+        reload = true;
+    }
+
+    if(reload == true)
+    {
+        doLs("./");
+        printAllName(pos,nselect);
+
+        if(listused>MAXPOS)
+            showArrow(DOWN_ARROW);
     }
 }
 void do_F1(void * data)
@@ -220,11 +250,90 @@ struct menu_item rootMenu;
 struct menu_item menu1;
 struct menu_item menu2;
 struct menu_item menu3;
+struct menu_item menu4;
 
+void DeleteChar(char* src, char* dest, int index)
+{
+   int cnt = 0;
+	int dstindex = 0;
 
+	for( cnt = 0; cnt < strlen(src); cnt++)
+	{
+	   if(cnt != index)
+		{
+	      dest[dstindex] = src[cnt];
+			dstindex++;
+		}
+	}
 
+	dest[dstindex] = '\0';
+}
 
+// Bereiche in folgender Reihenfolge:
+// 33-44 Sonderzeichen
+// 58-63 Sonderzeichen
+// 91-96 Sonderzeichen
+// 123-126 Sonderzeichen
+// 45-57 Zahlen
+// 32 Space
+// 64-90 Grossbuchstaben
+// 97-122 Kleinbuchstaben
+// 192-255 Erweiterter Zeichensatz
+int NextAscii(int lastAscii)
+{
+   int ascii = ASCII_DEFAULT;
 
+   if(lastAscii == 32) // Space
+      ascii = 64; // auf @ und Grossbuchstaben springen
+	else if(lastAscii == 90)
+      ascii = 97;
+	else if(lastAscii == 122)
+	   ascii = 192;
+	else if(lastAscii == 255)
+      ascii = 33;
+	else if(lastAscii == 44)
+	   ascii = 58;
+	else if(lastAscii == 63)
+      ascii = 91;
+	else if(lastAscii == 96)
+      ascii = 123;
+	else if(lastAscii == 126)
+      ascii = 45;
+	else if(lastAscii == 57)
+      ascii = 32;
+	else
+      ascii = lastAscii+1;
+
+	return ascii;
+}
+
+int PrevAscii(int lastAscii)
+{
+   int ascii = ASCII_DEFAULT;
+
+   if(lastAscii == 33)
+	   ascii = 255;
+	else if(lastAscii == 192)
+      ascii = 122;
+	else if(lastAscii == 97)
+	   ascii = 90;
+	else if(lastAscii == 64)
+      ascii = 32;
+	else if(lastAscii == 32)
+      ascii = 57;
+	else if(lastAscii == 45)
+      ascii = 126;
+	else if(lastAscii == 123)
+      ascii = 96;
+	else if(lastAscii == 91)
+      ascii = 63;
+	else if(lastAscii == 58)
+      ascii = 44;
+	else
+      ascii = lastAscii-1;
+
+	return ascii;
+}
 
 int is_script_type(char *extension)
 {
@@ -580,7 +689,7 @@ int execBin(char * path, ...)
         while ((array[argno++] = va_arg(ap, char*)) != (char*)0) /* NOTHING */ ;
         va_end(ap);
         execv(path, array);
-        
+
         fprintf(stderr, "exec failed!\n");
         _exit(1);        
     }
@@ -662,9 +771,6 @@ void handle_type_other(char *filename)
        // unknown type
     }
 }
-
-
-int pos,nselect;
 
 int eventHandler(int evt)
 {
@@ -869,6 +975,7 @@ int main(int argc,char * * argv)
         menu1.data=(void*)"Rename";
         menu2.data=(void*)"Delete";
         menu3.data=(void*)"Copy";
+        menu4.data=(void*)"New Dir";
 
         menu1.prev=NULL;
         menu1.nxt=&menu2;
@@ -881,9 +988,14 @@ int main(int argc,char * * argv)
         menu2.up=NULL;
 
         menu3.prev=&menu2;
-        menu3.nxt=NULL;
+        menu3.nxt=&menu4;
         menu3.sub=NULL;
         menu3.up=NULL;
+
+        menu4.prev=&menu3;
+        menu4.nxt=NULL;
+        menu4.sub=NULL;
+        menu4.up=NULL;
 
         listused = 0;
 
