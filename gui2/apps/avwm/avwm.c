@@ -45,23 +45,25 @@ int stopWM;
 
 char * path;
 
-void getPath(char * str)
+char * getPath(char * str)
 {
 	char * tmpC;
+        char * res;
         int pos;
         tmpC=(char*)strrchr(str,'/');
         pos=tmpC-str;
         fprintf(stderr,"Pos: %d\n",pos);
-        path=(char*)malloc(sizeof(char)*(pos+1));
-        strncpy(path,str,pos);
-        path[pos]='\0';
+        res=(char*)malloc(sizeof(char)*(pos+1));
+        strncpy(res,str,pos);
+        res[pos]='\0';
+        return res;
 }
 
 int main(int argc,char * * argv)
 {
     fprintf(stderr,"Starting AvWm\n");
     
-    getPath(argv[0]);    
+    path=getPath(argv[0]);    
     
     ini_graphics();    
     ini_font(STD8X13);

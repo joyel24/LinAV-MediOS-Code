@@ -24,4 +24,6 @@ void   enableMenu       (void);
 void   disableMenu      (void);
 int    menuStatus       (void);
 
+char*  getPath          (char * str);
+
 #endif

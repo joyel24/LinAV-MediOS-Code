@@ -16,13 +16,25 @@
 
 #define MAX_TOKEN 250
 
+/* reading */
 int  next_char(void);
 void again(int ch);
 int  nxt_token(char * buff);
 int  nxt_cfg(char *item,char *value);
 
-int  openFile(char * filename);
+/* writting */
+#define CFG_READ  0
+#define CFG_WRITE 1
+
+int write_cfg(char * item,char * value);
+int write_comment(char * cmt);
+int add_line(void);
+
+/* file handling */
+
+int  openFile(char * filename,int mode);
 void closeFile(void);
 
+int curLineNum(void);
 
 #endif

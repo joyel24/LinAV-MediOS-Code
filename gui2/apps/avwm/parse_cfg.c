@@ -40,6 +40,7 @@ int nxt_token(char * buff)
 	    if (feof(file)) return 0;
 	cfg_line_num++;
     }
+
 /* processing '=' char */    
     if (ch == '=')
     {
@@ -47,15 +48,16 @@ int nxt_token(char * buff)
 	buff[1]=0;
     	return 1;
     }
+    
 /* processing quoted string */
-    if (ch == '"') {
+    if (ch == '"') {    
 	here = buff;
 	while (here-buff < MAX_TOKEN) {
 	    ch = next_char();
 	    if (feof(file)) fprintf(stderr,"EOF in quoted string");
 	    if (ch == '"') {
 		*here = 0;
-		return 1;
+                return 1;
 	    }
 	    if (ch == '\n' || ch == '\r' || ch == '\t')
 		fprintf(stderr,"\\n and \\t are not allowed in quoted strings");
@@ -64,6 +66,7 @@ int nxt_token(char * buff)
 	fprintf(stderr,"Quoted string is too long");
 	return 0; /* not reached */
     }
+
 /* processing normal char */
     here = buff;
     while (here-buff < MAX_TOKEN) {
@@ -83,15 +86,16 @@ int nxt_token(char * buff)
 int nxt_cfg(char *item,char *value)
 {
     
-    if (!nxt_token(item)) return 0;
+    if (!nxt_token(item)) return 0;    
     if (!strcmp(item,"="))
     {
     	fprintf(stderr,"Syntax error");
 	return 0;
-    }
+    }   
     
     if (!nxt_token(value)) return 0;
     if (strcmp(value,"="))
+    
     {
     	fprintf(stderr,"Error '=' expected (get: %s)\n",value);
 	return 0;
@@ -109,19 +113,55 @@ int nxt_cfg(char *item,char *value)
     return 1;
 }
 
-int openFile(char * filename)
+int openFile(char * filename,int mode)
 {
-	if ((file = fopen(filename,"r"))<0)
-	{
-	fprintf(stderr,"error reading config file %s\n",filename);
-	return -1;
-	}
-	cfg_line_num=1;
+    char * file_mode;
+    switch(mode)
+    {
+        case CFG_READ:
+            file_mode="r";
+            break;
+        case CFG_WRITE:
+            file_mode="w";
+            break;
+    }
+    
+    if ((file = fopen(filename,file_mode))<0)
+    {
+        fprintf(stderr,"error reading config file %s (%s)\n",filename,file_mode);
+        return -1;
+    }
+    cfg_line_num=1;
 }
 
 void closeFile(void)
 {
 	fclose(file);
 }
+
+int write_cfg(char * item,char * value)
+{
+    char * fmt;
+    if(strchr(value,' '))
+        fmt="%s=\"%s\"\n";
+    else
+        fmt="%s=%s\n";
+    fprintf(file,fmt,item,value);
+    return 1;
+}
+
+int write_comment(char * cmt)
+{
+    fprintf(file,"#%s\n",cmt);
+    return 1;
+}
+
+int add_line(void)
+{
+    fprintf(file,"\n");
+}
+
+int curLineNum(void) {return cfg_line_num;}
+
 
 

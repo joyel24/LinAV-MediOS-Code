@@ -247,51 +247,52 @@ int do_parse(struct cfg_menu ** cfg,char * filename)
     char *item=item_buff;
     char *value=value_buff;
 
-    openFile(filename);
+    openFile(filename,CFG_READ);
 
-    while (1) {
-    if (!nxt_cfg(item,value)) break;
-    if(!strcmp(item,"name"))
+    while (1)
     {
-        addItem(cfg);
-        strcpy(current_item->name,value);
-    }
-    else if(!strcmp(item,"parent"))
-    {
-        if(current_item==NULL)
+        if (!nxt_cfg(item,value)) break;
+        if(!strcmp(item,"name"))
         {
-            fprintf(stderr,"'label' param before image\n");
+            addItem(cfg);
+            strcpy(current_item->name,value);
+        }
+        else if(!strcmp(item,"parent"))
+        {
+            if(current_item==NULL)
+            {
+                fprintf(stderr,"'label' param before image\n");
+            }
+            else
+            {
+                strcpy(current_item->parent,value);
+            }
+    
+        }
+        else if(!strcmp(item,"link"))
+        {
+            if(current_item==NULL)
+            {
+                fprintf(stderr,"'link' param before image\n");
+            }
+            else
+            {
+                strcpy(current_item->link,value);
+            }
+        }
+        else if(!strcmp(item,"param"))
+        {
+            if(current_item==NULL)
+            {
+                fprintf(stderr,"'param' param before image\n");
+            }
+            else
+            {
+                strcpy(current_item->param,value);
+            }
         }
         else
-        {
-            strcpy(current_item->parent,value);
-        }
-
-    }
-    else if(!strcmp(item,"link"))
-    {
-        if(current_item==NULL)
-        {
-            fprintf(stderr,"'link' param before image\n");
-        }
-        else
-        {
-            strcpy(current_item->link,value);
-        }
-    }
-    else if(!strcmp(item,"param"))
-    {
-        if(current_item==NULL)
-        {
-            fprintf(stderr,"'param' param before image\n");
-        }
-        else
-        {
-            strcpy(current_item->param,value);
-        }
-    }
-    else
-        fprintf(stderr,"unknown item type: %s on line %d\n",item,cfg_line_num);
+            fprintf(stderr,"unknown item type: %s on line %d\n",item,cfg_line_num);
     }
     closeFile();
     return 0;

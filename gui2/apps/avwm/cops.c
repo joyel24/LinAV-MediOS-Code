@@ -19,6 +19,7 @@
 #include "avevents.h"
 #include "plugin.h"
 #include "sound.h"
+#include "parse_cfg.h"
 
 #include <stdlib.h>
 
@@ -80,6 +81,14 @@ struct client_operations cops={
     
     debug              : debug,
     
-    playMp3            : playMp3
+    playMp3            : playMp3,
+    
+    openCfg            : openFile,
+    closeCfg           : closeFile,
+    getCfg             : nxt_cfg,
+    putCfg             : write_cfg,
+    putComment         : write_comment,
+    newLine            : add_line,
+    curLineNum         : curLineNum
 
 };

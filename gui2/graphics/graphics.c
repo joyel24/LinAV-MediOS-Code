@@ -101,7 +101,6 @@ extern struct graphics_operations g8ops;
 
 int ini_graphics()
 {
-    int diff;
     /* reset everything */
     osdSetComponentConfig(AV3XX_OSD_VIDEO1,  0);
     osdSetComponentConfig(AV3XX_OSD_VIDEO2,  0);
@@ -182,7 +181,7 @@ GC_ID createGC(int vplane)
             gc->gops=NULL;
             gc->buffer=&VIDEO_1;
             break;
-                case VID2:
+        case VID2:
             gc->gops=NULL;
             gc->buffer=&VIDEO_2;
             break;

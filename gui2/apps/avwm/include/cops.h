@@ -16,6 +16,7 @@
 
 #include "av3xx_common.h"
 #include "graphics.h"
+#include "parse_cfg.h"
 
 #define REGISTER(ops,event,flag)    {ops=(struct client_operations*)atoi(argv[argc-1]);ops->registerPlugin(event,flag);}
 #define PACK(ops,loop)              {ops->pack(loop);}
@@ -94,6 +95,14 @@ struct client_operations {
     void (*debug)               (char *fmt, ...);
     
     int  (*playMp3)             (char * filename);
+    
+    int  (*openCfg)             (char * filename,int mode);
+    void (*closeCfg)            (void);
+    int  (*getCfg)              (char *item,char *value);
+    int  (*putCfg)              (char * item,char * value);
+    int  (*putComment)          (char * cmt);
+    int  (*newLine)             (void);
+    int  (*curLineNum)          (void);
     
 };
 
