@@ -155,7 +155,7 @@ osdLookupOffsetHI:  .word 0x30694
 .thumb_func
 
 osdSetCursor2Bitmap:
-        push {r1, r2, r3, lr}
+        push {r1, r2, r3}
         ldr r2, =0x306f2
         strh r1, [r2]           @ Setup data reg
         
@@ -167,7 +167,8 @@ osdSetCursor2Bitmap:
         mov r0, #0x80
         orr r1, r0
         strh r1, [r2, #2]       @ Set the data...
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3}
+        bx lr
 
                     
 @ ------------------------------------------------------------------------------
@@ -177,14 +178,15 @@ osdSetCursor2Bitmap:
 .thumb_func
 
 osdSetBorderColor:
-        push {r1, r2, lr}
+        push {r1, r2}
         ldr r2, =0x30680
         ldrh r1, [r2]
         lsr r1, #8
         lsl r1, #8
         orr r1, r0
         strh r1, [r2]
-        pop {r1, r2, pc}
+        pop {r1, r2}
+        bx lr
 
         
 @ ------------------------------------------------------------------------------
@@ -194,7 +196,7 @@ osdSetBorderColor:
 .thumb_func
 
 osdSetMainConfig:
-        push {r0, r1, r2, lr}
+        push {r0, r1, r2}
         ldr r2, =0x30680
         ldrh r1, [r2]
         lsl r1, #24
@@ -202,8 +204,9 @@ osdSetMainConfig:
         lsl r0, #8
         orr r1, r0
         strh r1, [r2]
-        pop {r0, r1, r2, pc}
-        
+        pop {r0, r1, r2}
+        bx r1
+
                     
 @ ------------------------------------------------------------------------------
 @ osdSetMainShift(r0=horizontal, r1=vertical)
@@ -212,11 +215,12 @@ osdSetMainConfig:
 .thumb_func
 
 osdSetMainShift:
-        push {r2, lr}
+        push {r2}
         ldr r2, =0x306a0
         strh r0, [r2]
         strh r1, [r2, #2]
-        pop {r2, pc}
+        pop {r2}
+        bx lr
                     
 
 @ ------------------------------------------------------------------------------
@@ -226,7 +230,7 @@ osdSetMainShift:
 .thumb_func
 
 osdSetPallette:
-        push {r0, r1, r3, r4, r5, lr}
+        push {r0, r1, r3, r4, r5}
         mov r5, #0
         ldr r4, =0x306f4
 osdWait:ldrh r5, [r4]
@@ -241,7 +245,8 @@ osdWaiu:ldrh r5, [r4]
         lsl r0, #8
         orr r0, r2
         strh r0, [r4, #2]
-        pop {r0, r1, r3, r4, r5, pc}
+        pop {r0, r1, r3, r4, r5}
+        bx lr
 
         
 @ ------------------------------------------------------------------------------
@@ -251,7 +256,7 @@ osdWaiu:ldrh r5, [r4]
 .thumb_func
 
 osdSet16CPallette:
-        push {r0, r1, r3, r4, r5, lr}
+        push {r0, r1, r3, r4, r5}
         lsl r0, #4
         mov r4, r1
         lsl r4, #31
@@ -268,7 +273,8 @@ osdSet16CPallette:
         and r3, r5
         orr r3, r2
         strh r3, [r0, r1]
-        pop {r0, r1, r3, r4, r5, pc}
+        pop {r0, r1, r3, r4, r5}
+        bx lr
 
         
 @ ------------------------------------------------------------------------------
@@ -278,7 +284,7 @@ osdSet16CPallette:
 .thumb_func
 
 osdSetAltOffset:
-        push {r0, r1, r2, r3, r4, lr}
+        push {r0, r1, r2, r3, r4}
         ldr r2, =0x3000000
         sub r1, r2
         lsr r1, #5
@@ -286,8 +292,9 @@ osdSetAltOffset:
         strh r1, [r2, #2]
         lsr r1, #16
         strh r1, [r2]
-        pop {r0, r1, r2, r3, r4, pc}
-        
+        pop {r0, r1, r2, r3, r4}
+        bx lr
+
 
 @ ------------------------------------------------------------------------------
 @ osdSetComponentOffset(r0=component, r1=offset)
@@ -297,7 +304,7 @@ osdSetAltOffset:
 .thumb_func
 
 osdSetComponentOffset:
-        push {r0, r1, r2, r3, r4, lr}
+        push {r0, r1, r2, r3, r4}
         ldr r2, =0x3000000
         sub r1, r2
         lsr r1, #5
@@ -323,7 +330,8 @@ osdSetComponentOffset:
         lsl r1, r3                      @ 00vv / vv00
         orr r1, r0
         strh r1, [r2]
-        pop {r0, r1, r2, r3, r4, pc}
+        pop {r0, r1, r2, r3, r4}
+        bx lr
 
         
 @ ------------------------------------------------------------------------------
@@ -335,13 +343,14 @@ osdSetComponentOffset:
 .thumb_func
 
 osdSetComponentSize:
-        push {r0, r3, lr}
+        push {r0, r3}
         lsl r0, #3                      @ component *8
         ldr r3, =0x306a8
         add r3, r0
         strh r1, [r3]
         strh r2, [r3, #2]
-        pop {r0, r3, pc}
+        pop {r0, r3}
+        bx lr
 
 
 @ ------------------------------------------------------------------------------
@@ -353,13 +362,14 @@ osdSetComponentSize:
 .thumb_func
 
 osdSetComponentPosition:
-        push {r0, r3, lr}
+        push {r0, r3}
         lsl r0, #3                      @ component *8
         ldr r3, =0x306a4
         add r3, r0
         strh r1, [r3]
         strh r2, [r3, #2]
-        pop {r0, r3, pc}
+        pop {r0, r3}
+        bx lr
 
 
 @ ------------------------------------------------------------------------------        
@@ -371,11 +381,12 @@ osdSetComponentPosition:
 .thumb_func
 
 osdSetComponentSourceWidth:
-        push {r0, r2, lr}
+        push {r0, r2}
         lsl r0, #1                      @ component *2
         ldr r2, =0x3068c
         strh r1, [r2, r0]
-        pop {r0, r2, pc}
+        pop {r0, r2}
+        bx lr
 
 
 @ ------------------------------------------------------------------------------
@@ -386,7 +397,7 @@ osdSetComponentSourceWidth:
 .thumb_func
 
 osdSetComponentConfig:
-        push {r0, r2, r3, lr}
+        push {r0, r2, r3}
         cmp r0, #OSD_VIDEO1
          bne osdNV1
         ldr r2, =0x30682
@@ -395,7 +406,8 @@ osdSetComponentConfig:
         lsl r3, #8
         orr r1, r3
         strh r1, [r2]
-        pop {r0, r2, r3, pc}
+        pop {r0, r2, r3}
+        bx lr
 osdNV1: cmp r0, #OSD_VIDEO2
          bne osdNV2
         ldr r2, =0x30682
@@ -405,12 +417,13 @@ osdNV1: cmp r0, #OSD_VIDEO2
         lsl r1, #8
         orr r1, r3
         strh r1, [r2]
-        pop {r0, r2, r3, pc}         
+        pop {r0, r2, r3}
+        bx lr
 osdNV2: lsl r0, #1
         ldr r2, =0x30680
         strh r1, [r0, r2]
-        pop {r0, r2, r3, pc}
-        
+        pop {r0, r2, r3}
+        bx lr
 
 
 @ ------------------------------------------------------------------------------
@@ -420,14 +433,15 @@ osdNV2: lsl r0, #1
 .thumb_func
 
 osdSetBrightness:
-        push {r0, r1, r2, lr}
+        push {r0, r1, r2}
         ldr r1, =0x30830
         ldrh r2, [r1]
         lsr r2, #8
         lsl r2, #8
         orr r2, r0
         strh r2, [r1]
-        pop {r0, r1, r2, pc}
+        pop {r0, r1, r2}
+        bx lr
 
 
 @ ------------------------------------------------------------------------------
@@ -437,7 +451,7 @@ osdSetBrightness:
 .thumb_func
 
 osdSetContrast:
-        push {r0, r1, r2, lr}
+        push {r0, r1, r2}
         ldr r1, =0x30830
         ldrh r2, [r1]
         lsl r2, #24
@@ -445,7 +459,8 @@ osdSetContrast:
         lsl r0, #8
         orr r2, r0
         strh r2, [r1]
-        pop {r0, r1, r2, pc}
+        pop {r0, r1, r2}
+        bx lr
 
 @ ------------------------------------------------------------------------------
 @ UNCLEANED...
@@ -457,7 +472,7 @@ osdSetContrast:
 .globl osdInit
 .thumb_func
 osdInit:
-        push {r0, r1, r2, lr}
+        push {r0, r1, r2}
 
         mov r2, #0
         ldr r0, =0x30800
@@ -517,8 +532,9 @@ osdInit:
         ldr r0, =02600200
         ldr r1, =0x4
         strh r1, [r0]
-        pop {r0, r1, r2, pc}
-
+        pop {r0, r1, r2}
+        bx lr
+        
         .ltorg
         .arm
         

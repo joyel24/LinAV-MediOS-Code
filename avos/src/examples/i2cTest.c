@@ -33,8 +33,6 @@ int main() {
     int b;
 
     osdInit();
-
-//    i2cInit();
     
     osdSetComponentConfig(OSD_VIDEO1, 0);
     osdSetComponentConfig(OSD_VIDEO2, 0);

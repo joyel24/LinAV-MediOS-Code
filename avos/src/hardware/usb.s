@@ -30,14 +30,15 @@ usbInc = 1
 .thumb_func
 
 usbIsConnected:
-        push {r1, lr}
+        push {r1}
         ldr r1, =0x30a24
         ldrh r0, [r1]
         lsr r0, #6
         mov r1, #1
         and r0, r1
-        pop {r1, pc}
-
+        pop {r1}
+        bx lr
+        
         
 @ ------------------------------------------------------------------------------
 @ usbEnable
@@ -46,11 +47,12 @@ usbIsConnected:
 .thumb_func
 
 usbEnable:
-        push {r1, lr}
+        push {r1}
         ldr r1, =0x02600100
         mov r0, #1
         strh r0, [r1]
-        pop {r1, pc}
+        pop {r1}
+        bx lr
 
 
 @ ------------------------------------------------------------------------------
@@ -60,12 +62,13 @@ usbEnable:
 .thumb_func
 
 usbDisable:
-        push {r1, lr}
+        push {r1}
         ldr r1, =0x02600100
         mov r0, #0
         strh r0, [r1]
-        pop {r1, pc}
-        
+        pop {r1}
+        bx lr
+
         .arm
         .ltorg
         

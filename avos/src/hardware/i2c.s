@@ -29,11 +29,10 @@
 @
 .thumb_func
 i2cDelay:
-        push {lr}
         mov r0, #8
 i2cDE:  sub r0, #1
          bne i2cDE
-        pop {pc}
+        bx lr
 
 @-------------------------------------------------------------------------------
 @
@@ -94,7 +93,9 @@ i2cXA2:
         orr r0, r1
         strh r0, [r7, #i2cRegDR]
         
-        pop {r0, r1, r7, pc}
+        pop {r0, r1, r7}
+        pop {r1}
+        bx r1
         
 @-------------------------------------------------------------------------------
 @
@@ -135,7 +136,9 @@ i2c_fn2:
         mov r1, #8
         orr r0, r1
         strh r0, [r7, #i2cRegDR]
-        pop {r0, r1, r7, pc}
+        pop {r0, r1, r7}
+        pop {r1}
+        bx r1
         
 @-------------------------------------------------------------------------------
 @
@@ -189,8 +192,9 @@ i2cVA2:
 
         bl i2cDelay
 
-        pop {r0, r1, r7, pc}
-
+        pop {r0, r1, r7}
+        pop {r1}
+        bx r1
         
 @-------------------------------------------------------------------------------
 @
@@ -224,8 +228,10 @@ i2c_fn4:
         ldr r1, =0xfffb
         and r0, r1
         strh r0, [r7, #i2cRegDR]
-        pop {r0, r1, r7, pc}
-
+        pop {r0, r1, r7}
+        pop {r1}
+        bx r1
+        
 @-------------------------------------------------------------------------------
 @ i2cGetAck
 @
@@ -287,7 +293,9 @@ i2cGA2:
         bl i2cDelay
         
         mov r0, r4
-        pop {r1, r2, r3, r4, r7, pc}
+        pop {r1, r2, r3, r4, r7}
+        pop {r1}
+        bx r1
 
 @-------------------------------------------------------------------------------
 @ i2cInb
@@ -351,8 +359,9 @@ i2cW9:
         
         mov r0, r2
 
-        pop {r1, r2, r3, r4, r5, r6, r7, pc}
-
+        pop {r1, r2, r3, r4, r5, r6, r7}
+        pop {r1}
+        bx r1
         
 @-------------------------------------------------------------------------------
 @ i2cOutb (r0=data)
@@ -429,7 +438,9 @@ i2cW2:
          
         bl i2cGetAck
 
-        pop {r1, r2, r3, r4, r5, r6, r7, pc}
+        pop {r1, r2, r3, r4, r5, r6, r7}
+        pop {r1}
+        bx r1
         
 @-------------------------------------------------------------------------------
 @ i2cRead (r0=device, r1=addr, r2->buffer, r3=count)
@@ -460,6 +471,7 @@ i2cRead:
         lsr r6, #4
          bcc i2cRE
       
+        mov r5, r1
         bl i2c_fn4
         
         lsl r0, #24
@@ -469,7 +481,7 @@ i2cRead:
         cmp r0, #0
          bne i2cRE
          
-        lsl r0, r1, #24
+        lsl r0, r5, #24
         lsr r0, #24
         bl i2cOutb
         cmp r0, #0
@@ -504,11 +516,15 @@ i2cRN:
         bl i2c_fn2
 
         mov r0, #0
-        pop {r1, r2, r3, r4, r5, r6, r7, pc}
+        pop {r1, r2, r3, r4, r5, r6, r7}
+        pop {r1}
+        bx r1
         
 i2cRE:  mov r0, #0
         sub r0, #1
-        pop {r1, r2, r3, r4, r5, r6, r7, pc}
+        pop {r1, r2, r3, r4, r5, r6, r7}
+        pop {r1}
+        bx r1
 
 
 @-------------------------------------------------------------------------------
@@ -540,6 +556,8 @@ i2cWrite:
         lsr r6, #4
          bcc i2cWE
       
+        mov r5, r1
+         
         bl i2c_fn4
         
         lsl r0, #24
@@ -549,7 +567,7 @@ i2cWrite:
         cmp r0, #0
          bne i2cWE
          
-        lsl r0, r1, #24
+        lsl r0, r5, #24
         lsr r0, #24
         bl i2cOutb
         cmp r0, #0
@@ -570,11 +588,14 @@ i2cWN:
         bl i2c_fn2
 
         mov r0, #0
-        pop {r1, r2, r3, r4, r5, r6, r7, pc}
+        pop {r1, r2, r3, r4, r5, r6, r7}
+        pop {r1}
+        bx r1
 
 i2cWE:  mov r0, #0
         sub r0, #1
-        pop {r1, r2, r3, r4, r5, r6, r7, pc}
+        pop {r1, r2, r3, r4, r5, r6, r7}
+        bx r1
         
         .arm
         .ltorg

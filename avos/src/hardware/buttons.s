@@ -50,7 +50,7 @@ buttonsInc = 1
 .thumb_func
 
 buttonsGetStatus:
-        push {r1, r2, r3, lr}
+        push {r1, r2, r3}
         mov r3, #0x0f
         ldr r2, =0x2600680
         ldrh r1, [r2, #0]
@@ -84,8 +84,9 @@ buttonsGetStatus:
         ldr r2, =0x3fff
         eor r0, r2
 
-        pop {r1, r2, r3, pc}
-
+        pop {r1, r2, r3}
+        bx lr
+        
         .arm
         .ltorg
 

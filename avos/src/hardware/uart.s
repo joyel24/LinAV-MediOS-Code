@@ -36,7 +36,7 @@ uartInc = 1
 .thumb_func
 
 uartGetch:
-        push {r1, r2, r3, lr}
+        push {r1, r2, r3}
         ldr r2, =uartBase
         mov r1, #0
         ldrh r1, [r2, #uartRegRFCR]
@@ -46,7 +46,8 @@ uartGetch:
          beq uartNon
         mov r0, #0
         ldrh r0, [r2, #uartRegDTTR]
-uartNon:pop {r1, r2, r3, pc}
+uartNon:pop {r1, r2, r3}
+        bx lr
 
 
 
@@ -81,9 +82,11 @@ uartLp1:ldrb r0, [r1, #0]
         bl uartOutch
         add r1, r1, #1
         b uartLp1
-uartEn1:pop {r1, pc}
+uartEn1:pop {r1}
+        pop {r1}
+        bx r1
 
         .ltorg
         .arm
-        
+
 .endif

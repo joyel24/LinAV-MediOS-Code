@@ -28,7 +28,7 @@ stringInc = 1
 .thumb_func
 
 stringPutHex:
-        push {r0, r1, r2, r3, r4, r5, lr}
+        push {r0, r1, r2, r3, r4, r5}
         ldr r4, =hextable
         mov r3, r2                  @ will be our shift val...
         sub r3, #1
@@ -44,7 +44,8 @@ stringl1:
         add r0, #1
         sub r2, #1
          bne stringl1
-        pop {r0, r1, r2, r3, r4, r5, pc}
+        pop {r0, r1, r2, r3, r4, r5}
+        bx lr
 
 hextable:   .ascii "0123456789ABCDEF"
 

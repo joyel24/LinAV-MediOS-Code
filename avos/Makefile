@@ -12,9 +12,9 @@
 
 
 libavos:
-	arm-elf-gcc -c -mthumb -mthumb-interwork -fno-zero-initialized-in-bss -nostdlib -nodefaultlibs -Iinclude/ src/fonts/*.c
-	arm-elf-gcc -c -mthumb -mthumb-interwork -fno-zero-initialized-in-bss -nostdlib -nodefaultlibs -Iinclude/ src/drivers/*.c
-	arm-elf-as -mthumb-interwork -o lib/libavos.o src/hardware/*.s
+	arm-linux-gcc -Wa,-R -c -mthumb-interwork -fno-zero-initialized-in-bss -Iinclude/ src/fonts/*.c
+	arm-linux-gcc -Wa,-R -c -mthumb-interwork -fno-zero-initialized-in-bss -Iinclude/ src/drivers/*.c
+	arm-linux-as -mfpu=softfpa -mthumb-interwork -o lib/libavos.o src/hardware/*.s
 	mv *.o lib
 
 .PHONY: clean
@@ -23,8 +23,10 @@ clean:
 
 examples: src/examples/*.c
 	@for i in src/examples/*.c;do\
-	arm-elf-gcc -c -mthumb -mcallee-super-interworking -fno-zero-initialized-in-bss -nostdlib -nodefaultlibs -Iinclude/ $$i;\
-	arm-elf-ld -Ttext 0x03000000 -e main -o `basename $$i .c`.elf `basename $$i .c`.o lib/*.o;\
-	arm-elf-objcopy -O binary `basename $$i .c`.elf `basename $$i .c`.bin;\
-	rm -f `basename $$i .c`.elf `basename $$i .c`.o;\
-	done
+	arm-linux-gcc -mthumb-interwork -static-libgcc -c -Wa,-R\
+    -fno-zero-initialized-in-bss -Iinclude/ $$i;\
+	arm-linux-ld -N -Ttext 0x03000000 -e main -o `basename $$i .c`.elf `basename $$i .c`.o\
+    lib/*.o -lfloat -lgcc -L/home/jimmy/archos/uclib/toolchain/gcc-3.3.x/toolchain_arm_nofpu/lib/gcc-lib/arm-linux-uclibc/3.3.2/;\
+	arm-linux-objcopy -O binary `basename $$i .c`.elf `basename $$i .c`.bin;\
+    rm -f `basename $$i .c`.elf `basename $$i .c`.o;\
+    done

@@ -68,9 +68,11 @@ int main() {
             graphicsString(&screenBitmap, 212, 0, &sprite7_13, std7x13_, 8, 0,
                     "F2[HDD]");
             graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
-                    "Selecting HDD...        ");
+                    "Power HDD...        ");
             uartOuts("\nSelecting HDD...\n");
             ataPowerUpHDD();
+            graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
+                    "Selecting HDD...        ");
             ataSelectHDD();
         } else {
             graphicsString(&screenBitmap, 212, 0, &sprite7_13, std7x13_, 8, 0,

@@ -29,7 +29,7 @@ mathInc = 1
 .thumb_func
 
 mathDivLU:
-        push {r1, r2, r3, r4, r5, lr}
+        push {r1, r2, r3, r4, r5}
         mov r3, #1
 mathL1: lsr r4, r0, #31
         lsl r0, #1
@@ -44,7 +44,8 @@ mathL1: lsr r4, r0, #31
 mathL2: add r3, #1
         cmp r3, #33
          bne mathL1
-        pop {r1, r2, r3, r4, r5, pc}
+        pop {r1, r2, r3, r4, r5}
+        bx lr
 
         
 @-------------------------------------------------------------------------------
@@ -56,7 +57,7 @@ mathL2: add r3, #1
 .thumb_func
 
 mathModLU:
-        push {r1, r2, r3, r4, r5, lr}
+        push {r1, r2, r3, r4, r5}
         mov r3, #1
 mathL3: lsr r4, r0, #31
         lsl r0, #1
@@ -72,7 +73,8 @@ mathL4: add r3, #1
         cmp r3, #33
          bne mathL3
         mov r0, r1
-        pop {r1, r2, r3, r4, r5, pc}
+        pop {r1, r2, r3, r4, r5}
+        bx lr
         
         .arm
         .ltorg

@@ -62,7 +62,7 @@ graphicsRoutines:
 .thumb_func
 
 graphicsGetOffset:
-        push {r1, r2, r3, r4, lr}
+        push {r1, r2, r3, r4}
         ldr r3, [r0, #GRAPHICS_BUFFER_OFFSET]
         ldr r4, [r0, #GRAPHICS_BUFFER_BYTESPERLINE]
         mul r2, r4
@@ -72,7 +72,8 @@ graphicsGetOffset:
         lsr r1, #3
         add r3, r1
         mov r0, r3
-        pop {r1, r2, r3, r4, pc}
+        pop {r1, r2, r3, r4}
+        bx lr
 
                     
 @ ------------------------------------------------------------------------------
@@ -82,7 +83,7 @@ graphicsGetOffset:
 .thumb_func
 
 graphicsFindRoutine:
-        push {r6, lr}
+        push {r6}
         mov r6, #(4*6)
         mul r7, r6
         ldr r6, [r0, #GRAPHICS_BUFFER_BPPSHIFT]
@@ -90,7 +91,8 @@ graphicsFindRoutine:
         add r7, r6
         ldr r6, =graphicsRoutines
         ldr r7, [r6, r7]
-        pop {r6, pc}
+        pop {r6}
+        bx lr
                     
 
 @ ------------------------------------------------------------------------------
@@ -105,7 +107,9 @@ graphicsSetPixel:
         bl graphicsFindRoutine
         mov lr, pc
         mov pc, r7    
-        pop {r1, r2, r3, r7, pc}
+        pop {r1, r2, r3, r7}
+        pop {r1}
+        bx r1
 
 
 @ ------------------------------------------------------------------------------
@@ -121,7 +125,9 @@ graphicsGetPixel:
         bl graphicsFindRoutine
         mov lr, pc
         mov pc, r7    
-        pop {r1, r2, r3, r7, pc}
+        pop {r1, r2, r3, r7}
+        pop {r1}
+        bx r1
 
 
 @ ------------------------------------------------------------------------------
@@ -138,7 +144,9 @@ graphicsBoxf:
         ldr r5, [sp, #(8*4)]
         mov lr, pc
         mov pc, r7
-        pop {r1, r2, r3, r4, r5, r7, pc}
+        pop {r1, r2, r3, r4, r5, r7}
+        pop {r1}
+        bx r1
 
 
 @ ------------------------------------------------------------------------------
@@ -153,7 +161,9 @@ graphicsSprite:
         bl graphicsFindRoutine
         mov lr, pc
         mov pc, r7
-        pop {r1, r2, r3, r4, r5, r7, pc}
+        pop {r1, r2, r3, r4, r5, r7}
+        pop {r1}
+        bx r1
         
         
 @ ------------------------------------------------------------------------------
@@ -170,7 +180,9 @@ graphicsString:
         ldr r6, [sp, #(7*4)]
         ldr r7, [sp, #(8*4)]
         bl graphicsStringR
-        pop {r4, r5, r6, r7, pc}
+        pop {r4, r5, r6, r7}
+        pop {r1}
+        bx r1
         
 
 graphicsStringR:
@@ -187,7 +199,9 @@ gsloop: push {r6}
         cmp r6, #0
          beq gsnochr
         str r6, [r3, #GRAPHICS_BUFFER_OFFSET]
+        mov r6, r1
         bl graphicsSprite
+        mov r1, r6
 gsnochr:
         pop {r6}
         add r1, r5
@@ -196,7 +210,9 @@ gsnochr:
         add r7, #1
         b gsloop
 gsdone: pop {r6}
-        pop {r1, r2, r7, pc}
+        pop {r1, r2, r7}
+        pop {r1}
+        bx r1
 
         .arm
         .ltorg

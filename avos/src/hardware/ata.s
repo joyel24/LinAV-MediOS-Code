@@ -76,8 +76,9 @@ ataSectorHalfwordsShift     =   8           @ 256 halfwords
 .thumb_func
 
 ataReadSectors:
-        push {r1, r2, r3, lr}
+        push {r1, r2, r3, r4, lr}
         mov r3, r0
+        mov r4, r1
         bl ataWaitForReady
         cmp r0, #0
          bne ataRSE
@@ -87,16 +88,23 @@ ataReadSectors:
         cmp r0, #0
          bne ataRSF
         mov r0, r2
+        mov r1, r4
         lsl r1, #ataSectorHalfwordsShift
         bl ataReadData
         mov r0, #0
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3, r4}
+        pop {r1}
+        bx r1
 ataRSE: mov r0, #0
         sub r0, #1
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3, r4}
+        pop {r1}
+        bx r1
 ataRSF: mov r0, #0
         sub r0, #2
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3, r4}
+        pop {r1}
+        bx r1
 
         
 @ ------------------------------------------------------------------------------
@@ -106,8 +114,9 @@ ataRSF: mov r0, #0
 .thumb_func
 
 ataWriteSectors:
-        push {r1, r2, r3, lr}
+        push {r1, r2, r3, r4, lr}
         mov r3, r0
+        mov r4, r1
         bl ataWaitForReady
         cmp r0, #0
          bne ataWSE
@@ -117,16 +126,23 @@ ataWriteSectors:
         cmp r0, #0
          bne ataWSF
         mov r0, r2
+        mov r1, r4
         lsl r1, #ataSectorHalfwordsShift
         bl ataWriteData
         mov r0, #0
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3, r4}
+        pop {r1}
+        bx r1
 ataWSE: mov r0, #0
         sub r0, #1
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3, r4}
+        pop {r1}
+        bx r1
 ataWSF: mov r0, #0
         sub r0, #2
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3, r4}
+        pop {r1}
+        bx r1
 
 
 @ ------------------------------------------------------------------------------
@@ -149,13 +165,19 @@ ataIdentifyDevice:
         ldr r1, =ataSectorHalfwords
         bl ataReadData
         mov r0, #0
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3}
+        pop {r1}
+        bx r1
 ataISE: mov r0, #0
         sub r0, #1
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3}
+        pop {r1}
+        bx r1
 ataISF: mov r0, #0
         sub r0, #2
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3}
+        pop {r1}
+        bx r1
         
         
 @ ------------------------------------------------------------------------------
@@ -165,7 +187,7 @@ ataISF: mov r0, #0
 .thumb_func
 
 ataRead:
-        push {r0, r2, lr}
+        push {r0, r2}
         ldr r2, =ataRegSector
         strb r0, [r2]
         ldr r2, =ataRegLCyl
@@ -184,7 +206,8 @@ ataRead:
         ldr r2, =ataRegCommand
         mov r0, #ataCommand_READ_SECTORS
         strb r0, [r2]
-        pop {r0, r2, pc}
+        pop {r0, r2}
+        bx lr
 
 @ ------------------------------------------------------------------------------
 @ ataWrite(r0=LBA, r1=number)
@@ -193,7 +216,7 @@ ataRead:
 .thumb_func
 
 ataWrite:
-        push {r0, r2, lr}
+        push {r0, r2}
         ldr r2, =ataRegSector
         strb r0, [r2]
         ldr r2, =ataRegLCyl
@@ -212,7 +235,8 @@ ataWrite:
         ldr r2, =ataRegCommand
         mov r0, #ataCommand_WRITE_SECTORS
         strb r0, [r2]
-        pop {r0, r2, pc}
+        pop {r0, r2}
+        bx lr
         
         
 @ ------------------------------------------------------------------------------
@@ -222,14 +246,15 @@ ataWrite:
 .thumb_func
 
 ataIdentify:
-        push {r1, r2, lr}
+        push {r1, r2}
         ldr r2, =ataRegSelect
         mov r1, #0
         strb r1, [r2]
         ldr r2, =ataRegCommand
         mov r1, #ataCommand_IDENTIFY
         strb r1, [r2]
-        pop {r1, r2, pc}
+        pop {r1, r2}
+        bx lr
         
         
 @ ------------------------------------------------------------------------------
@@ -239,7 +264,7 @@ ataIdentify:
 .thumb_func
 
 ataReadData:
-        push {r1, r2, r3, lr}
+        push {r1, r2, r3}
         ldr r2, =ataRegData
 ataReadD:
         ldrh r3, [r2]
@@ -247,8 +272,9 @@ ataReadD:
         add r0, #2
         sub r1, #1
          bne ataReadD
-        pop {r1, r2, r3, pc}
-
+        pop {r1, r2, r3}
+        bx lr
+        
         
 @ ------------------------------------------------------------------------------
 @ ataWriteData(r0->buffer, r1=#halfwords)
@@ -257,7 +283,7 @@ ataReadD:
 .thumb_func
 
 ataWriteData:
-        push {r1, r2, r3, lr}
+        push {r1, r2, r3}
         ldr r2, =ataRegData
 ataWriteD:
         ldrh r3, [r0]
@@ -265,7 +291,8 @@ ataWriteD:
         add r0, #2
         sub r1, #1
          bne ataWriteD
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3}
+        bx lr
         
         
 @ ------------------------------------------------------------------------------
@@ -276,7 +303,7 @@ ataWriteD:
 .thumb_func
 
 ataWaitForXfer:
-        push {r1, r2, r3, lr}
+        push {r1, r2, r3}
         ldr r3, =ataWaitForXferTO
 ataNotX:sub r3, #1
          beq ataTO2
@@ -290,10 +317,12 @@ ataNotX:sub r3, #1
         tst r0, r2
          beq ataNotX                @ DRQ Clear!
         mov r0, #0
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3}
+        bx lr
 ataTO2: mov r0, #0
         sub r0, #1
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3}
+        bx lr
         
         
 @ ------------------------------------------------------------------------------
@@ -304,7 +333,7 @@ ataTO2: mov r0, #0
 .thumb_func
 
 ataWaitForReady:
-        push {r1, r2, r3, lr}
+        push {r1, r2, r3}
         ldr r3, =ataWaitForReadyTO
 ataNotR:sub r3, #1
          beq ataTO1
@@ -318,10 +347,12 @@ ataNotR:sub r3, #1
         tst r0, r2
          beq ataNotR                @ RDY Clear!
         mov r0, #0
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3}
+        bx lr
 ataTO1: mov r0, #0
         sub r0, #1
-        pop {r1, r2, r3, pc}
+        pop {r1, r2, r3}
+        bx lr
 
         
 @ ------------------------------------------------------------------------------
@@ -331,11 +362,12 @@ ataTO1: mov r0, #0
 .thumb_func
 
 ataStatus:
-        push {r1, lr}
+        push {r1}
         mov r0, #0
         ldr r1, =ataRegStatus
         ldrb r0, [r1]
-        pop {r1, pc}
+        pop {r1}
+        bx lr
         
         
 @ ------------------------------------------------------------------------------
@@ -345,11 +377,12 @@ ataStatus:
 .thumb_func
 
 ataPowerUpHDD:
-        push {r0, r1, lr}
+        push {r0, r1}
         mov r0, #ataValPowerUpHDD
         ldr r1, =ataRegPowerUpHDD
         strh r0, [r1]
-        pop {r0, r1, pc}
+        pop {r0, r1}
+        bx lr
 
 
 @ ------------------------------------------------------------------------------
@@ -359,11 +392,12 @@ ataPowerUpHDD:
 .thumb_func
 
 ataPowerDownHDD:
-        push {r0, r1, lr}
+        push {r0, r1}
         mov r0, #0
         ldr r1, =ataRegPowerUpHDD
         strh r0, [r1]
-        pop {r0, r1, pc}
+        pop {r0, r1}
+        bx lr
         
         
 @ ------------------------------------------------------------------------------
@@ -373,7 +407,7 @@ ataPowerDownHDD:
 .thumb_func
 
 ataSelectHDD:
-        push {r0, r1, lr}
+        push {r0, r1}
         mov r0, #0
         ldr r1, =ataRegSelectSource
         strh r0, [r1]       @ Not sure why its done 5 times?
@@ -381,8 +415,8 @@ ataSelectHDD:
         strh r0, [r1]
         strh r0, [r1]
         strh r0, [r1]
-        pop {r0, r1, pc}
-
+        pop {r0, r1}
+        bx lr
 
 @ ------------------------------------------------------------------------------
 @ ataSelectMemoryCard()
@@ -391,7 +425,7 @@ ataSelectHDD:
 .thumb_func
 
 ataSelectMemoryCard:
-        push {r0, r1, lr}
+        push {r0, r1}
         mov r0, #1
         ldr r1, =ataRegSelectSource
         strh r0, [r1]       @ Not sure why its done 5 times?
@@ -399,7 +433,8 @@ ataSelectMemoryCard:
         strh r0, [r1]
         strh r0, [r1]
         strh r0, [r1]
-        pop {r0, r1, pc}
+        pop {r0, r1}
+        bx lr
         
         .ltorg
         .arm
