@@ -15,19 +15,22 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "ls_main.h"
+#include "browser.h"
+#include "graphics.h"
+#include "colordef.h"
+#include "icons.h"
 
-#include "ls-gui-icons.h"
+NEED_ICON(upBitmap)
+NEED_ICON(dwBitmap)
+NEED_ICON(dirBitmap)
+NEED_ICON(mp3Bitmap)
+NEED_ICON(textBitmap)
+NEED_ICON(imageBitmap)
+
+
+//#include "browser_icons.h"
 
 #define    FILE_X_OFFSET 10
-
-/*extern variables */
-extern struct client_operations * cops;
-/*extern struct dir_entry * list;
-extern int listused;
-extern int pos,nselect;
-extern int nbFile,nbDir,totSize,nbElem;*/
-/************************/
 
 int viewNewDir(struct browser_data *bdata,char *name)
 {
@@ -56,16 +59,15 @@ int viewNewDir(struct browser_data *bdata,char *name)
 void showArrow(int type,int max)
 {
     int h=0,w=0;
-    cops->getStringS("M", &w, &h);
+    getStringS("M", &w, &h);
 
     switch(type)
     {
         case UP_ARROW:
-            cops->drawBITMAP(&upBitmap,310,h+MENU_SHADOW+1+6);
+            drawBITMAP(&upBitmap,310,h+MENU_SHADOW+1+6);
             break;
         case DOWN_ARROW:
-//            cops->drawBITMAP(&dwBitmap,310,SCREEN_HEIGHT-10);
-            cops->drawBITMAP(&dwBitmap,310,2+h+6+MENU_SHADOW+(max-1)*(h+1));
+            drawBITMAP(&dwBitmap,310,2+h+6+MENU_SHADOW+(max-1)*(h+1));
             break;
     }
 }
@@ -73,16 +75,15 @@ void showArrow(int type,int max)
 void hideArrow(int type,int max)
 {
     int h=0,w=0;
-    cops->getStringS("M", &w, &h);
+    getStringS("M", &w, &h);
 
     switch(type)
     {
         case UP_ARROW:
-            cops->fillRect(COLOR_WHITE,310,h+MENU_SHADOW+1+6,9,9);
+            fillRect(COLOR_WHITE,310,h+MENU_SHADOW+1+6,9,9);
             break;
         case DOWN_ARROW:
-//            cops->fillRect(COLOR_WHITE,310,SCREEN_HEIGHT-10,9,9);
-            cops->fillRect(COLOR_WHITE,310,2+h+6+MENU_SHADOW+(max-1)*(h+1),9,9);
+            fillRect(COLOR_WHITE,310,2+h+6+MENU_SHADOW+(max-1)*(h+1),9,9);
             break;
     }
 }
@@ -98,7 +99,7 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
     int             h = 10;
     char *ext;
 
-   cops->getStringS("M", &w, &h);
+    getStringS("M", &w, &h);
 
     cp = strrchr(dEntry->name,(int) '/');
     if (cp)
@@ -107,7 +108,7 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
         cp = dEntry->name;
 
     if(clear)
-        cops->fillRect(COLOR_WHITE, 0, y , 320, h+1);
+        fillRect(COLOR_WHITE, 0, y , 320, h+1);
 
     switch(dEntry->type)
     {
@@ -118,7 +119,7 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
         case TYPE_DIR:    
             color=COLOR_RED;
             select_color=COLOR_BLUE;
-            cops->drawBITMAP (&dirBitmap, 2, y);
+            drawBITMAP (&dirBitmap, 2, y);
             break;
         case TYPE_FILE:
             color=COLOR_BLACK;
@@ -127,26 +128,26 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
             if (ext == 0)
             {
                 // no extension
-                cops->fillRect(COLOR_WHITE, 2, y, 8, 8);
+                fillRect(COLOR_WHITE, 2, y, 8, 8);
             }
             else if (is_mp3_type(ext))
-                cops->drawBITMAP (&mp3Bitmap, 2, y);
+                drawBITMAP (&mp3Bitmap, 2, y);
             else if(is_text_type(ext))
-                cops->drawBITMAP (&textBitmap, 2, y);
+                drawBITMAP (&textBitmap, 2, y);
             else if(is_image_type(ext))
-                cops->drawBITMAP (&imageBitmap, 2, y);
+                drawBITMAP (&imageBitmap, 2, y);
             else
-                cops->fillRect(COLOR_WHITE, 2, y, 8, 8);
+                fillRect(COLOR_WHITE, 2, y, 8, 8);
             break;
     }
 
     if(selected)
     {
-        cops->putS(color, select_color,x, y, dEntry->name);
+        putS(color, select_color,x, y, dEntry->name);
         draw_file_size(dEntry);
     }
     else
-        cops->putS(color, COLOR_WHITE,x, y, dEntry->name);
+        putS(color, COLOR_WHITE,x, y, dEntry->name);
     return 1;
 }
 
@@ -159,16 +160,16 @@ void printAllName(struct browser_data *bdata)
     int pos=bdata->pos;
     int nselect=bdata->nselect;
 
-    cops->getStringS("M", &w, &h);
+    getStringS("M", &w, &h);
 
     for (i = pos; i < bdata->listused && i < pos+bdata->nb_disp_entry; i++)
     {
-        cops->fillRect(COLOR_WHITE,0, 2+(i-pos)*(h+1)+ h+6+MENU_SHADOW , 320,(h+1));
+        fillRect(COLOR_WHITE,0, 2+(i-pos)*(h+1)+ h+6+MENU_SHADOW , 320,(h+1));
         printName(&bdata->list[i],FILE_X_OFFSET, 2 + (i-pos)*(h+1)+ h+6+MENU_SHADOW,0,(i-pos)==nselect);
     }
 
     for(;i<pos+bdata->nb_disp_entry;i++)
-        cops->fillRect(COLOR_WHITE,0, (i-pos)*(h+1)+ h+7+MENU_SHADOW , 320,(h+1));
+        fillRect(COLOR_WHITE,0, (i-pos)*(h+1)+ h+7+MENU_SHADOW , 320,(h+1));
     
     draw_bottom_status(bdata);
 }
@@ -178,7 +179,7 @@ void printAName(struct browser_data *bdata,int pos, int nselect, int clear, int 
     int w = 0;
     int h = 10;
 
-    cops->getStringS("M", &w, &h);
+    getStringS("M", &w, &h);
 
     printName(&bdata->list[pos],FILE_X_OFFSET,2 + nselect*(h+1)+ h+6+MENU_SHADOW,clear,selected);    
 }
@@ -192,13 +193,13 @@ void draw_file_size(struct dir_entry * entry)
     
     /* erase previsous drawing */
 
-    cops->fillRect(COLOR_WHITE,x, 230,320-x,10);
+    fillRect(COLOR_WHITE,x, 230,320-x,10);
     if(entry->type == TYPE_FILE)
     {
         createSizeString(tmpS,entry->size);
-        cops->getStringS(tmpS,&w,&h);
+        getStringS(tmpS,&w,&h);
         x=320-w;
-        cops->putS(COLOR_BLUE, COLOR_WHITE,x, 230, tmpS);
+        putS(COLOR_BLUE, COLOR_WHITE,x, 230, tmpS);
     }
 }
 
@@ -211,7 +212,7 @@ void draw_bottom_status(struct browser_data *bdata)
     
     createSizeString(tmpS,bdata->totSize);
         
-    cops->fillRect(COLOR_WHITE,2, 220,316,20);
+    fillRect(COLOR_WHITE,2, 220,316,20);
         
     if (!getcwd(pwd, PATHLEN))
     {
@@ -220,12 +221,39 @@ void draw_bottom_status(struct browser_data *bdata)
     else
     {
         len=strlen(pwd);        
-        cops->putS(COLOR_BLUE, COLOR_WHITE,2, 220, pwd);  
+        putS(COLOR_BLUE, COLOR_WHITE,2, 220, pwd);  
     }
 
     snprintf(tmp,100,"%d %s, %d %s, %s",bdata->nbFile,bdata->nbFile>0?"files":"file",
             bdata->nbDir,bdata->nbDir>0?"folders":"folders",tmpS);
     fprintf(stderr,"%s\n",tmp);
     
-    cops->putS(COLOR_BLUE, COLOR_WHITE,2, 230, tmp);    
+    putS(COLOR_BLUE, COLOR_WHITE,2, 230, tmp);    
+}
+
+void createSizeString(char * str,int Isize)
+{
+    char * unit;
+    float size=Isize;
+    if(str!=NULL)
+    {
+        if(size/1024>1)
+        {
+            size/=1024;
+            unit="Kb";
+            if(size/1024>1)
+            {
+                size/=1024;
+                unit="Mb";
+                if(size/1024>1)
+                {
+                    size/=1024;
+                    unit="Gb";
+                }
+            }
+        }
+        else 
+            unit = "b";
+        sprintf(str,"%.02f %s",size,unit);
+    }
 }

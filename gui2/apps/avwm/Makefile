@@ -32,12 +32,16 @@ else
 endif
 	@rm -f *.gdb
 
-$(TARGET) : $(OBJS)
-	$(GCC) $(OBJS) -o $@  $(LDFLAGS)
+$(TARGET) : $(OBJS) browser_dir
+	$(GCC) $(OBJS) browser/*.o -o $@  $(LDFLAGS)
 
+browser_dir:
+	@$(MAKE) -C browser/ all
+        
 clean:
 	@echo "**** Cleaning..."
 	@$(MAKE) -C lib/ clean
+	@$(MAKE) -C browser/ clean
 	@rm -f *.o *.bak *~ *.gdb *..elf *.elf2flt $(TARGET) include/*~
 	@rm -Rf ../../build/avwm/
         

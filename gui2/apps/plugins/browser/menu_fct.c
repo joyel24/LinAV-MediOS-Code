@@ -178,7 +178,7 @@ void do_right(void * data)
     drawhelperMenuBox(&browserMenu);
     
     if(reload == true)
-        viewNewDir(bdata,"./");
+        cops->viewNewDir(bdata,"./");
     
 }
 

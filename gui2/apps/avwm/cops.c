@@ -27,6 +27,7 @@
 #include "debug.h"
 #include "CF_handler.h"
 #include "helperMenu.h"
+#include "file_type.h"
 
 #include <stdlib.h>
 
@@ -131,5 +132,11 @@ struct client_operations cops={
     CF_is_connected    : CF_is_connected,
     CF_is_mounted      : CF_is_mounted,
     mountCF            : mountCF,
-    umountCF           : umountCF
+    umountCF           : umountCF,
+    
+    get_file_type      : get_file_type,
+    
+    browserEvt         :browserEvt,
+    viewNewDir         :viewNewDir,
+    cleanList          :cleanList
 };

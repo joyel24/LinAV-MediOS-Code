@@ -21,6 +21,7 @@
 #include "menu.h"
 #include "osd.h"
 #include "helperMenu.h"
+#include "browser.h"
 
 #define     MERGE_BACK              0x0000
 #define     BMAP_0TRANS             0x0004
@@ -151,6 +152,12 @@ struct client_operations {
     int  (*CF_is_mounted)       (void);
     void (*mountCF)             (void);
     void (*umountCF)            (void);
+    
+    int  (*get_file_type)       (char * filename);
+    
+    int  (*browserEvt)          (int evt,struct browser_data * bdata);
+    int  (*viewNewDir)          (struct browser_data *bdata,char *name);
+    void (*cleanList)           (struct browser_data * bdata);
 };
 
 #endif

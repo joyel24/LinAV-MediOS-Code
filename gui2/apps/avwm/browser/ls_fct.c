@@ -16,8 +16,9 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
+#include <unistd.h>
 
-#include "ls_main.h"
+#include "browser.h"
 
 #define LISTSIZE   256
 

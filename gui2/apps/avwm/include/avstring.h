@@ -21,5 +21,7 @@ void   wmSetFont        (int font);
 void   wmgetStringS     (unsigned char *str, int *w, int *h);
 void   defaultFont      (void);
 void   debug            (char *fmt, ...);
+int    namesort         (char **s1,char **s2);
+void   strlwr           (char *s);
 
 #endif

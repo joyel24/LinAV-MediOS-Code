@@ -71,6 +71,30 @@ void ini_font(int font)
     wmSetFont(font);
 }
 
+#define    toLower(chr)  ((chr>64 && chr<91)?chr+32:chr)
+
+int namesort(char **s1,char **s2)
+{
+    char * st1=*s1;
+    char * st2=*s2;
+    while(*st1!=0 && *st2!=0 && toLower(*st1) == toLower(*st2))
+    {
+        st1++;
+        st2++;
+    }
+
+    return (toLower(*st1) - toLower(*st2));
+}
+
+void strlwr(char *s)
+{
+    while (*s)
+    {
+        *s = toLower(*s);
+        s++;
+    }
+}
+
 void wmgetStringS(unsigned char *str, int *w, int *h)
 {
     FONT_ID font=getFont();

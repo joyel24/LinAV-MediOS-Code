@@ -17,45 +17,7 @@
 #include "events.h"
 #include "colordef.h"
 #include "font.h"
-
-
-#define TYPE_DIR    1
-#define TYPE_FILE   2
-#define TYPE_BACK   0
-
-struct dir_entry {
-    char * name;
-    int type;
-    int size;
-};
-
-struct browser_data {
-    char * path;
-    
-    struct dir_entry * list;
-    int                listused;
-    int                listsize;
-    
-    int pos;
-    int nselect;
-    
-    int show_dot_files;
-
-    int nbFile;
-    int nbDir;
-    int totSize;
-    
-    int nb_disp_entry;
-    int x_start;
-    int y_start;
-    
-    int width;
-};
-
-#define    UP_ARROW     0
-#define    DOWN_ARROW   1
-
-//#define    MAXPOS     20
+#include "file_type.h"
 
 #define    false 0
 #define    true  1
@@ -65,23 +27,10 @@ struct browser_data {
 #define PATHLEN    256
 #define MAX_CHAR   100;
 
-/*****    str_fct   *****/
-int  namesort          (char **s1,char **s2);
-void strlwr            (char *s);
-void createSizeString  (char * str,int Isize);
+int  eventHandler       (int evt);
 
-/*****    ls_fct    *****/
-int  qSortEntry  (const void * a1,const void * a2);
-void cleanList   (struct browser_data * bdata);
-int  ini_lists   (struct browser_data * bdata);
-int  addEntry    (struct browser_data * bdata,char * name,int type,int size);
-int  doLs        (struct browser_data * bdata,char * name);
 
 /*****    file_handle_fct    *****/
-int   is_script_type     (char * extension);
-int   is_image_type      (char * extension);
-int   is_mp3_type        (char * extension);
-int   is_text_type       (char * extension);
 int   execBin            (char * path, ...);
 int   launchBin          (char * name);
 void  launchSoundPlayer  (char * name);
@@ -95,8 +44,6 @@ int   isadir             (char * name);
 char* buildname          (char * dirname,char * filename);
 int   copyfile           (char * src,char * dest,int setmodes);
 
-/*****    evt_handle_fct    *****/
-int  eventHandler       (int evt);
 
 /*****    menu_fct    *****/
 void ini_menu_struct  (void);
@@ -107,13 +54,3 @@ void do_F1            (void * data);
 void do_F2            (void * data);
 void do_F3            (void * data);
 void mk_item_str      (void * data,char * str);
-
-/*****    gui_fct    *****/
-int  viewNewDir         (struct browser_data *bdata,char *name);
-void showArrow          (int type,int max);
-void hideArrow          (int type,int max);
-int  printName          (struct dir_entry * dEntry,int x,int y,int clear,int selected);
-void printAllName       (struct browser_data *bdata);
-void printAName         (struct browser_data *bdata,int pos, int nselect, int clear, int selected);
-void draw_bottom_status (struct browser_data *bdata);
-void draw_file_size     (struct dir_entry * entry);

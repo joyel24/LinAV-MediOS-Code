@@ -38,6 +38,9 @@ struct helperMenu browserMenu = {
 };
 
 struct browser_data * bdata;
+extern int menuOff;
+extern struct menu_item menu1;
+extern struct menu_data menu_cfg;
 
 struct browser_data realData = {
     path            : NULL,
@@ -61,6 +64,64 @@ struct browser_data realData = {
     
     width           :0
 };
+
+int eventHandler(int evt)
+{
+    int w = 0;
+    int h = 10;
+    char pwd[10];    
+
+    cops->getStringS("M", &w, &h);
+
+    if(menuOff)
+    {
+        helperEvt(evt,BTN_JOY);
+        evt=cops->browserEvt(evt,bdata);
+        switch(evt)
+        {
+            case BTN_RIGHT:
+                if(bdata->list[bdata->pos+bdata->nselect].type==TYPE_FILE)
+                {                    
+                    handle_type_other(bdata->list[bdata->pos+bdata->nselect].name);                    
+                }
+                break;
+            case BTN_F1:
+                cops->viewNewDir(bdata,"/mnt");                  
+                break;
+            case BTN_F2:
+                if(cops->CF_is_mounted())
+                    cops->viewNewDir(bdata,"/cf");
+                break;
+            case BTN_F3:
+                menu_cfg.root=&menu1;
+                menuOff=0;
+                hideHelper();
+                cops->start_menu(&menu_cfg);
+                cops->menuEvtHandler(EVT_REDRAW);
+                break;
+            case BTN_OFF:
+            case EVT_QUIT:
+                RELEASE(cops)
+                break;
+            case EVT_REDRAW:
+                break;
+            case EVT_CF_REMOVED:
+                getcwd(pwd, 10);
+                pwd[10]='\0';
+                if(pwd[0]=='/' && pwd[1]=='c' && pwd[2]=='f' && (pwd[3]=='/'||pwd[3]=='\0'))
+                    cops->viewNewDir(bdata,"/mnt");
+                break;
+            case EVT_CF_ADDED:
+                cops->viewNewDir(bdata,"/cf");
+                break;
+        }
+    }
+    else
+    {
+        cops->menuEvtHandler(evt);
+    }
+    return 1;
+}
 
 int main(int argc,char * * argv)
 {
@@ -88,11 +149,11 @@ int main(int argc,char * * argv)
         else
             chdir(argv[1]);
 
-        viewNewDir(bdata,"./");       
+        cops->viewNewDir(bdata,"./");       
 
         PACK(cops,NULL);
 
-        cleanList(bdata);
+        cops->cleanList(bdata);
         return 0;
     }
     STOPME(cops)

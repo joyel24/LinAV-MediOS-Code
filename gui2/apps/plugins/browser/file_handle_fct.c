@@ -30,53 +30,6 @@
 extern struct client_operations * cops;
 /************************/
 
-/******************************************************************************* test file types */
-
-int is_script_type(char *extension)
-{
-    strlwr(extension);
-    return strcmp(extension, ".sh") == 0;
-}
-
-int is_image_type(char *extension)
-{
-    strlwr(extension);
-    return strcmp(extension, ".jpg") == 0
-        || strcmp(extension, ".gif") == 0
-        || strcmp(extension, ".bmp") == 0;
-}
-
-int is_mp3_type(char *extension)
-{
-    strlwr(extension);
-    return strcmp(extension, ".mp3") == 0;
-}
-
-int is_text_type(char * extension)
-{
-   int retVal = 0;
-
-    strlwr(extension);
-   if(strcmp(extension, ".txt") == 0)
-       retVal = 1;
-   else if(strcmp(extension, ".cfg") == 0)
-       retVal = 1;
-   else if(strcmp(extension, ".c") == 0)
-       retVal = 1;
-   else if(strcmp(extension, ".cpp") == 0)
-       retVal = 1;
-   else if(strcmp(extension, ".h") == 0)
-       retVal = 1;
-   else if(strcmp(extension, ".ini") == 0)
-       retVal = 1;
-   else if(strcmp(extension, ".csv") == 0)
-       retVal = 1;
-
-    return retVal;
-}
-
-/***********************************************************************************************/
-
 /****************************************************************************** file launcher */
 
 //execBin(path,arg0,arg1,arg2,...,(char*)0) arg0 should be the name of the app
@@ -150,39 +103,32 @@ int launchScript(char * name)
 }
 
 void handle_type_other(char *filename)
-{
-    char *ext;
+{   
+    int type=cops->get_file_type(filename);
+    printf("[handle_type_other]: %s, (type=%d)\n",filename,type);
     
-    ext = strrchr(filename, '.');
-    
-    printf("[handle_type_other]: %s, %s\n",filename,ext);
-    if (ext == 0)
+    switch(type)
     {
-      // no extension
-        launchBin(filename);
+        case BIN_TYPE:
+            launchBin(filename);
+            break;
+        case SCRIPT_TYPE:
+            launchScript(filename);
+            break;
+        case IMG_TYPE:
+            launchViewer(filename);
+            break;
+        case MP3_TYPE:
+            cops->playMp3(filename);
+            break;
+        case TXT_TYPE:
+            launchTxtView(filename);
+            break;
+        case UKN_TYPE:
+        default:
+            printf("[handle_type_other]: unknown type\n");
     }
-    else if (is_image_type(ext))
-    {
-       launchViewer(filename);
-    }
-    else if (is_text_type(ext))
-    {
-       launchTxtView(filename);
-    }
-    else if (is_mp3_type(ext))
-    {
-       //launchSoundPlayer(filename);
-       cops->playMp3(filename);
-    }
-    else if (is_script_type(ext))
-    {
-       launchScript(filename);
-    }
-    else
-    {
-       // unknown type
-    }
-}
+ }
 
 /***********************************************************************************************/
 
