@@ -8,13 +8,13 @@ LDFLAGS=-elf2flt
 MICROWINDOWS = ../microwindows-0.90/src
 
 # enable JPEG support
-LDFLAGS+=-L ../jpeg-6b
+#LDFLAGS+=-L ../jpeg-6b
 
 CFLAGS+=-I$(MICROWINDOWS)/include -g
 LDFLAGS+=$(MICROWINDOWS)/lib/libnano-X.a $(MICROWINDOWS)/lib/libmwengine.a $(MICROWINDOWS)/lib/libmwdrivers.a $(MICROWINDOWS)/lib/libmwfonts.a
 
 # enable JPEG support
-LDFLAGS += -ljpeg
+#LDFLAGS += -ljpeg
 
 LDFLAGS += -lpthread
 

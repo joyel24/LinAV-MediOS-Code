@@ -32,4 +32,4 @@ play: play.o
 	$(CC) play.o -o play  $(CFLAGS) -elf2flt #$(LDFLAGS)
 
 clean: 
-	$(RM) $(OBJS) *~ example example.gdb snow snow.gdb viewer viewer.gdb play play.gdb
+	$(RM) $(OBJS) *~ example example.gdb snow snow.gdb viewer viewer.gdb play play.gdb *.o
