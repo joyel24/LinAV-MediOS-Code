@@ -47,7 +47,6 @@ TASKMGR * createNewTask(void(*handler))
     head_task_mgr=ptr;
     
     return ptr;
-
 }
 
 void evtLoop(unsigned int evt_buffer)
@@ -58,10 +57,16 @@ void evtLoop(unsigned int evt_buffer)
     
     while(1)
     {
+        printk("before wait\n");
         evt=waitEvt(evt_buffer);
+        printk("get evt %d\n",evt);
         for(ptr=head_task_mgr;ptr!=NULL;ptr=ptr->nxt)
             if(ptr->state && ptr->evtHandler)
-                ptr->evtHandler(evt);        
+            {
+                printk("send to task ");
+                ptr->evtHandler(evt);   
+                printk("done\n");     
+            }
     }
 }
 
