@@ -27,6 +27,24 @@ int batteryRefresh=0;
 int pwrState=0;
 int usbState=0;
 
+const unsigned char usb[6][15] = {
+{38,38,38,38,38,01,01,01,01,01,01,38,38,38,38},
+{38,38,38,38,01,01,01,01,01,01,01,01,01,01,01},
+{01,01,01,01,01,01,01,01,01,01,01,38,01,38,01},
+{01,01,01,01,01,01,01,01,01,01,01,38,01,38,01},
+{38,38,38,38,01,01,01,01,01,01,01,01,01,01,01},
+{38,38,38,38,38,01,01,01,01,01,01,38,38,38,38} };
+const unsigned char power[6][12] = {
+{38,38,38,38,38,01,01,01,01,38,38,38,38},
+{38,38,38,38,01,01,01,01,01,01,01,01,01},
+{01,01,01,01,01,01,01,01,01,38,38,38,38},
+{01,01,01,01,01,01,01,01,01,38,38,38,38},
+{38,38,38,38,01,01,01,01,01,01,01,01,01},
+{38,38,38,38,38,01,01,01,01,38,38,38,38} };
+
+BITMAP usbIcon = {(unsigned int) usb, 15, 6, 0, 0};
+BITMAP powerIcon = {(unsigned int) power, 12, 6, 0, 0};
+
 /* draw the current time */
 void drawTime(void)
 {
@@ -35,7 +53,7 @@ void drawTime(void)
     if(getTimeS(timeSt))
     {
         //fillRect(BG_COLOR,150,2,130,11);
-        putS(TXT_COLOR,BG_COLOR,150,3,timeSt);
+        putS(TXT_COLOR,BG_COLOR,100,3,timeSt);
     }
 
 }
@@ -74,7 +92,7 @@ void drawBat(void)
             color = COLOR_GREEN;
             level = 20;
         }
-        
+
         //fprintf(stderr,"[BAT] P=%d,C=%d,L=%d\n",power,color,level);
 
         drawRect(COLOR_BLACK,289,2,22,10);
@@ -85,6 +103,14 @@ void drawBat(void)
     else
         fprintf(stderr,"[BAT] error getting bat level\n");
 
+}
+
+void drawStatus(void)
+{
+    if(usbState)
+        drawBITMAP(&usbIcon, 250, 4);
+    if(pwrState)
+        drawBITMAP(&powerIcon, 273, 4);
 }
 
 void drawGui(void)
@@ -108,9 +134,14 @@ void drawGui(void)
     sprintf(myName,"AvWm %d.%d",MAJOR_V,MINOR_V);
     putS(TXT_COLOR,BG_COLOR,2,3,myName);
 
+    /* get usb/power status */
+    pwrState=getPwr();
+    usbState=getUSB();
+
     /* and time, and battery */
     drawTime();
     drawBat();
+    drawStatus();
 }
 
 /* events */
