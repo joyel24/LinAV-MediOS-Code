@@ -32,6 +32,9 @@ extern void graphicsSetPixel(struct graphicsBuffer *buffDef, u32 x, u32 y, u32 c
 extern u32 graphicsGetPixel(struct graphicsBuffer *buffDef, u32 x, u32 y);
 extern void graphicsBoxf(struct graphicsBuffer *buffDef, u32 x, u32 y, u32 width, u32 height, u32 c);
 extern void graphicsSprite(struct graphicsBuffer *buffDest, u32 x, u32 y, struct graphicsBuffer *buffSrc);
+extern void graphicsString(struct graphicsBuffer *buffDest, u32 x, u32 y,
+                           struct graphicsBuffer *font, char (*fontlut[]) [], u32 dx, u32 dy,
+                           char *s);
 
 extern void graphics32SetPixel(struct graphicsBuffer *buffDef, u32 x, u32 y, u32 c);
 extern u32 graphics32GetPixel(struct graphicsBuffer *buffDef, u32 x, u32 y);

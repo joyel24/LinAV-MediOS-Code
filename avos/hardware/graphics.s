@@ -150,6 +150,49 @@ graphicsSprite:
         mov pc, r7
         pop {r1, r2, r3, r4, r5, r7, pc}
         
+        
+@ ------------------------------------------------------------------------------
+@ graphicsString(r0->bufferDefDest, r1=x, r2=y, r3=bufferDefSrc,
+@                r4->fontLUT, r5=dx, r6=dy, r7->String)
+@
+.globl graphicsString
+.thumb_func
+
+graphicsString:
+        push {r4, r5, r6, r7, lr}
+        ldr r4, [sp, #(5*4)]
+        ldr r5, [sp, #(6*4)]
+        ldr r6, [sp, #(7*4)]
+        ldr r7, [sp, #(8*4)]
+        bl graphicsStringR
+        pop {r4, r5, r6, r7, pc}
+        
+        
+
+graphicsStringR:
+        push {r1, r2, r7, lr}        
+        
+gsloop: push {r6}
+        mov r6, #0
+        ldrb r6, [r7]
+        cmp r6, #0
+         beq gsdone
+       
+        lsl r6, #2
+        ldr r6, [r4, r6]
+        str r6, [r3, #GRAPHICS_BUFFER_OFFSET]
+
+        bl graphicsSprite
+
+        pop {r6}
+        add r1, r5
+        add r2, r6
+
+        add r7, #1
+        b gsloop
+gsdone: pop {r6}
+        pop {r1, r2, r7, pc}
+        
         .include "graphics1.s"
         .include "graphics2.s"
         .include "graphics4.s"
