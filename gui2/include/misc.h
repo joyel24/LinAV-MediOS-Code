@@ -23,4 +23,9 @@ int   set_mouseParam    (int freq, int repeat);
 
 int   getBat            (void);
 
+int   getPwr            (void);
+
+int   getUSB            (void);
+int   setUSB            (int state);
+
 #endif

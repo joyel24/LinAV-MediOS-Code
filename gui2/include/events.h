@@ -29,6 +29,8 @@
 #define        BTN_OFF     0x000a
 #define        EVT_TIMER   0x000b
 #define        EVT_WKUP    0x000c
+#define        EVT_USB     0x000d
+#define        EVT_PWR     0x000e
 
 
 int  iniEvent(void);

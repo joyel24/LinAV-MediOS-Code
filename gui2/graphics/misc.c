@@ -103,3 +103,77 @@ int getBat(void)
         
         return power;
 }
+
+int getPwr(void)
+{
+    int fd,plug;
+    fd=open("/dev/avpower",O_RDONLY | O_NONBLOCK);
+        
+    if (fd < 0)
+    {
+        printf("Can't open /dev/avpower\n");
+        return 0;
+    }
+    
+    if(ioctl(fd,AV_POWER_IOC_STATE,&plug)<0)
+    {
+        printf("Error getting power value\n");
+        close(fd);
+        return 0;
+    }
+    
+    close(fd);
+    
+    return plug;
+}
+
+int getUSB(void)
+{
+    int fd,usb;
+    fd=open("/dev/avusb",O_RDONLY | O_NONBLOCK);
+        
+    if (fd < 0)
+    {
+        printf("Can't open /dev/avusb\n");
+        return 0;
+    }
+    
+    if(ioctl(fd,AV_USB_IOC_STATE,&usb)<0)
+    {
+        printf("Error getting power value\n");
+        close(fd);
+        return 0;
+    }
+    
+    close(fd);
+    
+    return usb;
+}
+
+int setUSB(int state)
+{
+    int fd;
+    fd=open("/dev/avusb",O_RDONLY | O_NONBLOCK);
+        
+    if (fd < 0)
+    {
+        printf("Can't open /dev/avusb\n");
+        return 0;
+    }
+    
+    if(sate)
+        usb=AV_USB_IOC_ENABLE;
+    else
+        usb=AV_USB_IOC_DISABLE;
+    
+    if(ioctl(fd,state,NULL)<0)
+    {
+        printf("Error getting power value\n");
+        close(fd);
+        return 0;
+    }
+    
+    close(fd);
+    
+    return usb;
+}

@@ -24,6 +24,8 @@
 #define TXT_COLOR COLOR_DARK_GREY
 
 int batteryRefresh=0;
+int pwrState=0;
+int usbState=0;
 
 /* draw the current time */
 void drawTime(void)
@@ -133,5 +135,7 @@ int statusEvtHandler(int evt)
 
 void ini_status_bar(struct plugin * status_plugin)
 {
+    pwrState=getPwr();
+    usbState=getUSB();
     doRegisterPlugin(status_plugin,statusEvtHandler,0);
 }
