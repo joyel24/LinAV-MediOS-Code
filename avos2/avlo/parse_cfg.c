@@ -49,11 +49,11 @@ int nxt_token(char * buff)
 
 /* processing empty lines and comments */
     while (1) {
-	while ((ch = next_char()), ch == ' ' || ch == '\t' || ch == '\n')
-	    if (ch == '\n') line_num++;
+	while ((ch = next_char()), ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
+	    if (ch == '\n' || ch == '\r') line_num++;
 	if (feof(file)) return 0;
 	if (ch != '#') break;
-	while ((ch = next_char()), ch != '\n')
+	while ((ch = next_char()), (ch != '\n' && ch != '\r'))
 	    if (feof(file)) return 0;
 	line_num++;
     }
@@ -74,7 +74,7 @@ int nxt_token(char * buff)
 		*here = 0;
 		return 1;
 	    }
-	    if (ch == '\n' || ch == '\t')
+	    if (ch == '\n' || ch == '\r' || ch == '\t')
 		debug("\\n and \\t are not allowed in quoted strings");
 	    *here++ = ch;
 	}
@@ -84,7 +84,7 @@ int nxt_token(char * buff)
 /* processing normal char */
     here = buff;
     while (here-buff < MAX_TOKEN) {
-	if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '#' ||
+	if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '#' ||
 	      ch == '=' || feof(file)) {
 		again(ch);
 		*here = 0;

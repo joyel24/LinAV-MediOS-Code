@@ -36,13 +36,17 @@ void iniGraph();
 void affUSB();
 void drawMenu();
 void processDefault(int key,int nbCfg);
+void printErr(int key);
+void waitKeyReleased(void);
 
-int usbstate;
-int keyPressed,oldpos=-1,cnt=0,cursorPos=0,delayCnt=0x30000;
+int usbstate,usbenable=0,cleanUSBMsg=0;
+int chkdefault,cnt=0,cursorPos=0,delayCnt=0x5000;
+int errNoDefault=0,cntNoDefault=0,stateNoDefault=0;
 
 int main(int argc,char **argv)
 {
 	int ret,nbCfg,key,redraw;
+	int i;
 	
 	void (*systemRelocateAdjusted)();
 
@@ -52,10 +56,13 @@ int main(int argc,char **argv)
 	iniGraph();
 	
 	iniHD();
-	
+loop:
 	if((ret=file_open("/avlo.cfg"))<0)
 		err();
 
+	pal32[0] = 0x6c706c93;
+	pal32[1] = 0xffffffff;
+	
 	graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AVL");
 		
 	if((nbCfg=do_parse(&cfg,&cfgG))<0)
@@ -64,26 +71,18 @@ int main(int argc,char **argv)
 		err();
 	}
 	
-	file_close();
+	file_close();	
 	
-	if(cfgG.defBin[0]==0)
-	{
-		keyPressed=1;
-	}
-	else
-	{
-		keyPressed=0;
-	}
+	chkdefault=(!cfgG.defBin[0]==0);
+	
 	
 	graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AVLO");	
 	graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader Version 0.1 by OxyGen");	
-	graphicsBoxfA(&screenBitmap2, 110, 52, 100, 100, 0x466c4696);	
+		
 	
 	usbstate=!usbIsConnectedA();
 	
 	redraw=1;
-	oldpos=-1;
-	cnt=0;
 		
 	while(1)
 	{		
@@ -98,40 +97,86 @@ int main(int argc,char **argv)
 		key=buttonsGetStatusA();
 		
 		processDefault(key,nbCfg);
+		printErr(key);
 		
-		if (key & BUTTONS_AV300_DOWN) {
-			if(cursorPos<nbCfg)
-			{
-				cursorPos++;
+		if(key & BUTTONS_AV300_ANY)
+		{
+			if ((key & BUTTONS_AV300_DOWN) && !usbenable) {
+				if(cursorPos<nbCfg)
+				{
+					cursorPos++;
+					redraw=1;
+				}
+			}
+			
+			if ((key & BUTTONS_AV300_UP) && !usbenable) {
+				if(cursorPos>0)
+				{
+					cursorPos--;
+					redraw=1;
+				}
+			}
+			
+			if ((key & BUTTONS_AV300_ON) && !usbenable) {
+				if(loadFile(cfg[cursorPos].image))
+				{
+					binCaller();
+					while(1);
+				}
+				else
+					debug("error loading %s\n",cfg[cursorPos].image);
 				redraw=1;
 			}
-		}
-		
-		if (key & BUTTONS_AV300_UP) {
-			if(cursorPos>0)
+			
+			if(key & BUTTONS_AV300_MENU3)
 			{
-				cursorPos--;
-				redraw=1;
+				if(usbenable)
+				{
+					debug("disable usb\n");
+					usbenable=0;
+					usbDisableA();
+					ataPowerUpHDDA();
+					redraw=1;
+					cleanUSBMsg=1;
+					waitKeyReleased();
+					goto loop;
+				}
+				else
+				{
+					if(usbstate)
+					{
+						debug("enable usb\n");
+						usbenable=1;
+						
+						graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);	
+						pal32[1]=0xc476c491;
+						pal32[0] = 0x466c4696;
+			graphicsStringA(&screenBitmap2,   65, 120, &sprite6_9, std6x9_, 6, 0,"USB Enable, PRESS F3 to resume");
+						usbEnableA();
+					}
+				}
 			}
-		}
-		
-		if (key & BUTTONS_AV300_ON) {
-			if(loadFile(cfg[cursorPos].image))
-			{
-				binCaller();
-				err();
-			}
-			else
-				debug("error loading %s\n",cfg[cursorPos].image);
-			redraw=1;
+			waitKeyReleased();
 		}
 	}
 }
 
 void err()
 {
-	debug("end let's loop\n");
-	while(1);
+	debug("end let's loop\n");	
+	graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);	
+						pal32[1]=0xc476c491;
+						pal32[0] = 0x466c4696;
+	graphicsStringA(&screenBitmap2, 65, 100, &sprite6_9, std6x9_, 6, 0,"Error (check config)");
+	graphicsStringA(&screenBitmap2, 65, 120, &sprite6_9, std6x9_, 6, 0,"USB Forced, reboot when done");
+	usbEnableA();
+	while(1) ;
+	
+}
+
+void waitKeyReleased(void)
+{
+	while(buttonsGetStatusA()&BUTTONS_AV300_ANY);
 }
 
 void iniGraph()
@@ -204,26 +249,19 @@ void affUSB()
 void processDefault(int key,int nbCfg)
 {
 	int pos;
-	if(cfgG.defBin[0]!=0)
+	if(chkdefault)
 	{
-		if(!(key & BUTTONS_AV300_ANY) && cnt < delayCnt && !keyPressed)
-		{
-			if(oldpos!=(320*cnt)/delayCnt)
-			{
-				graphicsBoxfA(&screenBitmap2, (320*cnt)/delayCnt, 210, 1, 5, 0x466c4696);
-				oldpos=(320*cnt)/delayCnt;
-			}
-			cnt++;
-		}
-		
-		if(!(key & BUTTONS_AV300_ANY) && cnt==delayCnt)
+		if(!(key & BUTTONS_AV300_ANY) && cnt < delayCnt)
+			graphicsBoxfA(&screenBitmap2, (320*(cnt++))/delayCnt, 210, 1, 5, 0x466c4696);
+
+		if(cnt==delayCnt)
 		{	
 			pos=0;
 			while(pos<nbCfg+1 && strcmp(cfg[pos].label,cfgG.defBin))
 				pos++;
 			if(pos<nbCfg+1)
 			{
-				if(loadFile(cfg[cursorPos].image))
+				if(loadFile(cfg[pos].image))
 				{
 					binCaller();
 					err();
@@ -231,29 +269,62 @@ void processDefault(int key,int nbCfg)
 				else
 					debug("error loading %s\n",cfg[cursorPos].image);
 			}
-			graphicsBoxfA(&screenBitmap2, 0, 210, 320, 5, 0x6c706c93);
-			keyPressed=1;
+			
+			errNoDefault=1;
+			chkdefault=0;
 			cnt=0;
 			
 		}
 		
 		if(key & BUTTONS_AV300_ANY)
 		{
-			if(!keyPressed)
-			{
-				graphicsBoxfA(&screenBitmap2, 0, 210, 320, 5, 0x6c706c93);
-				keyPressed=1;
-				cnt=0;
-			}
+			graphicsBoxfA(&screenBitmap2, 0, 210, 320, 5, 0x6c706c93);
+			chkdefault=0;
+			cnt=0;
 		}
 	}
-	else
-		debug("no default in config\n");
+}
+
+void printErr(int key)
+{
+	if(errNoDefault)
+	{
+		if(cntNoDefault<0x2000)
+			cntNoDefault++;
+		else
+		{
+			if(stateNoDefault)
+			{
+				graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, 0x6c706c93);
+			}
+			else
+			{
+				graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, 0x6c706c93);
+				pal32[1]=0xc476c491;
+				pal32[0] = 0x6c706c93;//0x466c4696;
+				graphicsStringA(&screenBitmap2, 80, 210, &sprite6_9, std6x9_, 6, 0,"default image can't be found");
+			}
+			stateNoDefault=!stateNoDefault;
+			cntNoDefault=0;
+		}
+		
+		if(key & BUTTONS_AV300_ANY)
+		{
+			graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, 0x6c706c93);
+			errNoDefault=0;
+		}
+	}
 }
 
 void drawMenu(int nbCfg)
 {
 	int pos;
+	if(cleanUSBMsg)
+	{
+		graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x6c706c93);
+		cleanUSBMsg=0;
+	}
+	graphicsBoxfA(&screenBitmap2, 110, 52, 100, 100, 0x466c4696);
 	for(pos=0;pos<nbCfg+1;pos++)
 	{
 		pal32[1] = 0xff80ff80;
