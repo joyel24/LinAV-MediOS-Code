@@ -26,6 +26,8 @@ hexInc = 1
 
 @ hex2T  r0->dest, r1=value
 @
+.globl hex2T
+.thumb_func
 hex2T:
         push {r1, r2, r3, r4}
         ldr r4, =hextable
@@ -43,6 +45,8 @@ hex2T:
 
 @ hex4T  r0->dest, r1=value (A.B.C.D)
 @
+.globl hex4T
+.thumb_func
 hex4T:
         push {r1, r2, r3, r4}
         ldr r4, =hextable
@@ -74,6 +78,8 @@ hextable:   .ascii "0123456789ABCDEF"
 
 @ hex8T  r0->dest, r1=value (A.B.C.D.E.F.G.H)
 @
+.globl hex8T
+.thumb_func
 hex8T:
         push {r1, r2, r3, r4}
         ldr r4, =hextable

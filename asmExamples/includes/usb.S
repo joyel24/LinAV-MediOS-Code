@@ -23,6 +23,8 @@ usbInc = 1
 
 @ usbIsConnectedT
 @
+.globl usbIsConnectedT
+.thumb_func
 usbIsConnectedT:
         push {r1}
         ldr r1, =0x30a24

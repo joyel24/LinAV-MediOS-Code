@@ -23,6 +23,8 @@ visorKeyboardInc = 1
 
 @ visorConvertToAscii r0=scan code
 @                     r0=ascii, or 0 if not translatable.
+.globl visorConvertToAscii
+.thumb_func
 visorConvertToAscii:
         push {lr}
         push {r1, r2, r3, r4}
@@ -56,6 +58,8 @@ visor1:
 
 @ visorUpdateShift (0, key, cmpVal, ->var)
 @           Returns in r4 1 if its the shift
+.globl visorUpdateShift
+.thumb_func
 visorUpdateShift:
         push {r0}
         mov r4, #0

@@ -25,6 +25,8 @@ colorInc = 1
 
 @ colorPackYCbCrT r0=Y, r1=Cr, r2=Cb -> r0=packed
 @
+.globl colorPackYCbCrT
+.thumb_func
 colorPackYCbCrT:
         lsl r0, #8
         orr r0, r2
@@ -37,6 +39,8 @@ colorPackYCbCrT:
 @       cb=-0.1687r - 0.3313g + 0.5000b + 128
 @       cr= 0.5000r - 0.4187g - 0.0813b + 128
 @
+.globl colorRGB2YCbCrT
+.thumb_func
 colorRGB2YCbCrT:
         push {r3, r4, r5, r6}
         

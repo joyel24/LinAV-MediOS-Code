@@ -53,6 +53,8 @@ osdInc = 1
 
 @ osdSetPalletteColorT
 @
+.globl osdSetPalletteColorT
+.thumb_func
 osdSetPalletteColorT:
         push {r0, r1, r2, r3, r4, r5}
         mov r5, #0
@@ -74,6 +76,8 @@ osdWaiu:ldrh r5, [r4]
         
 @ osdSetScreenConfigT r0=config
 @
+.globl osdSetScreenConfigT
+.thumb_func
 osdSetScreenConfigT:
         push {r1}
         ldr r1, =0x30680
@@ -83,6 +87,8 @@ osdSetScreenConfigT:
         
 @ osdSetScreenPositionT r0=x, r1=y
 @
+.globl osdSetScreenPositionT
+.thumb_func
 osdSetScreenPositionT:
         push {r2}
         ldr r2, =0x306a0
@@ -93,6 +99,8 @@ osdSetScreenPositionT:
         
 @ osdSetMainConfigT r0=byte width, r1=config
 @
+.globl osdSetMainConfigT
+.thumb_func
 osdSetMainConfigT:
         push {r0, r1, r2}
         ldr r2, =0x30684
@@ -103,6 +111,8 @@ osdSetMainConfigT:
 
 @ osdSetMain2ConfigT r0=byte width, r1=config
 @
+.globl osdSetMain2ConfigT
+.thumb_func
 osdSetMain2ConfigT:
         push {r0, r1, r2}
         ldr r2, =0x30686
@@ -113,6 +123,8 @@ osdSetMain2ConfigT:
 
 @ osdSetBackConfigT r0=byte width, r1=config
 @
+.globl osdSetBackConfigT
+.thumb_func
 osdSetBackConfigT:
         push {r0, r1, r2, r3}
         ldr r2, =0x30682
@@ -128,6 +140,8 @@ osdSetBackConfigT:
 
 @ osdSetBack2ConfigT r0=byte width, r1=config
 @
+.globl osdSetBack2ConfigT
+.thumb_func
 osdSetBack2ConfigT:
         push {r0, r1, r2, r3}
         ldr r2, =0x30682
@@ -144,6 +158,8 @@ osdSetBack2ConfigT:
         
 @ osdSetMainOffsetT r0=offset
 @
+.globl osdSetMainOffsetT
+.thumb_func
 osdSetMainOffsetT:
         push {r0, r1, r2}
         ldr r1, =0x3069a
@@ -163,6 +179,8 @@ osdSetMainOffsetT:
 
 @ osdSetMain2OffsetT r0=offset
 @
+.globl osdSetMain2OffsetT
+.thumb_func
 osdSetMain2OffsetT:
         push {r0, r1, r2}
         ldr r1, =0x3069a
@@ -183,6 +201,8 @@ osdSetMain2OffsetT:
 
 @ osdSetBackOffsetT r0=offset
 @
+.globl osdSetBackOffsetT
+.thumb_func
 osdSetBackOffsetT:
         push {r0, r1, r2}
         ldr r1, =0x30694
@@ -202,6 +222,8 @@ osdSetBackOffsetT:
 
 @ osdSetBack2OffsetT r0=offset
 @
+.globl osdSetBack2OffsetT
+.thumb_func
 osdSetBack2OffsetT:
         push {r0, r1, r2}
         ldr r1, =0x30694
@@ -222,6 +244,8 @@ osdSetBack2OffsetT:
         
 @ osdSetMainSizeT r0=width, r1=height
 @
+.globl osdSetMainSizeT
+.thumb_func
 osdSetMainSizeT:
         push {r2}
         ldr r2, =0x306b8
@@ -232,6 +256,8 @@ osdSetMainSizeT:
 
 @ osdSetMain2SizeT r0=width, r1=height
 @
+.globl osdSetMain2SizeT
+.thumb_func
 osdSetMain2SizeT:
         push {r2}
         ldr r2, =0x306c0
@@ -242,6 +268,8 @@ osdSetMain2SizeT:
 
 @ osdSetBackSizeT r0=width, r1=height
 @
+.globl osdSetBackSizeT
+.thumb_func
 osdSetBackSizeT:
         push {r2}
         ldr r2, =0x306a8
@@ -252,6 +280,8 @@ osdSetBackSizeT:
 
 @ osdSetBack2SizeT r0=width, r1=height
 @
+.globl osdSetBack2SizeT
+.thumb_func
 osdSetBack2SizeT:
         push {r2}
         ldr r2, =0x306b0
@@ -262,6 +292,8 @@ osdSetBack2SizeT:
 
 @ osdSetCursorSizeT r0=width, r1=height
 @
+.globl osdSetCursorSizeT
+.thumb_func
 osdSetCursorSizeT:
         push {r2}
         ldr r2, =0x306c8
@@ -272,6 +304,8 @@ osdSetCursorSizeT:
         
 @ osdSetMainPositionT r0=x, r1=y
 @
+.globl osdSetMainPositionT
+.thumb_func
 osdSetMainPositionT:
         push {r2}
         ldr r2, =0x306b4
@@ -282,6 +316,8 @@ osdSetMainPositionT:
 
 @ osdSetMain2PositionT r0=x, r1=y
 @
+.globl osdSetMain2PositionT
+.thumb_func
 osdSetMain2PositionT:
         push {r2}
         ldr r2, =0x306bc
@@ -292,6 +328,8 @@ osdSetMain2PositionT:
 
 @ osdSetBackPositionT r0=x, r1=y
 @
+.globl osdSetBackPositionT
+.thumb_func
 osdSetBackPositionT:
         push {r2}
         ldr r2, =0x306a4
@@ -302,6 +340,8 @@ osdSetBackPositionT:
 
 @ osdSetBack2PositionT r0=x, r1=y
 @
+.globl osdSetBack2PositionT
+.thumb_func
 osdSetBack2PositionT:
         push {r2}
         ldr r2, =0x306ac
@@ -312,6 +352,8 @@ osdSetBack2PositionT:
 
 @ osdSetCursorPositionT r0=x, r1=y
 @
+.globl osdSetCursorPositionT
+.thumb_func
 osdSetCursorPositionT:
         push {r2}
         ldr r2, =0x306c4
@@ -322,6 +364,8 @@ osdSetCursorPositionT:
 
 @ osdSetCursor2PositionT r0=x, r1=y
 @
+.globl osdSetCursor2PositionT
+.thumb_func
 osdSetCursor2PositionT:
         push {r2}
         ldr r2, =0x306cc
@@ -332,6 +376,8 @@ osdSetCursor2PositionT:
 
 @ osdInitT
 @
+.globl osdInitT
+.thumb_func
 osdInitT:
         push {r0, r1, r2}
     .ifdef hardwareAV300

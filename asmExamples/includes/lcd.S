@@ -36,6 +36,8 @@ lcdVideoBuffer2 = ramStart + 0xc00000
 
 @ lcdScrollUpT r0=lines, r1=color
 @
+.globl lcdScrollUpT
+.thumb_func
 lcdScrollUpT:
         push {r0, r1, r2, r3, r4}
         cmp r0, #0
@@ -67,6 +69,8 @@ noneed:
         
 @ lcdPutsT r0=x, r1=y, r2->string, r3=color
 @
+.globl lcdPutsT
+.thumb_func
 lcdPutsT:
         push {r4, r5, r6, r7, lr}
 
@@ -106,6 +110,8 @@ lcdDone1:
 
 @ lcdPutchT r0=x, r1=y, r2=character, r3=color
 @
+.globl lcdPutchT
+.thumb_func
 lcdPutchT:
         push {r2, r3, r4, r5, r6, lr}  
         ldr r5, =0xff
@@ -133,6 +139,8 @@ lcdNota:
 
 @ lcdSpritecT r0=x, r1=y, r2=width, r3=height, r4->data, r5=colorF
 @   
+.globl lcdSpritecT
+.thumb_func
 lcdSpritecT:
         push {r0, r1, r2, r3, r4, r5, r6, r7}
 
@@ -173,6 +181,8 @@ lcdDco:
 
 @ lcdRectfT r0=x, r1=y, r2=width, r3=height, r4=color
 @   
+.globl lcdRectfT
+.thumb_func
 lcdRectfT:
         push {r1, r2, r3, r4, r5, r6}
 
@@ -199,6 +209,8 @@ lcdLoop5:
 
 @ lcdPlotT  r0=x, r1=y, r2=c
 @    
+.globl lcdPlotT
+.thumb_func
 lcdPlotT:
         push {r1, r3}
         ldr r3, =(lcdWidth*2)
@@ -212,6 +224,8 @@ lcdPlotT:
 
 @ lcdGetPixelT r0=x, r1=y
 @              r0 = pixel
+.globl lcdGetPixelT
+.thumb_func
 lcdGetPixelT:
         push {r1, r3}
         ldr r3, =(lcdWidth*2)
@@ -225,6 +239,8 @@ lcdGetPixelT:
 
 @ lcdSpriteT r0=x, r1=y, r2=width, r3=height, r4->data
 @
+.globl lcdSpriteT
+.thumb_func
 lcdSpriteT:
         push {r0, r1, r2, r3, r4, r5, r6}
         ldr r5, =(lcdWidth*2)
@@ -255,6 +271,8 @@ lcdLoop7:
 
 @ lcdSpriteBT r0=x, r1=y, r2=width, r3=height, r4->data
 @
+.globl lcdSpriteBT
+.thumb_func
 lcdSpriteBT:
         push {r0, r1, r2, r3, r4, r5, r6}
         ldr r5, =(lcdWidth*2)
@@ -286,6 +304,8 @@ lcdLoopB7:
         
 @ lcdInitT
 @
+.globl lcdInitT
+.thumb_func
 lcdInitT:
         push {lr}
         callThumb r0, osdInitT

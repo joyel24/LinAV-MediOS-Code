@@ -43,6 +43,8 @@ ataSelectLBA                =   0x40
 
 @ ataReadLBAT (r0->buffer, r1=lba, r2=n)
 @       return 0-success, 1-Failed on waitRDY, 2-Failed on waitXFer
+.globl ataReadLBAT
+.thumb_func
 ataReadLBAT:
         push {lr}
         push {r2, r3, r4, r5, r6}
@@ -109,6 +111,8 @@ ataRT2:
 
 @ ataIdentifyT (r0->buffer)
 @       return 0-success, 1-Failed on waitRDY, 2-Failed on waitXFer
+.globl ataIdentifyT
+.thumb_func
 ataIdentifyT:
         push {lr}
         push {r1, r2, r3, r4, r5}
@@ -157,6 +161,8 @@ ataRT:
         
 @ ataWaitForStartOfXferT
 @
+.globl ataWaitForStartOfXferT
+.thumb_func
 ataWaitForStartOfXferT:
         push {lr}
         push {r2, r3}
@@ -179,6 +185,8 @@ tout2:
         
 @ ataWaitForRDYT
 @
+.globl ataWaitForRDYT
+.thumb_func
 ataWaitForRDYT:
         push {lr}
         push {r2, r3}
@@ -200,6 +208,8 @@ tout1:  pop {r2, r3}
 
 @ ataWaitForBSYT
 @
+.globl ataWaitForBSYT
+.thumb_func
 ataWaitForBSYT:
         push {r1, r2, lr}
 notreb: ldr r1, =(ataGetStatusT+1)
@@ -216,6 +226,8 @@ notreb: ldr r1, =(ataGetStatusT+1)
         
 @ ataGetStatusT
 @
+.globl ataGetStatusT
+.thumb_func
 ataGetStatusT:
         push {r1}
         ldr r1, =ataRegStatus
@@ -226,6 +238,8 @@ ataGetStatusT:
         
 @ ataInitT
 @
+.globl ataInitT
+.thumb_func
 ataInitT:
         push {lr}
         push {r0, r1}

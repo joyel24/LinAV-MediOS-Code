@@ -40,6 +40,8 @@ buttonsInc = 1
 
 @ buttonsGetStatusT
 @
+.globl buttonsGetStatusT
+.thumb_func
 buttonsGetStatusT:
         push {r1, r2, r3}
         mov r3, #0x0f

@@ -84,6 +84,8 @@
 
 @ i2cStartT
 @
+.globl i2cStartT
+.thumb_func
 i2cStartT:
         push {r0, r7}
         ldr r7, =i2cBaseAddress
@@ -100,6 +102,8 @@ i2cd1:  sub r0, #1
 
 @ i2cStopT
 @
+.globl i2cStopT
+.thumb_func
 i2cStopT:
         push {r0, r7}
         ldr r7, =i2cBaseAddress
@@ -114,6 +118,8 @@ i2cd2:  sub r0, #1
 
 @ i2cInitT
 @
+.globl i2cInitT
+.thumb_func
 i2cInitT:
         push {r0, r1, r7, lr}
         ldr r7, =i2cBaseAddress
@@ -128,6 +134,8 @@ i2cl1:  callThumb r0, i2cStopT
 
 @ i2cAckT
 @
+.globl i2cAckT
+.thumb_func
 i2cAckT: 
         push {r0, r1, r7}
         ldr r7, =i2cBaseAddress

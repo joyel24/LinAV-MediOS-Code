@@ -29,6 +29,8 @@ fatInc = 1
 
 @ fatInitT (r0=LBA of Partition)
 @
+.globl fatInitT
+.thumb_func
 fatInitT:
         push {lr}
         push {r1, r2, r3, r4, r5, r6, r7}
@@ -79,6 +81,8 @@ fatInitT:
         
 @ fatReadCT  r0=cluster, r1->buffer
 @
+.globl fatReadCT
+.thumb_func
 fatReadCT:
         push {lr}
         push {r1, r2, r3, r4, r5, r6, r7}
@@ -109,6 +113,8 @@ fatReadM:
 
 @ fatTraceCCT r0=cluster
 @            returns next cluster in chain.
+.globl fatTraceCCT
+.thumb_func
 fatTraceCCT:
         push {lr}
         push {r1, r2, r3, r4, r5, r6, r7}

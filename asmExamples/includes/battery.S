@@ -23,6 +23,8 @@ batteryInc = 1
 
 @ batteryIsDCT
 @
+.globl batteryIsDCT
+.thumb_func
 batteryIsDCT:
         push {r1}
         ldr r1, =0x30a24

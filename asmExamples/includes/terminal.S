@@ -37,6 +37,8 @@ terminalInc = 1
 
 @ terminalSetColorFT r0=color
 @
+.globl terminalSetColorFT
+.thumb_func
 terminalSetColorFT:
         push {r1}
         ldr r1, =terminalColorF
@@ -46,6 +48,8 @@ terminalSetColorFT:
 
 @ terminalSetPosT r0=x, r1=y
 @
+.globl terminalSetPosT
+.thumb_func
 terminalSetPosT:
         push {r2}
         ldr r2, =terminalPosX
@@ -57,6 +61,8 @@ terminalSetPosT:
 
 @ terminalPutsCT r0->string, r1=color
 @
+.globl terminalPutsCT
+.thumb_func
 terminalPutsCT:
         push {lr}
         push {r2, r3, r4}
@@ -84,6 +90,8 @@ terminalDa:
         
 @ terminalPutsT r0->string
 @
+.globl terminalPutsT
+.thumb_func
 terminalPutsT:
         push {lr}
         push {r2, r3}
@@ -103,6 +111,8 @@ terminalD1:
         
 @ terminalPutchT r0=chr
 @
+.globl terminalPutchT
+.thumb_func
 terminalPutchT:
         push {r1, r2, r3, r4, lr}
         

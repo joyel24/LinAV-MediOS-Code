@@ -38,6 +38,8 @@ uartInc = 1
 
 @ uartGetchT returns r0=chr or -1 if none
 @
+.globl uartGetchT
+.thumb_func
 uartGetchT:
         push {r1, r2, r3, lr}
         ldr r2, =uartBase
@@ -55,6 +57,8 @@ uartNon:
 
 @ uartOutchT r0=chr to output to UART1
 @
+.globl uartOutchT
+.thumb_func
 uartOutchT:
         push {r1, r2}
         ldr r1, =uartBase
@@ -69,6 +73,8 @@ uartWait1:
 
 @ uartOutsT r0->string to output to UART1
 @
+.globl uartOutsT
+.thumb_func
 uartOutsT:
         push {r2, lr}
         mov r1, r0
