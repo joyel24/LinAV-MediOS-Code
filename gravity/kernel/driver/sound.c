@@ -36,7 +36,7 @@ __IRAM_DATA int nb_loop;
 
 __IRAM_DATA struct mp3_play * data;
 
-#define SEND_TO_MAS(BUFFER,SIZE)                              \
+#define SEND_TO_MAS(BUFFER,SIZE,LOOP)                              \
  ({                                                           \
     int  __i;                                                 \
     int __data;                                              \
@@ -54,7 +54,7 @@ __IRAM_DATA struct mp3_play * data;
         outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);               \
         /* wait for RTR to be set */                          \
         while(!(inw(GIO_BITSET1) & (0x1<<(GIO_MAS_RTR-16))))  \
-            /*nothing*/;                                        \
+            LOOP+;                                        \
         /* clear latch (lower raise PR) */                    \
         outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);             \
     }                                                         \
@@ -73,8 +73,9 @@ __IRAM_CODE void dsp_interrupt(int irq)
        /* else
             toSend=data->buffer_write-data->buffer_read;*/
         buffer=data->buffer+data->buffer_read;    
-        send=SEND_TO_MAS(buffer,toSend);
-        
+        send=SEND_TO_MAS(buffer,toSend,nb_loop);
+        if(send)
+            nb_send++;
         data->buffer_read+=send;
         
         if(data->buffer_read>= data->buffer_len)

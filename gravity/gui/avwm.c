@@ -95,12 +95,12 @@ void avwm(void)
                 
                 dsp_ini_mp3(&data);
                 
-                /*while(1)
+                while(1)
                 {
                     dsp_interrupt(0);
-                }*/
+                }
 
-                dsp_start_mp3();
+                //dsp_start_mp3();
                 printf("out of play\n");
             }
         }
