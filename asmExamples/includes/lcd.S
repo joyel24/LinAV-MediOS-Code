@@ -326,6 +326,68 @@ lcdInitT:
         callThumb1 r1, osdSetMainOffsetT, lcdVideoBuffer
         callThumb1 r1, osdSetBackOffsetT, lcdVideoBuffer2
     
+        ldr r0, =0x30522
+        ldr r2, =0x0800
+        ldrh r1, [r0]
+        orr r1, r2
+        strh r1, [r0]
+        
+        mov r1, #0
+        strh r1, [r0, #2]
+        
+        ldr r0, =0x30500
+        ldr r1, =0xffff
+        strh r1, [r0]
+        strh r1, [r0, #2]
+        strh r1, [r0, #4]
+        strh r1, [r0, #6]
+        
+        ldr r0, =0x30a00
+        ldr r1, =0x4456
+        ldr r2, =0x0220
+        ldr r3, =0x4220
+        strh r1, [r0]
+        strh r2, [r0, #2]
+        strh r1, [r0, #0x0e]
+        strh r3, [r0, #0x10]
+        
+        ldr r0, =0x30590
+        mov r1, #0
+        strh r1, [r0]
+        
+        ldr r0, =0x02600100
+        mov r1, #0
+        strh r1, [r0]
+        
+        ldr r0, =0x30502
+        ldr r1, =0x0800
+        ldrh r2, [r0]
+        orr r2, r1
+        strh r2, [r0]
+        
+        ldr r0, =0x30526
+        ldr r2, =0x0800
+        ldrh r1, [r0]
+        orr r1, r2
+        strh r1, [r0]
+     
+        ldr r0, =0x30400
+        mov r1, #1
+        strh r1, [r0]
+        strh r1, [r0, #2]
+        ldr r1, =0x3e7
+        strh r1, [r0, #4]
+        ldr r1, =0x1a
+        strh r1, [r0, #6]
+        
+        ldr r0, =0x0260300
+        mov r1, #1
+        strh r1, [r0]
+        
+        ldr r0, =0x0260200
+        mov r1, #4
+        strh r1, [r0]                @ backlight?        
+        
         ldr r0, =lcdVideoBuffer
         ldr r1, =(lcdWidth*lcdHeight*2)
         ldr r2, =0x0000

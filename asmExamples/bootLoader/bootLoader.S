@@ -21,6 +21,12 @@
 
         .thumb
 
+        b overb
+        .space 0x46, 0
+        .asciz "CJBMVERSION2000"
+        .space 0x20, 0
+overb:
+
         mov r0, #0x30
         lsl r0, #20     @ 03000000
 
@@ -43,6 +49,18 @@ lrel:   ldr r3, [r0]
         add r2, pc
         bx r2           @ *** *** JUMP UP TO HIGH RAM
         
+        
+        callThumb r1, buttonsGetStatusT
+        ldr r1, =0x677                      @ menu1
+        cmp r0, r1
+         beq overusbW
+
+        @ Wait for USB disconnect... 
+waitUsb:
+        callThumb r1, usbIsConnectedT
+        cmp r0, #1
+         beq waitUsb
+overusbW:
 
         ldr r0, =bufferx
         
@@ -192,7 +210,8 @@ lfval:  mov r0, #0
         b noshq
 noshp:  add r7, #32
         b lfval
-         
+
+        .ltorg
          
 noshq:
         @ Now display it on screen, and wait for user navigation...
@@ -227,6 +246,33 @@ loopDV:
         ldr r1, =(dirLine + 9)
         mov r2, #3
         callThumb r3, memMoveT  @ Move ext
+
+        ldr r1, =runFile
+        mov r0, r7
+        mov r2, #11
+        mov r3, #0
+        mov r4, #0
+lcmpe:  ldrb r3, [r1]
+        ldrb r4, [r0]
+        cmp r3, r4
+         bne ncmpe
+        add r1, #1
+        add r0, #1
+        sub r2, #1
+         bne lcmpe
+         
+        mov r0, r7
+        add r0, #20
+        callThumb r1, read2T
+        mov r3, r0
+        lsl r3, #16
+        mov r0, r7
+        add r0, #26
+        callThumb r1, read2T
+        orr r3, r0       
+        ldr r0, =runClus
+        str r3, [r0]                @ save cluster # of autorun file...    
+ncmpe:
 
         ldr r3, =0xffff
         ldr r0, =fontBG
@@ -283,6 +329,9 @@ nobot1:
         ldr r1, =0x0001
         tst r7, r1
          bne notup
+        ldr r0, =timeoutC
+        ldr r0, timeoutMax
+        str r1, [r0]
         ldr r0, =dirCurrentCursor
         callThumb r2, cursorUpT
         cmp r0, #0
@@ -295,6 +344,9 @@ nobot1:
 notup:  ldr r1, =0x0020
         tst r7, r1
          bne notdn
+        ldr r0, =timeoutC
+        ldr r0, timeoutMax
+        str r1, [r0]
         ldr r0, =dirCurrentCursor
         callThumb r2, cursorDnT
         cmp r0, #0
@@ -346,6 +398,23 @@ notm1:
 wait6:  sub r0, #1
         bne wait6
 
+        ldr r0, timeoutC
+        cmp r0, #0
+         bne noovf
+        
+        callThumb2 r4, terminalSetPosT, 0, 35
+        callThumb2 r4, terminalPutsCT, msg780, 0x0101
+        
+        ldr r0, runClus
+        cmp r0, #0
+         beq errt
+        b launchFile
+errt:   ldr r0, timeoutMax
+
+noovf:  sub r0, #1
+        ldr r1, =timeoutC
+        str r0, [r1]
+        
         b loopNV
 
         b alldo
@@ -362,7 +431,9 @@ part3Size:  .word   0
 part4Start: .word   0
 part4Size:  .word   0
 
-        
+timeoutC:   .word   0x100
+timeoutMax: .word   0x100
+
 cursorUpT:
         push {r1, r2, r3, r4, r7}
         ldr r1, [r0]
@@ -429,10 +500,13 @@ launchFile:
         beq alldo
 
         mov r7, r0
+
+        callThumb2 r4, terminalSetPosT, 0, 36        
         callThumb2 r4, terminalPutsCT, msg600, 0xffff
 
         ldr r6, =0x03000000
 loopLE: 
+        callThumb2 r4, terminalPutsCT, msg601, 0xffff
         mov r0, r7
         mov r1, r6
         callThumb r2, fatReadCT
@@ -446,12 +520,12 @@ loopLE:
         cmp r7, r0
         blt loopLE
 
-        callThumb2 r4, terminalPutsCT, msg680, 0xffff
+@        callThumb2 r4, terminalPutsCT, msg680, 0xffff
         
-lwaitk: callThumb r4, buttonsGetStatusT
-        ldr r1, =0x100
-        tst r0, r1
-         bne lwaitk
+@lwaitk: callThumb r4, buttonsGetStatusT
+@        ldr r1, =0x100
+@        tst r0, r1
+@         bne lwaitk
         
         callThumb2 r4, terminalPutsCT, msg700, 0xffff
 
@@ -596,7 +670,9 @@ read2T:
         pop {r1, r2}
         bx lr
                 
-msg1:   .asciz " -- avOS BootLoader version 0.02a (c)2004 DoGgEr -- \n\n"
+        .ltorg
+        
+msg1:   .asciz " -- avOS BootLoader version 0.2a (c)2004 DoGgGeR -- \n\n"
 msg2:   .asciz "Initialising ATA...                        "
 msg3:   .asciz "Identifying hard drive...                  "
 msg4:   .asciz " Serial:    xxxxxxxxxxxxxxxxxxxx\n"
@@ -609,17 +685,17 @@ msg201: .asciz " OEM:       xxxxxxxx\n"
 msg300: .asciz "Loading root directory entries...          \n"
 msg400: .asciz " xxxxxxxxxxx SIZE=xxxxxxxx ATTR=xx CLUST=xxxxxxxx\n"
 msg600: .asciz "Loading image...                           \n"
-msg680: .asciz "Press menu1 key to run image...            \n"
+msg601: .asciz "."
+msg680: .asciz "\nPress menu1 key to run image...            \n"
 msg700: .asciz "Running image...                           \n"
+msg780: .asciz "Timed out!                                 \n"
 msg900: .asciz "ALL DONE\n"
 msgDONE:  .asciz "[ DONE ]\n"
 
-msg_001:.asciz " -- avOs BootLoader Version 0.02a (c)2004 DoGeR -- "
+msg_001:.asciz " -- avOs BootLoader Version 0.2a (c)2004 DoGgEr -- "
 
 dirLine:.asciz "xxxxxxxx.xxx"
 dirEmpt:.asciz "            "
-
-        .ltorg
 
         .align 4
 .include "../includes/hex.S"
@@ -629,7 +705,7 @@ dirEmpt:.asciz "            "
 .include "../includes/fat.S"
 .include "../includes/terminal.S"
 .include "../includes/uart.S"
-
+.include "../includes/usb.S" 
 
         .align 4
 fatbuffLBA: .word 0

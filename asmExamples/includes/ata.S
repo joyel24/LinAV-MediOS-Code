@@ -91,7 +91,7 @@ ataR2:  mov r1, #0
         strh r1, [r5]
         add r5, #2
         sub r6, #1
-        bne ataR2
+         bne ataR2
         
         pop {r1, r2, r3, r4, r5, r6}        
         pop {r0}

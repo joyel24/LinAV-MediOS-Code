@@ -14,7 +14,7 @@
 @
 
 .text
-        .include "../include/common.S"
+        .include "../includes/common.S"
 loop1:
 
         add r0, pc, #1

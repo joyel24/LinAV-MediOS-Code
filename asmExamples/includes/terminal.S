@@ -59,7 +59,8 @@ terminalSetPosT:
 @
 terminalPutsCT:
         push {lr}
-        push {r2, r3}
+        push {r2, r3, r4}
+        mov r4, r0
         ldr r2, =terminalColorF
         str r1, [r2]
         mov r2, r0
@@ -72,7 +73,11 @@ terminalLa:
         callThumb r3, terminalPutchT
         b terminalLa
 terminalDa:
-        pop {r2, r3}
+
+        mov r0, r4
+        callThumb r3, uartOutsT
+
+        pop {r2, r3, r4}
         pop {r0}
         bx r0
 
