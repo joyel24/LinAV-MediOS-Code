@@ -1,36 +1,39 @@
 IR codes:
 
-Menu1   00ff6a95    6a
-Menu2   00ffaa55    aa
-Menu2   00ffea15    ea
-ON      00ff4ab5    4a
-left    00ff728d    72
-right   00fff20d    f2
-up      00ff926d    92
-down    00ff52ad    52
-play    00ffb24d    b2
-off     00ffd22d    d2
+        D  ~D D  ~D
+Menu1   00 ff 6a 95
+Menu2   00 ff aa 55
+Menu2   00 ff ea 15
+ON      00 ff 4a b5
+left    00 ff 72 8d
+right   00 ff f2 0d
+up      00 ff 92 6d
+down    00 ff 52 ad
+play    00 ff b2 4d
+off     00 ff d2 2d
 
 // Now for video remote:
 
-ON/OFF  22dd48b7
-CHAN+   22ddd827
-CHAN-   22ddf807
-1       22dd807f
-2       22dd40bf
-3       22ddc03f
-4       22dd20df
-5       22dda05f
-6       22dd609f
-7       22dde01f
-8       22dd10ef
-9       22dd906f
-0       22dd50af
-TV/VCR  22dd8877
-ENTER   22ddd02f
-STOP    22dd28d7
-PAUSE   22dd08f7
-PLAY    22dda857
-REWIND  22dd9867
+        D  ~D D  ~D
+ON/OFF  22 dd 48 b7
+CHAN+   22 dd d8 27
+CHAN-   22 dd f8 07
+1       22 dd 80 7f
+2       22 dd 40 bf
+3       22 dd c0 3f
+4       22 dd 20 df
+5       22 dd a0 5f
+6       22 dd 60 9f
+7       22 dd e0 1f
+8       22 dd 10 ef
+9       22 dd 90 6f
+0       22 dd 50 af
+TV/VCR  22 dd 88 77
+ENTER   22 dd d0 2f
+
+STOP    22 dd 28 d7
+PAUSE   22 dd 08 f7
+PLAY    22 dd a8 57
+REWIND  22 dd 98 67
 REC     
-FF      22ddc837
+FF      22 dd c8 37

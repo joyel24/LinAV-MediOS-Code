@@ -148,7 +148,7 @@ int main() {
 }
 
 static unsigned int v=0,f=0,lf=0,state=0,count=0,data=0;
-static unsigned int dataCount=0;
+static unsigned int dataCount=0,repCount=0;
 char hex4[] = "xxxx";
 char hex8[] = "xxxxxxxx";
 
@@ -189,13 +189,25 @@ void intsub() {
             lf = v;
 
             if (f<0x7d0) {
-                if (f>0x514 && f<0x578) {
-                    //debug("514:578 - 0:0 ?\n");
+                if (f>0x514 && f<0x578) {           // 13548?
+                    // On code
                     state=2;
                     count=0;
                     data=0;
-                } else if (f>0x44c && f<0x4b0) {
-                    //debug("44c:4b0\n");
+                    repCount=0;
+                } else if (f>0x44c && f<0x4b0) {    // 11294?
+                    // Repeat...
+                    debug("44c:4b0\n");
+                    repCount++;
+                    op0 = pal16[0];
+                    op1 = pal16[1];
+                    
+                    pal16[0] = 0x0000;
+                    pal16[1] = 0xffff;
+                    stringPutHexA(hex8, repCount, 8);
+                    graphicsStringA(&screenBitmap, 4+(18*6), 210, &sprite5_8, std5x8_, 6, 0, hex8);
+                    pal16[0] = op0;
+                    pal16[1] = op1;
                 }
                 
             } else {
@@ -207,13 +219,13 @@ void intsub() {
             f = v - lf;
             lf = v;
 
-            if (f>100 && f<130) {   // b76
+            if (f>100 && f<130) {           // 1127?
                 count++;
                 data = (data << 1);
-            } else if (f>200 && f<240) {    // b50
+            } else if (f>200 && f<240) {    // 2254?
                 count++;
                 data = (data << 1) | 1;
-            } else {    // b64
+            } else {
                 count++;
                 data = (data << 1);
             }
