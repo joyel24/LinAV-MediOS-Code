@@ -17,7 +17,7 @@
 
 #warning we should lock the access to cpld see lock comment below
 
-__LOW_SEC_DATA int cpld_port_state[4]=
+__IRAM_DATA int cpld_port_state[4]=
 {
     0x0,
     0x0,
@@ -25,14 +25,14 @@ __LOW_SEC_DATA int cpld_port_state[4]=
     0x8,
 };
 
-__LOW_SEC_DATA int cpld_port_array[4] = {
+__IRAM_DATA int cpld_port_array[4] = {
     CPLD_PORT0,
     CPLD_PORT1,
     CPLD_PORT2,
     CPLD_PORT3
 };
 
-__LOW_SEC_CODE void cpld_chg_state(int cpld_port,int bit_num,int direction)
+__IRAM_CODE void cpld_chg_state(int cpld_port,int bit_num,int direction)
 {
     int tmp;
     
@@ -51,7 +51,7 @@ __LOW_SEC_CODE void cpld_chg_state(int cpld_port,int bit_num,int direction)
     /* UNLOCK */
 }
 
-__LOW_SEC_CODE int cpld_read(int cpld_port)
+__IRAM_CODE int cpld_read(int cpld_port)
 {
     int val;
     /* LOCK */
@@ -60,7 +60,7 @@ __LOW_SEC_CODE int cpld_read(int cpld_port)
     return val;
 }
 
-__LOW_SEC_CODE void cpld_select(int bit_num,int direction)
+__IRAM_CODE void cpld_select(int bit_num,int direction)
 {
     int val;
     /* LOCK */
@@ -76,7 +76,7 @@ __LOW_SEC_CODE void cpld_select(int bit_num,int direction)
     /* UNLOCK */
 }
 
-__LOW_SEC_CODE void cpld_do_select(void)
+__IRAM_CODE void cpld_do_select(void)
 {  
     int res,res2;
     /* LOCK */
@@ -95,7 +95,7 @@ __LOW_SEC_CODE void cpld_do_select(void)
 
 
 
-__LOW_SEC_CODE void init_cpld(void)
+__IRAM_CODE void init_cpld(void)
 {
     int version;
     

@@ -17,9 +17,9 @@
 #include <kernel/irq.h>
 #include <kernel/kernel.h>
 
-struct irq_data_s irq_data[NR_IRQS] __LOW_SEC_DATA;
+struct irq_data_s irq_data[NR_IRQS] __IRAM_DATA;
 
-__LOW_SEC_CODE void do_IRQ(int irq, struct pt_regs *regs)
+__IRAM_CODE void do_IRQ(int irq, struct pt_regs *regs)
 {
     struct irq_data_s * desc;
     //printk("I%d",irq);
@@ -51,7 +51,7 @@ static inline void fiq_ack(unsigned int irq)
 
 /* Mask the IRQ. */
 
-__LOW_SEC_CODE void mask_irq(unsigned int irq)
+__IRAM_CODE void mask_irq(unsigned int irq)
 {
     unsigned int eint;
     int mask;
@@ -64,7 +64,7 @@ __LOW_SEC_CODE void mask_irq(unsigned int irq)
 
 /* Unmask the IRQ. */
 
-__LOW_SEC_CODE void unmask_irq(unsigned int irq)
+__IRAM_CODE void unmask_irq(unsigned int irq)
 {
     unsigned int eint;
     int mask;
@@ -77,7 +77,7 @@ __LOW_SEC_CODE void unmask_irq(unsigned int irq)
 
 /* Mask the IRQ and acknowledge it. */
 
-__LOW_SEC_CODE void mask_ack_irq(unsigned int irq)
+__IRAM_CODE void mask_ack_irq(unsigned int irq)
 {
     unsigned int eint;
     int mask;
@@ -117,7 +117,7 @@ void init_irq(void)
     printk("[init] irq\n");    
 }
 
-__attribute__ ((section(".core"))) void add_irq_handler(int irq,void(*action)(void),char * name)
+__IRAM_CODE void add_irq_handler(int irq,void(*action)(void),char * name)
 {
     if(irq>=0 && irq<NR_IRQS && action != NULL)
     {
@@ -126,7 +126,7 @@ __attribute__ ((section(".core"))) void add_irq_handler(int irq,void(*action)(vo
     }
 }
 
-__attribute__ ((section(".core"))) void del_irq_handler(int irq)
+__IRAM_CODE void del_irq_handler(int irq)
 {
     if(irq>=0 && irq<NR_IRQS)
     {
@@ -135,7 +135,7 @@ __attribute__ ((section(".core"))) void del_irq_handler(int irq)
     }
 }
 
-__attribute__ ((section(".core"))) void disable_irq(int irq)
+__IRAM_CODE void disable_irq(int irq)
 {
     if(irq>=0 && irq<NR_IRQS)
     {
@@ -144,7 +144,7 @@ __attribute__ ((section(".core"))) void disable_irq(int irq)
     }
 }
 
-__attribute__ ((section(".core"))) void enable_irq(int irq)
+__IRAM_CODE void enable_irq(int irq)
 {
     if(irq>=0 && irq<NR_IRQS)
     {
@@ -153,7 +153,7 @@ __attribute__ ((section(".core"))) void enable_irq(int irq)
     }
 }
 
-__attribute__ ((section(".core"))) int irq_state(int irq)
+__IRAM_CODE int irq_state(int irq)
 {
     if(irq>=0 && irq<NR_IRQS)
         return irq_data[irq].enable;

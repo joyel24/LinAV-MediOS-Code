@@ -10,7 +10,7 @@
 *  ASM optimised string functions
 */
 
-	.text
+	.section .core
 	.align	5
 	.word	0
 /*

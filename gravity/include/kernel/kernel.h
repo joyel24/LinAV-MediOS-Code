@@ -34,10 +34,10 @@ struct pt_regs {
 
 /* section definition */
 
-#define __LOW_SEC_CODE    __attribute__ ((section(".core")))
-#define __LOW_SEC_DATA    __attribute__ ((section(".cored")))
+#define __IRAM_CODE    __attribute__ ((section(".core")))
+#define __IRAM_DATA    __attribute__ ((section(".cored")))
 
-#define __SDRAM_SEC_CODE    __attribute__ ((section(".text")))
-#define __SDRAM_SEC_DATA    __attribute__ ((section(".data")))
+#define __SDRAM_CODE   __attribute__ ((section(".text")))
+#define __SDRAM_DATA   __attribute__ ((section(".data")))
 
 #endif

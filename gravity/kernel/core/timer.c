@@ -18,11 +18,11 @@
 #include <kernel/timer.h>
 #include <kernel/kernel.h>
 
-unsigned long tick __LOW_SEC_DATA;
+unsigned long tick __IRAM_DATA;
 
-struct timer_s * timer_head __LOW_SEC_DATA;
+struct timer_s * timer_head __IRAM_DATA;
 
-__LOW_SEC_CODE void main_timer_action(void)
+__IRAM_CODE void main_timer_action(void)
 {
     struct timer_s * ptr=timer_head;
     
@@ -40,7 +40,7 @@ __LOW_SEC_CODE void main_timer_action(void)
     }    
 }
 
-__LOW_SEC_CODE void setup_timer(struct timer_s * timer_data,char * name)
+__IRAM_CODE void setup_timer(struct timer_s * timer_data,char * name)
 {   
     timer_data->expires=0;
     timer_data->trigger=0;
@@ -52,7 +52,7 @@ __LOW_SEC_CODE void setup_timer(struct timer_s * timer_data,char * name)
     
 }
 
-__LOW_SEC_CODE void rm_timer(struct timer_s * timer_data)
+__IRAM_CODE void rm_timer(struct timer_s * timer_data)
 {
     
     if(!timer_data->prev)
@@ -64,12 +64,12 @@ __LOW_SEC_CODE void rm_timer(struct timer_s * timer_data)
             timer_data->nxt->prev=timer_data->prev;
 }
 
-__LOW_SEC_CODE void stop_timer(struct timer_s * timer_data)
+__IRAM_CODE void stop_timer(struct timer_s * timer_data)
 {
     timer_data->trigger=0;
 }
 
-__LOW_SEC_CODE void start_timer(struct timer_s * timer_data)
+__IRAM_CODE void start_timer(struct timer_s * timer_data)
 {
     if(timer_data->expires>tick)
         timer_data->trigger=1;
