@@ -717,7 +717,7 @@ extern char *nxErrorStrings[];
 
 /* added by oxygen77 */
 void GrHideCursor(void);
-void GrHideCursor(void);
+void GrShowCursor(void);
 /*********************/
 /* Public graphics routines. */
 void		GrFlush(void);
