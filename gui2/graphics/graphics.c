@@ -192,6 +192,7 @@ int ini_graphics()
         }            
     
     XMapWindow(display, window);
+    nxtEvent(); // call needed to force exposure event
 #endif  
           
     gc_bmap1=createGC(BMAP1);
