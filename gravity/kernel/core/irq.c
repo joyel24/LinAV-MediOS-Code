@@ -17,7 +17,7 @@
 #include <kernel/irq.h>
 #include <kernel/kernel.h>
 
-struct irq_data_s irq_data[NR_IRQS] __IRAM_DATA;
+__IRAM_DATA struct irq_data_s irq_data[NR_IRQS];
 
 __IRAM_CODE void do_IRQ(int irq, struct pt_regs *regs)
 {
