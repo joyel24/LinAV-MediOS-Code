@@ -108,7 +108,11 @@ struct client_operations cops={
     getTick            : getTick,
     getTime            : getTime,
     getTimeS           : getTimeS,
-    
+
+    set_mouseParam     : set_mouseParam,
+    get_mouseFreq      : get_mouseFreq,
+    get_mouseRepeat    : get_mouseRepeat,
+
     stop_menu          : stop_menu,
     start_menu         : start_menu,
     menuEvtHandler     : menuEvtHandler

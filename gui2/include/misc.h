@@ -22,6 +22,8 @@ int   setTime           (struct av_tm * date_time);
 int   getTick           (void);
 
 int   set_mouseParam    (int freq, int repeat);
+int   get_mouseFreq     ();
+int   get_mouseRepeat   ();
 
 int   getBat            (void);
 

@@ -129,7 +129,11 @@ struct client_operations {
     int  (*getTick)             (void);
     int  (*getTime)             (struct av_tm * date_time);
     int  (*getTimeS)            (char * timeSt);
-    
+
+    int  (*set_mouseParam)      (int freq, int repeat);
+    int  (*get_mouseFreq)       (void);
+    int  (*get_mouseRepeat)     (void);
+
     void (*stop_menu)           (void);
     void (*start_menu)          (struct menu_data * client_menu);
     void (*menuEvtHandler)      (int evt);

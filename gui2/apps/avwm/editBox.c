@@ -52,6 +52,8 @@ int fDownKey = false;
 int fValidEntry = false;
 int indexChar = 0;
 
+int freq = 0;
+int repeat = 0;
 
 int stopEditBoxLoop = 0; /* global variable used to stop the private evt loop*/
 
@@ -84,8 +86,12 @@ void editBoxEvtHandler(int evt)
 
     switch(evt)
     {
+        case BTN_ON:
+            break;
+
         case BTN_F3:
-            // Del Last char
+
+            // ToDo: Del Last char
             break;
 
         case BTN_UP:
@@ -98,13 +104,13 @@ void editBoxEvtHandler(int evt)
 
             current_ascii = NextAscii(current_ascii); // definierte Reihenfolge
 
-            // ToDo: Faster up and down
-/*
+            // Faster up and down
+
 			if(fUpKey == true)
-				delay(0x1000);
+                set_mouseParam(6,0);
 			else
-				delay(0x2000);
-*/
+                set_mouseParam(6,3);
+
 			fUpKey = true;
 
             SetUnderlinedCursor(xEditPos, yEditPos, current_ascii, true);
@@ -116,13 +122,13 @@ void editBoxEvtHandler(int evt)
 
 			current_ascii = PrevAscii(current_ascii);
 
-            // ToDo: Faster up and down
-/*
+            // Faster up and down
+
 			if(fDownKey == true)
-				delay(0x1000);
+                set_mouseParam(6,0);
 			else
-				delay(0x2000);
-*/
+                set_mouseParam(6,3);
+
 			fDownKey = true;
 
             SetUnderlinedCursor(xEditPos, yEditPos, current_ascii, true);
@@ -220,6 +226,9 @@ void drawEditBox(unsigned char* caption, unsigned char* text, int text_color, in
     setFont(std6x9);
     getStringS(caption, &w2, &h2); // for std6x9
 
+    freq   = get_mouseFreq  ();
+    repeat = get_mouseRepeat();
+
     setSize(BMAP2,EDITBOX_WIDTH,EDITBOX_HEIGHT, 8);
 
     // center box
@@ -234,11 +243,12 @@ void drawEditBox(unsigned char* caption, unsigned char* text, int text_color, in
     drawRect(frame_color, 0, 0, EDITBOX_WIDTH, EDITBOX_HEIGHT);
     fillRect(bk_color, 1, 1, EDITBOX_WIDTH-2, EDITBOX_HEIGHT-2);
 
+    // print caption
     setFont(std7x13);
     putS(text_color, bk_color, 2, 2, caption);
     drawLine(COLOR_BLACK,0, h1+2+2, EDITBOX_WIDTH, h1+2+2);
 
-    // write given text
+    // print given text
     setFont(std6x9);
     xEditPos = 2;
     yEditPos = h1+2+5;
@@ -282,6 +292,7 @@ void eraseEditBox(void)
     hidePlane(BMAP2);
     setPlane(BMAP1);
     setFont(std6x9);
+    set_mouseParam(freq, repeat);
 }
 
 /* main function */

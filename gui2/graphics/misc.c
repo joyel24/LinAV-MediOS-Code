@@ -110,6 +110,53 @@ int set_mouseParam(int freq, int repeat)
 
     return 1;
 }
+
+int get_mouseFreq()
+{
+    int fd = 0;
+    struct mouseParam param;
+
+    fd=open("/dev/mouse",O_RDONLY | O_NONBLOCK);
+    if (fd < 0)
+    {
+      printf("Can't open /dev/mouse\n");
+        return fd;
+    }
+
+    if(ioctl(fd,AV_GET_MOUSE_PARAM,&param)<0)
+    {
+      printf("Error setting mouse params\n");
+      close(fd);
+      return 0;
+    }
+    close(fd);
+
+    return param.freq;
+}
+
+int get_mouseRepeat()
+{
+    int fd = 0;
+    struct mouseParam param;
+
+    fd=open("/dev/mouse",O_RDONLY | O_NONBLOCK);
+    if (fd < 0)
+    {
+      printf("Can't open /dev/mouse\n");
+        return fd;
+    }
+
+    if(ioctl(fd,AV_GET_MOUSE_PARAM,&param)<0)
+    {
+      printf("Error setting mouse params\n");
+      close(fd);
+      return 0;
+    }
+    close(fd);
+
+    return param.repeated_press;
+}
+
 int getBat(void)
 {
 	int fd,power;
@@ -138,7 +185,7 @@ int getPwr(void)
 {
     int fd,plug;
     fd=open("/dev/avpower",O_RDONLY | O_NONBLOCK);
-        
+
     if (fd < 0)
     {
         printf("Can't open /dev/avpower\n");
