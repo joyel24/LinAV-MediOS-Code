@@ -19,6 +19,16 @@
 @ lcdGetPixelT (r0=x, r1=y)     returns color in r0
 @ lcdInitT ()
 @ lcdScrollUpT (r0=lines, r1=color)
+@
+@ lcdSetMainOffsetT (r0->buffer)
+@ lcdSetBackOffsetT (r0->buffer)
+@ lcdSetMainSizeT (r0=width, r1=height)
+@ lcdSetBackSizeT (r0=width, r1=height)
+@ lcdSetMainPositionT (r0=x, r1=y)
+@ lcdSetBackPositionT (r0=x, r1=y)
+@
+
+.include "../includes/common.S"
 
 .ifndef lcdInc
 lcdInc = 1
@@ -29,6 +39,75 @@ lcdInc = 1
 lcdVideoBuffer  = 0x3fc6940
 lcdWidth        = 320
 lcdHeight       = 240
+
+@ lcdSetMainOffsetT r0=offset
+@
+lcdSetMainOffsetT:
+        push {r0, r1, r2}
+        ldr r1, =0x3069a
+        ldr r2, =0x3000000
+        sub r0, r2
+        lsr r0, #5
+        strh r0, [r1, #2]
+        lsr r0, #16
+        strh r0, [r1]
+        pop {r0, r1, r2}
+        bx lr
+
+@ lcdSetBackOffsetT r0=offset
+@
+lcdSetBackOffsetT:
+        push {r0, r1, r2}
+        ldr r1, =0x30694
+        ldr r2, =0x3000000
+        sub r0, r2
+        lsr r0, #5
+        strh r0, [r1, #2]
+        lsr r0, #16
+        strh r0, [r1]
+        pop {r0, r1, r2}
+        bx lr
+
+@ lcdSetMainSizeT r0=width, r1=height
+@
+lcdSetMainSizeT:
+        push {r2}
+        ldr r2, =0x306b8
+        strh r0, [r2]
+        strh r1, [r2, #2]
+        pop {r2}
+        bx lr
+
+@ lcdSetBackSizeT r0=width, r1=height
+@
+lcdSetBackSizeT:
+        push {r2}
+        ldr r2, =0x306a8
+        strh r0, [r2]
+        strh r1, [r2, #2]
+        pop {r2}
+        bx lr
+        
+@ lcdSetMainPositionT r0=x, r1=y
+@
+lcdSetMainPositionT:
+        push {r2}
+        ldr r2, =0x306b4
+        strh r0, [r2]
+        strh r1, [r2, #2]
+        pop {r2}
+        bx lr
+
+@ lcdSetBackPositionT r0=x, r1=y
+@
+lcdSetBackPositionT:
+        push {r2}
+        ldr r2, =0x306a4
+        strh r0, [r2]
+        strh r1, [r2, #2]
+        pop {r2}
+        bx lr
+
 
 @ lcdScrollUpT r0=lines, r1=color
 @
@@ -184,11 +263,6 @@ lcdNco:
 @   
 lcdRectfT:
         push {r1, r2, r3, r4, r5, r6}
-        mov r5, #0xff
-        and r4, r5
-        mov r5, r4
-        lsl r4, #8
-        add r4, r5
 
         ldr r5, =(lcdWidth*2)
         mul r1, r5
@@ -274,6 +348,7 @@ lcdLoop7:
 @
 
 lcdInitT:
+        push {lr}
         mov r2, #0
     
         ldr r1, =0x0014
@@ -283,6 +358,7 @@ lcdInitT:
         ldr r1, =0x0013
         strh r1, [r0, #0x6]
         strh r2, [r0, #0xa]
+        
         ldr r1, =0xf912
         ldr r0, =0x30680
         strh r1, [r0, #8]
@@ -309,16 +385,16 @@ lcdInitT:
         strh r2, [r0, #0x18]
         ldr r1, =0x02e0
         strh r1, [r0, #0x1a]
-        ldr r1, =0x0085
+        ldr r1, =0x0085             @ X offset for display
         strh r1, [r0, #0x1c]
-        ldr r1, =0x0280
+        ldr r1, =0x0280             @ WIDTH in pixels (Number processed)
         strh r1, [r0, #0x1e]
 
         ldr r1, =0x0103
         strh r1, [r0, #0x20]
-        ldr r1, =0x0013
+        ldr r1, =0x0013             @ Y offset for display
         strh r1, [r0, #0x22]
-        ldr r1, =0x00f0
+        ldr r1, =0x00f0             @ HEIGHT in pixels (number processed)
         strh r1, [r0, #0x24]
 
         strh r2, [r0, #0x26]
@@ -329,7 +405,7 @@ lcdInitT:
         strh r1, [r0, #0x2c]
         ldr r1, =0x0002
         strh r1, [r0, #0x2e]
-        ldr r1, =0xff00
+        ldr r1, =0xff00             @ Brightness adder (lo)
         strh r1, [r0, #0x30]
 
         strh r2, [r0, #0x32]
@@ -340,11 +416,11 @@ lcdInitT:
         strh r1, [r0, #0x38]
 
         ldr r0, =0x30680
-        strh r2, [r0, #0x00]
+        strh r2, [r0, #0x00]        @ bit 1 enables border. Does other funny stuff
     
         ldr r1, =0x0003
         strh r1, [r0, #0x02]
-
+                                    
         ldr r1, =0x0040
         strh r1, [r0, #0x0c]
     
@@ -352,31 +428,29 @@ lcdInitT:
         strh r1, [r0, #0x20]
     
         strh r2, [r0, #0x22]
-        ldr r1, =0x0014
-        strh r1, [r0, #0x24]
-        ldr r1, =0x0013
-        strh r1, [r0, #0x26]
-        ldr r1, =0x0014
-        strh r1, [r0, #0x34]
-        ldr r1, =0x0280
-        strh r1, [r0, #0x38]
-        ldr r1, =0x0013
-        strh r1, [r0, #0x36]
-    
-        ldr r1, =0x00f0
-        strh r1, [r0, #0x3a]
-        ldr r1, =0x0280
-        strh r1, [r0, #0x28]
-        ldr r1, =0x00f0
-        strh r1, [r0, #0x2a]
+
         ldr r1, =0x0014
         strh r1, [r0, #0x10]
-                                    @->videoBuffer
-        ldr r1, =0x0007
-        strh r1, [r0, #0x1a]
-        ldr r1, =0xe34a
-        strh r1, [r0, #0x1c]
+        
+        mov r0, #0x14
+        mov r1, #0x13
+        callThumb r3, lcdSetBackPositionT
 
+        mov r0, #0x14
+        mov r1, #0x13
+        callThumb r3, lcdSetMainPositionT
+        
+        ldr r0, =0x0280
+        ldr r1, =0x00f0
+        callThumb r3, lcdSetBackSizeT
+
+        ldr r0, =0x0280
+        ldr r1, =0x00f0
+        callThumb r3, lcdSetMainSizeT
+        
+        ldr r0, =lcdVideoBuffer
+        callThumb r1, lcdSetMainOffsetT
+        
         ldr r0, =0x306d0
         strh r2, [r0]               @ 306d0 = 0
         
@@ -396,7 +470,8 @@ lcdCLS:
         add r0, #2
         sub r1, #1
          bne lcdCLS
-        bx lr
+        pop {r0}
+        bx r0
 
         .ltorg
     
