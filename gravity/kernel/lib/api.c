@@ -76,6 +76,7 @@ ERROR_CODE API_GFX_MOVE         (GFX_POINT* pOrigin)                            
 ERROR_CODE API_GFX_FOREGROUND   ()                                                              { swi_call(nAPI_GFX_FOREGROUND); }
 
 ERROR_CODE API_GFX_FASTBLIT     (GFX_DATA* pDst, GFX_DATA* pSrc, GFX_POINT* pOrigin)            { swi_call(nAPI_GFX_FASTBLIT); }
+ERROR_CODE API_GFX_BLENDBLIT    (GFX_DATA* pDst, GFX_DATA* pSrc, GFX_BLENDPARAMS* pParams)      { swi_call(nAPI_GFX_BLENDBLIT); }
 ERROR_CODE API_GFX_STRETCHBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc, unsigned long* pWorkBuffer)    { swi_call(nAPI_GFX_STRETCHBLIT); }
 ERROR_CODE API_GFX_PATTERNBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc)                                { swi_call(nAPI_GFX_PATTERNBLIT); }
 

@@ -41,6 +41,7 @@ typedef struct _TASK_INFO
 typedef struct _CRITSEC_INFO
 {
 	TASK_INFO* pOwnerTask;
+	long nLockCounter;
 } CRITSEC_INFO;
 
 typedef struct _KERNEL_OBJECT_INFO

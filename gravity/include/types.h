@@ -47,6 +47,14 @@ typedef struct _GFX_3DVERTEX
 	long ix, iy, iz, iu, iv;
 } GFX_3DVERTEX;
 
+typedef struct _GFX_BLENDPARAMS
+{
+	long x;
+	long y;
+	long mode;
+	long transparency;
+} GFX_BLENDPARAMS;
+
 typedef struct _PLANE_DATA
 {
     int vplane;

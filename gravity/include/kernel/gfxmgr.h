@@ -26,23 +26,17 @@ typedef struct _GFX_Z_RECT
 
 extern GFX_Z_RECT* g_pZRectList;
 
-enum
-{
-	eGFX_MGR_NOP,        // Simply test...
-	eGFX_MGR_ADD,        // Add context in Z-list
-	eGFX_MGR_DELETE,     // Remove context from Z-list
-	eGFX_MGR_FOREGROUND, // Sets context as foreground context
-	eGFX_MGR_MOVE,       // Moves graphics context to another screen position
-	eGFX_MGR_COMMIT,     // Commit changes in given context
-	eGFX_MGR_REDRAW,     // Redraws whole context's stack
-} E_GFX_MGR_CMD;
+#define SCR_WIDTH  320
+#define SCR_HEIGHT 240
 
-void kgfx_init ();
-
-void kgfx_manager_handler (
-	unsigned long nCmd,
-	unsigned long nParam1,
-	unsigned long nParam2,
-	TASK_INFO* pCallingTask);
+void GFX_init ();
+void GFX_BuildSpanStructure (int nYmin, int nYmax);
+void GFX_DestroySpanStructure (int nYmin, int nYmax);
+int GetRectIntersection (GFX_RECT* pRIn1, GFX_RECT* pRIn2, GFX_RECT* pROut);
+void GFX_MoveContext (TASK_INFO* pOwner, int nX, int nY);
+void GFX_UpdateRect (GFX_RECT* UpdateRect);
+void GFX_UpdateContext (TASK_INFO* pOwner, GFX_RECT* UpdateRect);
+void GFX_AddContext (TASK_INFO* pOwner, int nX, int nY);
+void GFX_UpdateZOrder (TASK_INFO* pOwner, int nZOrder);
 
 #endif

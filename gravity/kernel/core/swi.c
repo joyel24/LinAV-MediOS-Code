@@ -323,13 +323,20 @@ __IRAM_CODE int kcswi_handler (
 		__cli ();
 		CRITSEC_INFO* pCS = (CRITSEC_INFO*)nParam1;
 		if (!pCS->pOwnerTask)
+		{
 			pCS->pOwnerTask = g_pTaskRing;
+			pCS->nLockCounter = 0;
+		}
 		else
 		if (pCS->pOwnerTask != g_pTaskRing)
 		{// Block task while critical section is busy...
 			g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_MUTEX;
 			g_pTaskRing->nBlockingValue = nParam1;
 			API_TASK_YIELD ();
+		}
+		else
+		{
+			pCS->nLockCounter ++;
 		}
 		__sti ();
 	}
@@ -340,8 +347,15 @@ __IRAM_CODE int kcswi_handler (
 		__cli ();
 		if (((CRITSEC_INFO*)nParam1)->pOwnerTask == (unsigned long)g_pTaskRing)
 		{
-			((CRITSEC_INFO*)nParam1)->pOwnerTask = 0;
-			API_TASK_YIELD ();
+			if (((CRITSEC_INFO*)nParam1)->nLockCounter == 0)
+			{
+				((CRITSEC_INFO*)nParam1)->pOwnerTask = 0;
+				API_TASK_YIELD ();
+			}
+			else
+			{
+				((CRITSEC_INFO*)nParam1)->nLockCounter --;
+			}
 		}
 		__sti ();
 	}
@@ -412,7 +426,8 @@ __IRAM_CODE int kcswi_handler (
 
 		pTask->pMemoryContext = pCtx;
 
-		kgfx_manager_handler (eGFX_MGR_ADD, 0, 0, pTask);
+//		kgfx_manager_handler (eGFX_MGR_ADD, 0, 0, pTask);
+		GFX_AddContext (pTask, 0, 0);
 
 /*
 		__cli ();
@@ -440,7 +455,12 @@ __IRAM_CODE int kcswi_handler (
 		__cli ();
 		pTask = g_pTaskRing;
 		__sti ();
-		kgfx_manager_handler (eGFX_MGR_COMMIT, nParam1, 0, pTask);
+//		kgfx_manager_handler (eGFX_MGR_COMMIT, nParam1, 0, pTask);
+		GFX_RECT* pRect = (GFX_RECT*)nParam1;
+
+//printk ("Before GFX_UpdateContext: pRect = %d, \n", pRect, g_pZRectList->pOwnerTask);
+
+		GFX_UpdateContext (pTask, pRect);
 
 /*
 		__cli ();
@@ -468,7 +488,8 @@ __IRAM_CODE int kcswi_handler (
 		__cli ();
 		pTask = g_pTaskRing;
 		__sti ();
-		kgfx_manager_handler (eGFX_MGR_MOVE, nParam1, 0, pTask);
+//		kgfx_manager_handler (eGFX_MGR_MOVE, nParam1, 0, pTask);
+		GFX_MoveContext (pTask, ((GFX_POINT*)nParam1)->x, ((GFX_POINT*)nParam1)->y);
 
 /*
 		__cli ();
@@ -495,7 +516,8 @@ __IRAM_CODE int kcswi_handler (
 		__cli ();
 		pTask = g_pTaskRing;
 		__sti ();
-		kgfx_manager_handler (eGFX_MGR_FOREGROUND, nParam1, 0, pTask);
+//		kgfx_manager_handler (eGFX_MGR_FOREGROUND, nParam1, 0, pTask);
+		GFX_UpdateZOrder (pTask, 0);
 
 /*
 		__cli ();
@@ -575,6 +597,81 @@ __IRAM_CODE int kcswi_handler (
 			for (i=0;i<dy;i++)
 			{
 				memcpy (dptr, sptr, nRow);
+				dptr += dt;
+				sptr += st;
+			}
+		}
+		else
+			return ERR_INVALID_PARAM;
+	}
+	break;
+
+	case nAPI_GFX_BLENDBLIT:     //(GFX_DATA* pDst, GFX_DATA* pSrc, GFX_BLENDPARAMS* pParams);
+	{
+		GFX_DATA* pDst           = (GFX_DATA*)nParam1;
+		GFX_DATA* pSrc           = (GFX_DATA*)nParam2;
+		GFX_BLENDPARAMS* pParams = (GFX_POINT*)nParam3;
+
+		unsigned char nSrcElementSize = pSrc->pixel_size;
+		unsigned char nDstElementSize = pDst->pixel_size;
+
+		int bDoReverse = 0;
+		if (pSrc->direction != pDst->direction)
+			bDoReverse = 1;
+
+//		printk ("dw=%d, dh=%d, sw=%d, sh=%d\n", pDst->w, pDst->h, pSrc->w, pSrc->h);
+
+		int xmin = MAX(pParams->x,0);
+		int ymin = MAX(pParams->y,0);
+		int xmax = MIN(pDst->w, pSrc->w + pParams->x);
+		int ymax = MIN(pDst->h, pSrc->h + pParams->y);
+		int dx = xmax - xmin;
+		int dy = ymax - ymin;
+
+//		printk ("xmin=%d, ymin=%d, xmax=%d, ymax=%d\n", xmin, ymin, xmax, ymax);
+
+		if ((!dx) || (!dy))
+			break;
+
+//		printk ("blitting [2]...\n");
+
+		int i,j;
+
+		long st = pSrc->delta;
+		long dt = pDst->delta;
+		unsigned char* sptr;
+		unsigned char* dptr = (unsigned char*)(pDst->pixels + dt*ymin + xmin*nDstElementSize);
+
+		if (bDoReverse)
+		{
+			if (pParams->y < 0)
+				sptr = (unsigned char*)(pSrc->pixels + MAX(0,-pParams->x)*nSrcElementSize + (dy-1)*st);
+			else
+				sptr = (unsigned char*)(pSrc->pixels + MAX(0,-pParams->x)*nSrcElementSize + (pSrc->h-1)*st);
+			st = -st;
+		}
+		else
+		{
+			sptr = (unsigned char*)(pSrc->pixels + MAX(0,-pParams->x)*nSrcElementSize + MAX(0,-pParams->y)*st);
+		}
+
+//		printk ("blitting [3]...\n");
+
+//		if ((nSrcElementSize == nDstElementSize) && (nSrcElementSize == 4))
+		if (nSrcElementSize == nDstElementSize)
+		{
+//			printk ("blitting [4]...\n");
+			int nRow = dx * nDstElementSize;
+			unsigned long nC1 = pParams->transparency;
+			unsigned long nC2 = 256 - nC1;
+//			unsigned long nMix;
+			for (i=0;i<dy;i++)
+			{
+//				memcpy (dptr, sptr, nRow);
+				for (j=0;j<nRow;j++)
+				{
+					dptr[j] = (sptr[j] * nC1 + dptr[j] * nC2) >> 8;
+				}
 				dptr += dt;
 				sptr += st;
 			}
