@@ -56,3 +56,6 @@ uartEnd1:
         pop {r2}
         pop {r0}
         bx r0
+        
+        .ltorg
+        .arm
