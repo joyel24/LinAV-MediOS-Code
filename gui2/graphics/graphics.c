@@ -129,6 +129,8 @@ extern struct graphics_operations g8ops;
 
 int ini_graphics()
 {
+    
+
 #ifdef AV_SCREEN
     osdInit();
     
@@ -144,11 +146,15 @@ int ini_graphics()
     iniComponent(&BITMAP_2,(unsigned int)&screen_BMAP2); 
     iniComponent(&VIDEO_1,(unsigned int)&screen_VID1);
     iniComponent(&VIDEO_2,(unsigned int)&screen_VID2);
+    
+    setPalette(gui_pal,256);
 #else
     BITMAP_1.offset=(unsigned int)&screen_BMAP1;
     BITMAP_2.offset=(unsigned int)&screen_BMAP2;
     VIDEO_1.offset=(unsigned int)&screen_VID1;
     VIDEO_2.offset=(unsigned int)&screen_VID2;
+    
+
     
     display = XOpenDisplay(0);  
     if(!display) 
@@ -175,7 +181,7 @@ int ini_graphics()
     }
     XStoreName(display, window, "LinAV project");
     
-    calcpal();
+    setPalette(gui_pal,256);
     
     XMapWindow(display, window);
 #endif  
@@ -188,8 +194,7 @@ int ini_graphics()
     if(iniEvent()<0)
         return -1;
 
-    setPalette(gui_pal,256);
-            
+          
     setPlane(BMAP1);
     showPlane(BMAP1);
         
@@ -200,13 +205,14 @@ int ini_graphics()
 void lcd_update(void)
 {
     int x, y;
-    Colormap pal = DefaultColormap(display,screen);
+    unsigned char color;
     
     for(y=0; y<SCREEN_HEIGHT; y++)
         for(x=0; x<SCREEN_WIDTH; x++)
         {
-    XSetForeground(display, gc, colorTab[color]);
-    XDrawPoint(display, window, gc, x, y);
+            color=screen_BMAP1[y*SCREEN_WIDTH+x];
+            XSetForeground(display, gc, colorTab[color]);
+            XDrawPoint(display, window, gc, x, y);
         }   /*drawPixBuffer(screen_BMAP1[y*SCREEN_WIDTH+x], x, y);*/
 }
 #endif
@@ -229,16 +235,16 @@ void setPalette(int palette[256][3],int size)
     XColor c;
     Colormap pal = DefaultColormap(display,screen);
 
-    for(i=0; i<256; i++)
+    for(i=0; i<size; i++)
     {
-    r = gui_pal[i][0];
-    g = gui_pal[i][1];
-    b = gui_pal[i][2];
-    c.red = r*0x100+r;
-    c.green = g*0x100+g;
-    c.blue = b*0x100+b;
-    XAllocColor(display, pal, &c);
-    colorTab[i] = c.pixel;
+        r = palette[i][0];
+        g = palette[i][1];
+        b = palette[i][2];
+        c.red = r*0x100+r;
+        c.green = g*0x100+g;
+        c.blue = b*0x100+b;
+        XAllocColor(display, pal, &c);
+        colorTab[i] = c.pixel;
     }
 #endif
 }
