@@ -49,22 +49,34 @@ void dsp_run ()
 	outw (inw (HPIBCTL) | 128, HPIBCTL);
 }
 
-void load_dsp_program (const char* pszFilename)
+ERROR_CODE load_dsp_program_hdd (const char* pszFilename)
 {
-	printk ("Loading dsp program into sdram...\n");
+	printk ("Loading dsp program from hdd into sdram...\n");
 	unsigned char* pDSPCode = 0;
 	int fDSPCode = kfopen (pszFilename, O_RDONLY);
+	int nSize;
 	if (fDSPCode < 0)
+	{
 		printk ("Program not loaded.\n");
+		return ERR_FILE_NOT_FOUND;
+	}
 	else
 	{
-		int nSize = filesize (fDSPCode);
+		nSize = filesize (fDSPCode);
 		API_MALLOC (&pDSPCode, nSize);
 		int nReaded = fread (fDSPCode, pDSPCode, nSize);
-		printk ("Program loaded (%d bytes)\n", nReaded);
+		printk ("Program loaded into sdram (%d bytes)\n", nReaded);
 		kfclose (fDSPCode);
 	}
 
+	load_dsp_program_mem (pDSPCode, nSize);
+
+	API_FREE (pDSPCode);
+	return ERR_OK;
+}
+
+ERROR_CODE load_dsp_program_mem (void* pDSPCode, int nSize)
+{
 	printk ("Loading dsp program into dsp...\n");
 
 	dsp_on ();
@@ -131,27 +143,12 @@ void load_dsp_program (const char* pszFilename)
 	}
 
 	printk ("Program loaded into dsp.\n");
+	return ERR_OK;
 }
 
+DSP_HANDLER g_pDSPHandler = 0;//void (*g_pDSPHandler)(void) = 0;
 /*__IRAM_CODE*/ void c54_dsp_interrupt (int irq)
 {
-	AV3XX_DSP_INTERCONNECTION* pic = (AV3XX_DSP_INTERCONNECTION*)0x00040100;
-
-	switch (pic->nCommandToAV3XX)
-	{
-	case DSP_TO_AV3XX_COMMAND_MESSAGE:
-		printk ("*** DSP MESSAGE: [");
-		short* sMsg = (short*)0x00040120;//pic->sMsgBuffer;
-		while (*sMsg)
-		{
-			printk ("%c", (*sMsg ++) & 0xFF);
-		}
-		printk ("] ***\n");
-		break;
-	default:
-		printk ("*** DSP HINT: %.4X ***\n", pic->nCommandToAV3XX);
-		break;
-	}
-
-	pic->nAV3XXResultCode = 1;
+	if (g_pDSPHandler)
+		g_pDSPHandler ();
 }

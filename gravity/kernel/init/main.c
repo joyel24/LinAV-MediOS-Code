@@ -51,6 +51,8 @@
 #include <sys_def/file.h>
 #include <sys_def/colordef.h>
 
+#include <kernel/dsp.h>
+
 extern char screen_VID2 [320 * 240 *4 + 40];
 
 void print_boot_info(void)
@@ -366,6 +368,8 @@ void kernel_startup_thread (void)
 	GFX_init ();
 	////////////////////////////////////////////////////
 
+//	API_RUN_GRV ("/jpeg_view.grv", 0);
+
 /*
 	pS2.ptOrig.x = 40;
 	pS2.ptOrig.y = 20;
@@ -404,14 +408,14 @@ void kernel_startup_thread (void)
 	API_TASK_CREATE (win_thread, &rc4, 0);
 */
 
-
+/*
 	GFX_RECT rc5;
 	rc5.x = 9;
 	rc5.y = 5;
 	rc5.w = 73;
 	rc5.h = 230;
 	API_TASK_CREATE (win_thread, &rc5, 0);
-
+*/
 
 /*
 	GFX_RECT rc6;
@@ -422,6 +426,7 @@ void kernel_startup_thread (void)
 	API_TASK_CREATE (win_thread, &rc6, 0);
 */
 
+/*
 	printk ("Loading font 1...\n");
 	void* pFont1 = 0;
 	int fFnt1 = kfopen ("/fonts/8bit.grf",O_RDONLY);
@@ -451,6 +456,7 @@ void kernel_startup_thread (void)
 		}
 		API_GFX_UPDATE_RECT (0);
 	}
+*/
 
 //    avwm();
 	while (1)

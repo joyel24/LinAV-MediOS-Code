@@ -69,6 +69,9 @@ ERROR_CODE API_VAR_SET              (const char* pVarName, const char* pVarValue
 ERROR_CODE API_MALLOC               (void** ppvBuffer, unsigned long nBytes)                           { swi_call(nAPI_MALLOC); }
 ERROR_CODE API_FREE                 (void* pvBuffer)                                                   { swi_call(nAPI_FREE); }
 ERROR_CODE API_MEMAVAIL             (unsigned long* pnBytes)                                           { swi_call(nAPI_MEMAVAIL); }
+ERROR_CODE API_MEMSET               (void* pvBuffer, int fill, int size)                               { swi_call(nAPI_MEMSET); }
+ERROR_CODE API_MEMCPY               (void* pvBuffer, const void* pvSrc, int size)                      { swi_call(nAPI_MEMCPY); }
+
 ERROR_CODE API_HEAP_CREATE          (HEAP* phHeap, unsigned long nBytes)                               { swi_call(nAPI_HEAP_CREATE); }
 ERROR_CODE API_HEAP_DESTROY         (HEAP hHeap)                                                       { swi_call(nAPI_HEAP_DESTROY); }
 ERROR_CODE API_HEAP_MALLOC          (HEAP hHeap, void** ppvBuffer, unsigned long nBytes)               { swi_call(nAPI_HEAP_MALLOC); }
@@ -155,6 +158,19 @@ ERROR_CODE API_GFX                  (int cmd, void* p, void * pvData)           
 
 ERROR_CODE API_GFX_BUILD_SPANS      (int nYmin, int nYmax)                                             { swi_call(nAPI_GFX_BUILD_SPANS); }
 /////////////////////// GFX API ///////////////////////
+///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+/////////////////////// DSP API ///////////////////////
+ERROR_CODE API_DSP_OPEN             (void* pHandler)                                                   { swi_call(nAPI_DSP_OPEN); }
+ERROR_CODE API_DSP_CLOSE            ()                                                                 { swi_call(nAPI_DSP_CLOSE); }
+ERROR_CODE API_DSP_LOAD_MEMCODE     (void* pCode, int nSize)                                           { swi_call(nAPI_DSP_LOAD_MEMCODE); }
+ERROR_CODE API_DSP_LOAD_HDDCODE     (const char* pszCoffProgram)                                       { swi_call(nAPI_DSP_LOAD_HDDCODE); }
+ERROR_CODE API_DSP_ON               ()                                                                 { swi_call(nAPI_DSP_ON); }
+ERROR_CODE API_DSP_OFF              ()                                                                 { swi_call(nAPI_DSP_OFF); }
+ERROR_CODE API_DSP_RESET            ()                                                                 { swi_call(nAPI_DSP_RESET); }
+ERROR_CODE API_DSP_RUN              ()                                                                 { swi_call(nAPI_DSP_RUN); }
+/////////////////////// DSP API ///////////////////////
 ///////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////

@@ -10,6 +10,8 @@
 #ifndef __DSP_H
 #define __DSP_H
 
+#include <kernel/errors.h>
+
 #define HPIBCTL  0x00030600
 #define MOD1_REG 0x00030894
 #define MOD2_REG 0x00030896
@@ -59,40 +61,11 @@ typedef struct _COFF_SCNHDR
 //0x0080 STYP_BSS If set, indicates that this section defines uninitialized data, and has no data stored in the coff file for it. 
 } COFF_SCNHDR;
 
-void load_dsp_program (const char* pszFilename);
+ERROR_CODE load_dsp_program_hdd (const char* pszFilename);
+ERROR_CODE load_dsp_program_mem (void* pCode, int nSize);
 
+typedef void (*DSP_HANDLER)(void);
 
-
-////////////////////////////////////////////////////////
-// DSP - AV3XX interconnection data structs,
-// located in shared memory at address 0x0004100.
-////////////////////////////////////////////////////////
-typedef struct _AV3XX_DSP_GFX_CONTEXT
-{
-	unsigned long  pPixels;
-	unsigned short nWidth;
-	unsigned short nHeight;
-	unsigned short nStride;
-} AV3XX_DSP_GFX_CONTEXT;
-
-typedef struct _AV3XX_DSP_INTERCONNECTION
-{
-	unsigned short        nCommandToDSP;
-	unsigned short        nDSPResultCode;
-	unsigned short        nCommandToAV3XX;
-	unsigned short        nAV3XXResultCode;
-	unsigned long         nMemoryFileStart;
-	unsigned long         nMemoryFileSize;
-	unsigned long         nDecodingBufferAddress;
-	AV3XX_DSP_GFX_CONTEXT ctx;
-	short                 sMsgBuffer [64];
-} AV3XX_DSP_INTERCONNECTION;
-
-#define DSP_TO_AV3XX_COMMAND_MESSAGE  0x0100
-#define DSP_TO_AV3XX_COMMAND_READFILE 0x0101
-#define DSP_TO_AV3XX_COMMAND_COMPLETE 0x0102
-////////////////////////////////////////////////////////
-
-
+extern DSP_HANDLER g_pDSPHandler;
 
 #endif //__DSP_H

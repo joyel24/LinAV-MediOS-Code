@@ -31,6 +31,8 @@ typedef enum _ERROR_CODE
 	ERR_RECEIVER_EMPTY  = 10,
 	ERR_NO_GFX_CONTEXT  = 11,
 	ERR_NO_FONT         = 12,
+	ERR_DSP_BUSY        = 13,
+	ERR_SECTION_LOCKED  = 14
 } ERROR_CODE;
 
 #endif

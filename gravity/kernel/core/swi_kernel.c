@@ -283,7 +283,20 @@ int swi_kernel_handler (
 
 	case nAPI_CRITSEC_TRYENTER: //(HCRITSEC hCritSec);
 	{
-		// TO DO:
+		int nError = ERR_OK;
+		__cli ();
+		CRITSEC_INFO* pCS = (CRITSEC_INFO*)nParam1;
+		if (!pCS->pOwnerTask)
+		{
+			pCS->pOwnerTask = g_pTaskRing;
+			pCS->nLockCounter = 0;
+		}
+		else
+		{
+			nError = ERR_SECTION_LOCKED;
+		}
+		__sti ();
+		return nError;
 	}
 	break;
 
