@@ -99,8 +99,20 @@ int setUSB(int state)
     return 0;
 }
 
+int startTick =-1;
+
 int getTick(void)
 {
-    return 1;
+    /* don't want to access the jiffies value */
+    /* we will use the number of sec since the last round hour*/
+    time_t rawtime;
+    if(startTick==-1)
+    {
+        time ( &rawtime );
+        startTick=(((int)rawtime)/3600)*3600;
+    }
+    time ( &rawtime );
+    
+    return ((int)(rawtime)-startTick);
 }
 
