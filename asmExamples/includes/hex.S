@@ -24,6 +24,44 @@ hexInc = 1
 
         .thumb
 
+@ hexr2T    r0->string, r1=digits
+@
+.globl hexreadT
+.thumb_func
+hexreadT:
+        push {r1, r2, r3, r4, lr}
+        mov r3, #0                  @ Dest...
+        mov r2, #0
+hexrL1:
+        ldrb r2, [r0]               @ r1 = ascii High nibble
+        cmp r2, #'0'
+         blt h2nan1
+        cmp r2, #'9'
+         bgt h2nan1
+        sub r2, #'0'
+        b rednum
+h2nan1: cmp r2, #'A'
+         blt h2nal1
+        cmp r2, #'F'
+         bgt h2nal1
+        sub r2, #('A'-10)
+        b rednum
+h2nal1: cmp r2, #'a'
+         blt h2nal2
+        cmp r2, #'f'
+         bgt h2nal2
+        sub r2, #('a'-10)        
+rednum: lsl r3, #4
+        add r3, r2                  @ add it on to r3...
+h2nal2:
+        add r0, #1
+        sub r1, #1
+        cmp r1, #0
+         bne hexrL1
+        mov r0, r3
+        pop {r1, r2, r3, r4, pc}
+        
+        
 @ hex2T  r0->dest, r1=value
 @
 .globl hex2T
