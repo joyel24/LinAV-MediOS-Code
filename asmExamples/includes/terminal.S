@@ -32,7 +32,7 @@
 @
 terminalSetColorFT:
         push {r1}
-        ldr r1, =terminalColor
+        ldr r1, =terminalColorF
         str r0, [r1]
         pop {r1}
         bx lr
