@@ -145,7 +145,47 @@ g16s1n:
 .thumb_func
 
 graphics16Sprite2:
-        mov pc, lr
+        push {r0, r1, r2, r3, r4, r5, r6, r7, lr}
+        mov r4, r0
+        bl graphicsGetOffset                @ r0->TLC on dest...
+        ldr r1, [r3, #GRAPHICS_BUFFER_OFFSET]
+        ldr r6, [r3, #GRAPHICS_BUFFER_HEIGHT]
+g16s2y: ldr r7, [r3, #GRAPHICS_BUFFER_WIDTH]
+        push {r0, r1, r6}
+        mov r5, #6                          @ 0,2,4,6 counter
+g16s2x: 
+        ldrb r2, [r1]
+        lsr r2, r5
+        lsl r2, #30
+        lsr r2, #30
+        ldr r6, [r3, #GRAPHICS_BUFFER_TRANSPARENT]
+        cmp r2, r6
+         beq g16s2nd        
+
+        lsl r2, #2
+        ldr r6, [r3, #GRAPHICS_BUFFER_PALLETTE16]
+        ldr r2, [r6, r2]
+        strh r2, [r0]
+g16s2nd:
+        sub r5, #2
+        cmp r5, #0
+         bge g16s2n
+        mov r5, #6
+        add r1, #1
+g16s2n:
+        add r0, #2
+        sub r7, #1
+        cmp r7, #0
+         bne g16s2x
+        pop {r0, r1, r6}
+        ldr r5, [r4, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r0, r5
+        ldr r5, [r3, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r1, r5
+        sub r6, #1
+        cmp r6, #0
+         bne g16s2y
+        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
 
         
 @ ------------------------------------------------------------------------------
@@ -155,7 +195,47 @@ graphics16Sprite2:
 .thumb_func
 
 graphics16Sprite4:
-        mov pc, lr
+        push {r0, r1, r2, r3, r4, r5, r6, r7, lr}
+        mov r4, r0
+        bl graphicsGetOffset                @ r0->TLC on dest...
+        ldr r1, [r3, #GRAPHICS_BUFFER_OFFSET]
+        ldr r6, [r3, #GRAPHICS_BUFFER_HEIGHT]
+g16s4y: ldr r7, [r3, #GRAPHICS_BUFFER_WIDTH]
+        push {r0, r1, r6}
+        mov r5, #4                          @ 0,4 counter
+g16s4x: 
+        ldrb r2, [r1]
+        lsr r2, r5
+        lsl r2, #28
+        lsr r2, #28
+        ldr r6, [r3, #GRAPHICS_BUFFER_TRANSPARENT]
+        cmp r2, r6
+         beq g16s4nd        
+
+        lsl r2, #2
+        ldr r6, [r3, #GRAPHICS_BUFFER_PALLETTE16]
+        ldr r2, [r6, r2]
+        strh r2, [r0]
+g16s4nd:
+        sub r5, #4
+        cmp r5, #0
+         bge g16s4n
+        mov r5, #4
+        add r1, #1
+g16s4n:
+        add r0, #2
+        sub r7, #1
+        cmp r7, #0
+         bne g16s4x
+        pop {r0, r1, r6}
+        ldr r5, [r4, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r0, r5
+        ldr r5, [r3, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r1, r5
+        sub r6, #1
+        cmp r6, #0
+         bne g16s4y
+        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
         
         
 @ ------------------------------------------------------------------------------

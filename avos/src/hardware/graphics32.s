@@ -155,7 +155,47 @@ g32s1n:
 .thumb_func
 
 graphics32Sprite2:
-        mov pc, lr
+        push {r0, r1, r2, r3, r4, r5, r6, r7, lr}
+        mov r4, r0
+        bl graphicsGetOffset                @ r0->TLC on dest...
+        ldr r1, [r3, #GRAPHICS_BUFFER_OFFSET]
+        ldr r6, [r3, #GRAPHICS_BUFFER_HEIGHT]
+g32s2y: ldr r7, [r3, #GRAPHICS_BUFFER_WIDTH]
+        push {r0, r1, r6}
+        mov r5, #6                          @ 0,2,4,6 counter
+g32s2x: 
+        ldrb r2, [r1]
+        lsr r2, r5
+        lsl r2, #30
+        lsr r2, #30
+        ldr r6, [r3, #GRAPHICS_BUFFER_TRANSPARENT]
+        cmp r2, r6
+         beq g32s2nd        
+
+        lsl r2, #2
+        ldr r6, [r3, #GRAPHICS_BUFFER_PALLETTE32]
+        ldr r2, [r6, r2]
+        str r2, [r0]
+g32s2nd:
+        sub r5, #2
+        cmp r5, #0
+         bge g32s2n
+        mov r5, #6
+        add r1, #1
+g32s2n:
+        add r0, #4
+        sub r7, #1
+        cmp r7, #0
+         bne g32s2x
+        pop {r0, r1, r6}
+        ldr r5, [r4, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r0, r5
+        ldr r5, [r3, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r1, r5
+        sub r6, #1
+        cmp r6, #0
+         bne g32s2y
+        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
 
         
 @ ------------------------------------------------------------------------------
@@ -165,7 +205,47 @@ graphics32Sprite2:
 .thumb_func
 
 graphics32Sprite4:
-        mov pc, lr
+        push {r0, r1, r2, r3, r4, r5, r6, r7, lr}
+        mov r4, r0
+        bl graphicsGetOffset                @ r0->TLC on dest...
+        ldr r1, [r3, #GRAPHICS_BUFFER_OFFSET]
+        ldr r6, [r3, #GRAPHICS_BUFFER_HEIGHT]
+g32s4y: ldr r7, [r3, #GRAPHICS_BUFFER_WIDTH]
+        push {r0, r1, r6}
+        mov r5, #4                          @ 0,4 counter
+g32s4x: 
+        ldrb r2, [r1]
+        lsr r2, r5
+        lsl r2, #28
+        lsr r2, #28
+        ldr r6, [r3, #GRAPHICS_BUFFER_TRANSPARENT]
+        cmp r2, r6
+         beq g32s4nd        
+
+        lsl r2, #2
+        ldr r6, [r3, #GRAPHICS_BUFFER_PALLETTE32]
+        ldr r2, [r6, r2]
+        str r2, [r0]
+g32s4nd:
+        sub r5, #4
+        cmp r5, #0
+         bge g32s4n
+        mov r5, #4
+        add r1, #1
+g32s4n:
+        add r0, #4
+        sub r7, #1
+        cmp r7, #0
+         bne g32s4x
+        pop {r0, r1, r6}
+        ldr r5, [r4, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r0, r5
+        ldr r5, [r3, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r1, r5
+        sub r6, #1
+        cmp r6, #0
+         bne g32s4y
+        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
         
         
 @ ------------------------------------------------------------------------------
@@ -175,7 +255,39 @@ graphics32Sprite4:
 .thumb_func
 
 graphics32Sprite8:
-        mov pc, lr
+        push {r0, r1, r2, r3, r4, r5, r6, r7, lr}
+        mov r4, r0
+        bl graphicsGetOffset                @ r0->TLC on dest...
+        ldr r1, [r3, #GRAPHICS_BUFFER_OFFSET]
+        ldr r6, [r3, #GRAPHICS_BUFFER_HEIGHT]
+g32s8y: ldr r7, [r3, #GRAPHICS_BUFFER_WIDTH]
+        push {r0, r1, r6}
+g32s8x: 
+        mov r2, #0
+        ldrb r2, [r1]
+        ldr r6, [r3, #GRAPHICS_BUFFER_TRANSPARENT]
+        cmp r2, r6
+         beq g32s8nd        
+
+        lsl r2, #2
+        ldr r6, [r3, #GRAPHICS_BUFFER_PALLETTE32]
+        ldr r2, [r6, r2]
+        str r2, [r0]
+g32s8nd:
+        add r1, #1
+        add r0, #4
+        sub r7, #1
+        cmp r7, #0
+         bne g32s8x
+        pop {r0, r1, r6}
+        ldr r5, [r4, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r0, r5
+        ldr r5, [r3, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r1, r5
+        sub r6, #1
+        cmp r6, #0
+         bne g32s8y
+        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
         
         
 @ ------------------------------------------------------------------------------
@@ -195,8 +307,31 @@ graphics32Sprite16:
 .thumb_func
 
 graphics32Sprite32:
-        mov pc, lr
-        
+        push {r0, r1, r2, r3, r4, r5, r6, r7, lr}
+        mov r4, r0
+        bl graphicsGetOffset                @ r0->TLC on dest...
+        ldr r1, [r3, #GRAPHICS_BUFFER_OFFSET]
+        ldr r6, [r3, #GRAPHICS_BUFFER_HEIGHT]
+g32s32y:ldr r7, [r3, #GRAPHICS_BUFFER_WIDTH]
+        push {r0, r1, r6}
+g32s32x: 
+        ldr r2, [r1]
+        str r2, [r0]
+        add r1, #4
+        add r0, #4
+        sub r7, #1
+        cmp r7, #0
+         bne g32s32x
+        pop {r0, r1, r6}
+        ldr r5, [r4, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r0, r5
+        ldr r5, [r3, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r1, r5
+        sub r6, #1
+        cmp r6, #0
+         bne g32s32y
+        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
+
         
 graphics32SpriteRoutines:   .word graphics32Sprite1, graphics32Sprite2
                             .word graphics32Sprite4, graphics32Sprite8
