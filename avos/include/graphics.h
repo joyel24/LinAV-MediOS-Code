@@ -17,17 +17,21 @@ typedef unsigned long u32;
 #endif
 
 struct graphicsBuffer {
-    u32 offset;
+    u32 offset;                 // ->The data
     u32 bytesPerLine;
     u32 width;
     u32 height;
-    u32 bitsPerPixel;
+    u32 bitsPerPixel;           // eg 32 = YCbCr color
+    u32 bitsPerPixelShift;      // eg  5 = YCbCr color
+    int (*pallette) [];         // Pallette (index->YCbCr)
+    u32 transparent;            // Color index that shall be transparent
 };
 
 
 extern void graphicsSetPixel(struct graphicsBuffer *buffDef, u32 x, u32 y, u32 c);
 extern u32 graphicsGetPixel(struct graphicsBuffer *buffDef, u32 x, u32 y);
 extern void graphicsBoxf(struct graphicsBuffer *buffDef, u32 x, u32 y, u32 width, u32 height, u32 c);
+extern void graphicsSprite(struct graphicsBuffer *buffDest, u32 x, u32 y, struct graphicsBuffer *buffSrc);
 
 extern void graphics32SetPixel(struct graphicsBuffer *buffDef, u32 x, u32 y, u32 c);
 extern u32 graphics32GetPixel(struct graphicsBuffer *buffDef, u32 x, u32 y);

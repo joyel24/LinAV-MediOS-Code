@@ -22,12 +22,16 @@ graphicsInc = 1
         GRAPHICS_BUFFER_WIDTH       =   0x0008      @ Width in pixels
         GRAPHICS_BUFFER_HEIGHT      =   0x000c      @ Height in pixels
         GRAPHICS_BUFFER_BITSPERPIXEL=   0x0010      @ Bits per pixel
-        GRAPHICS_BUFFER_SIZE        =   0x0014
+        GRAPHICS_BUFFER_BPPSHIFT    =   0x0014
+        GRAPHICS_BUFFER_PALLETTE    =   0x0018      @ ->Pallette
+        GRAPHICS_BUFFER_TRANSPARENT =   0x001c
+        GRAPHICS_BUFFER_SIZE        =   0x0020
         
         GRAPHICS_ROUTINE_SETPIXEL   =   0x0000
         GRAPHICS_ROUTINE_GETPIXEL   =   0x0001
         GRAPHICS_ROUTINE_BOXF       =   0x0002
-        
+        GRAPHICS_ROUTINE_SPRITE     =   0x0003
+
 graphicsRoutines:
         .word graphics1SetPixel,    graphics2SetPixel
         .word graphics4SetPixel,    graphics8SetPixel
@@ -40,6 +44,10 @@ graphicsRoutines:
         .word graphics1BoxfR,       graphics2BoxfR
         .word graphics4BoxfR,       graphics8BoxfR
         .word graphics16BoxfR,      graphics32BoxfR
+
+        .word graphics1Sprite,      graphics2Sprite
+        .word graphics4Sprite,      graphics8Sprite
+        .word graphics16Sprite,     graphics32Sprite
         
 @ ------------------------------------------------------------------------------
 @ graphicsGetOffset(r0->bufferDef, r1=x, r2=y)
@@ -72,29 +80,9 @@ graphicsFindRoutine:
         push {r6, lr}
         mov r6, #(4*6)
         mul r7, r6
-        ldr r6, [r0, #GRAPHICS_BUFFER_BITSPERPIXEL]
-        cmp r6, #32
-         bne gcr32
-        add r7, #(5*4)
-        b gcrdo
-gcr32:  cmp r6, #16
-         bne gcr16
-        add r7, #(4*4)
-        b gcrdo
-gcr16:  cmp r6, #8
-         bne gcr8
-        add r7, #(3*4)
-        b gcrdo
-gcr8:   cmp r6, #4
-         bne gcr4
-        add r7, #(2*4)
-        b gcrdo
-gcr4:   cmp r6, #2
-         bne gcr2
-        add r7, #(1*4)
-        b gcrdo
-gcr2:
-gcrdo:
+        ldr r6, [r0, #GRAPHICS_BUFFER_BPPSHIFT]
+        lsl r6, #2
+        add r7, r6
         ldr r6, =graphicsRoutines
         ldr r7, [r6, r7]
         pop {r6, pc}
@@ -143,6 +131,21 @@ graphicsBoxf:
         bl graphicsFindRoutine
         ldr r4, [sp, #(7*4)]
         ldr r5, [sp, #(8*4)]
+        mov lr, pc
+        mov pc, r7
+        pop {r1, r2, r3, r4, r5, r7, pc}
+
+
+@ ------------------------------------------------------------------------------
+@ graphicsSprite(r0->bufferDefDest, r1=x, r2=y, r3=bufferDefSrc)
+@
+.globl graphicsSprite
+.thumb_func
+
+graphicsSprite:
+        push {r1, r2, r3, r4, r5, r7, lr}
+        mov r7, #GRAPHICS_ROUTINE_SPRITE
+        bl graphicsFindRoutine
         mov lr, pc
         mov pc, r7
         pop {r1, r2, r3, r4, r5, r7, pc}

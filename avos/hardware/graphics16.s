@@ -71,6 +71,16 @@ g16lx:  strh r5, [r0]
          bne g16ly
         pop {r0, r1, r2, r4, r7, pc}
         
+@ ------------------------------------------------------------------------------
+@ graphics16Sprite(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
+@
+.globl graphics16Sprite
+.thumb_func
+
+graphics16Sprite:
+        mov pc, lr
+        
+        
         .arm
         .ltorg
 

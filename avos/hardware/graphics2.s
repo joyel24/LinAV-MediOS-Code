@@ -51,6 +51,16 @@ graphics2BoxfR:
         mov pc, lr
         
         
+@ ------------------------------------------------------------------------------
+@ graphics2Sprite(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
+@
+.globl graphics2Sprite
+.thumb_func
+
+graphics2Sprite:
+        mov pc, lr
+        
+        
         .arm
         .ltorg
 

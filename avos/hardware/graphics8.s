@@ -72,6 +72,16 @@ g8lx:   strb r5, [r0]
         pop {r0, r1, r2, r4, r7, pc}
         
         
+@ ------------------------------------------------------------------------------
+@ graphics8Sprite(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
+@
+.globl graphics8Sprite
+.thumb_func
+
+graphics8Sprite:
+        mov pc, lr
+        
+        
         .arm
         .ltorg
 

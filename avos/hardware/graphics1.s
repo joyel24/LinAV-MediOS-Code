@@ -51,6 +51,16 @@ graphics1BoxfR:
         mov pc, lr
 
         
+@ ------------------------------------------------------------------------------
+@ graphics1Sprite(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
+@
+.globl graphics1Sprite
+.thumb_func
+
+graphics1Sprite:
+        mov pc, lr
+        
+        
         .arm
         .ltorg
 

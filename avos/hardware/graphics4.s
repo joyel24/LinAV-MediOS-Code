@@ -49,6 +49,17 @@ graphics4GetPixel:
 
 graphics4BoxfR:
         mov pc, lr
+
+
+@ ------------------------------------------------------------------------------
+@ graphics4Sprite(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
+@
+.globl graphics4Sprite
+.thumb_func
+
+graphics4Sprite:
+        mov pc, lr
+        
         
         .arm
         .ltorg
