@@ -4,11 +4,14 @@
 #include <ata.h>
 #include <fonts.h>
 #include <mas.h>
+#include <masc.h>
 
     static int pal32[2] = {0x004a4956, 0x00000000};
     struct graphicsBuffer screenBitmap;
     struct graphicsBuffer screenBitmap2;
     struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, -1, 0, 0, 0, 0, 0, (int**) &pal32};
+
+char volB[] = "xx";
     
 int main() {
     unsigned int c, v, b, x, y = 120, div;
@@ -18,7 +21,8 @@ int main() {
     unsigned int showin = 0;
     unsigned int mono = 1;
     unsigned int inr=0, inl=0, outr=0, outl=0;
-    
+    unsigned int vol=0x60;
+
     ataPowerDownHDDA();
     osdInitA();
 
@@ -79,26 +83,28 @@ int main() {
     masResetA();
     c = masGetVersionA();
     
-    c = masWriteCodecRegA(0x08, 0x8000);     // MONO input
-    c = masWriteCodecRegA(0x0e, 0x0000);
-    c = masWriteCodecRegA(0x11, 0x0000);     // Balance = center
+    masConfigInput(MAS_CONFIGINPUT_MONO);
+    masConfigOutput(0x40, 0x00, 0);
+    masSetBalance(0x00);
+    masConfigAudioCodec(0x0f, 0x0f, vol>>4, MAS_CONFIG_INPUT_MIC
+                                        | MAS_CONFIG_DAC_ENABLE
+                                        | MAS_CONFIG_ADCLEFT_ENABLE
+                                        | MAS_CONFIG_ADCRIGHT_ENABLE);
+    
+    masSetVolume(0x60);
+    
+    stringPutHexA(volB, vol, 2); 
+    graphicsStringA(&screenBitmap2, 2 + (20*8), 1, &sprite8_13, std8x13_, 8, 0, volB);
 
-    c = masWriteCodecRegA(0x10, 0x6000);     // Volume
-
-    c = masWriteCodecRegA(0x06, 0x4000);     // Input gain
-
-    c = masWriteCodecRegA(0, 0xffff);        // Enable stuff
 
     
     while(1) {
-        
-        b = (masReadCodecRegA(0x000c) & 0x7fff);
-        outl = 119 - ((b * 119) >> 15);
+
+        outl = 119 - ((masGetOutPeakLeft() * 119) >> 15);
         if (mono) {
             outr = 239-outl;
         } else {
-            b = (masReadCodecRegA(0x000d) & 0x7fff);
-            outr = 120 + ((b * 119) >> 15);
+            outr = 120 + ((masGetOutPeakRight() * 119) >> 15);
         }
 
         // Work out new display position after opdate...        
@@ -119,13 +125,11 @@ int main() {
         graphicsBoxfA(&screenBitmap, drawx, outl, 1, outr-outl, 0x0202);
          
         if (showin) {
-            b = (masReadCodecRegA(0x000a) & 0x7fff);
-            inl = 119 - ((b * 59) >> 15);
+            inl = 119 - ((masGetInPeakLeft() * 119) >> 15);
             if (mono) {
                 inr = 239 - inl;    
             } else {
-                b = (masReadCodecRegA(0x000b) & 0x7fff);
-                inr = 120 + ((b * 59) >> 15);
+                inr = 120 + ((masGetInPeakRight() * 119) >> 15);
             }
             graphicsSetPixelA(&screenBitmap, drawx, inl, 0x0101);
             graphicsSetPixelA(&screenBitmap, drawx, inr, 0x0101);
@@ -164,6 +168,26 @@ int main() {
             do {
                 b = buttonsGetStatusA();
             } while ((b & BUTTONS_AV300_ANY));            
+        } else if (b & BUTTONS_AV300_UP) {
+            if (vol<0xff) {
+                vol++;
+                masConfigAudioCodec(vol>>4, vol>>4, vol>>4, MAS_CONFIG_INPUT_MIC
+                                        | MAS_CONFIG_DAC_ENABLE
+                                        | MAS_CONFIG_ADCLEFT_ENABLE
+                                        | MAS_CONFIG_ADCRIGHT_ENABLE);
+                stringPutHexA(volB, vol, 2); 
+                graphicsStringA(&screenBitmap2, 2 + (20*8), 1, &sprite8_13, std8x13_, 8, 0, volB);
+            }
+        } else if (b & BUTTONS_AV300_DOWN) {
+            if (vol>0) {
+                vol--;
+                masConfigAudioCodec(vol>>4, vol>>4, vol>>4, MAS_CONFIG_INPUT_MIC
+                                        | MAS_CONFIG_DAC_ENABLE
+                                        | MAS_CONFIG_ADCLEFT_ENABLE
+                                        | MAS_CONFIG_ADCRIGHT_ENABLE);
+                stringPutHexA(volB, vol, 2); 
+                graphicsStringA(&screenBitmap2, 2 + (20*8), 1, &sprite8_13, std8x13_, 8, 0, volB);
+            }
         }
     }
 
