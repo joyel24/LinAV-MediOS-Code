@@ -61,14 +61,7 @@ void eventLoop()
     while(!stopWM)
     {
         evt=waitEvent();
-        
-        if(evt==EVT_TIMER)
-            printf("tick:%d usb:%d pwr:%d\n",getTick(),getUSB(),getPwr());
-        if(evt==EVT_PWR)
-            printf("Power changed\n");
-        if(evt==EVT_USB)
-            printf("USB changed\n");
-        
+                      
         if(evt==BTN_OFF)
         {
             if(nbOff)
