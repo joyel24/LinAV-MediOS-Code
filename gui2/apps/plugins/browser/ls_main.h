@@ -67,7 +67,6 @@ int   launchScript       (char * name);
 void  handle_type_other  (char * filename);
 int   do_mv              (char * src,char * dest);
 int   do_cp              (char * src,char * dest);
-int   do_mount           (char * devFile,char * dirMnt);
 int   isadir             (char * name);
 char* buildname          (char * dirname,char * filename);
 int   copyfile           (char * src,char * dest,int setmodes);

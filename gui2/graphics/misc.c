@@ -193,6 +193,20 @@ int get_lcd_TimeOutParam(int state)
     return param.val;
 }
 
+int CF_mod_is_connected(void)
+{
+    int state;
+    doGenIoctl("/dev/avstate",AV_CF_MOD_IS_CONNECTED,&state,"Error getting CF module state\n");
+    return state;
+}
+
+int CF_is_connected(void)
+{
+    int state;
+    doGenIoctl("/dev/avstate",AV_CF_IS_CONNECTED,&state,"Error getting CF state\n");
+    return state;
+}
+
 int gen_ioctl(char * dev_name, int ioctl_cmd,void * param)
 {
     int fd = 0;

@@ -103,6 +103,7 @@ int doLs(char * name)
     char            fullname[PATHLEN];
     
     totSize=0;
+    nbFile=0;nbDir=0;
     
     if(ini_lists()<0)
         return -1;

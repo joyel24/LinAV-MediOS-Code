@@ -237,31 +237,6 @@ int do_cp(char * src,char * dest)
     return 1;    
 }
 
-int do_mount(char * devFile,char * dirMnt)
-{
-   int pid;
-   int status;
-   
-   pid = vfork();
-   if (pid == 0)
-   {
-       execl("/bin/mount", "mount",devFile,dirMnt,(char*)NULL);
-       fprintf(stderr, "mount failed %s on %s\n",devFile,dirMnt);
-       _exit(1);       
-   }
-   else
-   {
-       if(pid>0)
-           waitpid(pid, &status, 0);
-       else
-       {
-           fprintf(stderr, "vfork failed for mount %s on %s\n",devFile,dirMnt);
-           return 0;
-       }
-   }
-   return 1;
-}
-
 int isadir(char *name)
 {
     struct stat statbuf;

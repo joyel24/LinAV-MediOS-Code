@@ -34,6 +34,7 @@
 #include "editBox.h"
 #include "avwm-menu.h"
 #include "status_line.h"
+#include "CF_handler.h"
 
 #include "osd.h"
 
@@ -78,6 +79,8 @@ int main(int argc,char * * argv)
     ini_font(STD6X9);
     set_mouseParam(6, 3);
     ini_settings();
+    
+    ini_CF_mount();
 
     ini_sound_connection();
     

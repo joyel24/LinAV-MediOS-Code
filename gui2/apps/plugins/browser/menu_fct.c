@@ -157,7 +157,7 @@ void do_right(void * data)
             }
             break;
         case MENU_CF:
-            do_mount("/dev/avcf1","/cf");
+            //do_mount("/dev/avcf1","/cf");
             break;
     }
 
