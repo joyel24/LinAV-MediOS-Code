@@ -127,7 +127,9 @@ struct av_peak {
 #define AV_PAUSE_APP           _IO(AV_OP_IOC_MAGIC,53)
 #define AV_RELEASE_APP         _IO(AV_OP_IOC_MAGIC,54)
 
-#define AV_OP_IOC_MAXNR        55
+#define AV_RTC_GET_JIFFY_IOC   _IOR(AV_OP_IOC_MAGIC,55,int)
+
+#define AV_OP_IOC_MAXNR        56
 
 /* MAJOR / MINOR */
 

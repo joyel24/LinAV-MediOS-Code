@@ -18,6 +18,7 @@
 
 int   getTimeS          (char * timeSt);
 int   getTime           (struct tm * date_time);
+int   getTick           (void);
 
 int   set_mouseParam    (int freq, int repeat);
 

@@ -177,3 +177,26 @@ int setUSB(int state)
     
     return 0;
 }
+
+int getTick(void)
+{
+    int fd,tick;
+    fd=open("/dev/avrtc",O_RDONLY | O_NONBLOCK);
+        
+    if (fd < 0)
+    {
+        printf("Can't open /dev/avrtc\n");
+        return 0;
+    }
+    
+    if(ioctl(fd,AV_RTC_GET_JIFFY_IOC,&tick)<0)
+    {
+        printf("Error getting tick value\n");
+        close(fd);
+        return 0;
+    }
+    
+    close(fd);
+    
+    return tick;
+}
