@@ -12,6 +12,8 @@
 @ Author:   By DoggerMoore
 @
 
+lcdRegBacklight             =   0x02600200
+
 ataRegData                  =   0x02400000
 ataRegError                 =   0x02400080
 ataRegNSector               =   0x02400100
@@ -19,6 +21,6 @@ ataRegSector                =   0x02400180
 ataRegLCyl                  =   0x02400200
 ataRegHCyl                  =   0x02400280
 ataRegSelect                =   0x02400300
-ataRegStatus                =   0x02400340      @
+ataRegStatus                =   0x02400340
 ataRegCommand               =   0x02400380
 

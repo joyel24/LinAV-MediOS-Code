@@ -321,7 +321,7 @@ lcdInitT:
         callThumb1 r1, osdSetMainOffsetT, lcdVideoBuffer
         callThumb1 r1, osdSetBackOffsetT, lcdVideoBuffer2
     
-        ldr r0, =0x02600200
+        ldr r0, =lcdRegBacklight
         ldr r1, =0x4
         strh r1, [r0]
         
@@ -329,11 +329,9 @@ lcdInitT:
         ldr r1, =0x8100
         strh r1, [r0]
         
-        ldr r0, =0x02600200
+        ldr r0, =lcdRegBacklight
         ldr r1, =0x4
         strh r1, [r0]
-        
-        
         
         ldr r0, =lcdVideoBuffer
         ldr r1, =(lcdWidth*lcdHeight*2)
