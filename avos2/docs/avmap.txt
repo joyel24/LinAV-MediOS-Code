@@ -191,6 +191,7 @@ TODO
 || 5 00000020
 || 6 00000040 I  - Input from IR remote ready
 || 7 00000080
+||
 || 8 00000100 IO - MAS D0
 || 9 00000200 IO - MAS D1
 || a 00000400 IO - MAS D2

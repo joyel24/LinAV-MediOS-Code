@@ -61,7 +61,7 @@ timersConfig:
         lsl r0, #7
         ldr r5, =0x30000
         add r5, r0
-        
+
         strh r1, [r5, #TIMER_TMMD]           @ Store config
         strh r2, [r5, #TIMER_TMCLK]          @ Store clk select
         strh r3, [r5, #TIMER_TMPS]           @ Store prescaler divide value

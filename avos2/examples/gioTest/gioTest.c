@@ -9,6 +9,7 @@
 #include <interrupts.h>
 #include <debug.h>
 #include <uart.h>
+#include <timers.h>
 
 char hex2[] = "xx";
 
@@ -146,43 +147,113 @@ int main() {
     }
 }
 
-int v=0;
+static unsigned int v=0,f=0,lf=0,state=0,count=0,data=0;
+static unsigned int dataCount=0;
 char hex4[] = "xxxx";
+char hex8[] = "xxxxxxxx";
 
 void intsub() {
     int i=0,c=0, op0, op1;
     c = interruptsGetCausesA();
     c = c | (~interruptsGetMaskA());
-    debug("INT called %d: ", v);
-    debug("CAUSES %08x MASK %08x ", c, interruptsGetMaskA());
-    debug("CAUSES2 %08x MASK2 %08x\n", interruptsGetCauses2A(), interruptsGetMask2A());
+    //debug("INT called ");
+    //debug("CAUSES %08x MASK %08x ", c, interruptsGetMaskA());
+    //debug("CAUSES2 %08x MASK2 %08x\n", interruptsGetCauses2A(), interruptsGetMask2A());
     
     for (i=0;i<32;i++) {
         if (!(c&1)) break;
         c = c>>1;
     }
 
-    debug("ID=%d\n", i);
+    if (i==2) {
+        timersConfigA(2, TIMERS_TMMD_STOP, TIMERS_TMCLK_EXT, 10, 280);
+        // call 4da03(27)
+        
+        // 43d(2)   - mask this IRQ...
+        
+        interruptsResetIRQA(2);
+        return; 
+    }
 
-    op0 = pal16[0];
-    op1 = pal16[1];
-    
-    pal16[0] = 0x0000;
-    pal16[1] = 0xffff;
-    stringPutHexA(hex4, v, 4);
-    graphicsStringA(&screenBitmap, 4, 210, &sprite5_8, std5x8_, 6, 0, hex4);
+    if (i==0x18) {    
+        interruptsResetIRQA(i);    
 
-    stringPutHexA(hex4, i, 4);
-    graphicsStringA(&screenBitmap, 4+(5*6), 210, &sprite5_8, std5x8_, 6, 0, hex4);
-    pal16[0] = op0;
-    pal16[1] = op1;
+        if (state==0) {
+            timersConfigA(2, TIMERS_TMMD_FREERUN, TIMERS_TMCLK_EXT, 269, 0xffff);
+            interruptsResetIRQA(2);
+            state=1;
+            lf=0;
+        } else if (state==1) {
+            v = timersGetValueA(2);
+            f = v - lf;
+            lf = v;
+
+            if (f<0x7d0) {
+                if (f>0x514 && f<0x578) {
+                    //debug("514:578 - 0:0 ?\n");
+                    state=2;
+                    count=0;
+                    data=0;
+                } else if (f>0x44c && f<0x4b0) {
+                    //debug("44c:4b0\n");
+                }
+                
+            } else {
+                timersConfigA(2, TIMERS_TMMD_FREERUN, TIMERS_TMCLK_EXT, 269, 0xffff);
+                lf = 0;
+            }
+        } else if (state==2) {
+            v = timersGetValueA(2);
+            f = v - lf;
+            lf = v;
+
+            if (f>100 && f<130) {   // b76
+                count++;
+                data = (data << 1);
+            } else if (f>200 && f<240) {    // b50
+                count++;
+                data = (data << 1) | 1;
+            } else {    // b64
+                count++;
+                data = (data << 1);
+            }
+            
+            if (count==32) {
+                op0 = pal16[0];
+                op1 = pal16[1];
+                
+                pal16[0] = 0x0000;
+                pal16[1] = 0xffff;
+                stringPutHexA(hex8, data, 8);
+                graphicsStringA(&screenBitmap, 4, 210, &sprite5_8, std5x8_, 6, 0, hex8);
+            
+                stringPutHexA(hex8, dataCount, 8);
+                graphicsStringA(&screenBitmap, 4+(9*6), 210, &sprite5_8, std5x8_, 6, 0, hex8);
+                pal16[0] = op0;
+                pal16[1] = op1;
+
+                debug("data=%08x\n", data);
+                state=0;
+                dataCount++;
+            }
+        }
+        interruptsResetIRQA(i);
+        return;
+    }
+//    op0 = pal16[0];
+//    op1 = pal16[1];
     
-    
-    //interruptsResetMaskA(i);      One shot
-    interruptsResetIRQA(i);
-    
-    debug("INT RET    %d: ", v++);
-    debug("CAUSES %08x MASK %08x ", interruptsGetCausesA(), interruptsGetMaskA());
-    debug("CAUSES2 %08x MASK2 %08x\n", interruptsGetCauses2A(), interruptsGetMask2A());
+//    pal16[0] = 0x0000;
+//    pal16[1] = 0xffff;
+//    stringPutHexA(hex4, v, 4);
+//    graphicsStringA(&screenBitmap, 4, 210, &sprite5_8, std5x8_, 6, 0, hex4);
+
+//    stringPutHexA(hex4, i, 4);
+//    graphicsStringA(&screenBitmap, 4+(5*6), 210, &sprite5_8, std5x8_, 6, 0, hex4);
+//    pal16[0] = op0;
+//    pal16[1] = op1;
+
+    interruptsResetIRQA(i);    
+
 }
 
