@@ -147,7 +147,7 @@ osdLookupOffsetHI:  .word 0x30694
                     .word 0x3069a
                     .word 0x3069b
 
-
+                    
 @ ------------------------------------------------------------------------------
 @ osdSetCursor2Bitmap(r0=index, r1=data)
 @
@@ -474,6 +474,18 @@ osdSetContrast:
 osdInit:
         push {r0, r1, r2}
 
+        @ setScreenConfig  0x2000
+        ldr r0, =0x2000
+        ldr r1, =0x30680
+        strh r0, [r1]
+        ldr r1, =0x306a0
+        mov r2, #0
+        mov r0, #0x79
+        strh r0, [r1]
+        strh r2, [r1, #2]
+        
+        @ setScreenPosition 0x79, 0x00
+        
         mov r2, #0
         ldr r0, =0x30800
         ldr r1, =0x4071
@@ -521,7 +533,7 @@ osdInit:
         ldr r1, =0x0022
         strh r1, [r0, #0x38]
         
-        ldr r0, =02600200
+        ldr r0, =0x02600200
         ldr r1, =0x4
         strh r1, [r0]
 
@@ -529,7 +541,7 @@ osdInit:
         ldr r1, =0x8100
         strh r1, [r0]
 
-        ldr r0, =02600200
+        ldr r0, =0x02600200
         ldr r1, =0x4
         strh r1, [r0]
         pop {r0, r1, r2}
