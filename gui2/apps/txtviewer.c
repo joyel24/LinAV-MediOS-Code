@@ -627,6 +627,7 @@ static void viewer_draw(int col)
 					 {
                     scratch_buffer[k] = 0;
 
+						  memset(&text, 0, sizeof(text));
 						  strncpy(&text, scratch_buffer + col, k);
                     lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, text);
 //                    lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, scratch_buffer + col);
@@ -641,6 +642,7 @@ static void viewer_draw(int col)
                     c = line_end[0];
                     line_end[0] = 0;
 
+						  memset(&text, 0, sizeof(text));
 						  strncpy(&text, line_begin + col, line_len);
                     lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, text);
 //                    lcd_putsxy(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, line_begin + col);
