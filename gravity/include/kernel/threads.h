@@ -14,6 +14,7 @@
 #define __THREADS_H
 
 #include <kernel/errors.h>
+#include <types.h>
 
 #define TASK_STACK_SIZE 16384
 
@@ -28,6 +29,8 @@ typedef struct _TASK_INFO
 	unsigned long      nBlockingState;
 	unsigned long      nBlockingValue;
 	char               cName [8];
+	PIPE*              pMessagePipe;
+	GFX_DATA*          pContext;
 } TASK_INFO;
 
 typedef struct _CRITSEC_INFO
@@ -48,12 +51,13 @@ typedef struct _SYSTEM_CTRL_COMMAND
 	TASK_INFO* pSenderThread;
 } SYSTEM_CTRL_COMMAND;
 
-#define TASK_BLOCKED_BY_NONE    0
-#define TASK_BLOCKED_BY_SLEEP   1
-#define TASK_BLOCKED_BY_PIPE    2
-#define TASK_BLOCKED_BY_MUTEX   3
-#define TASK_BLOCKED_BY_MEMMGR  4
-#define TASK_BLOCKED_BY_SUSPEND 5
+#define TASK_BLOCKED_BY_NONE     0
+#define TASK_BLOCKED_BY_SLEEP    1
+#define TASK_BLOCKED_BY_PIPE     2
+#define TASK_BLOCKED_BY_MUTEX    3
+#define TASK_BLOCKED_BY_MEMMGR   4
+#define TASK_BLOCKED_BY_SUSPEND  5
+#define TASK_BLOCKED_BY_DEBUGGER 6
 
 extern TASK_INFO* g_pTaskRing; // pointer to current element in ring list
 

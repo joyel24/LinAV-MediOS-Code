@@ -48,6 +48,9 @@ __IRAM_CODE void kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackS
 	while (*pszTaskName)
 		*pszTarget++ = *pszTaskName++;
 	*pszTarget++ = *pszTaskName++;
+
+	pTCB->pMessagePipe = 0;
+	pTCB->pContext     = 0;
 }
 
 __IRAM_CODE unsigned long* kInitialiseStack (unsigned long* pxTopOfStack, void* pvCode, void *pvParameters)

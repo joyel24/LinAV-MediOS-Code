@@ -17,37 +17,7 @@
 
 #include <sys_def/time.h>
 
-// API data type
-
-typedef struct _GFX_DATA
-{
-    long x;
-    long y;
-    long w;
-    long h;
-    int direction;
-    long delta; 
-    unsigned int color;
-    unsigned int bg_color;
-} GFX_DATA;
-
-typedef struct _PLANE_DATA
-{
-    int vplane;
-    int state;
-    int bpp;
-} PLANE_DATA;
-
-typedef struct _COUPLE_DATA
-{
-    void * a;
-    void * b;
-} COUPLE_DATA;
-
-typedef unsigned long HTASK;
-typedef unsigned long HPIPE;
-typedef unsigned long HCRITSEC;
-typedef unsigned long MESSAGE;
+#include <types.h>
 
 // API definition
 
