@@ -29,6 +29,7 @@
 #define ROWS 8
 #define Y_STEP 18
 #define LENGTH 16
+#define MAX_COLORS 8
 
 /* here is a global api struct pointer. while not strictly necessary,
    it's nice not to have to pass the api pointer in all function calls
@@ -38,11 +39,14 @@ struct client_operations * cops;
 void drawPieces();
 void showResult();
 void setCursor(int position, int state);
+void PrintCntColors();
 
 /* the cursor coordinates */
 int turns = 0;
 int pos = 0;
 int piece = 0;
+int GameMode = 0;
+int cntColors = 5;
 
 int pieceValues[4]  = { -1, -1, -1, -1 };
 int resultValues[4] = { -1, -1, -1, -1 };
@@ -161,7 +165,64 @@ unsigned char blue[16][16] =
       {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}
     };
 
-unsigned char white[8][8] =
+unsigned char black[16][16] =
+    { {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15, 0, 0,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15, 0, 0, 0, 0,15,15,15,15,15,15},
+      {15,15,15,15,15, 0, 0, 0, 0, 0, 0,15,15,15,15,15},
+      {15,15,15,15, 0, 0, 0, 0, 0, 0, 0, 0,15,15,15,15},
+      {15,15,15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,15,15,15},
+      {15,15,15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,15,15,15},
+      {15,15,15,15, 0, 0, 0, 0, 0, 0, 0, 0,15,15,15,15},
+      {15,15,15,15,15, 0, 0, 0, 0, 0, 0,15,15,15,15,15},
+      {15,15,15,15,15,15, 0, 0, 0, 0,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15, 0, 0,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}
+    };
+
+unsigned char purple[16][16] =
+    { {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,43,43,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,43,43,43,43,15,15,15,15,15,15},
+      {15,15,15,15,15,43,43,43,43,43,43,15,15,15,15,15},
+      {15,15,15,15,43,43,43,43,43,43,43,43,15,15,15,15},
+      {15,15,15,43,43,43,43,43,43,43,43,43,43,15,15,15},
+      {15,15,15,43,43,43,43,43,43,43,43,43,43,15,15,15},
+      {15,15,15,15,43,43,43,43,43,43,43,43,15,15,15,15},
+      {15,15,15,15,15,43,43,43,43,43,43,15,15,15,15,15},
+      {15,15,15,15,15,15,43,43,43,43,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,43,43,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}
+    };
+
+unsigned char orange[16][16] =
+    { {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,182,182,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,182,182,182,182,15,15,15,15,15,15},
+      {15,15,15,15,15,182,182,182,182,182,182,15,15,15,15,15},
+      {15,15,15,15,182,182,182,182,182,182,182,182,15,15,15,15},
+      {15,15,15,182,182,182,182,182,182,182,182,182,182,15,15,15},
+      {15,15,15,182,182,182,182,182,182,182,182,182,182,15,15,15},
+      {15,15,15,15,182,182,182,182,182,182,182,182,15,15,15,15},
+      {15,15,15,15,15,182,182,182,182,182,182,15,15,15,15,15},
+      {15,15,15,15,15,15,182,182,182,182,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,182,182,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+      {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}
+    };
+
+unsigned char whitePin[8][8] =
     { {15,15,15,15,15,15,15,15},
       {15,00,00,00,00,00,00,15},
       {15,00,15,15,15,15,00,15},
@@ -172,7 +233,7 @@ unsigned char white[8][8] =
       {15,15,15,15,15,15,15,15}
     };
 
-unsigned char black[8][8] =
+unsigned char blackPin[8][8] =
     { {15,15,15,15,15,15,15,15},
       {15,00,00,00,00,00,00,15},
       {15,00,00,00,00,00,00,15},
@@ -183,7 +244,7 @@ unsigned char black[8][8] =
       {15,15,15,15,15,15,15,15}
     };
 
-unsigned char empty[8][8] =
+unsigned char emptyPin[8][8] =
     { {15,15,15,15,15,15,15,15},
       {15,15,15,15,15,15,15,15},
       {15,15,15,15,15,15,15,15},
@@ -194,16 +255,19 @@ unsigned char empty[8][8] =
       {15,15,15,15,15,15,15,15}
     };
 
-static BITMAP  clearB =  {(unsigned int)  clear,  16, 16, 0, 0};
-static BITMAP    redB =  {(unsigned int)    red,  16, 16, 0, 0};
-static BITMAP yellowB =  {(unsigned int) yellow,  16, 16, 0, 0};
-static BITMAP   greyB =  {(unsigned int)   grey,  16, 16, 0, 0};
-static BITMAP  greenB =  {(unsigned int)  green,  16, 16, 0, 0};
-static BITMAP   blueB =  {(unsigned int)   blue,  16, 16, 0, 0};
+static BITMAP  clearB  =  {(unsigned int)    clear,  16, 16, 0, 0};
+static BITMAP    redB  =  {(unsigned int)      red,  16, 16, 0, 0};
+static BITMAP yellowB  =  {(unsigned int)   yellow,  16, 16, 0, 0};
+static BITMAP   greyB  =  {(unsigned int)     grey,  16, 16, 0, 0};
+static BITMAP  greenB  =  {(unsigned int)    green,  16, 16, 0, 0};
+static BITMAP   blueB  =  {(unsigned int)     blue,  16, 16, 0, 0};
+static BITMAP  blackB  =  {(unsigned int)    black,  16, 16, 0, 0};
+static BITMAP  purpleB =  {(unsigned int)   purple,  16, 16, 0, 0};
+static BITMAP  orangeB =  {(unsigned int)   orange,  16, 16, 0, 0};
 
-static BITMAP  blackB =  {(unsigned int)  black,   8,  8, 0, 0};
-static BITMAP  whiteB =  {(unsigned int)  white,   8,  8, 0, 0};
-static BITMAP  emptyB =  {(unsigned int)  empty,   8,  8, 0, 0};
+static BITMAP  blackPinB =  {(unsigned int)  blackPin,   8,  8, 0, 0};
+static BITMAP  whitePinB =  {(unsigned int)  whitePin,   8,  8, 0, 0};
+static BITMAP  emptyPinB =  {(unsigned int)  emptyPin,   8,  8, 0, 0};
 
 void delay(int value)
 {
@@ -239,10 +303,10 @@ void initMatrix()
     for(i = 0; i < ROWS; i++)
     {
         // Auswertefeld
-        cops->drawBITMAP (&emptyB, X_OFFSET, Y_OFFSET + i*Y_STEP);                       // links oben
-        cops->drawBITMAP (&emptyB, X_OFFSET, Y_OFFSET + i*Y_STEP + LENGTH/2);            // links unten
-        cops->drawBITMAP (&emptyB, X_OFFSET + LENGTH/2, Y_OFFSET + i*Y_STEP);            // rechts oben
-        cops->drawBITMAP (&emptyB, X_OFFSET + LENGTH/2, Y_OFFSET + i*Y_STEP + LENGTH/2); // rechts unten
+        cops->drawBITMAP (&emptyPinB, X_OFFSET, Y_OFFSET + i*Y_STEP);                       // links oben
+        cops->drawBITMAP (&emptyPinB, X_OFFSET, Y_OFFSET + i*Y_STEP + LENGTH/2);            // links unten
+        cops->drawBITMAP (&emptyPinB, X_OFFSET + LENGTH/2, Y_OFFSET + i*Y_STEP);            // rechts oben
+        cops->drawBITMAP (&emptyPinB, X_OFFSET + LENGTH/2, Y_OFFSET + i*Y_STEP + LENGTH/2); // rechts unten
 
         // Schwarze Kugeln
         cops->drawBITMAP (&clearB, X_OFFSET + LENGTH + X_OFFSET_BALLS +   LENGTH, Y_OFFSET + i*Y_STEP);
@@ -254,10 +318,10 @@ void initMatrix()
 
 void generate()
 {
-    resultValues[0] = rand() % 5;
-    resultValues[1] = rand() % 5;
-    resultValues[2] = rand() % 5;
-    resultValues[3] = rand() % 5;
+    resultValues[0] = rand() % cntColors;
+    resultValues[1] = rand() % cntColors;
+    resultValues[2] = rand() % cntColors;
+    resultValues[3] = rand() % cntColors;
 }
 
 void showResult()
@@ -276,6 +340,12 @@ void showResult()
             cops->drawBITMAP (&greenB, X_OFFSET + LENGTH + X_OFFSET_BALLS + (i+1)*LENGTH, Y_OFFSET + (ROWS+1)*Y_STEP);
         else if(resultValues[i] == 4)
             cops->drawBITMAP (&blueB, X_OFFSET + LENGTH + X_OFFSET_BALLS + (i+1)*LENGTH, Y_OFFSET + (ROWS+1)*Y_STEP);
+        else if(resultValues[i] == 5)
+            cops->drawBITMAP (&blackB, X_OFFSET + LENGTH + X_OFFSET_BALLS + (i+1)*LENGTH, Y_OFFSET + (ROWS+1)*Y_STEP);
+        else if(resultValues[i] == 6)
+            cops->drawBITMAP (&purpleB, X_OFFSET + LENGTH + X_OFFSET_BALLS + (i+1)*LENGTH, Y_OFFSET + (ROWS+1)*Y_STEP);
+        else if(resultValues[i] == 7)
+            cops->drawBITMAP (&orangeB, X_OFFSET + LENGTH + X_OFFSET_BALLS + (i+1)*LENGTH, Y_OFFSET + (ROWS+1)*Y_STEP);
     }
 }
 
@@ -289,30 +359,30 @@ void printChecks(int index, int kind)
     if(index == 0)
     {
         if(kind == 0)
-            cops->drawBITMAP (&whiteB, X_OFFSET, Y_OFFSET + turns*Y_STEP);                       // links oben
+            cops->drawBITMAP (&whitePinB, X_OFFSET, Y_OFFSET + turns*Y_STEP);                       // links oben
         else
-            cops->drawBITMAP (&blackB, X_OFFSET, Y_OFFSET + turns*Y_STEP);                       // links oben
+            cops->drawBITMAP (&blackPinB, X_OFFSET, Y_OFFSET + turns*Y_STEP);                       // links oben
     }
     else if(index == 1)
     {
         if(kind == 0)
-            cops->drawBITMAP (&whiteB, X_OFFSET, Y_OFFSET + turns*Y_STEP + LENGTH/2);            // links unten
+            cops->drawBITMAP (&whitePinB, X_OFFSET, Y_OFFSET + turns*Y_STEP + LENGTH/2);            // links unten
         else
-            cops->drawBITMAP (&blackB, X_OFFSET, Y_OFFSET + turns*Y_STEP + LENGTH/2);            // links unten
+            cops->drawBITMAP (&blackPinB, X_OFFSET, Y_OFFSET + turns*Y_STEP + LENGTH/2);            // links unten
     }
     else if(index == 2)
     {
         if(kind == 0)
-            cops->drawBITMAP (&whiteB, X_OFFSET + LENGTH/2, Y_OFFSET + turns*Y_STEP);            // rechts oben
+            cops->drawBITMAP (&whitePinB, X_OFFSET + LENGTH/2, Y_OFFSET + turns*Y_STEP);            // rechts oben
         else
-            cops->drawBITMAP (&blackB, X_OFFSET + LENGTH/2, Y_OFFSET + turns*Y_STEP);            // rechts oben
+            cops->drawBITMAP (&blackPinB, X_OFFSET + LENGTH/2, Y_OFFSET + turns*Y_STEP);            // rechts oben
     }
     else if(index == 3)
     {
         if(kind == 0)
-            cops->drawBITMAP (&whiteB, X_OFFSET + LENGTH/2, Y_OFFSET + turns*Y_STEP + LENGTH/2); // rechts unten
+            cops->drawBITMAP (&whitePinB, X_OFFSET + LENGTH/2, Y_OFFSET + turns*Y_STEP + LENGTH/2); // rechts unten
         else
-            cops->drawBITMAP (&blackB, X_OFFSET + LENGTH/2, Y_OFFSET + turns*Y_STEP + LENGTH/2); // rechts unten
+            cops->drawBITMAP (&blackPinB, X_OFFSET + LENGTH/2, Y_OFFSET + turns*Y_STEP + LENGTH/2); // rechts unten
     }
 }
 
@@ -394,7 +464,9 @@ void init(void)
 
     cops->putS(COLOR_BLACK, COLOR_GREEN, 271,13, "New game");
     cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
-    cops->putS(COLOR_BLACK, COLOR_GREEN, 288,152, "Check");
+    cops->putS(COLOR_BLACK, COLOR_GREEN, 290,152, "Check");
+
+    PrintCntColors();
 
     cops->putS(COLOR_WHITE, COLOR_GREEN, 15,220, "black=right color and position  white=right color");
 
@@ -404,7 +476,14 @@ void init(void)
 
     drawPieces();
 
-//    showResult(); // ToDo: muß wieder raus
+    showResult(); // ToDo: muß wieder raus
+}
+
+void PrintCntColors()
+{
+    char tmp[20];
+    sprintf(tmp,"%d Colors", cntColors);
+    cops->putS(COLOR_BLACK, COLOR_GREEN, 267,180, tmp);
 }
 
 void setCursor(int position, int state)
@@ -438,6 +517,12 @@ void drawPieces()
     {
         cops->drawBITMAP (&blueB, X_OFFSET + LENGTH + X_OFFSET_BALLS + (pos+1)*LENGTH, Y_OFFSET + turns*Y_STEP);
     }
+    else if(piece == 5)
+        cops->drawBITMAP (&blackB, X_OFFSET + LENGTH + X_OFFSET_BALLS + (pos+1)*LENGTH, Y_OFFSET + turns*Y_STEP);
+    else if(piece == 6)
+        cops->drawBITMAP (&purpleB, X_OFFSET + LENGTH + X_OFFSET_BALLS + (pos+1)*LENGTH, Y_OFFSET + turns*Y_STEP);
+    else if(piece == 7)
+        cops->drawBITMAP (&orangeB, X_OFFSET + LENGTH + X_OFFSET_BALLS + (pos+1)*LENGTH, Y_OFFSET + turns*Y_STEP);
 
     setCursor(pos, 1);
 
@@ -451,110 +536,122 @@ int eventHandler(int evt)
 {
     int ch = -1;
 
-    switch (evt) {
-        case BTN_OFF:
-        case EVT_QUIT:
-                /* get out of here */
-                RELEASE(cops)
-                break;
+    if(GameMode == 0)
+    {
+        switch (evt) {
+            case BTN_OFF:
+            case EVT_QUIT:
+                    /* get out of here */
+                    RELEASE(cops)
+                    break;
 
-                /* move cursor left */
-            case BTN_LEFT:
-
-                setCursor(pos, 0);
-                pos--;
-                if(pos < 0)
-                    pos = 3;
-
-                if(pieceValues[pos] == -1)
-                {
-                    piece = 0;
-                    pieceValues[pos] = piece;
-                }
-                else
-                    piece = pieceValues[pos];
-
-                drawPieces();
-                break;
-
-                /* move cursor right */
-            case BTN_RIGHT:
-                setCursor(pos, 0);
-                pos++;
-                if(pos > 3)
-                    pos = 0;
-
-                if(pieceValues[pos] == -1)
-                {
-                    piece = 0;
-                    pieceValues[pos] = piece;
-                }
-                else
-                    piece = pieceValues[pos];
-
-                drawPieces();
-                break;
-
-                /* move cursor down */
-            case BTN_DOWN:
-                piece++;
-                if(piece > 4)
-                    piece = 0;
-
-                pieceValues[pos] = piece;
-                drawPieces();
-                break;
-
-                /* move cursor up */
-            case BTN_UP:
-                piece--;
-                if(piece < 0)
-                    piece = 4;
-
-                pieceValues[pos] = piece;
-                drawPieces();
-                break;
-
-            case BTN_F2:
-                break;
-
-                /* toggle flag under cursor */
-            case BTN_F1:
-                ch = check();
-                if(ch == 0)
-                {
-                    resetPieceValues();
+                    /* move cursor left */
+                case BTN_LEFT:
 
                     setCursor(pos, 0);
+                    pos--;
+                    if(pos < 0)
+                        pos = 3;
 
-                    pos = 0;
-                    piece = 0;
-                    turns++;
-
-                    if(turns == ROWS)
+                    if(pieceValues[pos] == -1)
                     {
-                        LooseGame();
+                        piece = 0;
+                        pieceValues[pos] = piece;
                     }
                     else
+                        piece = pieceValues[pos];
+
+                    drawPieces();
+                    break;
+
+                    /* move cursor right */
+                case BTN_RIGHT:
+                    setCursor(pos, 0);
+                    pos++;
+                    if(pos > 3)
+                        pos = 0;
+
+                    if(pieceValues[pos] == -1)
                     {
-                        pieceValues[0] = piece;
-                        drawPieces();
-                        setCursor(pos, 1);
+                        piece = 0;
+                        pieceValues[pos] = piece;
                     }
-                }
-                else if(ch == 1)
-                {
-                    WinGame();
-                }
-                break;
+                    else
+                        piece = pieceValues[pos];
 
-            case BTN_ON: // new game
-                cops->clearScreen(COLOR_GREEN);
-                init();
-                break;
+                    drawPieces();
+                    break;
 
-            case BTN_F3: // settings
-                break;
+                    /* move cursor down */
+                case BTN_DOWN:
+                    piece++;
+                    if(piece > cntColors)
+                        piece = 0;
+
+                    pieceValues[pos] = piece;
+                    drawPieces();
+                    break;
+
+                    /* move cursor up */
+                case BTN_UP:
+                    piece--;
+                    if(piece < 0)
+                        piece = cntColors;
+
+                    pieceValues[pos] = piece;
+                    drawPieces();
+                    break;
+
+                case BTN_F3:
+                    break;
+
+                    /* toggle flag under cursor */
+                case BTN_F1:
+                    ch = check();
+                    if(ch == 0)
+                    {
+                        resetPieceValues();
+
+                        setCursor(pos, 0);
+
+                        pos = 0;
+                        piece = 0;
+                        turns++;
+
+                        if(turns == ROWS)
+                        {
+                            LooseGame();
+                        }
+                        else
+                        {
+                            pieceValues[0] = piece;
+                            drawPieces();
+                            setCursor(pos, 1);
+                        }
+                    }
+                    else if(ch == 1)
+                    {
+                        WinGame();
+                    }
+                    break;
+
+                case BTN_ON: // new game
+                    cops->clearScreen(COLOR_GREEN);
+                    init();
+                    break;
+
+                case BTN_F2: // change amount of colors
+
+                    if(cntColors > MAX_COLORS)
+                        cntColors = 4;
+                    else
+                        cntColors++;
+
+                    // restart
+                    cops->clearScreen(COLOR_GREEN);
+                    init();
+                    break;
+        }
     }
 }
 
