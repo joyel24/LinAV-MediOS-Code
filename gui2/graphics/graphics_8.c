@@ -63,15 +63,15 @@ void graphics8_DrawRect(int color, int x, int y, int width, int height, struct g
 void graphics8_FillRect(int color, int x, int y, int width, int height, struct graphicsBuffer * buff)
 {
     int j;
+
     char * offset=getOffset(x,y,buff,char);
-    
-    //printf("[g8 FillRect] c=%d, (%d,%d) (%d,%d)\n",color,x,y,width,height);
     
     for(j=0;j<height;j++)
     {
         graphics8_DrawHorizLine(color, width, offset);    
         offset+=buff->width;
     }
+    
 }
 
 void graphics8_DrawHLine(int color, int x, int y, int width, struct graphicsBuffer * buff)

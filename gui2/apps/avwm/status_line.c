@@ -20,6 +20,9 @@
 #include "events.h"
 #include "plugin.h"
 
+#define BG_COLOR  COLOR_LIGHT_BLUE
+#define TXT_COLOR COLOR_DARK_GREY
+
 int batteryRefresh=0;
 
 /* draw the current time */
@@ -29,8 +32,8 @@ void drawTime(void)
 
     if(getTimeS(timeSt))
     {
-        fillRect(COLOR_LIGHT_BLUE,150,2,130,11);
-        putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,150,3,timeSt);
+        //fillRect(BG_COLOR,150,2,130,11);
+        putS(TXT_COLOR,BG_COLOR,150,3,timeSt);
     }
 
 }
@@ -74,6 +77,7 @@ void drawBat(void)
 
         drawRect(COLOR_BLACK,289,2,22,10);
         fillRect(COLOR_BLACK,311,4,3,6);
+        fillRect(BG_COLOR,290,3,20,8);
         fillRect(color,290,3,level,8);
     }
     else
@@ -91,7 +95,7 @@ void drawGui(void)
     getStringS("M", &w, &h);
 
     /* blue background */
-    fillRect(COLOR_LIGHT_BLUE,0,0,320,h+6);
+    fillRect(BG_COLOR,0,0,320,h+6);
 
     /* nice little shadow */
     drawLine(COLOR_BLACK,0,h+5,319,h+5);
@@ -100,7 +104,7 @@ void drawGui(void)
 
     /* show version */
     sprintf(myName,"AvWm %d.%d",MAJOR_V,MINOR_V);
-    putS(COLOR_DARK_GREY,COLOR_LIGHT_BLUE,2,3,myName);
+    putS(TXT_COLOR,BG_COLOR,2,3,myName);
 
     /* and time, and battery */
     drawTime();

@@ -66,7 +66,7 @@ int main(int argc,char * * argv)
     path=getPath(argv[0]);    
     
     ini_graphics();    
-    ini_font(STD8X13);
+    ini_font(STD6X9);
     set_mouseParam(6, 3);
     
     ini_sound_connection();

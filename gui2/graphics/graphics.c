@@ -101,6 +101,8 @@ extern struct graphics_operations g8ops;
 
 int ini_graphics()
 {
+    osdInit();
+    
     /* reset everything */
     osdSetComponentConfig(AV3XX_OSD_VIDEO1,  0);
     osdSetComponentConfig(AV3XX_OSD_VIDEO2,  0);

@@ -46,28 +46,25 @@ FONT_ID plugin_font;
 
 void ini_font(int font)
 {
-    font_table[0]=std6x9;
-    font_table[1]=std8x13;
-    font_table[2]=std6x9;
-    font_table[3]=std8x13;
-    font_table[4]=std4x6;
-    font_table[5]=std4x8;
-    font_table[6]=std5x7;
-    font_table[7]=std5x8;
-    font_table[8]=std6x10;
-    font_table[9]=std6x12;
-    font_table[10]=std6x13;
-    font_table[11]=std6x9;
-    font_table[12]=std7x13;
-    font_table[13]=std7x14;
-    font_table[14]=std8x13;
-    font_table[15]=cursive;
-    font_table[16]=dagger;
-    font_table[17]=inkblot;
-    font_table[18]=radon;
-    font_table[19]=radonWide;
-    font_table[20]=shadow;
-    font_table[21]=shadowBold;
+
+    font_table[0]=std4x6;
+    font_table[1]=std4x8;
+    font_table[2]=std5x7;
+    font_table[3]=std5x8;
+    font_table[4]=std6x10;
+    font_table[5]=std6x12;
+    font_table[6]=std6x13;
+    font_table[7]=std6x9;
+    font_table[8]=std7x13;
+    font_table[9]=std7x14;
+    font_table[10]=std8x13;
+    font_table[11]=cursive;
+    font_table[12]=dagger;
+    font_table[13]=inkblot;
+    font_table[14]=radon;
+    font_table[15]=radonWide;
+    font_table[26]=shadow;
+    font_table[27]=shadowBold;
     
     setFont(font_table[font]);
     wmSetFont(font);
