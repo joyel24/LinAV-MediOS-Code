@@ -22,31 +22,31 @@
 #include "events.h" /* for events */
 #include "font.h" /* for font definitions/switching */
 #include "colordef.h" /* for color definitions (COLOR_BLACK, etc) */
+#include "graphics.h" /* graphics... */
 
 #define MODE_INIT 1
 #define MODE_PLAYING 2
 #define MODE_PAUSED 3
 #define MODE_DEAD 4
 int mode = 1;
+int wait = 0, delay = 0;
 
 /* Initialization, REQUIRED */
 struct client_operations * cops;
 
-static int board[28][16],snakelength;
-static unsigned int score,hiscore=0;
+static int board[80][56], snakelength;
+static unsigned int score;
 static int dir,frames,apple,level=1,dead=0;
-int wait = 0;
 
 void die(void)
 {
     char pscore[5],hscore[17];
-    cops->clearScreen(COLOR_BLACK);
 
     sprintf(pscore,"Your Score: %d",score);
     cops->putS(COLOR_WHITE, COLOR_BLACK, 3, 10, "Oops!");
     cops->putS(COLOR_WHITE, COLOR_BLACK, 3, 30, pscore);
 
-    if (score>hiscore)
+    /*if (score>hiscore)
     {
         hiscore=score;
         cops->putS(COLOR_WHITE, COLOR_BLACK, 3, 45, "New High Score!");
@@ -55,8 +55,8 @@ void die(void)
     {
         sprintf(hscore,"High Score: %d",hiscore);
         cops->putS(COLOR_WHITE, COLOR_BLACK, 3, 45,hscore);
-    }
-    dead=1;
+    } */
+    mode=MODE_DEAD;
 }
 
 void collision(int x, int y)
@@ -71,11 +71,15 @@ void collision(int x, int y)
             apple=0;
             break;
         default:
+            cops->clearScreen(COLOR_BLACK);
             die();
             break;
     }
-    if (x==28 || x<0 || y==16 || y<0)
+    if(x==80 || x<0 || y==56 || y<0)
+    {
+        cops->clearScreen(COLOR_BLACK);
         die();
+    }
 }
 
 void move_head(int x, int y)
@@ -105,16 +109,17 @@ void move_head(int x, int y)
 void frame(void)
 {
     int x,y,head=0;
-    for (x=0; x<28; x++)
+    for (x=0; x<80; x++)
     {
-        for (y=0; y<16; y++)
+        for (y=0; y<56; y++)
         {
-            switch (board[x][y])
+            switch(board[x][y])
             {
                 case 1:
-                    if (!head) {
+                    if (!head)
+                    {
                         move_head(x,y);
-                        if (dead)
+                        if(dead)
                             return;
                         board[x][y]++;
                         head=1;
@@ -125,7 +130,8 @@ void frame(void)
                 case -1:
                     break;
                 default:
-                    if (board[x][y]==snakelength) {
+                    if (board[x][y]==snakelength)
+                    {
                         board[x][y]=0;
                         cops->fillRect(COLOR_BLACK, x*4, y*4, 4, 4);
                     }
@@ -141,9 +147,9 @@ void redraw(void)
 {
     int x,y;
     cops->clearScreen(COLOR_BLACK);
-    for (x=0; x<28; x++)
+    for (x=0; x<80; x++)
     {
-        for (y=0; y<16; y++)
+        for (y=0; y<56; y++)
         {
             switch (board[x][y])
             {
@@ -163,18 +169,19 @@ void redraw(void)
 
 void game_pause(void)
 {
-    cops->clearScreen(COLOR_BLACK);
-    cops->putS(COLOR_WHITE, COLOR_BLACK, 3, 10,"Game Paused");
-    cops->putS(COLOR_WHITE, COLOR_BLACK, 3, 30,"[On] to resume");
-    cops->putS(COLOR_WHITE, COLOR_BLACK, 3, 50,"[Off] to quit");
+    cops->putS(COLOR_WHITE, COLOR_BLACK, 3, 10,"      SNAKE");
+    cops->putS(COLOR_WHITE, COLOR_BLACK, 3, 30,"-- Game Paused --");
+    cops->putS(COLOR_WHITE, COLOR_BLACK, 3, 50," [ON] to resume");
+    cops->putS(COLOR_WHITE, COLOR_BLACK, 3, 70,"  [OFF] to quit");
 }
 
 void game(void)
 {
     int x,y;
+    char score_s[12];
 
     frame();
-    if (dead)
+    if(dead)
         return;
     frames++;
     if(frames==10)
@@ -184,8 +191,9 @@ void game(void)
         {
             do
             {
-                x=rand() % 28;
-                y=rand() % 16;
+                srand(cops->getTick());
+                x=rand() % 80;
+                y=rand() % 56;
             } while (board[x][y]);
             apple=1;
             board[x][y]=-1;
@@ -194,8 +202,11 @@ void game(void)
         }
     }
 
+    sprintf(score_s,"Score: %04d",score);
+    cops->putS(COLOR_WHITE, COLOR_BLACK, 2, 226, score_s);
+
     /* no sleep() */
-    while(wait < level*100)
+    while(wait < delay)
         wait++;
     wait = 0;
 }
@@ -205,21 +216,21 @@ void game_init(void)
     int x,y;
     char plevel[10],phscore[20];
 
-    for (x=0; x<28; x++)
-        for (y=0; y<16; y++)
+    for (x=0; x<80; x++)
+        for (y=0; y<56; y++)
             board[x][y]=0;
     dead=0;
     apple=0;
     snakelength=4;
     score=0;
-    board[11][7]=1;
+    board[40][28]=1;
 
-    sprintf(plevel,"Level - %02d",level);
-    sprintf(phscore,"High Score: %d",hiscore);
+    sprintf(plevel,"Current Level: %02d",level);
     cops->putS(COLOR_WHITE, COLOR_BLACK, 2, 10, plevel);
-    cops->putS(COLOR_WHITE, COLOR_BLACK, 2, 30, "(1-slow, 9-fast)");
-    cops->putS(COLOR_WHITE, COLOR_BLACK, 2, 60, "OFF = quit");
-    cops->putS(COLOR_WHITE, COLOR_BLACK, 2, 90, "ON = start/pause");
+    cops->putS(COLOR_WHITE, COLOR_BLACK, 2, 30, "1 = Slower, 9 = Faster");
+    cops->putS(COLOR_WHITE, COLOR_BLACK, 2, 50, "UP/DOWN = Change level");
+    cops->putS(COLOR_WHITE, COLOR_BLACK, 2, 70, "      OFF = quit");
+    cops->putS(COLOR_WHITE, COLOR_BLACK, 2, 90, "   ON = start/pause");
 }
 
 int eventHandler(int evt)
@@ -233,13 +244,28 @@ int eventHandler(int evt)
 
         case BTN_ON:
             if(mode == MODE_INIT)
-                mode = 2;
+            {
+                cops->clearScreen(COLOR_BLACK);
+                cops->drawLine(COLOR_WHITE, 0, 224, 320, 224);
+                delay = (10-level)*2000;
+                mode = MODE_PLAYING;
+            }
             else if(mode == MODE_PLAYING)
-                mode = 3;
+            {
+                cops->clearScreen(COLOR_BLACK);
+                mode = MODE_PAUSED;
+            }
             else if(mode == MODE_PAUSED)
-                mode = 2;
+            {
+                cops->clearScreen(COLOR_BLACK);
+                cops->drawLine(COLOR_WHITE, 0, 224, 320, 224);
+                mode = MODE_PLAYING;
+            }
             else if(mode == MODE_DEAD)
-                mode = 1;
+            {
+                cops->clearScreen(COLOR_BLACK);
+                mode = MODE_INIT;
+            }
             break;
 
         case BTN_UP:
@@ -287,7 +313,7 @@ int eventHandler(int evt)
                     level=9;
             }
             else if(mode == MODE_PLAYING)
-                if (dir!=1) dir=3;
+                if(dir!=1) dir=3;
             break;
     }
 }
