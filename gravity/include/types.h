@@ -83,4 +83,5 @@ typedef struct _MESSAGE
 	unsigned long nParam2;
 } MESSAGE;
 
+
 #endif

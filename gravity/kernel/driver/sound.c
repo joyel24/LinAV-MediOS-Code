@@ -25,24 +25,26 @@
 
 #define MAS_DELAY        {int __i; for(__i=0;__i<20;__i++);}
 #define MIN(a, b)        (((a)<(b))?(a):(b))
+#define MAX(a, b)        (((a)<(b))?(b):(a))
 
 /********************* DSP                    ***************************/
 
 
-__IRAM_DATA int playing=0;   // 1 if we are sending data to MAS, 0 if no more data to send or Stop mode or Pause mode
+__IRAM_DATA int playing_sound=0;   // 1 if we are sending data to MAS, 0 if no more data to send or Stop mode or Pause mode
 __IRAM_DATA int in_pause=0;     // 1 if in Pause mode
 
-__IRAM_DATA struct mp3_play * data;
+__IRAM_DATA sound_buffer_s * current_buffer;
 
 #define SEND_TO_MAS(BUFFER,SIZE)                              \
  ({                                                           \
     int  __i;                                                 \
-    int __data;                                              \
+    int __data;                                               \
+    char * data_buff=BUFFER->data+BUFFER->read;             \
     for(__i=0;__i<SIZE;__i++)                                 \
     {                                                         \
         if(inw(GIO_BITSET0) & (0x1<<GIO_MAS_EOD))             \
             break;  /* EOD set => exit */                     \
-        __data=(BUFFER[__i] << 8) & 0xFF00;                   \
+        __data=(data_buff[__i] << 8) & 0xFF00;                \
         if(__data!=0)                                         \
             outw(__data,GIO_BITSET0);                         \
         __data ^= 0xFF00;                                     \
@@ -52,7 +54,7 @@ __IRAM_DATA struct mp3_play * data;
         outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);               \
         /* wait for RTR to be set */                          \
         while(!(inw(GIO_BITSET1) & (0x1<<(GIO_MAS_RTR-16))))  \
-            /*nothing*/;                                        \
+            /*nothing*/;                                      \
         /* clear latch (lower raise PR) */                    \
         outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);             \
     }                                                         \
@@ -61,34 +63,94 @@ __IRAM_DATA struct mp3_play * data;
 
 __IRAM_CODE void dsp_interrupt(int irq)
 {
-   int toSend;
-   int send;
-   char * buffer;
-   if(playing)
-   {     
-       /*if(data->buffer_write<data->buffer_read)*/
-            toSend=data->buffer_len-data->buffer_read;
-       /* else
-            toSend=data->buffer_write-data->buffer_read;*/
-        buffer=data->buffer+data->buffer_read;    
-        send=SEND_TO_MAS(buffer,toSend);
-        
-        data->buffer_read+=send;
-        
-        if(data->buffer_read>= data->buffer_len)
+    int toSend;
+    int send;
+    char * buffer;
+    if(playing_sound && current_buffer!=NULL)
+    {
+        if(current_buffer->read==current_buffer->write) /* nothing in buffer */
         {
-            /*data->buffer_read=0;
-            toSend=data->buffer_write-data->buffer_read;
-            buffer=data->buffer;
-            data->buffer_read+=SEND_TO_MAS(buffer,toSend); */
-            /*disable_irq(IRQ_MAS_DATA);
-            printk("end of playback\n");
-            playing=0;*/
-            printk("loop\n");
-            data->buffer_read=0;
-            dsp_interrupt(0); 
+            disable_irq(IRQ_MAS_DATA);
+            return;
+        }
+        
+        if(current_buffer->read>current_buffer->write)   /* write before read => count only size till the end of buffer*/
+            toSend=current_buffer->size-current_buffer->read;
+        else                                             /* we have less than size-read in buffer */
+            toSend=current_buffer->size-current_buffer->read; 
+        
+        send=SEND_TO_MAS(current_buffer,toSend);
+        
+        current_buffer->read+=send;
+        
+        if(current_buffer->read >= current_buffer->size)  /* we reached end of buffer => go back to start */
+        {
+            current_buffer->read=0;
+            dsp_interrupt(IRQ_MAS_DATA);             /* retry to send data */
         }
     }
+    else
+    {
+        disable_irq(IRQ_MAS_DATA);
+    }
+}
+
+__IRAM_CODE int sound_buff_write(sound_buffer_s * sound_buffer, int (*reader_fct)(char * data,int count,void* param),
+            int count,void * param)
+{
+    int need_wake_up=0;
+    int toSend,send;
+    int totSend=0;
+    
+    if(current_buffer->read==current_buffer->write)
+        need_wake_up=1;
+        
+    if(count>0)
+    {
+        
+        if(sound_buffer->write > sound_buffer->read)
+        {
+            toSend=sound_buffer->size-sound_buffer->write;
+            toSend=MIN(count,toSend);
+            send=reader_fct(sound_buffer->data+sound_buffer->write,toSend,param);
+            count-=send;
+            totSend+=send;
+            
+            if(send<toSend)     /* haven't write enough => go out */
+            {
+                sound_buffer->write+=send;
+                return totSend;
+            }
+            
+            if(count>0)
+            {
+                sound_buffer->write=0;
+                toSend=sound_buffer->read-sound_buffer->write;
+                toSend=MIN(count,toSend);
+                send=reader_fct(sound_buffer->data+sound_buffer->write,toSend,param);
+                totSend+=send;
+            }
+            
+            sound_buffer->write+=send;
+        }
+        else
+        {
+            toSend=sound_buffer->size-sound_buffer->read;
+            toSend=MIN(count,toSend);
+            send=reader_fct(sound_buffer->data+sound_buffer->write,toSend,param);
+            totSend+=send;
+            sound_buffer->write+=send;
+        }
+        
+        if(need_wake_up && !(inw(GIO_BITSET0) & (0x1<<GIO_MAS_EOD)))
+        {
+            enable_irq(IRQ_MAS_DATA);
+            dsp_interrupt(IRQ_MAS_DATA);  
+        }
+        
+    }
+    
+    return totSend;
 }
 
 __IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
@@ -99,31 +161,31 @@ __IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
     {
         case DSP_INI_MP3:
             ini_mas_for_mp3();
-            data=(struct mp3_play *)arg;    
-            playing=1;
+            current_buffer=(sound_buffer_s *)arg;    
+            playing_sound=1;
             in_pause=0;
             break;
         case DSP_START_MP3:
             if(in_pause)
             {
-                playing=1;
+                playing_sound=1;
                 in_pause=0;
                 dsp_interrupt(IRQ_MAS_DATA);
             }
             else
             {
-                playing=1;
+                playing_sound=1;
                 enable_irq(IRQ_MAS_DATA);
                 dsp_interrupt(IRQ_MAS_DATA);                
             }
             printk("MP3 playing\n");
             break;
         case DSP_STOP_MP3:
-            playing=0;
+            playing_sound=0;
             disable_irq(IRQ_MAS_DATA);
             break;
         case DSP_PAUSE_MP3:
-            playing=0;
+            playing_sound=0;
             in_pause=1;
             break;
         case DSP_FRAME_CNT:
@@ -345,9 +407,10 @@ void init_sound(void)
     mas_read_version(&version);
     printk("S%x:%d:%c%d ",version.major_number,version.derivate,version.char_order_version,version.digit_order_version);
     oldVol=mas_control_config(MAS_GET,MAS_VOLUME,0);
-    playing=0;
+    playing_sound=0;
     in_pause=0;
 
+    current_buffer=NULL;
 
     disable_irq(IRQ_MAS_DATA);
     

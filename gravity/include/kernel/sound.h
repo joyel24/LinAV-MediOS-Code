@@ -18,6 +18,36 @@
 
 #include <kernel/mas.h>
 
+/********************* Sound buffer           ***************************/
+
+#define FREE_SPACE_IN_BUFF(BUFF)                           \
+    ({                                                     \
+            int __free_space=BUFF.read-BUFF.write;         \
+            if(__free_space<=0)                            \
+                __free_space+=BUFF.size;                   \
+            __free_space;                                  \
+    })
+
+    
+typedef struct _SOUND_BUFFER
+{
+    unsigned int write;
+    unsigned int read;
+    unsigned char * data;
+    unsigned int size;
+    unsigned int size_mask;
+} sound_buffer_s;
+
+typedef struct _sound_api_param
+{
+    int (*reader_fct)(char * data,int count,void* param);
+    int count;
+} sound_api_param;
+
+extern int sound_buff_write(sound_buffer_s * sound_buffer, int (*reader_fct)(char * data,int count,void* param),
+            int count,void * param);
+
+
 /********************* DSP                    ***************************/
 /* dev functions */
 void    dsp_interrupt     (int irq);

@@ -123,6 +123,27 @@ ERROR_CODE API_GFX                  (int cmd, void* p, void * pvData)           
 /////////////////////// GFX API ///////////////////////
 ///////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////
+////////////////////// SOUND API //////////////////////
+
+int sound_buffer_write             (sound_buffer_s * sound_buffer, int (*reader_fct)(char * data,int count,void* param),
+            int count,void * param)
+{
+    sound_api_param api_param;
+    api_param.count=count;
+    api_param.reader_fct=reader_fct;
+    API_SOUND_BUFFER_WRITE(sound_buffer,&api_param,param);
+    return api_param.count;
+}
+
+ERROR_CODE API_SOUND_BUFFER_WRITE(sound_buffer_s * sound_buffer,sound_api_param  * api_param, void * param)
+{
+    swi_call(nAPI_SOUND_BUFFER_WRITE);
+}
+
+////////////////////// SOUND API //////////////////////
+///////////////////////////////////////////////////////
+
 void printf(char *fmt, ...)
 {
     va_list ap;

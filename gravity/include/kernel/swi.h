@@ -105,9 +105,10 @@
 #define nAPI_SOUND_PLAY           (nAPI_SND_section + 0)
 #define nAPI_SOUND_PAUSE          (nAPI_SND_section + 1)
 #define nAPI_SOUND_STOP           (nAPI_SND_section + 2)
+#define nAPI_SOUND_BUFFER_WRITE   (nAPI_SND_section + 3)
 
-#define nAPI_MIXER             (nAPI_SND_section + 10)
-#define nAPI_DSP               (nAPI_SND_section + 11)
+#define nAPI_MIXER                (nAPI_SND_section + 10)
+#define nAPI_DSP                  (nAPI_SND_section + 11)
 ////////////////////// SOUND API //////////////////////
 ///////////////////////////////////////////////////////
 

@@ -16,8 +16,9 @@
 #include <kernel/errors.h>
 
 #include <sys_def/time.h>
-
 #include <types.h>
+
+#include <kernel/sound.h>
 
 // API definition
 
@@ -142,6 +143,16 @@ ERROR_CODE API_GFX                  (int cmd, void* ptr, void * pvData);
 /////////////////////// GFX API ///////////////////////
 ///////////////////////////////////////////////////////
 
+
+///////////////////////////////////////////////////////
+////////////////////// SOUND API //////////////////////
+
+int sound_buffer_write(sound_buffer_s * sound_buffer, int (*reader_fct)(char * data,int count,void* param),int count,void * param);
+
+ERROR_CODE API_SOUND_BUFFER_WRITE   (sound_buffer_s * sound_buffer,sound_api_param  * api_param, void * param);
+
+////////////////////// SOUND API //////////////////////
+///////////////////////////////////////////////////////
 
 int        do_api_power         (int cmd);
 
