@@ -23,10 +23,10 @@ void docmd();
     struct graphicsBuffer screenBitmap;
     char data[512];
     struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-    struct graphicsBuffer sprite7_13 = {0, 1, 7, 13, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
     int mode=0;
+    int lba=0;
+    char showLba[] = "LBA: xxxxxxxx";
 
-    
 int main() {
     int b;
     int source=0;
@@ -58,14 +58,15 @@ int main() {
                                      | OSD_BITMAP_8BIT);
 
 
+    graphicsBoxf(&screenBitmap, 0, 0, 320, 240, 0x0000);    
+
     while(1) {
-        graphicsBoxf(&screenBitmap, 0, 0, 320, 240, 0x0000);    
         pal16[1] = 0x0202;
         graphicsString(&screenBitmap, 0, 0, &sprite4_6, std4x6_, 5, 0,
                     "ATATest By DoGgEr");
 
         if (source==0) {
-            graphicsString(&screenBitmap, 212, 0, &sprite7_13, std7x13_, 8, 0,
+            graphicsString(&screenBitmap, 212, 0, &sprite4_6, std4x6_, 5, 0,
                     "F2[HDD]");
             graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Power HDD...        ");
@@ -75,7 +76,7 @@ int main() {
                     "Selecting HDD...        ");
             ataSelectHDD();
         } else {
-            graphicsString(&screenBitmap, 212, 0, &sprite7_13, std7x13_, 8, 0,
+            graphicsString(&screenBitmap, 212, 0, &sprite4_6, std4x6_, 5, 0,
                     "F2[MemCard]");
             graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Selecting MemCard...        ");
@@ -84,6 +85,10 @@ int main() {
             ataSelectMemoryCard();
         }
 
+        stringPutHex(showLba + 5, lba, 8);
+        graphicsString(&screenBitmap, 212, 8, &sprite4_6, std4x6_, 5, 0,
+                    showLba);
+        
         docmd();
 
         do {
@@ -92,6 +97,10 @@ int main() {
 
         if (b & BUTTONS_AV300_MENU2) source=!source;
         if (b & BUTTONS_AV300_MENU1) mode=!mode;
+        if (b & BUTTONS_AV300_RIGHT) lba++;
+        if (b & BUTTONS_AV300_LEFT) lba--;
+        if (b & BUTTONS_AV300_DOWN) lba+=0x100;
+        if (b & BUTTONS_AV300_UP) lba-=0x100;
         if (b & BUTTONS_AV300_MENU3) {
             usbs = !usbs;
             if (usbs) {
@@ -108,40 +117,29 @@ int main() {
 }
 
 void docmd() {
-    int c;
-    int delay;
-    c = ataWaitForReady();
-    if (c!=0) {
-        pal16[1] = 0x0101;
-        graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
-                "ATA Says not ready!        ");            
-        uartOuts("ATA Says not ready!\n");
-        for (delay=0;delay<0x1000;delay++) {}
-        return;
-    }
-        
+    int c=0;
+    int delay=0;
+
     pal16[1] = 0x0101;
     if (mode==0) {
-        graphicsString(&screenBitmap, 108, 0, &sprite7_13, std7x13_, 8, 0,
+        graphicsString(&screenBitmap, 108, 0, &sprite4_6, std4x6_, 5, 0,
                     "F1[Identify]");
-        ataIdentify();
+        c = ataIdentifyDevice(data);
     } else {
-        graphicsString(&screenBitmap, 108, 0, &sprite7_13, std7x13_, 8, 0,
+        graphicsString(&screenBitmap, 108, 0, &sprite4_6, std4x6_, 5, 0,
                     "F1[Read MBR]");
-        ataRead(0, 1);    
+        c = ataReadSectors(lba, 1, data);    
     }
     
-    c = ataWaitForXfer();
     if (c!=0) {
         pal16[1] = 0x0101;
         graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
-                "ATA Says no xfer!        ");            
-        uartOuts("ATA Says no xfer!\n");
+                "ATA Error!        ");            
+        uartOuts("ATA Error!\n");
         for (delay=0;delay<0x1000;delay++) {}
         return;
     }
         
-    ataReadData(data, 256);
     showBuffer(data);
 }
 
