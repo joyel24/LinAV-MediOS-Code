@@ -41,15 +41,16 @@
 #define S32bit     6
 
 // some data types
-#define newPalette(name)  unsigned int name[]
+#define newPalette(name)         unsigned int name[]
 #define newSpriteData(name)      char name[]
+#define PALETTE                  unsigned int
 
 struct spriteBuffer {
 	unsigned int  data;
 	int           width;
     	int           height;
 	int           type;
-	int           bpp;
+	int           bpline;
 };
 
 typedef struct spriteBuffer       SPRITE;
@@ -61,7 +62,7 @@ struct graphicsFont {
 	int      dy;
 	int      width;
 	int      height;
-	int      bpp;
+	int      bpline;
 };
 
 typedef struct graphicsFont *     FONT_ID;
@@ -84,7 +85,7 @@ int  (*readPixel)    (int x, int y, struct graphicsBuffer * buff);
 void (*drawRect)     (int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
 void (*fillRect)     (int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
 void (*drawChar)     (struct graphicsFont * font, int color,int bg_color, int x, int y, char c, struct graphicsBuffer * buff);
-void (*drawSprite)   (SPRITE * sprite, unsigned int * palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+void (*drawSprite)   (SPRITE * sprite, PALETTE * palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
 void (*drawBITMAP)   (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
 };
 
@@ -119,7 +120,7 @@ void drawRect        (int color, int x, int y, int width, int height, struct gra
 void fillRect        (int color, int x, int y, int width, int height, struct graphics_context * gc);
 void putS            (int color, int bg_color,int x, int y, char *s, struct graphics_context * gc);
 void putC            (int color, int bg_color,int x, int y, char s, struct graphics_context * gc);
-void drawSprite      (unsigned int * palette, SPRITE * sprite, int x, int y, struct graphics_context * gc);
+void drawSprite      (PALETTE * palette, SPRITE * sprite, int x, int y, struct graphics_context * gc);
 void drawBITMAP      (BITMAP * bitmap, int x, int y, struct graphics_context * gc);
 
 /* font */

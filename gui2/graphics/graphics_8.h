@@ -19,13 +19,12 @@ int  graphics8_ReadPixel   (int x, int y, struct graphicsBuffer * buff);
 void graphics8_DrawRect    (int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
 void graphics8_FillRect    (int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
 void graphics8_DrawChar    (struct graphicsFont * font, int color,int bg_color, int x, int y, char c, struct graphicsBuffer * buff);
-void graphics8_ScrollUP    (int bg_color,int Hup, struct graphicsBuffer * buff);
-void graphics8_DrawSprite  (SPRITE * sprite, unsigned int * palette, unsigned int trsp,int x, int y, struct graphicsBuffer * buff);
+void graphics8_DrawSprite  (SPRITE * sprite, PALETTE * palette, unsigned int trsp,int x, int y, struct graphicsBuffer * buff);
 void graphics8_DrawBITMAP  (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
 
-void graphics8_1bit_Sprite(char * src, int width, int height, int bpp, unsigned int *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
-void graphics8_2bit_Sprite(char * src, int width, int height, int bpp, unsigned int *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
-void graphics8_4bit_Sprite(char * src, int width, int height, int bpp, unsigned int *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+void graphics8_1bit_Sprite(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+void graphics8_2bit_Sprite(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+void graphics8_4bit_Sprite(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
 
 struct graphics_operations g8ops =  {
 	drawPixel  : graphics8_DrawPixel,

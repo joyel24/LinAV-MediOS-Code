@@ -30,7 +30,7 @@ int main(int argc,char * * argv)
 	sprite.width=32;
 	sprite.height=6;
 	sprite.type=S4bit;
-	sprite.bpp=16;
+	sprite.bpline=16;
 	
 	fillRect(1,0, 0 , 320, 240, gc);
 	

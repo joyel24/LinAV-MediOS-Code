@@ -81,9 +81,9 @@ void graphics8_FillRect(int color, int x, int y, int width, int height, struct g
 	}
 }
 
-void graphics8_DrawSprite(SPRITE * sprite, unsigned int * palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
+void graphics8_DrawSprite(SPRITE * sprite, PALETTE * palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
 {
-	void (*routine)(char * src, int width, int height, int bpp, unsigned int *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+	void (*routine)(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
 	if(sprite->type == 8)
 	{
 		graphics8_DrawBITMAP  (sprite,trsp,x,y, buff);
@@ -91,7 +91,7 @@ void graphics8_DrawSprite(SPRITE * sprite, unsigned int * palette, unsigned int 
 	else
 	{
 		routine=graphics8_Sprite_routines[sprite->type];
-		routine(sprite->data,sprite->width,sprite->height,sprite->bpp,palette,trsp,x,y,buff);
+		routine(sprite->data,sprite->width,sprite->height,sprite->bpline,palette,trsp,x,y,buff);
 	}
 }
 
@@ -134,10 +134,10 @@ void graphics8_DrawChar(struct graphicsFont * font, int color,int bg_color, int 
 	unsigned int palette[2]={bg_color,color};
 	
 	if(src!=0)	
-		graphics8_1bit_Sprite(src,font->width,font->height,font->bpp,palette,-1,x,y,buff);
+		graphics8_1bit_Sprite(src,font->width,font->height,font->bpline,palette,-1,x,y,buff);
 }
 
-void graphics8_1bit_Sprite(char * src, int width, int height, int bpp, unsigned int *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
+void graphics8_1bit_Sprite(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
 {
 	int i,j,k,shift,index;
 	
@@ -162,7 +162,7 @@ void graphics8_1bit_Sprite(char * src, int width, int height, int bpp, unsigned 
 			}
 				
 			dest+=buff->width;
-			src+=bpp;
+			src+=bpline;
 		}
 	else
 		for(j=0;j<height;j++)
@@ -184,11 +184,11 @@ void graphics8_1bit_Sprite(char * src, int width, int height, int bpp, unsigned 
 			}
 				
 			dest+=buff->width;
-			src+=bpp;
+			src+=bpline;
 		}
 }
 
-void graphics8_2bit_Sprite(char * src, int width, int height, int bpp, unsigned int *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
+void graphics8_2bit_Sprite(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
 {
 	int i,j,k,shift,index;
 	
@@ -213,7 +213,7 @@ void graphics8_2bit_Sprite(char * src, int width, int height, int bpp, unsigned 
 			}
 				
 			dest+=buff->width;
-			src+=bpp;
+			src+=bpline;
 		}
 	else
 		for(j=0;j<height;j++)
@@ -235,11 +235,11 @@ void graphics8_2bit_Sprite(char * src, int width, int height, int bpp, unsigned 
 			}
 				
 			dest+=buff->width;
-			src+=bpp;
+			src+=bpline;
 		}
 }
 
-void graphics8_4bit_Sprite(char * src, int width, int height, int bpp, unsigned int *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
+void graphics8_4bit_Sprite(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
 {
 	int i,j,k,shift,index;
 	
@@ -263,7 +263,7 @@ void graphics8_4bit_Sprite(char * src, int width, int height, int bpp, unsigned 
 			}
 				
 			dest+=buff->width;
-			src+=bpp;
+			src+=bpline;
 		}
 	else
 		for(j=0;j<height;j++)
@@ -285,7 +285,7 @@ void graphics8_4bit_Sprite(char * src, int width, int height, int bpp, unsigned 
 			}
 				
 			dest+=buff->width;
-			src+=bpp;
+			src+=bpline;
 		}
 }
 
