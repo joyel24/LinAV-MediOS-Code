@@ -9,7 +9,7 @@
 .global entry_code
 entry_code:
         b chg_stack
-        .space 0x10000
+        .space 0x1000
 @.global stack_start
 chg_stack:
     ldr r0, =chg_stack

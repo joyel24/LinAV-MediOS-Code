@@ -17,9 +17,9 @@
 #include <kernel/irq.h>
 #include <kernel/kernel.h>
 
-struct irq_data_s irq_data[NR_IRQS] __attribute__ ((section(".cored")));
+struct irq_data_s irq_data[NR_IRQS] __LOW_SEC_DATA;
 
-__attribute__ ((section(".core"))) void do_IRQ(int irq, struct pt_regs *regs)
+__LOW_SEC_CODE void do_IRQ(int irq, struct pt_regs *regs)
 {
     struct irq_data_s * desc;
     //printk("I%d",irq);
@@ -51,7 +51,7 @@ static inline void fiq_ack(unsigned int irq)
 
 /* Mask the IRQ. */
 
-__attribute__ ((section(".core"))) void mask_irq(unsigned int irq)
+__LOW_SEC_CODE void mask_irq(unsigned int irq)
 {
     unsigned int eint;
     int mask;
@@ -64,7 +64,7 @@ __attribute__ ((section(".core"))) void mask_irq(unsigned int irq)
 
 /* Unmask the IRQ. */
 
-__attribute__ ((section(".core"))) void unmask_irq(unsigned int irq)
+__LOW_SEC_CODE void unmask_irq(unsigned int irq)
 {
     unsigned int eint;
     int mask;
@@ -77,7 +77,7 @@ __attribute__ ((section(".core"))) void unmask_irq(unsigned int irq)
 
 /* Mask the IRQ and acknowledge it. */
 
-__attribute__ ((section(".core"))) void mask_ack_irq(unsigned int irq)
+__LOW_SEC_CODE void mask_ack_irq(unsigned int irq)
 {
     unsigned int eint;
     int mask;

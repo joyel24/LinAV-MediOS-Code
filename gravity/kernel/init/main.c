@@ -42,7 +42,6 @@ extern char _core_code_end;
 
 
 void kernel_start(void)
-
 {
     int i;    
     char *src;

@@ -16,14 +16,13 @@
 #include <kernel/hardware.h>
 #include <kernel/irq.h>
 #include <kernel/timer.h>
+#include <kernel/kernel.h>
 
-void printk(char *fmt, ...);
+unsigned long tick __LOW_SEC_DATA;
 
-unsigned long tick;
+struct timer_s * timer_head __LOW_SEC_DATA;
 
-struct timer_s * timer_head;
-
-void main_timer_action(void)
+__LOW_SEC_CODE void main_timer_action(void)
 {
     struct timer_s * ptr=timer_head;
     
@@ -41,7 +40,7 @@ void main_timer_action(void)
     }    
 }
 
-void setup_timer(struct timer_s * timer_data,char * name)
+__LOW_SEC_CODE void setup_timer(struct timer_s * timer_data,char * name)
 {   
     timer_data->expires=0;
     timer_data->trigger=0;
@@ -53,7 +52,7 @@ void setup_timer(struct timer_s * timer_data,char * name)
     
 }
 
-void rm_timer(struct timer_s * timer_data)
+__LOW_SEC_CODE void rm_timer(struct timer_s * timer_data)
 {
     
     if(!timer_data->prev)
@@ -65,12 +64,12 @@ void rm_timer(struct timer_s * timer_data)
             timer_data->nxt->prev=timer_data->prev;
 }
 
-void stop_timer(struct timer_s * timer_data)
+__LOW_SEC_CODE void stop_timer(struct timer_s * timer_data)
 {
     timer_data->trigger=0;
 }
 
-void start_timer(struct timer_s * timer_data)
+__LOW_SEC_CODE void start_timer(struct timer_s * timer_data)
 {
     if(timer_data->expires>tick)
         timer_data->trigger=1;
