@@ -20,6 +20,7 @@
 #include   "graphics.h"
 #include   "events.h"
 #include   "colordef.h"
+#include   "font.h"
 
 #include "cops.h"
 #include "avevents.h"
@@ -34,7 +35,7 @@
 int namesort(s1,s2)
 char **s1;
 char **s2;
-{    
+{
     char * st1=*s1;
     char * st2=*s2;
     while(*st1!=0 && *st2!=0 && toLower(*st1) == toLower(*st2))
@@ -43,7 +44,7 @@ char **s2;
         st2++;
     }
 
-    return (toLower(*st1) - toLower(*st2));       
+    return (toLower(*st1) - toLower(*st2));
 }
 
 char            **dir_list;
@@ -109,7 +110,7 @@ void showArrow(int type)
             break;
         case DOWN_ARROW:
 //            cops->drawBITMAP(&dwBitmap,310,SCREEN_HEIGHT-10);
-            cops->drawBITMAP(&dwBitmap,310,h+MENU_SHADOW+1+6+(MAXPOS+1)*h);
+            cops->drawBITMAP(&dwBitmap,310,2+h+6+MENU_SHADOW+(MAXPOS-1)*(h+1));
             break;
     }
 }
@@ -118,7 +119,7 @@ void hideArrow(int type)
 {
     int h=0,w=0;
     cops->getStringS("M", &w, &h);
-    
+
     switch(type)
     {
         case UP_ARROW:
@@ -126,7 +127,7 @@ void hideArrow(int type)
             break;
         case DOWN_ARROW:
 //            cops->fillRect(COLOR_WHITE,310,SCREEN_HEIGHT-10,9,9);
-            cops->fillRect(COLOR_WHITE,310,h+MENU_SHADOW+1+6+(MAXPOS+1)*h,9,9);
+            cops->fillRect(COLOR_WHITE,310,2+h+6+MENU_SHADOW+(MAXPOS-1)*(h+1),9,9);
             break;
     }
 }
@@ -142,7 +143,7 @@ int ini_lists(void)
         dir_listsize = LISTSIZE;
     }
     dir_listused = 0;
-    
+
     if (file_listsize == 0) {
         file_list = (char **) malloc(LISTSIZE * sizeof(char *));
         if (file_list == NULL) {
@@ -158,7 +159,7 @@ int ini_lists(void)
 int add_dir(char * name)
 {
     char            **newlist;
-    
+
     if (dir_listused >= dir_listsize)
     {
         newlist = malloc((sizeof(char **)) * (dir_listsize + LISTSIZE));
@@ -357,7 +358,7 @@ void printAName(int pos, int nselect, int clear, int selected)
 {
     int w = 0;
     int h = 10;
-    
+
     cops->getStringS("M", &w, &h);
     
     printName(&list[pos],5,2 + nselect*(h+1)+ h+6+MENU_SHADOW,clear,selected);
@@ -567,7 +568,7 @@ int eventHandler(int evt)
             
             if(pos == 0 && nselect == 0)
                 hideArrow(UP_ARROW);
-            
+
             break;
         case BTN_DOWN:
             if(listused>MAXPOS)
@@ -673,6 +674,8 @@ int main(int argc,char * * argv)
 
     if(argc>0)
     {
+        cops->setFont(STD6X9);
+
         listused = 0;
 
         chdir(argv[1]);
@@ -683,10 +686,10 @@ int main(int argc,char * * argv)
             return -1;
         }
         
-        cops->getStringS("M", &w, &h);
+//        cops->getStringS("M", &w, &h);
         //cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,240-h-6-MENU_SHADOW);
         printAllName(pos,nselect);
-        
+
         if(listused>MAXPOS)
             showArrow(DOWN_ARROW);
 
