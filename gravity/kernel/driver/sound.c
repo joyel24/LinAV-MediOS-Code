@@ -1,0 +1,393 @@
+/* 
+*   kernel/driver/sound.c
+*
+*   AMOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*/
+
+#include <sys_def/stddef.h>
+
+#include <kernel/io.h>
+#include <kernel/irq.h>
+#include <kernel/kernel.h>
+
+#include <kernel/hardware.h>
+
+#include <kernel/mas.h>
+#include <kernel/sound.h>
+
+#define MAS_DELAY        {int __i; for(__i=0;__i<20;__i++);}
+#define MIN(a, b)        (((a)<(b))?(a):(b))
+
+/********************* DSP                    ***************************/
+
+
+int playing=0;   // 1 if we are sending data to MAS, 0 if no more data to send or Stop mode or Pause mode
+int in_pause=0;     // 1 if in Pause mode
+
+struct mp3_play * data;
+
+void dsp_interrupt(int irq)
+{
+   int unread=0;int toSend;
+   static int old_unread=-1;
+   int send;
+   
+   if(playing)
+   {       
+        toSend=data->buffer_len-data->buffer_read;
+        toSend=MIN(toSend,120);
+        send=mas_pio_write((void *) (data->buffer+data->buffer_read),toSend); 
+        data->buffer_read+=send;
+        //printk("%d ",send);         
+        if(data->buffer_read>= data->buffer_len)
+        {
+            data->buffer_read=0;        
+            data->buffer_read+=mas_pio_write((void *) (data->buffer+data->buffer_read),120); 
+        }
+        
+        if(data->endOfFile)
+        {
+            printk("EOF irq\n");
+            unread=data->buffer_write-data->buffer_read;
+            
+            if(unread<0)
+                unread+=data->buffer_len;
+            //printk("%x|%x ",unread,old_unread);
+            if(old_unread < unread && old_unread!=-1)
+            {
+                disable_irq(IRQ_MAS_DATA);
+                playing=0;
+                data->finished=1;
+                printk("finished playback\n");
+            }
+            old_unread=unread;
+        }
+    }
+}
+
+void dsp_ctl(unsigned int cmd, int dir,void * arg)
+{	
+    int * val;
+    struct av_peak * av_p;
+    switch(cmd)
+    {
+        case DSP_INI_MP3:
+            ini_mp3_playback((struct mp3_play *)arg);
+            break;
+        case DSP_START_MP3:
+            start_mp3_playback();
+            break;
+        case DSP_STOP_MP3:
+            stop_mp3_playback();
+            break;
+        case DSP_PAUSE_MP3:
+            playing=0;
+            in_pause=1;
+            break;
+        case DSP_FRAME_CNT:
+            val=(int*)arg;
+            *val=mas_get_frame_count();
+            break;
+        case DSP_IN_PEAK:
+            av_p=(struct av_peak *)arg;
+            av_p->left=(mas_read_codec(MAS_REG_INPEAK_LEFT)*100)/0x7FFF;
+            av_p->right=(mas_read_codec(MAS_REG_INPEAK_RIGHT)*100)/0x7FFF;
+            break;
+        case DSP_OUT_PEAK:
+            av_p=(struct av_peak *)arg;
+            av_p->left=(mas_read_codec(MAS_REG_OUTPEAK_LEFT)*100)/0x7FFF;
+            av_p->right=(mas_read_codec(MAS_REG_OUTPEAK_RIGHT)*100)/0x7FFF;
+            break;
+        case DSP_IN_PEAK_REAL:
+            av_p=(struct av_peak *)arg;
+            av_p->left=mas_read_codec(MAS_REG_INPEAK_LEFT);
+            av_p->right=mas_read_codec(MAS_REG_INPEAK_RIGHT);
+            break;
+        case DSP_OUT_PEAK_REAL:
+            av_p=(struct av_peak *)arg;
+            av_p->left=mas_read_codec(MAS_REG_OUTPEAK_LEFT);
+            av_p->right=mas_read_codec(MAS_REG_OUTPEAK_RIGHT);
+            break;
+    }	
+
+}
+
+int start_mp3_playback()
+{
+    printk("Statring mp3 playback\n");
+        
+    if(in_pause)
+    {
+        playing=1;
+        in_pause=0;
+        dsp_interrupt();
+    }
+    else
+    {
+        playing=1;
+        enable_irq(IRQ_MAS_DATA);
+        dsp_interrupt();                
+    }
+    return 0;       
+}
+
+int stop_mp3_playback(void)
+{
+    int i=0;
+    playing=0;
+    disable_irq(IRQ_MAS_DATA);
+    for(i=0;i<100;i++);
+    return 0;
+}
+
+int ini_mp3_playback(struct mp3_play * arg)
+{
+    ini_mas_for_mp3();
+    data=arg;
+    
+    playing=0;
+    return 0;
+}
+
+int mas_stop_mp3_app(void)
+{
+    int i;
+    mas_app_select(MASS_APP_NONE);
+    while(1)
+    {
+        i=mas_app_running(MASS_APP_ANY);
+        if(i<0)
+        {
+            printk("error getting app status\n");
+            return 0;
+        }
+        if(i==0)
+            break;
+    }
+    return 1;
+}
+
+int mas_start_mp3_app(void)
+{
+    int i;
+    mas_app_select(MASS_APP_MPEG3_DEC | MASS_APP_MPEG2_DEC);	
+    while(1)
+    {
+        i=mas_get_D0(MAS_APP_SELECT);
+        if(i<0)
+        {
+            printk("error getting app status\n");
+            return -0;
+        }
+        if((i & MASS_APP_MPEG3_DEC) && (i & MASS_APP_MPEG2_DEC))
+            break;
+    }
+    return 1;
+}
+
+void mas_line_in_on(void)
+{
+    mas_write_codec(MAS_REG_AUDIO_CONF, MAS_L_AD_CONVERTER | MAS_R_AD_CONVERTER | MAS_DA_CONVERTER
+                        | 0x0  << 4 // mic gain
+                        | 0xf << 8  // adc gain right
+                        | 0xf <<12  // adc gain left
+                        );
+    mas_write_codec(MAS_REG_INPUT_MODE,MAS_CONFIG_INPUT_STEREO);
+    mas_write_codec(MAS_REG_MIX_ADC_SCALE,0x40 << 8);
+    mas_write_codec(MAS_REG_MIX_DSP_SCALE,0x00 << 8);
+    mas_write_codec(MAS_REG_DA_OUTPUT_MODE,0x0);
+    mas_control_config(MAS_SET,MAS_BALANCE,50);
+    mas_control_config(MAS_SET,MAS_VOLUME,70);
+}
+
+void mas_line_in_off(void)
+{
+    mas_write_codec(MAS_REG_MIX_ADC_SCALE,0x00 << 8);
+    mas_control_config(MAS_SET,MAS_VOLUME,0x0);
+}
+
+int ini_mas_for_mp3(void)
+{
+    mas_write_codec(MAS_REG_AUDIO_CONF,MAS_INPUT_AD | MAS_L_AD_CONVERTER | MAS_R_AD_CONVERTER | MAS_DA_CONVERTER
+                        | 0xf  << 4 // mic gain
+                        | 0xf << 8  // adc gain right
+                        | 0xf <<12  // adc gain left
+                        );
+    mas_write_codec(MAS_REG_INPUT_MODE,MAS_CONFIG_INPUT_MONO);
+    mas_write_codec(MAS_REG_MIX_ADC_SCALE,0x00 << 8);
+    mas_write_codec(MAS_REG_MIX_DSP_SCALE,0x40 << 8);
+    mas_write_codec(MAS_REG_DA_OUTPUT_MODE,0x0);
+    mas_control_config(MAS_SET,MAS_BALANCE,50);
+    mas_control_config(MAS_SET,MAS_VOLUME,70);
+    
+    MAS_DELAY
+        
+    if(!mas_stop_mp3_app())
+        return -1;        
+    
+    mas_set_D0(MAS_INTERFACE_CONTROL,0x04);
+    mas_set_clk_speed(0x4800);
+    mas_set_D0(MAS_MAIN_IO_CONTROL,0x125);
+    
+    MAS_DELAY
+        
+    if(!mas_start_mp3_app())
+        return -1;	
+            
+    printk("MAS configured for mp3 playing, waiting for start\n");
+    
+    return 0;
+}
+
+/********************* MIXER                 ***************************/
+
+int oldVol=0;
+
+void mixer_ctl(unsigned int cmd, int dir, void * arg)
+{
+    int * val=(int*)arg;
+    int tmp;
+    switch(cmd)
+    {
+        case MIXER_VOLUME:
+            if(dir==MAS_SET)
+            {
+                mas_control_config(MAS_SET,MAS_VOLUME,*val);
+                oldVol=*val;
+            }
+            else
+            {
+                *val=mas_control_config(MAS_GET,MAS_VOLUME,*val);
+            }
+            break;
+        case MIXER_BALANCE:
+            if(dir==MAS_SET)
+                mas_control_config(MAS_SET,MAS_BALANCE,*val);
+            else
+                *val=mas_control_config(MAS_GET,MAS_BALANCE,*val);
+            break;
+        case MIXER_MUTE:
+            if(dir==MAS_SET)
+            {
+                if(*val)
+                    mas_control_config(MAS_SET,MAS_VOLUME,0);
+                else
+                    mas_control_config(MAS_SET,MAS_VOLUME,oldVol);
+            }
+            else
+            {
+                tmp=mas_control_config(MAS_GET,MAS_VOLUME,*val);
+                if(tmp==0)
+                    *val=1;
+                else
+                    *val=0;
+            }                        
+            break;
+        case MIXER_BASS:
+            if(dir==MAS_SET)
+                mas_control_config(MAS_SET,MAS_BASS,*val);
+            else            
+                *val=mas_control_config(MAS_GET,MAS_BASS,*val);
+            break;
+        case MIXER_TREBLE:
+            if(dir==MAS_SET)
+                mas_control_config(MAS_SET,MAS_TREBLE,*val);
+            else
+                *val=mas_control_config(MAS_GET,MAS_TREBLE,*val);
+            break;
+        case MIXER_LOUDNESS:
+            if(dir==MAS_SET)
+                mas_control_config(MAS_SET,MAS_LOUDNESS,*val);
+            else
+                *val=mas_control_config(MAS_GET,MAS_LOUDNESS,*val);
+            break;
+        case MIXER_MIC_GAIN:
+            if(dir==MAS_SET)
+                mas_control_config(MAS_SET,MAS_MICRO_GAIN,*val);
+            else
+                *val=mas_control_config(MAS_GET,MAS_MICRO_GAIN,*val);
+            break;
+        case MIXER_ADC_L_GAIN:
+            if(dir==MAS_SET)
+                mas_control_config(MAS_SET,MAS_ADC_L_GAIN,*val);
+            else
+                *val=mas_control_config(MAS_GET,MAS_ADC_L_GAIN,*val);                
+            break;
+        case MIXER_ADC_R_GAIN:
+            if(dir==MAS_SET)
+                mas_control_config(MAS_SET,MAS_ADC_R_GAIN,*val);
+            else
+                *val=mas_control_config(MAS_GET,MAS_ADC_R_GAIN,*val);
+            break;
+        default:
+                printk("[ctl MIX] bad ctl\n");
+    }
+}
+
+
+/********************* OSS init               ***************************/
+
+void init_sound(void)
+{
+    struct mas_version version;
+    
+    printk("[init] Loading av3xx sound driver: ");
+    mas_gio_init();
+    printk("M");
+    mas_reset();
+    printk("A");
+    mas_read_version(&version);
+    printk("S%x:%d:%c%d ",version.major_number,version.derivate,version.char_order_version,version.digit_order_version);
+    oldVol=mas_control_config(MAS_GET,MAS_VOLUME,0);
+    playing=0;
+
+    disable_irq(IRQ_MAS_DATA);
+    
+    add_irq_handler(IRQ_MAS_DATA,dsp_interrupt,"MAS");        
+
+    disable_irq(IRQ_MAS_DATA);
+    
+            
+    /*************************************************************/
+    #if 0
+    /* wave testing */
+    mas_write_codec(MAS_REG_AUDIO_CONF,MAS_INPUT_AD | MAS_L_AD_CONVERTER | MAS_R_AD_CONVERTER | MAS_DA_CONVERTER
+                                | 0xf  << 4 // mic gain
+                                | 0xf << 8  // adc gain right
+                                | 0xf <<12  // adc gain left
+                                );
+    mas_write_codec(MAS_REG_INPUT_MODE,MAS_CONFIG_INPUT_MONO);
+    mas_write_codec(MAS_REG_MIX_ADC_SCALE,0x00 << 8);
+    mas_write_codec(MAS_REG_MIX_DSP_SCALE,0x40 << 8);
+    mas_write_codec(MAS_REG_DA_OUTPUT_MODE,0x0);
+    mas_control_config(MAS_SET,MAS_BALANCE,50);
+    mas_control_config(MAS_SET,MAS_VOLUME,70);
+    
+    
+    mas_set_D0(MAS_INTERFACE_CONTROL,0x04);
+    mas_set_clk_speed(0x4800);
+    mas_set_D0(MAS_MAIN_IO_CONTROL,0x125);
+    
+    mas_test_PCM();
+    
+    int cnt,mp3ptr=0;
+    
+    while(1)
+    {
+        cnt = mas_pio_write(mp3Buff + mp3ptr, 2000); 
+        printk("%d ",cnt); 
+        //mp3ptr+=cnt;
+        //if (mp3ptr>=65000){mp3ptr=0; printk("loop ");}
+    }
+    #endif
+    /*************************************************************/
+    printk("done\n");
+
+}
+

@@ -22,7 +22,7 @@ unsigned long tick __IRAM_DATA;
 
 struct timer_s * timer_head __IRAM_DATA;
 
-__IRAM_CODE void main_timer_action(void)
+__IRAM_CODE void main_timer_action(int irq)
 {
     struct timer_s * ptr=timer_head;
     

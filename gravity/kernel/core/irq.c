@@ -70,7 +70,7 @@ __IRAM_CODE void do_IRQ(int irq, struct pt_regs *regs)
     desc=&irq_data[irq];
     if(desc->enable==1 && desc->action!=NULL)
     {
-        desc->action();
+        desc->action(irq);
         unmask_irq(irq);
     }
 }
@@ -160,7 +160,7 @@ void init_irq(void)
     printk("[init] irq\n");    
 }
 
-__IRAM_CODE void add_irq_handler(int irq,void(*action)(void),char * name)
+__IRAM_CODE void add_irq_handler(int irq,void(*action)(int irqnr),char * name)
 {
     if(irq>=0 && irq<NR_IRQS && action != NULL)
     {

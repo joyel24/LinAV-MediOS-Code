@@ -164,14 +164,14 @@ void __clf(void);
         
 struct irq_data_s {
     int enable;
-    void (*action)(void);
+    void (*action)(int irqnr);
     char * name;
     unsigned int nb_irq;
 };
 
 extern void init_irq(void);
 
-extern void add_irq_handler(int irq,void(*action)(void),char * name);
+extern void add_irq_handler(int irq,void(*action)(int irqnr),char * name);
 extern void del_irq_handler(int irq);
 extern void disable_irq(int irq);
 extern void enable_irq(int irq);

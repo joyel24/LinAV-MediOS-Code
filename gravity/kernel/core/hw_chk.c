@@ -75,6 +75,7 @@ void print_HW_chk(void)
 {
     struct hw_chk_s * ptr;
     int i=0;
+    printk("HW chk:\n");
     for(ptr=hw_chk_head;ptr!=NULL;ptr=ptr->nxt)
         printk("%d: %s, %s\n",i++,ptr->name!=NULL?ptr->name:"NO NAME",ptr->action!=NULL?"has action":"no action");
 }

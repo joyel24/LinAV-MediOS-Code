@@ -12,13 +12,32 @@
 
 #include <kernel/io.h>
 #include <kernel/hardware.h>
+#include <kernel/irq.h>
 #include <kernel/uart.h>
 #include <kernel/kernel.h>
+#include <kernel/pipes.h>
+
+PIPE UART_PIPES[2];
+
+__IRAM_DATA PIPE * UART_0_Pipe;
+__IRAM_DATA PIPE * UART_1_Pipe;
 
 __IRAM_DATA unsigned int uartAdrr[2]={
     UART0_BASE,
     UART1_BASE
 };
+
+__IRAM_CODE void uart_intr_action(int irq)
+{
+    char c;
+    int uart=irq-IRQ_UART0;
+    
+    if(inw(uartAdrr[uart]+UART_SR)&0x0004)
+    {
+        c=(unsigned char)(inw(uartAdrr[uart]+UART_DTRR)&0xFF);
+        kpipe_write (&UART_PIPES[uart], &c, 1);
+    }        
+}
 
 __IRAM_CODE int uartIn(unsigned char * data,int uartNum) 
 {
@@ -44,4 +63,23 @@ __IRAM_CODE void uartOutString(unsigned char * data,int uartNum)
         uartOut(*data,uartNum);
         data++;
     }
+}
+
+void init_uart(void)
+{
+    add_irq_handler(IRQ_UART0,uart_intr_action,"UART0 intr");
+    add_irq_handler(IRQ_UART1,uart_intr_action,"UART1 intr");
+    
+    UART_0_Pipe=&UART_PIPES[0];
+    UART_1_Pipe=&UART_PIPES[1];
+    
+    UART_0_Pipe->nReceiver = 0;
+    UART_0_Pipe->nSender   = 0;
+    UART_1_Pipe->nReceiver = 0;
+    UART_1_Pipe->nSender   = 0;
+    
+    enable_irq(IRQ_UART0);
+    enable_irq(IRQ_UART1);
+
+    printk("[init] uart\n");
 }

@@ -29,4 +29,6 @@ int  uartIn         (unsigned char * data,int uartNum);
 void uartOut        (unsigned char data,int uartNum);
 void uartOutString  (unsigned char * data,int uartNum);
 
+void init_uart      (void);
+
 #endif

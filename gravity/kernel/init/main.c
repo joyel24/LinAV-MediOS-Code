@@ -137,16 +137,20 @@ void kernel_startup_thread (void)
 
     /* driver init */
 
+    init_uart();
+    
     init_cpld();
     init_HW_chk();
 
     init_cmd_line();
 
     init_buttons();
+    init_power();
     init_rtc();
     init_usb_fw();
-
-    init_power();
+    
+    init_ext_module();
+    
     init_disk();
 
     printk("[init] ------------ all drivers\n");

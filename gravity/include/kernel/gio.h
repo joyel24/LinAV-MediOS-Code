@@ -67,7 +67,7 @@
 
 #define gio_addr(num,addr_bk1,addr_bk2)   (num<16?addr_bk1:addr_bk2)
 #define GIO_DIRECTION(num)                gio_addr(num,GIO_DIRECTION0,GIO_DIRECTION1)
-#define GIO_INVERT(num)                   gio_addr(num,GIO_GIO_INVERT0,GIO_GIO_INVERT1)
+#define GIO_INVERT(num)                   gio_addr(num,GIO_INVERT0,GIO_INVERT1)
 #define GIO_BITSET(num)                   gio_addr(num,GIO_BITSET0,GIO_BITSET1)
 #define GIO_BITCLEAR(num)                 gio_addr(num,GIO_BITCLEAR0,GIO_BITCLEAR1)
 
@@ -84,7 +84,7 @@
 #define gio_clear(gio_num)              {outw(0x1<<GIO_NUM(gio_num),GIO_BITCLEAR(gio_num));}
 #define gio_IRQ(gio_num,enable)         GIO_OUT_VAL(enable,gio_num,GIO_ENABLE_IRQ)
 #define gio_is_set(gio_num)             ((inw(GIO_BITSET(gio_num)) & (0x1 << GIO_NUM(gio_num))) != 0)
-#define gio_raw(data,bk,mask)           { outw(data&mask,bank==0?GIO_BITSET0:GIO_BITSET1);\
+#define gio_raw(data,bank,mask)           { outw(data&mask,bank==0?GIO_BITSET0:GIO_BITSET1);\
                                           outw(data ^ mask,bank==0?GIO_BITSET0:GIO_BITSET1);}
 
 #endif
