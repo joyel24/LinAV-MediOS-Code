@@ -27,11 +27,11 @@ needFont(std5x8);
 needFont(std6x9);
 needFont(std7x13);
 
-NEED_ICON(MsgBoxExclamationBitmap);
-NEED_ICON(MsgBoxQuestionBitmap);
-NEED_ICON(MsgBoxWarningBitmap);
-NEED_ICON(MsgBoxInformationBitmap);
-NEED_ICON(MsgBoxErrorBitmap);
+BITMAP * MsgBox_ExclamationBitmap;
+BITMAP * MsgBox_QuestionBitmap;
+BITMAP * MsgBox_WarningBitmap;
+BITMAP * MsgBox_InformationBitmap;
+BITMAP * MsgBox_ErrorBitmap;
 
 #define BUTTON_WIDTH 60
 #define BUTTON_HEIGHT 15
@@ -108,6 +108,12 @@ void msgBoxEvtHandler(int evt)
 // called in avwm.c main()
 void iniMsgBox(void)
 {
+    MsgBox_ExclamationBitmap=&getIcon("MsgBoxExclamationBitmap")->bmap_data;
+    MsgBox_QuestionBitmap=&getIcon("MsgBoxQuestionBitmap")->bmap_data;
+    MsgBox_WarningBitmap=&getIcon("MsgBoxWarningBitmap")->bmap_data;
+    MsgBox_InformationBitmap=&getIcon("MsgBoxInformationBitmap")->bmap_data;
+    MsgBox_ErrorBitmap=&getIcon("MsgBoxErrorBitmap")->bmap_data;
+
     doRegisterPlugin(&msg_box_plugin,msgBoxEvtHandler,0);
 }
 
@@ -190,15 +196,15 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
 
     // draw bitmap and buttons
     if(icon == MSGBOX_ICON_EXCLAMATION)
-        drawBITMAP (&MsgBoxExclamationBitmap, 2,h1+2+2+5);
+        drawBITMAP (MsgBox_ExclamationBitmap, 2,h1+2+2+5);
     else if(icon == MSGBOX_ICON_WARNING)
-        drawBITMAP (&MsgBoxWarningBitmap, 2,h1+2+2+5);
+        drawBITMAP (MsgBox_WarningBitmap, 2,h1+2+2+5);
     else if(icon == MSGBOX_ICON_INFORMATION)
-        drawBITMAP (&MsgBoxInformationBitmap, 2,h1+2+2+5);
+        drawBITMAP (MsgBox_InformationBitmap, 2,h1+2+2+5);
     else if(icon == MSGBOX_ICON_QUESTION)
-        drawBITMAP (&MsgBoxQuestionBitmap, 2,h1+2+2+5);
+        drawBITMAP (MsgBox_QuestionBitmap, 2,h1+2+2+5);
     else if(icon == MSGBOX_ICON_ERROR)
-        drawBITMAP (&MsgBoxErrorBitmap, 2,h1+2+2+5);
+        drawBITMAP (MsgBox_ErrorBitmap, 2,h1+2+2+5);
 
     // print message
     setFont(std5x8);

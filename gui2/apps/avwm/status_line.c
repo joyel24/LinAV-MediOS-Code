@@ -31,11 +31,11 @@
 #define FORMAT_12          0
 #define FORMAT_24          1
 
-NEED_ICON(linavLogo);
-NEED_ICON(usbIcon);
-NEED_ICON(fwExtIcon);
-NEED_ICON(cfIcon);
-NEED_ICON(powerIcon);
+BITMAP * st_fwExtIcon;
+BITMAP * st_cfIcon;
+BITMAP * st_usbIcon;
+BITMAP * st_powerIcon;
+BITMAP * st_linavLogo;
 
 int batteryRefresh=0;
 int batteryRefreshValue = 10;
@@ -154,12 +154,12 @@ void drawStatus(void)
     }
     
     if(fwExtState)
-        drawBITMAP(&fwExtIcon, 242, 4);
+        drawBITMAP(st_fwExtIcon, 242, 4);
     /*else
         fillRect(BG_COLOR,242,4,15,6);*/
         
     if(cfState)
-        drawBITMAP(&cfIcon, 242, 4);
+        drawBITMAP(st_cfIcon, 242, 4);
     /*else
         fillRect(BG_COLOR,242,4,15,6);*/
     if(!cfState && !fwExtState)
@@ -167,19 +167,19 @@ void drawStatus(void)
     
         
     if(usbState)
-        drawBITMAP(&usbIcon, 260, 4);
+        drawBITMAP(st_usbIcon, 260, 4);
     else
         fillRect(BG_COLOR,260,4,15,6);
 
     if(pwrState)
-        drawBITMAP(&powerIcon, 278, 4);
+        drawBITMAP(st_powerIcon, 278, 4);
     else
         fillRect(BG_COLOR,278,4,15,6);
 }
 
 void drawLogo(void)
 {
-    drawBITMAP(&linavLogo, 2, 2);
+    drawBITMAP(st_linavLogo, 2, 2);
 }
 
 void drawGui(void)
@@ -251,6 +251,13 @@ int statusEvtHandler(int evt)
 
 void ini_status_bar(struct plugin * status_plugin)
 {
+    /* get icons */
+    st_fwExtIcon=&getIcon("fwExtIcon")->bmap_data;
+    st_cfIcon=&getIcon("cfIcon")->bmap_data;
+    st_usbIcon=&getIcon("usbIcon")->bmap_data;
+    st_powerIcon=&getIcon("powerIcon")->bmap_data;
+    st_linavLogo=&getIcon("linavLogo")->bmap_data;
+        
     pwrState=getPwr();
     usbState=getUSB();
     fwExtState=getFwExt();

@@ -21,17 +21,26 @@
 #include "icons.h"
 #include "file_type.h"
 
-NEED_ICON(upBitmap)
-NEED_ICON(dwBitmap)
-NEED_ICON(dirBitmap)
-NEED_ICON(mp3Bitmap)
-NEED_ICON(textBitmap)
-NEED_ICON(imageBitmap)
-
+BITMAP * gui_ls_upBitmap;
+BITMAP * gui_ls_dwBitmap;
+BITMAP * gui_ls_dirBitmap;
+BITMAP * gui_ls_mp3Bitmap;
+BITMAP * gui_ls_textBitmap;
+BITMAP * gui_ls_imageBitmap;
 
 //#include "browser_icons.h"
 
 #define    FILE_X_OFFSET 10
+
+void iniBrowser(void)
+{
+    gui_ls_upBitmap=&getIcon("upBitmap")->bmap_data;
+    gui_ls_dwBitmap=&getIcon("dwBitmap")->bmap_data;
+    gui_ls_dirBitmap=&getIcon("dirBitmap")->bmap_data;
+    gui_ls_mp3Bitmap=&getIcon("mp3Bitmap")->bmap_data;
+    gui_ls_textBitmap=&getIcon("textBitmap")->bmap_data;
+    gui_ls_imageBitmap=&getIcon("imageBitmap")->bmap_data;
+}
 
 int viewNewDir(struct browser_data *bdata,char *name)
 {
@@ -67,10 +76,10 @@ void showArrow(int type,struct browser_data *bdata)
     switch(type)
     {
         case UP_ARROW:
-            drawBITMAP(&upBitmap,bdata->width-9,bdata->y_start);
+            drawBITMAP(gui_ls_upBitmap,bdata->width-9,bdata->y_start);
             break;
         case DOWN_ARROW:
-            drawBITMAP(&dwBitmap,bdata->width-9,bdata->y_start+(bdata->nb_disp_entry-1)*H);
+            drawBITMAP(gui_ls_dwBitmap,bdata->width-9,bdata->y_start+(bdata->nb_disp_entry-1)*H);
             break;
     }
 }
@@ -119,7 +128,7 @@ int printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct br
         case TYPE_DIR:    
             color=COLOR_RED;
             select_color=COLOR_BLUE;
-            drawBITMAP (&dirBitmap, X+2, Y);
+            drawBITMAP(gui_ls_dirBitmap, X+2, Y);
             break;
         case TYPE_FILE:
             color=COLOR_BLACK;
@@ -128,13 +137,13 @@ int printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct br
             switch(type)
             {                
                 case IMG_TYPE:
-                    drawBITMAP (&imageBitmap, X+2, Y);
+                    drawBITMAP(gui_ls_imageBitmap, X+2, Y);
                     break;
                 case MP3_TYPE:
-                    drawBITMAP (&mp3Bitmap, X+2, Y);
+                    drawBITMAP(gui_ls_mp3Bitmap, X+2, Y);
                     break;
                 case TXT_TYPE:
-                    drawBITMAP (&textBitmap, X+2, Y);
+                    drawBITMAP(gui_ls_textBitmap, X+2, Y);
                     break; 
                 case BIN_TYPE:
                 case SCRIPT_TYPE:

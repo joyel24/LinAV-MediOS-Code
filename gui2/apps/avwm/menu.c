@@ -72,10 +72,6 @@ int dispName_norm(struct menu_item * item,int x,int y,int clear,int selected)
     return 1;
 }
 
-//NEED_ICON(dirBitmap)
-NEED_ICON(textBitmap)
-BITMAP * folder_icon;
-
 int item_width=70;
 int item_height=70;
 int icon_zone_height=60;
@@ -87,7 +83,7 @@ int dispName_icon(struct menu_item * item,int i,int j,int clear_txt,int clear_ic
     int x,y;
     int w,h;
     
-    BITMAP * icon;
+    BITMAP * icon=NULL;
     
     x=current_menu->dx+i*(item_width+space_btw_items);
     y=current_menu->dy+TITLE_OFFSET+j*(item_height+space_btw_items);
@@ -96,13 +92,13 @@ int dispName_icon(struct menu_item * item,int i,int j,int clear_txt,int clear_ic
     {
         current_menu->submenu_str(item->data,tmp);
         color=current_menu->sub_color; /* => submenu */
-        icon=folder_icon;
+        icon=current_menu->getSubIcon(item->data);
     }
     else
     {
         current_menu->item_str(item->data,tmp);
         color=current_menu->txt_color; /* => item */
-        icon=&textBitmap;
+        icon=current_menu->getItemIcon(item->data);        
     }
     
     CHG_PLANE
@@ -110,7 +106,7 @@ int dispName_icon(struct menu_item * item,int i,int j,int clear_txt,int clear_ic
     if(clear_icon)
     {
         fillRect(current_menu->bg_color,x, y , item_width, icon->height);
-        if(icon->width<=item_width && icon->height<=icon_zone_height)
+        if(icon && icon->width<=item_width && icon->height<=icon_zone_height)
             drawBITMAP(icon,x+(item_width-icon->width)/2,y+(icon_zone_height-icon->height)/2);
     }
     
@@ -141,7 +137,7 @@ void dispAllName_norm(struct menu_item * pos,int nselect)
     }
 }
 
-int MaxI=3;
+int MaxI=4;
 int MaxJ=3;
 
 void dispAllName_icon(struct menu_item * pos,int nselect)
@@ -169,17 +165,9 @@ void dispAName_norm(struct menu_item * pos, int posY, int clear, int selected)
     dispName_norm(pos,current_menu->dx,TITLE_OFFSET + posY*(h+1)+ current_menu->dy,clear,selected);
 }
 
-extern struct icon_elem * icon_list_head;
-
 void start_menu(struct menu_data * client_menu)
 {    
     current_menu=client_menu;
-    
-    if(!current_menu->isTxtMenu && !icon_list_head)
-    {
-        loadIcon("folder.ico");
-        folder_icon=&icon_list_head->bmap_data;
-    }
     
     if(current_menu->useOwnDisp)
     {

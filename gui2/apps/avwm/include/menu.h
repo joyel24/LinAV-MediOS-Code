@@ -14,9 +14,10 @@
 #ifndef __MENU_H
 #define __MENU_H
 
+#include "icons.h"
+
 struct menu_item {
     void * data;
-    char * icon;
     struct menu_item * nxt;
     struct menu_item * prev;
     struct menu_item * sub;
@@ -40,7 +41,9 @@ struct menu_data {
         void (*f2_action)   (void * data);
         void (*f3_action)   (void * data);
         void (*item_str)     (void * data,char * str);
-        void (*submenu_str)  (void * data,char * str);        
+        void (*submenu_str)  (void * data,char * str);
+        BITMAP * (*getSubIcon) (void * data);
+        BITMAP * (*getItemIcon) (void * data);
 };
 
 void stop_menu(void);

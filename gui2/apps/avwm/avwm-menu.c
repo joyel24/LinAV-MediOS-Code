@@ -57,6 +57,8 @@ struct menu_data menu_cfg = {
     f3_action      : do_F3,
     item_str       : mk_item_str,
     submenu_str    : mk_submenu_str,
+    getSubIcon     : mk_sub_icon,
+    getItemIcon    : mk_item_icon,
     isTxtMenu      : 0
 };
 
@@ -79,6 +81,11 @@ struct helperMenu menuMenu = {
 };
 
 extern int cfg_line_num;
+
+struct icon_elem * sub_icon=NULL;
+struct icon_elem * back_icon=NULL;
+struct icon_elem * plugin_icon=NULL;
+
 
 #define SHOW_ALL        1
 #define LISTSIZE        256
@@ -183,6 +190,25 @@ void mk_item_str(void * data,char * str)
         sprintf(str,"%s",cfg_data->name);
 }
 
+BITMAP *  mk_sub_icon(void * data)
+{
+    struct cfg_menu * cfg_data = (struct cfg_menu *)data;
+    if(cfg_data->type == TYPE_STD) /* std sub menu */
+        return &sub_icon->bmap_data;
+    else
+        return &back_icon->bmap_data;
+    
+}
+
+BITMAP *  mk_item_icon(void * data)
+{
+    struct cfg_menu * cfg_data = (struct cfg_menu *)data;
+    if(cfg_data->icon)
+        return &cfg_data->icon->bmap_data;
+    else
+        return &plugin_icon->bmap_data;
+}
+
 void avwm_menuEvtHandler(int evt)
 {
     helperEvt(evt,BTN_JOY);
@@ -204,14 +230,14 @@ int ini_menu(char * path,struct plugin * plug)
         
     clearScreen(COLOR_BLACK);
     
-    putS(COLOR_WHITE,COLOR_BLACK,5,110,"Reading menu file ....");
+    putS(COLOR_WHITE,COLOR_BLACK,5,110,"[ini_menu] reading menu file");
     
     tmpC=(char*)malloc(sizeof(char)*(strlen(path)+1+strlen(MENU_FILE_NAME)));
     sprintf(tmpC,"%s/%s",path,MENU_FILE_NAME);
     
     if(loadMenu(tmpC)<0)
     {
-        putS(COLOR_RED,COLOR_BLACK,5,120,"Error reading menu => stoping");
+        putS(COLOR_RED,COLOR_BLACK,5,120,"[ini_menu] Error reading menu => stoping");
         for(i=0;i<10000;i++) /* nothing */
         free(tmpC);
         return 0;
@@ -221,16 +247,18 @@ int ini_menu(char * path,struct plugin * plug)
     menu_cfg.root=rootMenu;
     menu_cfg.dx=5;
     menu_cfg.dy=h+6+MENU_SHADOW;
-        
-#ifdef DO_DEBUG
-    printMenu();
-#endif
+
+    fprintf(stderr,"[ini_menu] menu loaded\n");
     
-    fprintf(stderr,"Menu loaded, ini helper\n");    
-    iniHelperMenu(&menuMenu);
-    
-    fprintf(stderr,"helper init done, registering\n"); 
+    iniHelperMenu(&menuMenu);    
     doRegisterPlugin(menu_plug,avwm_menuEvtHandler,0);
+    
+    fprintf(stderr,"[ini_menu] helper menu added\n");
+    
+    /* loading icons */
+    sub_icon=loadIcon("folder.ico");
+    back_icon=loadIcon("folder.ico");
+    plugin_icon=getIcon("textBitmap");
     
     free(tmpC);
     return 1;
@@ -331,6 +359,7 @@ void addItem(struct cfg_menu ** cfg)
     current_item->parent[0]=0;
     current_item->param[0]=0;
     current_item->type=TYPE_STD;
+    current_item->icon=NULL;
 }
 
 void cfgCleanMenu(struct cfg_menu * cfg)
@@ -391,6 +420,17 @@ int do_parse(struct cfg_menu ** cfg,char * filename)
             else
             {
                 strcpy(current_item->param,value);
+            }
+        }
+        else if(!strcmp(item,"icon"))
+        {
+            if(current_item==NULL)
+            {
+                fprintf(stderr,"'icon' param before name\n");
+            }
+            else
+            {
+                current_item->icon=loadIcon(value);
             }
         }
         else

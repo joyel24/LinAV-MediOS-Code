@@ -82,6 +82,7 @@ struct dir_entry * nxtSelect(struct browser_data * bdata,int * pos);
 int  browserEvt         (int evt,struct browser_data * bdata);
 
 /*****    gui_fct    *****/
+void iniBrowser         (void);
 int  viewNewDir         (struct browser_data *bdata,char *name);
 void showArrow          (int type,struct browser_data *bdata);
 void hideArrow          (int type,struct browser_data *bdata);

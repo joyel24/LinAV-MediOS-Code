@@ -16,17 +16,19 @@
 
 #include "menu.h"
 #include "plugin.h"
+#include "icons.h"
 
 #define TYPE_STD    0
 #define TYPE_BACK   1
 
 struct cfg_menu {
-	char name[MAX_TOKEN];
-	char parent[MAX_TOKEN];
-	char link[MAX_TOKEN];
-	char param[MAX_TOKEN];
-        int type;
-	struct cfg_menu * nxt;
+    char name[MAX_TOKEN];
+    char parent[MAX_TOKEN];
+    char link[MAX_TOKEN];
+    char param[MAX_TOKEN];
+    int type;
+    struct icon_elem * icon;
+    struct cfg_menu * nxt;
 };
 
 int                 ini_menu       (char * path,struct plugin * plug);
@@ -41,6 +43,8 @@ struct menu_item *  newItem        (struct cfg_menu * data);
 void                printMenu      (void);
 void                mk_submenu_str (void * data,char * str);
 void                mk_item_str    (void * data,char * str);
+BITMAP *            mk_sub_icon    (void * data);
+BITMAP *            mk_item_icon   (void * data);
 void                do_right       (void * data);
 void                do_on          (void * data);
 void                do_off         (void * data);

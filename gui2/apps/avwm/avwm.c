@@ -38,6 +38,8 @@
 #include "fm.h"
 #include "helperMenu.h"
 #include "bg_loader.h"
+#include "icons.h"
+#include "browser.h"
 
 #include "osd.h"
 
@@ -83,11 +85,15 @@ int main(int argc,char * * argv)
     set_mouseParam(6, 3);
     ini_settings();
     
+    iniIcon();
+    
     ini_CF_mount();
     ini_FM();
        
     iniMsgBox();
-    iniEditBox();    
+    iniEditBox();
+    
+    iniBrowser();
 
     if(!ini_menu(path,&menu_plugin))
     {
