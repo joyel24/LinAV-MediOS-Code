@@ -16,8 +16,16 @@ OBJS = $(SRC:%.c=%.o)
 	
 TARGET = avwm
 
+force: clean all
+
 all: $(TARGET)
-force: clean $(TARGET)
+	@mkdir -p ../../build/avwm
+	@rm -f ../../build/avwm/avwm
+	@mv $(TARGET) ../../build/avwm/
+	@cp -f menu.cfg ../../build/avwm/
+	@rm -f *.gdb
+
+
 
 $(TARGET) : $(OBJS)
 	$(GCC) $(OBJS) -o $@  $(LDFLAGS)
@@ -25,6 +33,7 @@ $(TARGET) : $(OBJS)
 clean:
 	@echo "**** Cleaning..."
 	@rm -f *.o *.bak *~ *.gdb *..elf *.elf2flt $(TARGET) include/*~
-
+	@rm -Rf ../../build/avwm/
+        
 .c.o:
 	$(GCC) $(GCCFLAGS) -c -o $@ $<
