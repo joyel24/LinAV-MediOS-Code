@@ -11,29 +11,33 @@
 #include <system.h>
 #include <power.h>
 
+int launchFile(char * fileN);
+void (*codeCaller)(int argc, char * argv[])=(void (*)(int argc, char * argv[]))0x03000000;
+
 static int pal32[2] = {0x8080c0e0, 0xffffffff};
 static int pal16[2] = {0x0000, 0xffff};
 
 struct graphicsBuffer screenBitmap;
 struct graphicsBuffer screenBitmap2;
-struct graphicsBuffer sprite6_10 = {0, 1, 6, 10, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 struct graphicsBuffer sprite5_7 = {0, 1, 5, 7, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 
-struct dirEntry dirBuffer[10000];
-struct dirEntry dirBuffer2[10000];
+struct dispDir {
+	char name[13];
+	int attr;
+	char ext[4];
+};
 
-char hex82[] = "xxxxxxxx";
+struct dispDir dirBuffer[10000];
 
-char dirLine[] = "xxxxxxxx.xxx\n";
+	int (*action[])(char * name) ={launchFile};
+	char * ext[]={"BIN"};
+	int nbExt=1;
 
 struct tm* ourTime;
 char timeSt[] = "xx:xx:xx.xx";
     
-char parentName[] = "..         ";
-char ext_bin[] = "BIN";
-
 char powerSt[] = "xxxx+";
 
 int main() {
@@ -45,15 +49,15 @@ int main() {
     int source = 0;             // 0 = HDD, 1 = memCard
     int mode = 0;               // 0 = normal, 1 = usb
     int cursorMoved=1;
-    void (*codeCaller)();
-    
-    codeCaller = (void (*)())0x03000000;
 
     void (*systemRelocateAdjusted)();
     systemRelocateAdjusted = systemRelocateMeA - 0x00400000;    
     systemRelocateAdjusted();
 
 startInit:
+	inifile();
+	inidir();
+
     cursorpos = 0;
     dirpos = 0;
     cluster = 0;
@@ -77,12 +81,12 @@ startInit:
     screenBitmap.offset = 0x03e00000;
     screenBitmap.bytesPerLine = 96*2;
     screenBitmap.width = 96;
-    screenBitmap.height = 4 + (11*16);
+    screenBitmap.height = 132;
     screenBitmap.bitsPerPixelShift = 4;
     screenBitmap.bitsPerPixel = 16;
 
-    graphicsBoxfA(&screenBitmap, 0, 0, 96, 4 + (11*16), 0xd5d5);    
-    graphicsBoxfA(&screenBitmap, 1, 1, 94, 2 + (11*16), 0x1414);    
+    graphicsBoxfA(&screenBitmap, 0, 0, 96, 132, 0xd5d5);    
+    graphicsBoxfA(&screenBitmap, 1, 1, 94, 130, 0x1414);    
 
     screenBitmap2.offset = 0x03b00000;
     screenBitmap2.bytesPerLine = 320*2;
@@ -91,7 +95,7 @@ startInit:
     screenBitmap2.bitsPerPixelShift = 4;
     screenBitmap2.bitsPerPixel = 16;
 
-    graphicsBoxfA(&screenBitmap2, 0, 0, 320, 240, 0xffff);
+    graphicsBoxfA(&screenBitmap2, 0, 0, 320, 240, 0x0000);
     graphicsBoxfA(&screenBitmap2, 0, 0, 320, 10, 0xd5d5);
     graphicsBoxfA(&screenBitmap2, 0, 11, 320, 1, 0x1717);
     graphicsBoxfA(&screenBitmap2, 0, 228, 320, 1, 0x1717);
@@ -107,8 +111,8 @@ startInit:
     osdSetComponentSourceWidthA(OSD_BITMAP1, 0x14);
     osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT);
-    osdSetComponentSizeA(OSD_BITMAP2, 96*2, 4 + (11*16));
-    osdSetComponentPositionA(OSD_BITMAP2, 0x14 + (2*16), 0x12 + 20);
+    osdSetComponentSizeA(OSD_BITMAP2, 96*2, 132);
+    osdSetComponentPositionA(OSD_BITMAP2, 0x14 + (2*16), 0x12 + 32);
     osdSetComponentOffsetA(OSD_BITMAP2, 0x03e00000);
     osdSetComponentSourceWidthA(OSD_BITMAP2, 6);
     osdSetComponentConfigA(OSD_BITMAP2, OSD_COMPONENT_ENABLE
@@ -142,40 +146,30 @@ startInit:
     c = fatInit(getPartition(0));
 	debug("[fatTest.c] fatInit returned = %x\n",c);
 
-    cluster = getRootClu();
+	char nameCur[MAX_PATH]="/";
+	int dir;
+	struct dirent* entry;
 
     while(1) {
-
         if (mode==0) {
-            graphicsBoxfA(&screenBitmap, 1, 1, 94, 2 + (11*16), 0x1414);    
+            graphicsBoxfA(&screenBitmap, 1, 1, 94, 130, 0x1414);    
 
-            for (c=0;c<1000;c++) {
-                dirBuffer[c].name[0] = 0;    
-            }
+            if((dir=opendir(nameCur))<0)
+			{
+				uartOuts("dir not found\n");
+				break;
+			}
 
-            c = fatReadFile(cluster, (char*) dirBuffer);
-			debug("[fatTest.c] fatReadFile returned = %x\n",c);
-
-            totalEntries = fatDirFilter(dirBuffer, dirBuffer2, 1000);
-        
-            parent = cluster;       // Assume no parent...
-            
-            for (c=0;c<totalEntries;c++) {
-                i = 1;              // Assume it matches...
-                for (b=0;b<11;b++) {
-                    if (dirBuffer2[c].name[b]!=parentName[b]) {
-                        i = 0;
-                        break;
-                    }
-                }
-                // i = 1 if we found the parent...
-                if (i==1) {
-                    parent = dirBuffer2[c].fatCluHI << 16
-                            | dirBuffer2[c].fatCluLO;
-                    if (parent==0) parent = getRootClu();
-                    break;
-                }
-            }
+			int i=0;
+			while((entry=readdir(dir))!=NULL && i<20)
+			{
+				strcpy(dirBuffer[i].name,entry->entryName);
+				strcpy(dirBuffer[i].ext,entry->ext);
+				dirBuffer[i].attr=entry->attribute;
+				i++;
+			}
+			closedir(dir);
+			totalEntries=i;
 
             cursorpos=0;
             dirpos=0;
@@ -188,7 +182,6 @@ startInit:
         }
             
         while(1) {
-
             c = usbIsConnectedA();
             pal16[0] = 0xd5d5;            
             pal16[1] = 0xffff;
@@ -245,13 +238,9 @@ startInit:
             if (mode==0 && cursorMoved==1) {
                 for (c=0;c<16;c++) {
                     if ((dirpos+c)>=totalEntries) break;
-    
-                    for (i=0;i<8;i++) dirLine[i] = dirBuffer2[dirpos+c].name[i];
-                    for (i=0;i<3;i++) dirLine[i+9] = dirBuffer2[dirpos+c].ext[i];
-    //                uartOuts(dirLine);
-    
+
                     pal16[1] = 0xffff;
-                    if (dirBuffer2[dirpos+c].attr & FAT_ATTR_DIR)
+                    if (dirBuffer[dirpos+c].attr & FAT_ATTR_DIR)
                         pal16[1] = 0x4e4e;
                     if (c==cursorpos) {
                         pal16[0] = 0x0000;
@@ -259,8 +248,8 @@ startInit:
                         pal16[0] = 0x1414;            
                     }
     
-                    graphicsStringA(&screenBitmap, 3, 3 + c*11, &sprite6_10, std6x10_, 6, 0,
-                        dirLine);
+                    graphicsStringA(&screenBitmap, 3, 3 + c*8, &sprite5_7, std5x7_, 5, 0,
+                        dirBuffer[dirpos+c].name);
                 }
                 cursorMoved=0;
             }
@@ -287,38 +276,73 @@ startInit:
                     if (loopDelay>=0x1000) loopDelay-=0x1000;
                     cursorMoved=1;
                 } else if (c & BUTTONS_AV300_LEFT) {
-                    if (cluster!=parent) {      // No point then!
-                        cluster = parent;
-                        cursorMoved=1;
-                        do {
-                            c =buttonsGetStatusA();
-                        } while(c & BUTTONS_AV300_ANY);                    
-                        break;
+					if(strcmp(nameCur,"/")!=0)	{
+						char * namePos=strrchr(nameCur+1,'/');
+						if ( namePos )
+							*namePos = 0;
+						namePos=strrchr(nameCur,'/');
+						if ( namePos )
+							*(namePos+1) = 0;
+						cursorMoved=1;
+						do {
+							c =buttonsGetStatusA();
+						} while(c & BUTTONS_AV300_ANY);
+						break;
                     }
                 } else if (c & BUTTONS_AV300_RIGHT) {
-                    if (dirBuffer2[dirpos+cursorpos].attr & FAT_ATTR_DIR) {
-                        cluster = dirBuffer2[dirpos+cursorpos].fatCluHI << 16
-                            | dirBuffer2[dirpos+cursorpos].fatCluLO;
-                        if (cluster==0) cluster=getRootClu();
+                    if (dirBuffer[dirpos+cursorpos].attr & FAT_ATTR_DIR) {
+                        if(strcmp(dirBuffer[dirpos+cursorpos].name,"..")==0)
+						{
+							char * namePos=strrchr(nameCur+1,'/');
+							if ( namePos )
+							{
+								*namePos = 0;
+							}
+							namePos=strrchr(nameCur,'/');
+							if ( namePos )
+							{
+								*(namePos+1) = 0;
+							}
+
+						}
+						else
+						{
+							strcat(nameCur,dirBuffer[dirpos+cursorpos].name);
+							strcat(nameCur,"/");
+						}
                         cursorMoved=1;
                         do {
                             c =buttonsGetStatusA();
-                        } while(c & BUTTONS_AV300_ANY);                    
+                        } while(c & BUTTONS_AV300_ANY);
                         break;
                     }
                 } else if (c & BUTTONS_AV300_ON) {
-                    if (dirBuffer2[dirpos+cursorpos].attr & FAT_ATTR_DIR) {
-                        cluster = dirBuffer2[dirpos+cursorpos].fatCluHI << 16
-                            | dirBuffer2[dirpos+cursorpos].fatCluLO;
-                        if (cluster==0) cluster=getRootClu();
+                    if (dirBuffer[dirpos+cursorpos].attr & FAT_ATTR_DIR) {
+                        if(strcmp(dirBuffer[dirpos+cursorpos].name,"..")==0)
+						{
+							char * namePos=strrchr(nameCur+1,'/');
+							if ( namePos )
+							{
+								*namePos = 0;
+							}
+							namePos=strrchr(nameCur,'/');
+							if ( namePos )
+							{
+								*(namePos+1) = 0;
+							}
+
+						}
+						else
+						{
+							strcat(nameCur,dirBuffer[dirpos+cursorpos].name);
+							strcat(nameCur,"/");
+						}
                         cursorMoved=1;
                         do {
                             c =buttonsGetStatusA();
-                        } while(c & BUTTONS_AV300_ANY);                    
+                        } while(c & BUTTONS_AV300_ANY);
                         break;
                     } else {
-                        pcluster = dirBuffer2[dirpos+cursorpos].fatCluHI << 16
-                            | dirBuffer2[dirpos+cursorpos].fatCluLO;
                         // TODO
                         //  Handle plugins
                         //  text file reader
@@ -327,28 +351,23 @@ startInit:
                         //  etc
 
                         // for now, RUN IT!
-                        i = 1;                  // Assume match
-                        for (c=0;c<3;c++) {
-                            if (dirBuffer2[dirpos+cursorpos].ext[c] != ext_bin[c]) {
-                                i=0;
-                                break;
-                            }
-                        }
-                        
-                        if (i==1) {
-                            
-                            c = fatReadFile(pcluster, (char*) 0x03000000);
-							debug("[fatTest.c] fatReadFile returned = %x\n",c);
+                        char fileN[MAX_PATH];
+						strcpy(fileN,nameCur);
+						strcat(fileN,dirBuffer[dirpos+cursorpos].name);
+						int i;
 
-                            // Now CALL IT!
-                            
-                            codeCaller();           // Go go go!
-    
+						for(i=0;i<nbExt;i++)
+						{
+							if(strcmp(dirBuffer[dirpos+cursorpos].ext,ext[i])==0)
+							{
+								if(action[i](fileN))
+									goto startInit;
+							}
+						}
+
                             goto startInit;
-                            
-                        } else {
-                            // HANDLE OTHER PLUGINS?    
-                        }
+
+
                     }
                     do {
                         c =buttonsGetStatusA();
@@ -357,7 +376,7 @@ startInit:
             }
             
             // Other non mode 0 specific stuff...
-            
+
             if (c & BUTTONS_AV300_MENU3) {
                 mode ^= 1;
                 do {
@@ -400,7 +419,8 @@ startInit:
                 c = fatInit(getPartition(0));
                 debug("[fatTest.c] fatInit returned = %x\n",c);
 
-                cluster = getRootClu();
+                nameCur[0]='/';
+				nameCur[1]=0;
 
                 do {
                     c =buttonsGetStatusA();
@@ -416,4 +436,22 @@ startInit:
     debug("All done!");
     
     while(1) {}
+}
+
+int launchFile(char * fileN)
+{
+	debug("loading:|%s|\n",fileN);
+	if(loadFile(fileN))
+	{
+		debug("File loaded at %x\n",0x03000000);
+
+		char * argv[MAX_PATH];
+		argv[0]=fileN;
+
+		codeCaller(1,argv);
+		return 1;
+	}
+	else
+		return 0;
+
 }
