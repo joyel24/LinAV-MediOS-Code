@@ -14,6 +14,7 @@
 #ifndef __MSGBOX_H
 #define __MSGBOX_H
 
+    void iniMsgBox(void);
     int msgBox(unsigned char * msg);
     
 #endif

@@ -72,6 +72,8 @@ int main(int argc,char * * argv)
     set_mouseParam(6, 3);
 
     ini_sound_connection();
+    
+    iniMsgBox();
 
     if(!ini_menu(path,&menu_plugin))
     {

@@ -15,19 +15,62 @@
 #include "graphics.h"
 #include "avstring.h"
 #include "colordef.h"
+#include "avevents.h"
+#include "events.h"
+
+extern struct plugin msg_box_plugin;
+
+int res; // updated in msgBoxEvtHandler
+// we should add some define in msgBox.h such as RES_OK RES_YES RES_NO RES_CANCEL ...
+// maybe a param to msgBox to set the type of box: alert, choice yes/no, input text
 
 
+int stopBoxLoop=0; /* global variable used to stop the private evt loop*/
+
+/*our private loop*/
+void msgEvtLoop(void)
+{    
+    msg_box_plugin.handle_on=1;
+    stopBoxLoop=0;
+    while(!stopBoxLoop)
+        procNxtEvent(waitEvent());
+    msg_box_plugin.handle_on=0;
+}
+
+/* msg_box event handler */
+void msgBoxEvtHandler(int evt)
+{
+    switch(evt)
+    {
+        case BTN_OFF:
+            stopBoxLoop=1;
+            break;
+    }
+}
+
+// called in avwm.c main()
+void iniMsgBox(void)
+{
+    doRegisterPlugin(&msg_box_plugin,msgBoxEvtHandler,0);
+}
+
+/* draw the msg box */
+void drawMsgBox(void)
+{
+
+}
+
+/* restore the previous state */
+void eraseMsgBox(void)
+{
+
+}
+
+/* main function */
 int msgBox(unsigned char * msg)
 {
-    int w=0,h=0;
-    
-    getStringS(msg, &w, &h);
-    
-    w+=10;
-    h+=10;
-   
-    
-    fillRect(COLOR_BLACK,(SCREEN_WIDTH-w)/2,(SCREEN_HEIGHT-h)/2,w,h);
-    putS(COLOR_WHITE,COLOR_BLACK,(SCREEN_WIDTH-w)/2+5,(SCREEN_HEIGHT-h)/2+5,msg);
-    
+    drawMsgBox();
+    msgEvtLoop();
+    eraseMsgBox();
+    return res;  
 }

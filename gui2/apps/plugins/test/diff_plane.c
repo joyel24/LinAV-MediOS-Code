@@ -16,7 +16,7 @@ int eventHandler(int evt)
 
         switch (evt) {
             case BTN_OFF:
-             case EVT_QUIT:
+            case EVT_QUIT:
                 /* get out of here */
                    cops->hidePlane(VID1);
                    cops->hidePlane(BMAP2);
@@ -29,6 +29,7 @@ int cnt,x,y;
 
 void mainLoop(void)
 {
+    cops->setPlane(BMAP2);
     if(cnt>1000)
     {
         cnt=0;
@@ -57,10 +58,9 @@ int main(int argc,char ** argv)
        
     cops->showPlane(VID1);
     cops->setPlane(VID1);
-    //cops->cfgPlane(BMAP2,MERGE_BACK|BMAP_A3);
+    //cops->cfgPlane(BMAP2,MERGE_BACK);
     cops->showPlane(BMAP2);    
     cops->drawBITMAP (&mp3BMAP, 0, 0);
-    cops->setPlane(BMAP2);
     cnt=0;x=0;y=0;
     PACK(cops,mainLoop)
     return 1;
