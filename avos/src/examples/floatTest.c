@@ -1,6 +1,7 @@
 #include <graphics.h>
 #include <osdDSC25.h>
 #include <math.h>
+#include <system.h>
 
 //void plot(float x, float y, float c);
 
@@ -17,7 +18,7 @@
 int main() {
     unsigned int dx, dy, dc;
     float x=0, y=0;
-
+    
     osdInit();
 
     osdSetComponentConfig(OSD_VIDEO1, 0);

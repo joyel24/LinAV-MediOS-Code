@@ -280,6 +280,8 @@ int main() {
                                             | OSD_VIDEO_ZX2 | OSD_VIDEO_ZY2);                    
                 }
                 }
+            } else if (c & BUTTONS_AV300_OFF) {
+                return;         // Go to bootloader...    
             }
             
             if (!(c & BUTTONS_AV300_MENU3)) mvlatched=0;

@@ -1,6 +1,5 @@
 * Get malloc working
-* Fix rockbox fat/file/dir access routines
-* Port as much rockbox code as is useful/applicable
+* Finish fat routines. Add support for FAT12/FAT16.
 * Look at the uclinux kernel etc
 * Work out MAS
 * Work out line in, line out

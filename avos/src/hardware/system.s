@@ -17,6 +17,27 @@ systemInc = 1
 
 .text
 
+@ ------------------------------------------------------------------------------
+@ systemRelocateMe()
+@
+.globl systemRelocateMe
+.thumb_func
+
+systemRelocateMe:
+        ldr r0, =0x03000000     @ src
+        ldr r1, =0x03400000     @ dest
+        ldr r3, =0x00400000     @ Size (Fixed atm)...
+srmc:   ldr r2, [r0]
+        str r2, [r1]
+        add r0, #4
+        add r1, #4
+        sub r3, #4
+         bne srmc
+        mov r0, lr
+        ldr r1, =0x00400000
+        add r0, r1
+        bx r0                   @ Jump back, but at higher address...
+
         
 @ ------------------------------------------------------------------------------
 @ systemReboot()

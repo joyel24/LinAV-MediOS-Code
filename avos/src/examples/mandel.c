@@ -1,4 +1,5 @@
 #include <graphics.h>
+#include <buttons.h>
 #include <osdDSC25.h>
 #include <math.h>
 
@@ -18,7 +19,7 @@ int escapes( float i, float j );
     
 
 int main() {
-    int c, v;
+    int c, v, b;
     int cpalo=0, cp=0;
     osdInit();
 
@@ -62,6 +63,8 @@ int main() {
   for( i = -2; i < 1; i = i + ((float)2.8/320)) {
     for( j = -1.5; j < 1.5; j = j + ((float)2.8/240)) {
       plot( i+0.5, j, escapes( i, j ) );
+      b = buttonsGetStatus();
+      if (b & BUTTONS_AV300_OFF) return;
     }
   }
   
@@ -76,7 +79,10 @@ int main() {
         cp &= 0xff;
     }
 
-    for(delay=0;delay<0xc000;delay++) {}
+    for(delay=0;delay<0xc000;delay++) {
+        b = buttonsGetStatus();
+        if (b & BUTTONS_AV300_OFF) return;
+    }
   }
 
 }
@@ -86,11 +92,13 @@ int escapes( float i, float j ) {
   float b = j;
   float tempx, tempy;
   int n;
-  for( n = 0; n < 100; n++ ) {
-    if( a < -100 || a > 100 || b < -100 || b > 100 ) {
+  for( n = 0; n < 256; n++ ) {
+    tempx = a*a;
+    tempy = b*b;
+    if( (tempx + tempy) > 2 ) {
       return n;
     }
-    tempx = a*a - b*b + i;
+    tempx = tempx - tempy + i;
     tempy = 2*a*b + j;
     a = tempx;
     b = tempy;

@@ -81,6 +81,8 @@ int main() {
             do {
                 b = buttonsGetStatus();
             } while(b & BUTTONS_AV300_LEFT);
+        } else if (b & BUTTONS_AV300_OFF) {
+            return;
         }
         
     }

@@ -8,6 +8,7 @@
 #include <fonts.h>
 #include <usb.h>
 #include <rtc.h>
+#include <system.h>
 
 void showBuffer(char *source);
 
@@ -20,8 +21,8 @@ struct graphicsBuffer sprite5_7 = {0, 1, 5, 7, 1, 0, -1, 0, 0, 0, 0, (int**) &pa
 struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 
-struct dirEntry dirBuffer[1000];
-struct dirEntry dirBuffer2[1000];
+struct dirEntry dirBuffer[10000];
+struct dirEntry dirBuffer2[10000];
 unsigned char mbr[512];
 
 char hex82[] = "xxxxxxxx";
@@ -35,15 +36,31 @@ int main() {
     int c, i, totalEntries;
     int cursorpos=0;
     int dirpos=0;
-    unsigned int cluster=0;
+    unsigned int cluster=0, pcluster=0;
     int loopDelay = 0xc000;
-    int source = 0;
-    int mode = 0;
+    int source = 0;             // 0 = HDD, 1 = memCard
+    int mode = 0;               // 0 = normal, 1 = usb
     int part;
     int cursorMoved=1;
+    void (*codeCaller)();
     
-    osdInit();    
-    
+    codeCaller = (void (*)())0x03000000;
+
+    void (*systemRelocateAdjusted)();
+    systemRelocateAdjusted = systemRelocateMe - 0x00400000;    
+    systemRelocateAdjusted();
+
+startInit:
+    cursorpos = 0;
+    dirpos = 0;
+    cluster = 0;
+    loopDelay = 0xc000;
+                            // Preserve source
+    mode = 0;
+    cursorMoved = 1;
+
+    osdInit();
+
     rtcInit();
     
     osdSetComponentConfig(OSD_VIDEO1, 0);
@@ -214,45 +231,67 @@ int main() {
                 
             c =buttonsGetStatus();
             if (!(c & BUTTONS_AV300_ANY)) loopDelay = 0xc000;
-        
-            if (c & BUTTONS_AV300_DOWN) {
-                if ((cursorpos<15) && (cursorpos<(totalEntries-1))) {
-                    cursorpos++;
-                } else {
-                    if ((dirpos+15)<(totalEntries-1)) dirpos++;
-                }
-                cursorMoved=1;
-                if (loopDelay>=0x1000) loopDelay-=0x1000;
-            } else if (c & BUTTONS_AV300_UP) {
-                if (cursorpos>0) {
-                    cursorpos--;
-                } else {
-                    if (dirpos>0) dirpos--;
-                }
-                if (loopDelay>=0x1000) loopDelay-=0x1000;
-                cursorMoved=1;
-            } else if (c & BUTTONS_AV300_ON) {
-                if (dirBuffer2[dirpos+cursorpos].attr & FAT_ATTR_DIR) {
-                    cluster = dirBuffer2[dirpos+cursorpos].fatCluHI << 16
-                        | dirBuffer2[dirpos+cursorpos].fatCluLO;
-                    if (cluster==0) cluster=getRootClu();
+
+            if (mode==0) {
+                if (c & BUTTONS_AV300_DOWN) {
+                    if ((cursorpos<15) && (cursorpos<(totalEntries-1))) {
+                        cursorpos++;
+                    } else {
+                        if ((dirpos+15)<(totalEntries-1)) dirpos++;
+                    }
                     cursorMoved=1;
+                    if (loopDelay>=0x1000) loopDelay-=0x1000;
+                } else if (c & BUTTONS_AV300_UP) {
+                    if (cursorpos>0) {
+                        cursorpos--;
+                    } else {
+                        if (dirpos>0) dirpos--;
+                    }
+                    if (loopDelay>=0x1000) loopDelay-=0x1000;
+                    cursorMoved=1;
+                } else if (c & BUTTONS_AV300_ON) {
+                    if (dirBuffer2[dirpos+cursorpos].attr & FAT_ATTR_DIR) {
+                        cluster = dirBuffer2[dirpos+cursorpos].fatCluHI << 16
+                            | dirBuffer2[dirpos+cursorpos].fatCluLO;
+                        if (cluster==0) cluster=getRootClu();
+                        cursorMoved=1;
+                        do {
+                            c =buttonsGetStatus();
+                        } while(c & BUTTONS_AV300_ANY);                    
+                        break;
+                    } else {
+                        pcluster = dirBuffer2[dirpos+cursorpos].fatCluHI << 16
+                            | dirBuffer2[dirpos+cursorpos].fatCluLO;
+                        // TODO
+                        //  Handle plugins
+                        //  text file reader
+                        //  image reader
+                        //  mp3 player
+                        //  etc
+
+                        // for now, RUN IT!
+                        
+                        c = fatReadFile(pcluster, (char*) 0x03000000);
+                        stringPutHex(hex82, c, 8);
+                        uartOuts("[fatTest.c] fatReadFile returned = ");
+                        uartOuts(hex82);
+                        uartOuts("\n");
+                        
+                        // Now CALL IT!
+                        
+                        codeCaller();           // Go go go!
+
+                        goto startInit;
+                    }
                     do {
                         c =buttonsGetStatus();
-                    } while(c & BUTTONS_AV300_ANY);                    
-                    break;
-                } else {
-                    // TODO
-                    //  Handle plugins
-                    //  text file reader
-                    //  image reader
-                    //  mp3 player
-                    //  etc
+                    } while(c & BUTTONS_AV300_ANY);
                 }
-                do {
-                    c =buttonsGetStatus();
-                } while(c & BUTTONS_AV300_ANY);
-            } else if (c & BUTTONS_AV300_OFF) {
+            }
+            
+            // Other non mode 0 specific stuff...
+            
+            if (c & BUTTONS_AV300_OFF) {
                 mode ^= 1;
                 do {
                     c =buttonsGetStatus();

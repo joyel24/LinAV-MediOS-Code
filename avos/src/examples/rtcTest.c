@@ -67,6 +67,8 @@ int main() {
         graphicsString(&screenBitmap, 160-(5*14)-7, 120, &spriteShadow, shadow_, 14, 0,
                     timeSt);
         uartOuts("Loop\n");
+        b = buttonsGetStatus();
+        if (b & BUTTONS_AV300_OFF) return;        
     }
 }
 

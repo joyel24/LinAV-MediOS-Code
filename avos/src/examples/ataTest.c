@@ -124,6 +124,7 @@ int main() {
                 usbDisable();
             }
         }
+        if (b & BUTTONS_AV300_OFF) return;
         
         do {
             b =buttonsGetStatus();
