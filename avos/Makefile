@@ -13,7 +13,7 @@
 BUILDDIR=/home/thomas/Av320/arm-tools/inst_uclibc/toolchain/gcc-3.3.x/toolchain_arm_nofpu
 LDFLAG=-L$(BUILDDIR)/arm-linux/lib
 
-GCCFLAG= -Wa,-R -fno-zero-initialized-in-bss
+GCCFLAG= -Wa,-R -fno-zero-initialized-in-bss -Wall
 
 ##########################
 ## you need to make some special link:
@@ -74,8 +74,7 @@ debug: src/examples/*.c
 
 boot: src/boot/boot.c
 	arm-linux-as -mfpu=softfpa -o bootstart.o src/boot/bootstart.s
-	arm-linux-gcc -static-libgcc -c -Wa,-R\
-    -fno-zero-initialized-in-bss -Iinclude/ src/boot/boot.c
+	arm-linux-gcc $(GCCFLAG) -c -Iinclude/ src/boot/boot.c
 	arm-linux-ld -N -Ttext 0x03400000 -e main2 -o boot.elf bootstart.o boot.o\
     lib/*.o $(LDFLAG) -lc -lfloat -lgcc
 	arm-linux-objcopy -O binary boot.elf boot.bin

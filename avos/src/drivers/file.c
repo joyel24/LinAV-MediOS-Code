@@ -780,7 +780,7 @@ int loadFile(char * fileN)
 {
     int curFile;
 
-	curFile=fopen(fileN,F_RD);
+	curFile=fopen(fileN,"r");
 	debug("openFile(): %d\n",curFile);
 
 	if(curFile>=0)

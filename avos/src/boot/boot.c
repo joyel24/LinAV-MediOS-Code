@@ -11,8 +11,6 @@
 #include <system.h>
 #include <power.h>
 
-void showBuffer(char *source);
-
 static int pal32[2] = {0x8080c0e0, 0xffffffff};
 static int pal16[2] = {0x0000, 0xffff};
 
@@ -53,7 +51,7 @@ int main() {
     codeCaller = (void (*)())0x03000000;
 
     void (*systemRelocateAdjusted)();
-    systemRelocateAdjusted = systemRelocateMe - 0x00400000;    
+    systemRelocateAdjusted = systemRelocateMeA - 0x00400000;    
     systemRelocateAdjusted();
 
 startInit:
@@ -143,7 +141,7 @@ startInit:
     uartOutsA(hex82);
     uartOutsA("\n");
 
-    showBuffer(mbr);
+    printBuffer(mbr,512);
 
     part = mbr[0x1c6] | (mbr[0x1c7]<<8) | (mbr[0x1c8]<<16) | (mbr[0x1c9]<<24);
     stringPutHexA(hex82, part, 8);
@@ -196,8 +194,6 @@ startInit:
                 }
             }
 
-            //showBuffer((char*) dirBuffer2);
-        
             cursorpos=0;
             dirpos=0;
             osdSetComponentConfigA(OSD_BITMAP2, OSD_COMPONENT_ENABLE
@@ -445,21 +441,4 @@ startInit:
     uartOutsA("All done!");
     
     while(1) {}
-}
-
-char p[] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | xxxxxxxxxxxxxxxx\n";
-
-void showBuffer(char *source) {
-    int i,j;
-    char c;
-
-    for (j=0;j<512;j+=16) {
-        for (i=0;i<16;i++) {
-            c = source[i+j];
-            stringPutHexA(p+(i*2), c, 2);
-            if (c<32 || c>126) c='.';
-            p[35+i] = c;
-        }
-        uartOutsA(p);
-    }
 }
