@@ -100,6 +100,8 @@ void do_right(void * data)
 {
     char tmp[200];
     int reload = false;
+    int buttonResult = 0;
+
     cops->stop_menu();
     mode=1;
 
@@ -113,10 +115,13 @@ void do_right(void * data)
     }
     else if(strcmp((char*)data, "Delete") == 0)
     {
-        cops->msgBox("Info", "Delete", MSGBOX_TYPE_OKCANCEL, MSGBOX_ICON_WARNING);
+        buttonResult = cops->msgBox("Delete Warning", "Really delete it ?", MSGBOX_TYPE_OKCANCEL, MSGBOX_ICON_WARNING);
 
-//        remove(list[pos+nselect].name);
-//        reload = true;
+        if(buttonResult == MSGBOX_OK)
+        {
+            remove(list[pos+nselect].name);
+            reload = true;
+        }
     }
     else if(strcmp((char*)data, "Rename") == 0)
     {
