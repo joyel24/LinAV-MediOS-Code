@@ -28,7 +28,7 @@ void graphics8_1bit_Sprite (char * src, int width, int height, int bpline, PALET
 void graphics8_2bit_Sprite (char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
 void graphics8_4bit_Sprite (char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
 
-void graphics8_DrawHorizLine (int color, unsigned int bigColor, int width,char * offset);
+void graphics8_DrawHorizLine (int color, int width,char * offset);
 void graphics8_DrawString    (struct graphicsFont * font, int color,int bg_color, int x, int y, char * s, struct graphicsBuffer * buff);
 int graphics8_GetStringSize(struct graphicsFont * font, const unsigned char *str, int *w, int *h);
 

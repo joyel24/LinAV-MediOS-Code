@@ -240,8 +240,12 @@ int execBin(char * path, ...)
         {
             int status;
             cops->closeScreen();
+            cops->stopEvt();
+            cops->stopTimout();
             waitpid(pid, &status, 0);
             cops->openScreen();
+            cops->startEvt();
+            cops->startTimout();
         }
         else
         {
@@ -249,6 +253,9 @@ int execBin(char * path, ...)
         }
     }
 }
+
+
+
 
 int launchBin(char * name)
 {
@@ -400,7 +407,7 @@ int eventHandler(int evt)
             printAllName(pos,nselect);
             cops->clearEventQueue();
             break;
-        case BTN_OFF:
+        //case BTN_OFF:
         case EVT_QUIT:
             stop=1;
             break;

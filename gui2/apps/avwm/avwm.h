@@ -24,36 +24,40 @@
 #define REGISTER(ops,event)    {ops=atoi(argv[argc-1]);ops->addEventHandler(event);}
 #define PACK(ops)              {ops->pack();}
 
-struct client_operations {	
-	void (*drawPixel)         (int color, int x, int y);
-	int  (*readPixel)         (int x, int y);
-	void (*drawRect)          (int color, int x, int y, int width, int height);
-	void (*fillRect)          (int color, int x, int y, int width, int height);
-	void (*drawLine)          (int color, int x1, int y1, int x2, int y2);
-	void (*putS)              (int color, int bg_color,int x, int y, char *s);
-	void (*putC)              (int color, int bg_color,int x, int y, char s);
-	//void (*drawSprite)        (PALETTE * palette, SPRITE * sprite, int x, int y);
-	//void (*drawBITMAP)        (BITMAP * bitmap, int x, int y);
-	void (*scrollWindowVert)  (int bgColor, int x, int y, int width, int height, int scroll, int UP);
-	void (*scrollWindowHoriz) (int bgColor, int x, int y, int width, int height, int scroll, int RIGHT);
-	void (*drawImage)         (char * filename);
-	int  (*clearEventQueue)   (void);
-	int  (*nxtEvent)          (void);
-	void (*processEvent)      (int evt);
-	void (*addEventHandler)   (void (*evtHandle));
-	void (*pack)              (void);
-	int  (*closeScreen)       (void);
-	void (*openScreen)        (void);
-	void (*setFont)           (int font);
-   int  (*getStringS)        (const unsigned char *str, int *w, int *h);
+struct client_operations {    
+    void (*drawPixel)         (int color, int x, int y);
+    int  (*readPixel)         (int x, int y);
+    void (*drawRect)          (int color, int x, int y, int width, int height);
+    void (*fillRect)          (int color, int x, int y, int width, int height);
+    void (*drawLine)          (int color, int x1, int y1, int x2, int y2);
+    void (*putS)              (int color, int bg_color,int x, int y, char *s);
+    void (*putC)              (int color, int bg_color,int x, int y, char s);
+    //void (*drawSprite)        (PALETTE * palette, SPRITE * sprite, int x, int y);
+    //void (*drawBITMAP)        (BITMAP * bitmap, int x, int y);
+    void (*scrollWindowVert)  (int bgColor, int x, int y, int width, int height, int scroll, int UP);
+    void (*scrollWindowHoriz) (int bgColor, int x, int y, int width, int height, int scroll, int RIGHT);
+    void (*drawImage)         (char * filename);
+    int  (*clearEventQueue)   (void);
+    int  (*nxtEvent)          (void);
+    void (*processEvent)      (int evt);
+    void (*addEventHandler)   (void (*evtHandle));
+    void (*pack)              (void);
+    int  (*closeScreen)       (void);
+    void (*openScreen)        (void);
+    void (*setFont)           (int font);
+    int  (*getStringS)        (const unsigned char *str, int *w, int *h);
+    void (*stopEvt)           ();
+    void (*startEvt)          ();
+    void (*stopTimout)        ();
+    void (*startTimout)       ();
 };
 
 struct menu_item {
-	struct cfg_menu * data;
-	struct menu_item * nxt;
-	struct menu_item * prev;
-	struct menu_item * sub;
-	struct menu_item * up;
+    struct cfg_menu * data;
+    struct menu_item * nxt;
+    struct menu_item * prev;
+    struct menu_item * sub;
+    struct menu_item * up;
 };
 
 void   wmNxtEvent       (int evt);
@@ -71,6 +75,11 @@ int    launchPlugin     (char * path,char * param);   // launch a plugin
 void   wmPutS           (int color, int bg_color,int x, int y, char *s);
 void   wmPutC           (int color, int bg_color,int x, int y, char s);
 void   wmSetFont        (int font);
-void   wmgetStringS(const unsigned char *str, int *w, int *h);
+void   wmgetStringS     (const unsigned char *str, int *w, int *h);
+
+void   stopEvt          ();
+void   startEvt         ();
+void   stopTimout       ();
+void   startTimout      ();
 
 #endif

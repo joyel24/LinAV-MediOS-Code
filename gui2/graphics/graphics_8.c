@@ -46,44 +46,21 @@ void graphics8_DrawRect(int color, int x, int y, int width, int height, struct g
 
 void graphics8_FillRect(int color, int x, int y, int width, int height, struct graphicsBuffer * buff)
 {
-	int i,j,k,l,m;
-	unsigned int val;
+	int j;
+
 	char * offset=getOffset(x,y,buff,char);
-	val= color<<24 | color<<16 | color<<8 | color;
 	
 	for(j=0;j<height;j++)
 	{
-		graphics8_DrawHorizLine(color, val,width,offset);	
+		graphics8_DrawHorizLine(color, width, offset);	
 		offset+=buff->width;
 	}
 }
 
 /* draw an horizontal line starting at (x,y) */ 
-void graphics8_DrawHorizLine(int color, unsigned int bigColor, int width,char * offset)
+void graphics8_DrawHorizLine(int color, int width,char * offset)
 {
-	int i,m,w;
-	
-	m=((int)offset)&0x3;
-	
-	if(m != 0)
-	{
-		m=4-m;
-		for(i=0;i<m;i++)
-			OUTB(color,offset+i);
-		offset+=i;
-		width-=m;
-	}
-	
-	w=width&0xFFFFFFF8;
-	
-	for(i=0;i<w;i+=4)
-		OUTL(bigColor,offset+i);
-	offset+=i;
-	width&=0x3;
-	
-	for(i=0;i<width;i++)
-		OUTB(color,offset+i);
-	
+	memset((void*)offset,(char)color,width);
 }
 
 void graphics8_DrawSprite(SPRITE * sprite, PALETTE * palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
