@@ -20,6 +20,7 @@
 
 #include "misc.h"
 #include "events.h"
+#include "avevents.h"
 #include "plugin.h"
 
 #include "CF_handler.h"
@@ -27,6 +28,12 @@
 int cf_mnt_state=0;
 
 struct plugin CF_mnt_plugin;
+extern struct plugin cur_plugin;
+
+int CF_is_mounted(void)
+{
+    return cf_mnt_state;
+}
 
 void mountCF(void)
 {
@@ -48,12 +55,25 @@ void mountCF(void)
         cf_mnt_state=1;
     }
     else
-        fprintf(stderr,"[mountCF] no mounting as it is already mounted\n"); 
+        fprintf(stderr,"[mountCF] no mounting as it is already mounted\n");
+    sendEvt(&cur_plugin,EVT_CF_ADDED);
 }
+
+
 
 void umountCF(void)
 {
     int res;
+    char pwd[10];
+    sendEvt(&cur_plugin,EVT_CF_REMOVED);
+    getcwd(pwd, 10);
+    pwd[10]='\0';
+    fprintf(stderr,"[UmountCF] pwd= %s\n",pwd);
+    if(pwd[0]=='/' && pwd[1]=='c' && pwd[2]=='f' && (pwd[3]=='/'||pwd[3]=='\0'))    
+    {
+        fprintf(stderr,"[UmountCF] chg dir\n");
+        chdir("/mnt");
+    }    
     res=umount2("/cf",MNT_FORCE);
     fprintf(stderr,"[UmountCF] res=%d-err=%d\n",res,errno);
     //do_fct(DO_UMOUNT,"/dev/avcf1","/cf");

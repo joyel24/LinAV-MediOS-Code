@@ -22,5 +22,6 @@ void umountCF          (void);
 int  do_fct            (int fct,char * devFile,char * dirMnt);
 void CFmntEvtHandler   (int evt);
 void ini_CF_mount      (void);
+int  CF_is_mounted     (void);
 
 #endif

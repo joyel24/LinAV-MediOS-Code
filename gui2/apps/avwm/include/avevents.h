@@ -16,10 +16,12 @@
 
 #include "plugin.h"
 
-#define EVT_REDRAW  0x0100
-#define EVT_QUIT    0x0101
-#define EVT_SUSPEND 0x0102
-#define EVT_RESUME  0x0103
+#define EVT_REDRAW      0x0100
+#define EVT_QUIT        0x0101
+#define EVT_SUSPEND     0x0102
+#define EVT_RESUME      0x0103
+#define EVT_CF_REMOVED  0x0104
+#define EVT_CF_ADDED    0x0105
 
 #define NO_APP      0
 #define APP_MP3     1

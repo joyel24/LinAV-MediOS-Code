@@ -31,6 +31,7 @@ int eventHandler(int evt)
 {
     int w = 0;
     int h = 10;
+    char pwd[10];    
 
     cops->getStringS("M", &w, &h);
 
@@ -142,7 +143,8 @@ int eventHandler(int evt)
                 viewNewDir("/mnt");                  
                 break;
             case BTN_F2:
-                viewNewDir("/cf");                  
+                if(cops->CF_is_mounted())
+                    viewNewDir("/cf");
                 break;
             case BTN_F3:
                 menu_cfg.root=&menu1;
@@ -150,13 +152,21 @@ int eventHandler(int evt)
                 cops->start_menu(&menu_cfg);
                 cops->menuEvtHandler(EVT_REDRAW);
                 break;
-
             case BTN_OFF:
             case EVT_QUIT:
                 RELEASE(cops)
                 break;
             case EVT_REDRAW:
                 printAllName(pos,nselect);
+                break;
+            case EVT_CF_REMOVED:
+                getcwd(pwd, 10);
+                pwd[10]='\0';
+                if(pwd[0]=='/' && pwd[1]=='c' && pwd[2]=='f' && (pwd[3]=='/'||pwd[3]=='\0'))
+                    viewNewDir("/mnt");
+                break;
+            case EVT_CF_ADDED:
+                viewNewDir("/cf");
                 break;
         }
     }

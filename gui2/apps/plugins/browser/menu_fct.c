@@ -157,18 +157,21 @@ void do_right(void * data)
             }
             break;
         case MENU_CF:
-            //do_mount("/dev/avcf1","/cf");
+            if(cops->CF_mod_is_connected())
+            {
+                if(cops->CF_is_mounted())
+                    cops->umountCF();
+                else
+                {
+                    cops->mountCF();
+                    viewNewDir("./");
+                }                    
+            }
             break;
     }
 
     if(reload == true)
-    {
-        doLs("./");
-        printAllName(pos,nselect);
-
-        if(listused>MAXPOS)
-            showArrow(DOWN_ARROW);
-    }
+        viewNewDir("./");
 }
 
 void do_F1(void * data)
@@ -189,7 +192,12 @@ void mk_item_str(void * data,char * str)
     switch(item->num)
     {
         case MENU_CF:
-            strcpy(str,item->label);
+            if(!cops->CF_mod_is_connected())
+                strcpy(str,"CF not connected");
+            else if(cops->CF_is_mounted())
+                strcpy(str,"umount CF");
+            else
+                strcpy(str,"mount CF");            
             break;
         default:
             strcpy(str,item->label);

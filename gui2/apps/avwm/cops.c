@@ -25,6 +25,7 @@
 #include "misc.h"
 #include "avgraphics.h"
 #include "debug.h"
+#include "CF_handler.h"
 
 #include <stdlib.h>
 
@@ -119,6 +120,12 @@ struct client_operations cops={
     start_menu         : start_menu,
     menuEvtHandler     : menuEvtHandler,
     
-    print_data         : print_data
+    print_data         : print_data,
+    
+    CF_mod_is_connected : CF_mod_is_connected,
+    CF_is_connected    : CF_is_connected,
+    CF_is_mounted      : CF_is_mounted,
+    mountCF            : mountCF,
+    umountCF           : umountCF
 
 };

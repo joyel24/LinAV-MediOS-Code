@@ -140,6 +140,12 @@ struct client_operations {
     void (*menuEvtHandler)      (int evt);
     
     void (*print_data)          (char * data,int length);
+    
+    int  (*CF_mod_is_connected) (void);
+    int  (*CF_is_connected)     (void);
+    int  (*CF_is_mounted)       (void);
+    void (*mountCF)             (void);
+    void (*umountCF)            (void);
 };
 
 #endif
