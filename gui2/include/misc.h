@@ -22,17 +22,21 @@ int   setTime           (struct av_tm * date_time);
 int   getTick           (void);
 
 int   set_mouseParam    (int freq, int repeat);
-int   get_mouseFreq     ();
-int   get_mouseRepeat   ();
+int   get_mouseFreq     (void);
+int   get_mouseRepeat   (void);
 
-int   set_lcd_TimeOutParam  (int state, int value);
-int   get_lcd_TimeOutParam  (int state);
+int   set_lcd_TimeOutParam       (int state, int value);
+int   get_lcd_TimeOutParam       (int state);
 
-int   set_hd_TimeOutParam(int state, int value);
-int   get_hd_TimeOutParam(int state);
+int   set_hd_TimeOutParam        (int state, int value);
+int   get_hd_TimeOutParam        (int state);
 
-int   set_halt_TimeOutParam(int state, int value);
-int   get_halt_TimeOutParam(int state);
+int   set_halt_TimeOutParam      (int state, int value);
+int   get_halt_TimeOutParam      (int state);
+
+int   powerOff_timer_on          (void);
+int   powerOff_timer_off         (void);
+int   get_power_off_timer_state  (void);
 
 int   setBrightness(int val);
 int   getBrightness(void);

@@ -130,10 +130,10 @@ struct client_operations cops={
     print_data         : print_data,
     
     CF_mod_is_connected : CF_mod_is_connected,
-    CF_is_connected    : CF_is_connected,
-    CF_is_mounted      : CF_is_mounted,
-    mountCF            : mountCF,
-    umountCF           : umountCF,
+    CF_is_connected     : CF_is_connected,
+    CF_is_mounted       : CF_is_mounted,
+    mountCF             : mountCF,
+    umountCF            : umountCF,
     
     get_file_type      : get_file_type,
     handle_type_other  : handle_type_other,
@@ -142,5 +142,10 @@ struct client_operations cops={
     viewNewDir         : viewNewDir,
     cleanList          : cleanList,
     chgSelect          : chgSelect,
-    nbSelected         : nbSelected
+    nbSelected         : nbSelected,
+    
+    powerOff_timer_on         : powerOff_timer_on,
+    powerOff_timer_off        : powerOff_timer_off,
+    get_power_off_timer_state : get_power_off_timer_state
+    
 };

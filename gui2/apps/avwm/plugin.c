@@ -148,7 +148,8 @@ int launchPlugin(char * path,char * param)
         cur_plugin.pid=pid;        
         menu_plugin.handle_on=0;
         fprintf(stderr,"load success pid= %d\n",pid);
-        waitpid(cur_plugin.pid, &status, 0);        
+        waitpid(pid, &status, 0);        
+        fprintf(stderr,"[launchPlugin] after wait\n",pid);
     }    
     return 0;
 #else

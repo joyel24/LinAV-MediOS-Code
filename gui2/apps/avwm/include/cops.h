@@ -132,7 +132,8 @@ struct client_operations {
     int  (*curLineNum)          (void);
     
     int  (*msgBox)              (unsigned char* caption, unsigned char* msg, int type, int icon);
-    char*(*editBox)             (unsigned char* caption, unsigned char* text, int text_color, int bk_color, int frame_color, int cursor_color);
+    char*(*editBox)             (unsigned char* caption, unsigned char* text, int text_color, 
+                                    int bk_color, int frame_color, int cursor_color);
 
     int  (*getTick)             (void);
     int  (*getTime)             (struct av_tm * date_time);
@@ -162,6 +163,11 @@ struct client_operations {
     void (*cleanList)           (struct browser_data * bdata);
     void (*chgSelect)           (struct browser_data *bdata,int num);
     int  (*nbSelected)          (struct browser_data * bdata);
+    
+    int  (*powerOff_timer_on)          (void);
+    int  (*powerOff_timer_off)         (void);
+    int  (*get_power_off_timer_state)  (void);
+
 };
 
 #endif

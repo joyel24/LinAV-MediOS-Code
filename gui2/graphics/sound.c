@@ -22,30 +22,6 @@
 int fd_dsp=-1;
 int fd_mix=-1;
 
-int ini_sound_connection(void)
-{
-    /*if(fd_dsp<0)
-    {
-        fd_dsp=open("/dev/dsp",O_WRONLY);
-        if (fd_dsp < 0)
-        {
-            fprintf(stderr,"Can't open /dev/dsp\n");
-            return 0;
-        }
-    }
-    
-    if(fd_mix<0)
-    {
-        fd_mix=open("/dev/mixer",O_WRONLY);
-        if (fd_mix < 0)
-        {
-            fprintf(stderr,"Can't open /dev/mixer\n");
-            return 0;
-        }
-    }*/
-    return 1;
-}
-
 int ini_mp3_playback(struct mp3_play * mp3_p_data)
 {    
     return execDSP_ioctl(AV_DSP_INI_MP3,(unsigned int)mp3_p_data);
@@ -54,10 +30,6 @@ int ini_mp3_playback(struct mp3_play * mp3_p_data)
 void close_mp3_playback(void)
 {
     stop_playback();
-   /* if(fd_dsp>=0)
-        close(fd_dsp);
-    if(fd_mix>=0)
-        close(fd_mix);  */  
 }
 
 int start_playback(void)

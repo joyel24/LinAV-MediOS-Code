@@ -34,6 +34,8 @@ struct client_operations * cops;
 #define MWINCLUDECOLORS
 
 
+char buffer[MP3_BUFF_SIZE];
+
 /******************************
  * Color order for LCD printing
  *****************************/
@@ -113,6 +115,7 @@ int main(int argc, char * * argv)
 {
     
     REGISTER(cops,eventHandler,0);
+       
     
 #ifdef AV_SCREEN
    if(argc<2)
@@ -156,7 +159,7 @@ int main(int argc, char * * argv)
     data.freqPeakDraw=10;
     data.peakDraw=drawPeak;
     
-    data.buffer=(char*)malloc(data.buffer_len);
+    /*data.buffer=(char*)malloc(data.buffer_len);
     if(!data.buffer)
     {
             fprintf(stderr,"Can't allocate buff (size=%d)\n",data.buffer_len);
@@ -164,7 +167,8 @@ int main(int argc, char * * argv)
             return -1;
     }
 
-    printf("buffer created %d\n",data.buffer_len);    
+    printf("buffer created %d\n",data.buffer_len);    */
+    data.buffer=&buffer;
  
 
     /* initialize the graphics and clear the lcd */
@@ -203,11 +207,12 @@ int main(int argc, char * * argv)
     apply_settings();  
     /* start mp3 */
     cops->start_playback();
-    
+    cops->powerOff_timer_off();
     PACK(cops,NULL);
+    cops->powerOff_timer_on();
     fprintf(stderr,"I've been released\n");
     fclose(fd);
-    free(data.buffer);
+    //free(data.buffer);
     fprintf(stderr,"file closed and buffer freed\n");
     return 1;
 }

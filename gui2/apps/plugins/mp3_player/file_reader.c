@@ -33,7 +33,7 @@ int threadActive=0;
 void mp3_read_more(void)
 {
     int free_space;
-    fprintf(stderr,"r=%x w=%x dif=%x\n",data.buffer_read,data.buffer_write,data.buffer_write-data.buffer_read);
+    //fprintf(stderr,"r=%x w=%x dif=%x\n",data.buffer_read,data.buffer_write,data.buffer_write-data.buffer_read);
     if(!threadActive && !data.endOfFile )
     {        
         free_space=data.buffer_read-data.buffer_write;
@@ -56,7 +56,7 @@ void * mp3_read_data(void * arg)
     size=*(int*)arg;
     threadActive=1;
     
-    fprintf(stderr,"in thread: %d pos:%x/%x (r=%x)\n",size,data.buffer_write,data.buffer_len,data.buffer_read);
+    //fprintf(stderr,"in thread: %d pos:%x/%x (r=%x)\n",size,data.buffer_write,data.buffer_len,data.buffer_read);
     
     pos=ftell(fd);
     size = MIN(size,(data.buffer_len*50)/100);
@@ -92,7 +92,7 @@ void * mp3_read_data(void * arg)
         printf("EOF\n");
     } 
             
-    fprintf(stderr,"out thread: %d\n",size);
+    //fprintf(stderr,"out thread: %d\n",size);
     threadActive=0;
     return NULL;   
 }

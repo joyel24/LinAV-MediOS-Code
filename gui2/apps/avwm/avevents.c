@@ -62,7 +62,8 @@ void myRelease_app(void)
 }
 
 void procNxtEvent(int evt)
-{                          
+{
+                      
     if(evt==BTN_OFF)
     {
         if(nbOff)
@@ -83,7 +84,9 @@ void procNxtEvent(int evt)
             case NO_APP:
                 break;
             case APP_MP3:
+                fprintf(stderr,"[procNxtEvent] before launching\n");
                 loadPlugin("/mnt/avwm/plugins/play",nxt_action.arg);
+                fprintf(stderr,"[procNxtEvent] after launching\n");
                 menu_plugin.handle_on=0;
                 break;
         }
@@ -152,3 +155,4 @@ void sendEvt(struct plugin * plug,int evt)
 	if(plug->handle_on && plug->handler)
 		plug->handler(evt);
 }
+

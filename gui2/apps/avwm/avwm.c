@@ -52,7 +52,6 @@ extern struct plugin cur_plugin;
 extern struct plugin menu_plugin;
 extern struct plugin status_bar_plugin;
 
-
 int stopWM;
 int maxChar;
 
@@ -86,9 +85,7 @@ int main(int argc,char * * argv)
     
     ini_CF_mount();
     ini_FM();
-
-    ini_sound_connection();
-    
+       
     iniMsgBox();
     iniEditBox();    
 
@@ -104,6 +101,7 @@ int main(int argc,char * * argv)
     clearScreen(COLOR_WHITE);
     
 
+    
     ini_status_bar(&status_bar_plugin);
 
     setTimerFreq(10);

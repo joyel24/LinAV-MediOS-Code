@@ -248,6 +248,25 @@ int CF_mod_is_connected(void)
     return state;
 }
 
+int powerOff_timer_on(void)
+{
+    doGenIoctl("/dev/avstate",AV_HALT_TIMOUT_ON,NULL,"Error turning on POWEROFF timer\n");
+    return 1;
+}
+
+int powerOff_timer_off(void)
+{
+    doGenIoctl("/dev/avstate",AV_HALT_TIMOUT_OFF,NULL,"Error turning off POWEROFF timer\n");
+    return 1;
+}
+
+int get_power_off_timer_state(void)
+{
+   int state;
+   doGenIoctl("/dev/avstate",AV_HALT_TIMOUT_STATE,&state,"Error getting POWEROFF state\n"); 
+   return state;
+}
+
 int CF_is_connected(void)
 {
     int state;

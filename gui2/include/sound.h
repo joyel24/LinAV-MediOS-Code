@@ -16,8 +16,6 @@
 
 #include "av3xx_common.h"
 
-
-int  ini_sound_connection(void);
 int  ini_mp3_playback   (struct mp3_play * mp3_p_data);
 void close_mp3_playback (void);
 int  start_playback     (void);
