@@ -55,7 +55,7 @@ powerGetStatusA:
 powerGetStatus:
         push {r1, r2, r3, r4, r5, r6, r7, lr}
 
-        mov r0, #0x90
+        mov r0, #0x90            @ 10010000
         mov r1, #0x00            @ no idea if this is anything
         ldr r2, =pgs
         mov r3, #2
@@ -67,64 +67,7 @@ powerGetStatus:
         lsl r0, #8
         ldrb r1, [r2, #1]
         orr r0, r1
-        pop {r1, r2, r3, r4, r5, r6, r7}
-        pop {r1}
-        bx r1
-        
-        @@ Hrm, not sure why it needs address... Doesn't seem to matter...
-        
-        
-        ldr r7, =i2cBaseAddress
-        ldrh r6, [r7, #i2cRegDR]
-        mov r5, #4
-        orr r6, r5
-        strh r6, [r7, #i2cRegDR]
-
-        ldrh r6, [r7, #i2cRegDR]
-        mov r5, #8
-        orr r6, r5
-        strh r6, [r7, #i2cRegDR]
-
-        ldrh r6, [r7, #i2cRegIN]
-        lsr r6, #3
-         bcc powerRE
-
-        ldrh r6, [r7, #i2cRegIN]
-        lsr r6, #4
-         bcc powerRE
-      
-        bl i2cStart
-
-        mov r0, #0x90               @ ==DEVICE==
-        mov r6, #1
-        orr r0, r6
-        bl i2cOutb
-        cmp r0, #0
-         bne powerRE
-        
-        bl i2cInb
-        mov r4, r0
-        
-        bl i2cAck
-
-        bl i2cInb
-        lsl r4, #8
-        orr r4, r0
-        
-        bl i2cAckEnd
-
-        bl i2cStop
-
-        mov r0, r4
-        pop {r1, r2, r3, r4, r5, r6, r7}
-        pop {r1}
-        bx r1
-        
-powerRE:
-        bl i2cStop
-
-        mov r0, #0
-        sub r0, #1
+        lsr r0, #4
         pop {r1, r2, r3, r4, r5, r6, r7}
         pop {r1}
         bx r1
