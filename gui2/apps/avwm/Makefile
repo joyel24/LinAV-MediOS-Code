@@ -22,10 +22,12 @@ all: $(TARGET)
 	@mkdir -p ../../build/avwm
 	@rm -f ../../build/avwm/avwm
 	@mv $(TARGET) ../../build/avwm/
-	@cp -f menu.cfg ../../build/avwm/
+ifeq ($(BUILD),X11)
+	@sed s%\\[CFG_PATH\\]%$(ROOTPATH)%g menu-x11.cfg > ../../build/avwm/menu.cfg
+else
+	@cp -f menu.cfg ../../build/avwm/menu.cfg
+endif
 	@rm -f *.gdb
-
-
 
 $(TARGET) : $(OBJS)
 	$(GCC) $(OBJS) -o $@  $(LDFLAGS)
