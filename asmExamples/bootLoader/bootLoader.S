@@ -78,7 +78,7 @@ waity:  sub r0, #1
         mov r2, #40
         callThumb r3, memMoveT
         callThumb2 r4, terminalPutsCT, msg6, 0xfbfb
-        
+
         callThumb2 r4, terminalPutsCT, msg100, 0xffff
         ldr r0, =bufferx
         mov r1, #1
