@@ -1153,9 +1153,10 @@ void init_settings_screen()
     RefreshSettings();
 }
 
+/*
 static int GetTime()
 {
-    struct tm tm;
+    struct av_tm tm;
     int fd;
 	int seconds = 0;
     char tmp[0];
@@ -1171,6 +1172,7 @@ static int GetTime()
 
 	return seconds;
 }
+*/
 
 /* check surrounding if an identical card is already there */
 int id_card_found(int pos, int new_card )
@@ -1285,9 +1287,9 @@ void init(void){
 
     readINI();
 
-	time = GetTime();
+    //time = GetTime();
 
-    srand(time);
+    srand(cops->getTick());
 
     cops->setFont(STD8X13);
     cops->putS(COLOR_BLACK, COLOR_WHITE, 40,70, "Generating matrix...");

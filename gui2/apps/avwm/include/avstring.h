@@ -15,10 +15,10 @@
 #define __AVSTRING_H
 
 void   ini_font         (int font);
-void   wmPutS           (int color, int bg_color,int x, int y, char *s);
-void   wmPutC           (int color, int bg_color,int x, int y, char s);
+void   wmPutS           (unsigned int color, unsigned int bg_color,int x, int y, unsigned char *s);
+void   wmPutC           (unsigned int color, unsigned int bg_color,int x, int y, unsigned char s);
 void   wmSetFont        (int font);
-void   wmgetStringS     (const unsigned char *str, int *w, int *h);
+void   wmgetStringS     (unsigned char *str, int *w, int *h);
 void   defaultFont      (void);
 void   debug            (char *fmt, ...);
 

@@ -354,10 +354,10 @@ void discover(int x, int y){
     }
     return;
 }
-
+/*
 static int GetTime()
 {
-   struct tm tm;
+   struct av_tm tm;
    int fd;
     int seconds = 0;
     char tmp[100];
@@ -373,7 +373,7 @@ static int GetTime()
 
     return seconds;
 }
-
+*/
 
 /* init not mine related elements of the mine field */
 void minesweeper_init(void){
@@ -386,9 +386,9 @@ void minesweeper_init(void){
     tiles_left=width*height;
     mine_num = 0;
 
-    time = GetTime();
+    //time = GetTime();
 
-    srand(time);
+    srand(cops->getTick());
 
     cops->putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
     cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");

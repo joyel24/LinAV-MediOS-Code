@@ -14,6 +14,6 @@
 #ifndef __MSGBOX_H
 #define __MSGBOX_H
 
-    int msgBox(char * msg);
+    int msgBox(unsigned char * msg);
     
 #endif

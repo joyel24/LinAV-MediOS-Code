@@ -17,7 +17,7 @@
 #define __ASM_ARCH_AV3XX_COMMON_H
 
 /* rtc */
-struct tm {
+struct av_tm {
     int tm_ms;
     int tm_sec;
     int tm_min;
@@ -76,8 +76,8 @@ struct av_peak {
 #define AV_LEVEL_IN0_IOC       _IOR(AV_OP_IOC_MAGIC, 9, int)
 #define AV_LEVEL_IN1_IOC       _IOR(AV_OP_IOC_MAGIC,10, int)
 
-#define AV_RTC_GET_TIME_IOC    _IOR(AV_OP_IOC_MAGIC,11, struct tm)
-#define AV_RTC_SET_TIME_IOC    _IOW(AV_OP_IOC_MAGIC,12, struct tm)
+#define AV_RTC_GET_TIME_IOC    _IOR(AV_OP_IOC_MAGIC,11, struct av_tm)
+#define AV_RTC_SET_TIME_IOC    _IOW(AV_OP_IOC_MAGIC,12, struct av_tm)
 
 #define AV_GET_MOUSE_IOC       _IOR(AV_OP_IOC_MAGIC,13, struct av3xx_pos)
 #define AV_SET_MOUSE_IOC       _IOW(AV_OP_IOC_MAGIC,14, struct av3xx_pos)

@@ -153,7 +153,7 @@ struct client_operations * cops;
 /***************
  * Main function
  **************/
-int matrix(void)
+void matrix(void)
 {
     for(j=0; j<16; j++)
     {

@@ -54,9 +54,9 @@ struct client_operations {
     
     int  (*clearEventQueue)   (void);    
     void (*registerPlugin)    (void (*evtHandle),int flag);    
-    void (*pack)              (void (*loopFct));
+    void (*pack)              (void (*loopFct)(void));
     void (*stop_me)           (void);    
-    int  (*release_app)       (void);
+    void (*release_app)       (void);
     
     void (*showSBar)          (void);
     void (*hideSBar)          (void);
@@ -102,10 +102,10 @@ struct client_operations {
     int  (*newLine)             (void);
     int  (*curLineNum)          (void);
     
-    void (*msgBox)              (char *);
+    int  (*msgBox)              (unsigned char * msg);
     
     int  (*getTick)             (void);
-    int  (*getTime)             (struct tm * date_time);
+    int  (*getTime)             (struct av_tm * date_time);
     int  (*getTimeS)            (char * timeSt);
     
 };

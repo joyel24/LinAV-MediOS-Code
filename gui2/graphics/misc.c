@@ -18,7 +18,7 @@
 
 int getTimeS(char * timeSt)
 {    
-    struct tm date_time={0,0,0,0,0,0,0,0};
+    struct av_tm date_time={0,0,0,0,0,0,0,0};
 
     if(getTime(&date_time))
     {
@@ -33,7 +33,7 @@ int getTimeS(char * timeSt)
     }
 }
 
-int getTime(struct tm * date_time)
+int getTime(struct av_tm * date_time)
 {
 	int fd;
         

@@ -490,8 +490,8 @@ static void viewer_draw(int col)
     unsigned char *line_end;
     unsigned char c;
     unsigned char scratch_buffer[MAX_COLUMNS + 1];
-	 char tmp[20];
-	 char text[200];
+    char tmp[20];
+    char text[200];
 
     /* If col==-1 do all calculations but don't display */
     if (col != -1)

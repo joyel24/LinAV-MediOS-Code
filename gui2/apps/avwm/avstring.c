@@ -70,7 +70,7 @@ void ini_font(int font)
     wmSetFont(font);
 }
 
-void wmgetStringS(const unsigned char *str, int *w, int *h)
+void wmgetStringS(unsigned char *str, int *w, int *h)
 {
     FONT_ID font=getFont();
     if(font != plugin_font)
@@ -83,7 +83,7 @@ void wmgetStringS(const unsigned char *str, int *w, int *h)
         getStringS(str,w,h);
 }
 
-void wmPutS(int color, int bg_color,int x, int y, char *s)
+void wmPutS(unsigned int color, unsigned int bg_color,int x, int y,unsigned  char *s)
 {
     FONT_ID font=getFont();
     if(font != plugin_font)
@@ -96,7 +96,7 @@ void wmPutS(int color, int bg_color,int x, int y, char *s)
         putS(color,bg_color,x,y,s);
 }
 
-void wmPutC(int color, int bg_color,int x, int y, char s)
+void wmPutC(unsigned int color, unsigned int bg_color,int x, int y,unsigned  char s)
 {
     FONT_ID font=getFont();
     if(font != plugin_font)

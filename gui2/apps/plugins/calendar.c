@@ -155,7 +155,7 @@ static int calc_weekday( struct shown *shown )
 static void calendar_init()
 {
    int w,h;
-   struct tm tm;
+   struct av_tm tm;
    int fd;
 	char tmp[100];
 
@@ -170,9 +170,10 @@ static void calendar_init()
       printf("Error getting time and date\n");
    }
    close(fd);*/
+   
    cops->getTime(&tm);
 
-	sprintf(tmp, "%02d",tm.tm_wday);
+/*	sprintf(tmp, "%02d",tm.tm_wday);
    today.wday = atoi(tmp);
 	sprintf(tmp, "%04d",tm.tm_year);
    today.year = atoi(tmp);//%100;
@@ -180,11 +181,13 @@ static void calendar_init()
    today.mon = atoi(tmp);
 	sprintf(tmp, "%02d",tm.tm_mday);
    today.mday = atoi(tmp);
+*/
 
-   shown.mday = today.mday;
-   shown.mon  = today.mon;
-   shown.year = today.year;
-   shown.wday = today.wday;
+
+   shown.mday = today.mday = tm.tm_mday;
+   shown.mon  = today.mon  = tm.tm_mon;
+   shown.year = today.year = tm.tm_year;
+   shown.wday = today.wday = tm.tm_wday;
 
    shown.firstday = calc_weekday(&shown);
    leap_year = is_leap_year(shown.year);

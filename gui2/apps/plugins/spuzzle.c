@@ -615,9 +615,10 @@ void showTurns()
     cops->setFont(STD6X9);
 }
 
+/*
 static int GetTime()
 {
-    struct tm tm;
+    struct av_tm tm;
     int fd;
 	int seconds = 0;
     char tmp[0];
@@ -634,6 +635,7 @@ static int GetTime()
 
 	return seconds;
 }
+*/
 
 coord GetXY(int pos)
 {
@@ -751,12 +753,12 @@ int checkOrder()
 /* init*/
 void init(void){
     int i,j;
-	int time = 0;
-	char tmp[20];
+    int time = 0;
+    char tmp[20];
 
-	time = GetTime();
+//	time = GetTime();
 
-    srand(time);
+    srand(cops->getTick());
 
     cops->setFont(STD8X13);
     cops->putS(COLOR_BLACK, COLOR_WHITE, 50,80, "Generating matrix...");

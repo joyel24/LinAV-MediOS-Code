@@ -17,7 +17,7 @@
 #include "colordef.h"
 
 
-int msgBox(char * msg)
+int msgBox(unsigned char * msg)
 {
     int w=0,h=0;
     
