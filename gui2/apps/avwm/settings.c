@@ -43,28 +43,29 @@ struct SettingsDataT {
     int  changed;
 };
 
-#define CNT_SETTINGS_ENTRIES 3
+#define CNT_SETTINGS_ENTRIES 4
 struct SettingsDataT sData[CNT_SETTINGS_ENTRIES] = { {0, 5, 30, "Key Repeat",         1, 10, 5, 1, 0},
                                                      {0, 5, 44, "Key Freq",           0,  6, 5, 0, 0},
-                                                     {0, 5, 72, "LCD Timeout",        1, 10, 1, 0, 0} };
+                                                     {0, 5, 58, "LCD Bat Timeout",    1, 10, 1, 0, 0},
+                                                     {0, 5, 72, "LCD DC Timeout",     1, 10, 1, 0, 0} };
 
 
-unsigned char SettingsSlider[13][6] =
-{   { 4, 4, 4, 4, 4, 4},
-    { 4, 4, 4, 4, 4, 4},
-    { 9, 9, 4, 4, 9, 9},
-    { 9, 9, 4, 4, 9, 9},
-    { 9, 9, 4, 4, 9, 9},
-    { 9, 9, 4, 4, 9, 9},
-    { 9, 9, 4, 4, 9, 9},
-    { 9, 9, 4, 4, 9, 9},
-    { 9, 9, 4, 4, 9, 9},
-    { 9, 9, 4, 4, 9, 9},
-    { 9, 9, 4, 4, 9, 9},
-    { 4, 4, 4, 4, 4, 4},
-    { 4, 4, 4, 4, 4, 4},
+unsigned char SettingsSlider[13][2] =
+{   {12,12},
+    {12,12},
+    {12,12},
+    {12,12},
+    {12,12},
+    {12,12},
+    {12,12},
+    {12,12},
+    {12,12},
+    {12,12},
+    {12,12},
+    {12,12},
+    {12,12},
 };
-BITMAP SettingsSliderBitmap = {(unsigned int) SettingsSlider, 6, 13, 0, 0};
+BITMAP SettingsSliderBitmap = {(unsigned int) SettingsSlider, 2, 13, 0, 0};
 
 
 int GetActiveSetting()
@@ -94,27 +95,27 @@ void SettingsEvtLoop(void)
 
 void GetSettings()
 {
-    CREATE_TIMER_VAR(lcd_timeout);
-
     // get actual settings
     sData[0].value = get_mouseRepeat();
     sData[1].value = get_mouseFreq();
 
-    sData[2].value = GET_VAL_TIMER(lcd_timeout);
+    sData[2].value = get_TimeOutParam (AV_TIMER_ON_BAT);
+    sData[3].value = get_TimeOutParam (AV_TIMER_ON_DC);
+
 
     set_mouseParam(6,3); // set to 6,3 for the settings screen only
 }
 
 void SetSettings()
 {
-    CREATE_TIMER_VAR(lcd_timeout);
-
     if((sData[0].changed) || (sData[1].changed))
         set_mouseParam(sData[1].value,sData[0].value);
-/*
+
     if(sData[2].changed)
-        SET_VAL_TIMER(AV_LCD_SET_TIMOUT,sData[2].value,lcd_timeout)
-*/
+        set_TimeOutParam(AV_TIMER_ON_BAT, sData[2].value);
+
+    if(sData[3].changed)
+        set_TimeOutParam(AV_TIMER_ON_DC, sData[3].value);
 }
 
 /* events */

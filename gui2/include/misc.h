@@ -25,6 +25,9 @@ int   set_mouseParam    (int freq, int repeat);
 int   get_mouseFreq     ();
 int   get_mouseRepeat   ();
 
+int   set_TimeOutParam  (int state, int value);
+int   get_TimeOutParam  (int state);
+
 int   getBat            (void);
 
 int   getPwr            (void);

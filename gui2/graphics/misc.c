@@ -149,7 +149,7 @@ int get_mouseRepeat()
 
     if(ioctl(fd,AV_GET_MOUSE_PARAM,&param)<0)
     {
-      printf("Error setting mouse params\n");
+      printf("Error getting mouse params\n");
       close(fd);
       return 0;
     }
@@ -199,7 +199,7 @@ int getPwr(void)
         close(fd);
         return 0;
     }
-    
+
     close(fd);
     
     return plug;
@@ -266,7 +266,7 @@ int setUSB(int state)
         usb=AV_USB_IOC_ENABLE;
     else
         usb=AV_USB_IOC_DISABLE;
-    
+
     if(ioctl(fd,usb,NULL)<0)
     {
         printf("Error setting usb state:%d\n",state);
@@ -366,7 +366,7 @@ int processFM_cmd(int cmd,void * param)
         close(fd);
         return 0;
     }
-    
+
     close(fd);
     return 1;
 }
@@ -409,4 +409,54 @@ void print_data(char * data,int length)
     printf(" ] ");
     print_nonhexa(str);
     printf("\n");
+}
+
+int set_TimeOutParam(int state, int value)
+{
+   int fd = 0;
+    struct timer_val param;
+    param.num = state;
+    param.val = value;
+
+   fd=open("/dev/avstate",O_RDONLY | O_NONBLOCK);
+   if (fd < 0)
+    {
+      printf("Can't open /dev/avstate\n");
+        return fd;
+   }
+
+    if(ioctl(fd,AV_LCD_SET_TIMOUT,&param)<0)
+    {
+      printf("Error setting state params\n");
+      close(fd);
+      return 0;
+   }
+   close(fd);
+
+    return 1;
+}
+
+int get_TimeOutParam(int state)
+{
+    int fd = 0;
+    struct timer_val param;
+    param.num = state;
+    param.val = 0;
+
+    fd=open("/dev/avstate",O_RDONLY | O_NONBLOCK);
+    if (fd < 0)
+    {
+      printf("Can't open /dev/avstate\n");
+        return fd;
+    }
+
+    if(ioctl(fd,AV_LCD_GET_TIMOUT,&param)<0)
+    {
+      printf("Error getting state params\n");
+      close(fd);
+      return 0;
+    }
+    close(fd);
+
+    return param.val;
 }
