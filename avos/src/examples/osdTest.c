@@ -3,23 +3,19 @@
 #include <buttons.h>
 #include <fonts.h>
 
-    static int pal32[2] = {
-        0x8080c0e0, 0xffffffff
-    };
-    static int pal16[2] = {
-        0x0101, 0xffff
-    };
+    static int pal32[2] = {0x8080c0e0, 0xffffffff};
+    static int pal16[2] = {0x0101, 0xffff};
 
     struct graphicsBuffer screenVideo;
     struct graphicsBuffer screenVideo2;
     struct graphicsBuffer screenBitmap;
     struct graphicsBuffer screenBitmap2;
     
-    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-    struct graphicsBuffer sprite5_8 = {0, 1, 5, 8, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-    struct graphicsBuffer sprite7_13 = {0, 1, 7, 13, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-    struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-    struct graphicsBuffer spriteCursive = {0, 2, 9, 15, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+    static struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+    static struct graphicsBuffer sprite5_8 = {0, 1, 5, 8, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+    static struct graphicsBuffer sprite7_13 = {0, 1, 7, 13, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+    static struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+    static struct graphicsBuffer spriteCursive = {0, 2, 9, 15, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 
     int cursor[256] = {
         0xbb00, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -165,6 +161,7 @@ int main() {
     graphicsBoxf(&screenBitmap, 0, 0, 160, 120, 0x0000);
     graphicsBoxf(&screenBitmap, 20, 20, 120, 80, 0x0101);
     graphicsBoxf(&screenBitmap2, 0, 0, 40, 32, 0x0404);
+
     
     graphicsString(&screenBitmap, 2, 20, &sprite4_6, std4x6_, 5, 1, "abcdefghijklmnop");
 
@@ -174,6 +171,11 @@ int main() {
     
     
     graphicsString(&screenVideo, 2, 120, &spriteShadow, shadow_, 13, 0, "ABC DEF GHI JKL MNOPQ");
+    graphicsString(&screenVideo, 2, 48, &sprite5_8, std5x8_, 6, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
+
+    //sprite5_8.offset = std5x8_[54];
+    //graphics32Sprite(&screenVideo, 2, 48, &sprite5_8);
+
     graphicsString(&screenVideo, 2, 48, &sprite5_8, std5x8_, 6, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
     pal32[1] = 0x50503020;
     graphicsString(&screenVideo, 100, 30, &sprite7_13, std7x13_, 0, 14, "Font drawing!");

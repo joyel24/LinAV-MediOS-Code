@@ -6,6 +6,10 @@
 #include <ata.h>
 #include <mas.h>
 
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
+
     struct graphicsBuffer screenBitmap;
     static int pal16[2] = {0x0000, 0xffff};
 
@@ -15,7 +19,7 @@ char masVer[] = "Mas Version: xxxxxxxx";
 char masReg[] = "xxxxxxxx\n";
     
 int main() {
-    int c, v, b;
+    unsigned int c, v, b;
     
     osdInit();
 
@@ -69,18 +73,44 @@ int main() {
     uartOuts(masReg);
     
     uartOuts("Done write...\n");
+
+    graphicsString(&screenBitmap, 0, 120, &sprite8_13, std8x13_, 9, 0,
+                "IN  L");
+    graphicsString(&screenBitmap, 0, 134, &sprite8_13, std8x13_, 9, 0,
+                "IN  R");
+    graphicsString(&screenBitmap, 0, 148, &sprite8_13, std8x13_, 9, 0,
+                "OUT L");
+    graphicsString(&screenBitmap, 0, 162, &sprite8_13, std8x13_, 9, 0,
+                "OUT R");
     
-    for (v=0;v<0x40;v++) {
-        //c = masReadReg(v);
-        c = masReadCodecReg(v);
-        stringPutHex(masReg, c, 8);
-        uartOuts(masReg);
-    //graphicsString(&screenBitmap, 0, 14*2, &sprite8_13, std8x13_, 9, 0,
-    //            masReg);
-    }        
     while(1) {
-            b = buttonsGetStatus();
-            if (b & BUTTONS_AV300_OFF) return;
+        b = buttonsGetStatus();
+        if (b & BUTTONS_AV300_OFF) return;
+
+        b = (masReadCodecReg(0x000a) & 0x7fff);
+        v = (b * (320-54)) >> 15;
+        b = 320-54-v;
+        if (b>0) graphicsBoxf(&screenBitmap, 54 + v, 124, b, 6, 0x0000);
+        if (v>0) graphicsBoxf(&screenBitmap, 54, 124, v, 6, 0x0202);
+        
+        b = (masReadCodecReg(0x000b) & 0x7fff);
+        v = (b * (320-54)) >> 15;
+        b = 320-54-v;
+        if (b>0) graphicsBoxf(&screenBitmap, 54 + v, 138, b, 6, 0x0000);
+        if (v>0) graphicsBoxf(&screenBitmap, 54, 138, v, 6, 0x0202);
+
+        b = (masReadCodecReg(0x000c) & 0x7fff);
+        v = (b * (320-54)) >> 15;
+        b = 320-54-v;
+        if (b>0) graphicsBoxf(&screenBitmap, 54 + v, 152, b, 6, 0x0000);
+        if (v>0) graphicsBoxf(&screenBitmap, 54, 152, v, 6, 0x0202);
+
+        b = (masReadCodecReg(0x000d) & 0x7fff);
+        v = (b * (320-54)) >> 15;
+        b = 320-54-v;
+        if (b>0) graphicsBoxf(&screenBitmap, 54 + v, 166, b, 6, 0x0000);
+        if (v>0) graphicsBoxf(&screenBitmap, 54, 166, v, 6, 0x0202);
+        
     }
 
 }

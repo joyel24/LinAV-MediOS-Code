@@ -56,6 +56,7 @@ graphicsInc = 1
         GRAPHICS_ROUTINE_BOXF       =   0x0002
         GRAPHICS_ROUTINE_SPRITE     =   0x0003
 
+        .align 4
 graphicsRoutines:
         .word graphics1SetPixel,    graphics2SetPixel
         .word graphics4SetPixel,    graphics8SetPixel
@@ -112,7 +113,7 @@ graphicsFindRoutine:
         ldr r7, [r6, r7]
         pop {r6}
         bx lr
-                    
+  
 
 @ ------------------------------------------------------------------------------
 @ graphicsSetPixel(r0->bufferDef, r1=x, r2=y, r3=c)
@@ -125,7 +126,7 @@ graphicsSetPixel:
         mov r7, #GRAPHICS_ROUTINE_SETPIXEL        
         bl graphicsFindRoutine
         mov lr, pc
-        mov pc, r7    
+        mov pc, r7
         pop {r1, r2, r3, r7}
         pop {r1}
         bx r1
@@ -143,7 +144,7 @@ graphicsGetPixel:
         mov r7, #GRAPHICS_ROUTINE_GETPIXEL
         bl graphicsFindRoutine
         mov lr, pc
-        mov pc, r7    
+        mov pc, r7
         pop {r1, r2, r3, r7}
         pop {r1}
         bx r1
