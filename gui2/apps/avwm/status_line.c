@@ -19,32 +19,16 @@
 #include "avevents.h"
 #include "events.h"
 #include "plugin.h"
+#include "icons.h"
 
 #define BG_COLOR  COLOR_LIGHT_BLUE
 #define TXT_COLOR COLOR_DARK_GREY
+#define TIME_COLOR COLOR_BLACK
 #define BATTERY_REFRESH_VALUE 20
 
 int batteryRefresh=0;
 int pwrState=0;
 int usbState=0;
-
-const unsigned char usb[6][15] = {
-{38,38,38,38,38,01,01,01,01,01,01,38,38,38,38},
-{38,38,38,38,01,01,01,01,01,01,01,01,01,01,01},
-{01,01,01,01,01,01,01,01,01,01,01,38,01,38,01},
-{01,01,01,01,01,01,01,01,01,01,01,38,01,38,01},
-{38,38,38,38,01,01,01,01,01,01,01,01,01,01,01},
-{38,38,38,38,38,01,01,01,01,01,01,38,38,38,38} };
-const unsigned char power[6][13] = {
-{38,38,38,38,38,01,01,01,01,38,38,38,38},
-{38,38,38,38,01,01,01,01,01,01,01,01,01},
-{01,01,01,01,01,01,01,01,01,38,38,38,38},
-{01,01,01,01,01,01,01,01,01,38,38,38,38},
-{38,38,38,38,01,01,01,01,01,01,01,01,01},
-{38,38,38,38,38,01,01,01,01,38,38,38,38} };
-
-BITMAP usbIcon = {(unsigned int) usb, 15, 6, 0, 0};
-BITMAP powerIcon = {(unsigned int) power, 13, 6, 0, 0};
 
 /* draw the current time */
 void drawTime(void)
@@ -54,7 +38,7 @@ void drawTime(void)
     if(getTimeS(timeSt))
     {
         //fillRect(BG_COLOR,150,2,130,11);
-        putS(TXT_COLOR,BG_COLOR,100,3,timeSt);
+        putS(TIME_COLOR,BG_COLOR,135,3,timeSt);
     }
 
 }
@@ -96,10 +80,10 @@ void drawBat(void)
 
         //fprintf(stderr,"[BAT] P=%d,C=%d,L=%d\n",power,color,level);
 
-        drawRect(COLOR_BLACK,289,2,22,10);
-        fillRect(COLOR_BLACK,311,4,3,6);
-        fillRect(BG_COLOR,290,3,20,8);
-        fillRect(color,290,3,level,8);
+        drawRect(COLOR_BLACK,293,2,22,10);
+        fillRect(COLOR_BLACK,315,4,3,6);
+        fillRect(BG_COLOR,294,3,20,8);
+        fillRect(color,294,3,level,8);
     }
     else
         fprintf(stderr,"[BAT] error getting bat level\n");
@@ -109,14 +93,19 @@ void drawBat(void)
 void drawStatus(void)
 {
     if(usbState)
-        drawBITMAP(&usbIcon, 250, 4);
+        drawBITMAP(&usbIcon, 260, 4);
     else
-        fillRect(BG_COLOR,250,4,15,6);
+        fillRect(BG_COLOR,260,4,15,6);
 
     if(pwrState)
-        drawBITMAP(&powerIcon, 273, 4);
+        drawBITMAP(&powerIcon, 278, 4);
     else
-        fillRect(BG_COLOR,273,4,15,6);
+        fillRect(BG_COLOR,278,4,15,6);
+}
+
+void drawLogo(void)
+{
+    drawBITMAP(&linavLogo, 2, 2);
 }
 
 void drawGui(void)
@@ -124,7 +113,7 @@ void drawGui(void)
     int w = 0;
     int h = 0;
 
-    char myName[]="AvWm xx.xx";
+    char avwm[10];
 
     getStringS("M", &w, &h);
 
@@ -137,13 +126,14 @@ void drawGui(void)
     drawLine(COLOR_LIGHT_GREY,0,h+7,319,h+7);
 
     /* show version */
-    sprintf(myName,"AvWm %d.%d",MAJOR_V,MINOR_V);
-    putS(TXT_COLOR,BG_COLOR,2,3,myName);
+    sprintf(avwm,"AvWm %d.%d",MAJOR_V,MINOR_V);
+    putS(TXT_COLOR,BG_COLOR,75,3,avwm);
 
     /* and time, and battery */
     drawTime();
     drawBat();
     drawStatus();
+    drawLogo();
 }
 
 /* events */
