@@ -42,6 +42,7 @@ struct browser_data {
     int y_start;
     
     int width;
+    int height;
     
     int entry_height;
     

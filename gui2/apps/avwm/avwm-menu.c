@@ -95,7 +95,7 @@ int  menuStatus(void)  {return menu_plugin.allowed;}
 extern int stopWM;
 void do_off(void * data)
 {
-    menuEvtHandler(BTN_LEFT); /* send a Btn left evt to simulate an up */    
+    menuEvtHandler(EVT_MENU_UP_LVL); /* send a evt to do an up lvl */
 }
 
 void do_on(void * data)
@@ -168,7 +168,7 @@ void do_F3(void * data) // switch to usb
 void mk_submenu_str(void * data,char * str)
 {
     struct cfg_menu * cfg_data = (struct cfg_menu *)data;
-    if(cfg_data->type == TYPE_STD)
+    if(cfg_data->type == TYPE_STD && menu_cfg.isTxtMenu)
         sprintf(str,"> %s",cfg_data->name);
     else
         sprintf(str,"%s",cfg_data->name);
@@ -177,7 +177,10 @@ void mk_submenu_str(void * data,char * str)
 void mk_item_str(void * data,char * str)
 {
     struct cfg_menu * cfg_data = (struct cfg_menu *)data;
-    sprintf(str,"x %s",cfg_data->name);
+    if(menu_cfg.isTxtMenu)
+        sprintf(str,"x %s",cfg_data->name);
+    else
+        sprintf(str,"%s",cfg_data->name);
 }
 
 void avwm_menuEvtHandler(int evt)

@@ -14,7 +14,16 @@
 #ifndef __ICONS_H
 #define __ICONS_H
 
+#include "graphics.h"
+
 #define NEED_ICON(icon)   extern BITMAP icon;
+
+struct icon_elem {
+    char * name;
+    BITMAP bmap_data;
+    unsigned char * data;
+    struct icon_elem * nxt;
+};
 
 /* icon list
 - linavLogo

@@ -63,6 +63,7 @@ struct browser_data realData = {
     y_start         : 18,
     
     width           : 310,
+    height          : 212,
     entry_height    : 10,
     
     draw_bottom_status : draw_bottom_status,

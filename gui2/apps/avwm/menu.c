@@ -24,7 +24,7 @@
 #include "parse_cfg.h"
 #include "icons.h"
 
-#include "folder_icon.h"
+//#include "folder_icon.h"
 
 #define MAXPOS       10
 #define TITLE_OFFSET  2
@@ -32,7 +32,7 @@
 #define CHG_PLANE     {if(current_menu->useOwnDisp) setPlane(BMAP2);}
 #define RESTORE_PLANE  {if(current_menu->useOwnDisp) setPlane(BMAP1);}
 
-int nselect;
+int nselect,iselect,jselect;
 struct menu_item *pos;
 struct menu_item *pselect;
 
@@ -74,26 +74,29 @@ int dispName_norm(struct menu_item * item,int x,int y,int clear,int selected)
 
 //NEED_ICON(dirBitmap)
 NEED_ICON(textBitmap)
+BITMAP * folder_icon;
 
 int item_width=70;
 int item_height=70;
+int icon_zone_height=60;
 int space_btw_items=4;
 
-int dispName_icon(struct menu_item * item,int i,int j,int clear,int selected)
+int dispName_icon(struct menu_item * item,int i,int j,int clear_txt,int clear_icon,int selected)
 {
     int color;
     int x,y;
+    int w,h;
     
     BITMAP * icon;
     
     x=current_menu->dx+i*(item_width+space_btw_items);
-    y=current_menu->dy+j*(item_height+space_btw_items);
+    y=current_menu->dy+TITLE_OFFSET+j*(item_height+space_btw_items);
     
     if(item->sub)
     {
         current_menu->submenu_str(item->data,tmp);
         color=current_menu->sub_color; /* => submenu */
-        icon=&folder_icon;
+        icon=folder_icon;
     }
     else
     {
@@ -104,15 +107,24 @@ int dispName_icon(struct menu_item * item,int i,int j,int clear,int selected)
     
     CHG_PLANE
        
-    if(clear)
-        fillRect(current_menu->bg_color,x, y , item_width, item_height);
-
-    drawBITMAP(icon,x+(item_width-icon->width)/2,y);
-        
+    if(clear_icon)
+    {
+        fillRect(current_menu->bg_color,x, y , item_width, icon->height);
+        if(icon->width<=item_width && icon->height<=icon_zone_height)
+            drawBITMAP(icon,x+(item_width-icon->width)/2,y+(icon_zone_height-icon->height)/2);
+    }
+    
+    if(clear_txt)
+    {
+        fillRect(current_menu->bg_color,x, y + icon_zone_height+1, item_width,item_height-(icon_zone_height+1));
+    }
+    
+       getStringS(tmp, &w, &h); 
+    
     if(selected)
-        putS(color, current_menu->select_color,x, y+icon->height+1, tmp);
+        putS(color, current_menu->select_color,x+(item_width-w)/2, y+icon_zone_height+1, tmp);
     else
-        putS(color, current_menu->bg_color,x, y+icon->height+1, tmp);
+        putS(color, current_menu->bg_color,x+(item_width-w)/2, y+icon_zone_height+1, tmp);
     RESTORE_PLANE
     return 1;
 }
@@ -129,7 +141,7 @@ void dispAllName_norm(struct menu_item * pos,int nselect)
     }
 }
 
-int MaxI=4;
+int MaxI=3;
 int MaxJ=3;
 
 void dispAllName_icon(struct menu_item * pos,int nselect)
@@ -139,7 +151,7 @@ void dispAllName_icon(struct menu_item * pos,int nselect)
     int i=0,j=0;
 
     for (ptr = pos; ptr !=NULL && j<MaxJ; ptr=ptr->nxt) {
-        dispName_icon(ptr,i,j,0,nbAff==nselect);
+        dispName_icon(ptr,i,j,0,1,nbAff==nselect);
         i++;
         if(i>=MaxI)
         {
@@ -157,9 +169,17 @@ void dispAName_norm(struct menu_item * pos, int posY, int clear, int selected)
     dispName_norm(pos,current_menu->dx,TITLE_OFFSET + posY*(h+1)+ current_menu->dy,clear,selected);
 }
 
+extern struct icon_elem * icon_list_head;
+
 void start_menu(struct menu_data * client_menu)
 {    
     current_menu=client_menu;
+    
+    if(!current_menu->isTxtMenu && !icon_list_head)
+    {
+        loadIcon("folder.ico");
+        folder_icon=&icon_list_head->bmap_data;
+    }
     
     if(current_menu->useOwnDisp)
     {
@@ -199,7 +219,10 @@ void normMenu_handler(int evt)
             if(nselect==0) // moving out of current window
             {
                 if(!pos->prev) // we are at the beg => nothing to change
-                    break; // to do rolling menu code to change is here
+                {
+                    
+                    break;
+                }
 
                 pos=pos->prev;
                 pselect=pos;
@@ -259,6 +282,7 @@ void normMenu_handler(int evt)
                 current_menu->right_action(pselect->data);
             }
             break;
+        case EVT_MENU_UP_LVL:
         case BTN_LEFT:
             if(pselect->up)
             {
@@ -307,21 +331,221 @@ void normMenu_handler(int evt)
     }
 }
 
+struct menu_item * getPrevLine(struct menu_item * ptr)
+{
+    int var=0;
+    while(ptr->prev && var<MaxI)
+    {
+        ptr=ptr->prev;
+        var++;
+    }
+    if(var!=MaxI)
+        return NULL;
+    else
+        return ptr;
+}
+
+struct menu_item * getMaxPrevLine(struct menu_item * ptr)
+{
+    int var=0;
+    while(ptr->prev && var<MaxI)
+    {
+        ptr=ptr->prev;
+        var++;
+    }
+    return ptr;
+}
+
+struct menu_item * getNxtLine(struct menu_item * ptr)
+{
+    int var=0;
+    while(ptr->nxt && var<MaxI)
+    {
+        ptr=ptr->nxt;
+        var++;
+    }
+    if(var!=MaxI)
+        return NULL;
+    else
+        return ptr;
+}
+
+struct menu_item * getMaxNxtLine(struct menu_item * ptr)
+{
+    int var=0;
+    while(ptr->nxt && var<MaxI)
+    {
+        ptr=ptr->nxt;
+        var++;
+    }
+    return ptr;
+}
+
 void iconMenu_handler(int evt)
 {
-    int var;
+   int var;
+   struct menu_item * ptr;
    switch(evt) {
         case BTN_UP:
-            
+            if(jselect==0) /* we are at the top of screen*/
+            {
+                if(!pos->prev) /* we already display the first line */
+                    break; /* roll should be done here */
+                
+                /* deselect previsous */
+                dispName_icon(pselect,iselect,jselect,1,0,0);            
+                
+                ptr=getPrevLine(pos);
+                
+                if(ptr) /* we are one line up */
+                {
+                    pselect=getPrevLine(pselect);
+                    pos=ptr;
+                    CHG_PLANE
+                    scrollWindowVert(current_menu->bg_color, current_menu->dx, current_menu->dy,
+                                    (item_width+space_btw_items)*MaxI,(item_height+space_btw_items)*MaxJ,
+                                    item_height+space_btw_items,0);
+                    RESTORE_PLANE
+                    for(var=0;var<MaxI;var++)
+                    {
+                        if(var==iselect)
+                        {
+                            dispName_icon(ptr,var,jselect,1,1,1);
+                            pselect=ptr;
+                        }
+                        else
+                            dispName_icon(ptr,var,jselect,1,1,0);
+                        ptr=ptr->nxt;
+                    }
+                        
+                }
+                else /* not a complete line => redraw everything */
+                {
+                    pos=pselect=getMaxPrevLine(pos);
+                    CHG_PLANE
+                    fillRect(current_menu->bg_color,0 , current_menu->dy,
+                                current_menu->width, current_menu->height-current_menu->dy);
+                    RESTORE_PLANE
+                    iselect=jselect=0;
+                    dispAllName_icon(pos,0);
+                }
+            }
+            else
+            {
+                dispName_icon(pselect,iselect,jselect,1,0,0);
+                jselect--;
+                pselect=getPrevLine(pselect);
+                dispName_icon(pselect,iselect,jselect,1,0,1);                
+            }
             break;
         case BTN_DOWN:
-            
+            if(jselect==(MaxJ-1) || !getNxtLine(pselect)) /* we are at the bottom of screen*/
+            {
+                ptr=pselect;
+                for(var=iselect;var>0;var--)
+                    ptr=ptr->prev;
+                    
+                ptr=getNxtLine(ptr);
+                if(!ptr) /* we are already at the end of  */
+                    break; 
+                dispName_icon(pselect,iselect,jselect,1,0,0);
+                CHG_PLANE
+                scrollWindowVert(current_menu->bg_color, current_menu->dx, current_menu->dy,
+                                (item_width+space_btw_items)*MaxI,(item_height+space_btw_items)*MaxJ,
+                                item_height+space_btw_items,1);
+                RESTORE_PLANE
+                pos=getNxtLine(pos);
+                
+                pselect=NULL;
+                for(var=0;var<MaxI;var++)
+                {
+                    if(var==iselect)
+                    {
+                        dispName_icon(ptr,var,jselect,1,1,1);
+                        pselect=ptr;                        
+                    }
+                    else
+                        dispName_icon(ptr,var,jselect,1,1,0);
+                    if(ptr->nxt==NULL)
+                    {
+                        break;
+                    }
+                    ptr=ptr->nxt;
+                }
+                
+                if(pselect==NULL)
+                {
+                    pselect=ptr;
+                    iselect=var;
+                    dispName_icon(pselect,var,jselect,1,0,1);
+                }
+                
+            }
+            else
+            {
+                dispName_icon(pselect,iselect,jselect,1,0,0);
+                jselect++;
+                pselect=getNxtLine(pselect);
+                dispName_icon(pselect,iselect,jselect,1,0,1);
+            }
             break;
         case BTN_RIGHT:
-            
+            if(iselect==(MaxI-1) || pselect->nxt==NULL) /* roll to start of line */
+            {
+                dispName_icon(pselect,iselect,jselect,1,0,0);
+                while(pselect->prev != NULL && iselect!=0)
+                {
+                    pselect=pselect->prev;
+                    iselect--;
+                }
+                dispName_icon(pselect,iselect,jselect,1,0,1);
+            }
+            else
+            {
+                dispName_icon(pselect,iselect,jselect,1,0,0);
+                pselect=pselect->nxt;
+                iselect++;
+                dispName_icon(pselect,iselect,jselect,1,0,1);
+            }
             break;
         case BTN_LEFT:
-            
+            if(iselect==0) /* roll to start of line */
+            {
+                dispName_icon(pselect,iselect,jselect,1,0,0);
+                while(pselect->nxt != NULL && iselect!=(MaxI-1))
+                {
+                    pselect=pselect->nxt;
+                    iselect++;
+                }
+                dispName_icon(pselect,iselect,jselect,1,0,1);
+            }
+            else
+            {
+                dispName_icon(pselect,iselect,jselect,1,0,0);
+                pselect=pselect->prev;
+                iselect--;
+                dispName_icon(pselect,iselect,jselect,1,0,1);
+            }
+            break;
+        case EVT_MENU_UP_LVL:        
+            if(pselect->up)
+            {
+                if(pos->up)
+                {
+                    if(pos->up->up)
+                        pos=pos->up->up;    
+                    else
+                        pos=current_menu->root;
+                    iselect=jselect=0;
+                    pselect=pos;
+                    CHG_PLANE
+                    fillRect(current_menu->bg_color,current_menu->dx, current_menu->dy,
+                                current_menu->width-current_menu->dx,current_menu->height-current_menu->dy);
+                    RESTORE_PLANE
+                    dispAllName_icon(pos,0);
+                    clearEventQueue();
+                }
+            }
             break;
         case EVT_REDRAW:        
             CHG_PLANE
@@ -330,14 +554,29 @@ void iconMenu_handler(int evt)
             RESTORE_PLANE
             pos=current_menu->root;
             pselect=current_menu->root;
-            nselect=0;
-            dispAllName_icon(pos,nselect);
+            iselect=jselect=0;
+            dispAllName_icon(pos,0);
             break;
         case BTN_OFF:
             current_menu->off_action(pselect->data);            
             break;
         case BTN_ON:
-            current_menu->on_action(pselect->data);
+            if(pselect->sub) // submenu
+            {
+                pos=pselect->sub;
+                iselect=jselect=0;
+                pselect=pos;
+                CHG_PLANE
+                fillRect(current_menu->bg_color,current_menu->dx, current_menu->dy,
+                             current_menu->width-current_menu->dx,current_menu->height-current_menu->dy);
+                RESTORE_PLANE
+                dispAllName_icon(pos,0);
+                clearEventQueue();
+            }
+            else // launch plugin
+            {
+                current_menu->right_action(pselect->data);
+            }            
             break;
         case BTN_F1:
             current_menu->f1_action(pselect->data);

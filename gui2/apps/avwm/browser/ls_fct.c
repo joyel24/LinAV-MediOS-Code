@@ -67,7 +67,7 @@ int qSortEntry(const void * a1,const void * a2)
     return namesort((char**) &e1->name,(char**) &e2->name);
 }
 
-#define DEBUG_DO_LS
+//#define DEBUG_DO_LS
 
 int addEntry(struct browser_data * bdata,char * name,int type,int size)
 {

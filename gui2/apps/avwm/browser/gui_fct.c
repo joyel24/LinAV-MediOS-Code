@@ -47,6 +47,9 @@ int viewNewDir(struct browser_data *bdata,char *name)
         bdata->listused = 0;
         return 0;
     }
+    
+    fillRect(COLOR_WHITE,bdata->x_start,bdata->y_start,bdata->width,bdata->height);
+    
     bdata->pos=0;
     bdata->nselect=0;
     hideArrow(DOWN_ARROW,bdata);

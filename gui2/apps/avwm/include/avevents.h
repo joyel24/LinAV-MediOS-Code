@@ -22,6 +22,7 @@
 #define EVT_RESUME      0x0103
 #define EVT_CF_REMOVED  0x0104
 #define EVT_CF_ADDED    0x0105
+#define EVT_MENU_UP_LVL 0x0106
 
 #define NO_APP      0
 #define APP_MP3     1

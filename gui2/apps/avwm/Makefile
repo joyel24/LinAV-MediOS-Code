@@ -26,6 +26,7 @@ ifeq ($(BUILD),X11)
 	@sed s%\\[CFG_PATH\\]%$(ROOTPATH)%g menu-x11.cfg > ../../build/avwm/menu.cfg
 else
 	@cp -f menu.cfg ../../build/avwm/menu.cfg
+	@cp -Rf icons ../../build/avwm/
 endif
 	@rm -f *.gdb
 

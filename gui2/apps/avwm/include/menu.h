@@ -57,7 +57,7 @@ void dispAllName_norm (struct menu_item * pos,int nselect);
 int  dispName_norm    (struct menu_item * item,int x,int y,int clear,int selected);
 
 void dispAllName_icon (struct menu_item * pos,int nselect);
-int  dispName_icon    (struct menu_item * item,int i,int j,int clear,int selected);
+int  dispName_icon    (struct menu_item * item,int i,int j,int clear_txt,int clear_icon,int selected);
 
 #endif
 
