@@ -19,6 +19,7 @@
 #include <graphics.h>
 #include "events.h"
 #include "graphics_8.h"
+#include "gui_pal.h"
 
 #define STRING_MAXSIZE 200
 
@@ -34,7 +35,8 @@ char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
 
   Display* display;				/* display */	
   Window window;				/* Create a window */
-  GC gc; 
+  GC gc;
+  int screen; 
 
 struct graphicsBuffer BITMAP_1 = {
     offset             : 0,
@@ -115,8 +117,6 @@ int ini_graphics()
     
     setPlane(BMAP1);
     showPlane(BMAP1);
-    
-    int screen;
  
     /*connect to X server */ 
     display = XOpenDisplay(0);  
@@ -156,18 +156,14 @@ int ini_graphics()
     
 void drawPixBuffer(char color, int x, int y)
 {
-    int gui_pal[256][3];
     int r,g,b,stockcolor;
-    int screen;
     XColor c;
     Colormap pal = DefaultColormap(display,screen);
-    screen = DefaultScreen(display);
-    gc = DefaultGC(display, screen);
     
     stockcolor = color;
-    r = gui_pal[stockcolor][1];
-    g = gui_pal[stockcolor][2];
-    b = gui_pal[stockcolor][3];
+    r = gui_pal[stockcolor][0];
+    g = gui_pal[stockcolor][1];
+    b = gui_pal[stockcolor][2];
     c.red = r;
     c.green = g;
     c.blue = b;

@@ -9,7 +9,7 @@ int main(int argc,char ** argv)
 {
     ini_graphics();
 
-    drawRect(4,10,10,100,50);
+    drawRect(120,10,10,100,50);
     
  while(1)
   {  
