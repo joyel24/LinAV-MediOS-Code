@@ -81,6 +81,10 @@ typedef struct graphicsFont *     FONT_ID;
 
 struct graphicsBuffer {
     unsigned int  offset;                 // ->The data
+#ifndef AV_SCREEN
+    unsigned int offset_sav;
+    int          enable;
+#endif
     int           component;
     int           width;
     int           height;

@@ -50,6 +50,9 @@ char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
 
 #ifndef AV_SCREEN
 char screen_BMAP1_SAV[SCREEN_WIDTH*SCREEN_HEIGHT+40];
+char screen_BMAP2_SAV[SCREEN_WIDTH*SCREEN_HEIGHT+40];
+char screen_VID1_SAV[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
+char screen_VID2_SAV[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
 #endif
 
 struct graphicsBuffer BITMAP_1 = {
@@ -57,6 +60,9 @@ struct graphicsBuffer BITMAP_1 = {
 #ifdef AV_SCREEN
     state              : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
                     AV3XX_OSD_BITMAP_8BIT ,
+#else
+    offset_sav         : 0,
+    enable             : 0,
 #endif
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
@@ -70,6 +76,9 @@ struct graphicsBuffer BITMAP_2 = {
 #ifdef AV_SCREEN
     state              : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
                     AV3XX_OSD_BITMAP_8BIT ,
+#else
+    offset_sav         : 0,
+    enable             : 0,
 #endif
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
@@ -82,6 +91,9 @@ struct graphicsBuffer VIDEO_1 = {
     offset             : 0,
 #ifdef AV_SCREEN
     state              : 0,
+#else
+    offset_sav         : 0,
+    enable             : 0,
 #endif
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
@@ -94,6 +106,9 @@ struct graphicsBuffer VIDEO_2 = {
     offset             : 0,
 #ifdef AV_SCREEN
     state              : 0,
+#else
+    offset_sav         : 0,
+    enable             : 0,
 #endif
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
@@ -143,6 +158,7 @@ int buffers_comp[NB_BUFFER] = {
 
 GC_ID   default_gc=NULL;
 FONT_ID default_font=GC_FONT;
+int     default_plane=0;
 
 GC_ID   gc_bmap1,gc_bmap2,gc_vid1,gc_vid2;
 
@@ -186,6 +202,11 @@ int ini_graphics()
     VIDEO_1.offset=(unsigned int)&screen_VID1;
     VIDEO_2.offset=(unsigned int)&screen_VID2;
     
+    BITMAP_1.offset_sav=(unsigned int)&screen_BMAP1_SAV;
+    BITMAP_2.offset_sav=(unsigned int)&screen_BMAP2_SAV;
+    VIDEO_1.offset_sav=(unsigned int)&screen_VID1_SAV;
+    VIDEO_2.offset_sav=(unsigned int)&screen_VID2_SAV;
+    
 
     
     display = XOpenDisplay(0);  
@@ -216,11 +237,14 @@ int ini_graphics()
     setPalette(gui_pal,256);
     
     /* initializing the tmp buffer and the screen */
+    XSetForeground(display, gc, colorTab[0]);
     for(y=0; y<SCREEN_HEIGHT; y++)
         for(x=0; x<SCREEN_WIDTH; x++)
         {
-            screen_BMAP1_SAV[y*SCREEN_WIDTH+x]=0;
-            XSetForeground(display, gc, colorTab[0]);
+            screen_BMAP1_SAV[y*SCREEN_WIDTH+x]=0;            
+            screen_BMAP2_SAV[y*SCREEN_WIDTH+x]=0;
+            screen_VID1_SAV[y*SCREEN_WIDTH+x]=0;
+            screen_VID2_SAV[y*SCREEN_WIDTH+x]=0;
             XDrawPoint(display, window, gc, x, y);
         }            
     
@@ -249,20 +273,128 @@ int ini_graphics()
 }
 
 #ifndef AV_SCREEN
+
+unsigned int getCurrent(GC_ID Dgc,int X,int Y)
+{
+    if(Dgc==gc_vid1 || Dgc==gc_vid2)
+    {
+        return ((unsigned int *)Dgc->buffer->offset)[Y*Dgc->buffer->width+X];
+    }
+    else
+    {
+        return (unsigned int)(((char*)Dgc->buffer->offset)[Y*Dgc->buffer->width+X]);
+    }
+}
+
+unsigned int getCurrent2(GC_ID Dgc,GC_ID Dgc2,int X,int Y) // get color in Dgc2 using coordinate (X,Y) in Dgc
+{
+    int x1,y1;
+    
+    if(Dgc==gc_vid1 || Dgc==gc_vid2)
+    {
+        return ((unsigned int *)Dgc->buffer->offset)[Y*Dgc->buffer->width+X];
+    }
+    else
+    {
+        return (unsigned int)(((char*)Dgc->buffer->offset)[Y*Dgc->buffer->width+X]);
+    }
+}
+
+unsigned int getSav(GC_ID Dgc,int X,int Y)
+{
+    if(Dgc==gc_vid1 || Dgc==gc_vid2)
+    {
+        return ((unsigned int *)Dgc->buffer->offset_sav)[Y*Dgc->buffer->width+X];
+    }
+    else
+    {
+        return (unsigned int)(((char*)Dgc->buffer->offset_sav)[Y*Dgc->buffer->width+X]);
+    }
+}
+
+void setCurrent(GC_ID Dgc,int X,int Y,unsigned int val)
+{
+    if(Dgc==gc_vid1 || Dgc==gc_vid2)
+    {
+        ((unsigned int *)Dgc->buffer->offset)[Y*Dgc->buffer->width+X]=val;
+    }
+    else
+    {
+        ((char*)Dgc->buffer->offset)[Y*Dgc->buffer->width+X]=(unsigned char)val;
+    }
+}
+
+void setSav(GC_ID Dgc,int X,int Y,unsigned int val)
+{
+    if(Dgc==gc_vid1 || Dgc==gc_vid2)
+    {
+        ((unsigned int *)Dgc->buffer->offset_sav)[Y*Dgc->buffer->width+X]=val;
+    }
+    else
+    {
+        ((char*)Dgc->buffer->offset_sav)[Y*Dgc->buffer->width+X]=(unsigned char)val;
+    }
+}
+
+/*
+#define getCurrent(DGC,X,Y)        (((char*)DGC->buffer->offset)[Y*DGC->buffer->width+X])
+#define getSav(DGC,X,Y)            (((char*)DGC->buffer->offset_sav)[Y*DGC->buffer->width+X])
+#define setCurrent(DGC,X,Y,val)    {((char*)DGC->buffer->offset)[Y*DGC->buffer->width+X]=val;}
+#define setSav(DGC,X,Y,val)        {((char*)DGC->buffer->offset_sav)[Y*DGC->buffer->width+X]=val;}
+*/
 void lcd_update(int type, int x_ini, int y_ini, int w, int h)
 {
-    int x, y;
-    unsigned char color;
+    int x, y, doDraw;
+    unsigned int color;
+    XColor c;
+    Colormap pal;
+    int r,g,b,Y,Cr,Cb;
     
     for(y=y_ini; y<(y_ini+h); y++)
         for(x=x_ini; x<(x_ini+w); x++)
         {
-            if(screen_BMAP1[y*SCREEN_WIDTH+x]!=screen_BMAP1_SAV[y*SCREEN_WIDTH+x] || type == FORCE_REDRAW)
+            if((color=getCurrent(default_gc,x,y)) != getSav(default_gc,x,y) || type == FORCE_REDRAW)
             {
-                color=screen_BMAP1[y*SCREEN_WIDTH+x];
-                XSetForeground(display, gc, colorTab[color]);
-                XDrawPoint(display, window, gc, x, y);
-                screen_BMAP1_SAV[y*SCREEN_WIDTH+x]=screen_BMAP1[y*SCREEN_WIDTH+x];
+                doDraw=1;
+                switch(default_plane)
+                {
+                    case VID1:
+                        if(gc_vid2->buffer->enable && getCurrent(gc_vid2,x,y)!=0)
+                            break;
+                    case VID2:
+                        if(gc_bmap1->buffer->enable && getCurrent(gc_bmap1,x,y)!=0)
+                            break;
+                    case BMAP1:
+                        if(gc_bmap2->buffer->enable && getCurrent(gc_bmap2,x,y)!=0)
+                            break;
+                    case BMAP2:
+                        switch(default_plane)
+                        {
+                            case VID1:
+                            case VID2:
+                                pal = DefaultColormap(display,screen);
+                                Cb=color&0xFF;
+                                Y=(color>>8)&0xFF;
+                                Cr=(color>>16)&0xFF;
+                                r=Y+1.402*(Cr-128);
+                                g=Y-0.34414*(Cb-128)-0.71414*(Cr-128);
+                                b=Y+1.772*(Cb-128);
+                                c.red = r*0x100+r;
+                                c.green = g*0x100+g;
+                                c.blue = b*0x100+b;
+                                XAllocColor(display, pal, &c);
+                                XSetForeground(display, gc, c.pixel);
+                                break;
+                            case BMAP1:
+                            case BMAP2:
+                                XSetForeground(display, gc, colorTab[color]);
+                                break;
+                        }
+                        //XDrawPoint(display, window, gc, default_gc->buffer->x+x, default_gc->buffer->y+y);
+                        XDrawPoint(display, window, gc, x,y);
+                }
+                
+                setSav(default_gc,x,y,color);
             }
         }
 }
@@ -361,6 +493,7 @@ void setPlane(int vplane)
     if(vplane>=0 && vplane < NB_BUFFER)
     {
         default_gc=listGC[vplane];
+        default_plane=vplane;
     }
     else
     {
@@ -370,35 +503,40 @@ void setPlane(int vplane)
 
 void hidePlane(int vplane)
 {
-#ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
+#ifdef AV_SCREEN
         osdSetComponentConfig(buffers_comp[vplane],0);
+#else
+        buffers[vplane]->enable=0;
+#warning add redraw here
+#endif
     }
     else
     {
         fprintf(stderr,"wrong plane %d\n",vplane);
     }    
-#endif
 }
 
 void showPlane(int vplane)
 {
-#ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
+#ifdef AV_SCREEN
         osdSetComponentConfig(buffers_comp[vplane],buffers[vplane]->state|AV3XX_OSD_COMPONENT_ENABLE);
+#else
+        buffers[vplane]->enable=1;
+#warning add redraw here
+#endif
     }
     else
     {
         fprintf(stderr,"wrong plane %d\n",vplane);
-    }
-#endif          
+    }          
 }
 
 void setState(int vplane,int state)
 {
-#ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
         buffers[vplane]->state=state;
@@ -406,13 +544,11 @@ void setState(int vplane,int state)
     else
     {
         fprintf(stderr,"wrong plane %d\n",vplane);
-    }  
-#endif          
+    }       
 }
 
 int getState(int vplane)
 {
-#ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
         return buffers[vplane]->state;
@@ -421,31 +557,29 @@ int getState(int vplane)
     {
         fprintf(stderr,"wrong plane %d\n",vplane);
         return -1;
-    }  
-#endif          
+    }        
 }
 
 void setSize(int vplane,int width,int height,int bitsPerPixel)
 {
-#ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
         buffers[vplane]->width=width;
         buffers[vplane]->height=height;
         buffers[vplane]->bitsPerPixel=bitsPerPixel;
+#ifdef AV_SCREEN
         osdSetComponentSize(buffers_comp[vplane], 2*width, height);
         osdSetComponentSourceWidth(buffers_comp[vplane], ((width*bitsPerPixel)/32)/8);
+#endif
     }
     else
     {
         fprintf(stderr,"wrong plane %d\n",vplane);
-    }  
-#endif          
+    }           
 }
 
 void getSize(int vplane,int * width,int * height,int * bitsPerPixel)
 {
-#ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
         if(width)
@@ -458,29 +592,27 @@ void getSize(int vplane,int * width,int * height,int * bitsPerPixel)
     else
     {
         fprintf(stderr,"wrong plane %d\n",vplane);
-    }  
-#endif          
+    }          
 }
 
 void setPos(int vplane,int x,int y)
 {
-#ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
         buffers[vplane]->x=x;
         buffers[vplane]->y=y;
+#ifdef AV_SCREEN
         osdSetComponentPosition(buffers_comp[vplane],x,y);        
+#endif
     }
     else
     {
         fprintf(stderr,"wrong plane %d\n",vplane);
-    }  
-#endif          
+    }        
 }
 
 void getPos(int vplane,int * x,int * y)
 {
-#ifdef AV_SCREEN
     if(vplane>=0 && vplane < NB_BUFFER)
     {
         if(x)
@@ -491,8 +623,7 @@ void getPos(int vplane,int * x,int * y)
     else
     {
         fprintf(stderr,"wrong plane %d\n",vplane);
-    }  
-#endif          
+    }         
 }
 
 #ifdef AV_SCREEN
@@ -512,8 +643,8 @@ void iniComponent(int vplane,struct graphicsBuffer * buff,unsigned int offset)
 /* drawing functions */
 void clearScreen(unsigned int color)
 {
-    default_gc->gops->fillRect(color,0,0,SCREEN_WIDTH,SCREEN_HEIGHT,default_gc->buffer);
-    LCD_UPDATE(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
+    default_gc->gops->fillRect(color,0,0,default_gc->buffer->width,default_gc->buffer->height,default_gc->buffer);
+    LCD_UPDATE(0,0,default_gc->buffer->width,default_gc->buffer->height);
 }
 
 void drawPixel(unsigned int color,int x, int y)
@@ -832,6 +963,7 @@ void drawImage(char * filename)
     hidePlane(BMAP1);
     hidePlane(BMAP2);
     showPlane(VID1);
+    setPlane(VID1);
     
     screenDirect=(unsigned int *)buff->offset;
     for (j=0;j<SCREEN_HEIGHT;j++)
@@ -849,7 +981,8 @@ void drawImage(char * filename)
             offset+=buff->width*4;
     }
     
-    
+    LCD_UPDATE(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
+    setPlane(BMAP1);
     
     jpeg_destroy_decompress(&cinfo);
     fclose(img_file);

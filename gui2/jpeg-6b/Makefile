@@ -5,8 +5,14 @@
 
 # Read installation instructions before saying "make" !!
 
+include ../Makefile.conf
+
 # The name of your C compiler:
+ifeq ($(BUILD),AV)
 CC= arm-elf-gcc
+else
+CC= gcc
+endif
 
 # You may need to adjust these cc options:
 CFLAGS= -O

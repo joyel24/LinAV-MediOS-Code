@@ -80,8 +80,7 @@ int set_mouseParam(int freq, int repeat)
 }
 int getBat(void)
 {
-        printf("%d\n", stateBAT);
-	return stateBAT;
+        return stateBAT;
 }
 
 int getPwr(void)
