@@ -76,7 +76,7 @@ ataSectorHalfwords          =   256
 ataSectorHalfwordsShift     =   8           @ 256 halfwords
 
         .thumb
-
+        
 @ ------------------------------------------------------------------------------
 @ ataReadSectors(r0=LBA, r1=number, r2->buffer)
 @

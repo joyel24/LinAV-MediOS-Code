@@ -69,7 +69,6 @@ extern u32 ataReadSectorsA(u32 lba, u32 count, char *buffer);
 extern u32 ataWriteSectorsA(u32 lba, u32 count, char *buffer);
 extern u32 ataIdentifyDeviceA(char *buffer);
 
-
 extern int ataReadMBR();
 extern struct partInfo * getPartition(int i);
 extern void printPartInfo(int i);

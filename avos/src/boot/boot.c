@@ -74,7 +74,7 @@ static char nameCurHDD[MAX_PATH] = "/";
 static unsigned int * screenDirect = 0x03a00000;
 
 int main() {
-    unsigned int a;
+    unsigned int a, a1, a2;
     int c, b, i, totalEntries;
     int cursorposHDD=0;
     int dirposHDD=0;
@@ -202,13 +202,51 @@ startInit:
         }
             
         while(1) {
+            c = usbIsConnectedA();
+            pal32[0] = 0x6c4696;
+            pal32[1] = 0x80ff80;
+            if (c) {
+                graphicsStringA(&screenBitmap2, 2, 2, &sprite8_13, std8x13_, 8, 0,
+                    "[USB]");
+            } else {
+                graphicsStringA(&screenBitmap2, 2, 2, &sprite8_13, std8x13_, 8, 0,
+                    "     ");
+            }
+
+            if (mode!=0) {
+                graphicsStringA(&screenBitmap2, 2 + 6*8, 2, &sprite8_13, std8x13_, 8, 0,
+                    "[USB mode]");
+                
+            } else {
+                graphicsStringA(&screenBitmap2, 2 + 6*8, 2, &sprite8_13, std8x13_, 8, 0,
+                    "          ");
+            }
+
+            pal32[0] = 0x706c93;
+            if (source==0) {
+                graphicsStringA(&screenBitmap2, 2 + 19*8, 2, &sprite8_13, std8x13_, 8, 0,
+                    "[HDD]");
+                
+            } else {
+                graphicsStringA(&screenBitmap2, 2 + 19*8, 2, &sprite8_13, std8x13_, 8, 0,
+                    "[MEM]");
+            }
+
+            b = powerGetStatusA();
+            stringPutHexA(powerSt, b, 4);
+
+            if (powerIsDCConnectedA()) {
+                powerSt[4] = '+';                
+            } else {
+                powerSt[4] = ' ';
+            }
+            graphicsStringA(&screenBitmap2, 2 + 25*8, 2, &sprite8_13, std8x13_, 8, 0,
+                        powerSt);
             
             ourTime = rtcGetTime();
             stringPutHexA(timeSt+6, ourTime->tm_sec, 2);
             stringPutHexA(timeSt+3, ourTime->tm_min, 2);
             stringPutHexA(timeSt, ourTime->tm_hour, 2);
-            pal32[0] = 0x706c93;
-            pal32[1] = 0x80ff80;
             graphicsStringA(&screenBitmap2, 320-(8*9)-2, 2, &sprite8_13, std8x13_, 9, 0,
                         timeSt);
 
@@ -315,6 +353,15 @@ startInit:
                         } while(buttonsGetStatusA() & BUTTONS_AV300_ANY);
                         break;
                     }
+                } else if (c & BUTTONS_AV300_OFF) {
+                    for (a=0;a<20000;a++) {
+                        if (!(buttonsGetStatusA() & BUTTONS_AV300_ANY)) {
+                            launchFile("/DEFAULT.BIN");
+                            goto startInit;                            
+                        }
+                    }
+                    do {
+                    } while(buttonsGetStatusA() & BUTTONS_AV300_ANY);                    
                 } else if (c & BUTTONS_AV300_ON) {
                     if (dirBufferHDD[dirposHDD+cursorposHDD].attr & FAT_ATTR_DIR) {
                         if(strcmp(dirBufferHDD[dirposHDD+cursorposHDD].filename,"..")==0)
@@ -363,31 +410,17 @@ startInit:
             // Other non mode 0 specific stuff...
 
             if (c & BUTTONS_AV300_MENU3) {
-                mode ^= 1;
-                do {
-                } while(buttonsGetStatusA() & BUTTONS_AV300_ANY);
-                cursorMoved=1;
-                if (mode==0) {
-                    usbDisableA();
-                } else {
-                    usbEnableA();
-                }
-
                 if (source==0) {
-                    ataPowerUpHDDA();
-                    ataSelectHDDA();
-                } else {
-                    ataPowerDownHDDA();
-                    ataSelectMemoryCardA();
-                }
-
-                // TODO - reinit? USB could have modified disk...
-                // Only matters if dir struct changed etc
-
-                break;
-            } else if (c & BUTTONS_AV300_MENU2) {
-                if (mode==0) {
-                    source ^= 1;    
+                    mode ^= 1;
+                    do {
+                    } while(buttonsGetStatusA() & BUTTONS_AV300_ANY);
+                    cursorMoved=1;
+                    if (mode==0) {
+                        usbDisableA();
+                    } else {
+                        usbEnableA();
+                    }
+    
                     if (source==0) {
                         ataPowerUpHDDA();
                         ataSelectHDDA();
@@ -395,22 +428,50 @@ startInit:
                         ataPowerDownHDDA();
                         ataSelectMemoryCardA();
                     }
+    
+                    // TODO - reinit? USB could have modified disk...
+                    // Only matters if dir struct changed etc
                     
-                    ataReadMBR();
+                    break;
+                }
+            } else if (c & BUTTONS_AV300_MENU2) {
+                if (mode==0) {
+                    a1 = 0;
+                    if (source==0) {
+                        a1 = gioGetBitA(0x15) + gioGetBitA(0x16);
+                        debug("GIO 15+16 = %d", a1);
+                    }
 
-                    for(i=0;i<4;i++)
-                        printPartInfo(i);
-
-                    fatHD = fatInit(getPartition(0));
-                    debug("[fatTest.c] fatInit returned = %d\n",fatHD);
-                    selectFat(fatHD);
+                    if (a1==0) {
+                        source ^= 1;    
+                        
+                        if (source==0) {
+                            ataPowerUpHDDA();
+                            ataSelectHDDA();
+                        } else {
+                            ataPowerDownHDDA();
+                            ataSelectMemoryCardA();
+                        }
+                        
+                        ataReadMBR();
     
-                    nameCurHDD[0]='/';
-                    nameCurHDD[1]=0;
+                        for(i=0;i<4;i++)
+                            printPartInfo(i);
     
-                    do {
-                    } while(buttonsGetStatusA() & BUTTONS_AV300_ANY);
-                    goto startInit;
+                        closeFat(fatHD);
+     
+                        fatHD = fatInit(getPartition(0));
+                        debug("[fatTest.c] fatInit returned = %d\n",fatHD);
+                        selectFat(fatHD);
+        
+                        nameCurHDD[0]='/';
+                        nameCurHDD[1]=0;
+        
+                        do {
+                        } while(buttonsGetStatusA() & BUTTONS_AV300_ANY);
+                        cursorMoved=1;
+                        break;
+                    }
                 }
             }
             for (i=0;i<loopDelay;i++) {}          // Little delay...
@@ -453,7 +514,7 @@ int exeFile(char * fileN, char * arg)
     void (*codeCaller)(int argc, char * argv[])=(void (*)(int argc, char * argv[]))0x03000000;
     strcpy(callArg1, fileN);
     debug("exeFile '%s','%s','%s'\n", fileN, arg, callArg1);
-    
+   
 	if(loadFile(callArg1)) {
 		int argc=1;
 
