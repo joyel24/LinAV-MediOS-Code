@@ -24,9 +24,7 @@
 uartInc = 1
 
 .text
-
-        uartBase    =   0x30300     @ av300 UART1
-
+        
         uartRegDTTR =   0x00
         uartRegBRSR =   0x02
         uartRegMSR  =   0x04
@@ -37,7 +35,7 @@ uartInc = 1
 
         .thumb
 @ ------------------------------------------------------------------------------
-@ uartGetch()
+@ uartGetch(r0=device)
 @   Returns char in r0, or -1 if none to be read.
 .globl uartGetchA
 uartGetchA:
@@ -46,8 +44,9 @@ uartGetchA:
 .thumb_func
 
 uartGetch:
-        push {r1, r2, r3}
-        ldr r2, =uartBase
+        lsl r0, #2
+        ldr r2, =uartBases
+        ldr r2, [r2, r0]
         mov r1, #0
         ldrh r1, [r2, #uartRegRFCR]
         mov r0, #0
@@ -56,13 +55,12 @@ uartGetch:
          beq uartNon
         mov r0, #0
         ldrh r0, [r2, #uartRegDTTR]
-uartNon:pop {r1, r2, r3}
-        bx lr
+uartNon:bx lr
 
 
 
 @ ------------------------------------------------------------------------------
-@ uartOutch r0=chr to output to UART1
+@ uartOutch r0=device, r1=chr to output to UART
 @
 .globl uartOutchA
 uartOutchA:
@@ -71,18 +69,18 @@ uartOutchA:
 .thumb_func
 
 uartOutch:
-        push {r1, r2}
-        ldr r1, =uartBase
-uartWt1:ldrh r2, [r1, #uartRegSR]
-        lsr r2, r2, #11
+        lsl r0, #2
+        ldr r2, =uartBases
+        ldr r2, [r2, r0]
+uartWt1:ldrh r3, [r2, #uartRegSR]
+        lsr r3, r3, #11
          bcc uartWt1
-        strh r0, [r1, #uartRegDTTR]
-        pop {r1, r2}
+        strh r1, [r2, #uartRegDTTR]
         bx lr
 
         
 @ ------------------------------------------------------------------------------
-@ uartOuts r0->string to output to UART1
+@ uartOuts r0=device, r1->string to output to UART1
 @
 .globl uartOutsA
 uartOutsA:
@@ -90,19 +88,23 @@ uartOutsA:
 .globl uartOuts
 .thumb_func
 uartOuts:
-        push {r1, lr}
-        mov r1, r0
-uartLp1:ldrb r0, [r1, #0]
-        cmp r0, #0
+        push {lr}
+        mov r2, r1
+uartLp1:ldrb r1, [r2, #0]
+        cmp r1, #0
          beq uartEn1
+        push {r0, r2}
         bl uartOutch
-        add r1, r1, #1
+        pop {r0, r2}
+        add r2, #1
         b uartLp1
 uartEn1:pop {r1}
-        pop {r1}
         bx r1
 
         .ltorg
         .arm
 
+uartBases:  .word 30300
+            .word 30380
+        
 .endif

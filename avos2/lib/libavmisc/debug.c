@@ -24,7 +24,7 @@ void debug(char *fmt, ...)
     va_start(ap, fmt);
     vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
     va_end(ap);
-    uartOutsA(debugmembuf);
+    uartOutsA(UART_0, debugmembuf);
 }
 
 char pbu[] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | xxxxxxxxxxxxxxxx\n";
@@ -40,7 +40,7 @@ void printBuffer(char *source,int size) {
             if (c<32 || c>126) c='.';
             pbu[35+i] = c;
         }
-        uartOutsA(pbu);
+        uartOutsA(UART_0, pbu);
     }
-	uartOutsA("\n\n");
+	uartOutsA(UART_0, "\n\n");
 }

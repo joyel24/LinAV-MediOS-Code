@@ -100,11 +100,10 @@ int main() {
     }
 
     cpldSetModeA(4);
+
+    cpldInitVideoA();
     
-//    interruptsSetCausesA(0xffffffff);
-//    interruptsSetCauses2A(0xffffffff);
-    interruptsSetMaskA(interruptsGetMaskA() | 0xffffff7f);
-//    interruptsSetMask2A(0x0);
+    interruptsSetMaskA(0xffffff7f);     // 0100 = DVR thing?
     interruptsSetIRQEnabledA();
     
     gioSetAllIRQsA(0xff);    // Set all gio (0-7) to be IRQ!

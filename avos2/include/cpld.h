@@ -40,5 +40,7 @@ extern u32 cpldGetVersionA();
     // bits 14-0 - CPLD Version
 extern u32 cpldGetModuleIDA();
     
+extern void cpldInitVideoA();
+
 #endif
 

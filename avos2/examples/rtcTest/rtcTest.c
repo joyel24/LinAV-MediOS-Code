@@ -56,9 +56,9 @@ int main() {
     graphicsStringA(&screenBitmap, 0, 0, &sprite4_6, std4x6_, 5, 0,
                 "RTCTest By DoGgEr");
     while(1) {
-        uartOutsA("rtcGetTime()\n");
+        uartOutsA(UART_0, "rtcGetTime()\n");
         ourTime = rtcGetTime();
-        uartOutsA("Ret\n");
+        uartOutsA(UART_0, "Ret\n");
         stringPutHexA(timeSt+9, ourTime->tm_ms, 2);
         stringPutHexA(timeSt+6, ourTime->tm_sec, 2);
         stringPutHexA(timeSt+3, ourTime->tm_min, 2);
@@ -66,7 +66,7 @@ int main() {
         pal16[1] = 0x0202;
         graphicsStringA(&screenBitmap, 160-(5*14)-7, 120, &spriteShadow, shadow_, 14, 0,
                     timeSt);
-        uartOutsA("Loop\n");
+        uartOutsA(UART_0, "Loop\n");
         b = buttonsGetStatusA();
         if (b & BUTTONS_AV300_OFF) return 0;        
     }

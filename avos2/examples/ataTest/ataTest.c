@@ -71,7 +71,7 @@ int main() {
                     "F2[HDD]");
             graphicsStringA(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Power HDD...        ");
-            uartOutsA("\nSelecting HDD...\n");
+            uartOutsA(UART_0, "\nSelecting HDD...\n");
             ataPowerUpHDDA();
             graphicsStringA(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Selecting HDD...        ");
@@ -81,7 +81,7 @@ int main() {
                     "F2[MemCard]");
             graphicsStringA(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Selecting MemCard...        ");
-            uartOutsA("\nSelecting Memory card...\n");
+            uartOutsA(UART_0, "\nSelecting Memory card...\n");
             ataPowerDownHDDA();
             ataSelectA(source);
         } else {
@@ -89,7 +89,7 @@ int main() {
                     "F2[Other]");
             graphicsStringA(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Selecting Other...        ");
-            uartOutsA("\nSelecting Other...\n");
+            uartOutsA(UART_0, "\nSelecting Other...\n");
             ataPowerDownHDDA();
             ataSelectA(source);
         }
@@ -151,7 +151,7 @@ void docmd() {
         pal16[1] = 0x0101;
         graphicsStringA(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                 "ATA Error!        ");            
-        uartOutsA("ATA Error!\n");
+        uartOutsA(UART_0, "ATA Error!\n");
         for (delay=0;delay<0x1000;delay++) {}
         return;
     }
@@ -172,7 +172,7 @@ void showBuffer(char *source) {
             if (c<32 || c>126) c='.';
             p[35+i] = c;
         }
-        uartOutsA(p);
+        uartOutsA(UART_0, p);
 
         pal16[1] = 0xffff;
         graphicsStringA(&screenBitmap, 4, 16 + y*7, &sprite4_6, std4x6_, 6, 0,

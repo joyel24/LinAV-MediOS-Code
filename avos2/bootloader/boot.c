@@ -175,7 +175,7 @@ startInit:
             debug("Listing contents of '%s'\n", nameCurHDD);
             if((dir=opendir(nameCurHDD))<0)
 			{
-				uartOutsA("dir not found trying root...\n");
+				uartOutsA(UART_0, "dir not found trying root...\n");
                 nameCurHDD[0] = '/';
                 nameCurHDD[1] = 0;
                 if ((dir=opendir(nameCurHDD))<0) break;

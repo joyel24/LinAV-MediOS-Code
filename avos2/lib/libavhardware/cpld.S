@@ -40,10 +40,15 @@ cpldSetModeA:
 cpldSetMode:
         push {r1}
         ldr r1, =0x02600300
+        mov r0, r0
         strh r0, [r1]       @ Not sure why its done 5 times?
+        mov r0, r0
         strh r0, [r1]
+        mov r0, r0
         strh r0, [r1]
+        mov r0, r0
         strh r0, [r1]
+        mov r0, r0
         strh r0, [r1]
         pop {r1}
         bx lr
@@ -81,7 +86,7 @@ cpldGetModuleIDA:
 
 cpldGetModuleID:
         ldr r1, =0x02600000
-cpldnstab:                      // Not stable!!! Wait until it is...
+cpldnstab:                      @ Not stable!!! Wait until it is...
         ldrh r0, [r1]
         lsl r0, #28
         lsr r0, #28
@@ -92,6 +97,26 @@ cpldnstab:                      // Not stable!!! Wait until it is...
          bne cpldnstab
 cpldstab:
         bx lr
+
+@ ------------------------------------------------------------------------------
+@ cpldInitVideoA()
+@
+.globl cpldInitVideoA
+cpldInitVideoA:
+        switchThumb
+.globl cpldInitVideo
+.thumb_func
+
+cpldInitVideo:
+        ldr r1, =0x02600200
+        mov r0, #0x6              @ Keep backlight enabled...
+        strh r0, [r1]
+
+        ldr r1, =0x02600300
+        mov r0, #0x2
+        strh r0, [r1]
+        bx lr
+
         
         .ltorg
         .arm
