@@ -26,10 +26,10 @@ ataInc = 1
 
 .text
 
-ataCommand_IDENTIFY         =   0xec
 ataCommand_READ_SECTORS     =   0x20
 ataCommand_READ_MULTIPLE    =   0xc4
 ataCommand_SET_MULTIPLE_MODE=   0xc6
+ataCommand_IDENTIFY         =   0xec
 
 ataStatus_BSY               =   0x80
 ataStatus_RDY               =   0x40
@@ -38,16 +38,6 @@ ataStatus_DRQ               =   0x08
 ataStatus_ERR               =   0x01
 
 ataSelectLBA                =   0x40
-
-ataRegData                  =   0x02400000
-ataRegError                 =   0x02400080
-ataRegNSector               =   0x02400100
-ataRegSector                =   0x02400180
-ataRegLCyl                  =   0x02400200
-ataRegHCyl                  =   0x02400280
-ataRegSelect                =   0x02400300
-ataRegCommand               =   0x02400380
-ataRegStatus                =   0x02400380
 
         .thumb
 
@@ -59,6 +49,11 @@ ataReadLBAT:
         mov r5, r0
         mov r4, r1
         mov r6, r2
+
+        ldr r0, =0x02600300
+        mov r1, #8
+        strh r1, [r0]                        @ Spin up the HDD Please...        
+
         callThumb r1, ataWaitForRDYT        
 
         ldr r2, =ataRegSector
@@ -76,6 +71,9 @@ ataReadLBAT:
         ldr r2, =ataRegSelect
         orr r1, r3
         strb r1, [r2]
+
+        ldr r2, =ataRegNSector
+        strb r6, [r2]
         
         ldr r2, =ataRegCommand
         ldr r1, =ataCommand_READ_SECTORS
@@ -86,13 +84,13 @@ ataReadLBAT:
         lsl r6, #8              @ * 256
         
         ldr r2, =ataRegData
-ataR2:  mov r1, #0
-        ldrh r1, [r2]
+        mov r1, #0
+ataR2:  ldrh r1, [r2]
         strh r1, [r5]
         add r5, #2
         sub r6, #1
          bne ataR2
-        
+
         pop {r1, r2, r3, r4, r5, r6}        
         pop {r0}
         bx r0
@@ -103,6 +101,11 @@ ataIdentifyT:
         push {lr}
         push {r1, r2, r3, r4, r5}
         mov r5, r0
+
+        ldr r0, =0x02600300
+        mov r1, #8
+        strh r1, [r0]                        @ Spin up the HDD Please...        
+
         callThumb r1, ataWaitForRDYT        
 
         ldr r2, =ataRegSelect

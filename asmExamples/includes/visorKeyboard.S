@@ -24,22 +24,54 @@ visorKeyboardInc = 1
 @ visorConvertToAscii r0=scan code
 @                     r0=ascii, or 0 if not translatable.
 visorConvertToAscii:
-        push {r1, r2}
+        push {lr}
+        push {r1, r2, r3, r4}
         mov r1, r0
         mov r0, #0
         lsl r1, #24
         lsr r1, #24
+
+        mov r2, #0x1a
+        ldr r3, =kShift
+        callThumb r4, visorUpdateShift
+        
         cmp r1, #0x80
-         bge ret1
+         bge visor1
         mov r0, #0x0a
         cmp r1, #0x3b
-         beq ret1
+         beq visor1
         ldr r2, =xlatTable
+        ldr r3, kShift
+        cmp r3, #0
+         beq visorn
+        ldr r2, =xlatTableS        
+visorn:
         ldrb r0, [r2, r1]
-ret1:
-        pop {r1, r2}
+visor1:
+        pop {r1, r2, r3, r4}
+        pop {r1}
+        bx r1
+
+@ visorUpdateShift (0, key, cmpVal, ->var)
+@
+visorUpdateShift:
+        push {r0}
+        cmp r1, r2
+         bne visorn1
+        mov r0, #1
+        str r0, [r3]
+        b visorn2
+visorn1:mov r0, #0x80
+        orr r2, r0
+        cmp r1, r2
+         bne visorn2
+        mov r0, #0
+        str r0, [r3]        
+visorn2:
+        pop {r0}
         bx lr
 
+        
         .ltorg
 
 xlatTable:
@@ -47,8 +79,22 @@ xlatTable:
         .ascii "90abstuv....----"
         .ascii "opqrwxyz....----"
         .ascii "-=[]/.......----"
-        .ascii "cdef'~      ----"
-        .ascii "1234klmn|;,.----"
+        .ascii "cdef'`      ----"
+        .ascii "1234klmn\\;,.----"
+xlatTableS:
+        .ascii "%^&*GHIJ....----"
+        .ascii "()ABSTUV....----"
+        .ascii "OPQRWXYZ....----"
+        .ascii "_+{}?.......----"
+        .ascii "CDEF\"~      ----"
+        .ascii "!@#$KLMN|:<>----"
+
+kCtrl:  .word 0
+kShift: .word 0
+kAlt:   .word 0
+kCaps:  .word 0
+kCmd:   .word 0
+
         
         .arm
 .endif

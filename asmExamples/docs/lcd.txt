@@ -1,3 +1,9 @@
+The dsc series of DSPs include an OSD (On screen display).
+the dsc25 is as follows.
+
+MAIN and MAIN2 are 256 color bitmaps,
+BACK and BACK2 are YCbCr color video planes.
+
 30680   0-7 Border color
         9 - funny coloured bars
         14 - duplicates scanlines every 15?
@@ -32,10 +38,10 @@
                                 15-makes it long and moves it?
 flashing, long, etc
 
-3068c   *Controls back width setting something? (14)  <<4 = #pixels / line
-3068e   *Controls back2 width setting something?
-30690   *Controls main width setting something?
-30692   *Controls main2 width setting something?
+3068c   *Controls back width <<4 = #pixels / line
+3068e   *Controls back2 width
+30690   *Controls main width
+30692   *Controls main2 width
 
 30694   back2 off HI | back off HI
 30696   back off LO

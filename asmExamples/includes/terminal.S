@@ -74,9 +74,6 @@ terminalLa:
         b terminalLa
 terminalDa:
 
-        mov r0, r4
-        callThumb r3, uartOutsT
-
         pop {r2, r3, r4}
         pop {r0}
         bx r0

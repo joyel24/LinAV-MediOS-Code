@@ -13,8 +13,9 @@
 @
 @
         .include "../includes/common.S"
+        .include "../includes/av300.S"
 
-        doimage = 1
+@        doimage = 1
         
 .text
 
@@ -25,7 +26,7 @@
 
         b overb
         .space 0x46, 0
-        .asciz "CJBMVERSION2000"
+        .asciz "CJBMVERSION2000"    @ So we can update firmware to this...
         .space 0x20, 0
 overb:
 

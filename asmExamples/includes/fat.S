@@ -95,7 +95,7 @@ fatReadCT:
 fatReadM:
         mov r0, r6
         mov r1, r4
-        mov r2, #1  @r5                          @ #1
+        mov r2, #1      @r5                          @ #1
         callThumb r3, ataReadLBAT
         
         ldr r0, =fatSectorSize
