@@ -14,6 +14,8 @@
 
 hardwareAV300               =   1
 
+@uartDebug 					= 	1 @ send debug info on UART
+
 ramStart                    =   0x03000000
 
 lcdRegBacklight             =   0x02600200

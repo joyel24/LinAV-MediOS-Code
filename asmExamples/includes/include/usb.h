@@ -11,8 +11,8 @@
    even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.
 */
-#ifndef u32_defined
-#define u32_defined yes
+#ifndef _u32_
+#define _u32_
 typedef unsigned long u32;
 #endif
 

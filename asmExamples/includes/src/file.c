@@ -20,12 +20,12 @@ int launchFile(char * fileN)
 	terminalSetPosT(0, 35);
 	terminalPutsCT("loading file ", 0xfbfb);
 
-	if((curFile=open(fileN))>=0)
+	if((curFile=openF(fileN))>=0)
 	{
 		char buffer[512];
 		u32 offset=0;
 
-		while((read(curFile,buffer,512))>0)
+		while((readF(curFile,buffer,512))>0)
 		{
    			codecpy(buffer,offset,512);
 			offset+=512;
@@ -33,7 +33,7 @@ int launchFile(char * fileN)
 				terminalPutsCT(".", 0xfbfb);
 		}
 
-		close(curFile);
+		closeF(curFile);
 
   		startProg(1,fileN);
 		return 1;
@@ -45,7 +45,7 @@ int launchFile(char * fileN)
 	}
 }
 
-int open(const char* pathname)
+int openF(const char* pathname)
 {
     int dir;
     struct dirent* entry;
@@ -99,6 +99,7 @@ int open(const char* pathname)
 		{
             file->size = entry->size;
             file->attr = entry->attribute;
+			file->count = 0;
             break;
         }
     }
@@ -124,12 +125,32 @@ int open(const char* pathname)
     return fd;
 }
 
-void close(int fd)
+void closeF(int fd)
 {
 	openfiles[fd].busy=false;
 }
 
-int read(int fd, void* buf, int count)
+int sizeF(int fd)
+{
+	if(openfiles[fd].busy)
+	{
+		return openfiles[fd].size;
+	}
+	else
+		return -1;
+}
+
+int tellF(int fd)
+{
+	if(openfiles[fd].busy)
+	{
+		return openfiles[fd].count;
+	}
+	else
+		return -1;
+}
+
+int readF(int fd, void* buf, int count)
 {
 	myFILE * file;
 	struct fatent * fat_ent;
@@ -190,3 +211,142 @@ int read(int fd, void* buf, int count)
 	file->count+=pos;
 	return pos;
 }
+
+int mySetPosF(int fd,long int pos)
+{
+
+
+	myFILE * file=&(openfiles[fd]);
+	struct fatent * fat_ent=&file->fat_ent;
+
+	char txt[80];
+	snprintf(txt,80,"posactu: %d Cacheoffset: %d newpos: %d\n",file->count,fat_ent->cacheoffset,pos);
+	uartOutsT(txt);
+
+	if(pos == file->count)
+		return 1;
+
+	int bufferPos = file->count - fat_ent->cacheoffset;
+
+	snprintf(txt,80,"bufferpos: %d\n",bufferPos);
+	uartOutsT(txt);
+
+
+	if(pos >= bufferPos && pos < bufferPos+512) // we stay in the buffer
+	{
+		fat_ent->cacheoffset=pos-bufferPos;
+		file->count=pos;
+
+		snprintf(txt,80,"same buffer, cacheoffset: %d pos: %d\n",fat_ent->cacheoffset,file->count);
+		uartOutsT(txt);
+
+		return 1;
+	}
+
+	if(pos < file->count) // we need to start from the beginning
+	{
+		uartOutsT("go to the beg of file\n");
+		file->fat_ent.curCluster = 0;
+		file->count=0;
+		nxtSector(&file->fat_ent);
+	}
+	else
+	{
+		file->count+=512-fat_ent->cacheoffset;
+
+		snprintf(txt,80,"let's move to nxt sector, new pos: %d\n",file->count);
+		uartOutsT(txt);
+		nxtSector(&file->fat_ent);
+	}
+
+	while((file->count + 512) < pos)
+	{
+		nxtSector(&file->fat_ent);
+		file->count +=512;
+		snprintf(txt,80,"loop, new pos: %d\n",file->count);
+		uartOutsT(txt);
+	}
+
+
+	fat_ent->cacheoffset=pos - file->count;
+	file->count=pos;
+
+	snprintf(txt,80,"end loop, new pos: %d, new cacheoffset:%d\n",file->count,fat_ent->cacheoffset);
+	uartOutsT(txt);
+
+	return 1;
+
+
+
+}
+
+int seekF(int fd, long int offset, int whence)
+{
+	if(openfiles[fd].busy)
+	{
+		myFILE * file=&(openfiles[fd]);
+		int newpos;
+
+		if(whence == SEEK_END)
+		{
+			uartOutsT("SEEK_END\n");
+			if(offset > 0 || (offset + file->size)<0)
+				return 0;
+			else
+				newpos = offset + file->size;
+		}
+
+		if(whence == SEEK_SET)
+		{
+			uartOutsT("SEEK_SET\n");
+			if (offset < 0 || (offset > file->size))
+				return 0;
+			else
+				newpos = offset;
+		}
+
+		if(whence == SEEK_CUR)
+		{
+			uartOutsT("SEEK_CUR\n");
+			if((file->count+offset)<0 || (file->count+offset) > file->size)
+				return 0;
+			else
+				newpos = file->count+offset;
+		}
+
+		char txt[80];
+		snprintf(txt,80,"offset: %d posactu: %d newpos: %d\n",offset,file->count,newpos);
+		uartOutsT(txt);
+
+		return mySetPosF(fd,newpos);
+
+	}
+	else
+		return 0;
+}
+
+int setposF(int fd,long int pos)
+{
+	if(openfiles[fd].busy)
+	{
+		if (pos <0 || pos > openfiles[fd].size)
+			return 0;
+		return mySetPosF(fd,pos);
+	}
+	else
+		return 0;
+}
+
+
+
+bool eofF(int fd)
+{
+	if(openfiles[fd].busy)
+	{
+		return openfiles[fd].eof;
+	}
+	else
+		return true;
+}
+
+

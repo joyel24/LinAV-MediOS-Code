@@ -29,6 +29,8 @@ ataInc = 1
 
 ataCommand_READ_SECTORS     =   0x20
 ataCommand_READ_MULTIPLE    =   0xc4
+ataCommand_WRITE_SECTORS	=	0x30
+ataCommand_WRITE_MULTIPLE   =   0xc5
 ataCommand_SET_MULTIPLE_MODE=   0xc6
 ataCommand_IDENTIFY         =   0xec
 
@@ -42,30 +44,51 @@ ataSelectLBA                =   0x40
 
         .thumb
 
-@ ataReadLBA (r0->buffer, r1=lba, r2=n)
+@ ataReadLBAT (r0->buffer, r1=lba, r2=n)
 @       return 0-success, 1-Failed on waitRDY, 2-Failed on waitXFer
 .globl ataReadLBA
 .thumb_func
 ataReadLBA:
+	push {r4, lr}
+	mov r3, #1
+	callThumb r4, ataRWLBA
+	pop {r4, pc}
+
+@ ataWriteLBAT (r0->buffer, r1=lba, r2=n)
+@       return 0-success, 1-Failed on waitRDY, 2-Failed on waitXFer
+.globl ataWriteLBA
+.thumb_func
+ataWriteLBA:
+	push {r4, lr}
+	mov r3, #2
+	callThumb r4, ataRWLBA
+	pop {r4, pc}
+
+
+@ ataRWBAT (r0->buffer, r1=lba, r2=n, r3=R=1/W=2)
+@       return 0-success, 1-Failed on waitRDY, 2-Failed on waitXFer
+.globl ataRWLBA
+.thumb_func
+ataRWLBA:
         push {lr}
-        push {r2, r3, r4, r5, r6}
+        push {r2, r3, r4, r5, r6, r7}
         mov r5, r0
         mov r4, r1
         mov r6, r2
+		mov r7, r3
 
-        .ifdef hardwareAV300
+		.ifdef hardwareAV300
         ldr r0, =0x02600300
         mov r1, #8
-        strh r1, [r0]                        @ Spin up the HDD Please...        
-        .endif
+        strh r1, [r0]                        @ Spin up the HDD Please...
+		.endif
 
-        callThumb r1, ataWaitForRDY        
+        callThumb r1, ataWaitForRDY
         mov r1, r0
-        mov r0, #1
         cmp r1, #0
-         bne ataRT2
+        bne ataRT2
 
-        ldr r2, =ataRegSector
+        ldr r2, =ataRegSector @ id number of first sector
         mov r1, r4
         strb r1, [r2]
         ldr r2, =ataRegLCyl
@@ -83,30 +106,61 @@ ataReadLBA:
 
         ldr r2, =ataRegNSector
         strb r6, [r2]
-        
+
         ldr r2, =ataRegCommand
+		cmp r7, #2
+		beq doWrite
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ read
         ldr r1, =ataCommand_READ_SECTORS
         strb r1, [r2]
-
-        callThumb r1, ataWaitForStartOfXfer
+		callThumb r1, ataWaitForStartOfXfer
         mov r1, r0
-        mov r0, #2
         cmp r1, #0
-         bne ataRT2
+        bne ataRT3
+		ldr r2, =ataRegData
+        mov r1, #0
 
         lsl r6, #8              @ * 256
-        
-        ldr r2, =ataRegData
-        mov r1, #0
+
 ataR2:  ldrh r1, [r2]
         strh r1, [r5]
         add r5, #2
         sub r6, #1
-         bne ataR2
-
+        bne ataR2
         mov r0, #0
+		b endRWlba
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ write
+doWrite:
+		ldr r1, =ataCommand_WRITE_SECTORS
+		strb r1, [r2]
+		ldr r2, =ataRegData
+bgLoopWr:
+		callThumb r1, ataWaitForStartOfXfer
+        mov r1, r0
+        cmp r1, #0
+        bne ataRT3
+
+		mov r1, #0
+		mov r3, #1
+		lsl r3, #8
+loopWr:
+		ldrh r1, [r5]
+		strh r1, [r2]
+		add r5, #2
+		sub r3, #1
+		bne loopWr
+		sub r6, #1
+		bne bgLoopWr
+		mov r0, #0
+		b endRWlba
+ataRT3:
+		mov r0, #1
+		b endRWlba
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ataRT2:
-        pop {r2, r3, r4, r5, r6}        
+		mov r0, #2
+endRWlba:
+        pop {r2, r3, r4, r5, r6, r7}
         pop {r1}
         bx r1
 
@@ -122,9 +176,9 @@ ataIdentify:
         .ifdef hardwareAV300
         ldr r0, =0x02600300
         mov r1, #8
-        strh r1, [r0]                        @ Spin up the HDD Please...        
+        strh r1, [r0]                        @ Spin up the HDD Please...
         .endif
-        
+
         callThumb r1, ataWaitForRDY
         mov r1, r0
         mov r0, #1

@@ -46,6 +46,8 @@ fatInitT:
         mov r0, r6
         add r0, #36             @ BPB_FATSz32
         callThumb r3, fatRead4T
+		ldr r5, =fatSize
+		str r0, [r5]
         mov r5, r0
 
         mov r0, #0
@@ -206,12 +208,21 @@ getFatRootCluT:
 	ldr r0, =fatRootClu
 	ldr r0, [r0]
 	bx lr
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.globl getFatSize
+.thumb_func
+getFatSize:
+	ldr r0, =fatSize
+	ldr r0, [r0]
+	bx lr
         
         .ltorg
         
 fatClusterSize:     .word   0
 fatSecPerClu:       .word   0
 fatRootClu:         .word   0
+fatSize:			.word	0
 
 fatLBAFAT:          .word   0
 fatLBADATA:         .word   0

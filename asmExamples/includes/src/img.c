@@ -7,7 +7,7 @@
 int loadRGB(char *fileN)
 {
 	int curFile;
-	if((curFile=open(fileN))>=0)
+	if((curFile=openF(fileN))>=0)
 	{
 		terminalPutsCT("Opening image..", 0xfbfb);
 
@@ -16,7 +16,7 @@ int loadRGB(char *fileN)
 
 		int size=320*240;
 
-		while(read(curFile,image,90)>0 && size>0)
+		while(readF(curFile,image,90)>0 && size>0)
 		{
 			offset=loadImg(image,offset,30);
 			size-=30;
@@ -24,7 +24,7 @@ int loadRGB(char *fileN)
 				terminalPutsCT(".", 0xfbfb);
 
 		}
-		close(curFile);
+		closeF(curFile);
 
 		osdSetBackConfigT(0x14, 0x03);
         osdSetMainConfigT(0x14, 0xdd);
