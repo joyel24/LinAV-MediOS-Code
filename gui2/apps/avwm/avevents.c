@@ -35,17 +35,6 @@ void pack(void (*loopFct)(void))
     cur_plugin.handle_on=1;
     stopApp=0;
     
-    /*if(loopFct)
-    {
-        while(!stopApp)
-            loopFct();
-    }
-    else
-    {
-        inLoop=0;
-        pause_app();
-    }*/    
-    
     while(!stopApp)
     {
         if(loopFct)
@@ -61,10 +50,7 @@ void pack(void (*loopFct)(void))
 
 void myRelease_app(void)
 {
-    /*if(inLoop)*/
-        stopApp=1;
-    /*else
-        release_app();*/
+    stopApp=1;    
 }
 
 void procNxtEvent(int evt)

@@ -60,34 +60,29 @@ int eventHandler(int evt)
 int main(int argc,char * * argv)
 {
     int w, h, c;
-
-     REGISTER(cops,eventHandler,0);
-    cops->hideSBar();
-
     
-
-     cops->clearScreen(COLOR_WHITE);
-
-     c = 0;
-
-     for(w = 0; w < SCREEN_WIDTH; w+=7)
-     {
-        if(c == 1) c=0; else c=1;
-
+    REGISTER(cops,eventHandler,0);
+    cops->hideSBar();
+    
+    cops->clearScreen(COLOR_WHITE);
+    
+    c = 0;
+    
+    for(w = 0; w < SCREEN_WIDTH; w+=7)
+    {
+        c=(c==1?0:1);
+        
         for(h = 0; h < SCREEN_HEIGHT; h+=7)
-         {
+        {
             // Switch see palettes for each line
             if(c==0)
-                        cops->drawSprite ((PALETTE*)&pal1, &testS, w, h);
-                    else
-                        cops->drawSprite ((PALETTE*)&pal2, &testS, w, h);
-         }
-     }
-         
-         PACK(cops,NULL)
-         
-         STOPME(cops)
-
-    return 0;
+                cops->drawSprite ((PALETTE*)&pal1, &testS, w, h);
+            else
+                cops->drawSprite ((PALETTE*)&pal2, &testS, w, h);
+        }
+    }
+        
+    PACK(cops,NULL)
+    return 1;
 }
 

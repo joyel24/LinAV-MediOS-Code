@@ -861,8 +861,6 @@ int main(int argc, char * * argv)
     /* shut down everything used */
     
     cops->close_mp3_playback();
-    
-    STOPME(cops)
-    
-    return 0;
+        
+    return 1;
 }

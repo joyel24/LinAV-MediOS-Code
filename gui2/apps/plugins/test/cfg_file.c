@@ -200,8 +200,7 @@ to write nack the config
 
     PACK(cops,NULL)
     
-    STOPME(cops)
 
-    return ;
+    return 1;
 }
 

@@ -21,6 +21,7 @@ all: $(TARGET)
 	@rm -f *.gdb
 	@$(MAKE) -C bluecube/ all
 	@mv -f bluecube/tetris ../../build/avwm/plugins/
+	@$(MAKE) -C test/ all
 
 $(TARGET) : $(OBJS)
 	$(GCC) $@.o -o $@  $(LDFLAGS)
@@ -30,6 +31,7 @@ clean:
 	@rm -f *.o *.bak *~ *.gdb $(TARGET)
 	@rm -Rf ../../build/avwm/plugins
 	@$(MAKE) -C bluecube/ clean
+	@$(MAKE) -C test/ clean
         
 
 .c.o:

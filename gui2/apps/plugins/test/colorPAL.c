@@ -45,7 +45,5 @@ int main(int argc,char * * argv)
 	}
 		
 	PACK(cops, NULL);
-        STOPME(cops);
-
-	return 0;
+        return 0;
 }

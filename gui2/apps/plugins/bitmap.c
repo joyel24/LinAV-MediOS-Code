@@ -66,9 +66,7 @@ int main(int argc,char * * argv)
             cops->drawBITMAP (&testB, w, h);
 
     PACK(cops,NULL)
-    
-    STOPME(cops)
-
-    return ;
+   
+    return 0;
 }
 

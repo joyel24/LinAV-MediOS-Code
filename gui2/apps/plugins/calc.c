@@ -1351,9 +1351,6 @@ int main(int argc,char * * argv)
     init();
 
     PACK(cops,NULL);
-    STOPME(cops)
-
-    cops->showSBar();
-
+    
     return 1;
 }

@@ -213,7 +213,7 @@ int main(int argc,char * * argv)
 
     /* .. and loop. */
     PACK(cops,matrix);
-    STOPME(cops);
+
 
     return 0;
 }

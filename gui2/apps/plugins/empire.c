@@ -436,10 +436,7 @@ int main(int argc,char * * argv)
     empire_init();
 
     PACK(cops,NULL);
-    STOPME(cops)
-
-    cops->showSBar();
-
-    return;
+    
+    return 1;
 }
 

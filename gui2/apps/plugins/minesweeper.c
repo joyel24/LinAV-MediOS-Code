@@ -781,9 +781,5 @@ int main(int argc,char * * argv)
     setCursor(0);
 
     PACK(cops,NULL);
-    STOPME(cops)
 
-    cops->showSBar();
-
-    return 1;
 }

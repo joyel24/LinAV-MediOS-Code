@@ -60,6 +60,6 @@ int main(int argc,char * * argv)
     /* These two functions REQUIRED */
     /* Usage: PACK(cops, <main function>)*/
     PACK(cops, hello);
-    /* Stay here in the plugin */
-    STOPME(cops);
+    
+    return 1;
 }

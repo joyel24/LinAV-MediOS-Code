@@ -65,18 +65,14 @@ void eventHandler(int evt)
 
 int main(int argc,char * * argv)
 {
-	int evt;
-	REGISTER(cops,eventHandler,0);	
- stop=0;
- blocked=0;
- cops->hideSBar();
- 
-   snow_init();
-PACK(cops,snow_move);
-	
-        cops->showSBar();
-STOPME(cops)
-return 1;
+    int evt;
+    REGISTER(cops,eventHandler,0);	
+    stop=0;
+    blocked=0;
+    cops->hideSBar();    
+    snow_init();
+    PACK(cops,snow_move);        
+    return 1;
 }
 
 int GetTime()
