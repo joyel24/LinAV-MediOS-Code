@@ -118,7 +118,8 @@ char *bg_img=0x03b00000;
 int main(int argc,char **argv)
 {
     int ret,nbCfg,key,redraw;
-    int i,j;
+    int i,j,val;
+    int * ptrScreen=(int*)screenDirect;
     
     void (*systemRelocateAdjusted)();
 
@@ -144,9 +145,11 @@ usbenable=0;cleanUSBMsg=0;cnt=0;cursorPos=0;errNoDefault=0;cntNoDefault=0;stateN
     {
         COLOR_TSP=0xA6A6;
         pal16[0] = COLOR_TSP;
-        for (j=0;j<240;j++)
-            for (i=0;i<320*2;i++)            
-                screenDirect[j*320*2 + i] = COLOR_TSP;
+        val=COLOR_TSP | (COLOR_TSP<<8) | (COLOR_TSP<<16) | (COLOR_TSP<<24);
+        j=(240*320*2)/4;
+        for(i=0;i<j;i++)                
+            ptrScreen[i] = val;
+        
         graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader by OxyGen"); 
     }
 #endif  
@@ -427,7 +430,8 @@ void waitKeyReleased(void)
 
 void iniGraph()
 {
-    int i,j;
+    int i,j,val;
+    int * ptr=(int*)screenDirect;
     
     osdInitA();
     
@@ -452,9 +456,10 @@ void iniGraph()
     screenBitmap2.bitsPerPixelShift = 4;
     screenBitmap2.bitsPerPixel = 16;
     
-     for (j=0;j<240;j++)
-        for (i=0;i<320*2;i++)            
-            screenDirect[j*320*2 + i] = COLOR_TSP;//0x6c706c93;
+    val=COLOR_TSP | (COLOR_TSP<<8) | (COLOR_TSP<<16) | (COLOR_TSP<<24);
+    j=(240*320*2)/4;
+    for(i=0;i<j;i++)                
+        ptr[i] = val;//0x6c706c93;
             
     osdSetComponentSizeA(OSD_VIDEO1, 320*2, 240);
     osdSetComponentPositionA(OSD_VIDEO1, 0x14, 0x12);
