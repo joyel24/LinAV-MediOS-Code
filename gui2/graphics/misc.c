@@ -10,7 +10,7 @@
 * KIND, either express of implied.
 *
 */
-
+#include <stdlib.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
@@ -152,7 +152,7 @@ int getUSB(void)
 
 int setUSB(int state)
 {
-    int fd;
+    int fd,usb;
     fd=open("/dev/avusb",O_RDONLY | O_NONBLOCK);
         
     if (fd < 0)
@@ -161,7 +161,7 @@ int setUSB(int state)
         return 0;
     }
     
-    if(sate)
+    if(state)
         usb=AV_USB_IOC_ENABLE;
     else
         usb=AV_USB_IOC_DISABLE;
@@ -175,5 +175,5 @@ int setUSB(int state)
     
     close(fd);
     
-    return usb;
+    return 0;
 }
