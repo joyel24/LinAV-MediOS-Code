@@ -104,7 +104,7 @@ int eventHandler(int evt)
     {
         case BRW_MODE:
             cops->helperEvt(evt,BTN_JOY);
-            evt=cops->browserEvt(evt,bdata);
+            evt=browserEvt(evt,bdata);
             switch(evt)
             {
                 case BTN_RIGHT:
@@ -114,12 +114,12 @@ int eventHandler(int evt)
                     }
                     break;
                 case BTN_F1:
-                    if(!cops->viewNewDir(bdata,"/mnt"))
+                    if(!viewNewDir(bdata,"/mnt"))
                         stopLs();
                     break;
                 case BTN_F2:
                     if(cops->CF_is_mounted())
-                        if(!cops->viewNewDir(bdata,"/cf"))
+                        if(!viewNewDir(bdata,"/cf"))
                             stopLs();
                     break;
                 case BTN_F3:
@@ -130,7 +130,7 @@ int eventHandler(int evt)
                     cops->menuEvtHandler(EVT_REDRAW);
                     break;
                 case BTN_ON:
-                    cops->chgSelect(bdata,bdata->pos+bdata->nselect);
+                    chgSelect(bdata,bdata->pos+bdata->nselect);
                     break;
                 case BTN_OFF:
                 case EVT_QUIT:
@@ -143,11 +143,11 @@ int eventHandler(int evt)
                     getcwd(pwd, 10);
                     pwd[10]='\0';
                     if(pwd[0]=='/' && pwd[1]=='c' && pwd[2]=='f' && (pwd[3]=='/'||pwd[3]=='\0'))
-                        if(!cops->viewNewDir(bdata,"/mnt"))
+                        if(!viewNewDir(bdata,"/mnt"))
                             stopLs();
                     break;
                 case EVT_CF_ADDED:
-                    if(!cops->viewNewDir(bdata,"/cf"))
+                    if(!viewNewDir(bdata,"/cf"))
                         stopLs();
                     break;
             }
@@ -170,6 +170,8 @@ int main(int argc,char * * argv)
     nselect=0;*/
     bdata = &realData;
 
+    iniBrowser();
+    
     if(argc>0)
     {
         cops->disableMenu();
@@ -189,7 +191,7 @@ int main(int argc,char * * argv)
         else
             chdir(argv[1]);
 
-        if(!cops->viewNewDir(bdata,"./"))
+        if(!viewNewDir(bdata,"./"))
         {
             STOPME(cops)
             return -1;
@@ -197,7 +199,7 @@ int main(int argc,char * * argv)
         
         PACK(cops,NULL);
 
-        cops->cleanList(bdata);
+        cleanList(bdata);
         return 0;
     }
     STOPME(cops)

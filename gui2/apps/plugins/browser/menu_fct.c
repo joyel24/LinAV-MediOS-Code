@@ -202,7 +202,7 @@ void do_right(void * data)
         case MENU_MOVE:
             copy_mode=MODE_MOVE;
         case MENU_COPY:
-            if(cops->nbSelected(bdata)==0)
+            if(nbSelected(bdata)==0)
                 cops->msgBox("Warning - copy", "Select files first", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
             else
             {
@@ -215,10 +215,10 @@ void do_right(void * data)
                 
                 bdata2=&browser2;
                 evt_mode=CP_MV_MODE;
-                cops->clearBrowser(bdata);
+                clearBrowser(bdata);
                 cops->putS(COLOR_WHITE, COLOR_RED, 5,20, "Select the destination folder");
                 cops->drawRect(COLOR_BLACK,bdata2->x_start-1,bdata2->y_start-1,bdata2->width+2,bdata2->height+2);
-                if(!cops->viewNewDir(bdata2,pwd))
+                if(!viewNewDir(bdata2,pwd))
                     stopLs();
             }
             break;
@@ -262,7 +262,7 @@ void do_right(void * data)
     cops->iniHelperMenu(&browserMenu);
     
     if(reload == true)
-        if(!cops->viewNewDir(bdata,"./"))
+        if(!viewNewDir(bdata,"./"))
             stopLs();
     
 }
@@ -303,17 +303,17 @@ void cp_mv_evt(int evt)
     int pos_list=0;
     char src[PATHLEN];
     struct dir_entry * entry;
-    evt=cops->browserEvt(evt,bdata2);
+    evt=browserEvt(evt,bdata2);
     switch(evt)
     {
         //case BTN_RIGHT: dest has to be dir atm
         case BTN_ON:
-            cops->clearBrowser(bdata2);
+            clearBrowser(bdata2);
             evt_mode=BRW_MODE;
             if(!getcwd(&pwd2,PATHLEN))
             {
                 cops->msgBox("Warning - Copy/Move", "Can't get dest path", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
-                if(!cops->viewNewDir(bdata,pwd))
+                if(!viewNewDir(bdata,pwd))
                     stopLs();
                 break;
             }
@@ -321,14 +321,14 @@ void cp_mv_evt(int evt)
             if(!strcmp(pwd,pwd2))
             {
                 cops->msgBox("Warning - Copy/Move", "dest==src", MSGBOX_TYPE_OK, MSGBOX_ICON_WARNING);
-                if(!cops->viewNewDir(bdata,pwd))
+                if(!viewNewDir(bdata,pwd))
                     stopLs();
                 break;
             }
                         
             printf("copying from %s to %s\n",pwd,pwd2);
             
-            while((entry=cops->nxtSelect(bdata,&pos_list))!=NULL)
+            while((entry=nxtSelect(bdata,&pos_list))!=NULL)
             {
                 fprintf(stderr,"- %s %s",entry->name,entry->type==TYPE_DIR?"folder":"file");
                 snprintf(src,PATHLEN,"%s/%s",pwd,entry->name);
@@ -337,12 +337,12 @@ void cp_mv_evt(int evt)
                 else
                     if(!cops->do_cp(src,pwd2)) fprintf(stderr," - cp error\n"); else fprintf(stderr," - cp done\n");                
             }
-            if(!cops->viewNewDir(bdata,pwd2))
+            if(!viewNewDir(bdata,pwd2))
                 stopLs();
             break;
          case BTN_OFF:
-             cops->clearBrowser(bdata2);
-             if(!cops->viewNewDir(bdata,pwd))
+             clearBrowser(bdata2);
+             if(!viewNewDir(bdata,pwd))
                  stopLs();
              break;
     }

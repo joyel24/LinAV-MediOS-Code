@@ -33,8 +33,9 @@ endif
 
 force: clean all        
         
-$(TARGET) : $(OBJS) browser_dir lib_dir
-	$(GCC) $(OBJS) browser/*.o -o $@  $(LDFLAGS)
+$(TARGET) : $(OBJS) lib_dir
+	$(GCC) $(OBJS)  -o $@  $(LDFLAGS)
+#browser_dir browser/*.o
 ifeq ($(HOST),CYGWIN)
 	@mv $@.elf.bflt $@
 endif

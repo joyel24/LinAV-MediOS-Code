@@ -23,6 +23,7 @@
 #include "helperMenu.h"
 #include "browser.h"
 #include "scrollbar.h"
+#include "icons.h"
 
 #define     MERGE_BACK              0x0000
 #define     BMAP_0TRANS             0x0004
@@ -159,13 +160,13 @@ struct client_operations {
     int  (*get_file_type)       (char * filename);
     void (*handle_type_other)   (char *filename);
     
-    int  (*browserEvt)          (int evt,struct browser_data * bdata);
+/*    int  (*browserEvt)          (int evt,struct browser_data * bdata);
     int  (*viewNewDir)          (struct browser_data *bdata,char *name);
     void (*clearBrowser)        (struct browser_data *bdata);
     void (*cleanList)           (struct browser_data * bdata);
     void (*chgSelect)           (struct browser_data *bdata,int num);
     int  (*nbSelected)          (struct browser_data * bdata);
-    struct dir_entry * (*nxtSelect) (struct browser_data * bdata,int * pos);
+    struct dir_entry * (*nxtSelect) (struct browser_data * bdata,int * pos);*/
     int  (*do_mv)               (char * src,char * dest);
     int  (*do_cp)               (char * src,char * dest);
     
@@ -178,6 +179,8 @@ struct client_operations {
     void (*hideHelper)                 (void);
     
     void (*draw_scrollBar)             (struct scroll_bar * scrollBar, int items, int min_shown,int max_shown);
+    
+    struct icon_elem * (*getIcon)      (char * name);
 
 };
 

@@ -93,7 +93,7 @@ int main(int argc,char * * argv)
     iniMsgBox();
     iniEditBox();
     
-    iniBrowser();
+    //iniBrowser();
 
     if(!ini_menu(path,&menu_plugin))
     {

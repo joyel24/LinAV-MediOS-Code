@@ -139,7 +139,7 @@ struct client_operations cops={
     get_file_type      : get_file_type,
     handle_type_other  : handle_type_other,
     
-    browserEvt         : browserEvt,
+/*    browserEvt         : browserEvt,
     viewNewDir         : viewNewDir,
     clearBrowser       : clearBrowser,
     cleanList          : cleanList,
@@ -147,7 +147,7 @@ struct client_operations cops={
     nbSelected         : nbSelected,
     nxtSelect          : nxtSelect,
     do_cp              : do_cp,
-    do_mv              : do_mv,
+    do_mv              : do_mv,*/
     
     powerOff_timer_on         : powerOff_timer_on,
     powerOff_timer_off        : powerOff_timer_off,
@@ -158,4 +158,6 @@ struct client_operations cops={
     hideHelper        : hideHelper,
     
     draw_scrollBar    : draw_scrollBar,
+    
+    getIcon           : getIcon,
 };

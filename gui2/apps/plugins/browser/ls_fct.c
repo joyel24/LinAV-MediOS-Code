@@ -22,6 +22,7 @@
 #include "avstring.h"
 #include "graphics.h"
 #include "colordef.h"
+#include "cops.h"
 
 #define LISTSIZE   256
 
@@ -30,6 +31,23 @@ int                listused=0;
 int                listsize=0;
 
 int nbFile=0,nbDir=0,totSize=0;*/
+
+extern struct client_operations * cops;
+
+#define    toLower(chr)  ((chr>64 && chr<91)?chr+32:chr)
+
+int namesort(char **s1,char **s2)
+{
+    char * st1=*s1;
+    char * st2=*s2;
+    while(*st1!=0 && *st2!=0 && toLower(*st1) == toLower(*st2))
+    {
+        st1++;
+        st2++;
+    }
+
+    return (toLower(*st1) - toLower(*st2));
+}
 
 void cleanList(struct browser_data * bdata)
 {
