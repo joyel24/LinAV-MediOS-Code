@@ -642,7 +642,7 @@ read2T:
                 
         .ltorg
         
-msg1:   .asciz " -- avOS BootLoader version 0.2a (c)2004 DoGgGeR -- \n\n"
+msg1:   .asciz " -- avOS BootLoader version 0.2a (c)2004 DoGgEr -- \n\n"
 msg2:   .asciz "Initialising ATA...                        "
 msg3:   .asciz "Identifying hard drive...                  "
 msg4:   .asciz " Serial:    xxxxxxxxxxxxxxxxxxxx\n"
