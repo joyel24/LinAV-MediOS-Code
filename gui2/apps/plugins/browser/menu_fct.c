@@ -29,15 +29,15 @@ struct menu_data menu_cfg = {
     select_color   : COLOR_BLUE,
     sub_color      : COLOR_RED,
     border_color   : COLOR_BLACK,
-    has_border     : 0,
+    has_border     : 1,
     title          : NULL,
     root           : NULL,
-    right_action   : do_right,
-    on_action      : do_on,
-    off_action     : do_off,
+    right_action   : do_action,
+    on_action      : do_action,
+    off_action     : do_out,
     f1_action      : do_F1,
     f2_action      : do_F2,
-    f3_action      : do_F3,
+    f3_action      : do_out,
     item_str       : mk_item_str,
     submenu_str    : mk_item_str,
     getSubIcon     : NULL,
@@ -168,14 +168,10 @@ void ini_menu_struct(struct browser_data * bdata)
     
 }
 
-void do_off(void * data)
+void do_out(void * data)
 {
     cops->stop_menu();
     evt_mode=BRW_MODE;
-}
-
-void do_on(void * data)
-{
 }
 
 char pwd[PATHLEN];
@@ -183,7 +179,7 @@ char pwd2[PATHLEN];
 
 int copyMode=0;
 
-void do_right(void * data)
+void do_action(void * data)
 {
     char text[MAX_EDIT_CHARS];
     char* ptext = NULL;

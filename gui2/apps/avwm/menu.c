@@ -176,9 +176,7 @@ void start_menu(struct menu_data * client_menu)
 
         setPlane(BMAP2);
         clearScreen(current_menu->bg_color);
-        if(current_menu->has_border)
-            drawRect(current_menu->border_color,0,0,current_menu->width,current_menu->height);
-        
+                
         setPos(BMAP2,0x14 +2*current_menu->x,0x13+current_menu->y);
         setPlane(BMAP1);
     }
@@ -264,6 +262,10 @@ void normMenu_handler(int evt)
                 CHG_PLANE
                 fillRect(current_menu->bg_color,current_menu->dx, current_menu->dy,
                              current_menu->width-current_menu->dx,(h+1)*MAXPOS);
+                if(current_menu->has_border)
+                {
+                    drawRect(current_menu->border_color,0,0,current_menu->width,current_menu->height);
+                }
                 RESTORE_PLANE
                 dispAllName_norm(pos,nselect);
                 clearEventQueue();
@@ -298,6 +300,10 @@ void normMenu_handler(int evt)
             CHG_PLANE
             fillRect(current_menu->bg_color,0 , current_menu->dy,
                         current_menu->width, current_menu->height-current_menu->dy);
+            if(current_menu->has_border)
+            {
+                drawRect(current_menu->border_color,0,0,current_menu->width,current_menu->height);
+            }
             RESTORE_PLANE
             pos=current_menu->root;
             pselect=current_menu->root;
@@ -437,8 +443,19 @@ void iconMenu_handler(int evt)
                     ptr=ptr->prev;
                     
                 ptr=getNxtLine(ptr);
-                if(!ptr) /* we are already at the end of  */
+                if(!ptr || (jselect!=(MaxJ-1) && !getNxtLine(pselect))) /* we are already at the end of  */
+                {
+                    /*dispName_icon(pselect,iselect,jselect,1,0,0);
+                    jselect=0;
+                    
+                    while(pos->prev!=NULL)
+                        pos=pos->prev;
+                    pselect=pos;
+                    for(var=0;var<iselect;var++)
+                        pselect=pselect->nxt;
+                    dispName_icon(pselect,iselect,jselect,1,0,1);    */
                     break; 
+                }
                 dispName_icon(pselect,iselect,jselect,1,0,0);
                 CHG_PLANE
                 scrollWindowVert(current_menu->bg_color, current_menu->dx, current_menu->dy,

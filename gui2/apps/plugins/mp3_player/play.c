@@ -34,6 +34,8 @@ struct client_operations * cops;
 #define MWINCLUDECOLORS
 
 
+//#define PLAY_DIR
+
 //char buffer[MP3_BUFF_SIZE];
 
 /******************************
@@ -117,13 +119,13 @@ int main(int argc, char * * argv)
     
     iniPlaylist();
     
-    /*if(argc<2)
+    if(argc<2)
        return 0; 
     else
     {
         filename=argv[1];
     }
-    
+/*    
     fd=fopen(filename,"ro");
     if(fd<0)
     {
@@ -134,10 +136,14 @@ int main(int argc, char * * argv)
     fseek(fd,0,SEEK_END);
     file_size = ftell(fd);
     fseek(fd,0,SEEK_SET);*/
-    
+#ifdef PLAY    _DIR
     nbFile=addDir("./");
     fprintf(stderr,"found %d files in dir (nb in list:%d)\n",nbFile,nbEntryInList());
     showList();
+#else
+    if(!addPlaylist(filename))
+        return 0;
+#endif
     
     /* openning current file */
     
