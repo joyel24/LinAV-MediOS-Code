@@ -18,6 +18,7 @@
 #include <X11/Xutil.h>
 #include "graphics.h"
 #include "X11/keysym.h"
+#include "misc.h"
 
 extern Display* display;
 extern Window window;	/*variable Event */
@@ -53,6 +54,7 @@ int getKey(int key)
 {
     switch(key)
     {
+    /* Fonctions principales (boutons) */
 	case XK_KP_Left:
 	case XK_Left:
 	case XK_KP_4:
@@ -110,6 +112,14 @@ int getKey(int key)
 	case XK_3:
 	    return BTN_F3;
             break;
+	    
+	/* Autres evenements */
+	    
+	case XK_u:
+	case XK_U:
+	  getUSB();
+	  return EVT_USB;
+	break;
         }
 }
 

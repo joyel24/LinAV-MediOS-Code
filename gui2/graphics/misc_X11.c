@@ -12,6 +12,10 @@
 */
 
 #include "misc.h"
+#include "events.h"
+
+/* Global variables */
+int stat = 0;
 
 int getTimeS(char * timeSt)
 {    
@@ -39,8 +43,17 @@ int getPwr(void)
 }
 
 int getUSB(void)
-{
-    return 0;
+{   
+    if(stat == 0)
+    {
+      stat = 1;
+    }
+    else
+    {
+      stat = 0;
+    }
+  printf("%d\n", stat);
+  return stat;
 }
 
 int setUSB(int state)
