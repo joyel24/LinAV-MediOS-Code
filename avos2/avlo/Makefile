@@ -27,7 +27,7 @@ $(TARGET): $(OBJS)
 clean:
 	@echo "**** Cleaning..."
 	@rm -f include/*~ include/*.bak
-	@rm -f *.o *.O *.bak *~
+	@rm -f *.o *.O *.bak *~ *.bin *.head *.ajz
 spotless: clean
 	@rm -f $(TARGET)
 

@@ -220,9 +220,12 @@ void iniHD()
 	inidir();
 	inifatinfo();
 	
+	usbDisableA();
 	ataSelectHDDA();
 	ataPowerUpHDDA();
+	usbDisableA();
 	ataReadMBR();
+	
 	
 	if((fatHD = fatInit(getPartition(0)))<0)
 		err();
