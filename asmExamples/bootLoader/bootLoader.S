@@ -206,7 +206,7 @@ waitScr:
          bne waitScr
 
 @ ------------------------------------------------------------------------------
-@ Find files
+@ Find ini files
 @ ------------------------------------------------------------------------------
 
 		ldr r0, =fatRootClu             @ Start at root dir.
@@ -440,7 +440,13 @@ notm1:
         ldr r4, =bufferx
         add r4, r0
                                     @ r4->file entry
-        mov r0, r4
+		mov r1, #0
+        ldrb r1, [r4, #11]          @ ATTR
+        mov r2, #0x10
+        tst r1, r2
+         bne notm2                  @ is it (not a dir)?
+
+		 mov r0, r4
         add r0, #20
         callThumb r5, read2T
         mov r3, r0
@@ -449,15 +455,58 @@ notm1:
         add r0, #26
         callThumb r5, read2T
         orr r0, r3
+		mov r3,r0	@ r3 = cluster adr of file
 
-        mov r1, #0
-        ldrb r1, [r4, #11]          @ ATTR
-        mov r2, #0x10
-        tst r1, r2
-         bne notm2                  @ is it (not a dir)?
+		mov r0, r4
+        add r0, #8
+        ldr r1, =(fileExt)
+        mov r2, #3
+        callThumb r4, memMoveT  @ get ext
 
-        callThumb r4, launchFile                @ Launch the file...
+		ldr r1, =fileExt
+		ldr r0, =binExt
+		mov r2, #3
+		callThumb r4, cmpStr
+		cmp r2,#0
+		beq nxtExt
+		mov r0, r3
+        callThumb r4, launchFile                @ Launch the bin file...
 		b lNdir
+nxtExt:
+		ldr r1, =fileExt
+		ldr r0, =rgbExt
+		mov r2, #3
+		callThumb r4, cmpStr
+		cmp r2,#0
+		beq nxtExt2  @ display rgb img
+		callThumb r0, lcdClsT      @ Clear screen...
+		mov r0, r3
+		callThumb r4, loadImg
+waKPress:
+		callThumb r0, buttonsGetStatusT @ wait for a key press
+        ldr r1, =0x777
+        cmp r0, r1
+		beq waKPress
+waRelease:
+		callThumb r0, buttonsGetStatusT @ wait for all keys release
+        ldr r1, =0x777
+        cmp r0, r1
+		bne waRelease
+
+		callThumb r4, loadDisp @ reload avos bkg image
+
+		b lNdir
+nxtExt2:
+		ldr r1, =fileExt
+		ldr r0, =rgbExt
+		mov r2, #3
+		callThumb r4, cmpStr
+		cmp r2,#0
+		beq nxtExt3  @ display txt
+
+
+nxtExt3:
+		b notm2
 notm2:
         ldr r0, timeoutC
         cmp r0, #0
@@ -625,18 +674,13 @@ loopLE:
 
 
 @ ------------------------------------------------------------------------------
-@ r0 -> LBAbuffer r1->file name r2->cluster save
+@ r0 -> str1 r1->str2 r2->size output: r2==1 if str1==str2
 @ ------------------------------------------------------------------------------
 
-getFileCluT:
-		push {r0, r1, r2, r3, r4, r5, r6, r7, lr}
-
-		mov r7, r0
-		mov r6, r1
-		mov r5, r2
-        mov r2, #11
-        mov r3, #0
-        mov r4, #0
+cmpStr:
+		push {r0, r1, r3, r4}
+		mov r3, #0
+		mov r4, #0
 lcmpe1: ldrb r3, [r1]
         ldrb r4, [r0]
         cmp r3, r4
@@ -645,15 +689,35 @@ lcmpe1: ldrb r3, [r1]
         add r0, #1
         sub r2, #1
         bne lcmpe1
+		mov r2, #1
+		pop {r0, r1, r3, r4}
+		bx lr
+ncmpe1:
+		mov r2, #0
+		pop {r0, r1, r3, r4}
+		bx lr
+
+
+@ ------------------------------------------------------------------------------
+@ r0 -> LBAbuffer r1->file name r2->cluster save
+@ ------------------------------------------------------------------------------
+
+getFileCluT:
+		push {r0, r1, r2, r3, r4, r5, r7, lr}
+		mov r7, r0
+		mov r5, r2
+		mov r2, #11
+		callthumb r4, cmpStr
+		cmp R2, #0
+		beq outGetFile
 
 .ifdef uartDebug
-	mov r0, r6					@@@ send debug info on UART
+	mov r0, r1					@@@ send debug info on UART
 	ldr r1, =(msg782+12)
 	mov r2, #11
 	callthumb r4, memMoveT
 	callthumb1 r4, uartOutsT, msg782
 .endif
-
         mov r0, r7
         add r0, #20
         callThumb r1, read2T
@@ -665,10 +729,8 @@ lcmpe1: ldrb r3, [r1]
         orr r3, r0
 		mov r1, r5
         str r3, [r1]		@ save cluster # of file...
-
-		pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
-ncmpe1:
-		pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
+outGetFile:
+		pop {r0, r1, r2, r3, r4, r5, r7, pc}
 
 @ ------------------------------------------------------------------------------
 @ r0=LBA of dir... r1->bufferx update dirCurrentScroll, dirCurrentCursor
@@ -761,10 +823,10 @@ loadImg:
         ldr r3, =lcdVideoBuffer2
         ldr r5, =(320*240)
 
-		ldr r1, =bufferImg
+		ldr r1, =bufferx2
 		mov r0, r7
 		callthumb r4, fatReadCT
-		ldr r4, =bufferImg
+		ldr r4, =bufferx2
 lcop:
 		mov r0, #0
         mov r1, #0
@@ -800,7 +862,7 @@ nxtClust:
 		mov r2, r4
 		ldr r0, =fatClusterSize
 		ldr r0, [r0]
-		ldr r1, =bufferImg
+		ldr r1, =bufferx2
 		add r0, r1
 		sub r2, r0
 		bne outNxtClust
@@ -815,9 +877,9 @@ outNxtClust:
 		pop {r0, r1, r2, pc}
 getNxtClust:
 		mov r0, r7
-		ldr r1, =bufferImg
+		ldr r1, =bufferx2
 		callThumb r4, fatReadCT
-		ldr r4, =bufferImg
+		ldr r4, =bufferx2
 		pop {r0, r1, r2, pc}
 
 @ ------------------------------------------------------------------------------
@@ -944,6 +1006,10 @@ msg_001:.asciz " -- avOs BootLoader Version 0.4a (c)2004 DoGgEr -- "
 
 dirLine:.asciz "xxxxxxxx.xxx"
 dirEmpt:.asciz ".           "
+fileExt:.asciz "xxx"
+binExt: .asciz "BIN"
+rgbExt: .asciz "RGB"
+txtExt: .asciz "TXT"
 
 
 
@@ -962,4 +1028,4 @@ dirEmpt:.asciz ".           "
 fatbuffLBA: .word 0
 fatbuff:    .space 512, 0
 bufferx:    .space 512, 0
-bufferImg:  .space 512, 0
+bufferx2:  .space 512, 0
