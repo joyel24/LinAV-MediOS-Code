@@ -12,7 +12,8 @@ DEST=../lib
 LIB_CONTENT= \
 	graphics.o \
 	osd.o \
-	events.o
+	events.o \
+        misc.o
 
 TARGET = libGraphics.a
 	

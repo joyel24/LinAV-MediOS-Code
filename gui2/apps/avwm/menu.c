@@ -1,3 +1,16 @@
+/*
+* menu.c
+*
+* linav - http://linav.sourceforge.net
+* Copyright (c) 2004 by Christophe THOMAS
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -5,10 +18,12 @@
 
 #include "graphics.h"
 #include "events.h"
-#include "avwm.h"
+#include "cops.h"
 #include "parse_cfg.h"
 #include "menu.h"
 #include "colordef.h"
+#include "plugin.h"
+#include "avevents.h"
 
 #define SHOW_ALL        1
 #define	LISTSIZE        256
@@ -16,6 +31,8 @@
 
 #define MAXPOS       10
 #define TITLE_OFFSET  2
+
+#define MENU_FILE_NAME "menu.cfg"
 
 //#define FONT_HEIGHT  10 // now using graphic function for that
 
@@ -32,6 +49,39 @@ char value_buff[MAX_TOKEN+1];
 struct cfg_menu * current_item=NULL;
 
 extern int cfg_line_num;
+
+struct plugin * menu_plug;
+
+int ini_menu(char * path,struct plugin * plug)
+{
+	char * tmpC;
+        int i;
+        
+        menu_plug=plug;
+        
+	clearScreen(COLOR_BLACK);
+	putS(COLOR_WHITE,COLOR_BLACK,5,110,"Reading menu file ....");
+    
+        tmpC=(char*)malloc(sizeof(char)*(strlen(path)+1+strlen(MENU_FILE_NAME)));
+        sprintf(tmpC,"%s/%s",path,MENU_FILE_NAME);
+        
+        if(loadMenu(tmpC)<0)
+        {
+            putS(COLOR_RED,COLOR_BLACK,5,120,"Error reading menu => stoping");
+            for(i=0;i<10000;i++) /* nothing */
+            free(tmpC);
+            return 0;
+        }
+        
+#ifdef DO_DEBUG
+        printMenu();
+#endif
+
+        doRegisterPlugin(menu_plug,menuEvtHandler,0);
+        
+        free(tmpC);
+        return 1;
+}
 
 void cleanMenu(struct menu_item * root)
 {
@@ -278,137 +328,112 @@ void printAName(struct menu_item * pos, int posY, int clear, int selected)
 
 extern int stopWM;
 
-int eventHandler(int evt)
+void menuEvtHandler(int evt)
 {
    int w = 0;
-	int h = 0;
+   int h = 0;
 
    getStringS("M", &w, &h);
 
-	switch(evt) {
-		case BTN_UP:
-			if(nselect==0) // moving out of current window
-			{
-				if(!pos->prev) // we are at the beg => nothing to change
-					break; // to do rolling menu code to change is here
+    switch(evt) {
+        case BTN_UP:
+            if(nselect==0) // moving out of current window
+            {
+                if(!pos->prev) // we are at the beg => nothing to change
+                    break; // to do rolling menu code to change is here
 
-				pos=pos->prev;
-				pselect=pos;
+                pos=pos->prev;
+                pselect=pos;
 
-				scrollWindowVert(COLOR_WHITE, 5, h+6+MENU_SHADOW, 315, (h+1)*MAXPOS, h+1,0);
-			}
-			else // just going up
-			{
-				nselect--;
-				pselect=pselect->prev;
-			}
-			printAName(pselect->nxt,nselect+1,1,0);
-			printAName(pselect,nselect,1,1);
-			break;
-		case BTN_DOWN:
-			if(!pselect->nxt) // we are at the end => can't go down anymore
-				break;
+                scrollWindowVert(COLOR_WHITE, 5, h+6+MENU_SHADOW, 315, (h+1)*MAXPOS, h+1,0);
+            }
+            else // just going up
+            {
+                nselect--;
+                pselect=pselect->prev;
+            }
+            printAName(pselect->nxt,nselect+1,1,0);
+            printAName(pselect,nselect,1,1);
+            break;
+        case BTN_DOWN:
+            if(!pselect->nxt) // we are at the end => can't go down anymore
+                break;
 
-			if(nselect==MAXPOS-1) // moving out of the window
-			{
-				if(!pos->nxt) // we are at the end => can't go down anymore
-					break;
-				
-				pos=pos->nxt;
-				pselect=pos;
-				
-				scrollWindowVert(COLOR_WHITE, 5, h+6+MENU_SHADOW, 315, (h+1)*MAXPOS, h+1,1);
-			}
-			else
-			{
-				nselect++;
-				pselect=pselect->nxt;
-			}
-			printAName(pselect->prev,nselect-1,1,0);
-			printAName(pselect,nselect,1,1);
-			break;
-		case BTN_RIGHT:
-			if(pselect->sub) // submenu
-			{
-				pos=pselect->sub;
-				nselect=0;
-				pselect=pos;
-				fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
-				printAllName(pos,nselect);
-				clearEventQueue();
-			}
-			else // launch plugin
-			{
-				if(pselect->data->link[0]!=0)
-				{
-					if(pselect->data->param[0]!=0)
-					{
-						if(loadPlugin(pselect->data->link,pselect->data->param)>=0)
-							stop=1;
-					}
-					else
-					{
-						if(loadPlugin(pselect->data->link,NULL)>=0)
-							stop=1;
-					}
-				}
-			}
-			break;
-		case BTN_LEFT:
-			if(pselect->up)
-			{
-				if(pos->up)
-				{
-					if(pos->up->up)
-						pos=pos->up->up;	
-					else
-						pos=rootMenu;
-					nselect=0;
-					pselect=pos;
-					fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
-					printAllName(pos,nselect);
-					clearEventQueue();
-				}
-			}
-			break;
-		case BTN_OFF:
-			stopWM=1;
-			stop=1;
-			break;
-	}
-	return 0;
+            if(nselect==MAXPOS-1) // moving out of the window
+            {
+                if(!pos->nxt) // we are at the end => can't go down anymore
+                    break;
+                
+                pos=pos->nxt;
+                pselect=pos;
+                
+                scrollWindowVert(COLOR_WHITE, 5, h+6+MENU_SHADOW, 315, (h+1)*MAXPOS, h+1,1);
+            }
+            else
+            {
+                nselect++;
+                pselect=pselect->nxt;
+            }
+            printAName(pselect->prev,nselect-1,1,0);
+            printAName(pselect,nselect,1,1);
+            break;
+        case BTN_RIGHT:
+            if(pselect->sub) // submenu
+            {
+                pos=pselect->sub;
+                nselect=0;
+                pselect=pos;
+                fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
+                printAllName(pos,nselect);
+                clearEventQueue();
+            }
+            else // launch plugin
+            {
+                if(pselect->data->link[0]!=0)
+                {
+                    if(pselect->data->param[0]!=0)
+                    {
+                        if(loadPlugin(pselect->data->link,pselect->data->param)>=0)
+                        	menu_plug->handle_on=0;                            
+                    }
+                    else
+                    {
+                        if(loadPlugin(pselect->data->link,NULL)>=0)
+                        	menu_plug->handle_on=0;
+                    }
+                }
+            }
+            break;
+        case BTN_LEFT:
+            if(pselect->up)
+            {
+                if(pos->up)
+                {
+                    if(pos->up->up)
+                        pos=pos->up->up;    
+                    else
+                        pos=rootMenu;
+                    nselect=0;
+                    pselect=pos;
+                    fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
+                    printAllName(pos,nselect);
+                    clearEventQueue();
+                }
+            }
+            break;
+        case BTN_OFF:
+            stopWM=1;
+            break;
+        case EVT_REDRAW:
+            fillRect(COLOR_WHITE,0 , h+6+MENU_SHADOW, 320, 240-h-6-MENU_SHADOW);
+            pos=rootMenu;
+            pselect=rootMenu;
+            nselect=0;
+            printAllName(pos,nselect);
+    }
 }
 
-extern int timerOn;
-
-void doDraw()
-{
-	int evt;
-   int w = 0;
-	int h = 0;
-
-   getStringS("M", &w, &h);
-
-	pos=rootMenu;
-	pselect=rootMenu;
-	nselect=0;
-	stop=0;
-
-	fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW/*20*/, 315,(h+1)*MAXPOS);
-	printAllName(pos,nselect);
-
-
-	while(!stop) /*wait */
-	{
-		evt=waitEvent();
-		if(timerOn && evt==EVT_TIMER)
-		{
-			processTimeOut();
-		}
-
-		eventHandler(evt);
-	}
-}
+/* txt function used for debug */
 
 void doPrint(struct menu_item * ptr,int level)
 {

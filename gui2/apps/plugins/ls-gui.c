@@ -6,7 +6,9 @@
 
 #include   "graphics.h"
 #include   "events.h"
-#include   "avwm.h"
+
+#include "cops.h"
+#include "avevents.h"
 
 #define    SHOW_ALL   1
 #define    LISTSIZE   256
@@ -237,13 +239,9 @@ int execBin(char * path, ...)
         if (pid > 0)
         {
             int status;
-            cops->closeScreen();
-            cops->stopEvt();
-            cops->stopTimout();
+            cops->closeScreen();            
             waitpid(pid, &status, 0);
-            cops->openScreen();
-            cops->startEvt();
-            cops->startTimout();
+            cops->openScreen();         
         }
         else
         {
@@ -422,7 +420,7 @@ int main(int argc,char * * argv)
     int w = 0;
     int h = 10;
 
-    REGISTER(cops,eventHandler);
+    REGISTER(cops,eventHandler,0);
 
     pos=0;
     nselect=0;
@@ -442,7 +440,7 @@ int main(int argc,char * * argv)
         PACK(cops);
 
         cops->getStringS("M", &w, &h);
-        cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 320,225);
+        cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,240-h-6-MENU_SHADOW);
         printAllName(pos,nselect);
 
         while(!stop) /*wait */

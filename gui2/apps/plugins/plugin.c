@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "avwm.h"
+#include "cops.h"
+#include "avevents.h"
 #include "font.h"
 
 #define WHITE        0
@@ -15,7 +16,7 @@ struct client_operations * cops;
 
 int main(int argc,char * * argv)
 {
-	REGISTER(cops,NULL);
+	REGISTER(cops,NULL,0);
 	
 	cops->fillRect(WHITE,5, 15 , 320,225);
 	cops->putS(BLACK, BLUE,10, 40, "string 1");

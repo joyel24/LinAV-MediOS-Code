@@ -4,7 +4,7 @@ GCC=$(TOOL)-gcc
 AR=$(TOOL)-ar
 RANLIB=$(TOOL)-ranlib
 
-GCCFLAGS=-I../../include -I../avwm
+GCCFLAGS=-I../../include -I../avwm/include
 LDFLAGS=-elf2flt
 
 SRC = $(wildcard *.c)

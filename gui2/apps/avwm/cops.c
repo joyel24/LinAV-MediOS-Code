@@ -1,0 +1,48 @@
+/*
+* cops.c
+*
+* linav - http://linav.sourceforge.net
+* Copyright (c) 2004 by Christophe THOMAS
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*
+*/
+
+#include "graphics.h"
+#include "events.h"
+#include "avwm.h"
+#include "cops.h"
+#include "avstring.h"
+#include "avevents.h"
+#include "plugin.h"
+
+#include <stdlib.h>
+
+struct client_operations cops={
+    drawPixel          : drawPixel,
+    readPixel          : readPixel,
+    drawRect           : drawRect,
+    fillRect           : fillRect,
+    drawLine           : drawLine,
+    putS               : wmPutS,
+    putC               : wmPutC,
+    getStringS         : wmgetStringS,
+    drawSprite         : drawSprite,
+    drawBITMAP         : drawBITMAP,
+    scrollWindowVert   : scrollWindowVert,
+    scrollWindowHoriz  : scrollWindowHoriz,
+    clearEventQueue    : clearEventQueue,
+    registerPlugin     : registerPlugin,
+    pack               : pack,
+    drawImage          : drawImage,
+    openScreen         : ini_graphics,
+    closeScreen        : close_graphics,
+    setFont            : wmSetFont,
+    showSBar           : showSBar,
+    hideSBar           : hideSBar,
+    sBarStatus         : sBarStatus,    
+    clearScreen        : clearScreen
+};

@@ -4,7 +4,8 @@
 
 #include "graphics.h"
 #include "events.h"
-#include "avwm.h"
+#include "cops.h"
+#include "avevents.h"
 
 
 #define NUM_PARTICLES 320
@@ -32,7 +33,7 @@ void snow_init(void);
 struct client_operations * cops;
 int stop,blocked;
 
-int eventHandler(int evt)
+void eventHandler(int evt)
 {
 	switch(evt) {
 		case BTN_OFF:
@@ -51,12 +52,11 @@ int eventHandler(int evt)
 int main(int argc,char * * argv)
 {
 	int evt;
-	REGISTER(cops,eventHandler);	
+	REGISTER(cops,eventHandler,0);	
  stop=0;
  blocked=0;
- cops->stopTimout();
- cops->hideTime();
- cops->hideBat();
+ cops->hideSBar();
+ 
    snow_init();
 PACK(cops);
 	while (!stop)
@@ -68,9 +68,7 @@ PACK(cops);
 
   		
 	}
-        cops->startTimout();
-        cops->showTime();
-        cops->showBat();
+        cops->showSBar();
 }
 
 int GetTime()

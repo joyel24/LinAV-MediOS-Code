@@ -8,3 +8,4 @@ clean:
 	$(MAKE) -C jpeg-6b/ clean
 	$(MAKE) -C graphics/ clean
 	$(MAKE) -C apps/ clean
+	@rm -f *~

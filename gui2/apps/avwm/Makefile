@@ -4,7 +4,7 @@ GCC=$(TOOL)-gcc
 AR=$(TOOL)-ar
 RANLIB=$(TOOL)-ranlib
 
-GCCFLAGS=-I../../include
+GCCFLAGS=-I../../include -Iinclude/
 LDFLAGS=-elf2flt -L../../lib -lGraphics -ljpeg
 
 SRC = $(wildcard *.c)
@@ -20,7 +20,7 @@ $(TARGET) : $(OBJS)
 
 clean:
 	@echo "**** Cleaning..."
-	@rm -f *.o *.bak *~ *.gdb *..elf *.elf2flt $(TARGET)
+	@rm -f *.o *.bak *~ *.gdb *..elf *.elf2flt $(TARGET) include/*~
 
 .c.o:
 	$(GCC) $(GCCFLAGS) -c -o $@ $<

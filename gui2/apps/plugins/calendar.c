@@ -20,7 +20,8 @@
 
 #include "graphics.h"
 #include "events.h"
-#include "avwm.h"
+#include "cops.h"
+#include "avevents.h"
 
 #define DaySpace  23
 #define WeekSpace 15
@@ -376,7 +377,7 @@ void ClearCalendar()
 
 int main(int argc,char * * argv)
 {
-	REGISTER(cops,eventHandler);
+	REGISTER(cops,eventHandler,0);
    PACK(cops);
 
    calendar_init();

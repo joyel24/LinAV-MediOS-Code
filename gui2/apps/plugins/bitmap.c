@@ -1,6 +1,7 @@
 #include "graphics.h"
 #include "events.h"
-#include "avwm.h"
+#include "cops.h"
+#include "avevents.h"
 
 #define BLACK 1
 #define WHITE 16
@@ -43,8 +44,10 @@ int main(int argc,char * * argv)
 {
     int w, h, i;
 
-	 REGISTER(cops,eventHandler);
-    PACK(cops);
+	 REGISTER(cops,eventHandler,0);
+         cops->hideSBar();
+         
+    	 PACK(cops);
 
 	 cops->clearScreen(WHITE);
 
