@@ -17,6 +17,10 @@
 @ void ataPowerDownHDD()
 @ u32 ataStatus()
 @ u32 ataWaitForReady()
+@ u32 ataWaitForXfer()
+@ void ataWriteData(r0->buffer, r1=#halfwords)
+@ void ataReadData(r0->buffer, r1=#halfwords)
+@
 
 .ifndef ataInc
 ataInc = 1
@@ -24,10 +28,11 @@ ataInc = 1
 .text
 
 ataWaitForReadyTO           =   0x200000
+ataWaitForXferTO            =   0x200000
 
 ataRegSelectSource          =   0x02600000          @ JBMM = 0x02400000
 ataRegPowerUpHDD            =   0x02600300          @ JBMM = 0x02400200
-ataValPowerUpHDD            =   0x0a                @ JBMM = 0x04
+ataValPowerUpHDD            =   0x08                @ JBMM = 0x04
 
 ataRegData                  =   0x02400000          @ JBMM = 0x04000800
 ataRegError                 =   0x02400080          @ JBMM = 0x04000900
@@ -54,6 +59,70 @@ ataSelectLBA                =   0x40
         .thumb
 
 @ ------------------------------------------------------------------------------
+@ ataReadData(r0->buffer, r1=#halfwords)
+@
+.globl ataReadData
+.thumb_func
+
+ataReadData:
+        push {r1, r2, r3, lr}
+        ldr r2, =ataRegData
+ataReadD:
+        ldrh r3, [r2]
+        strh r3, [r0]
+        add r0, #2
+        sub r1, #1
+         bne ataReadD
+        pop {r1, r2, r3, pc}
+
+        
+@ ------------------------------------------------------------------------------
+@ ataWriteData(r0->buffer, r1=#halfwords)
+@
+.globl ataWriteData
+.thumb_func
+
+ataWriteData:
+        push {r1, r2, r3, lr}
+        ldr r2, =ataRegData
+ataWriteD:
+        ldrh r3, [r0]
+        strh r3, [r2]
+        add r0, #2
+        sub r1, #1
+         bne ataWriteD
+        pop {r1, r2, r3, pc}
+        
+        
+@ ------------------------------------------------------------------------------
+@ ataWaitForXfer()
+@   Waits until xfer is ready...
+@   returns -1 = Timeout
+.globl ataWaitForXfer
+.thumb_func
+
+ataWaitForXfer:
+        push {r1, r2, r3, lr}
+        ldr r3, =ataWaitForXferTO
+ataNotX:sub r3, #1
+         beq ataTO2
+        mov r0, #0
+        ldr r1, =ataRegStatus
+        ldrb r0, [r1]
+        mov r2, #ataStatus_BSY
+        tst r0, r2
+         bne ataNotX                @ BSY Set! Can't do much now
+        mov r2, #ataStatus_DRQ
+        tst r0, r2
+         beq ataNotX                @ DRQ Clear!
+        mov r0, #0
+        pop {r1, r2, r3, pc}
+ataTO2: mov r0, #0
+        sub r0, #1
+        pop {r1, r2, r3, pc}
+        
+        
+@ ------------------------------------------------------------------------------
 @ ataWaitForReady()
 @   Waits until Ready ATA is...
 @   returns -1 = Timeout
@@ -64,7 +133,6 @@ ataWaitForReady:
         push {r1, r2, r3, lr}
         ldr r3, =ataWaitForReadyTO
 ataNotR:sub r3, #1
-        cmp r3, #0
          beq ataTO1
         mov r0, #0
         ldr r1, =ataRegStatus
@@ -80,6 +148,7 @@ ataNotR:sub r3, #1
 ataTO1: mov r0, #0
         sub r0, #1
         pop {r1, r2, r3, pc}
+
         
 @ ------------------------------------------------------------------------------
 @ ataStatus()

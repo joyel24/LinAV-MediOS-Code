@@ -31,3 +31,7 @@ extern void ataPowerUpHDD();
 extern void ataPowerDownHDD();
 extern u32 ataStatus();
 extern u32 ataWaitForReady();
+extern u32 ataWaitForXfer();
+extern void ataReadData(char *buffer, u32 numHalfWords);
+extern void ataWriteData(char *buffer, u32 numHalfWords);
+
