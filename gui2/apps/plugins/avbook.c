@@ -14,6 +14,7 @@
 
 #include "stdlib.h"
 #include "stdio.h"
+#include "string.h"
 
 #include "graphics.h"
 #include "events.h"
@@ -27,6 +28,8 @@
 
 #define MAX_LABEL 20
 #define LABELFIELD_OFFSET 2
+#define LIST_HEADER_YPOS 15
+#define LIST_HEADER_HEIGHT 9
 
 enum
 {
@@ -47,20 +50,29 @@ typedef struct
   int  maxChars;
 } EntryInfoT;
 
+typedef struct
+{
+    char* pData;   // so gross wie Anzahl EntryInfoT, d.h. Anzahl Eingabefelder
+} AddressDataT;
+
 struct client_operations * cops;
 EntryInfoT* pEntryInfo;  // Felderbeschreibungen
-struct AddressDataT* pAvData;   // Datensaetze mit Inhalt
+AddressDataT* pAvData;   // Datensaetze mit Inhalt
 int *pListColumns;
+
+FILE * file;
 
 int g_fields = 0;
 int g_ListColumns = 0;
+int g_cntData =0;
 int g_ShowFieldNames = true;
 int g_StartWithListView = true;
 
-typedef struct
-{
-    char* pData;   // so gro? wie Anzahl EntryInfoT, d.h. Anzahl Eingabefelder
-} AddressDataT;
+//////////////////////
+void InitAvBook();
+
+//////////////////////
+
 
 int eventHandler(int evt)
 {
@@ -74,7 +86,7 @@ int eventHandler(int evt)
                 g_StartWithListView = true;
 
             InitAvBook();
-            
+
             break;
 
         case BTN_OFF:
@@ -85,6 +97,147 @@ int eventHandler(int evt)
     }
     return 1;
 }
+
+int ReadData(char * filename)
+{
+    int cntFields = 0;
+    int i = 0;
+    int cntChars = 0;
+    int ch = 0;
+    char buffer[255];
+
+    if ((file = fopen(filename,"r+"))==NULL)
+    {
+        fprintf(stderr,"error reading config file %s\n",filename);
+        return -1;
+    }
+
+    g_cntData = 0;
+
+    // Get Size
+    while(!feof(file))
+    {
+        ch = fgetc(file);
+
+        if(ch != ';' && ch != '\n' && ch != 0)  // Trennzeichen suchen
+        {
+        }
+        else if(ch == ';')
+        {
+            // new field
+            cntFields++;
+        }
+        else if(ch == '\n')
+        {
+            // new entry
+            cntFields++;
+            g_cntData++;
+        }
+        else
+        {
+        }
+    }
+
+    cntFields = cntFields / g_cntData;
+
+    if(g_cntData == 0)
+        return 0;
+
+    if(cntFields != g_fields)
+        return 0;
+
+    if(g_cntData > 0)
+    {
+        fseek(file, 0, SEEK_SET); // set to beginning of flile again
+/*
+        sprintf(buffer,"%d-%d %d",cntFields,g_fields,g_cntData);
+        cops->putS(COLOR_BLACK,
+                COLOR_LIGHT_BLUE,
+                5,
+                100,
+                buffer);
+*/
+        // Get Memory for address data
+        pAvData = (AddressDataT *)malloc(sizeof(AddressDataT)*g_cntData);
+
+        for(i = 0; i < cntFields; i++)
+        {
+            pAvData[i].pData = (char *)malloc(sizeof(char)*pEntryInfo[i].maxChars);
+        }
+
+        memset(&buffer,0,sizeof(buffer));
+        cntFields = 0;
+        g_cntData = 0;
+        cntChars  = 0;
+
+        while(!feof(file))
+        {
+            ch = fgetc(file);
+
+            if(ch != ';' && ch != '\n' && ch != 0)  // Trennzeichen suchen
+            {
+                buffer[cntChars++] = ch;
+            }
+            else if(ch == ';')
+            {
+                // new field
+                buffer[cntChars] = 0;
+                cntChars  = 0;
+
+                strncpy(&pAvData[g_cntData].pData[cntFields], buffer,pEntryInfo[cntFields].maxChars);
+                memset(&buffer,0,sizeof(buffer));
+                cntFields++;
+            }
+            else if(ch == '\n')
+            {
+                // new entry
+                buffer[cntChars] = 0;
+                cntChars  = 0;
+
+                strncpy(&pAvData[g_cntData].pData[cntFields], buffer,pEntryInfo[cntFields].maxChars);
+                memset(&buffer,0,sizeof(buffer));
+                g_cntData++;
+                cntFields = 0;
+            }
+            else
+            {
+            }
+        }
+    }
+
+    fclose(file);
+    file = 0;
+
+   // Datensaetze sortieren nach Nachnamen
+//   quicksort(0, cntData-1, 0, 1);
+
+    return 1;
+}
+
+void ShowListEntries()
+{
+    int i = 0;
+    int j = 0;
+    int xPos = 0;
+    int yPos = 0;
+
+    for(i = 0; i < g_cntData; i++)
+    {
+        for(j = 0; j < g_ListColumns;j++)
+        {
+            cops->putS( COLOR_BLACK,
+                        COLOR_LIGHT_GREY,
+                        xPos,
+                        LIST_HEADER_YPOS+LIST_HEADER_HEIGHT+1+yPos,
+                        &pAvData[i].pData[pListColumns[j]]);
+
+            xPos += pEntryInfo[pListColumns[j]].width;
+        }
+
+        yPos += LIST_HEADER_HEIGHT;
+    }
+ }
+
 
 int ReadConfig()
 {
@@ -277,6 +430,7 @@ void ShowEditView()
                        pEntryInfo[i].xPos,
                        pEntryInfo[i].yPos,
                         pEntryInfo[i].strLabel);
+
             cops->fillRect( COLOR_LIGHT_GREY,
                             pEntryInfo[i].xPos+w+LABELFIELD_OFFSET,
                             pEntryInfo[i].yPos,
@@ -294,11 +448,8 @@ void ShowEditView()
     }
 }
 
-void ShowListView()
+void ShowListHeader()
 {
-    int fontheight = 0;
-    int w = 0;
-    int h = 0;
     int i = 0;
     int xPos = 0;
 
@@ -310,13 +461,14 @@ void ShowListView()
         {
             cops->fillRect( COLOR_LIGHT_GREY,
                             xPos,
-                            15,
+                            LIST_HEADER_YPOS,
                             pEntryInfo[pListColumns[i]].width,
-                            9);
+                            LIST_HEADER_HEIGHT);
+
             cops->putS( COLOR_BLACK,
                         COLOR_LIGHT_GREY,
                         xPos,
-                        15,
+                        LIST_HEADER_YPOS,
                         pEntryInfo[pListColumns[i]].strLabel);
 
             xPos += pEntryInfo[pListColumns[i]].width;
@@ -341,19 +493,42 @@ void InitAvBook()
 
     ShowHeader();
 
+    ReadData("/mnt/avwm/plugins/avbook.cvs");
+
     if(g_StartWithListView == true)
-        ShowListView();
+    {
+        ShowListHeader();
+        ShowListEntries();
+    }
     else
         ShowEditView();
+
 }
 
 void QuitAvBook()
 {
+    int i = 0;
+
     if(pEntryInfo != 0)
         free(pEntryInfo);
 
     if(pListColumns != 0)
         free(pListColumns);
+
+    if(pAvData != 0)
+    {
+        for(i = 0; i < g_fields; i++)
+        {
+            if(pAvData[i].pData != 0)
+                free(pAvData[i].pData);
+        }
+
+        free(pAvData);
+    }
+
+    g_fields      = 0;
+    g_ListColumns = 0;
+    g_cntData     = 0;
 }
 
 /* called function from outside */
