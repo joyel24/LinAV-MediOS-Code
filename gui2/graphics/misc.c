@@ -21,11 +21,16 @@ int getTimeS(char * timeSt)
     struct tm date_time={0,0,0,0,0,0,0,0};
 
     if(getTime(&date_time))
+    {
     	sprintf(timeSt, "%02d:%02d:%02d %02d/%02d/%04d", date_time.tm_hour,date_time.tm_min,date_time.tm_sec,
                                                          date_time.tm_mday,date_time.tm_mon,date_time.tm_year);
+        return 1;
+    }
     else
+    {
+        sprintf(timeSt, "%02d:%02d:%02d %02d/%02d/%04d", 0,0,0,0,0,0);
     	return 0;
-    return 1;
+    }
 }
 
 int getTime(struct tm * date_time)

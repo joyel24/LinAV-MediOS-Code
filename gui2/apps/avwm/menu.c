@@ -423,7 +423,7 @@ void menuEvtHandler(int evt)
             printAllName(pos,nselect);
             break;
         case BTN_OFF:
-            stopWM=1;
+            //stopWM=1; /* use this if you want to be able to quit avwm without hakting the device*/
         /* to be done: call resume evt on plugin if it exists */
             break;
     }
