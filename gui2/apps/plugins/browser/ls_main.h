@@ -18,6 +18,7 @@
 #include "colordef.h"
 #include "font.h"
 #include "file_type.h"
+#include "browser.h"
 
 #define    false 0
 #define    true  1

@@ -21,6 +21,16 @@
 #define LEFT_SCROLL  0
 #define RIGHT_SCROLL 1
 
+#define PATHLEN    256
+#define MAX_CHAR   100;
+
+#define BRW_MODE    0
+#define MENU_MODE   1
+#define CP_MV_MODE  2
+
+#define MODE_COPY   0
+#define MODE_MOVE   1
+
 struct dir_entry {
     char * name;
     int type;
@@ -62,16 +72,11 @@ struct browser_data {
     
 };
 
-#define MENU_SHADOW 2 // height of small shadow under the title
+//#define MENU_SHADOW 2 // height of small shadow under the title
 
-#define    UP_ARROW     0
-#define    DOWN_ARROW   1
+//#define    UP_ARROW     0
+//#define    DOWN_ARROW   1
 
-//#define    MAXPOS     20
-
-
-#define PATHLEN    256
-#define MAX_CHAR   100;
 
 
 /*****    ls_fct    *****/

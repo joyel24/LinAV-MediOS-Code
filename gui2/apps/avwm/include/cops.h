@@ -21,7 +21,6 @@
 #include "menu.h"
 #include "osd.h"
 #include "helperMenu.h"
-#include "browser.h"
 #include "scrollbar.h"
 #include "icons.h"
 
