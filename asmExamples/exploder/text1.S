@@ -30,7 +30,7 @@ loop1:
         mov r0, #4
         mov r1, #0
         ldr r2, =message1a
-        ldr r3, =0x0101
+        ldr r3, =0xfcfc
         ldr r4, =(lcdPutsT+1)
         mov r5, #1
         mov lr, r5
@@ -38,9 +38,19 @@ loop1:
         bx r4
 
         mov r0, #4
+        mov r1, #12
+        ldr r2, =message1c
+        ldr r3, =0xfafa
+        ldr r4, =(lcdPutsT+1)
+        mov r5, #1
+        mov lr, r5
+        add lr, pc
+        bx r4
+        
+        mov r0, #4
         ldr r1, =36*6
         ldr r2, =message2a
-        ldr r3, =0x0101
+        ldr r3, =0xfbfb
         ldr r4, =(lcdPutsT+1)
         mov r5, #1
         mov lr, r5
@@ -134,11 +144,38 @@ not2right:
 
         cmp r6, #0x40
         bne notmenu3
-        ldr r7, =0x03000000
+        ldr r7, intaddrp
+        add r5, r7, #4
+        ldr r1, =intaddrp
+        cmp r5, r1
+        blt noov
+        ldr r5, =intaddrs
+noov:   str r5, [r1]
+        ldr r7, [r7]
 notmenu3:
         
         ldr r1, =saoff
         str r7, [r1]
+
+        
+        ldr r0, =message1bh
+        mov r1, r7
+        ldr r2, =(hex8T+1)
+        mov r3, #1
+        mov lr, r3
+        add lr, pc
+        bx r2
+        
+        
+        mov r0, #4
+        mov r1, #6
+        ldr r2, =message1b
+        ldr r3, =0xfbfb
+        ldr r4, =(lcdPutsT+1)
+        mov r5, #1
+        mov lr, r5
+        add lr, pc
+        bx r4
         
         
         ldr r0, saoff
@@ -156,11 +193,11 @@ lfop:
         bx r2
 
         ldr r0, caoff
-        add r0, r0, #8
+        add r0, r0, #0x10
         ldr r1, =caoff
         str r0, [r1, #0]
         
-        mov r0, #10
+        mov r0, #4
         ldr r1, cyoff
         ldr r2, =messagf1
         ldr r3, =0xffff
@@ -182,7 +219,7 @@ lfop:
         
         .align
         
-saoff:  .word 0x30a00
+saoff:  .word 0x3000000
 caoff:  .word 0
 cyoff:  .word 156
 
@@ -195,13 +232,13 @@ buildLine:
 
         ldr r0, =messagf1
         mov r1, r7
-        ldr r2, =(hex8T+1)
+        ldr r2, =(hex2T+1)
         mov r3, #1
         mov lr, r3
         add lr, pc
         bx r2
         
-        mov r6, #4
+        mov r6, #8
         ldr r5, =messagf1h
         ldr r4, =messagf1a
 loopda:
@@ -240,7 +277,7 @@ good4:
         add lr, pc
         bx r2
         
-        add r5, #5
+        add r5, #4
         add r4, #2
         sub r6, #1
         bne loopda
@@ -250,21 +287,31 @@ good4:
         .ltorg
         
 messagf1:
-        .ascii  "--------  "
+        .ascii  "-- "
 messagf1h:
-        .ascii  "---- ---- ---- ----  "
+        .ascii     "-------------------------------- "
 messagf1a:
-        .asciz  "........"
+        .asciz  "................"
 
         .align 4
-message1a:  .ascii " ------=====##### E X P L O D E R #####=====------  "            
-            .asciz "                                                    "
+message1a:  .asciz " ------=====##### E X P L O D E R #####=====------  "            
+
+message1b:  .ascii "BASE ADDRESS: "
+message1bh: .asciz "xxxxxxxx"
+message1c:  .asciz "++ -00--02--04--06--08--0A--0C--0E- 0123456789ABCDEF"
 
 message2a:  .ascii "     UP-00000010 DN+00000010 LT-00000002 RT+00000002"
             .ascii "F2+  UP-00100000 DN+00100000 LT-00001000 RT+00001000"
             .asciz "F1+  UP VAL-0001 DN VAL+0001 LT VAL-0100 RT VAL+0100"
 
         .align 4
+        
+intaddrs:   .word 0x00000000
+            .word 0x00030000
+            .word 0x00100000
+            .word 0x03000000
+intaddrp:   .word intaddrs
+
         
 .include "../includes/hex.S"
 .include "../includes/buttons.S"
