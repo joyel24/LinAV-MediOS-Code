@@ -526,7 +526,7 @@ int eventHandler(int evt)
     cops->putS(BLACK, WHITE,0, 220, tmp);*/
     int w = 0;
     int h = 10;
-    char str[40];
+//    char str[40];
 
     cops->getStringS("M", &w, &h);
 
@@ -565,11 +565,11 @@ int eventHandler(int evt)
                 printAName(pos+nselect,nselect,0,1);
             }
 
-//            if(pos == 0 && nselect == 0)
+/*
             sprintf(str,"pos: %2d select %2d used: %2d", pos, nselect, listused);
             cops->fillRect(COLOR_BLUE, 0, 229, 250,12);
             cops->putS(COLOR_WHITE, COLOR_BLUE,5, 230, str);
-
+*/
             if( (listused>MAXPOS) &&
                 (pos+MAXPOS < listused) )
                 showArrow(DOWN_ARROW);
@@ -618,25 +618,21 @@ int eventHandler(int evt)
                     printAName(pos+nselect,nselect,0,1);
                 }
             }
-
+/*
             sprintf(str,"pos: %2d select %2d used: %2d", pos, nselect, listused);
             cops->fillRect(COLOR_BLUE, 0, 229, 250,12);
             cops->putS(COLOR_WHITE, COLOR_BLUE,5, 230, str);
-
+*/
             if(pos>0)
                 showArrow(UP_ARROW);
             else
                 hideArrow(UP_ARROW);
-/*
-            if(pos+MAXPOS>=listused && nselect==(MAXPOS-1))
-                hideArrow(DOWN_ARROW);
-*/
+
             if( (listused>MAXPOS) &&
                 (pos+MAXPOS < listused) )
                 showArrow(DOWN_ARROW);
             else
                 hideArrow(DOWN_ARROW);
-
 
             break;
 
