@@ -24,6 +24,9 @@
 
 #include <kernel/version.h>
 
+#include <kernel/threads.h>
+#include <kernel/graphics.h>
+
 
 int lcd_state=1;
 int lcd_bright=10;
@@ -35,15 +38,46 @@ void print_boot_info(void)
     print_timer();
 }
 
-void kernel_start(void)
+void kidle (void)
 {
-    int i;
-    
+    while (1);
+}
+
+void kernel_startup_thread (void);
+
+void kernel_start (void)
+{
     /* malloc of max space in SDRAM */
-    init_malloc((void*)MALLOC_START,MALLOC_SIZE);   
-    
+    init_malloc((void*)MALLOC_START,MALLOC_SIZE);
+
+    /* initialize thread lists and setup first two threads */
+    kinit_tcb ();
+    kadd_tcb (&g_pActiveTask, kcreate_tcb (kidle, TASK_STACK_SIZE,   0, "IDLE"));
+    kadd_tcb (&g_pActiveTask, kcreate_tcb (kernel_startup_thread, TASK_STACK_SIZE, 0, "USER"));
+
+//    asm ("MSR CPSR_c, #0x1F");
+//    kStartScheduler ();
+
     ini_graphics();
     ini_debugOnScreen();
+
+    /* init the irq */
+    init_irq(); 
+
+    /* init the tick timer */
+    init_timer();
+
+//	interruptsSetMaskA (0xffffff7f);
+//	gioSetAllIRQsA (0xff);    // Set all gio (0-7) to be IRQ!
+//    timersConfigA (0, TIMERS_TMMD_FREERUN, 0, 999,  864); //  16 millisecond interval
+
+    kload_context ();
+}
+
+void kernel_startup_thread (void)
+{
+    int i;
+
     /* print banner on uart */ 
     printk("AMOS %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);    
     printk("Initial SP: %08x, kernel end: %08x, size in IRAM: %08x  Malloc start: %08x, size: %08x\n",get_sp(),
@@ -51,28 +85,22 @@ void kernel_start(void)
         (unsigned int)&_iram_end - (unsigned int)&_iram_start,
         (unsigned int)MALLOC_START,
         (unsigned int)MALLOC_SIZE);
-            
-    /* init the irq */
-    init_irq(); 
-    
-    /* init the tick timer */
-    init_timer();
-    
+
     /* enable the IRQ */
-    sti();       
-    printk("[init] int. IRQ enable\n"); 
-    
+//    sti();       
+//    printk("[init] int. IRQ enable\n"); 
+
     /* driver init */
-    init_cpld();
-    init_HW_chk();
-           
-    init_buttons();
-    
+//    init_cpld();
+//    init_HW_chk();
+
+//    init_buttons();
+
     printk("[init] ------------ all drivers\n");
-    
-    print_boot_info();    
-       
-    
+
+//    print_boot_info();    
+
+
     while(1)
     {
         printk("C ");
