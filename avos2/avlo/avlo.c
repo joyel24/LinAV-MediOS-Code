@@ -13,6 +13,20 @@
 
 #include "parse_cfg.h"
 
+#define MAX_OFF_PRESS	100
+
+#define __clf()							\
+	({							\
+		unsigned long temp;				\
+	__asm__ __volatile__(					\
+	"mrs	%0, cpsr		@ clf\n"		\
+"	orr	%0, %0, #64\n"					\
+"	msr	cpsr_c, %0"					\
+	: "=r" (temp)						\
+	:							\
+	: "memory");						\
+	})
+
 /**************************************************************
 ***************************************************************
 I should remove return -1 with clean halt
@@ -38,15 +52,18 @@ void drawMenu();
 void processDefault(int key,int nbCfg);
 void printErr(int key);
 void waitKeyReleased(void);
+void chkOFF(int key);
 
 int usbstate,usbenable=0,cleanUSBMsg=0;
 int chkdefault,cnt=0,cursorPos=0,delayCnt=0x5000;
 int errNoDefault=0,cntNoDefault=0,stateNoDefault=0;
+int nbOff=0;
+int * wdt = (int*)0x30a1a;
+
 
 int main(int argc,char **argv)
 {
 	int ret,nbCfg,key,redraw;
-	int i;
 	
 	void (*systemRelocateAdjusted)();
 
@@ -62,7 +79,7 @@ loop:
 
 	pal32[0] = 0x6c706c93;
 	pal32[1] = 0xffffffff;
-	
+		
 	graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AVL");
 		
 	if((nbCfg=do_parse(&cfg,&cfgG))<0)
@@ -77,7 +94,7 @@ loop:
 	
 	
 	graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AVLO");	
-	graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader Version 0.1 by OxyGen");	
+	graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader Version 0.5 by OxyGen");	
 		
 	
 	usbstate=!usbIsConnectedA();
@@ -128,6 +145,8 @@ loop:
 				redraw=1;
 			}
 			
+			
+			
 			if(key & BUTTONS_AV300_MENU3)
 			{
 				if(usbenable)
@@ -174,9 +193,39 @@ void err()
 	
 }
 
+void chkOFF(int key)
+{
+	int i;
+	if (key & BUTTONS_AV300_OFF)
+	{
+		nbOff++;
+		if(nbOff>MAX_OFF_PRESS)
+		{
+			graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);	
+			pal32[1]=0xc476c491;
+			pal32[0] = 0x466c4696;
+	graphicsStringA(&screenBitmap2,   65, 120, &sprite6_9, std6x9_, 6, 0,"Shutting down NOW !!");		
+			ataSleepCmdA();
+			for(i=0;i<10000;i++); /* Nothing */
+			ataPowerDownHDDA();
+			//for(i=0;i<1000;i++); /* Nothing */
+			__clf();
+			while(1) *wdt=0;
+		}
+	}
+	else
+		nbOff=0;
+}
+
 void waitKeyReleased(void)
 {
-	while(buttonsGetStatusA()&BUTTONS_AV300_ANY);
+	int key;
+	key=buttonsGetStatusA();
+	while(key&BUTTONS_AV300_ANY)
+	{
+		chkOFF(key);
+		key=buttonsGetStatusA();
+	}
 }
 
 void iniGraph()

@@ -63,6 +63,7 @@ ataRegCommand               =   0x02400380          @ JBMM = 0x04000f00
 ataCommand_READ_SECTORS     =   0x20
 ataCommand_WRITE_SECTORS    =   0x30
 ataCommand_IDENTIFY         =   0xec
+ataCommand_SLEEP            =   0xe0
 
 ataStatus_BSY               =   0x80
 ataStatus_RDY               =   0x40
@@ -294,7 +295,27 @@ ataIdentify:
         pop {r1, r2}
         bx lr
         
-        
+
+@ ------------------------------------------------------------------------------
+@ ataSleepCmd()
+@
+.globl ataSleepCmdA
+ataSleepCmdA:
+        switchThumb
+.globl ataSleepCmd
+.thumb_func
+ataSleepCmd:
+        push {r1, r2, lr}
+	bl ataWaitForReady      
+        ldr r2, =ataRegSelect
+        mov r1, #0
+        strb r1, [r2]
+        ldr r2, =ataRegCommand
+        mov r1, #ataCommand_SLEEP
+        strb r1, [r2]
+	bl ataWaitForReady
+        pop {r1, r2, pc}
+	
 @ ------------------------------------------------------------------------------
 @ ataReadData(r0->buffer, r1=#halfwords)
 @
