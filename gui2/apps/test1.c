@@ -4,6 +4,8 @@
 #include "colordef.h"
 #include "misc.h"
 
+#include "mp3_bg.h"
+static BITMAP mp3BMAP = {(unsigned int) mp3_bg, 320, 240, 0, 0};
 /* premier programme de test */
 
 needFont(std8x13);
@@ -16,18 +18,19 @@ int main(int argc,char ** argv)
     
     ini_graphics();
     
-    setFont(std8x13);
-    
-    
+    setFont(std8x13);  
+      
+    showPlane(VID1);
+    setPlane(VID1);
     clearScreen(COLOR_BLACK);
     
+    drawBITMAP (&mp3BMAP, 0, 0);
+    
  while(1)
-  {  
-       
-       evt=waitEvent();
+  {         
+       /*evt=waitEvent();
        sprintf(tmp,"evt=%04x tick=%d",evt,getTick());
-       printf(tmp);
-       drawRect(COLOR_BLACK,10,50,310,10);
-       putS(COLOR_WHITE,COLOR_BLACK,10,50,tmp);
+       printf(tmp);*/
+       
   }
 }
