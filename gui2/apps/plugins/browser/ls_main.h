@@ -50,18 +50,23 @@ int  add_file    (char * name);
 int  doLs        (char * name);
 
 /*****    file_handle_fct    *****/
-int  is_script_type     (char *extension);
-int  is_image_type      (char *extension);
-int  is_mp3_type        (char *extension);
-int  is_text_type       (char * extension);
-int  execBin            (char * path, ...);
-int  launchBin          (char * name);
-void launchSoundPlayer  (char *name);
-void launchViewer       (char *name);
-void launchTxtView      (char *name);
-int  launchScript       (char * name);
-void handle_type_other  (char *filename);
-int  simpleLaunch       (char * name);
+int   is_script_type     (char * extension);
+int   is_image_type      (char * extension);
+int   is_mp3_type        (char * extension);
+int   is_text_type       (char * extension);
+int   execBin            (char * path, ...);
+int   launchBin          (char * name);
+void  launchSoundPlayer  (char * name);
+void  launchViewer       (char * name);
+void  launchTxtView      (char * name);
+int   launchScript       (char * name);
+void  handle_type_other  (char * filename);
+int   do_mv              (char * src,char * dest);
+int   do_cp              (char * src,char * dest);
+int   do_mount           (char * devFile,char * dirMnt);
+int   isadir             (char * name);
+char* buildname          (char * dirname,char * filename);
+int   copyfile           (char * src,char * dest,int setmodes);
 
 /*****    evt_handle_fct    *****/
 int  eventHandler       (int evt);

@@ -11,8 +11,14 @@
 *
 */
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <utime.h>
+#include <fcntl.h>
 
 #include "ls_main.h"
 
@@ -22,6 +28,8 @@
 /*extern variables */
 extern struct client_operations * cops;
 /************************/
+
+/******************************************************************************* test file types */
 
 int is_script_type(char *extension)
 {
@@ -66,30 +74,9 @@ int is_text_type(char * extension)
     return retVal;
 }
 
-int simpleLaunch(char * name)
-{
-   int pid;
-   int status;
-   
-   pid = vfork();
-   if (pid == 0)
-   {
-       execl("/bin/mount", "mount","/dev/avcf1","/cf",(char*)NULL);
-       fprintf(stderr, "exec failed! %s\n",name);
-       _exit(1);       
-   }
-   else
-   {
-       if(pid>0)
-           waitpid(pid, &status, 0);
-       else
-       {
-           fprintf(stderr, "vfork failed %s\n", name);
-           return 0;
-       }
-   }
-   return 1;
-}
+/***********************************************************************************************/
+
+/****************************************************************************** file launcher */
 
 //execBin(path,arg0,arg1,arg2,...,(char*)0) arg0 should be the name of the app
 int execBin(char * path, ...)
@@ -191,3 +178,220 @@ void handle_type_other(char *filename)
        // unknown type
     }
 }
+
+/***********************************************************************************************/
+
+/*/************************************************************************ file basic command */
+
+int do_mv(char * src,char * dest)
+{
+    if (access(src, F_OK) < 0) /* check if src file exists */
+    {
+        perror(src);
+        return 0;
+    }             
+       
+    if(isadir(dest))                /* if dest is just a folder => build the complete name */
+        dest=buildname(dest,src);  
+        
+    if(rename(src,dest)>= 0)        /* try to move using rename */
+        return 1;    
+        
+    /* rename failed*/        
+    if (errno != EXDEV)  /*is it because dev are different*/
+    {
+        perror(dest); /* no => error */
+        return 0;
+    }    
+    
+    /* dev are different => copy + remove */    
+    if (!copyfile(src, dest, 1))    /* try to copy */
+        return 0;   
+                        /* it failed */
+    if (unlink(src) < 0)        /* now we can remove src */
+    {
+        perror(src);
+        return 0;
+    }    
+    
+    return 1;
+}
+
+int do_cp(char * src,char * dest)
+{
+    if (access(src, F_OK) < 0) /* check if src file exists */
+    {
+        perror(src);
+        return 0;
+    }  
+                  
+    if(isadir(dest))                /* if dest is just a folder => build the complete name */
+        dest=buildname(dest,src);
+        
+    if (!copyfile(src, dest, 0))    /* try to copy */
+        return 0;    
+        
+    return 1;    
+}
+
+int do_mount(char * devFile,char * dirMnt)
+{
+   int pid;
+   int status;
+   
+   pid = vfork();
+   if (pid == 0)
+   {
+       execl("/bin/mount", "mount",devFile,dirMnt,(char*)NULL);
+       fprintf(stderr, "mount failed %s on %s\n",devFile,dirMnt);
+       _exit(1);       
+   }
+   else
+   {
+       if(pid>0)
+           waitpid(pid, &status, 0);
+       else
+       {
+           fprintf(stderr, "vfork failed for mount %s on %s\n",devFile,dirMnt);
+           return 0;
+       }
+   }
+   return 1;
+}
+
+int isadir(char *name)
+{
+    struct stat statbuf;
+    
+    if (stat(name, &statbuf) < 0)
+            return 0;
+            
+    return S_ISDIR(statbuf.st_mode);
+}
+
+char * buildname(char * dirname,char * filename)
+{
+    char  *cp;
+    static char buf[PATHLEN]; 
+       
+    if ((dirname == NULL) || (*dirname == '\0'))
+        return filename;    
+        
+    cp = strrchr(filename, '/');
+    if (cp)
+        filename = cp + 1; 
+           
+    strcpy(buf, dirname);
+    strcat(buf, "/");
+    strcat(buf, filename);    
+    return buf;
+}
+
+int copyfile(char * src,char * dest,int setmodes)
+{
+    int  fdSrc;
+    int  fdDest;
+    int  ccSrc;
+    int  ccDest;
+    
+    char * writeBuf;
+    char * readBuf;
+    
+    struct stat statSrc;
+    struct stat statDest;
+    
+    struct utimbuf times;
+    
+    int len = 8192-16;
+
+    
+    if (stat(src, &statSrc) < 0)
+    {
+        perror(src);
+        return 0;
+    }
+    
+    if (stat(dest, &statDest) < 0)
+    {
+        statDest.st_ino = -1;
+        statDest.st_dev = -1;
+    }
+    
+    if (S_ISREG(statSrc.st_mode) && (statSrc.st_dev == statDest.st_dev) && (statSrc.st_ino == statDest.st_ino))
+    {
+        fprintf(stderr, "Copying file \"%s\" to itself\n", src);
+        return 0;
+    }
+        
+    fdSrc = open(src, 0);
+    if (fdSrc < 0)
+    {
+        perror(src);
+        return 0;
+    } 
+       
+    fdDest = open(dest, O_WRONLY|O_CREAT|O_TRUNC, statSrc.st_mode);
+    if (fdDest < 0)
+    {
+        perror(dest);
+        close(fdSrc);
+        return 0;
+    }
+       
+    readBuf = malloc(len);
+    if (!readBuf) 
+    {
+        fprintf(stderr,"Unable to allocate buffer of %d bytes\n", len);
+        return 0;
+    }
+        
+    while ((ccSrc = read(fdSrc, readBuf, len)) > 0)
+    {
+        writeBuf = readBuf;        
+        while (ccSrc > 0)
+        {
+            ccDest = write(fdDest, writeBuf, ccSrc);
+            if (ccDest < 0)
+            {
+                perror(dest);
+                free(readBuf);
+                goto error_exit;
+            }
+            writeBuf += ccDest;
+            ccSrc -= ccDest;
+        }
+    } 
+       
+    free(readBuf);
+        
+    if (ccSrc < 0)
+    {
+        perror(src);
+        goto error_exit;
+    } 
+       
+    close(fdSrc);    
+    if (close(fdDest) < 0)
+    {
+        perror(dest);
+        return 0;
+    }    
+    
+    if (setmodes)
+    {
+        chmod(dest, statSrc.st_mode);    
+        chown(dest, statSrc.st_uid, statSrc.st_gid);    
+        times.actime = statSrc.st_atime;
+        times.modtime = statSrc.st_mtime;    
+        utime(dest, &times);
+    }    
+    
+    return 1;   
+    
+error_exit:
+    close(fdSrc);
+    close(fdDest);    
+    return 0;
+}
+
+/***********************************************************************************************/

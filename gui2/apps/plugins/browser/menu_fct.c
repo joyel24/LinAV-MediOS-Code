@@ -157,7 +157,7 @@ void do_right(void * data)
             }
             break;
         case MENU_CF:
-            simpleLaunch("/bin/mntCF");
+            do_mount("/dev/avcf1","/cf");
             break;
     }
 
@@ -196,3 +196,5 @@ void mk_item_str(void * data,char * str)
             break;
     }
 }
+
+
