@@ -16,6 +16,8 @@
 
 /* Global variables */
 extern int stateUSB;
+extern int statePWR;
+extern int stateBAT;
 
 int getTimeS(char * timeSt)
 {    
@@ -34,12 +36,13 @@ int set_mouseParam(int freq, int repeat)
 }
 int getBat(void)
 {
-        return 0;
+        printf("%d\n", stateBAT);
+	return stateBAT;
 }
 
 int getPwr(void)
 {
-    return 0;
+    return statePWR;
 }
 
 int getUSB(void)

@@ -2,6 +2,7 @@
 #include "graphics.h"
 #include "events.h"
 #include "colordef.h"
+#include "misc.h"
 
 /* premier programme de test */
 
@@ -11,6 +12,7 @@ int main(int argc,char ** argv)
 {
     int evt;
     char tmp[10];
+    extern int stateBAT;
     
     ini_graphics();
     
@@ -26,5 +28,6 @@ int main(int argc,char ** argv)
        printf(tmp);
        drawRect(COLOR_BLACK,10,50,310,10);
        putS(COLOR_WHITE,COLOR_BLACK,10,50,tmp);
+       getBat();
   }
 }

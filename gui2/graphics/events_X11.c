@@ -20,12 +20,20 @@
 #include "X11/keysym.h"
 #include "misc.h"
 
+/* Define for battery */
+
+#define BATMAX 1600
+#define BATMIN 1000
+#define INCBAT 10
+
 /* Global variables */
 extern Display* display;
 extern Window window;	/*variable Event */
 int key;
 XEvent event;
 int stateUSB = 0;
+int statePWR =0;
+int stateBAT = BATMAX;
 
 int nxtEvent(void)
 {   
@@ -116,6 +124,7 @@ int getKey(int key)
             break;
 	    
 	/* Autres evenements */
+	/*======USB======*/
 	    
 	case XK_u:
 	case XK_U:
@@ -127,8 +136,48 @@ int getKey(int key)
 	  else
 	  {
 	    stateUSB = 0;
+	    return EVT_USB;
 	  }
-	  printf("%d\n", stateUSB);
+	break;
+	/*=======POWER=======*/
+	case XK_p:
+	case XK_P:
+	  if(statePWR == 0)
+	  {
+	    statePWR = 1;
+	    return EVT_PWR;
+	  }
+	  else
+	  {
+	    statePWR = 0;
+	    return EVT_PWR;
+	  }
+	break;
+	/*=============BATTERY +==========*/
+	case XK_w:
+	    if(stateBAT == BATMAX)
+	    {
+	       break;
+	       return stateBAT;
+	    }
+	    else
+	    {
+	       stateBAT = stateBAT+INCBAT;
+	       return stateBAT;
+	    }
+	break;
+	/*=============BATTERY -==========*/
+	case XK_x:
+	    if(stateBAT == BATMIN)
+	    {
+	       break;
+	       return stateBAT;
+	    }
+	    else
+	    {
+	       stateBAT = stateBAT-INCBAT;
+	       return stateBAT;
+	    }
 	break;
         }
 }
