@@ -14,7 +14,10 @@
 #ifndef __MSGBOX_H
 #define __MSGBOX_H
 
-    #define MSGBOX_MIN_WIDTH 160
+    #define MSGBOX_1BUTTON_MIN_WIDTH 160
+    #define MSGBOX_2BUTTON_MIN_WIDTH 180
+    #define MSGBOX_3BUTTON_MIN_WIDTH 260
+
     #define MSGBOX_HEIGHT     80
 
 

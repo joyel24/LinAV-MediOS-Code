@@ -19,6 +19,7 @@
 #include "events.h"
 #include "osd.h"
 #include "msgBox.h"
+#include "icons.h"
 
 extern struct plugin msg_box_plugin;
 
@@ -26,121 +27,15 @@ needFont(std5x8);
 needFont(std6x9);
 needFont(std7x13);
 
-#define BUTTON_WIDTH 50
+NEED_ICON(MsgBoxExclamationBitmap);
+NEED_ICON(MsgBoxQuestionBitmap);
+NEED_ICON(MsgBoxWarningBitmap);
+NEED_ICON(MsgBoxInformationBitmap);
+NEED_ICON(MsgBoxErrorBitmap);
+
+#define BUTTON_WIDTH 60
 #define BUTTON_HEIGHT 15
 #define BUTTON_DISTANCE 10
-
-
-unsigned char MsgBoxExclamation[18][18] =
-{   {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,12,12,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,12,12,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,12,12,12,12,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,12,12,12,12,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,12,12,12,12,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,12,12,12,12,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,12,12,12,12,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,12,12,12,12,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,12,12,12,12,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,12,12,12,12,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,12,12,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,12,12,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,12,12,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,12,12,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}
-};
-BITMAP MsgBoxExclamationBitmap = {(unsigned int) MsgBoxExclamation, 18, 18, 0, 0};
-
-unsigned char MsgBoxQuestion[18][18] =
-{   {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,00,00,15,00,00,00,15,15,15,15,15,15},
-    {15,15,15,15,15,15,00,00,15,15,00,00,15,15,15,15,15,15},
-    {15,15,15,15,15,15,00,15,15,15,15,00,00,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,00,00,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,00,00,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}
-};
-BITMAP MsgBoxQuestionBitmap = {(unsigned int) MsgBoxQuestion, 18, 18, 0, 0};
-
-unsigned char MsgBoxWarning[18][18] =
-{   {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}
-};
-BITMAP MsgBoxWarningBitmap = {(unsigned int) MsgBoxWarning, 18, 18, 0, 0};
-
-unsigned char MsgBoxInformation[18][18] =
-{   {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}
-};
-BITMAP MsgBoxInformationBitmap = {(unsigned int) MsgBoxInformation, 18, 18, 0, 0};
-
-unsigned char MsgBoxError[18][18] =
-{   {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,00,00,00,00,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,00,00,15,15,15,15,15,15,15,15},
-    {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}
-};
-BITMAP MsgBoxErrorBitmap = {(unsigned int) MsgBoxError, 18, 18, 0, 0};
-
 
 int res; // updated in msgBoxEvtHandler
 // we should add some define in msgBox.h such as RES_OK RES_YES RES_NO RES_CANCEL ...
@@ -242,17 +137,35 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
     setFont(std5x8);
     getStringS(msg, &w2, &h2);
 
+    // calculate width of box for text
     if(w1>w2)
         width = w1 + 20;
     else
         width = w2 + 20;
 
-    if(width < MSGBOX_MIN_WIDTH)
-        width = MSGBOX_MIN_WIDTH;
+    // calculate width of box for buttons
+    if(type == MSGBOX_TYPE_OK)
+    {
+        cntButtons = 1; //only one button
+        if(width < MSGBOX_1BUTTON_MIN_WIDTH) width = MSGBOX_1BUTTON_MIN_WIDTH;
+    }
+    else if(type == MSGBOX_TYPE_YESNOCANCEL)
+    {
+        cntButtons = 3; //three buttons
+        if(width < MSGBOX_3BUTTON_MIN_WIDTH) width = MSGBOX_3BUTTON_MIN_WIDTH;
+    }
+    else
+    {
+        cntButtons = 2; //two buttons
+        if(width < MSGBOX_2BUTTON_MIN_WIDTH) width = MSGBOX_2BUTTON_MIN_WIDTH;
+    }
 
     // the width must be a multiple of 32 !
-    value = width/32;
-    width = value*32;
+    value = width/8;
+    width = value*8;
+
+    buttonPos = (width-(2*BUTTON_DISTANCE))/cntButtons;
+    buttonOffset = (buttonPos - BUTTON_WIDTH)/2;
 
     setSize(BMAP2,width,MSGBOX_HEIGHT,8);
 
@@ -306,10 +219,10 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
         {
             drawRect(COLOR_BLACK, BUTTON_DISTANCE+i*buttonPos+buttonOffset, MSGBOX_HEIGHT-20, BUTTON_WIDTH, BUTTON_HEIGHT);
 
-            getStringS("Ok", &w_buttonText, &h_buttonText);
+            getStringS("Ok(F1)", &w_buttonText, &h_buttonText);
             buttonTextOffsetX = (BUTTON_WIDTH/2)-(w_buttonText/2);
             buttonTextOffsetY = (BUTTON_HEIGHT/2)-(h_buttonText/2);
-            putS(COLOR_BLACK, COLOR_WHITE, BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX, MSGBOX_HEIGHT-20+buttonTextOffsetY , "Ok");
+            putS(COLOR_BLACK, COLOR_WHITE, BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX, MSGBOX_HEIGHT-20+buttonTextOffsetY , "Ok(F1)");
         }
     }
     else if(type == MSGBOX_TYPE_YESNOCANCEL)
@@ -324,11 +237,11 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
             drawRect(COLOR_BLACK, BUTTON_DISTANCE+i*buttonPos+buttonOffset, MSGBOX_HEIGHT-20, BUTTON_WIDTH, BUTTON_HEIGHT);
 
             if(i == 0)
-                strcpy(strButtonText,"Yes");
+                strcpy(strButtonText,"Yes(F1)");
             else if (i == 1)
-                strcpy(strButtonText,"No");
+                strcpy(strButtonText,"No(F2)");
             else
-                strcpy(strButtonText,"Cancel");
+                strcpy(strButtonText,"Cancel(F3)");
 
             getStringS(strButtonText, &w_buttonText, &h_buttonText);
             buttonTextOffsetX = (BUTTON_WIDTH/2)-(w_buttonText/2);
@@ -350,16 +263,16 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
             if(i == 0)
             {
                 if(type == MSGBOX_TYPE_YESNO)
-                    strcpy(strButtonText,"Yes");
+                    strcpy(strButtonText,"Yes(F1)");
                 else
-                    strcpy(strButtonText,"Ok");
+                    strcpy(strButtonText,"Ok(F1)");
             }
             else
             {
                 if(type == MSGBOX_TYPE_YESNO)
-                    strcpy(strButtonText,"No");
+                    strcpy(strButtonText,"No(F2)");
                 else
-                    strcpy(strButtonText,"Cancel");
+                    strcpy(strButtonText,"Cancel(F2)");
             }
 
             getStringS(strButtonText, &w_buttonText, &h_buttonText);

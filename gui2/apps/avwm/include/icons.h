@@ -26,6 +26,11 @@
 - mp3Bitmap
 - textBitmap
 - imageBitmap
+- MsgBoxExclamationBitmap
+- MsgBoxQuestionBitmap
+- MsgBoxWarningBitmap
+- MsgBoxInformationBitmap
+- MsgBoxErrorBitmap
 */
 
 #endif

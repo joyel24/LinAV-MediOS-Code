@@ -22,8 +22,12 @@
 
 extern struct plugin edit_box_plugin;
 
-#define EDITBOX_HEIGHT 33
-#define EDITBOX_WIDTH  224 // must be a multiple of 32
+#define EDITBOX_HEIGHT 55
+#define EDITBOX_WIDTH  220
+
+#define EDITBUTTON_WIDTH 70
+#define EDITBUTTON_HEIGHT 15
+#define EDITBUTTON_DISTANCE 10
 
 #define ASCII_DEFAULT 65
 #define ASCII_SET_BEGIN 32
@@ -80,7 +84,7 @@ void editBoxEvtHandler(int evt)
 
     switch(evt)
     {
-        case BTN_F1:
+        case BTN_F3:
             // Del Last char
             break;
 
@@ -170,11 +174,11 @@ void editBoxEvtHandler(int evt)
             }
             break;
 
-        case BTN_ON:
+        case BTN_F1:
             stopEditBoxLoop=1;
             break;
 
-        case BTN_OFF:
+        case BTN_F2:
             stopEditBoxLoop=1;
             memset(strEdit, 0, sizeof(strEdit));
             break;
@@ -195,14 +199,26 @@ void iniEditBox(void)
 /* draw the edit box */
 void drawEditBox(unsigned char* caption, unsigned char* text, int text_color, int bk_color, int frame_color, int cursor_color)
 {
+    char strButtonText[10];
+
+    int i = 0;
     int w1 = 0;
     int h1 = 0;
+    int w2 = 0;
+    int h2 = 0;
     int posX = 0;
     int posY = 0;
+    int buttonPos = 0;
+    int buttonOffset = 0;
+    int w_buttonText = 0;
+    int h_buttonText = 0;
+    int buttonTextOffsetX=0;
+    int buttonTextOffsetY=0;
 
     setFont(std7x13);
     getStringS(caption, &w1, &h1);
     setFont(std6x9);
+    getStringS(caption, &w2, &h2); // for std6x9
 
     setSize(BMAP2,EDITBOX_WIDTH,EDITBOX_HEIGHT, 8);
 
@@ -230,6 +246,29 @@ void drawEditBox(unsigned char* caption, unsigned char* text, int text_color, in
     putS(text_color, bk_color, xEditPos, yEditPos, text);
 
     SetUnderlinedCursor(xEditPos, yEditPos, current_ascii, 1);
+
+    // draw Line under text
+    setPlane(BMAP2);
+    drawLine(COLOR_BLACK,0, h1+2+5+h2+3, EDITBOX_WIDTH, h1+2+5+h2+3);
+
+    // draw buttons
+    buttonPos = (EDITBOX_WIDTH-(2*EDITBUTTON_DISTANCE))/2;
+    buttonOffset = (buttonPos - EDITBUTTON_WIDTH)/2;
+
+    for(i = 0; i < 2; i++)
+    {
+        drawRect(COLOR_BLACK, EDITBUTTON_DISTANCE+i*buttonPos+buttonOffset, EDITBOX_HEIGHT-19, EDITBUTTON_WIDTH, EDITBUTTON_HEIGHT);
+
+        if(i == 0)
+            strcpy(strButtonText,"Ok(F1)");
+        else
+            strcpy(strButtonText,"Cancel(F2)");
+
+        getStringS(strButtonText, &w_buttonText, &h_buttonText);
+        buttonTextOffsetX = (EDITBUTTON_WIDTH/2)-(w_buttonText/2);
+        buttonTextOffsetY = (EDITBUTTON_HEIGHT/2)-(h_buttonText/2);
+        putS(COLOR_BLACK, COLOR_WHITE, EDITBUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX, EDITBOX_HEIGHT-19+buttonTextOffsetY , strButtonText);
+    }
 
     showPlane(BMAP2);
 
