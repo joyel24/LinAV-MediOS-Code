@@ -97,7 +97,7 @@ int main() {
 
 //    interruptsSetCausesA(0xffffffff);
 //    interruptsSetCauses2A(0xffffffff);
-    interruptsSetMaskA(interruptsGetMaskA() | 0xf); // Enable timer IRQs
+    interruptsSetMaskA(interruptsGetMaskA() | 0x7ffff3f);
 //    interruptsSetMask2A(0x0);
     interruptsSetIRQEnabledA();
     
@@ -109,22 +109,26 @@ int main() {
             v = timersGetValueA(c);
             y = v * 120 >> 16;
             if (y>119) y=119;
-            if (y<0) y=0;        
+            if (y<0) y=0;
             graphicsSetPixelA(&screenBitmap, 319, y, c+1);
         }
         
         b = buttonsGetStatusA();
         if (b & BUTTONS_AV300_OFF) return;
         if (b & BUTTONS_AV300_DOWN) {
-            tmax[ctimer]-=0x100;
-            timersConfigA(ctimer, tmode[ctimer], 0, div, tmax[ctimer]);
-            stringPutHexA(timev, tmax[ctimer], 4);
-            graphicsStringA(&screenTop, 4 + 12*5, 2, &sprite4_6, std4x6_, 5, 0, timev);
+            if (tmax[ctimer]>=0x100) {
+                tmax[ctimer]-=0x100;
+                timersConfigA(ctimer, tmode[ctimer], 0, div, tmax[ctimer]);
+                stringPutHexA(timev, tmax[ctimer], 4);
+                graphicsStringA(&screenTop, 4 + 12*5, 2, &sprite4_6, std4x6_, 5, 0, timev);
+            }
         } else if (b & BUTTONS_AV300_UP) {
-            tmax[ctimer]+=0x100;
-            timersConfigA(ctimer, tmode[ctimer], 0, div, tmax[ctimer]);
-            stringPutHexA(timev, tmax[ctimer], 4);
-            graphicsStringA(&screenTop, 4 + 12*5, 2, &sprite4_6, std4x6_, 5, 0, timev);
+            if (tmax[ctimer]<0xff00) {
+                tmax[ctimer]+=0x100;
+                timersConfigA(ctimer, tmode[ctimer], 0, div, tmax[ctimer]);
+                stringPutHexA(timev, tmax[ctimer], 4);
+                graphicsStringA(&screenTop, 4 + 12*5, 2, &sprite4_6, std4x6_, 5, 0, timev);
+            }
         }
         
         if (b & BUTTONS_AV300_MENU1) {
@@ -170,6 +174,7 @@ char hex4[] = "xxxx";
 void intsub() {
     int i=0,c=0;
     c = interruptsGetCausesA();
+    c = c | (~interruptsGetMaskA());
     debug("INT called %d: ", v);
     debug("CAUSES %08x MASK %08x ", c, interruptsGetMaskA());
     debug("CAUSES2 %08x MASK2 %08x\n", interruptsGetCauses2A(), interruptsGetMask2A());

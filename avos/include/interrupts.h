@@ -16,6 +16,16 @@
 typedef unsigned long u32;
 #endif
 
+#define INTERRUPTS_TIMER0   0
+#define INTERRUPTS_TIMER1   1
+#define INTERRUPTS_TIMER2   2
+#define INTERRUPTS_TIMER3   3
+
+#define INTERRUPTS_OSD      7   // Seems to just interrupt really fast
+                                // Does this mean end of osd update?
+#define INTERRUPTS_UART0    12
+#define INTERRUPTS_UART1    13
+
 void interruptsSetMaskA(u32 bitmask);
 u32 interruptsGetMaskA();
 void interruptsSetCausesA(u32 bitmask);
