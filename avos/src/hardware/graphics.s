@@ -198,13 +198,6 @@ gsnochr:
 gsdone: pop {r6}
         pop {r1, r2, r7, pc}
 
-        .include "graphics1.s"
-        .include "graphics2.s"
-        .include "graphics4.s"
-        .include "graphics8.s"
-        .include "graphics16.s"
-        .include "graphics32.s"
-        
         .arm
         .ltorg
 

@@ -68,7 +68,6 @@ int main() {
     graphicsBoxf(&screenBitmap, 0, 0, 320, 240, 0x0000);
     graphicsBoxf(&screenBitmap, 20, 20, 280, 200, 0x0101);
     
-    
     graphicsString(&screenBitmap, 2, 20, &sprite1, &std8x13_, 9, 1, "abcdefghijklmnopqrstuvwyxz");
     graphicsString(&screenVideo, 2, 34, &sprite1, &std8x13_, 9, 1, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     graphicsString(&screenVideo, 2, 48, &sprite1, &std8x13_, 9, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
