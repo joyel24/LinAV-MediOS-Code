@@ -190,7 +190,7 @@ void mk_item_str(void * data,char * str)
         sprintf(str,"%s",cfg_data->name);
 }
 
-BITMAP *  mk_sub_icon(void * data)
+BITMAP *mk_sub_icon(void * data)
 {
     struct cfg_menu * cfg_data = (struct cfg_menu *)data;
     if(cfg_data->type == TYPE_STD) /* std sub menu */
@@ -200,7 +200,7 @@ BITMAP *  mk_sub_icon(void * data)
     
 }
 
-BITMAP *  mk_item_icon(void * data)
+BITMAP * mk_item_icon(void * data)
 {
     struct cfg_menu * cfg_data = (struct cfg_menu *)data;
     if(cfg_data->icon)
@@ -232,7 +232,7 @@ int ini_menu(char * path,struct plugin * plug)
     
     putS(COLOR_WHITE,COLOR_BLACK,5,110,"[ini_menu] reading menu file");
     
-    tmpC=(char*)malloc(sizeof(char)*(strlen(path)+1+strlen(MENU_FILE_NAME)));
+    tmpC=(char*)malloc(sizeof(char)*(strlen(path)+1+strlen(MENU_FILE_NAME)+1));
     sprintf(tmpC,"%s/%s",path,MENU_FILE_NAME);
     
     if(loadMenu(tmpC)<0)
@@ -256,9 +256,9 @@ int ini_menu(char * path,struct plugin * plug)
     fprintf(stderr,"[ini_menu] helper menu added\n");
     
     /* loading icons */
-    sub_icon=loadIcon("folder.ico");
-    back_icon=loadIcon("folder.ico");
-    plugin_icon=getIcon("textBitmap");
+    sub_icon=loadIcon("sub_icon.ico");
+    back_icon=loadIcon("back_icon.ico");
+    plugin_icon=loadIcon("plugin_icon.ico");
     
     free(tmpC);
     return 1;
@@ -317,7 +317,10 @@ int insertItem(struct menu_item * item)
     if(rootMenu==NULL)
     {
         if(cfg_data->parent[0] != 0) 
+        {
+            fprintf(stderr,"no sub defined and data is not in root => error\n");
             return -1; // no sub defined and data is not in root => error
+        }
         else
             rootMenu=item; // no root => item is first item
     }
@@ -340,7 +343,10 @@ int insertItem(struct menu_item * item)
                 item->up=ptr;
             }
             else
+            {
+                fprintf(stderr,"parent not found %s\n",cfg_data->name);
                 return -1; // parent not found
+            }
         }
     }
     return 0;
@@ -430,6 +436,7 @@ int do_parse(struct cfg_menu ** cfg,char * filename)
             }
             else
             {
+                fprintf(stderr,"icon:|%s|\n",value);
                 current_item->icon=loadIcon(value);
             }
         }
@@ -460,7 +467,10 @@ int doAddBackEntry(char * name,struct menu_item * up,struct menu_item *cur)
                 fprintf(stderr,"can't malloc back item\n");
                 return 0;
             }
-            sprintf(data->name,"<-  %s",name);
+            if(menu_cfg.isTxtMenu)
+                sprintf(data->name,"<-  %s",name);
+            else
+                sprintf(data->name,"%s",name);
             data->type=TYPE_BACK;
             if(cur)
                 cur->prev=ptr;            

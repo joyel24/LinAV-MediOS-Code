@@ -72,7 +72,7 @@ void drawTime(void)
     {    
         fillRect(BG_COLOR,135,3,106,10);
         
-        sprintf(timeSt,"%02d%s:%02d %02d/%02d/%04d",HOUR(date_time.tm_hour),AMPM_ADD(date_time.tm_hour),date_time.tm_min,
+        sprintf(timeSt,"%02d:%02d%s %02d/%02d/%04d",HOUR(date_time.tm_hour),date_time.tm_min,AMPM_ADD(date_time.tm_hour),
                                                          DATE1(date_time.tm_mday,date_time.tm_mon),
                                                          DATE2(date_time.tm_mday,date_time.tm_mon),
                                                          date_time.tm_year);

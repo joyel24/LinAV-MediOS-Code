@@ -37,11 +37,11 @@ struct icon_elem * loadIcon(char * filename)
     char * name;
     
     /* create the filename+path */
-    tmpF=(char*)malloc(sizeof(char)*(strlen(path)+1+strlen(ICON_DIR)+1+strlen(filename)));
+    tmpF=(char*)malloc(sizeof(char)*(strlen(path)+1+strlen(ICON_DIR)+1+strlen(filename)+1));
     if(!tmpF)
     {
         printf("[loadIcon] can't create filename string\n");
-        return 0;
+        return NULL;
     }    
     sprintf(tmpF,"%s/%s/%s",path,ICON_DIR,filename);
     
@@ -49,8 +49,8 @@ struct icon_elem * loadIcon(char * filename)
     infile = fopen(tmpF, "rb");
     if(!infile)
     {
-        printf("[loadIcon] can't open file '%s' for reading!\n", tmpF);
-        return 0;
+        printf("[loadIcon] can't open file '%s' (%s) for reading!\n", tmpF,filename);
+        return NULL;
     }
     
     /* check if it has the correct ident. string */    
