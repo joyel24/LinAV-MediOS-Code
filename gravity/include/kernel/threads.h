@@ -15,6 +15,8 @@
 
 #include <kernel/errors.h>
 
+#define TASK_STACK_SIZE 16384
+
 typedef struct _TASK_INFO
 {
 	unsigned long*     pTopOfStack;
@@ -31,6 +33,9 @@ typedef struct _TASK_INFO
 	void*              pFont;
 	char               cName [8];
 } TASK_INFO;
+
+extern TASK_INFO* g_pActiveTask; // pointer to current element in ring list
+extern TASK_INFO* g_pBlockedTask; // pointer to current element in ring list
 
 #define kload_context()													\
 {																		\
