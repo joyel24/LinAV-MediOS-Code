@@ -81,7 +81,7 @@ extern int fopen(const char* pathname,const char * mode);
 extern int fclose(int fd);
 
 extern int fread(int fd, void* buf, int count);
-//extern int fgetc(int fd);
+extern char fgetc(int fd);
 //extern int fgets(int fd,const char * string,int maxread);
 //extern int fprintf(int fd,char *fmt, ...);
 extern int fwrite(int fd, void* buf, int count);

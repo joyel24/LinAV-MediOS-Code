@@ -531,6 +531,16 @@ int fread(int fd, void* buf, int count)
 	}
 }
 
+char fgetc(int fd)
+{
+	char c;
+	int ret;
+	if((ret=fread(fd, &c, 1))<0)
+		return ret;
+	else
+		return c;
+}
+
 //******************************************************
 // fread
 // copy 'count' bytes from buf to disk
