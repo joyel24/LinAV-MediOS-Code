@@ -164,8 +164,8 @@ struct partition_info * setup_disk(int drive)
 void identify_disk(int drive, struct hd_info_s * hd_info)
 {
     unsigned char * buffer=(unsigned char *)kmalloc(sizeof(unsigned char)*SECTOR_SIZE);    
-    select_drive(drive);
-    if(buffer && !ata_identify(buffer))
+    
+    if(buffer && !ata_identify(drive,buffer))
     {    
         strncpy(hd_info->serial, &buffer[20], 20);
         dd_swapChar(hd_info->serial,20);
@@ -189,8 +189,19 @@ void identify_disk(int drive, struct hd_info_s * hd_info)
 
 int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direction)
 {
-    select_drive(drive);
-    return ata_RW_Sector(lba,count,buffer,direction);
+    ata_cmd_s * cmd=(ata_cmd_s *)kmalloc(sizeof(ata_cmd_s));
+    int res;    
+    
+    cmd->lba=lba;
+    cmd->count=count;
+    cmd->data=buffer;
+    cmd->xfer_dir=direction;
+    cmd->use_dma=ATA_WITH_DMA;
+    cmd->drive=drive;
+            
+    res=ata_RW_sector(cmd);
+    kfree(cmd);
+    return res;
 }
 
 void printPartition_info(struct partition_info * partition_list)
@@ -203,7 +214,7 @@ void printPartition_info(struct partition_info * partition_list)
 }
 
 
-
+/*
 void select_drive(int drive)
 {
     if(drive==HD_DRIVE)
@@ -218,7 +229,7 @@ void select_drive(int drive)
         ata_select_CF();
     }
 }
-
+*/
 
 
 void dd_swapChar(char * txt,int size)

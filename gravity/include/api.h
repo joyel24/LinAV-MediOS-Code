@@ -177,6 +177,8 @@ ERROR_CODE API_SOUND_BUFFER_WRITE   (sound_buffer_s * sound_buffer,sound_api_par
 ////////////////////// SOUND API //////////////////////
 ///////////////////////////////////////////////////////
 
+ERROR_CODE API_FILE             (int cmd,void * data1,void * data2);
+
 int        do_api_power         (int cmd);
 
 void       printf               (char *fmt, ...);

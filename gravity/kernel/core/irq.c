@@ -21,35 +21,29 @@
 #include <kernel/sound.h>
 #include <kernel/timer.h>
 #include <kernel/uart.h>
+#include <kernel/ata.h>
 
 
 __IRAM_DATA int cli_var=0;
 __IRAM_DATA int clf_var=0;
 
-extern void c54_dsp_interrupt (int irq);
-
-__IRAM_CODE void ata_interrupt (int irq)
-{
-	printk ("*** ATA INTR ***\n");
-}
-
 __IRAM_DATA struct irq_data_s irq_table[] = {
     {
         irq     : IRQ_MAS_DATA,
         action  : dsp_interrupt,
-        name    : "MAS intr",
+        name    : "MAS",
         nb_irq  : 0
     },
     {
         irq     : IRQ_TMR_0,
         action  : main_timer_action,
-        name    : "Tick timer intr",
+        name    : "Tick_timer",
         nb_irq  : 0
     },
     {
-        irq     : IRQ_DSP,
-        action  : c54_dsp_interrupt,
-        name    : "DSP intr",
+        irq     : IRQ_IDE,
+        action  : ide_intr_action,
+        name    : "IDE intr",
         nb_irq  : 0
     },
     {
@@ -62,12 +56,6 @@ __IRAM_DATA struct irq_data_s irq_table[] = {
         irq     : IRQ_UART1,
         action  : uart_intr_action,
         name    : "UART1 intr",
-        nb_irq  : 0
-    },
-    {
-        irq     : IRQ_ATA,
-        action  : ata_interrupt,
-        name    : "ATA intr",
         nb_irq  : 0
     },
     {
