@@ -10,6 +10,7 @@ To apply the patch:
 - untar the kernel sources
 - apply the patch with zcat patch-xxxx | patch -p0 -E
 where patch-xxxx is the patch you are trying to apply
+- put rom.inc in arch/armnommu/mach-av3xx
 
 To build the kernel:
 make mrproper
@@ -26,9 +27,8 @@ make menuconfig (not xconfig)
 make dep
 make
 objcopy -O binary linux linux-exe.bin 
-objcopy -O binary arch/armnommu/boot.o boot.bin
+objcopy -O binary arch/armnommu/mach-av3xx/boot.o boot.bin
 (where objcopy is the one from your toolchain)
-put rom.inc in arch/armnommu/mach-av3xx
 cat boot.bin linux-exe.bin > linux.bin
 
 you can then run linux.bin from the bootloader.
