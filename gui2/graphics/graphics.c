@@ -340,6 +340,30 @@ void drawLine(int color, int x1, int y1, int x2, int y2)
 
     tstXY(x1,y1);
     tstXY(x2,y2);
+    
+    if(x1==x2)
+    {
+        if(y1>y2)
+        {
+            i=y1;
+            y1=y2;
+            y2=i;
+        }
+        default_gc->gops->drawVLine(color,x1,y1,y2-y1+1,default_gc->buffer);
+        return;        
+    }
+    
+    if(y1==y2)
+    {
+        if(x1>x2)
+        {
+            i=x1;
+            x1=x2;
+            x2=i;
+        }
+        default_gc->gops->drawHLine(color,x1,y1,x2-x1+1,default_gc->buffer);
+        return;
+    }
 
     deltax = abs(x2 - x1);
     deltay = abs(y2 - y1);

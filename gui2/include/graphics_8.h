@@ -23,6 +23,8 @@ void graphics8_DrawSprite        (PALETTE * palette, SPRITE * sprite, unsigned i
 void graphics8_DrawBITMAP        (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
 void graphics8_ScrollWindowVert  (int bgColor, int x, int y, int width, int height, int scroll, int UP, struct graphicsBuffer * buff);
 void graphics8_ScrollWindowHoriz (int bgColor, int x, int y, int width, int height, int scroll, int RIGHT, struct graphicsBuffer * buff);
+void graphics8_DrawHLine         (int color, int x, int y, int width, struct graphicsBuffer * buff);
+void graphics8_DrawVLine         (int color, int x, int y, int height, struct graphicsBuffer * buff);
 
 void graphics8_1bit_Sprite (char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
 void graphics8_2bit_Sprite (char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
@@ -30,6 +32,6 @@ void graphics8_4bit_Sprite (char * src, int width, int height, int bpline, PALET
 
 void graphics8_DrawHorizLine (int color, int width,char * offset);
 void graphics8_DrawString    (struct graphicsFont * font, int color,int bg_color, int x, int y, char * s, struct graphicsBuffer * buff);
-int graphics8_GetStringSize(struct graphicsFont * font, const unsigned char *str, int *w, int *h);
+int graphics8_GetStringSize  (struct graphicsFont * font, const unsigned char *str, int *w, int *h);
 
 #endif

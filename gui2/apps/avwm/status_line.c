@@ -10,6 +10,8 @@
 * KIND, either express of implied.
 *
 */
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "colordef.h"
 #include "cops.h"
@@ -67,11 +69,15 @@ void drawBat(void)
             color = COLOR_GREEN;
             level = 20;
         }
+        
+        //fprintf(stderr,"[BAT] P=%d,C=%d,L=%d\n",power,color,level);
 
         drawRect(COLOR_BLACK,289,2,22,10);
         fillRect(COLOR_BLACK,311,4,3,6);
         fillRect(color,290,3,level,8);
     }
+    else
+        fprintf(stderr,"[BAT] error getting bat level\n");
 
 }
 

@@ -99,7 +99,8 @@ void (*scrollWindowVert) (int bgColor, int x, int y, int width, int height, int 
 void (*scrollWindowHoriz)(int bgColor, int x, int y, int width, int height, int scroll, int RIGHT, struct graphicsBuffer * buff);
 int  (*getStringSize)    (struct graphicsFont * font, const unsigned char *str, int *w, int *h);
 void (*clearScreen)      (int color);
-
+void (*drawHLine)        (int color, int x, int y, int width, struct graphicsBuffer * buff);
+void (*drawVLine)        (int color, int x, int y, int height, struct graphicsBuffer * buff);
 };
 
 struct graphics_context {

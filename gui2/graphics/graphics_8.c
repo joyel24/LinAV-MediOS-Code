@@ -25,7 +25,9 @@ struct graphics_operations g8ops =  {
 	drawString        : graphics8_DrawString,
 	scrollWindowVert  : graphics8_ScrollWindowVert,
 	scrollWindowHoriz : graphics8_ScrollWindowHoriz,
-	getStringSize     : graphics8_GetStringSize
+	getStringSize     : graphics8_GetStringSize,
+        drawHLine         : graphics8_DrawHLine,
+        drawVLine         : graphics8_DrawVLine
 };
 
 void graphics8_DrawPixel(int color, int x, int y, struct graphicsBuffer * buff)
@@ -61,12 +63,30 @@ void graphics8_DrawRect(int color, int x, int y, int width, int height, struct g
 void graphics8_FillRect(int color, int x, int y, int width, int height, struct graphicsBuffer * buff)
 {
     int j;
-
     char * offset=getOffset(x,y,buff,char);
+    
+    //printf("[g8 FillRect] c=%d, (%d,%d) (%d,%d)\n",color,x,y,width,height);
     
     for(j=0;j<height;j++)
     {
         graphics8_DrawHorizLine(color, width, offset);    
+        offset+=buff->width;
+    }
+}
+
+void graphics8_DrawHLine(int color, int x, int y, int width, struct graphicsBuffer * buff)
+{
+    char * offset=getOffset(x,y,buff,char);
+    graphics8_DrawHorizLine(color,width,offset);
+}
+
+void graphics8_DrawVLine(int color, int x, int y, int height, struct graphicsBuffer * buff)
+{
+    int i;
+    char * offset=getOffset(x,y,buff,char);
+    for(i=0;i<height;i++)
+    {
+        OUTB(color,offset);
         offset+=buff->width;
     }
 }
