@@ -144,7 +144,7 @@ struct timer_val {
 #define AV_DSP_PAUSE_MP3       _IOW(AV_OP_IOC_MAGIC_SOUND,27, int)
 
 #define AV_OP_IOC_MAGIC_STATE  'f'
-#define AV_OP_IOC_MAXNR_STATE  20
+#define AV_OP_IOC_MAXNR_STATE  22
 #define AV_LCD_GET_TIMOUT      _IOR(AV_OP_IOC_MAGIC_STATE,1,struct timer_val*)
 #define AV_LCD_SET_TIMOUT      _IOW(AV_OP_IOC_MAGIC_STATE,2,struct timer_val*)
 #define AV_LCD_TIMOUT_OFF      _IOW(AV_OP_IOC_MAGIC_STATE,3,struct timer_val*)
@@ -165,6 +165,8 @@ struct timer_val {
 #define AV_HALT_TIMOUT_ON      _IOW(AV_OP_IOC_MAGIC_STATE,18,struct timer_val*)
 #define AV_HALT_TIMOUT_STATE   _IOR(AV_OP_IOC_MAGIC_STATE,19,struct timer_val*)
 #define AV_HALT_DEVICE         _IO(AV_OP_IOC_MAGIC_STATE,20)
+#define AV_LCD_GET_BRIGHT      _IOR(AV_OP_IOC_MAGIC_STATE,21,int)
+#define AV_LCD_SET_BRIGHT      _IOW(AV_OP_IOC_MAGIC_STATE,22,int)
 
 #define AV_OP_IOC_MAGIC_FM     'f'
 #define AV_OP_IOC_MAXNR_FM     14
