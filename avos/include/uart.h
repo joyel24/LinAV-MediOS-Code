@@ -17,6 +17,6 @@ typedef unsigned long u32;
 #endif
 
 extern u32 uartGetch();
-extern void uartPutch(u32 data);
-extern void uartPuts(char* string);
+extern void uartOutch(u32 data);
+extern void uartOuts(char* string);
 

@@ -26,7 +26,7 @@ int fatDirFilter(struct dirEntry dirIn[], struct dirEntry dirOut[], int n) {
 
     for (cpin=0;cpin<n;cpin++) {
         if (dirIn[cpin].name[0]==0) {
-            break;    
+            break;
         } else if (dirIn[cpin].name[0]!=0xe5) {
             if (!(dirIn[cpin].attr & FAT_ATTR_VOLUME_ID) &&
                (dirIn[cpin].attr!= FAT_ATTR_LONG_NAME)) {
@@ -133,21 +133,167 @@ int fatTrace(int cluster) {
     return fatCache[cluster & 127];
 }
 
+int fatfatNxtSector(struct fatent * fat_ent)
+{
+
+	if(fat_ent->curCluster==0) // we start a new fat_ent
+	{
+		fat_ent->curCluster=fat_ent->startCluster;
+		fat_ent->fatoffset=(fat_ent->curCluster-2)*secPerClu+LBAData;
+		fat_ent->sectorNumber=0;
+	}
+
+
+	ataReadSectors(fat_ent->fatoffset+fat_ent->sectorNumber, 1, fat_ent->cache);
+
+	fat_ent->sectorNumber++;
+
+	if(fat_ent->sectorNumber>=secPerClu) // need to change cluster
+	{
+		fat_ent->curCluster=fatTrace(fat_ent->curCluster);
+		if(fat_ent->curCluster >= FAT_CHAIN_END)
+		{
+			fat_ent->eof_disk=true;
+		}
+		else
+		{
+			fat_ent->fatoffset=(fat_ent->curCluster-2)*secPerClu+LBAData;
+			fat_ent->sectorNumber=0;
+		}
+	}
+
+	fat_ent->cacheoffset=0;
+	return 0;
+}
+
+int fatValidateEntry(struct dirEntry * entry)
+{
+	if(entry->name[0] == 0x0)
+		return END_ENTRY;
+
+	if(entry->name[0] == 0xe5)
+		return EMPTY_ENTRY;
+
+	if(((entry->attr & FAT_ATTR_VOLUME_ID) == FAT_ATTR_VOLUME_ID) || entry->attr == (FAT_ATTR_LONG_NAME))
+		return BAD_ENTRY;
+
+	return GOOD_ENTRY;
+}
+
+void fatGetName(char * name,struct dirEntry * entry)
+{
+	int i;
+	for(i=0;i<NAME_SIZE;i++)
+		name[i]=entry->name[i];
+	name[i]=0x0;
+}
+
+void fatGetEntryName(char * entryName,struct dirEntry * entry)
+{
+	int i,j;
+
+	for(i=0;i<NAME_SIZE;i++)
+		if(entry->name[i] == ' ')
+			break;
+		else
+			entryName[i]=entry->name[i];
+
+	if(entry->ext[0]!=' ')
+	{
+		entryName[i]='.';
+		i++;
+
+		for(j=0;j<EXT_SIZE;j++)
+			if(entry->ext[j] == ' ')
+				break;
+			else
+			{
+				entryName[i]=entry->ext[j];
+				i++;
+			}
+	}
+	entryName[i]=0x0;
+}
+
+void fatGetExt(char * ext,struct dirEntry * entry)
+{
+	int i;
+	for(i=0;i<EXT_SIZE;i++)
+		ext[i]=entry->ext[i];
+	ext[i]=0x0;
+}
+
+int fatGetAtr(struct dirEntry * entry)
+{
+	return entry->attr;
+}
+
+int fatGetstrtClu(struct dirEntry * entry)
+{
+	int val = entry->fatCluHI << 16;
+	return val + entry->fatCluLO;
+}
+
+int fatGetSize(struct dirEntry * entry)
+{
+	return entry->size;
+}
+
+void fatOpendir(struct fatent * fat_ent,int startCluster)
+{
+	if(startCluster==-1)
+		fat_ent->startCluster=rootClu;
+	else
+		fat_ent->startCluster=startCluster;
+
+	fat_ent->curCluster=0;
+	fat_ent->cacheoffset=0;
+	fat_ent->eof_disk=false;
+
+	fatfatNxtSector(fat_ent);
+}
+
+
 int fatReadFile(int cluster, char* buffer) {
     int c;
-    while(1) {    
+    while(1) {
         stringPutHex(hex8, cluster, 8);
         uartOuts("[fat.c] reading cluster ");
         uartOuts(hex8);
         uartOuts("\n");
-        
+
         c = fatReadCluster(cluster, buffer);        // Read data...
         if (c!=ATA_ERROR_NONE) return c;
         buffer = buffer + (secPerClu*512);      // Move along,
         cluster = fatTrace(cluster);            // Trace the fat
         if (cluster<0) return cluster;          // ATA Error!
-        if (cluster>0x0ffffff0) return 0;       // End of chain...
+        if (cluster>FAT_CHAIN_END) return 0;       // End of chain...
     }
+}
+
+int fatloadFile(char * fileN)
+{
+    int curFile;
+
+	curFile=fopen(fileN);
+	debug("openFile(): %d\n",curFile);
+
+	if(curFile>=0)
+	{
+
+		int offset=0;
+		char * buffer=(char*) 0x03000000;
+
+		while((fread(curFile,&buffer[offset],secPerClu*SECTOR_SIZE))>0)
+			offset+=secPerClu*SECTOR_SIZE;
+		fclose(curFile);
+		return 1;
+	}
+	else
+	{
+		uartOuts("Error loading file\n");
+		return 0;
+	}
 }
 
 
@@ -159,3 +305,4 @@ int bootRead(int addr, int n) {
     }
     return v;
 }
+

@@ -10,6 +10,15 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
+BUILDDIR=/home/thomas/Av320/arm-tools/inst_uclibc/toolchain/gcc-3.3.x/toolchain_arm_nofpu
+LDFLAG=-L$(BUILDDIR)/arm-linux/lib
+
+##########################
+## you need to make some special link:
+## in LDFLAG dir do ln -s ../../lib/gcc-lib/arm-linux-uclibc/3.3.2/libgcc.a
+## and ln -s ../../lib/libfloat.a
+## or find a better way to do it ;)
+
 
 libavos:
 	arm-linux-gcc -Wa,-R -c -mthumb-interwork -fno-zero-initialized-in-bss -Iinclude/ src/fonts/*.c
@@ -28,7 +37,7 @@ examples: src/examples/*.c
 	arm-linux-gcc -mthumb-interwork -static-libgcc -c -Wa,-R\
     -fno-zero-initialized-in-bss -Iinclude/ $$i;\
 	arm-linux-ld -N -Ttext 0x03000000 -e main -o `basename $$i .c`.elf `basename $$i .c`.o\
-    lib/*.o -lfloat -lgcc -lc -L/home/jimmy/archos/uclib/toolchain/gcc-3.3.x/toolchain_arm_nofpu/libfloat/ -L/home/jimmy/archos/uclib/toolchain/gcc-3.3.x/toolchain_arm_nofpu/lib/gcc-lib/arm-linux-uclibc/3.3.2/;\
+    lib/*.o $(LDFLAG) -lc -lfloat -lgcc;\
 	arm-linux-objcopy -O binary `basename $$i .c`.elf `basename $$i .c`.bin;\
     rm -f `basename $$i .c`.elf `basename $$i .c`.o;\
     mv *.bin dist/;\
@@ -39,7 +48,7 @@ debug: src/examples/*.c
 	arm-linux-gcc -mthumb-interwork -static-libgcc -c -Wa,-R\
     -fno-zero-initialized-in-bss -Iinclude/ $$i;\
 	arm-linux-ld -N -Ttext 0x03000000 -e main -o `basename $$i .c`.elf `basename $$i .c`.o\
-    lib/*.o -lfloat -lgcc -L/home/jimmy/archos/uclib/toolchain/gcc-3.3.x/toolchain_arm_nofpu/lib/gcc-lib/arm-linux-uclibc/3.3.2/;\
+    lib/*.o $(LDFLAG) -lc -lfloat -lgcc;\
 	arm-linux-objcopy -O binary `basename $$i .c`.elf `basename $$i .c`.bin;\
     done
 
@@ -48,7 +57,7 @@ boot: src/boot/boot.c
 	arm-linux-gcc -mthumb-interwork -static-libgcc -c -Wa,-R\
     -fno-zero-initialized-in-bss -Iinclude/ src/boot/boot.c
 	arm-linux-ld -N -Ttext 0x03400000 -e main2 -o boot.elf bootstart.o boot.o\
-    lib/*.o -lfloat -lgcc -L/home/jimmy/archos/uclib/toolchain/gcc-3.3.x/toolchain_arm_nofpu/lib/gcc-lib/arm-linux-uclibc/3.3.2/
+    lib/*.o $(LDFLAG) -lc -lfloat -lgcc
 	arm-linux-objcopy -O binary boot.elf boot.bin
 	rm -f boot.elf boot.o
 	mv boot.bin dist/
