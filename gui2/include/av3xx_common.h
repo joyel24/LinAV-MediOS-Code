@@ -43,8 +43,7 @@ struct mouseParam {
 /* mp3 player */
 
 struct mp3_play {
-	int size;
-	
+        int size;
         char * buffer;
         int endOfFile;
         int buffer_read;
@@ -130,19 +129,29 @@ struct av_peak {
 
 #define AV_RTC_GET_JIFFY_IOC   _IOR(AV_OP_IOC_MAGIC,55,int)
 
-#define AV_OP_IOC_MAXNR        56
+#define AV_LCD_GET_TIMOUT      _IOR(AV_OP_IOC_MAGIC,55,int)
+#define AV_LCD_SET_TIMOUT      _IOW(AV_OP_IOC_MAGIC,56,int)
+#define AV_LCD_TIMOUT_OFF      _IO(AV_OP_IOC_MAGIC,57)
+#define AV_LCD_TIMOUT_ON       _IO(AV_OP_IOC_MAGIC,58)
+#define AV_LCD_TIMOUT_STATE    _IOR(AV_OP_IOC_MAGIC,59,int)
+#define AV_LCD_ON              _IO(AV_OP_IOC_MAGIC,60)
+#define AV_LCD_OFF             _IO(AV_OP_IOC_MAGIC,61)
+#define AV_LCD_GET_STATE       _IOR(AV_OP_IOC_MAGIC,62,int)
+
+#define AV_OP_IOC_MAXNR        63
 
 /* MAJOR / MINOR */
 
 #define AV_STATE_MAJOR          254
 
-#define AV_STATE_NR_MINOR       5
+#define AV_STATE_NR_MINOR       6
 
 #define AV_STATE_RTC_MINOR      0       /* time        /dev/avrtc             */
 #define AV_STATE_POWER_MINOR    1       /* power       /dev/avpower           */
 #define AV_STATE_TSC2003_MINOR  2       /* battery     /dev/avtsc             */
 #define AV_STATE_USB_MINOR      3       /* usb         /dev/avusb             */
 #define AV_STATE_MOUSE_MINOR    4       /* mouse       /dev/mouse             */
+#define AV_STATE_STATE_MINOR    5       /* state       /dev/avstate           */
 
 #define SND_DEV_CTL             0       /* Control port     /dev/mixer     */
 #define SND_DEV_DSP             3       /* Digitized voice  /dev/dsp       */
