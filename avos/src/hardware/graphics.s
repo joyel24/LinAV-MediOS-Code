@@ -147,6 +147,7 @@ graphicsRGB2Packed:
 @ graphicsGetOffset(r0->bufferDef, r1=x, r2=y)
 @       Returns offset of pixel in r0.
 @
+.globl graphicsGetOffset
 .thumb_func
 
 graphicsGetOffset:

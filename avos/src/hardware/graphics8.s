@@ -35,7 +35,7 @@ graphics8SetPixel:
 @ graphics8GetPixel(r0->bufferDef, r1=x, r2=y)
 @       Returns the pixels color in r0
 @
-.globl graphics8SetPixel
+.globl graphics8GetPixel
 .thumb_func
 
 graphics8GetPixel:

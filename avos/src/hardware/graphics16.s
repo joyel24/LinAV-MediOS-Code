@@ -35,7 +35,7 @@ graphics16SetPixel:
 @ graphics16GetPixel(r0->bufferDef, r1=x, r2=y)
 @       Returns the pixels color in r0
 @
-.globl graphics16SetPixel
+.globl graphics16GetPixel
 .thumb_func
 
 graphics16GetPixel:

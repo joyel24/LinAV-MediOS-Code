@@ -33,7 +33,7 @@ graphics2SetPixel:
 @ graphics2GetPixel(r0->bufferDef, r1=x, r2=y)
 @       Returns the pixels color in r0
 @
-.globl graphics2SetPixel
+.globl graphics2GetPixel
 .thumb_func
 
 graphics2GetPixel:
