@@ -22,6 +22,7 @@
 
 #define BG_COLOR  COLOR_LIGHT_BLUE
 #define TXT_COLOR COLOR_DARK_GREY
+#define BATTERY_REFRESH_VALUE 20
 
 int batteryRefresh=0;
 int pwrState=0;
@@ -111,7 +112,7 @@ void drawStatus(void)
         drawBITMAP(&usbIcon, 250, 4);
     else
         fillRect(BG_COLOR,250,4,15,6);
-        
+
     if(pwrState)
         drawBITMAP(&powerIcon, 273, 4);
     else
@@ -154,13 +155,15 @@ int statusEvtHandler(int evt)
             break;
         case EVT_TIMER:
             drawTime();
-            if(batteryRefresh >= 20)
-            {
+            if(batteryRefresh == 0)
                 drawBat();
-                batteryRefresh = 0;
-            }
             else
+            {
                 batteryRefresh++;
+                if(batteryRefresh == BATTERY_REFRESH_VALUE)
+                    batteryRefresh = 0; // Reset
+            }
+
             break;
         case EVT_PWR:
             pwrState=getPwr();
