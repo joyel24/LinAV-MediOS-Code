@@ -36,6 +36,8 @@ typedef struct _GFX_POINT
 
 typedef struct _GFX_RECT
 {
+    long w;
+    long h;
     long x;
     long y;
 } GFX_RECT;

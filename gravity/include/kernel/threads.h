@@ -63,6 +63,7 @@ typedef struct _SYSTEM_CTRL_COMMAND
 #define TASK_BLOCKED_BY_MEMMGR   4
 #define TASK_BLOCKED_BY_SUSPEND  5
 #define TASK_BLOCKED_BY_DEBUGGER 6
+#define TASK_BLOCKED_BY_GFXMGR   7
 
 extern TASK_INFO* g_pTaskRing; // pointer to current element in ring list
 

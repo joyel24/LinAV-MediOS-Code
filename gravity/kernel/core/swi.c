@@ -19,6 +19,7 @@
 #include <kernel/bat_power.h>
 #include <kernel/sound.h>
 #include <kernel/evt.h>
+#include <kernel/gfxmgr.h>
 
 extern int gfx_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
 extern int fs_swi(int cmd,void * data1, void * data2);
@@ -88,6 +89,9 @@ __IRAM_CODE int kcswi_handler (
 
 	case nAPI_TASK_SLEEP:       //(unsigned long nMilliseconds)                                   { SAVE; asm("swi 5"); LOAD; }
 	{
+		if (nParam1 == 0)
+			break;
+
 		__cli ();
 		g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_SLEEP;
 		g_pTaskRing->nBlockingValue = tick + nParam1 / 10;
@@ -401,13 +405,32 @@ __IRAM_CODE int kcswi_handler (
 		pCtx->x = 0;
 		pCtx->y = 0;
 		pCtx->direction = 0;
+		pCtx->delta = pCtx->w * 4;
+		pCtx->pixel_size = 4;
+
+		API_MALLOC (&pCtx->pixels, pCtx->w * pCtx->h * 4);
+
 		pTask->pMemoryContext = pCtx;
 	}
 	break;
 
 	case nAPI_GFX_COMMIT:       //(GFX_RECT* pArea);
 	{
-		// TO DO:
+		__cli ();
+
+		SYSTEM_CTRL_COMMAND* pSysCtrl = (SYSTEM_CTRL_COMMAND*)(g_pGFXManagerPipe->buffer + g_pGFXManagerPipe->nSender);
+		pSysCtrl->nCmdId = eGFX_MGR_COMMIT;
+		pSysCtrl->nCmdParam1 = nParam1;
+		pSysCtrl->nCmdParam2 = nParam2;
+		pSysCtrl->pSenderThread = g_pTaskRing;
+		g_pGFXManagerPipe->nSender = (g_pGFXManagerPipe->nSender + sizeof(SYSTEM_CTRL_COMMAND)) & PIPE_SIZE_MASK;
+
+		/// Block calling task...
+		g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_GFXMGR;
+		g_pTaskRing->nBlockingValue = 0;
+
+		API_TASK_YIELD ();
+		__sti ();
 	}
 	break;
 
@@ -417,12 +440,16 @@ __IRAM_CODE int kcswi_handler (
 		GFX_DATA* pSrc     = (GFX_DATA*)nParam2;
 		GFX_POINT* pOrigin = (GFX_POINT*)nParam3;
 
+//		printk ("blitting [1]...\n");
+
 		unsigned char nSrcElementSize = pSrc->pixel_size;
 		unsigned char nDstElementSize = pDst->pixel_size;
 
 		int bDoReverse = 0;
 		if (pSrc->direction != pDst->direction)
 			bDoReverse = 1;
+
+//		printk ("dw=%d, dh=%d, sw=%d, sh=%d\n", pDst->w, pDst->h, pSrc->w, pSrc->h);
 
 		int xmin = MAX(pOrigin->x,0);
 		int ymin = MAX(pOrigin->y,0);
@@ -431,8 +458,12 @@ __IRAM_CODE int kcswi_handler (
 		int dx = xmax - xmin;
 		int dy = ymax - ymin;
 
+//		printk ("xmin=%d, ymin=%d, xmax=%d, ymax=%d\n", xmin, ymin, xmax, ymax);
+
 		if ((!dx) || (!dy))
 			break;
+
+//		printk ("blitting [2]...\n");
 
 		int i,j;
 
@@ -454,8 +485,11 @@ __IRAM_CODE int kcswi_handler (
 			sptr = (unsigned char*)(pSrc->pixels + MAX(0,-pOrigin->x)*nSrcElementSize + MAX(0,-pOrigin->y)*st);
 		}
 
+//		printk ("blitting [3]...\n");
+
 		if (nSrcElementSize == nDstElementSize)
 		{
+//			printk ("blitting [4]...\n");
 			int nRow = dx * nDstElementSize;
 			for (i=0;i<dy;i++)
 			{
