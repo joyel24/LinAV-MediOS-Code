@@ -44,6 +44,13 @@ int main() {
     graphicsStringA(&screenBitmap, 0, 0, &sprite5_8, std5x8_, 6, 0,
                 "GIO test v0.01 (c)DoGgEr");
 
+    graphicsStringA(&screenBitmap, 280, 150, &sprite5_8, std5x8_, 6, 0,
+                "IN/OUT");
+    graphicsStringA(&screenBitmap, 280, 180, &sprite5_8, std5x8_, 6, 0,
+                "INVERT");
+    graphicsStringA(&screenBitmap, 280, 210, &sprite5_8, std5x8_, 6, 0,
+                "Exit");
+
     while(1) {
         c = gioGetAllDirectionsA();
         d = gioGetAllInvertsA();
