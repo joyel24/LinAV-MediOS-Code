@@ -96,7 +96,7 @@ together, and to handle nonstandard hardware such as the plugin modules.
 || bottom of the AV300 as a 3.5mm stereo jack socket, which may be used to hook
 || the unit up to a computer, or connect a keyboard or other devices.
 || UART1 is used on the AV300, possibly as a factory debug channel. Not sure
-|| yet.
+|| yet. Could also be the FM remote.
 ++------------------------------------------------------------------------------
 30300   Uart #0 DTTR
 30302   Uart #0 BRSR
@@ -132,6 +132,21 @@ TODO
  // Interrupt handler
 || This controls how interrupts are handled. It is also used to reset things
 || after an interrupt has occurred, and used to determine why an IRQ occurred.
+||
+|| IRQ0  00000001 Timer0
+|| IRQ1  00000002 Timer1
+|| IRQ2  00000004 Timer2
+|| IRQ3  00000008 Timer3
+|| IRQ4  00000010
+|| IRQ5  00000020
+|| IRQ7  00000080
+|| IRQ11 00000800
+|| IRQ14 00004000
+|| IRQ15 00008000
+|| IRQ18 00040000 GIO0 ON button
+|| IRQ22 00400000 GIO4 MAS Data request
+|| IRQ24 01000000 GIO6 IR data
+||
 ++------------------------------------------------------------------------------
 30500   Interrupt causes2 HI
 30502   Interrupt causes2 LO
@@ -140,10 +155,8 @@ TODO
 
 30520   Interrupt mask2 HI
 30522   Interrupt mask2 LO
-30524   Interrupt mask HI       // Remote button down = 8007   // GIO18 (EXT0)
-                                //               up   = 8003
+30524   Interrupt mask HI
 30526   Interrupt mask LO
-                                // +100 for remote? (Serial interface 0)
 
 30528   0-3
 
@@ -189,7 +202,7 @@ TODO
 || 3 00000008
 || 4 00000010 I  - MAS EOD
 || 5 00000020
-|| 6 00000040 I  - Input from IR remote ready
+|| 6 00000040 I  - DATA Input from IR remote control
 || 7 00000080
 ||
 || 8 00000100 IO - MAS D0
@@ -813,7 +826,7 @@ TODO
 30b28   0-ff
 
   ++----------------------------------------------------------------------------
- // ATA - Hard disk/memory card reader access
+ // ATA - Hard disk/CF memory card reader access
 || This is used to communicate with the ATA system. This is done via the CPLD
 || chip.
 ++------------------------------------------------------------------------------
@@ -836,7 +849,6 @@ TODO
 02600000    CPLD mode
             0 = HDD access
             1 = Compact flash card access
-            2 = 
             4 = video imput?
             8 = Smart media reader
             9 = multimedia card reader

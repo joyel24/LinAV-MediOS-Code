@@ -94,6 +94,7 @@ void intsub() {
 
     if (i==2) {
         timersConfigA(2, TIMERS_TMMD_STOP, TIMERS_TMCLK_EXT, 10, 280);
+        state=0;
         // call 4da03(27)
         
         // 43d(2)   - mask this IRQ...
