@@ -40,12 +40,15 @@ extern char _real_core_start;
 extern char _core_code_start;
 extern char _core_code_end;
 
+extern void init_stack(void);
 
 void kernel_start(void)
 {
     int i;    
     char *src;
     char *dst;
+    
+    init_stack();
     
     /* moving core code to lower RAM */    
     clf();    
