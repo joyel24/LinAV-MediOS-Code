@@ -29,10 +29,33 @@ struct dir_entry {
     int size;
 };
 
+struct browser_data {
+    char * path;
+    
+    struct dir_entry * list;
+    int                listused;
+    int                listsize;
+    
+    int pos;
+    int nselect;
+    
+    int show_dot_files;
+
+    int nbFile;
+    int nbDir;
+    int totSize;
+    
+    int nb_disp_entry;
+    int x_start;
+    int y_start;
+    
+    int width;
+};
+
 #define    UP_ARROW     0
 #define    DOWN_ARROW   1
 
-#define    MAXPOS     20
+//#define    MAXPOS     20
 
 #define    false 0
 #define    true  1
@@ -49,11 +72,10 @@ void createSizeString  (char * str,int Isize);
 
 /*****    ls_fct    *****/
 int  qSortEntry  (const void * a1,const void * a2);
-void cleanList   (void);
-int  ini_lists   (void);
-int  add_dir     (char * name);
-int  add_file    (char * name);
-int  doLs        (char * name);
+void cleanList   (struct browser_data * bdata);
+int  ini_lists   (struct browser_data * bdata);
+int  addEntry    (struct browser_data * bdata,char * name,int type,int size);
+int  doLs        (struct browser_data * bdata,char * name);
 
 /*****    file_handle_fct    *****/
 int   is_script_type     (char * extension);
@@ -87,11 +109,11 @@ void do_F3            (void * data);
 void mk_item_str      (void * data,char * str);
 
 /*****    gui_fct    *****/
-int  viewNewDir         (char *name);
-void showArrow          (int type);
-void hideArrow          (int type);
+int  viewNewDir         (struct browser_data *bdata,char *name);
+void showArrow          (int type,int max);
+void hideArrow          (int type,int max);
 int  printName          (struct dir_entry * dEntry,int x,int y,int clear,int selected);
-void printAllName       (int pos,int nselect);
-void printAName         (int pos, int nselect, int clear, int selected);
-void draw_bottom_status (void);
+void printAllName       (struct browser_data *bdata);
+void printAName         (struct browser_data *bdata,int pos, int nselect, int clear, int selected);
+void draw_bottom_status (struct browser_data *bdata);
 void draw_file_size     (struct dir_entry * entry);

@@ -41,6 +41,7 @@ struct menu_data menu_cfg = {
 struct ls_item {
     char * label;
     int num;
+    struct browser_data * bdata;
 };
 
 struct menu_item menu1;
@@ -71,6 +72,7 @@ extern int pos,nselect;
 extern struct dir_entry * list;
 extern int listused;
 extern struct helperMenu browserMenu;
+
 /************************/
 
 void ini_menu_struct(void)
@@ -125,6 +127,7 @@ void do_right(void * data)
     int reload = false;
     int buttonResult = 0;
     struct ls_item * item=(struct ls_item*)data;
+    struct browser_data * bdata=item->bdata;
     
     cops->stop_menu();
     menuOff=1;
@@ -138,10 +141,10 @@ void do_right(void * data)
             buttonResult = cops->msgBox("Delete Warning", "Really delete it ?", MSGBOX_TYPE_OKCANCEL, MSGBOX_ICON_WARNING);
             if(buttonResult == MSGBOX_OK)
             {
-                if(list[pos+nselect].type == TYPE_FILE)
-                    unlink(list[pos+nselect].name);
+                if(bdata->list[bdata->pos+bdata->nselect].type == TYPE_FILE)
+                    unlink(bdata->list[bdata->pos+bdata->nselect].name);
                 else
-                    rmdir(list[pos+nselect].name);    
+                    rmdir(bdata->list[bdata->pos+bdata->nselect].name);    
                 reload = true;
             }
             break;
@@ -165,7 +168,8 @@ void do_right(void * data)
                 else
                 {
                     cops->mountCF();
-                    viewNewDir("./");
+                    reload=true;
+                    /*viewNewDir((bdata,"./");*/
                 }                    
             }
             break;
@@ -174,7 +178,7 @@ void do_right(void * data)
     drawhelperMenuBox(&browserMenu);
     
     if(reload == true)
-        viewNewDir("./");
+        viewNewDir(bdata,"./");
     
 }
 

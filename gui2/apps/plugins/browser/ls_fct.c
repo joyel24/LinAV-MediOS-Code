@@ -21,36 +21,34 @@
 
 #define LISTSIZE   256
 
-#define SHOW_ALL   1
-
-struct dir_entry * list;
+/*struct dir_entry * list;
 int                listused=0;
 int                listsize=0;
 
-int nbFile=0,nbDir=0,totSize=0;
+int nbFile=0,nbDir=0,totSize=0;*/
 
-void cleanList(void)
+void cleanList(struct browser_data * bdata)
 {
     int i;
-    for (i = 0; i < listused; i++)
-        free(list[i].name);
-    free(list);
-    listused=0;
-    listsize=0;
+    for (i = 0; i < bdata->listused; i++)
+        free(bdata->list[i].name);
+    free(bdata->list);
+    bdata->listused=0;
+    bdata->listsize=0;
 }
 
-int ini_lists(void)
+int ini_lists(struct browser_data * bdata)
 {
    
-    if (listsize == 0) {
-        list = (struct dir_entry *) malloc(LISTSIZE * sizeof(struct dir_entry));
-        if (list == NULL) {
+    if (bdata->listsize == 0) {
+        bdata->list = (struct dir_entry *) malloc(LISTSIZE * sizeof(struct dir_entry));
+        if (bdata->list == NULL) {
             fprintf(stderr, "No memory for ls buffer\n");
             return -1;
         }
-        listsize = LISTSIZE;
+        bdata->listsize = LISTSIZE;
     }
-    listused = 0;
+    bdata->listused = 0;
     
     return 0;
 }
@@ -64,38 +62,38 @@ int qSortEntry(const void * a1,const void * a2)
     return namesort((char**) &e1->name,(char**) &e2->name);
 }
 
-int addEntry(char * name,int type,int size)
+int addEntry(struct browser_data * bdata,char * name,int type,int size)
 {
     struct dir_entry * newlist;
     
-    if (listused >= listsize) /* do we need to increase the list size? */
+    if (bdata->listused >= bdata->listsize) /* do we need to increase the list size? */
     {
-        newlist = (struct dir_entry *) malloc((LISTSIZE+listsize) * sizeof(struct dir_entry));
+        newlist = (struct dir_entry *) malloc((LISTSIZE+bdata->listsize) * sizeof(struct dir_entry));
         if (!newlist)
         {
             fprintf(stderr, "No memory for ls buffer\n");
             return -1;
         }
-        memcpy(newlist, list, sizeof(struct dir_entry) * listsize);
-        free(list);
-        list=newlist;
-        listsize += LISTSIZE;
+        memcpy(newlist, bdata->list, sizeof(struct dir_entry) * bdata->listsize);
+        free(bdata->list);
+        bdata->list=newlist;
+        bdata->listsize += LISTSIZE;
     }
-    list[listused].name = strdup(name);
+    bdata->list[bdata->listused].name = strdup(name);
     
-    if (list[listused].name == NULL)
+    if (bdata->list[bdata->listused].name == NULL)
     {
         fprintf(stderr, "No memory for filenames\n");
         return -1;
     }
-    list[listused].type=type;
-    list[listused].size=size;
+    bdata->list[bdata->listused].type=type;
+    bdata->list[bdata->listused].size=size;
     
-    listused++;
+    bdata->listused++;
     return 0;
 }
 
-int doLs(char * name)
+int doLs(struct browser_data * bdata,char * name)
 {
     DIR             *dirp;
     struct dirent   *dp;
@@ -104,10 +102,11 @@ int doLs(char * name)
     char            tmpP[4];
     int             isRoot=0;
     
-    totSize=0;
-    nbFile=0;nbDir=0;
+    bdata->totSize=0;
+    bdata->nbFile=0;
+    bdata->nbDir=0;
     
-    if(ini_lists()<0)
+    if(ini_lists(bdata)<0)
         return -1;
 
     dirp = opendir(name);
@@ -127,7 +126,7 @@ int doLs(char * name)
         if(dp->d_name[0]=='\0')
             continue;            
           
-        if ((dp->d_name[0] == '.') && !SHOW_ALL)
+        if ((dp->d_name[0] == '.') && !bdata->show_dot_files)
             continue;            
 
         fullname[0] = '\0';
@@ -147,28 +146,28 @@ int doLs(char * name)
             if(fullname[0]=='.' && fullname[1]=='.' && fullname[2]=='\0')
             {
                 if(!isRoot)
-                    if(addEntry("<-Back",TYPE_BACK,0)<0)
+                    if(addEntry(bdata,"<-Back",TYPE_BACK,0)<0)
                         return -1;
             }
             else
             {
-                if(addEntry(fullname,TYPE_DIR,0)<0)
+                if(addEntry(bdata,fullname,TYPE_DIR,0)<0)
                     return -1;
-                nbDir++;
+                bdata->nbDir++;
             }
         }
         else
         {
-            if(addEntry(fullname,TYPE_FILE,statbuf.st_size)<0)
+            if(addEntry(bdata,fullname,TYPE_FILE,statbuf.st_size)<0)
                 return -1;
-            totSize+=statbuf.st_size;
-            nbFile++;
+            bdata->totSize+=statbuf.st_size;
+            bdata->nbFile++;
         }
     }
 
     closedir(dirp);
     
-    qsort(list,listused,sizeof(struct dir_entry),qSortEntry);
+    qsort(bdata->list,bdata->listused,sizeof(struct dir_entry),qSortEntry);
     
    return 0;
 }

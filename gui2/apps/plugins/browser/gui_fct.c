@@ -23,13 +23,13 @@
 
 /*extern variables */
 extern struct client_operations * cops;
-extern struct dir_entry * list;
+/*extern struct dir_entry * list;
 extern int listused;
 extern int pos,nselect;
-extern int nbFile,nbDir,totSize,nbElem;
+extern int nbFile,nbDir,totSize,nbElem;*/
 /************************/
 
-int viewNewDir(char *name)
+int viewNewDir(struct browser_data *bdata,char *name)
 {
     if(chdir(name)<0)
     {
@@ -37,23 +37,23 @@ int viewNewDir(char *name)
         return 0;
     }
         
-    cleanList();
-    if(doLs("./")<0)
+    cleanList(bdata);
+    if(doLs(bdata,"./")<0)
     {
-        listused = 0;
+        bdata->listused = 0;
         return 0;
     }
-    pos=0;
-    nselect=0;
-    hideArrow(DOWN_ARROW);
-    hideArrow(UP_ARROW);
-    if(listused>MAXPOS)
-        showArrow(DOWN_ARROW);
-    printAllName(pos,nselect);
+    bdata->pos=0;
+    bdata->nselect=0;
+    hideArrow(DOWN_ARROW,bdata->nb_disp_entry);
+    hideArrow(UP_ARROW,bdata->nb_disp_entry);
+    if(bdata->listused>bdata->nb_disp_entry)
+        showArrow(DOWN_ARROW,bdata->nb_disp_entry);
+    printAllName(bdata);
     return 1;
 }
 
-void showArrow(int type)
+void showArrow(int type,int max)
 {
     int h=0,w=0;
     cops->getStringS("M", &w, &h);
@@ -65,12 +65,12 @@ void showArrow(int type)
             break;
         case DOWN_ARROW:
 //            cops->drawBITMAP(&dwBitmap,310,SCREEN_HEIGHT-10);
-            cops->drawBITMAP(&dwBitmap,310,2+h+6+MENU_SHADOW+(MAXPOS-1)*(h+1));
+            cops->drawBITMAP(&dwBitmap,310,2+h+6+MENU_SHADOW+(max-1)*(h+1));
             break;
     }
 }
 
-void hideArrow(int type)
+void hideArrow(int type,int max)
 {
     int h=0,w=0;
     cops->getStringS("M", &w, &h);
@@ -82,7 +82,7 @@ void hideArrow(int type)
             break;
         case DOWN_ARROW:
 //            cops->fillRect(COLOR_WHITE,310,SCREEN_HEIGHT-10,9,9);
-            cops->fillRect(COLOR_WHITE,310,2+h+6+MENU_SHADOW+(MAXPOS-1)*(h+1),9,9);
+            cops->fillRect(COLOR_WHITE,310,2+h+6+MENU_SHADOW+(max-1)*(h+1),9,9);
             break;
     }
 }
@@ -150,34 +150,37 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
     return 1;
 }
 
-void printAllName(int pos,int nselect)
+void printAllName(struct browser_data *bdata)
 {
     int w = 0;
     int h = 10;
     int i;
+    
+    int pos=bdata->pos;
+    int nselect=bdata->nselect;
 
     cops->getStringS("M", &w, &h);
 
-    for (i = pos; i < listused && i < pos+MAXPOS; i++)
+    for (i = pos; i < bdata->listused && i < pos+bdata->nb_disp_entry; i++)
     {
         cops->fillRect(COLOR_WHITE,0, 2+(i-pos)*(h+1)+ h+6+MENU_SHADOW , 320,(h+1));
-        printName(&list[i],FILE_X_OFFSET, 2 + (i-pos)*(h+1)+ h+6+MENU_SHADOW,0,(i-pos)==nselect);
+        printName(&bdata->list[i],FILE_X_OFFSET, 2 + (i-pos)*(h+1)+ h+6+MENU_SHADOW,0,(i-pos)==nselect);
     }
 
-    for(;i<pos+MAXPOS;i++)
+    for(;i<pos+bdata->nb_disp_entry;i++)
         cops->fillRect(COLOR_WHITE,0, (i-pos)*(h+1)+ h+7+MENU_SHADOW , 320,(h+1));
     
-    draw_bottom_status();
+    draw_bottom_status(bdata);
 }
 
-void printAName(int pos, int nselect, int clear, int selected)
+void printAName(struct browser_data *bdata,int pos, int nselect, int clear, int selected)
 {
     int w = 0;
     int h = 10;
 
     cops->getStringS("M", &w, &h);
 
-    printName(&list[pos],FILE_X_OFFSET,2 + nselect*(h+1)+ h+6+MENU_SHADOW,clear,selected);    
+    printName(&bdata->list[pos],FILE_X_OFFSET,2 + nselect*(h+1)+ h+6+MENU_SHADOW,clear,selected);    
 }
 
 int x=320;
@@ -199,14 +202,14 @@ void draw_file_size(struct dir_entry * entry)
     }
 }
 
-void draw_bottom_status(void)
+void draw_bottom_status(struct browser_data *bdata)
 {
     char tmp[100];
     char tmpS[15];
     char pwd[PATHLEN];
     int len=0;   
     
-    createSizeString(tmpS,totSize);
+    createSizeString(tmpS,bdata->totSize);
         
     cops->fillRect(COLOR_WHITE,2, 220,316,20);
         
@@ -220,7 +223,8 @@ void draw_bottom_status(void)
         cops->putS(COLOR_BLUE, COLOR_WHITE,2, 220, pwd);  
     }
 
-    snprintf(tmp,100,"%d %s, %d %s, %s",nbFile,nbFile>0?"files":"file",nbDir,nbDir>0?"folders":"folders",tmpS);
+    snprintf(tmp,100,"%d %s, %d %s, %s",bdata->nbFile,bdata->nbFile>0?"files":"file",
+            bdata->nbDir,bdata->nbDir>0?"folders":"folders",tmpS);
     fprintf(stderr,"%s\n",tmp);
     
     cops->putS(COLOR_BLUE, COLOR_WHITE,2, 230, tmp);    

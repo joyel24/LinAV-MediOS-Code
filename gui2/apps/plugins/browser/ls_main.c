@@ -37,17 +37,38 @@ struct helperMenu browserMenu = {
     align         : ALIGN_RIGHT
 };
 
-/*extern variables */
-extern int pos,nselect;
-extern int listused;
-/************************/
+struct browser_data * bdata;
+
+struct browser_data realData = {
+    path            : NULL,
+    
+    list            : NULL,
+    listused        : 0,
+    listsize        : 0,
+    
+    pos             : 0,
+    nselect         : 0,
+   
+    show_dot_files  : 1,
+
+    nbFile          : 0,
+    nbDir           : 0,
+    totSize         : 0,
+    
+    nb_disp_entry   : 20,
+    x_start         : 0,
+    y_start         : 0,
+    
+    width           :0
+};
 
 int main(int argc,char * * argv)
 {
     REGISTER(cops,eventHandler,0);
 
-    pos=0;
-    nselect=0;
+    /*pos=0;
+    nselect=0;*/
+    bdata = &realData;
 
     if(argc>0)
     {
@@ -67,20 +88,11 @@ int main(int argc,char * * argv)
         else
             chdir(argv[1]);
 
-        if(doLs("./")<0)
-        {
-            cleanList();
-            return -1;
-        }        
-
-        printAllName(pos,nselect);
-
-        if(listused>MAXPOS)
-            showArrow(DOWN_ARROW);
+        viewNewDir(bdata,"./");       
 
         PACK(cops,NULL);
 
-        cleanList();
+        cleanList(bdata);
         return 0;
     }
     STOPME(cops)
