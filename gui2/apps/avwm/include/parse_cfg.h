@@ -38,3 +38,4 @@ void closeFile(void);
 int curLineNum(void);
 
 #endif
+

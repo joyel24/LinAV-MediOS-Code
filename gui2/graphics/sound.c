@@ -17,7 +17,6 @@
 #include <sys/ioctl.h>
 
 #include "sound.h"
-#include "av3xx_common.h"
 
 int fd_dsp=-1;
 int fd_mix=-1;

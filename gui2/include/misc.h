@@ -14,16 +14,23 @@
 #ifndef __MISC_H
 #define __MISC_H
 
-#if (GTYPE==AV_SCREEN)
+#ifdef AV_SCREEN
 #include "av3xx_common.h"
+#else
+struct tm {
+    int tm_ms;
+    int tm_sec;
+    int tm_min;
+    int tm_hour;
+    int tm_wday;
+    int tm_mday;
+    int tm_mon;
+    int tm_year;
+};
 #endif
 
 int   getTimeS          (char * timeSt);
-#if (GTYPE==AV_SCREEN)
 int   getTime           (struct tm * date_time);
-#else
-int   getTime           (void);
-#endif
 int   getTick           (void);
 
 int   set_mouseParam    (int freq, int repeat);

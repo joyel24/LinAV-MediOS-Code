@@ -159,7 +159,7 @@ static void calendar_init()
    int fd;
 	char tmp[100];
 
-   fd=open("/dev/avrtc",O_RDONLY | O_NONBLOCK);
+   /*fd=open("/dev/avrtc",O_RDONLY | O_NONBLOCK);
    if (fd < 0)
 	{
       printf("Can't open /dev/avrtc\n");
@@ -169,7 +169,8 @@ static void calendar_init()
 	{
       printf("Error getting time and date\n");
    }
-   close(fd);
+   close(fd);*/
+   cops->getTime(&tm);
 
 	sprintf(tmp, "%02d",tm.tm_wday);
    today.wday = atoi(tmp);

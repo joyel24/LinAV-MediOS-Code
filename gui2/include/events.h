@@ -14,8 +14,11 @@
 #ifndef __EVENTS_H
 #define __EVENTS_H
 
-#if (GTYPE==AV_SCREEN)
+#ifdef AV_SCREEN
 #include "av3xx_common.h"
+#else
+struct mouseParam {
+};
 #endif
 
 #define        NO_EVENT    0x0000

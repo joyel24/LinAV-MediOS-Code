@@ -14,7 +14,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "av3xx_common.h"
 #include "graphics.h"
 #include "events.h"
 #include "cops.h"

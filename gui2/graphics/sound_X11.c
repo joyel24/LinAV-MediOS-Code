@@ -13,3 +13,88 @@
 
 #include "sound.h"
 
+int ini_sound_connection(void)
+{
+   return 1;
+}
+
+int ini_mp3_playback(struct mp3_play * mp3_p_data)
+{    
+    return 0;
+}
+
+void close_mp3_playback(void)
+{
+    stop_playback();  
+}
+
+int start_playback(void)
+{
+    return 0;
+}
+
+int pause_playback(void)
+{
+    return 0;
+}
+
+int stop_playback(void)
+{
+    return 0;
+}
+
+int readPeak(struct av_peak * peak)
+{
+    return 0;  
+}
+
+int setVolume(int val)
+{
+    return 0;
+}
+
+int setBass(int val)
+{
+    return 0;
+}
+
+int setTreble(int val)
+{
+    return 0;
+}
+
+int setLoudness(int val)
+{
+    return 0;
+}
+
+int setBalance(int val)
+{
+    return 0;
+}
+
+
+int getVolume(void)
+{
+    return 0;
+}
+
+int getBass(void)
+{
+    return 0;
+}
+
+int getTreble(void)
+{
+    return 0;
+}
+
+int getLoudness(void)
+{
+     return 0;
+}
+
+int getBalance(void)
+{
+    return 0;
+}

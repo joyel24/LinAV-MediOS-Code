@@ -15,7 +15,6 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include "av3xx_common.h"
 #include "events.h"
 
 

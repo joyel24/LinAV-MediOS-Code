@@ -13,3 +13,43 @@
 
 #include "misc.h"
 
+int getTimeS(char * timeSt)
+{    
+    sprintf(timeSt, "%02d:%02d:%02d %02d/%02d/%04d", 0,0,0,0,0,0);
+    return 1;
+}
+
+int getTime(struct tm * date_time)
+{
+       return 1;
+}
+
+int set_mouseParam(int freq, int repeat)
+{
+    return 1;
+}
+int getBat(void)
+{
+        return 0;
+}
+
+int getPwr(void)
+{
+    return 0;
+}
+
+int getUSB(void)
+{
+    return 0;
+}
+
+int setUSB(int state)
+{
+    return 0;
+}
+
+int getTick(void)
+{
+    return 1;
+}
+

@@ -8,6 +8,10 @@ ifeq ($(HAVE_JPEG),y)
 LDFLAGS += -ljpeg
 endif
 
+ifeq ($(BUILD),X11)
+LDFLAGS += -L/usr/X11R6/lib -lX11
+endif
+
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
 TARGET = $(SRC:%.c=%)

@@ -38,3 +38,4 @@ void printAllName    (struct menu_item * pos,int nselect);
 int  printName       (struct menu_item * item,int x,int y,int clear,int selected);
 
 #endif
+

@@ -21,7 +21,6 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include "av3xx_common.h"
 #define MWINCLUDECOLORS
 #include "graphics.h"
 #include "events.h"
@@ -143,29 +142,6 @@ static unsigned char *next_screen_to_draw_ptr;
 static unsigned char *next_line_ptr;
 
 
-int set_mouseParam(int freq, int repeat)
-{
-   int fd = 0;
-	struct mouseParam param;
-	param.freq = freq;
-	param.repeated_press = repeat;
-
-   fd=open("/dev/mouse",O_RDONLY | O_NONBLOCK);
-   if (fd < 0)
-	{
-      printf("Can't open /dev/mouse\n");
-		return fd;
-   }
-
-	if(ioctl(fd,AV_SET_MOUSE_PARAM,&param)<0)
-	{
-      printf("Error setting mouse params\n");
-		return fd;
-   }
-   close(fd);
-
-	return fd;
-}
 
 static unsigned char* find_first_feed(const unsigned char* p, int size)
 {

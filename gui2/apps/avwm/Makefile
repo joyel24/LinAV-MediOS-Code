@@ -1,10 +1,14 @@
 include ../../Makefile.conf
 
 GCCFLAGS += -I../../include -Iinclude/
-LDFLAGS += -L../../lib -lGraphics -ljpeg
+LDFLAGS += -L../../lib -lGraphics
 
 ifeq ($(HAVE_JPEG),y)
 LDFLAGS += -ljpeg
+endif
+
+ifeq ($(BUILD),X11)
+LDFLAGS += -L/usr/X11R6/lib -lX11
 endif
 
 SRC = $(wildcard *.c)

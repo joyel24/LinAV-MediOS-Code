@@ -78,9 +78,6 @@ struct client_operations cops={
     getLoudness        : getLoudness,
     getBalance         : getBalance,
     
-    execDSP_ioctl      : execDSP_ioctl,
-    execMIX_ioctl      : execMIX_ioctl,
-    
     debug              : debug,
     
     playMp3            : playMp3,
@@ -95,6 +92,8 @@ struct client_operations cops={
     
     msgBox             : msgBox,
     
-    getTick            : getTick
+    getTick            : getTick,
+    getTime            : getTime,
+    getTimeS           : getTimeS
 
 };

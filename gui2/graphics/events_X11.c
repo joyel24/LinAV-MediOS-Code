@@ -37,3 +37,88 @@ int nxtEvent(void)
     }
     return 0; 
 }  
+
+int waitEvent(void)
+{
+    return 0;
+}
+
+int iniEvent(void)
+{
+    return 0;
+}
+
+int clearEventQueue(void)
+{
+    return 0;    
+}
+
+int wakeUP(void)
+{  
+    return 0;    
+}
+
+int halt_device(void)
+{
+    return 0;    
+}
+
+int pause_app(void)
+{   
+    return 0;    
+}
+
+int release_app(void)
+{    
+    return 0; 
+}
+
+int setRepeate(int val)
+{
+    return 0; 
+}
+
+int getRepeate(void)
+{
+    return 0; 
+}
+
+int setFreq(int val)
+{
+    return 0; 
+}
+
+int getFreq(void)
+{
+    return 0; 
+}
+
+int setSettings(struct mouseParam * param)
+{
+    return 0; 
+}
+
+int getSettings(struct mouseParam * param)
+{
+    return 0; 
+}
+
+int setTimerFreq(int val)
+{
+    return 0; 
+}
+
+int startTimer()
+{
+    return 0; 
+}
+
+int stopTimer()
+{
+    return 0; 
+}
+
+int timerState()
+{
+    return 0; 
+}

@@ -361,18 +361,8 @@ static int GetTime()
    int fd;
     int seconds = 0;
     char tmp[100];
-
-   fd=open("/dev/avrtc",O_RDONLY | O_NONBLOCK);
-   if (fd < 0)
-    {
-      printf("Can't open /dev/avrtc\n");
-   }
-
-    if(ioctl(fd,AV_RTC_GET_TIME_IOC,&tm)<0)
-    {
-      printf("Error getting time and date\n");
-   }
-    close(fd);
+    cops->getTime(&tm);
+   
 
     sprintf(tmp, "%02d",tm.tm_hour);
     seconds = atoi(tmp)*3600;

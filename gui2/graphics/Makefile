@@ -9,7 +9,7 @@ LIB_CONTENT= \
         graphics_8.o	
 
 ifeq ($(HAVE_JPEG),y)
-GCCFLAGS += -D'HAVE_JPEG=1' -I../jpeg-6b
+GCCFLAGS += -I../jpeg-6b
 endif
 
 ifeq ($(BUILD),AV)

@@ -13,12 +13,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if (GTYPE==AV_SCREEN)
+#ifndef GTYPE
+#warning GTYPE not declared
+#endif
+
+#ifdef AV_SCREEN
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <osd.h>
 #define FBIO_INIT        _IO ('F', 0x26)
 #define LCD_UPDATE       {;}
+#warning in AV_SCREEN
 #else
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -50,7 +55,7 @@ char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
 
 struct graphicsBuffer BITMAP_1 = {
     offset             : 0,
-#if (GTYPE==AV_SCREEN)
+#ifdef AV_SCREEN
     component          : AV3XX_OSD_BITMAP1,
     enable             : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
                     AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE,
@@ -67,7 +72,7 @@ struct graphicsBuffer BITMAP_1 = {
 
 struct graphicsBuffer BITMAP_2 = {
     offset             : 0,
-#if (GTYPE==AV_SCREEN)
+#ifdef AV_SCREEN
     component          : AV3XX_OSD_BITMAP2,
     enable             : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
                     AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE,
@@ -84,7 +89,7 @@ struct graphicsBuffer BITMAP_2 = {
 
 struct graphicsBuffer VIDEO_1 = {
     offset             : 0,
-#if (GTYPE==AV_SCREEN)
+#ifdef AV_SCREEN
     component          : AV3XX_OSD_VIDEO1,
     enable             : AV3XX_OSD_COMPONENT_ENABLE,
 #endif
@@ -100,7 +105,7 @@ struct graphicsBuffer VIDEO_1 = {
 
 struct graphicsBuffer VIDEO_2 = {
     offset             : 0,
-#if (GTYPE==AV_SCREEN)
+#ifdef AV_SCREEN
     component          : AV3XX_OSD_VIDEO2,
     enable             : AV3XX_OSD_COMPONENT_ENABLE,
 #endif
@@ -123,7 +128,7 @@ extern struct graphics_operations g8ops;
 
 int ini_graphics()
 {
-#if (GTYPE==AV_SCREEN)
+#ifdef AV_SCREEN
     osdInit();
     
     /* reset everything */
@@ -187,7 +192,7 @@ int ini_graphics()
     return 0;
 }
 
-#if (GTYPE==X11_SCREEN)
+#ifndef AV_SCREEN
 void lcd_update(void)
 {
 }
@@ -195,7 +200,7 @@ void lcd_update(void)
 
 void setPalette(int palette[256][3],int size)
 {
-#if (GTYPE==AV_SCREEN)
+#ifdef AV_SCREEN
     int i=0;
     int y,cr,cb;
     for(i=0;i<size;i++)
@@ -212,7 +217,7 @@ void setPalette(int palette[256][3],int size)
 
 void close_graphics()
 {
-#if (GTYPE==AV_SCREEN)
+#ifdef AV_SCREEN
     int fd=open("/dev/fb0",O_WRONLY);
     if(fd<0)
         printf("error opening /dev/fb\n");
@@ -288,7 +293,7 @@ void setPlane(int vplane)
 
 void hidePlane(int vplane)
 {
-#if (GTYPE==AV_SCREEN)
+#ifdef AV_SCREEN
     switch(vplane) {
         case BMAP1:
             osdSetComponentConfig(AV3XX_OSD_BITMAP1, 0);
@@ -310,7 +315,7 @@ void hidePlane(int vplane)
 
 void showPlane(int vplane)
 {
-#if (GTYPE==AV_SCREEN)
+#ifdef AV_SCREEN
     switch(vplane) {
         case BMAP1:
             //tstPlane(&BITMAP_1);
@@ -334,7 +339,7 @@ void showPlane(int vplane)
 #endif          
 }
 
-#if (GTYPE==AV_SCREEN)
+#ifdef AV_SCREEN
 void iniComponent(struct graphicsBuffer * buff,unsigned int offset)
 {    
     int diff=offset % 32;

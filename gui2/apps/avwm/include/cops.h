@@ -14,9 +14,10 @@
 #ifndef __COPS_H
 #define __COPS_H
 
-#include "av3xx_common.h"
 #include "graphics.h"
 #include "parse_cfg.h"
+#include "misc.h"
+#include "sound.h"
 
 #define REGISTER(ops,event,flag)    {ops=(struct client_operations*)atoi(argv[argc-1]);ops->registerPlugin(event,flag);}
 #define PACK(ops,loop)              {ops->pack(loop);}
@@ -89,9 +90,6 @@ struct client_operations {
     int  (*getLoudness)         (void);
     int  (*getBalance)          (void);
     
-    int  (*execDSP_ioctl)       (int ioctl_call,unsigned int val);
-    int  (*execMIX_ioctl)       (int ioctl_call,unsigned int val);
-
     void (*debug)               (char *fmt, ...);
     
     int  (*playMp3)             (char * filename);
@@ -107,6 +105,8 @@ struct client_operations {
     void (*msgBox)              (char *);
     
     int  (*getTick)             (void);
+    int  (*getTime)             (struct tm * date_time);
+    int  (*getTimeS)            (char * timeSt);
     
 };
 

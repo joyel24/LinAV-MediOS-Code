@@ -1,8 +1,4 @@
-TOOL=arm-elf
-
-GCC=$(TOOL)-gcc
-AR=$(TOOL)-ar
-RANLIB=$(TOOL)-ranlib
+include ../../Makefile.conf
 
 GCCFLAGS=-I../../include
 

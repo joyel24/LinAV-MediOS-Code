@@ -1,7 +1,7 @@
 include Makefile.conf
 
 all:
-ifeq ($(BUILD),AV)
+ifeq ($(HAVE_JPEG),y)
 	$(MAKE) -C jpeg-6b/ all
 endif
 	$(MAKE) -C graphics/ all
