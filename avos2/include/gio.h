@@ -1,5 +1,4 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
+/* gio.h
    Copyright 2004, the Avos project.
 
    This file is free software; we give unlimited permission to copy
@@ -45,6 +44,7 @@ typedef unsigned long u32;
 
 #define         GIO_OUTPUT       0
 #define         GIO_INPUT        1
+
 #define         GIO_UNINVERTED   0
 #define         GIO_INVERTED     1
 
@@ -56,8 +56,7 @@ void gioSetAllBitsetsA(u32 bitsets);
 u32 gioGetAllBitsetsA();
 void gioSetAllBitclearsA(u32 bitclears);
 u32 gioGetAllBitclearsA();
-void gioSetAllIRQs(u32 bitset);
-
+void gioSetAllIRQsA(u32 bitset);
 void gioSetBitA(u32 line);
 void gioClearBitA(u32 line);
 u32 gioGetBitA(u32 line);

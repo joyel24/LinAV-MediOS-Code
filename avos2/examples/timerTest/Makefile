@@ -2,29 +2,35 @@
 include ../../Makefile.conf
 
 # State the main target to build
-TARGET = ../libavhardware.a
+TARGET = timerTest.bin
 
 #LOCAL GCCFLAGS
+GCCFLAGS = -static-libgcc
 GCCINCDIRS = -I../../include
 
+#LOCAL LDFLAGS
+LDFLAGS = -L../../lib -lavhardware -lavgraphics -lavfonts -lavmisc -lavata -lc -lfloat -lgcc
+
+
 # State the object files that the main target is made up of
-OBJS = buttons.O cpld.O dma.O ecr.O gio.O\
-       i2c.O interrupts.O\
-       power.O timers.O uart.O usb.O
+OBJS = timerTest.o
 
 ALL:$(TARGET)
 
-# Rule to make library
+# Rule to make executable
 $(TARGET): $(OBJS)
-	$(AR) -rc $(TARGET) $(OBJS)
-	$(RANLIB) $(TARGET)
+	$(LD) -N -Ttext 0x03000000 -e main -o $(TARGET).elf $(OBJS) $(LDFLAG)
+	$(OBJCOPY) -O binary $(TARGET).elf $(TARGET)
+	@$(RM) -f $(TARGET).elf
 
 clean:
 	@echo "**** Cleaning..."
 	@rm -f include/*~ include/*.bak
-	@rm -f *.o *.O *.bak *~
+	@rm -f *.o *.bak *~
 spotless: clean
 	@rm -f $(TARGET)
+
 depend:
 	makedepend -Y $(GCCINCDIR) *.c
 # DO NOT DELETE
+

@@ -39,7 +39,7 @@ u32 interruptsGetMask2A();
 void interruptsSetCauses2A(u32 bitmask);
 u32 interruptsGetCauses2A();
 
-void interruptsInitA(u32 fun);
+void interruptsInitA(void* fun);
 u32 interruptsGetIRQEnabledA();
 void interruptsSetIRQEnabledA();
 void interruptsSetIRQDisabledA();
