@@ -132,21 +132,21 @@ mgvD1:  sub r0, #1
         
         mov r2, #0
         bl i2cInb
-        lsl r0, #16
+        lsl r0, #24
         orr r2, r0        
         bl i2cAck
         
         bl i2cInb
-        lsl r0, #24
+        lsl r0, #16
         orr r2, r0        
         bl i2cAck
     
         bl i2cInb
+        lsl r0, #8
         orr r2, r0
         bl i2cAck
 
         bl i2cInb
-        lsl r0, #8
         orr r2, r0        
         bl i2cAckEnd
 
@@ -219,21 +219,21 @@ masReadReg:
         
         mov r2, #0
         bl i2cInb
-        lsl r0, #16
+        lsl r0, #24
         orr r2, r0        
         bl i2cAck
         
         bl i2cInb
-        lsl r0, #24
+        lsl r0, #16
         orr r2, r0        
         bl i2cAck
     
         bl i2cInb
+        lsl r0, #8
         orr r2, r0
         bl i2cAck
 
         bl i2cInb
-        lsl r0, #8
         orr r2, r0        
         bl i2cAckEnd
 
