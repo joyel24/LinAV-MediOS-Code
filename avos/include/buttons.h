@@ -16,9 +16,16 @@
 typedef unsigned long u32;
 #endif
 
-struct 
+#define        BUTTONS_AV300_UP        0x0001
+#define        BUTTONS_AV300_LEFT      0x0002
+#define        BUTTONS_AV300_RIGHT     0x0010
+#define        BUTTONS_AV300_DOWN      0x0020
+#define        BUTTONS_AV300_MENU3     0x0040
+#define        BUTTONS_AV300_MENU1     0x0100
+#define        BUTTONS_AV300_MENU2     0x0200
+#define        BUTTONS_AV300_JOYPRESS  0x0400
+#define        BUTTONS_AV300_ON        0x1000
+#define        BUTTONS_AV300_OFF       0x2000
 
-
-extern void graphicsSetPixel(u32 buffDef, u32 x, u32 y, u32 c);
-extern u32 graphicsGetPixel(u32 buffDef, u32 x, u32 y);
+extern u32 buttonsGetStatus();
 
