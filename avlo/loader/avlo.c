@@ -45,13 +45,20 @@ void (*binCaller)()=(void (*)())0x03000000;
 struct config_image cfg[MAX_CFG];
 struct config_gene cfgG;
 
-void iniHD();
+char * errorMsg[]={
+"Error initializing HD",                  /*err(0)*/
+"Error: should not come back from OS",    /*err(1)*/
+"Error opening file avlo.cfg",            /*err(2)*/
+"Bad config file (avlo.cfg)",             /*err(3)*/
+};
+
+int  iniHD();
 void moveCursor(int direction);
-void err();
+void err(int i);
 void iniGraph();
 void affUSB();
 void drawMenu();
-void processDefault(int key,int nbCfg);
+int  processDefault(int key,int nbCfg);
 void printErr(int key);
 void waitKeyReleased(void);
 void chkOFF(int key);
@@ -76,13 +83,20 @@ int main(int argc,char **argv)
 
         systemRelocateAdjusted = systemRelocateMeA - 0x00400000;    
         systemRelocateAdjusted();
-    
+loopErr:    
+
+usbenable=0;cleanUSBMsg=0;cnt=0;cursorPos=0;errNoDefault=0;cntNoDefault=0;stateNoDefault=0;nbOff=0;
     iniGraph();
-    
-    iniHD();
+   
+    if(iniHD()<0)
+        goto loopErr;
+        
 loop:
     if((ret=file_open("/avlo.cfg"))<0)
-        err();
+    {
+        err(2);
+        goto loopErr;
+    }
 
     pal32[0] = 0x6c706c93;
     pal32[1] = 0xffffffff;
@@ -92,7 +106,8 @@ loop:
     if((nbCfg=do_parse(&cfg,&cfgG))<0)
     {
         debug("Error getting config info\n");
-        err();
+        err(3);
+        goto loopErr;
     }
     
     file_close();    
@@ -111,8 +126,9 @@ loop:
        
     debug("Gal opt:\n -default=%s,\n-key=%s,\n-repeat=%d,\n-time out=%d\n",cfgG.defBin,cfgG.key,maxRepeat,delayCnt);
         
-    graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AVLO");    
-    graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader Version 1.1 by OxyGen");    
+    graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AVLO");
+        
+    graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader Version 1.2 by OxyGen");    
         
     
     usbstate=!usbIsConnectedA();
@@ -131,7 +147,9 @@ loop:
         
         key=buttonsGetStatusA();
         
-        processDefault(key,nbCfg);
+        if(processDefault(key,nbCfg)<0)
+            goto loopErr;
+            
         printErr(key);
         
         if(key & BUTTONS_AV300_ANY)
@@ -155,10 +173,10 @@ loop:
                 char * ext=strrchr(cfg[cursorPos].image,'.')+1;
                 int launch=0;
                 
-                if(ext[0]=='b' && ext[1]=='i' && ext[2]=='n' && ext[3]=='\0' && loadFile(cfg[cursorPos].image))
-                	launch=1;
-                else if(ext[0]=='a' && ext[1]=='j' && ext[2]=='z' && ext[3]=='\0' 
+                if(ext[0]=='a' && ext[1]=='j' && ext[2]=='z' && ext[3]=='\0' 
                 		&& cfgG.key[0]!=0 && loadCJBM(cfg[cursorPos].image,cfgG.key))
+                	launch=1;
+                else if (loadFile(cfg[cursorPos].image))
                 	launch=1;
                 
                 if(launch)
@@ -199,7 +217,7 @@ loop:
                         graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);    
                         pal32[1]=0xc476c491;
                         pal32[0] = 0x466c4696;
-            graphicsStringA(&screenBitmap2,   65, 120, &sprite6_9, std6x9_, 6, 0,"USB Enable, PRESS F3 to resume");
+                        graphicsStringA(&screenBitmap2,   65, 120, &sprite6_9, std6x9_, 6, 0,"USB Enable, PRESS F3 to resume");
                         usbEnableA();
                         for(i=0;i<0x10000;i++); /* Nothing */
                         ataPowerUpHDDA();
@@ -233,24 +251,22 @@ void moveCursor(int direction)
         graphicsStringA(&screenBitmap2, 10, 230, &sprite6_9, std6x9_, 6, 0,cfg[cursorPos].image);
 }
 
-void err()
+void err(int i)
 {
     int key;
-    debug("end let's loop\n");    
-    graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);    
+    debug("error, let's loop\n");    
+    graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, 0x466c4696);    
                         pal32[1]=0xc476c491;
                         pal32[0] = 0x466c4696;
-    graphicsStringA(&screenBitmap2, 65, 100, &sprite6_9, std6x9_, 6, 0,"Error (check config)");
-    graphicsStringA(&screenBitmap2, 65, 120, &sprite6_9, std6x9_, 6, 0,"USB Forced, reboot when done");
+    graphicsStringA(&screenBitmap2, 65, 105, &sprite6_9, std6x9_, 6, 0,errorMsg[i]);
+    graphicsStringA(&screenBitmap2, 65, 115, &sprite6_9, std6x9_, 6, 0,"USB is enable, you can access the HD");
+    graphicsStringA(&screenBitmap2, 65, 125, &sprite6_9, std6x9_, 6, 0,"Press a key to retry");
     usbEnableA();
     usbenable=1;
-    while(1)
+    while(!((key=buttonsGetStatusA()) & BUTTONS_AV300_ANY))
     {
-    	key=buttonsGetStatusA();
         chkOFF(key);
-    }
-
-    
+    }   
 }
 
 void chkOFF(int key)
@@ -264,7 +280,7 @@ void chkOFF(int key)
             graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);    
             pal32[1]=0xc476c491;
             pal32[0] = 0x466c4696;
-    graphicsStringA(&screenBitmap2,   65, 120, &sprite6_9, std6x9_, 6, 0,"Shutting down NOW !!");    
+            graphicsStringA(&screenBitmap2,   65, 120, &sprite6_9, std6x9_, 6, 0,"Shutting down NOW !!");    
             if(usbenable)
             {
                 usbDisableA();
@@ -327,7 +343,7 @@ void iniGraph()
     osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
 }
 
-void iniHD(void)
+int iniHD(void)
 {
     int fatHD,c;
     
@@ -351,9 +367,13 @@ void iniHD(void)
     
     
     if((fatHD = fatInit(getPartition(0)))<0)
-        err();
+    {
+        err(0);
+        return -1;
+    }
     
     graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AV");
+    return 0;
 }
 
 void affUSB(void)
@@ -372,7 +392,7 @@ void affUSB(void)
     }
 }
 
-void processDefault(int key,int nbCfg)
+int processDefault(int key,int nbCfg)
 {
     int pos;
     if(chkdefault)
@@ -390,7 +410,8 @@ void processDefault(int key,int nbCfg)
                 if(loadFile(cfg[pos].image))
                 {
                     binCaller();
-                    err();
+                    err(1);
+                    return -1;
                 }
                 else
                     debug("error loading %s\n",cfg[cursorPos].image);
@@ -409,6 +430,7 @@ void processDefault(int key,int nbCfg)
             cnt=0;
         }
     }
+    return 0;
 }
 
 void drawProgress(int offset,int length,int mode)
