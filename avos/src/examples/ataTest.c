@@ -111,7 +111,7 @@ int main() {
         if (b & BUTTONS_AV300_MENU1) mode=!mode;
 
         source &= 7;
-        
+
         if (b & BUTTONS_AV300_RIGHT) lba++;
         if (b & BUTTONS_AV300_LEFT) lba--;
         if (b & BUTTONS_AV300_DOWN) lba+=0x100;

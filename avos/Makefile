@@ -20,6 +20,8 @@ libavos:
 .PHONY: clean
 clean:
 	rm -f *~ *.o *.elf *.bin
+	rm -f lib/*.o
+	rm -f dist/*.bin
 
 examples: src/examples/*.c
 	@for i in src/examples/*.c;do\

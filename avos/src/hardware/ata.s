@@ -85,13 +85,19 @@ ataReadSectors:
          bne ataRSE
         mov r0, r3
         bl ataRead
+        mov r3, #1
+        lsl r3, #ataSectorHalfwordsShift
+ataRX1:
         bl ataWaitForXfer
         cmp r0, #0
          bne ataRSF
         mov r0, r2
-        mov r1, r4
-        lsl r1, #ataSectorHalfwordsShift
+        mov r1, r3
         bl ataReadData
+        add r2, r3
+        add r2, r3
+        sub r4, #1
+         bne ataRX1
         mov r0, #0
         pop {r1, r2, r3, r4}
         pop {r1}
@@ -123,13 +129,19 @@ ataWriteSectors:
          bne ataWSE
         mov r0, r3
         bl ataWrite
+        mov r3, #1
+        lsl r3, #ataSectorHalfwordsShift
+ataWX1:
         bl ataWaitForXfer
         cmp r0, #0
          bne ataWSF
         mov r0, r2
-        mov r1, r4
-        lsl r1, #ataSectorHalfwordsShift
+        mov r1, r3
         bl ataWriteData
+        add r2, r3
+        add r2, r3
+        sub r4, #1
+         bne ataWX1
         mov r0, #0
         pop {r1, r2, r3, r4}
         pop {r1}
