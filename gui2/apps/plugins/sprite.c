@@ -2,9 +2,7 @@
 #include "events.h"
 #include "cops.h"
 #include "avevents.h"
-
-#define BLACK 1
-#define WHITE 16
+#include "colordef.h"
 
 #define true 1
 #define false 0
@@ -24,22 +22,11 @@ static unsigned char test[7][7] =
       {2, 3, 3, 3, 3, 3, 2},
       {2, 2, 2, 2, 2, 2, 2} };
 
-/*
-static unsigned char test[7][2] =
-{
-   {2,8},
-   {2,8},
-   {2,8},
-   {2,8},
-   {2,8},
-   {2,8},
-   {2,8}
-};
-*/
 static SPRITE testS = {(unsigned int) test, 7, 7, 1, 2};
 
 //                    Index    0,    1,    2,    3    for the test matrix
-static unsigned int pal[4] = {0x00, 0x01, 0xB9, 0xFF};
+static unsigned int pal1[4] = {0x00, 0x01, 0xB9, 0xFF};
+static unsigned int pal2[4] = {0xB9, 0xFF, 0x00, 0x01};
 
 
 int eventHandler(int evt)
@@ -58,21 +45,31 @@ int eventHandler(int evt)
 /* called function from outside */
 int main(int argc,char * * argv)
 {
-    int w, h, i;
+    int w, h, c;
 
 	 REGISTER(cops,eventHandler,0);
     cops->hideSBar();
 
     PACK(cops);
 
-	 cops->clearScreen(WHITE);
+	 cops->clearScreen(COLOR_WHITE);
 
-    cops->drawSprite (&pal, &testS, 10, 10);
-/*
+	 c = 0;
+
 	 for(w = 0; w < SCREEN_WIDTH; w+=7)
+	 {
+	    if(c == 1) c=0; else c=1;
+
    	 for(h = 0; h < SCREEN_HEIGHT; h+=7)
-         cops->drawSprite (&testS, &pal, w, h);
-*/
+		 {
+		    // Switch see palettes for each line
+		    if(c==0)
+            cops->drawSprite (&pal1, &testS, w, h);
+			 else
+            cops->drawSprite (&pal2, &testS, w, h);
+		 }
+	 }
+
     while (!stop)
  	 {
 	 }
