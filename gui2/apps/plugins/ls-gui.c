@@ -29,7 +29,13 @@
 #define    PATHLEN    256
 
 #define    toLower(chr)  ((chr>64 && chr<91)?chr+32:chr)
-
+/*
+#define WHITE        16
+#define BLACK        1
+#define GRAY         21
+#define BLUE         32
+#define RED          77
+*/
 int namesort(s1,s2)
 char **s1;
 char **s2;
@@ -41,7 +47,7 @@ char **s2;
         st1++;
         st2++;
     }
-    
+
     return (toLower(*st1) - toLower(*st2));       
 }
 
@@ -67,27 +73,27 @@ struct dir_entry * list;
 int                listused;
 
 unsigned char upArrow[9][9] =
-    { {19,19,19,19,02,19,19,19,19},
-      {19,19,19,02,02,02,19,19,19},
-      {19,19,02,19,02,19,02,19,19},
-      {19,02,19,19,02,19,19,02,19},
-      {19,19,19,19,02,19,19,19,19},
-      {19,19,19,19,02,19,19,19,19},
-      {19,19,19,19,02,19,19,19,19},
-      {19,19,19,19,02,19,19,19,19},
-      {19,19,19,19,02,19,19,19,19},
+    { {21,21,21,21,00,21,21,21,21},
+      {21,21,21,00,00,00,21,21,21},
+      {21,21,00,21,00,21,00,21,21},
+      {21,00,21,21,00,21,21,00,21},
+      {21,21,21,21,00,21,21,21,21},
+      {21,21,21,21,00,21,21,21,21},
+      {21,21,21,21,00,21,21,21,21},
+      {21,21,21,21,00,21,21,21,21},
+      {21,21,21,21,00,21,21,21,21},
     };
-    
+
 unsigned char dwArrow[9][9] =
-    { {19,19,19,19,02,19,19,19,19},
-      {19,19,19,19,02,19,19,19,19},
-      {19,19,19,19,02,19,19,19,19},
-      {19,19,19,19,02,19,19,19,19},
-      {19,19,19,19,02,19,19,19,19},
-      {19,02,19,19,02,19,19,02,19},
-      {19,19,02,19,02,19,02,19,19},
-      {19,19,19,02,02,02,19,19,19},
-      {19,19,19,19,02,19,19,19,19},
+    { {21,21,21,21,00,21,21,21,21},
+      {21,21,21,21,00,21,21,21,21},
+      {21,21,21,21,00,21,21,21,21},
+      {21,21,21,21,00,21,21,21,21},
+      {21,21,21,21,00,21,21,21,21},
+      {21,00,21,21,00,21,21,00,21},
+      {21,21,00,21,00,21,00,21,21},
+      {21,21,21,00,00,00,21,21,21},
+      {21,21,21,21,00,21,21,21,21},
     };
     
 BITMAP upBitmap = {(unsigned int) upArrow, 9, 9, 0, 0};
@@ -298,12 +304,6 @@ int doLs(char * name)
 
 #define MAXPOS       22
 
-#define WHITE        16
-#define BLACK        1
-#define GRAY         21
-#define BLUE         32
-#define RED          77
-
 int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
 {
     //struct stat     statbuf;
@@ -327,17 +327,17 @@ int printName(struct dir_entry * dEntry,int x,int y,int clear,int selected)
 
     /*if(S_ISDIR(statbuf.st_mode))*/
     if(dEntry->type == TYPE_DIR)
-        color=RED;
+        color=COLOR_RED;
     else
-        color=BLACK;
+        color=COLOR_BLACK;
 
     if(clear)
-        cops->fillRect(WHITE,x, y , 3055, h+1);
+        cops->fillRect(COLOR_WHITE,x, y , 3055, h+1);
 
     if(selected)
-        cops->putS(color, BLUE,x, y, dEntry->name);
+        cops->putS(color, COLOR_BLUE,x, y, dEntry->name);
     else
-        cops->putS(color, WHITE,x, y, dEntry->name);
+        cops->putS(color, COLOR_WHITE,x, y, dEntry->name);
 }
 
 void printAllName(int pos,int nselect)
@@ -350,12 +350,12 @@ void printAllName(int pos,int nselect)
 
     for (i = pos; i < listused && i < pos+MAXPOS; i++)
     {
-        cops->fillRect(WHITE,5, 2+(i-pos)*(h+1)+ h+6+MENU_SHADOW , 305,(h+1));
+        cops->fillRect(COLOR_WHITE,5, 2+(i-pos)*(h+1)+ h+6+MENU_SHADOW , 305,(h+1));
         printName(&list[i],5, 2 + (i-pos)*(h+1)+ h+6+MENU_SHADOW,0,(i-pos)==nselect);
     }
-    
+
     for(;i<pos+MAXPOS;i++)
-        cops->fillRect(WHITE,5, (i-pos)*(h+1)+ h+6+MENU_SHADOW , 305,(h+1));
+        cops->fillRect(COLOR_WHITE,5, (i-pos)*(h+1)+ h+6+MENU_SHADOW , 305,(h+1));
 }
 
 void printAName(int pos, int nselect, int clear, int selected)
@@ -559,7 +559,7 @@ int eventHandler(int evt)
                 }
                 else // not going up, scrolling
                 {
-                    cops->scrollWindowVert(WHITE, 5, 1  + h+6+MENU_SHADOW, 305, (h+1)*MAXPOS, h+1,0);
+                    cops->scrollWindowVert(COLOR_WHITE, 5, 1  + h+6+MENU_SHADOW, 305, (h+1)*MAXPOS, h+1,0);
                     printAName(pos+nselect+1,nselect+1,1,0);
                     printAName(pos+nselect,nselect,1,1);
                 }
@@ -599,7 +599,7 @@ int eventHandler(int evt)
                     }
                     else // not going down, scrolling
                     {
-                        cops->scrollWindowVert(WHITE, 5, 1  + h+6+MENU_SHADOW, 305, (h+1)*MAXPOS, h+1,1);
+                        cops->scrollWindowVert(COLOR_WHITE, 5, 1  + h+6+MENU_SHADOW, 305, (h+1)*MAXPOS, h+1,1);
                         printAName(pos+nselect-1,nselect-1,1,0);
                         printAName(pos+nselect,nselect,1,1);
                     }
