@@ -34,7 +34,9 @@ struct client_operations cops={
 	processEvent       : wmNxtEvent,
 	addEventHandler    : addEventHandler,
 	pack               : pack,
-	drawImage          : drawImage
+	drawImage          : drawImage,
+	openScreen         : ini_graphics,
+	closeScreen        : close_graphics
 };
 
 void (*currentHandler)(int evt)=NULL;

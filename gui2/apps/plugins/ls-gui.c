@@ -158,6 +158,33 @@ void cleanList()
 	listused=0;
 }
 
+int launchBin(char * name)
+{
+	int pid;
+	pid = vfork();
+	if (pid == 0) {
+		execl(name,name,(char*)0);
+		fprintf(stderr, "exec failed!\n");
+		exit(1);
+	}
+	else {
+		if (pid > 0) {
+			int status;
+			cops->closeScreen();
+			waitpid(pid, &status, 0);
+			cops->openScreen();
+		}
+		else {
+			fprintf(stderr, "vfork failed %d\n", pid);
+		}
+	}
+
+	//execl();
+	//fprintf(stderr, "Cannot restart podzilla!\n");
+	//exit(1);
+}
+
+
 int pos,nselect,stop;
 
 int eventHandler(int evt)
@@ -213,7 +240,7 @@ int eventHandler(int evt)
 			break;
 		case BTN_RIGHT:
 			if(chdir(list[pos+nselect])<0)
-				break;
+				launchBin(list[pos+nselect]);
 			cleanList();
 			if(doLs("./")<0)
 			{

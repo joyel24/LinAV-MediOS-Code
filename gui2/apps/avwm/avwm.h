@@ -40,6 +40,8 @@ struct client_operations {
 	void (*processEvent)      (int evt);
 	void (*addEventHandler)   (void (*evtHandle));
 	void (*pack)              (void);
+	void (*closeScreen)       (void);
+	void (*openScreen)        (void);
 };
 
 struct menu_item {
@@ -62,4 +64,5 @@ void   drawTime         (void);
 void   processTimeOut   (void);
 int    loadPlugin       (char * path, char * param);  // prepare env to load a new plugin
 int    launchPlugin     (char * path,char * param);   // launch a plugin
+
 #endif
