@@ -26,7 +26,59 @@ extern struct plugin settings_plugin;
 needFont(std6x9);
 needFont(std7x13);
 
+#define SLIDER_OFFSET 110
+
 int stopSettingsLoop = 0; /* global variable used to stop the private evt loop*/
+
+struct SettingsDataT {
+    int  tab;
+    int  x;
+    int  y;
+    char* text;
+    int  min;
+    int  max;
+    int  value;
+    int  active;
+};
+
+#define CNT_SETTINGS_ENTRIES 3
+struct SettingsDataT sData[CNT_SETTINGS_ENTRIES] = { {0, 5, 30, "Key Repeat", 2, 10, 5, 1},
+                                                     {0, 5, 44, "Key Freq",   1,  6, 5, 0},
+                                                     {0, 5, 58, "LCD Timeout",0, 10, 1, 0} };
+
+
+unsigned char SettingsSlider[13][6] =
+{   { 4, 4, 4, 4, 4, 4},
+    { 4, 4, 4, 4, 4, 4},
+    { 9, 9, 4, 4, 9, 9},
+    { 9, 9, 4, 4, 9, 9},
+    { 9, 9, 4, 4, 9, 9},
+    { 9, 9, 4, 4, 9, 9},
+    { 9, 9, 4, 4, 9, 9},
+    { 9, 9, 4, 4, 9, 9},
+    { 9, 9, 4, 4, 9, 9},
+    { 9, 9, 4, 4, 9, 9},
+    { 9, 9, 4, 4, 9, 9},
+    { 4, 4, 4, 4, 4, 4},
+    { 4, 4, 4, 4, 4, 4},
+};
+BITMAP SettingsSliderBitmap = {(unsigned int) SettingsSlider, 6, 13, 0, 0};
+
+
+int GetActiveSetting()
+{
+    int i = 0;
+
+    for(i = 0; i < CNT_SETTINGS_ENTRIES; i++)
+    {
+        if(sData[i].active == 1)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
 
 /*our private loop*/
 void SettingsEvtLoop(void)
@@ -41,10 +93,101 @@ void SettingsEvtLoop(void)
 /* events */
 int settingsEvtHandler(int evt)
 {
+    int active = 0;
+
     switch (evt) {
         case EVT_REDRAW:
             break;
         case EVT_TIMER:
+            break;
+
+        case BTN_DOWN:
+            active = GetActiveSetting();
+            sData[active].active = 0;
+            drawSlider(sData[active].x,
+                       sData[active].y,
+                       sData[active].text,
+                       sData[active].min,
+                       sData[active].max,
+                       sData[active].value,
+                       sData[active].active);
+
+            if(active >= CNT_SETTINGS_ENTRIES-1)
+                active = 0;
+            else
+                active++;
+
+            sData[active].active = 1;
+
+            drawSlider(sData[active].x,
+                       sData[active].y,
+                       sData[active].text,
+                       sData[active].min,
+                       sData[active].max,
+                       sData[active].value,
+                       sData[active].active);
+
+            break;
+
+        case BTN_UP:
+            active = GetActiveSetting();
+            sData[active].active = 0;
+            drawSlider(sData[active].x,
+                       sData[active].y,
+                       sData[active].text,
+                       sData[active].min,
+                       sData[active].max,
+                       sData[active].value,
+                       sData[active].active);
+
+            if(active == 0)
+                active = CNT_SETTINGS_ENTRIES-1;
+            else
+                active--;
+
+            sData[active].active = 1;
+
+            drawSlider(sData[active].x,
+                       sData[active].y,
+                       sData[active].text,
+                       sData[active].min,
+                       sData[active].max,
+                       sData[active].value,
+                       sData[active].active);
+
+            break;
+
+        case BTN_LEFT:
+            active = GetActiveSetting();
+            if(sData[active].value-1 < sData[active].min)
+                sData[active].value = sData[active].value;
+            else
+                sData[active].value--;
+
+            drawSlider(sData[active].x,
+                       sData[active].y,
+                       sData[active].text,
+                       sData[active].min,
+                       sData[active].max,
+                       sData[active].value,
+                       sData[active].active);
+            break;
+
+        case BTN_RIGHT:
+            active = GetActiveSetting();
+            if(sData[active].value+1 > sData[active].max)
+                sData[active].value = sData[active].value;
+            else
+                sData[active].value++;
+
+            drawSlider(sData[active].x,
+                       sData[active].y,
+                       sData[active].text,
+                       sData[active].min,
+                       sData[active].max,
+                       sData[active].value,
+                       sData[active].active);
+
             break;
 
         case BTN_OFF:
@@ -53,22 +196,75 @@ int settingsEvtHandler(int evt)
     }
 }
 
+void drawSlider(int x, int y, char* text, int min, int max, int value, int active)
+{
+	int filler;
+	char tmp[10];
+
+    setPlane(BMAP2);
+    setFont(std6x9);
+
+	fillRect(COLOR_GREY, x, y-2, SCREEN_WIDTH-40, 13); // clear active settings range
+
+    if(active)
+        putS(COLOR_RED, COLOR_GREY, x, y, text);
+    else
+        putS(COLOR_BLACK, COLOR_GREY, x, y, text);
+
+
+    filler = ((int)(((value-min) * 128) / (max-min) ));
+
+	sprintf(tmp,"%d", min);
+    putS(COLOR_BLACK, COLOR_GREY, x+SLIDER_OFFSET-15, y, tmp);
+	sprintf(tmp,"%d", max);
+    putS(COLOR_BLACK, COLOR_GREY, x+SLIDER_OFFSET+128+5, y, tmp);
+
+	fillRect(COLOR_BLUE, x+SLIDER_OFFSET, y, 128, 9);
+
+    drawBITMAP (&SettingsSliderBitmap, x+filler+SLIDER_OFFSET-3,y-2); // -3 = half of bitmap width
+
+	sprintf(tmp,"%d", value);
+    if(filler < 128/2)
+        putS(COLOR_BLACK, COLOR_BLUE, x+filler+SLIDER_OFFSET+7, y, tmp);
+    else
+        putS(COLOR_BLACK, COLOR_BLUE, x+filler+SLIDER_OFFSET-15, y, tmp);
+
+    setPlane(BMAP1);
+}
+
 void drawSettings()
 {
-    setSize(BMAP2,SCREEN_WIDTH,SCREEN_HEIGHT, 8);
-    setPos(BMAP2,0x14,0x13);
+    int i = 0;
+
+    setSize(BMAP2,SCREEN_WIDTH-40,SCREEN_HEIGHT-60, 8);
+    setPos(BMAP2,0x14+40,0x13+20);
 
     // show box
     setPlane(BMAP2);
     setFont(std7x13);
 
-    clearScreen(COLOR_WHITE);
+    clearScreen(COLOR_GREY);
 
-    putS(COLOR_BLACK, COLOR_WHITE, 2, 20, "AVWM Settings");
-    putS(COLOR_BLACK, COLOR_WHITE, 2, 100, "There are many things to do :)");
-    putS(COLOR_BLACK, COLOR_WHITE, 2, 200, "Press OFF to leave");
+    drawLine(COLOR_RED, 0, 2, SCREEN_WIDTH-40, 2);
+    drawLine(COLOR_RED, 0, 4, SCREEN_WIDTH-40, 4);
+    drawLine(COLOR_RED, 0, 6, 95, 6); drawLine(COLOR_RED, 162, 6, SCREEN_WIDTH-40, 6);
+    drawLine(COLOR_RED, 0, 8, 95, 8); drawLine(COLOR_RED, 162, 8, SCREEN_WIDTH-40, 8);
+    drawLine(COLOR_RED, 0,10, 95,10); drawLine(COLOR_RED, 162,10, SCREEN_WIDTH-40,10);
+    drawLine(COLOR_RED, 0,12, 95,12); drawLine(COLOR_RED, 162,12, SCREEN_WIDTH-40,12);
+    drawLine(COLOR_RED, 0,14, 95,14); drawLine(COLOR_RED, 162,14, SCREEN_WIDTH-40,14);
+    drawLine(COLOR_RED, 0,16, 95,16); drawLine(COLOR_RED, 162,16, SCREEN_WIDTH-40,16);
+    putS(COLOR_BLACK, COLOR_GREY, 100, 5, "AVWM Settings");
+    drawLine(COLOR_RED, 0, 18, SCREEN_WIDTH-40, 18);
+    drawLine(COLOR_RED, 0, 20, SCREEN_WIDTH-40, 20);
+
+    for(i = 0; i < CNT_SETTINGS_ENTRIES; i++)
+    {
+        drawSlider(sData[i].x, sData[i].y, sData[i].text, sData[i].min, sData[i].max, sData[i].value, sData[i].active);
+    }
 
     showPlane(BMAP2);
+    setPlane(BMAP1);
+    setFont(std6x9);
 }
 
 void ini_settings()
