@@ -13,7 +13,8 @@
 @
 @
         .include "../includes/common.S"
-
+        .include "../includes/av300.S"
+        
 .text
 
 loop1:
@@ -43,8 +44,8 @@ lcop:   mov r0, #0
         sub r5, #1
         bne lcop   
         
-        callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
-        callThumb2 r3, osdSetMainConfigT, 0x14, 0xd9      
+@        callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
+@        callThumb2 r3, osdSetMainConfigT, 0x14, 0xd9      
         
         mov r0, #4
         mov r1, #0

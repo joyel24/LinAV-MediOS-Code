@@ -39,6 +39,8 @@
 @ osdSetScreenPositionT (r0=x, r1=y)
 @ osdSetScreenConfigT (r0=config)
 @
+@ osdSetPalletteColorT (r0=Y,r1=Cr,r2=Cb, r3=index)
+@
 @ ostInitT
 
 .include "../includes/common.S"
@@ -49,6 +51,27 @@ osdInc = 1
 .text
         .thumb
 
+@ osdSetPalletteColorT
+@
+osdSetPalletteColorT:
+        push {r0, r1, r2, r3, r4, r5}
+        mov r5, #0
+        ldr r4, =0x306f4
+osdWait:ldrh r5, [r4]
+        cmp r5, #0
+         bne osdWait
+        lsl r1, #8
+        orr r3, r1
+        strh r3, [r4, #4]
+osdWaiu:ldrh r5, [r4]
+        cmp r5, #0
+         bne osdWaiu
+        lsl r0, #8
+        orr r0, r2
+        strh r0, [r4, #2]
+        pop {r0, r1, r2, r3, r4, r5}
+        bx lr
+        
 @ osdSetScreenConfigT r0=config
 @
 osdSetScreenConfigT:

@@ -15,7 +15,7 @@
 
 .text
         .include "../includes/common.S"
-        .include "../includes/jbmm.S"
+        .include "../includes/av300.S"
 loop1:
 
         add r0, pc, #1
@@ -24,6 +24,23 @@ loop1:
         .thumb
 
         callThumb r0, lcdInitT
+
+        callThumb2 r3, osdSetMainConfigT, 0x14, 0x10d9      
+
+        mov r5, #0
+lpal:
+        mov r0, r5
+        mov r1, r5
+        mov r2, r5
+        callThumb r3, colorRGB2YCbCrT
+        
+        mov r3, r5
+        callThumb r4, osdSetPalletteColorT
+
+        ldr r4, =0x100
+        add r5, #1
+        cmp r4, r5
+        bne lpal
         
         mov r0, #0
         ldr r1, =posy
@@ -87,3 +104,4 @@ cuec:   .word 0
 
 .include "../includes/lcd.S"
 .include "../includes/hex.S"
+.include "../includes/color.S"

@@ -14,7 +14,7 @@ BACK and BACK2 are YCbCr color video planes.
         1 - Makes it half height?
         8-9 - Pixel height
         10-11 - Pixel width
-        12 - combine with bg?
+        12 - ROM/RAM CLUT
         13 - ?
         
         11011001 normal, see thru
