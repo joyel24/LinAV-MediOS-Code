@@ -57,16 +57,18 @@ ecrSwapBytesBufferA:
 .thumb_func
 
 ecrSwapBytesBuffer:
-        push {r0, r1, r2, r3, r4}
+        push {r4}
         ldr r4, =0x30900
-        sub r2, #2
+        sub r0, #2
+        sub r1, #2
 ecrl1:  ldrh r3, [r0, r2]
-        strh r3, [r4, r2]
+        strh r3, [r4]
         ldrh r3, [r4, #2]
-        strh r3, [r1]
+        strh r3, [r1, r2]
         sub r2, #2
-         bcc ecrl1
-        pop {r0, r1, r2, r3, r4}
+        cmp r2, #0
+         bne ecrl1
+        pop {r4}
         bx lr
 
         
@@ -98,16 +100,18 @@ ecrSwapBitsBufferA:
 .thumb_func
 
 ecrSwapBitsBuffer:
-        push {r0, r1, r2, r3, r4}
+        push {r4}
         ldr r4, =0x30900
-        sub r2, #2
+        sub r0, #2
+        sub r1, #2
 ecrl2:  ldrh r3, [r0, r2]
         strh r3, [r4]
         ldrh r3, [r4, #4]
         strh r3, [r1, r2]
         sub r2, #2
-         bcc ecrl2
-        pop {r0, r1, r2, r3, r4}
+        cmp r2, #0
+         bne ecrl2
+        pop {r4}
         bx lr
         
         .arm

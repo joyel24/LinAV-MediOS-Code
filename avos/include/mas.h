@@ -35,5 +35,5 @@ extern u32 masWriteD0(u32 addr, void* buff, u32 size);
 extern u32 masWriteD1(u32 addr, void* buff, u32 size);
 extern u32 masControlWriteA(u32 val);
 
-extern u32 masReadData();
-extern u32 masWriteData(u32 val);
+extern u32 masReadData(u32 ptr, u32 maxCount);
+extern u32 masWriteData(u32 ptr, u32 maxCount);

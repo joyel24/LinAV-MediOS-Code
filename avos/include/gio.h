@@ -45,6 +45,7 @@ typedef unsigned long u32;
 
 #define         GIO_OUTPUT       0
 #define         GIO_INPUT        1
+
 #define         GIO_UNINVERTED   0
 #define         GIO_INVERTED     1
 

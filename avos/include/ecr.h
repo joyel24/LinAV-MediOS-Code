@@ -23,6 +23,6 @@ extern void ecrSwapBits(char* bufferIn, char* bufferOut, u32 count);
 
 extern u32 ecrSwapBytesA(u32 value);
 extern u32 ecrSwapBitsA(u32 value);
-extern void ecrSwapBytesA(char* bufferIn, char* bufferOut, u32 count);
-extern void ecrSwapBitsA(char* bufferIn, char* bufferOut, u32 count);
+extern void ecrSwapBytesBufferA(char* bufferIn, char* bufferOut, u32 count);
+extern void ecrSwapBitsBufferA(char* bufferIn, char* bufferOut, u32 count);
 

@@ -428,10 +428,10 @@ i2cOL:
         and r6, r3
         strh r6, [r7, #i2cRegDR]
 
-        bl i2cDelay        
+        bl i2cDelay     
 
-        lsr r0, r2, #7
-         bne noHI
+        lsr r0, r2, #8
+         bcs noHI
         mov r0, #8
         strh r0, [r7, #i2cRegIO]
         ldrh r0, [r7, #i2cRegDR]
@@ -440,6 +440,8 @@ i2cOL:
         strh r0, [r7, #i2cRegDR]
         b i2cDP
 noHI:
+        mov r0, #4                      @@
+        strh r0, [r7, #i2cRegIO]        @@
         ldrh r0, [r7, #i2cRegDR]
         mov r1, #8
         orr r0, r1
