@@ -431,7 +431,7 @@ __IRAM_CODE int kcswi_handler (
 		GFX_POINT org;
 		for (org.y=0;org.y<pDst->h+pSrc->h;org.y+=pSrc->h)
 		for (org.x=0;org.x<pDst->w+pSrc->w;org.x+=pSrc->w)
-			kcswi_handler (nParam1, nParam2, (unsigned long)&org, nAPI_GFX_FASTBLIT);
+			kcswi_handler (nAPI_GFX_FASTBLIT, nParam2, (unsigned long)&org, nParam1);
 	}
 	break;
 
