@@ -4,6 +4,7 @@
 #include <ata.h>
 #include <fonts.h>
 #include <timers.h>
+#include <interrupts.h>
 
     struct graphicsBuffer screenBitmap;
     struct graphicsBuffer screenTop;
@@ -14,6 +15,10 @@
 
 char timev[] = "xxxx";
 char ct[] = "F1 Timer: x";
+
+unsigned int* intptr = 0x34;
+
+void intsub();
 
 int main() {
     int c, v, b, x, y = 120;
@@ -90,6 +95,9 @@ int main() {
         timersConfigA(c, tmode[c], 0, div, tmax[c]);        
     }
 
+    *intptr = intsub;
+    interruptsSetMaskA(0);
+
     while(1) {
         graphicsBoxfA(&screenBitmap2, 320, 0, 1, 120, 0x0000);
         graphicsSpriteA(&screenBitmap, 0, 0, &screenBitmap2);
@@ -152,3 +160,8 @@ int main() {
     }
 
 }
+
+void intsub() {
+    uartOutsA("INT called\n");
+}
+

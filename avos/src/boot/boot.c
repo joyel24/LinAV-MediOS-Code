@@ -16,12 +16,7 @@
 #include <debug.h>
 
 int launchFile(char * fileN);
-int readTxt(char * fileN);
-
-int (*action[])(char * name) ={launchFile,readTxt};
-char * ext[]={"BIN","TXT"};
-int nbExt=2;
-
+int pluginFile(char * fileN, char * ext);
 
 int exeFile(char * fileN, char * arg);
 void (*codeCaller)(int argc, char * argv[])=(void (*)(int argc, char * argv[]))0x03000000;
@@ -44,7 +39,6 @@ struct dispDir dirBuffer[10000];
 
 struct tm* ourTime;
 char timeSt[] = "xx:xx:xx.xx";
-
 char powerSt[] = "xxxx+";
 
 int main() {
@@ -371,31 +365,20 @@ startInit:
                         } while(c & BUTTONS_AV300_ANY);
                         break;
                     } else {
-                        // TODO
-                        //  Handle plugins
-                        //  text file reader
-                        //  image reader
-                        //  mp3 player
-                        //  etc
-
-                        // for now, RUN IT!
                         char fileN[MAX_PATH];
-						strcpy(fileN,nameCur);
-						strcat(fileN,dirBuffer[dirpos+cursorpos].name);
+						strcpy(fileN, nameCur);
+						strcat(fileN, dirBuffer[dirpos+cursorpos].name);
 						int i;
 
-						for(i=0;i<nbExt;i++)
-						{
-							if(strcmp(dirBuffer[dirpos+cursorpos].ext,ext[i])==0)
-							{
-								if(action[i](fileN))
-									goto startInit;
-							}
-						}
-
+                        if (strcmp(dirBuffer[dirpos+cursorpos].ext, "BIN")==0) {
+                            // Launch it...
+                            launchFile(fileN);
                             goto startInit;
-
-
+                        } else {
+                            // Try for a plugin...   
+                            if (pluginFile(fileN, dirBuffer[dirpos+cursorpos].ext))
+                                goto startInit;
+                        }
                     }
                     do {
                         c =buttonsGetStatusA();
@@ -483,15 +466,19 @@ startInit:
     while(1) {}
 }
 
-int launchFile(char * fileN)
-{
-	return exeFile(fileN,NULL);
+int launchFile(char * fileN) {
+	return exeFile(fileN, NULL);
 }
 
-int readTxt(char * fileN)
-{
-	if(!exeFile("/TXTREAD.BIN",fileN))
-		debug("[readTxt] error launching /TXTREAD.BIN %s\n",fileN);
+int pluginFile(char * fileN, char * ext) {
+    char lname[] = "/PLUGINS/xxx.BIN";
+    lname[9] = ext[0];
+    lname[10] = ext[1];
+    lname[11] = ext[2];
+	if(!exeFile(lname, fileN)) {
+		debug("[pluginFile] error launching plugin %s\n", fileN);
+        return 0;
+    }
 	return 1;
 }
 
@@ -499,25 +486,22 @@ int readTxt(char * fileN)
 
 int exeFile(char * fileN, char * arg)
 {
-	if(loadFile(fileN))
-	{
+	if(loadFile(fileN)) {
 		char * argv[MAX_PATH];
 
 		int argc=1;
 
 		argv[0]=fileN;
-		if(arg!=NULL)
-		{
+		if(arg!=NULL) {
 			argv[1]=arg;
 			argc++;
 		}
 
-		codeCaller(argc,argv);
+		codeCaller(argc, argv);
 		return 1;
-	}
-	else
+	} else {
 		return 0;
-
+    }
 }
 
 

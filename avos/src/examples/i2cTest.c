@@ -123,7 +123,7 @@ void showBuffer(char *source) {
             if (c<32 || c>126) c='.';
             p[35+i] = c;
         }
-//        uartOuts(p);
+        uartOutsA(p);
 
         pal16[1] = 0xffff;
         graphicsStringA(&screenBitmap, 4, 16 + y*7, &sprite4_6, std4x6_, 6, 0,

@@ -20,6 +20,7 @@
 @ u32 masReadD1(u32 addr, u32 buff, u32 size)
 @ u32 masWriteD0(u32 addr, u32 buff, u32 size)
 @ u32 masWriteD1(u32 addr, u32 buff, u32 size)
+@ u32 masControlWrite(u32 val)
 @
 
 .macro switchThumb
@@ -191,6 +192,52 @@ mgvE:
         bx r1
 
         .ltorg
+
+@ ------------------------------------------------------------------------------
+@ masControlWrite(u32 data)
+@   
+.globl masControlWriteA
+masControlWriteA:
+        switchThumb
+.globl masControlWrite
+.thumb_func
+
+masControlWrite:
+        push {lr}
+        mov r3, r0
+        bl i2cStart
+    
+        mov r0, #MAS_DEV_WRITE
+        bl i2cOutb
+        cmp r0, #0
+         bne mcwE
+
+        mov r0, #MAS_CONTROL
+        bl i2cOutb
+        cmp r0, #0
+         bne mcwE
+        
+        mov r0, r3
+        lsr r0, #8
+        bl i2cOutb
+        cmp r0, #0
+         bne mcwE
+
+        mov r0, r3
+        bl i2cOutb
+        cmp r0, #0
+         bne mcwE
+
+        bl i2cStop
+    
+        mov r0, #0
+        pop {r1}
+        bx r1
+mcwE:
+        mov r0, #0
+        sub r0, #1
+        pop {r1}
+        bx r1
         
 @ ------------------------------------------------------------------------------
 @ masReadReg(u32 reg)
@@ -431,23 +478,20 @@ masReadD0:
         @ r5 = n
 mrd0l:
         bl i2cInb
-        strb r0, [r4]
-        add r4, #1
+        strb r0, [r4, #3]
         bl i2cAck
         
         bl i2cInb
-        strb r0, [r4]
-        add r4, #1
+        strb r0, [r4, #2]
         bl i2cAck
     
         bl i2cInb
-        strb r0, [r4]
-        add r4, #1
+        strb r0, [r4, #1]
         bl i2cAck
 
         bl i2cInb
         strb r0, [r4]
-        add r4, #1
+        add r4, #4
 
         sub r5, #1
          beq mrd0d
@@ -529,20 +573,17 @@ masWriteD0:
         @ r4 -> buffer
         @ r5 = n
 mwd0l:
-        ldrb r0, [r4]
-        add r4, #1
+        ldrb r0, [r4, #3]
+        bl i2cOutb
+
+        ldrb r0, [r4, #2]
+        bl i2cOutb
+
+        ldrb r0, [r4, #1]
         bl i2cOutb
 
         ldrb r0, [r4]
-        add r4, #1
-        bl i2cOutb
-
-        ldrb r0, [r4]
-        add r4, #1
-        bl i2cOutb
-
-        ldrb r0, [r4]
-        add r4, #1
+        add r4, #4
         bl i2cOutb
         
         sub r5, #1
@@ -642,23 +683,20 @@ masReadD1:
         @ r5 = n
 mrd1l:
         bl i2cInb
-        strb r0, [r4]
-        add r4, #1
+        strb r0, [r4, #3]
         bl i2cAck
         
         bl i2cInb
-        strb r0, [r4]
-        add r4, #1
+        strb r0, [r4, #2]
         bl i2cAck
     
         bl i2cInb
-        strb r0, [r4]
-        add r4, #1
+        strb r0, [r4, #1]
         bl i2cAck
 
         bl i2cInb
         strb r0, [r4]
-        add r4, #1
+        add r4, #4
 
         sub r5, #1
          beq mrd1d
@@ -740,20 +778,17 @@ masWriteD1:
         @ r4 -> buffer
         @ r5 = n
 mwd1l:
-        ldrb r0, [r4]
-        add r4, #1
+        ldrb r0, [r4, #3]
+        bl i2cOutb
+
+        ldrb r0, [r4, #2]
+        bl i2cOutb
+
+        ldrb r0, [r4, #1]
         bl i2cOutb
 
         ldrb r0, [r4]
-        add r4, #1
-        bl i2cOutb
-
-        ldrb r0, [r4]
-        add r4, #1
-        bl i2cOutb
-
-        ldrb r0, [r4]
-        add r4, #1
+        add r4, #4
         bl i2cOutb
         
         sub r5, #1
