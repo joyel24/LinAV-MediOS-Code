@@ -18,7 +18,7 @@
 #include <asm/arch/av3xx_common.h>
 
 int av3xx_rtc_init(void);
-int av3xx_rtc_getTime(struct tm * valTime);
-int av3xx_rtc_setTime(struct tm * newTime);
+int av3xx_rtc_getTime(struct av_tm * valTime);
+int av3xx_rtc_setTime(struct av_tm * newTime);
 
 #endif

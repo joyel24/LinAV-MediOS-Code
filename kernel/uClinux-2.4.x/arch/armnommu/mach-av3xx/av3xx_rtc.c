@@ -23,7 +23,7 @@ unsigned char userToPv(int val)
 	return ((((val/10)<<4)&0xf0)+(val&0xF));
 }
 
-int av3xx_rtc_getTime(struct tm * valTime)
+int av3xx_rtc_getTime(struct av_tm * valTime)
 {
 	struct tm_pv pv_dt;
         int retVal;
@@ -50,7 +50,7 @@ int av3xx_rtc_getTime(struct tm * valTime)
 	return 0;
 }
 
-int av3xx_rtc_setTime(struct tm *newTime)
+int av3xx_rtc_setTime(struct av_tm *newTime)
 {
 	struct tm_pv pv_dt;
 	

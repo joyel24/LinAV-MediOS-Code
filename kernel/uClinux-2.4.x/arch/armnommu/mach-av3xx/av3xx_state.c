@@ -32,22 +32,21 @@ int usbEnabled(void)
 
 void setUsb(int state)
 {
-	int val;
 	if(status!=state)
 	{
 		if(state==1)
+                {
 			disable_irq(AV3XX_IDE_IRQ);
-
-		val=inw(AV3XX_USB_EN_DIS_ABLE);
-		val = (val & 0xFFFFFFFE) | val;
-		outw(val,AV3XX_USB_EN_DIS_ABLE);
-
-		AV3XX_POWER_UP_HDD
-		AV3XX_SELECT_HDD
-
-		if(state==0)
+                        outw(1,AV3XX_USB_EN_DIS_ABLE);
+                }
+                else
+                {
+                        outw(0,AV3XX_USB_EN_DIS_ABLE);
+		
+		        AV3XX_POWER_UP_HDD
+		        AV3XX_SELECT_HDD
 			enable_irq(AV3XX_IDE_IRQ);
-
+                }
 		status=state;
 	}
 	else
@@ -212,7 +211,7 @@ struct file_operations av_power_fops = {
 int av3xx_time_read(char *buf, char **start, off_t offset,
                    int len, int *eof, void *data)
 {
-	struct tm timeV ;
+	struct av_tm timeV ;
 
 	av3xx_rtc_getTime(&timeV);
 
@@ -245,7 +244,7 @@ int av_rtc_release(struct inode *inode, struct file *filp)
 int av_rtc_ioctl(struct inode *inode, struct file *filp,
                  unsigned int cmd, unsigned long arg)
 {
-	struct tm * ptrTm=(struct tm * )arg;
+	struct av_tm * ptrTm=(struct tm * )arg;
         int * val=(int*)arg;
 	if (_IOC_TYPE(cmd) != AV_OP_IOC_MAGIC) return -ENOTTY;	 
 	
