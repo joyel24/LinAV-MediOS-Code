@@ -15,7 +15,7 @@
         .include "../includes/common.S"
         .include "../includes/av300.S"
 
-@        doimage = 1
+        doimage = 1
         
 .text
 
@@ -183,7 +183,7 @@ oval1:
         callThumb r0, lcdClsT      @ Clear screen...
 
 .ifdef doimage
-        
+
         ldr r3, =lcdVideoBuffer2
         ldr r4, =sprite
         ldr r5, =(320*240)
@@ -205,7 +205,7 @@ lcop:   mov r0, #0
         
         callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
         callThumb2 r3, osdSetMainConfigT, 0x14, 0xdd      
-        
+
 .endif
         
         mov r0, #4
@@ -472,20 +472,16 @@ notm1:
         b launchFile
 notm2:
 
-        ldr r0, =0x10000
-wait6:  sub r0, #1
-        bne wait6
-
         ldr r0, timeoutC
         cmp r0, #0
          bne noovf
-        
-        callThumb2 r4, terminalSetPosT, 0, 35
-        callThumb2 r4, terminalPutsCT, msg780, 0x0101
-        
+
         ldr r0, runClus
         cmp r0, #0
          beq errt
+        callThumb2 r4, terminalSetPosT, 0, 35
+        callThumb2 r4, terminalPutsCT, msg780, 0x0101
+        ldr r0, runClus
         b launchFile
 errt:   ldr r0, timeoutMax
 
@@ -493,9 +489,11 @@ noovf:  sub r0, #1
         ldr r1, =timeoutC
         str r0, [r1]
 
+        ldr r0, =0x10000
+wait6:  sub r0, #1
+        bne wait6
+        
         b loopNV
-
-        b alldo
 
         .ltorg
 

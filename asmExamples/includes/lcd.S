@@ -30,8 +30,8 @@ lcdInc = 1
 .text
         .thumb
 
-lcdVideoBuffer  = 0x3fb0000
-lcdVideoBuffer2 = 0x3f60000
+lcdVideoBuffer  = 0x3fc0000
+lcdVideoBuffer2 = 0x3c00000
 lcdWidth        = 320
 lcdHeight       = 240
 
