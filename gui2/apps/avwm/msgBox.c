@@ -289,7 +289,10 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
 
     // print message
     setFont(std5x8);
-    putS(COLOR_BLACK, COLOR_WHITE, 25, h1+2+2+10, msg);
+    if(icon == MSGBOX_ICON_NO_ICON)
+        putS(COLOR_BLACK, COLOR_WHITE, 2, h1+2+2+10, msg); // if no icon, print the text on the left side
+    else
+        putS(COLOR_BLACK, COLOR_WHITE, 25, h1+2+2+10, msg); // xPos with offset for icon
 
     // print buttons
     if(type == MSGBOX_TYPE_OK)
