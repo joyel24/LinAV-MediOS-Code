@@ -510,7 +510,7 @@ osdInit:
         ldr r1, =0x4
         strh r1, [r0]
         pop {r0, r1, r2, pc}
-        
+
         .ltorg
         .arm
         
