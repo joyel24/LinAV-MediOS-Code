@@ -44,9 +44,26 @@ void kidle (void)
 
     while (1)
     {
-        printk("[ idle ]\n");
-        for(i=0;i<0x8000;i++) /*nothing*/;
+        cli(); // for safe multithreaded printing
+        printk("   [ idle ]\n");
+        sti();
+        for(i=0;i<0xC000;i++) /*nothing*/;
     };
+}
+
+int ksomethread (int nParam)
+{
+   int i;
+
+   while (1)
+   {
+      cli(); // for safe multithreaded printing
+      printk("      [ thread-3 ]\n");
+      sti();
+      for(i=0;i<0x12000;i++) /*nothing*/;
+   };
+
+   return 666;//Return code test...
 }
 
 void kernel_startup_thread (void);
@@ -68,6 +85,7 @@ void kernel_start (void)
     kinit_tcb ();
     kadd_tcb (&g_pActiveTask, kcreate_tcb (kernel_startup_thread, TASK_STACK_SIZE, 0, "USER"));
     kadd_tcb (&g_pActiveTask, kcreate_tcb (kidle, TASK_STACK_SIZE,   0, "IDLE"));
+    kadd_tcb (&g_pActiveTask, kcreate_tcb (ksomethread, TASK_STACK_SIZE,   0, "THREAD-3"));
 
     ini_graphics();
     ini_debugOnScreen();
@@ -91,7 +109,10 @@ void kernel_startup_thread (void)
 
     while (1)
     {
+        cli(); // for safe multithreaded printing
         printk("[ startup ]\n");
+        sti();
+
         for(i=0;i<0x8000;i++) /*nothing*/;
     };
 

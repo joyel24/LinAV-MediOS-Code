@@ -98,12 +98,10 @@ void init_timer(void)
     outw(TMR_SEL_ARM, TIMER0_BASE+TIMER_SEL);
 
     /* prescale  */
-//    outw(9, TIMER0_BASE+TIMER_SCAL);
-    outw(999, TIMER0_BASE+TIMER_SCAL);
+    outw(9, TIMER0_BASE+TIMER_SCAL);
 
     /* div  */
-//    outw((CONFIG_ARM_CLK/1000)-1, TIMER0_BASE+TIMER_DIV);
-    outw(60000, TIMER0_BASE+TIMER_DIV);
+    outw((CONFIG_ARM_CLK/1000)-1, TIMER0_BASE+TIMER_DIV);
 
     /* freerun */
     outw(TMR_MODE_FREERUN, TIMER0_BASE+TIMER_MODE);

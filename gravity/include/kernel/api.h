@@ -108,6 +108,8 @@ typedef struct _IMAGE
 
 /*
 // API definition
+
+
 inline AOS_RESULT AOS_API_TASK_YIELD       ()                                                              { SAVE; asm("swi 0"); LOAD; }
 inline AOS_RESULT AOS_API_TASK_CREATE      (void* pvCode, void* pParam, HANDLE* phTask)                    { SAVE; asm("swi 1"); LOAD; }
 inline AOS_RESULT AOS_API_TASK_REMOVE      (HANDLE hTask)                                                  { SAVE; asm("swi 2"); LOAD; }

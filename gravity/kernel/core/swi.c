@@ -14,5 +14,11 @@ __IRAM_CODE int kcswi_handler (
 	unsigned long nParam3,
 	unsigned long nCmd)
 {
-    return 0;
+   switch (nCmd)
+   {
+      default:
+         return 0;
+   }
+
+   return 0;
 }
