@@ -118,8 +118,12 @@ struct av_peak {
 #define AV_GET_EVENT           _IOR(AV_OP_IOC_MAGIC,44, int)
 #define AV_CLEAR_EVENTS        _IO(AV_OP_IOC_MAGIC,45)
 #define AV_WAIT_EVENT          _IOR(AV_OP_IOC_MAGIC,46,int)
+#define AV_SET_TIMER_FREQ      _IOW(AV_OP_IOC_MAGIC,47,int)
+#define AV_START_TIMER         _IO(AV_OP_IOC_MAGIC,48)
+#define AV_STOP_TIMER          _IO(AV_OP_IOC_MAGIC,49)
+#define AV_TIMER_STATE         _IOW(AV_OP_IOC_MAGIC,50,int) /* -1 => timer stop, >=0 => elapsed time */
 
-#define AV_OP_IOC_MAXNR        46
+#define AV_OP_IOC_MAXNR        50
 
 /* MAJOR / MINOR */
 

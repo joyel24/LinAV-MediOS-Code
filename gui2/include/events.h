@@ -27,17 +27,22 @@
 #define        BTN_JOY     0x0008
 #define        BTN_ON      0x0009
 #define        BTN_OFF     0x000a
+#define        EVT_TIMER   0x000b
 
 
-int iniEvent(void);
-int nxtEvent(void);
-int waitEvent(void);
-int clearEventQueue(void);
-int setRepeate(int val);
-int getRepeate(void);
-int setFreq(int val);
-int getFreq(void);
-int setSettings(struct mouseParam * param);
-int getSettings(struct mouseParam * param);
+int  iniEvent(void);
+int  nxtEvent(void);
+int  waitEvent(void);
+int  clearEventQueue(void);
+int  setRepeate(int val);
+int  getRepeate(void);
+int  setFreq(int val);
+int  getFreq(void);
+int  setSettings(struct mouseParam * param);
+int  getSettings(struct mouseParam * param);
+int  setTimerFreq(int val);
+int  startTimer();
+int  stopTimer();
+int  timerState();
 
 #endif
