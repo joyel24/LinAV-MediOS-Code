@@ -22,9 +22,6 @@
 #include "events.h"
 #include "avwm.h"
 
-#define LCD_WIDTH  320
-#define LCD_HEIGHT 240
-
 #define DaySpace  23
 #define WeekSpace 15
 #define MonthHeaderHeight 15
