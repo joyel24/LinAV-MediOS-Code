@@ -21,6 +21,7 @@
 #include "cops.h"
 #include "avevents.h"
 #include "colordef.h"
+#include "font.h"
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -275,46 +276,46 @@ void RefreshSettings()
     char tmp[10];
     cops->fillRect(COLOR_GREEN, 0, 20, 160,80); // clear
 
-	sprintf(tmp,"%ld", p);
+    sprintf(tmp,"%ld", p);
 
-	if(settingParam == 0)
-	{
+    if(settingParam == 0)
+    {
         sprintf(tmp,"%ld", width);
         cops->putS(COLOR_RED, COLOR_GREEN, 5,30, "Width");
         cops->putS(COLOR_RED, COLOR_GREEN, 100,30, tmp);
-	}
-	else
-	{
+    }
+    else
+    {
         sprintf(tmp,"%ld", width);
         cops->putS(COLOR_BLACK, COLOR_GREEN, 5,30, "Width");
         cops->putS(COLOR_BLACK, COLOR_GREEN, 100,30, tmp);
-	}
+    }
 
-	if(settingParam == 1)
-	{
+    if(settingParam == 1)
+    {
         sprintf(tmp,"%ld", height);
         cops->putS(COLOR_RED, COLOR_GREEN, 5,50, "Height");
         cops->putS(COLOR_RED, COLOR_GREEN, 100,50, tmp);
     }
-	else
-	{
+    else
+    {
         sprintf(tmp,"%ld", height);
         cops->putS(COLOR_BLACK, COLOR_GREEN, 5,50, "Height");
         cops->putS(COLOR_BLACK, COLOR_GREEN, 100,50, tmp);
-	}
+    }
 
-	if(settingParam == 2)
-	{
+    if(settingParam == 2)
+    {
         sprintf(tmp,"%ld", p);
-   	    cops->putS(COLOR_RED, COLOR_GREEN, 5,70, "Mines[%]");
+           cops->putS(COLOR_RED, COLOR_GREEN, 5,70, "Mines[%]");
         cops->putS(COLOR_RED, COLOR_GREEN, 100,70, tmp);
-	}
-	else
-	{
+    }
+    else
+    {
         sprintf(tmp,"%ld", p);
         cops->putS(COLOR_BLACK, COLOR_GREEN, 5,70, "Mines[%]");
         cops->putS(COLOR_BLACK, COLOR_GREEN, 100,70, tmp);
-	}
+    }
 
     g_changes = 1;
 }
@@ -339,7 +340,7 @@ void discover(int x, int y){
     if(x>width-1) return;
     if(y>height-1) return;
     if(minefield[y][x].known) return;
-    
+
     minefield[y][x].known = 1;
     if(minefield[y][x].neighbors == 0){
         discover(x-1,y-1);
@@ -358,44 +359,44 @@ static int GetTime()
 {
    struct tm tm;
    int fd;
-	int seconds = 0;
-	char tmp[100];
+    int seconds = 0;
+    char tmp[100];
 
    fd=open("/dev/avrtc",O_RDONLY | O_NONBLOCK);
    if (fd < 0)
-	{
+    {
       printf("Can't open /dev/avrtc\n");
    }
 
-	if(ioctl(fd,AV_RTC_GET_TIME_IOC,&tm)<0)
-	{
+    if(ioctl(fd,AV_RTC_GET_TIME_IOC,&tm)<0)
+    {
       printf("Error getting time and date\n");
    }
     close(fd);
 
-	sprintf(tmp, "%02d",tm.tm_hour);
+    sprintf(tmp, "%02d",tm.tm_hour);
     seconds = atoi(tmp)*3600;
-	sprintf(tmp, "%02d",tm.tm_min);
+    sprintf(tmp, "%02d",tm.tm_min);
     seconds += atoi(tmp)*60;
-	sprintf(tmp, "%02d",tm.tm_sec);
+    sprintf(tmp, "%02d",tm.tm_sec);
     seconds += atoi(tmp);
 
-	return seconds;
+    return seconds;
 }
 
 
 /* init not mine related elements of the mine field */
 void minesweeper_init(void){
     int i,j;
-	int time = 0;
-	char tmp[20];
+    int time = 0;
+    char tmp[20];
 
     readMinesINI();
 
     tiles_left=width*height;
     mine_num = 0;
 
-	time = GetTime();
+    time = GetTime();
 
     srand(time);
 
@@ -416,22 +417,22 @@ void minesweeper_init(void){
 void printNumberOfMines(void)
 {
     char tmp[20];
-	 int i=0;
-	 int j=0;
+     int i=0;
+     int j=0;
 
-	 if(mine_num > 0)
-	 {
-		tiles_left = 0;
-		for(i=0;i<height;i++){
-			for(j=0;j<width;j++){
-					if(minefield[i][j].flag) tiles_left++;
-			}
-		}
+     if(mine_num > 0)
+     {
+        tiles_left = 0;
+        for(i=0;i<height;i++){
+            for(j=0;j<width;j++){
+                    if(minefield[i][j].flag) tiles_left++;
+            }
+        }
 
-		cops->fillRect(COLOR_GREEN, 265,79, 54, 15);
-		sprintf(tmp,"%ld Mines", mine_num-tiles_left);
-		cops->putS(COLOR_WHITE, COLOR_GREEN, 266,80, tmp);
-	 }
+        cops->fillRect(COLOR_GREEN, 265,79, 54, 15);
+        sprintf(tmp,"%ld Mines", mine_num-tiles_left);
+        cops->putS(COLOR_WHITE, COLOR_GREEN, 266,80, tmp);
+     }
 }
 
 /* put mines on the mine field */
@@ -440,9 +441,9 @@ void printNumberOfMines(void)
 void minesweeper_putmines(int p, int x, int y){
     int i,j;
 /*
-	 char tmp[10];
-		sprintf(tmp,"p: %ld", p);
-		cops->putS(COLOR_WHITE, COLOR_GREEN, 266,110, tmp);
+     char tmp[10];
+        sprintf(tmp,"p: %ld", p);
+        cops->putS(COLOR_WHITE, COLOR_GREEN, 266,110, tmp);
 */
     for(i=0;i<height;i++){
         for(j=0;j<width;j++){
@@ -484,9 +485,9 @@ void minesweeper_putmines(int p, int x, int y){
 void setCursor(int del)
 {
    if(del)
-	   cops->drawRect(COLOR_GREEN, x*PIECE_DIM, y*PIECE_DIM, PIECE_DIM, PIECE_DIM);
-	else
-	   cops->drawRect(COLOR_RED, x*PIECE_DIM, y*PIECE_DIM, PIECE_DIM, PIECE_DIM);
+       cops->drawRect(COLOR_GREEN, x*PIECE_DIM, y*PIECE_DIM, PIECE_DIM, PIECE_DIM);
+    else
+       cops->drawRect(COLOR_RED, x*PIECE_DIM, y*PIECE_DIM, PIECE_DIM, PIECE_DIM);
 }
 
 int eventHandler(int evt)
@@ -496,276 +497,276 @@ int eventHandler(int evt)
 
     if(GameMode == 0)
     {
-		switch (evt) {
-			case BTN_OFF:
-			case EVT_QUIT:
-					/* get out of here */
-					RELEASE(cops)
-					break;
+        switch (evt) {
+            case BTN_OFF:
+            case EVT_QUIT:
+                    /* get out of here */
+                    RELEASE(cops)
+                    break;
 
-					/* move cursor left */
-				case BTN_LEFT:
-					setCursor(1);
+                    /* move cursor left */
+                case BTN_LEFT:
+                    setCursor(1);
                if(x-1 >= 0)
-					   x--;
-					else
-					   x = width-1;
+                       x--;
+                    else
+                       x = width-1;
 
-					setCursor(0);
-					break;
+                    setCursor(0);
+                    break;
 
-					/* move cursor right */
-				case BTN_RIGHT:
-					setCursor(1);
+                    /* move cursor right */
+                case BTN_RIGHT:
+                    setCursor(1);
                if(x+1 >= width)
-					   x = 0;
-					else
-					   x++;
-					setCursor(0);
-					break;
+                       x = 0;
+                    else
+                       x++;
+                    setCursor(0);
+                    break;
 
-					/* move cursor down */
-				case BTN_DOWN:
-					setCursor(1);
+                    /* move cursor down */
+                case BTN_DOWN:
+                    setCursor(1);
                if(y+1 >= height)
-					   y = 0;
-					else
-					   y++;
-					setCursor(0);
-					break;
+                       y = 0;
+                    else
+                       y++;
+                    setCursor(0);
+                    break;
 
-					/* move cursor up */
-				case BTN_UP:
-					setCursor(1);
+                    /* move cursor up */
+                case BTN_UP:
+                    setCursor(1);
                if(y-1 >= 0)
-					   y--;
-					else
-					   y = height-1;
-					setCursor(0);
-					break;
+                       y--;
+                    else
+                       y = height-1;
+                    setCursor(0);
+                    break;
 
-					/* discover a tile (and it's neighbors if .neighbors == 0) */
-				case BTN_F1:
-					if(minefield[y][x].flag) break;
-					/* we put the mines on the first "click" so that you don't */
-					/* lose on the first "click" */
-					if(tiles_left == width*height) minesweeper_putmines(p,x,y);
-					discover(x,y);
-					if(minefield[y][x].mine)
-					{
+                    /* discover a tile (and it's neighbors if .neighbors == 0) */
+                case BTN_F1:
+                    if(minefield[y][x].flag) break;
+                    /* we put the mines on the first "click" so that you don't */
+                    /* lose on the first "click" */
+                    if(tiles_left == width*height) minesweeper_putmines(p,x,y);
+                    discover(x,y);
+                    if(minefield[y][x].mine)
+                    {
                   GameMode = 1;
                   x=0;y=0;
-						cops->clearScreen(COLOR_GREEN);
-						cops->putS(COLOR_BLACK, COLOR_GREEN, 120, 100, "You lose!");
-						cops->putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
-						cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
-						return;
-					}
-					tiles_left = 0;
-					for(i=0;i<height;i++){
-						for(j=0;j<width;j++){
-								if(minefield[i][j].known == 0) tiles_left++;
-						}
-					}
-					if(tiles_left == mine_num)
-					{
+                        cops->clearScreen(COLOR_GREEN);
+                        cops->putS(COLOR_BLACK, COLOR_GREEN, 120, 100, "You lose!");
+                        cops->putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
+                        cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
+                        return;
+                    }
+                    tiles_left = 0;
+                    for(i=0;i<height;i++){
+                        for(j=0;j<width;j++){
+                                if(minefield[i][j].known == 0) tiles_left++;
+                        }
+                    }
+                    if(tiles_left == mine_num)
+                    {
                   GameMode = 1;
                   x=0;y=0;
-						cops->clearScreen(COLOR_GREEN);
-						cops->putS(COLOR_BLACK, COLOR_GREEN, 120, 100, "You win!");
-						cops->putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
-						cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
-						return;
-					}
+                        cops->clearScreen(COLOR_GREEN);
+                        cops->putS(COLOR_BLACK, COLOR_GREEN, 120, 100, "You win!");
+                        cops->putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
+                        cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
+                        return;
+                    }
 
-					displayMineField();
-					setCursor(0);
-					break;
+                    displayMineField();
+                    setCursor(0);
+                    break;
 
-					/* toggle flag under cursor */
-				case BTN_F2:
-					minefield[y][x].flag = (minefield[y][x].flag + 1)%2;
-					displayMineField();
-					break;
+                    /* toggle flag under cursor */
+                case BTN_F2:
+                    minefield[y][x].flag = (minefield[y][x].flag + 1)%2;
+                    displayMineField();
+                    break;
 
-				case BTN_ON: // new game
-					cops->clearScreen(COLOR_GREEN);
-					minesweeper_init();
-					displayMineField();
-					setCursor(0);
-					break;
+                case BTN_ON: // new game
+                    cops->clearScreen(COLOR_GREEN);
+                    minesweeper_init();
+                    displayMineField();
+                    setCursor(0);
+                    break;
 
-				case BTN_F3: // settings
-					cops->clearScreen(COLOR_GREEN);
-					cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
+                case BTN_F3: // settings
+                    cops->clearScreen(COLOR_GREEN);
+                    cops->putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
                GameMode = 2;
-					init_settings_screen();
-					break;
-		}
-	}
-	else if(GameMode == 1)
-	{
-		switch (evt) {
-			case BTN_OFF:
-			case EVT_QUIT:
-					/* get out of here */
-					RELEASE(cops)
-					break;
+                    init_settings_screen();
+                    break;
+        }
+    }
+    else if(GameMode == 1)
+    {
+        switch (evt) {
+            case BTN_OFF:
+            case EVT_QUIT:
+                    /* get out of here */
+                    RELEASE(cops)
+                    break;
 
-			case BTN_ON: // new game
-				cops->clearScreen(COLOR_GREEN);
+            case BTN_ON: // new game
+                cops->clearScreen(COLOR_GREEN);
                 GameMode = 0;
                 x=0;y=0;
-				minesweeper_init();
-				displayMineField();
-				setCursor(0);
-				break;
-		}
-	}
-	else
-	{
-		switch (evt) {
-		   case BTN_UP:
+                minesweeper_init();
+                displayMineField();
+                setCursor(0);
+                break;
+        }
+    }
+    else
+    {
+        switch (evt) {
+           case BTN_UP:
                 if(settingParam == 0)
-				   settingParam = 2;
-				else
-				   settingParam--;
+                   settingParam = 2;
+                else
+                   settingParam--;
 
-				RefreshSettings();
-			   break;
+                RefreshSettings();
+               break;
 
-		   case BTN_DOWN:
+           case BTN_DOWN:
                 if(settingParam == 2)
-				   settingParam = 0;
-				else
-				   settingParam++;
+                   settingParam = 0;
+                else
+                   settingParam++;
 
-				RefreshSettings();
-			   break;
+                RefreshSettings();
+               break;
 
-		   case BTN_LEFT:
+           case BTN_LEFT:
 
-				if(settingParam == 0)
-				{
-				   if(width > 10)
-					{
+                if(settingParam == 0)
+                {
+                   if(width > 10)
+                    {
                   width--;
                   RefreshSettings();
-					}
-				}
-				else if(settingParam == 1)
-				{
-				   if(height > 10)
-					{
+                    }
+                }
+                else if(settingParam == 1)
+                {
+                   if(height > 10)
+                    {
                   height--;
                   RefreshSettings();
-					}
-				}
-				else
-				{
-				   if(p > 0)
-					{
-					   p--;
+                    }
+                }
+                else
+                {
+                   if(p > 0)
+                    {
+                       p--;
                   RefreshSettings();
-					}
-				}
-			   break;
+                    }
+                }
+               break;
 
-		   case BTN_RIGHT:
-			   if(settingParam == 0)
-				{
-				   if(width < (SCREEN_WIDTH-50)/PIECE_DIM)
-					{
+           case BTN_RIGHT:
+               if(settingParam == 0)
+                {
+                   if(width < (SCREEN_WIDTH-50)/PIECE_DIM)
+                    {
                   width++;
                   RefreshSettings();
-					}
-				}
-				else if(settingParam == 1)
-				{
-				   if(height < (SCREEN_HEIGHT/PIECE_DIM))
-					{
+                    }
+                }
+                else if(settingParam == 1)
+                {
+                   if(height < (SCREEN_HEIGHT/PIECE_DIM))
+                    {
                   height++;
                   RefreshSettings();
                }
-				}
-				else
-				{
-				   if(p < 100)
-					{
-					   p++;
+                }
+                else
+                {
+                   if(p < 100)
+                    {
+                       p++;
                   RefreshSettings();
-					}
-				}
-			   break;
+                    }
+                }
+               break;
 
-			case BTN_OFF:
-			case EVT_QUIT:
+            case BTN_OFF:
+            case EVT_QUIT:
                 writeMinesINI();
-				cops->clearScreen(COLOR_GREEN);
+                cops->clearScreen(COLOR_GREEN);
                 GameMode = 0;
                 x=0;y=0;
-				minesweeper_init();
-				displayMineField();
-				setCursor(0);
-				break;
-		}
+                minesweeper_init();
+                displayMineField();
+                setCursor(0);
+                break;
+        }
 
-	}
+    }
 }
 
 void displayMineField()
 {
    int i=0,j=0;
 
-	//display the mine field
-	for(i=0;i<height;i++)
-	{
-			for(j=0;j<width;j++)
-			{
-				if(minefield[i][j].known)
-				{
-					if(minefield[i][j].mine)
-					{
-      				cops->putS(COLOR_RED, COLOR_GREY, 5j*PIECE_DIM+1,i*PIECE_DIM+1,"b");
-					}
-					else if(minefield[i][j].neighbors)
-					{
-							if(minefield[i][j].neighbors == 0)
-								cops->drawBITMAP (&emptyB, j*PIECE_DIM,i*PIECE_DIM);
-							else if(minefield[i][j].neighbors == 1)
-								cops->drawBITMAP (&oneB, j*PIECE_DIM,i*PIECE_DIM);
-							else if(minefield[i][j].neighbors == 2)
-								cops->drawBITMAP (&twoB, j*PIECE_DIM,i*PIECE_DIM);
-							else if(minefield[i][j].neighbors == 3)
-								cops->drawBITMAP (&threeB, j*PIECE_DIM,i*PIECE_DIM);
-							else if(minefield[i][j].neighbors == 4)
-								cops->drawBITMAP (&fourB, j*PIECE_DIM,i*PIECE_DIM);
-							else if(minefield[i][j].neighbors == 5)
-								cops->drawBITMAP (&fiveB, j*PIECE_DIM,i*PIECE_DIM);
-							else if(minefield[i][j].neighbors == 6)
-								cops->drawBITMAP (&sixB, j*PIECE_DIM,i*PIECE_DIM);
-							else if(minefield[i][j].neighbors == 7)
-								cops->drawBITMAP (&sevenB, j*PIECE_DIM,i*PIECE_DIM);
-							else if(minefield[i][j].neighbors == 8)
-								cops->drawBITMAP (&eightB, j*PIECE_DIM,i*PIECE_DIM);
-					}
-					else
-					{
-   					cops->fillRect(COLOR_DARK_GREY, j*PIECE_DIM+1,i*PIECE_DIM+1,PIECE_DIM-2,PIECE_DIM-2);
-					}
-				}
-				else if(minefield[i][j].flag)
-				{
-					cops->fillRect(COLOR_GREY, j*PIECE_DIM+1,i*PIECE_DIM+1,PIECE_DIM-2,PIECE_DIM-2);
-					cops->drawLine(COLOR_RED, j*PIECE_DIM+2,i*PIECE_DIM+2,j*PIECE_DIM+PIECE_DIM-2,i*PIECE_DIM+PIECE_DIM-2);
-					cops->drawLine(COLOR_RED, j*PIECE_DIM+2,i*PIECE_DIM+PIECE_DIM-2,j*PIECE_DIM+PIECE_DIM-2,i*PIECE_DIM+2);
-				}
-				else
-				{
-					cops->fillRect(COLOR_GREY, j*PIECE_DIM+1,i*PIECE_DIM+1,PIECE_DIM-2,PIECE_DIM-2);
-				}
-			}
-	}
+    //display the mine field
+    for(i=0;i<height;i++)
+    {
+            for(j=0;j<width;j++)
+            {
+                if(minefield[i][j].known)
+                {
+                    if(minefield[i][j].mine)
+                    {
+                      cops->putS(COLOR_RED, COLOR_GREY, 5j*PIECE_DIM+1,i*PIECE_DIM+1,"b");
+                    }
+                    else if(minefield[i][j].neighbors)
+                    {
+                            if(minefield[i][j].neighbors == 0)
+                                cops->drawBITMAP (&emptyB, j*PIECE_DIM,i*PIECE_DIM);
+                            else if(minefield[i][j].neighbors == 1)
+                                cops->drawBITMAP (&oneB, j*PIECE_DIM,i*PIECE_DIM);
+                            else if(minefield[i][j].neighbors == 2)
+                                cops->drawBITMAP (&twoB, j*PIECE_DIM,i*PIECE_DIM);
+                            else if(minefield[i][j].neighbors == 3)
+                                cops->drawBITMAP (&threeB, j*PIECE_DIM,i*PIECE_DIM);
+                            else if(minefield[i][j].neighbors == 4)
+                                cops->drawBITMAP (&fourB, j*PIECE_DIM,i*PIECE_DIM);
+                            else if(minefield[i][j].neighbors == 5)
+                                cops->drawBITMAP (&fiveB, j*PIECE_DIM,i*PIECE_DIM);
+                            else if(minefield[i][j].neighbors == 6)
+                                cops->drawBITMAP (&sixB, j*PIECE_DIM,i*PIECE_DIM);
+                            else if(minefield[i][j].neighbors == 7)
+                                cops->drawBITMAP (&sevenB, j*PIECE_DIM,i*PIECE_DIM);
+                            else if(minefield[i][j].neighbors == 8)
+                                cops->drawBITMAP (&eightB, j*PIECE_DIM,i*PIECE_DIM);
+                    }
+                    else
+                    {
+                       cops->fillRect(COLOR_DARK_GREY, j*PIECE_DIM+1,i*PIECE_DIM+1,PIECE_DIM-2,PIECE_DIM-2);
+                    }
+                }
+                else if(minefield[i][j].flag)
+                {
+                    cops->fillRect(COLOR_GREY, j*PIECE_DIM+1,i*PIECE_DIM+1,PIECE_DIM-2,PIECE_DIM-2);
+                    cops->drawLine(COLOR_RED, j*PIECE_DIM+2,i*PIECE_DIM+2,j*PIECE_DIM+PIECE_DIM-2,i*PIECE_DIM+PIECE_DIM-2);
+                    cops->drawLine(COLOR_RED, j*PIECE_DIM+2,i*PIECE_DIM+PIECE_DIM-2,j*PIECE_DIM+PIECE_DIM-2,i*PIECE_DIM+2);
+                }
+                else
+                {
+                    cops->fillRect(COLOR_GREY, j*PIECE_DIM+1,i*PIECE_DIM+1,PIECE_DIM-2,PIECE_DIM-2);
+                }
+            }
+    }
 
    printNumberOfMines();
 }
@@ -780,7 +781,9 @@ int main(int argc,char * * argv)
     cops->clearScreen(COLOR_GREEN);
     /* end of plugin init */
 
-	cops->disableMenu();
+    cops->disableMenu();
+    /* use standard font */
+    cops->setFont(NBFONT);
 
     minesweeper_init();
     displayMineField();
