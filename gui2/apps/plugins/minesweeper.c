@@ -245,7 +245,8 @@ void readMinesINI()
     char *value=value_buff;
     char str1[MAX_TOKEN+1];
 
-    cops->openCfg("/mnt/avwm/plugins/minesweeper.ini",CFG_READ);
+    if(cops->openCfg("/mnt/avwm/plugins/minesweeper.ini",CFG_READ)<0)
+        return;
 
     while (1)
     {
