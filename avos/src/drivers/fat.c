@@ -36,26 +36,12 @@ void inifatinfo()
 
 //******************************************************
 // fatInit
-// basic ini, no fat selection
-//
-// returns 0 on error
-//******************************************************
-int fatInit(struct partInfo * partition)
-{
-	if(fatInit_info(partition) >=0)
-		return 1;
-	else
-		return 0;
-}
-
-//******************************************************
-// fatInit_info
 // do all fat initialization
 //
 // returns -1 on error
 // returns fat fd otherwise
 //******************************************************
-int fatInit_info(struct partInfo * partition) {
+int fatInit(struct partInfo * partition) {
     int c,lba,fd;
 	lba=partition->start;
 	struct fat_info * fat;
@@ -828,7 +814,7 @@ int fatPrevSector(struct fatent * fat_ent)
 //******************************************************
 int fatCleanCluster(int cluster)
 {
-	char cache[BUFFER_SIZE];
+    char cache[BUFFER_SIZE];
 	memset(cache,0,BUFFER_SIZE);
 	int secNum,c;
 	int lba=(cluster-2)*curFat->secPerClu+curFat->LBAData;

@@ -20,11 +20,11 @@ char * fatStr[]={"zero", "FAT12", "FAT16<32MB", "ExtMSDOS", "FAT16>32MB", "FAT32
 int fatId[]={0x00, 0x01, 0x04, 0x05, 0x06, 0x0B, 0x0C, 0x0E, 0x0F};
 
 struct partInfo partitions[4];
+char buffer[512];
 
 int ataReadMBR()
 {
 	int i,j,c,offset;
-	char buffer[512];
 
 	for(i=0;i<4;i++)
 		memset(&partitions[i],0,sizeof(struct partInfo));

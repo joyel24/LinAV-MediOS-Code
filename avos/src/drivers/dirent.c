@@ -29,6 +29,7 @@ void inidir()
 		opendirs[dd].busy=false;
 }
 
+
 int opendir(const char* name)
 {
     char namecopy[MAX_PATH];

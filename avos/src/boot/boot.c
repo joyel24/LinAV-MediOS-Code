@@ -37,12 +37,10 @@ struct dispDir {
 	int attr;
 	char ext[4];
 };
-struct dispDir dirBuffer[10000];
 
 struct tm* ourTime;
 char timeSt[] = "xx:xx:xx.xx";
 char powerSt[] = "xxxx+";
-char nameCur[MAX_PATH] = "/";
 
 // 12x6
 static char usbOut[7][13]
@@ -67,12 +65,13 @@ struct graphicsBuffer usbInB = {usbIn, 13, 13, 7, 8, 3, -1, 0, 0, 0, 0, (int**) 
 static int source = 0;             // 0 = HDD, 1 = memCard
 static int mode = 0;               // 0 = normal, 1 = usb
 
-char callArg1[MAX_PATH];
-char callArg2[MAX_PATH];
-char * callArgs[2] = {callArg1, callArg2};
+static char callArg1[MAX_PATH];
+static char callArg2[MAX_PATH];
+static char * callArgs[2] = {callArg1, callArg2};
+static struct dispDir dirBuffer[1000];
+static char nameCur[MAX_PATH] = "/";
 
 int main() {
-
 	mvStackA();
 
     int c, b, i, totalEntries;
@@ -81,11 +80,12 @@ int main() {
     unsigned int cluster=0, parent=0;
     int loopDelay = 0xc000;
     int cursorMoved=1;
-
     void (*systemRelocateAdjusted)();
+
     systemRelocateAdjusted = systemRelocateMeA - 0x00400000;    
     systemRelocateAdjusted();
 
+    
 startInit:
 	inifile();
 	inidir();
@@ -177,8 +177,10 @@ startInit:
 	int fatHD=-1;
 	int fatCF=-1;
 
-	for(i=0;i<4;i++)
-		printPartInfo(i);
+	for(i=0;i<4;i++) {
+        debug("Partition %d\n", i);
+        printPartInfo(i);
+    }
 
     fatHD = fatInit(getPartition(0));
 	debug("[boot.c] fatInit returned = %d\n",fatHD);
