@@ -443,20 +443,22 @@ __IRAM_CODE int kcswi_handler (
 		if (!pTCB)
 			return ERR_NOMEMORY;
 
+		kInitialiseTCBVariables (pTCB, 16384 , "USER");
+
 		ERROR_CODE code = load_bflat ((const char *)nParam1, pTCB);
 
 		API_MALLOC (&pTCB->pStack, 16384);//nStackSize
 
-		kInitialiseTCBVariables (pTCB, 16384 , "USER");
 		unsigned char* pTopOfStack = (unsigned char*)pTCB->pStack;
 		pTopOfStack += pTCB->nStackSize - 4;
 		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, pTCB->pEntry, 0);
 		API_MALLOC (&pTCB->pMessagePipe, sizeof(PIPE));
 		pTCB->pMessagePipe->nReceiver = 0;
 		pTCB->pMessagePipe->nSender = 0;
-                    
+
                 *((TASK_INFO**)nParam2) = pTCB;
-                
+
+		printk ("TASK READY TO START. INCLUDING IN TASK RING...\n");
 
 		// Include new task in task ring...
 		__cli ();

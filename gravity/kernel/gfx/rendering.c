@@ -9,6 +9,7 @@
 */
 
 #include <sys_def/stddef.h>
+#include <kernel/kernel.h>
 
 #include <types.h>
 
@@ -22,7 +23,7 @@
 #define bound(v,min,max) (( (v)>(min) )?( ( (v)<(max) )?(v):(max) ):(min))
 #define swap(T, a, b) { T temp = a; a = b; b = temp; }
 
-static int RenderTriangle (
+__IRAM_CODE int RenderTriangle (
 	GFX_3DVERTEX* v0,
 	GFX_3DVERTEX* v1,
 	GFX_3DVERTEX* v2,
@@ -278,7 +279,7 @@ static int RenderTriangle (
 	return 0;
 }
 
-static void AlphaHorFill (
+__IRAM_CODE void AlphaHorFill (
 	long dx,
 	unsigned long* pRow,
 	unsigned long* pSrc,
@@ -312,7 +313,7 @@ static void AlphaHorFill (
 	while (--dx);
 }
 
-static int AlphaBilinearInterpolatedStretch (
+__IRAM_CODE int AlphaBilinearInterpolatedStretch (
 	GFX_DATA* pDst,
 	GFX_DATA* pSrc,
 	unsigned long* pBuffer1,

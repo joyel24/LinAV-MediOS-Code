@@ -119,9 +119,12 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
                    text_len, data_len,bss_len,header.stack_size,header.reloc_count);
                    
     printk("[load_bflat] flags: %08x\n",header.flags);
-    
-    text_pos=(unsigned long)kmalloc(text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
-    
+
+//    text_pos=(unsigned long)API_MALLOC(text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
+
+    text_pos = 0;
+    API_MALLOC (&text_pos, text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
+
     if(!text_pos)
     {
         printk("[load_bflat] can't alloc enough mem space (%08x needed)\n",text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
@@ -226,7 +229,8 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
     pTCB->pTaskCode = text_pos;
     pTCB->pEntry    = text_pos + header.entry;
 
-    //kfree((void*)text_pos);
+//header.stack_size
+
     kfclose(fd_bflat);         
     return ERR_OK;
 }

@@ -107,10 +107,29 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
 
                // Free task memory resources...
                if (pTCB->pTaskCode)
+               {
                   kfree (pTCB->pTaskCode); //code memory
+                  pTCB->pTaskCode = 0;
+               }
+
                if (pTCB->pMessagePipe)
+               {
                   kfree (pTCB->pMessagePipe); //message pipe
-               kfree (pTCB->pStack); //stack
+                  pTCB->pMessagePipe = 0;
+               }
+
+               if (pTCB->pContext)
+               {
+                  kfree (pTCB->pContext); //GFX context
+                  pTCB->pContext = 0;
+               }
+
+               if (pTCB->pStack)
+               {
+                  kfree (pTCB->pStack); //stack
+                  pTCB->pStack = 0;
+               }
+
                kfree (pTCB); //TCB record
                API_TASK_YIELD ();
 

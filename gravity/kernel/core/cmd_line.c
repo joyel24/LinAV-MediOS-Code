@@ -65,6 +65,12 @@ struct cmd_line_s cmd_tab[] = {
         cmd_action : print_handler_info,
         nb_args    : 0
     },
+    {
+        cmd        : "dump",
+        help_str   : "Dumps memory from given address",
+        cmd_action : do_memory_dump,
+        nb_args    : 1
+    },
     /* this has to be the last entry */
     {
         cmd        : NULL,
@@ -323,4 +329,32 @@ void print_handler_info (unsigned char ** params)
     print_irq();
     print_timer();
     print_HW_chk();
+}
+
+void do_memory_dump (unsigned char ** params)
+{
+   int nAddress = atoi (params[0]);
+   printk("Memory dump from %i:\n", nAddress);
+
+   unsigned char* pMemory = (unsigned char*)nAddress;
+
+   int i, j;
+   for (i=0;i<16;i++)
+   {
+      printk ("%08X:  ", (unsigned long)pMemory);
+      for (j=0;j<16;j++)
+         printk ("%02X ", pMemory[j]);
+      printk ("  |  ");
+      for (j=0;j<16;j++)
+      {
+         unsigned char c = pMemory[j];
+         if (c < 32)
+            c = '?';
+         if (c >= 128)
+            c = '?';
+         printk ("%c", c);
+      }
+      pMemory += 16;
+      printk ("\n");
+   }
 }

@@ -16,6 +16,11 @@
 
 #include <gui/file_type.h>
 
+int is_grv_type(char *extension)
+{
+    strlwr(extension);
+    return strcmp(extension, ".grv") == 0;
+}
 
 int is_script_type(char *extension)
 {
@@ -67,6 +72,8 @@ int get_file_type(char * filename)
     
     if(ext == 0)
         return BIN_TYPE;
+    else if(is_grv_type(ext))
+        return BIN_TYPE;
     else if(is_script_type(ext))
         return SCRIPT_TYPE;
     else if(is_image_type(ext))
@@ -81,6 +88,8 @@ int get_file_type(char * filename)
 
 int execBin(char * path, ...)
 {
+    HTASK hTask;
+    API_RUN_GRV (path, &hTask);
     return 1;
 }
 
@@ -141,5 +150,4 @@ void handle_type_other(char *filename)
         default:
             printf("[handle_type_other]: unknown type\n");
     }
- }
- 
+}
