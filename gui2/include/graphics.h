@@ -100,7 +100,7 @@ struct graphics_context {
 
 typedef struct graphics_context * GC_ID;
  
-#define needFont(name)	 FONT_ID name;
+
 
 /* general functions */
 
@@ -108,25 +108,28 @@ int   ini_graphics   (void);
 void  close_graphics (void);
 void  iniComponent   (struct graphicsBuffer * buff);
 GC_ID createGC       (int vplane);
-void destroyGC       (GC_ID gc);
-void hidePlane       (int vplane);
-void showPlane       (int vplane);
+void  destroyGC       (GC_ID gc);
+
 
 /* drawings */
 
-void drawPixel       (int color, int x, int y, struct graphics_context * gc);
-int  readPixel       (int x, int y, struct graphics_context * gc);
-void drawRect        (int color, int x, int y, int width, int height, struct graphics_context * gc);
-void fillRect        (int color, int x, int y, int width, int height, struct graphics_context * gc);
-void putS            (int color, int bg_color,int x, int y, char *s, struct graphics_context * gc);
-void putC            (int color, int bg_color,int x, int y, char s, struct graphics_context * gc);
-void drawSprite      (PALETTE * palette, SPRITE * sprite, int x, int y, struct graphics_context * gc);
-void drawBITMAP      (BITMAP * bitmap, int x, int y, struct graphics_context * gc);
+void drawPixel       (int color, int x, int y);
+int  readPixel       (int x, int y);
+void drawRect        (int color, int x, int y, int width, int height);
+void fillRect        (int color, int x, int y, int width, int height);
+void putS            (int color, int bg_color,int x, int y, char *s);
+void putC            (int color, int bg_color,int x, int y, char s);
+void drawSprite      (PALETTE * palette, SPRITE * sprite, int x, int y);
+void drawBITMAP      (BITMAP * bitmap, int x, int y);
 
-/* font */
+/* Font */
+#define needFont(name)	 FONT_ID name;
 void setFont(FONT_ID font);
 
-
+/* Planes */
+void  setPlane        (int vplane);
+void  hidePlane       (int vplane);
+void  showPlane       (int vplane);
 
 
 

@@ -28,7 +28,10 @@ char screen2[320*240+40];
 struct graphicsBuffer BITMAP_1;
 struct graphicsBuffer BITMAP_2;
 
+GC_ID   default_gc=NULL;
 FONT_ID default_font=GC_FONT;
+
+GC_ID   gc_bmap1,gc_bmap2;
 
 int ini_graphics()
 {
@@ -57,6 +60,8 @@ int ini_graphics()
 	
 	iniComponent(&BITMAP_1);
 	
+	gc_bmap1=createGC(BMAP1);
+	
 	BITMAP_2.offset            = (int)&screen2;
 	BITMAP_2.component         = AV3XX_OSD_BITMAP2;
 	BITMAP_2.bytesPerLine      = 320*2;
@@ -72,6 +77,8 @@ int ini_graphics()
 		BITMAP_2.offset+=(32-diff);	
 	
 	iniComponent(&BITMAP_2);
+	
+	gc_bmap2=createGC(BMAP2);
 	
 	if(iniEvent()<0)
 		return -1;
@@ -126,6 +133,20 @@ void destroyGC(GC_ID gc)
 		free(gc);
 }
 
+void setPlane(int vplane)
+{
+	switch(vplane) {
+		case BMAP1:
+			default_gc=gc_bmap1;
+			break;
+		case BMAP2:
+			default_gc=gc_bmap2;
+			break;
+		default:
+			printf("wrong plane\n");
+	}	
+}
+
 void hidePlane(int vplane)
 {
 	switch(vplane) {
@@ -168,71 +189,55 @@ void iniComponent(struct graphicsBuffer * buff)
 
 /* drawing functions */
 
-void drawPixel(int color,int x, int y, struct graphics_context * gc)
+void drawPixel(int color,int x, int y)
 {
-	if(color==USE_GC)
-		color=gc->fg;
-	gc->gops->drawPixel(color, x, y,gc->buffer);
+	default_gc->gops->drawPixel(color, x, y,default_gc->buffer);
 }
 
-int readPixel(int x, int y, struct graphics_context * gc)
+int readPixel(int x, int y)
 {
-	return gc->gops->readPixel(x,y,gc->buffer);
+	return default_gc->gops->readPixel(x,y,default_gc->buffer);
 }
 
-void drawRect(int color, int x, int y, int width, int height, struct graphics_context * gc)
+void drawRect(int color, int x, int y, int width, int height)
 {
-	if(color==USE_GC)
-		color=gc->fg;
-	gc->gops->drawRect(color,x,y,width,height,gc->buffer);
+	default_gc->gops->drawRect(color,x,y,width,height,default_gc->buffer);
 }
 
-void fillRect(int color, int x, int y, int width, int height, struct graphics_context * gc)
+void fillRect(int color, int x, int y, int width, int height)
 {
-	if(color==USE_GC)
-		color=gc->fg;
-	gc->gops->fillRect(color,x,y,width,height,gc->buffer);
+	default_gc->gops->fillRect(color,x,y,width,height,default_gc->buffer);
 }
 
-void putS(int color, int bg_color, int x, int y, char *s, struct graphics_context * gc)
+void putS(int color, int bg_color, int x, int y, char *s)
 {
 	FONT_ID font=default_font;
-	if(color==USE_GC)
-		color=gc->fg;
-	if(bg_color==USE_GC)
-		bg_color=gc->bg;	
-	if(font==GC_FONT)
-		font=gc->font;	
+	
 	while (*s)
 	{
-		gc->gops->drawChar(font,color,bg_color,x,y,*s,gc->buffer);
+		default_gc->gops->drawChar(font,color,bg_color,x,y,*s,default_gc->buffer);
 		x+=font->dx;
 		y+=font->dy;
 		s++;
 	}
 }
 
-void putC(int color, int bg_color, int x, int y, char s, struct graphics_context * gc)
+void putC(int color, int bg_color, int x, int y, char s)
 {
 	FONT_ID font=default_font;
-	if(color==USE_GC)
-		color=gc->fg;
-	if(bg_color==USE_GC)
-		bg_color=gc->bg;	
-	if(font==NULL)
-		font=gc->font;
-	gc->gops->drawChar(font,color,bg_color,x,y,s,gc->buffer);
+	
+	default_gc->gops->drawChar(font,color,bg_color,x,y,s,default_gc->buffer);
 }
 
-void drawSprite(unsigned int * palette, SPRITE * sprite, int x, int y, struct graphics_context * gc)
+void drawSprite(unsigned int * palette, SPRITE * sprite, int x, int y)
 {
 	
-	gc->gops->drawSprite(sprite,palette,gc->transparent,x,y,gc->buffer);
+	default_gc->gops->drawSprite(sprite,palette,default_gc->transparent,x,y,default_gc->buffer);
 }
 
-void drawBITMAP(BITMAP * bitmap, int x, int y, struct graphics_context * gc)
+void drawBITMAP(BITMAP * bitmap, int x, int y)
 {
-	gc->gops->drawBITMAP(bitmap,gc->transparent,x,y,gc->buffer);
+	default_gc->gops->drawBITMAP(bitmap,default_gc->transparent,x,y,default_gc->buffer);
 }
 
 /* font */
