@@ -109,8 +109,13 @@ void drawStatus(void)
 {
     if(usbState)
         drawBITMAP(&usbIcon, 250, 4);
+    else
+        fillRect(BG_COLOR,250,4,15,6);
+        
     if(pwrState)
         drawBITMAP(&powerIcon, 273, 4);
+    else
+        fillRect(BG_COLOR,273,4,15,6);
 }
 
 void drawGui(void)
@@ -134,10 +139,6 @@ void drawGui(void)
     sprintf(myName,"AvWm %d.%d",MAJOR_V,MINOR_V);
     putS(TXT_COLOR,BG_COLOR,2,3,myName);
 
-    /* get usb/power status */
-    pwrState=getPwr();
-    usbState=getUSB();
-
     /* and time, and battery */
     drawTime();
     drawBat();
@@ -160,6 +161,14 @@ int statusEvtHandler(int evt)
             }
             else
                 batteryRefresh++;
+            break;
+        case EVT_PWR:
+            pwrState=getPwr();
+            drawStatus();
+            break;
+        case EVT_USB:
+            usbState=getUSB();
+            drawStatus();
             break;
     }
 }
