@@ -79,8 +79,9 @@ void kload_context();
 void kernel_start (void)
 {
     ini_graphics();
+#ifdef USE_DEBUG_ON_SCREEN    
     ini_debugOnScreen();
-
+#endif
     /* malloc of max space in SDRAM */
     init_malloc((void*)MALLOC_START,MALLOC_SIZE);
 
@@ -165,6 +166,6 @@ void kernel_startup_thread (void)
 
     printk("[init] END\n");
 
-    while(1);
-    //avwm();
+    
+    avwm();
 }

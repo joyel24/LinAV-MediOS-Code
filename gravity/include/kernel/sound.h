@@ -10,54 +10,13 @@
 * KIND, either express of implied.
 */
 
-#ifndef __SOUND_H
-#define __SOUND_H
+#ifndef __SOUND_K_H
+#define __SOUND_K_H
+
+
+#include <sound.h>
 
 #include <kernel/mas.h>
-
-/********************** DSP ctl                    **********************/
-
-#define DSP_INI_MP3             0x0101
-#define DSP_START_MP3           0x0102
-#define DSP_STOP_MP3            0x0103
-#define DSP_PAUSE_MP3           0x0104
-#define DSP_FRAME_CNT           0x0105
-#define DSP_IN_PEAK             0x0106
-#define DSP_OUT_PEAK            0x0107
-#define DSP_IN_PEAK_REAL        0x0108
-#define DSP_OUT_PEAK_REAL       0x0109
-
-/********************** mp3 player                 **********************/
-
-struct mp3_play {
-        int size;
-        char * buffer;
-        int endOfFile;
-        int buffer_read;
-        int buffer_write;
-	int buffer_len;
-	int finished;
-	char * filename;
-	int pos;
-        int freqPeakDraw;
-        void * (*peakDraw)(int left,int right,int frame);
-};
-
-struct av_peak {
-	int left;
-	int right;
-};
-
-/********************* MIXER ctl              ***************************/
-#define MIXER_VOLUME            0x0001
-#define MIXER_BALANCE           0x0002
-#define MIXER_MUTE              0x0003
-#define MIXER_BASS              0x0004
-#define MIXER_TREBLE            0x0005
-#define MIXER_LOUDNESS          0x0006
-#define MIXER_MIC_GAIN          0x0007
-#define MIXER_ADC_L_GAIN        0x0008
-#define MIXER_ADC_R_GAIN        0x0009
 
 /********************* DSP                    ***************************/
 /* dev functions */

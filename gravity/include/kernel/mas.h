@@ -149,8 +149,10 @@ int mas_read_version(struct mas_version * ptr);
 #define MAS_ADC_L_GAIN            0x06
 #define MAS_ADC_R_GAIN            0x07
 
+#ifndef MAS_SET
 #define MAS_SET                   0x00
 #define MAS_GET                   0x01
+#endif
 
 int mas_control_config(int action,int control,int val);
 int convertVal(int val,int control,int action);

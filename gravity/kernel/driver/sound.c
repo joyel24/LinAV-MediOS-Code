@@ -31,13 +31,15 @@
 
 __IRAM_DATA int playing=0;   // 1 if we are sending data to MAS, 0 if no more data to send or Stop mode or Pause mode
 __IRAM_DATA int in_pause=0;     // 1 if in Pause mode
+__IRAM_DATA int nb_send;
+__IRAM_DATA int nb_loop;
 
 __IRAM_DATA struct mp3_play * data;
 
 #define SEND_TO_MAS(BUFFER,SIZE)                              \
  ({                                                           \
     int  __i;                                                 \
-    char __data;                                              \
+    int __data;                                              \
     for(__i=0;__i<SIZE;__i++)                                 \
     {                                                         \
         if(inw(GIO_BITSET0) & (0x1<<GIO_MAS_EOD))             \
@@ -52,7 +54,7 @@ __IRAM_DATA struct mp3_play * data;
         outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);               \
         /* wait for RTR to be set */                          \
         while(!(inw(GIO_BITSET1) & (0x1<<(GIO_MAS_RTR-16))))  \
-            /*nothing*/;                                      \
+            /*nothing*/;                                        \
         /* clear latch (lower raise PR) */                    \
         outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);             \
     }                                                         \
@@ -62,21 +64,29 @@ __IRAM_DATA struct mp3_play * data;
 __IRAM_CODE void dsp_interrupt(int irq)
 {
    int toSend;
+   int send;
    char * buffer;
    if(playing)
    {       
-        if(data->buffer_write<data->buffer_read)
+       /*if(data->buffer_write<data->buffer_read)*/
             toSend=data->buffer_len-data->buffer_read;
-        else
-            toSend=data->buffer_write-data->buffer_read;        
-        buffer=data->buffer+data->buffer_read;        
-        data->buffer_read+=SEND_TO_MAS(buffer,toSend); 
+       /* else
+            toSend=data->buffer_write-data->buffer_read;*/
+        buffer=data->buffer+data->buffer_read;    
+        send=SEND_TO_MAS(buffer,toSend);
+        /*if(send>0)
+            nb_send++;*/
+        data->buffer_read+=send;
+        
         if(data->buffer_read>= data->buffer_len)
         {
-            data->buffer_read=0;
+            /*data->buffer_read=0;
             toSend=data->buffer_write-data->buffer_read;
             buffer=data->buffer;
-            data->buffer_read+=SEND_TO_MAS(buffer,toSend); 
+            data->buffer_read+=SEND_TO_MAS(buffer,toSend); */
+            disable_irq(IRQ_MAS_DATA);
+            printk("end of playback send=%d loop=%d\n",nb_send,nb_loop);
+            playing=0;
         }
     }
 }
@@ -90,8 +100,10 @@ __IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
         case DSP_INI_MP3:
             ini_mas_for_mp3();
             data=(struct mp3_play *)arg;    
-            playing=0;
+            playing=1;
             in_pause=0;
+            nb_send=0;
+            nb_loop=0;
             break;
         case DSP_START_MP3:
             if(in_pause)
@@ -106,6 +118,7 @@ __IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
                 enable_irq(IRQ_MAS_DATA);
                 dsp_interrupt(IRQ_MAS_DATA);                
             }
+            printk("MP3 playing\n");
             break;
         case DSP_STOP_MP3:
             playing=0;
@@ -152,7 +165,7 @@ int mas_stop_mp3_app(void)
         i=mas_app_running(MASS_APP_ANY);
         if(i<0)
         {
-            printk("error getting app status\n");
+            printk("error getting app status (trying to stop)\n");
             return 0;
         }
         if(i==0)
@@ -170,8 +183,8 @@ int mas_start_mp3_app(void)
         i=mas_get_D0(MAS_APP_SELECT);
         if(i<0)
         {
-            printk("error getting app status\n");
-            return -0;
+            printk("error getting app status (trying to start)\n");
+            return 0;
         }
         if((i & MASS_APP_MPEG3_DEC) && (i & MASS_APP_MPEG2_DEC))
             break;

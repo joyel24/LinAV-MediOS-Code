@@ -187,7 +187,7 @@ int mas_set_D0(int addr,int val)
 
 int mas_get_D0(int addr)
 {
-	int ret;
+	unsigned int ret;
 	if( mas_read_Di_register(MAS_REGISTER_D0,addr,&ret,1)<0)
 		return -1;
 	return ret;
