@@ -57,6 +57,9 @@ __IRAM_CODE int kcswi_handler (
 	case nAPI_MEMORY_section_code:
 		return swi_memory_handler (nCmd, nParam1, nParam2, nParam3);
 
+	case nAPI_DSP_section_code:
+		return swi_dsp_handler (nCmd, nParam1, nParam2, nParam3);
+
 	default:
 		printk("Unknown SWI module call %d\n", nCmd);
 	}

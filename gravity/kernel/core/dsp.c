@@ -7,6 +7,7 @@
 * KIND, either express of implied.
 */
 
+#include <kernel/kernel.h>
 #include <kernel/dsp.h>
 #include <kernel/io.h>
 #include <sys_def/file.h>
@@ -116,10 +117,10 @@ void load_dsp_program (const char* pszFilename)
 			}
 		}
 		else
-		if (!strcmp(sec_name, ".cinit"))
-		{
-		}
-		else
+//		if (!strcmp(sec_name, ".cinit"))
+//		{
+//		}
+//		else
 		{
 			unsigned short* pSrcCode = (unsigned short*)(pDSPCode + psec->s_scnptr_lo);
 			for (j=0;j<psec->s_size_lo;j++)
@@ -130,4 +131,27 @@ void load_dsp_program (const char* pszFilename)
 	}
 
 	printk ("Program loaded into dsp.\n");
+}
+
+/*__IRAM_CODE*/ void c54_dsp_interrupt (int irq)
+{
+	AV3XX_DSP_INTERCONNECTION* pic = (AV3XX_DSP_INTERCONNECTION*)0x00040100;
+
+	switch (pic->nCommandToAV3XX)
+	{
+	case DSP_TO_AV3XX_COMMAND_MESSAGE:
+		printk ("*** DSP MESSAGE: [");
+		short* sMsg = (short*)0x00040120;//pic->sMsgBuffer;
+		while (*sMsg)
+		{
+			printk ("%c", (*sMsg ++) & 0xFF);
+		}
+		printk ("] ***\n");
+		break;
+	default:
+		printk ("*** DSP HINT: %.4X ***\n", pic->nCommandToAV3XX);
+		break;
+	}
+
+	pic->nAV3XXResultCode = 1;
 }

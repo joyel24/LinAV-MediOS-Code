@@ -26,10 +26,7 @@
 __IRAM_DATA int cli_var=0;
 __IRAM_DATA int clf_var=0;
 
-__IRAM_CODE void c54_dsp_interrupt (int irq)
-{
-	printk ("*** DSP HINT ***\n");
-}
+extern void c54_dsp_interrupt (int irq);
 
 __IRAM_CODE void ata_interrupt (int irq)
 {

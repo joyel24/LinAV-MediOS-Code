@@ -42,6 +42,26 @@ __IRAM_CODE int swi_memory_handler (
 	break;
 /// Serialize critical API calls to memory manager
 
+	case nAPI_MEMSET: //(void* pvBuffer, int fill, size_t size);
+	{
+		int i;
+		unsigned char* pDst = (unsigned char*)nParam1;
+		unsigned char fill = nParam2;
+		for (i=0;i<nParam3;i++)
+			pDst[i] = fill;
+	}
+	break;
+
+	case nAPI_MEMCPY: //(void* pvBuffer, const void* pvSrc, size_t size);
+	{
+		int i;
+		unsigned char* pDst = (unsigned char*)nParam1;
+		unsigned char* pSrc = (unsigned char*)nParam2;
+		for (i=0;i<nParam3;i++)
+			pDst[i] = pSrc[i];
+	}
+	break;
+
 	case nAPI_HEAP_CREATE:      //(HEAP* phHeap, unsigned long nBytes);
 	{
 		// TO DO:

@@ -245,6 +245,17 @@ __IRAM_CODE int swi_gfx_handler (
 			}
 		}
 		else
+		if ((nSrcElementSize == 1) && (nDstElementSize == 4))
+		{
+			for (i=0;i<dy;i++)
+			{
+				for (j=0;j<dx;j++)
+					((unsigned long*)dptr)[j] = 0x00800080 | (sptr[j] << 8) | (sptr[j] << 24);
+				dptr += dt;
+				sptr += st;
+			}
+		}
+		else
 			return ERR_INVALID_PARAM;
 	}
 	break;
