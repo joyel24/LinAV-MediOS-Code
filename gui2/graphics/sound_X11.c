@@ -20,7 +20,7 @@ int ini_sound_connection(void)
 
 int ini_mp3_playback(struct mp3_play * mp3_p_data)
 {    
-    return 0;
+    return 1;
 }
 
 void close_mp3_playback(void)

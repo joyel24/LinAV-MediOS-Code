@@ -26,7 +26,7 @@ struct client_operations * cops;
 /***********************
  * Miscellaneous DEFINEs
  **********************/
-#define MP3_BUFF_SIZE (1020*1000)
+#define MP3_BUFF_SIZE (1020*2000)
 #define MWINCLUDECOLORS
 
 /*
@@ -819,6 +819,7 @@ void drawPeak()
 
 int main(int argc, char * * argv)
 {
+#ifdef AV_SCREEN
    if(argc<2)
        return 0; 
     else
@@ -832,7 +833,7 @@ int main(int argc, char * * argv)
     vol=70;
     wait=0;
     end=0;
-    
+#endif
     REGISTER(cops,eventHandler,0);
 
     data.size=MP3_BUFF_SIZE;
@@ -852,7 +853,7 @@ int main(int argc, char * * argv)
     /* set standard font */
     cops->setFont(STD6X9);
     eventHandler(-1); // initial draw !!    
-        
+        printf("ini redraw done\n");
     /* start mp3 */
     cops->start_playback();
         
