@@ -52,8 +52,7 @@ void new_message_window(char *message)
 
 	msg_gc = GrNewGC();
 	GrSetGCUseBackground(msg_gc, GR_TRUE);
-	GrSetGCForegroundPixelVal(msg_gc, AV3XX_COLOR_WHITE);
-//	GrSetGCForeground(msg_gc, WHITE);
+	GrSetGCForegroundPixelVal(msg_gc, AV3XX_COLOR_BLACK);
 
 	GrGetGCTextSize(msg_gc, message, -1, GR_TFASCII, &width, &height, &base);
 
