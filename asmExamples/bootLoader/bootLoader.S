@@ -20,7 +20,7 @@
 
 		@uartDebug = 1 @ send debug info on UART
 		doTimeOut = 1 @ turn on the autorun of DEFAULT.BIN after time out
-        
+
 .text
 
         add r0, pc, #1

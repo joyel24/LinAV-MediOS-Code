@@ -12,6 +12,7 @@
 @
 @
 
+.include "../includes/common.S"
 .include "../includes/av300.S"
 
 .text
@@ -20,11 +21,7 @@
         
         .thumb
 
-        ldr r0, =(lcdInitT+1)
-        mov r1, #1
-        mov lr, r1
-        add lr, pc
-        bx r0
+        callThumb r1, lcdInitT
         
 loopb:
 
@@ -33,21 +30,50 @@ loopb:
         ldr r2, =0x10
         ldr r3, =0x10
         ldr r4, =sprite1
-        ldr r5, =(lcdSpriteT+1)
-        mov r6, #1
-        mov lr, r6
-        add lr, pc
-        bx r5
+        callThumb r6, lcdSpriteT
 
-        ldr r2, =0x200
+        ldr r2, =0x4000
 del1:   sub r2, #1
         bpl del1
-        
+
+        callThumb r1, buttonsGetStatusT
+        mov r1, #1
+        ldr r2, =posdy
+        ldr r3, [r2]
+        tst r0, r1
+        bne noUp
+        sub r3, #1
+noUp:   mov r1, #0x20
+        tst r0, r1
+        bne noDn
+        add r3, #1
+noDn:   str r3, [r2]
+
+        ldr r2, =posdx
+        ldr r3, [r2]
+        mov r1, #2
+        tst r0, r1
+        bne noLt
+        sub r3, #1
+noLt:   mov r1, #0x10
+        tst r0, r1
+        bne noRt
+        add r3, #1
+noRt:   str r3, [r2]
+
+
+        ldr r0, posx
+        ldr r1, posy
+        ldr r2, =0x10
+        ldr r3, =0x10
+        mov r4, #0
+        callThumb r6, lcdRectfT
+
         ldr r0, posx
         ldr r1, posdx
         add r0, r0, r1
         cmp r0, #0
-        blt oov1
+         blt oov1
         ldr r1, =304
         cmp r0, r1
         bge oov1
@@ -65,7 +91,7 @@ noov1:
         ldr r1, posdy
         add r0, r0, r1
         cmp r0, #0
-        blt oov2
+         blt oov2
         cmp r0, #224
         bge oov2
         ldr r1, =posy
@@ -112,4 +138,4 @@ sprite1:
         
                 
 .include "../includes/lcd.S"
-
+.include "../includes/buttons.S"
