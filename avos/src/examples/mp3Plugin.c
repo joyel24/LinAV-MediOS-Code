@@ -11,6 +11,7 @@
 #include <graphics.h>
 #include <osdDSC25.h>
 #include <fonts.h>
+#include <timers.h>
 
 void intsub();
 void feedMas();
@@ -98,7 +99,7 @@ int main(int argc, char * * argv) {
     debug("GetVersion: %08x\n", masGetVersionA());
 
     for(c=0;c<100;c++) {}
-   
+
     debug("masControl %04x\n", masControlReadA());
     
     
@@ -113,33 +114,25 @@ int main(int argc, char * * argv) {
     c = gioGetAllDirectionsA();
     
     debug("gioDirections %08x\n", c);
-    
+
     gioSetAllInvertsA(0x00000010);      // Just EOD inverted...
     //gioSetAllIRQsA(0xff);
     //interruptsInitA(intsub);
     //interruptsSetIRQEnabledA();    
     //interruptsSetMaskA(interruptsGetMaskA() | 0xffffff7f);
 
-    //masWriteCodecRegA(0x0, 0x2207);
-    //masWriteCodecRegA(0x8, 0x0);
-    //masWriteCodecRegA(0x6, 0x0);
-    //masWriteCodecRegA(0x7, 0x4000);
-    //masWriteCodecRegA(0xe, 0x0);
-    //masWriteCodecRegA(0x10, 0x7300);
-    
-    
     masConfigAudioCodec(0x0c, 0x0c, 0x0c, MAS_CONFIG_INPUT_MIC
                                         | MAS_CONFIG_ADCLEFT_ENABLE
                                         | MAS_CONFIG_ADCRIGHT_ENABLE
                                         | MAS_CONFIG_DAC_ENABLE);
     
-    masConfigInput(MAS_CONFIGINPUT_MONO);    
-    masConfigOutput(0x00, 0x40, 0);
+    masConfigInput(MAS_CONFIGINPUT_MONO);
+    masConfigOutput(0x0, 0x40, 0);
     masSetBalance(0x00);
     masSetVolume(vol);
 
     for(c=0;c<20;c++) {}
-    
+
     buffmem[0] = 0x0;
     masWriteD0A(0x7f6, buffmem, 1);     // App select - none
     while(1) {
@@ -151,12 +144,17 @@ int main(int argc, char * * argv) {
     buffmem[0] = 0x04;                  // Check. 0d/04?
     masWriteD0A(0x7f2, buffmem, 1);
 
+    // 48000 = 0x4800
+    // 44100 = 0x4e5e
+    buffmem[0] = 0x4800;                // Controls speed of playback
+    masWriteD0A(0x7f3, buffmem, 1);
+    
     buffmem[0] = 0x125;
     masWriteD0A(0x7f1, buffmem, 1);     // Demand mode
 
     masReady=1;
     debug("Starting app...");
-    
+
     for(c=0;c<20;c++) {}
     
     buffmem[0] = 0x0c;
@@ -169,10 +167,8 @@ int main(int argc, char * * argv) {
     }
     
     debug("App started...\n");
-    
-    for (i=0;i<=0x10;i++) {
-        debug("CodecReg %02x %08x\n", i, masReadCodecRegA(i));    
-    }
+
+//    timersConfigA(0, TIMERS_TMMD_FREERUN, 0, 1023, 0x400);    
     
     v = (vol * (320-54)) >> 7;
     b = 320-54-v;
@@ -186,7 +182,6 @@ int main(int argc, char * * argv) {
         if (c & BUTTONS_AV300_UP) {
             if (vol<0x7f) {
                 vol++;
-                feedMas();
                 masSetVolume(vol);
                 v = (vol * (320-54)) >> 7;
                 b = 320-54-v;
@@ -196,7 +191,6 @@ int main(int argc, char * * argv) {
         } else if (c & BUTTONS_AV300_DOWN) {
             if (vol>0x00) {
                 vol--;
-                feedMas();
                 masSetVolume(vol);
                 v = (vol * (320-54)) >> 7;
                 b = 320-54-v;
@@ -204,21 +198,51 @@ int main(int argc, char * * argv) {
                 if (v>0) graphicsBoxfA(&screenBitmap, 54, 138, v, 6, 0x0202);
             }
         } else if (c & BUTTONS_AV300_LEFT) {
-            if (speed>0) {
-                speed-=0x80;
+            if (speed>0x80) {
+                speed-=0x80;    
                 buffmem[0] = speed;
-                masWriteD0A(0x7f3, buffmem, 1);     // Demand mode
-                //buffmem[0] = 0x125;
-                //masWriteD0A(0x7f1, buffmem, 1);     // Demand mode
+                masWriteD0A(0x7f3, buffmem, 1);
+                
+                buffmem[0] = 0x125;
+                masWriteD0A(0x7f1, buffmem, 1);     // Demand mode
+            
+   //             debug("Starting app...");
+
+   //             for(c=0;c<20;c++) {}
+                
+   //             buffmem[0] = 0x0c;
+   //             masWriteD0A(0x7f6, buffmem, 1);     // App select - RUN!
+            
+   //             while(1) {
+   //                 masReadD0A(0x7f7, buffmem, 1);      // App running
+   //                 debug("Waiting for app start [%02x]...\n", buffmem[0]);
+   //                 if (buffmem[0]==0x0c) break;
+   //             }
+                
+                debug("App started...\n");
                 
             }
         } else if (c & BUTTONS_AV300_RIGHT) {
             if (speed<0xff80) {
-                speed+=0x80;
+                speed+=0x80;    
                 buffmem[0] = speed;
-                masWriteD0A(0x7f3, buffmem, 1);     // Demand mode
-                //buffmem[0] = 0x125;
-                //masWriteD0A(0x7f1, buffmem, 1);     // Demand mode
+                masWriteD0A(0x7f3, buffmem, 1);
+                
+                buffmem[0] = 0x125;
+                masWriteD0A(0x7f1, buffmem, 1);     // Demand mode
+            
+   //             debug("Starting app...");
+            
+   //             for(c=0;c<20;c++) {}
+                
+   //             buffmem[0] = 0x0c;
+   //             masWriteD0A(0x7f6, buffmem, 1);     // App select - RUN!
+            
+   //             while(1) {
+   //                 masReadD0A(0x7f7, buffmem, 1);      // App running
+   //                 debug("Waiting for app start [%02x]...\n", buffmem[0]);
+   //                 if (buffmem[0]==0x0c) break;
+   //             }
                 
             }
         }
@@ -228,45 +252,40 @@ int main(int argc, char * * argv) {
             feedMas();
         }
 
+//            debug("gioBitset %08x\n", gioGetAllBitsetsA());
+        
         b = (masReadCodecRegA(0x000c) & 0x7fff);
         v = (b * (320-54)) >> 15;
         b = 320-54-v;
-        feedMas();
         if (b>0) graphicsBoxfA(&screenBitmap, 54 + v, 152, b, 6, 0x0000);
         if (v>0) graphicsBoxfA(&screenBitmap, 54, 152, v, 6, 0x0202);
 
         b = (masReadCodecRegA(0x000d) & 0x7fff);
         v = (b * (320-54)) >> 15;
         b = 320-54-v;
-        feedMas();
         if (b>0) graphicsBoxfA(&screenBitmap, 54 + v, 166, b, 6, 0x0000);
         if (v>0) graphicsBoxfA(&screenBitmap, 54, 166, v, 6, 0x0202);
 
-//        debug("\nMasMem:\n");
-        
-//        for (c=0x7f0;c<0x800;c++) {
-//            masReadD0A(c, buffmem, 1);
-//            debug("%08x: %08x\n", c, buffmem[0]);
-//        }
 //        for (c=0xfd0;c<0xfd8;c++) {
+//            c = 0xfd0;
 //            masReadD0A(c, buffmem, 1);
-//            debug("%08x: %08x\n", c, buffmem[0]);
+//            debug("Mas %08x: %08x\n", c, buffmem[0]);
 //        }
         
 //        debug("out L, R: %08x, %08x\n", masGetOutPeakLeft(), masGetOutPeakRight());
     }
-
     
 }
 
 int cnt=0;
 
+char irqb[] = "IRQ=xx\n";
+
 void intsub() {
     int i=0,c=0;
     c = interruptsGetCausesA();
     c = c | (~interruptsGetMaskA());
-//    debug("INT called ");
-//    debug("CAUSES %08x MASK %08x ", c, interruptsGetMaskA());
+//    debug("INT CAUSES %08x MASK %08x ", c, interruptsGetMaskA());
 //    debug("CAUSES2 %08x MASK2 %08x\n", interruptsGetCauses2A(), interruptsGetMask2A());
     
     for (i=0;i<32;i++) {
@@ -274,10 +293,14 @@ void intsub() {
         c = c>>1;
     }
 
-    debug("IRQ=%d\n", i);
+    stringPutHexA(irqb+4, i, 2);
+    uartOutsA(irqb);
 
+    //debug("IRQ=%d\n", i);
+    
     //interruptsResetMaskA(i);      One shot
     interruptsResetIRQA(i);
+//    if (i==0) feedMas();                // Timer0
     
 //    debug("INT RET ");
 //    debug("CAUSES %08x MASK %08x ", interruptsGetCausesA(), interruptsGetMaskA());
@@ -285,19 +308,12 @@ void intsub() {
 }
 
 void feedMas() {
-    int i;
     if (masReady==1) {
+        interruptsSetIRQDisabledA();    
         cnt = masWriteDataA(mp3Buff + mp3ptr, 2048);
-
-        //debug("GIO Bitset: %08x clear %08x\n", gioGetAllBitsetsA(), gioGetAllBitclearsA());
-        
-        
-        //for (i=0;i<cnt;i++) {
-        //    debug("[%02x] ", mp3Buff[mp3ptr+i]);    
-        //}
-
+        interruptsSetIRQEnabledA();    
         mp3ptr+=cnt;
         if (mp3ptr>=fileSize) mp3ptr=0;
-        //debug("DataWrite %d\n", cnt);
     }
+    debug("masDataFed %d\n", cnt);
 }

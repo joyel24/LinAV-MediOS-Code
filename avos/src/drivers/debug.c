@@ -16,10 +16,9 @@
 #include <uart.h>
 
 
-static char debugmembuf[200];
-
 void debug(char *fmt, ...)
 {
+    char debugmembuf[200];
     va_list ap;
     va_start(ap, fmt);
     vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
