@@ -18,29 +18,94 @@
 #include <X11/Xutil.h>
 #include "graphics.h"
 
+/*===== define Keyboard // Archos ====== */
+#define KEYBOARD_GENERIC \
+  "Keyboard   Rockbox\n" \
+  "--------   --------------\n" \
+  "+          ON\n" \
+  "8          UP\n" \
+  "2          DOWN\n" \
+  "4          LEFT\n" \
+  "6          RIGHT\n" \
+  "Enter      OFF\n" \
+  "5          PLAY\n" \
+  "/          F1\n" \
+  "*          F2\n" \
+  "-          F3\n"
+/*=========== End of define ============ */
+
 extern Display* display;
 extern Window window;	/*variable Event */
+XEvent event;
 
 int nxtEvent(void)
-{
-    XEvent event;
-    
-    XSelectInput(display, window, ExposureMask);
+{   
+    XSelectInput(display, window, ExposureMask | KeyPressMask | KeyReleaseMask);
     /* next event */
     XNextEvent(display, &event);
+    
     
     switch (event.type) 
     {
       case Expose :
-        lcd_update(); 
+        lcd_update(FORCE_REDRAW,0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
+      break;
+      case KeyPress :
+        getKey(event.type);
+      break;
+      case KeyRelease :
       break;
     }
     return 0; 
 }  
 
+int getKey(XEvent *event)
+{
+    switch (event.type)
+    {
+    case ON :
+       return BTN_ON;
+    break;
+    case OFF :
+       return BTN_OFF;
+    break;
+    case F1 :
+       return BTN_F1;
+    break;
+    case F2 :
+       return BTN_F2;
+    break;
+    case PLAY :
+       return BTN_JOY;
+    break;
+    case F3 :
+       return BTN_F3;
+    break;
+    case UP :
+       return BTN_UP;
+    break;
+    case DOWN :
+       return BTN_DOWN;
+    break;
+    case LEFT :
+       return BTN_LEFT;
+    break;
+    case RIGHT :
+       return BTN_RIGHT;
+    break;
+    }
+}
+
 int waitEvent(void)
 {
-    return 0;
+    int evt;
+    while(1)
+    {
+      evt = nxtEvent();
+      if(evt != NO_EVENT)
+       break;
+     }
+  return evt;      
 }
 
 int iniEvent(void)
