@@ -11,7 +11,7 @@ ifeq ($(BUILD),X11)
 LDFLAGS += -L/usr/X11R6/lib -lX11
 endif
 
-LDFLAGS  += -lpthread
+LDFLAGS  += -lpthread -Llib -lavwm
 
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)

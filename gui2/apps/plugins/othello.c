@@ -494,7 +494,7 @@ void simpleMove(int dx,int dy)
 
 int eventHandler(int evt)
 {
-    helperEvt(evt,BTN_JOY);
+    cops->helperEvt(evt,BTN_JOY);
     switch(evt)
     {
         case BTN_UP:
@@ -576,7 +576,7 @@ int main(int argc,char ** argv)
 
     iniBoard();
     
-    iniHelperMenu(&othelloMenu);
+    cops->iniHelperMenu(&othelloMenu);
     
     computeAllowed(allowedHuman,HUMAN);
     eventHandler(EVT_REDRAW);

@@ -195,7 +195,7 @@ void do_right(void * data)
             break;
     }
     
-    iniHelperMenu(&browserMenu);
+    cops->iniHelperMenu(&browserMenu);
     
     if(reload == true)
         cops->viewNewDir(bdata,"./");

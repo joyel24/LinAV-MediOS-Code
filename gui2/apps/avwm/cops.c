@@ -146,6 +146,10 @@ struct client_operations cops={
     
     powerOff_timer_on         : powerOff_timer_on,
     powerOff_timer_off        : powerOff_timer_off,
-    get_power_off_timer_state : get_power_off_timer_state
+    get_power_off_timer_state : get_power_off_timer_state,
+    
+    iniHelperMenu     : iniHelperMenu,
+    helperEvt         : helperEvt,
+    hideHelper        : hideHelper,
     
 };

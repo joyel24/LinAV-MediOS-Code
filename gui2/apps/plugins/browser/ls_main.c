@@ -93,7 +93,7 @@ int eventHandler(int evt)
     if(menuOff)
     {
         //printList(bdata,1);
-        helperEvt(evt,BTN_JOY);
+        cops->helperEvt(evt,BTN_JOY);
         //printList(bdata,2);
         evt=cops->browserEvt(evt,bdata);
         //printList(bdata,3);
@@ -116,7 +116,7 @@ int eventHandler(int evt)
             case BTN_F3:
                 menu_cfg.root=&menu1;
                 menuOff=0;
-                hideHelper();
+                cops->hideHelper();
                 cops->start_menu(&menu_cfg);
                 cops->menuEvtHandler(EVT_REDRAW);
                 break;
@@ -125,7 +125,7 @@ int eventHandler(int evt)
                 break;
             case BTN_OFF:
             case EVT_QUIT:
-                hideHelper();
+                cops->hideHelper();
                 RELEASE(cops)
                 break;
             case EVT_REDRAW:
@@ -162,7 +162,7 @@ int main(int argc,char * * argv)
         cops->setFont(STD6X9);
 
         ini_menu_struct(bdata);
-        iniHelperMenu(&browserMenu);
+        cops->iniHelperMenu(&browserMenu);
         //openHelper();
         
         if(strlen(argv[1]) == 1)

@@ -168,6 +168,9 @@ struct client_operations {
     int  (*powerOff_timer_off)         (void);
     int  (*get_power_off_timer_state)  (void);
 
+    void (*iniHelperMenu)              (struct helperMenu * menu);
+    void (*helperEvt)                  (int evt,int action_btn);
+    void (*hideHelper)                 (void);
 };
 
 #endif

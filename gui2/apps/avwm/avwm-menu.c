@@ -26,6 +26,7 @@
 #include "avwm-menu.h"
 #include "avwm.h"
 #include "avevents.h"
+#include "events.h"
 #include "colordef.h"
 #include "settings.h"
 #include "helperMenu.h"
@@ -58,6 +59,24 @@ struct menu_data menu_cfg = {
     submenu_str    : mk_submenu_str
 };
 
+struct helperMenu menuMenu = {
+    ON_txt        : "Select",
+    OFF_txt       : "UP",
+    JOY_txt       : "Nav/Sel",
+    F1_txt        : "",
+    F2_txt        : "Settings",
+    F3_txt        : "USB/FW",
+    
+    helperDelay   :  1,
+    helperSpeed   :  300,
+    
+    bg_color      : COLOR_WHITE,
+    border_color  : COLOR_BLUE,
+    txt_color     : COLOR_BLACK,
+    
+    align         : ALIGN_RIGHT
+};
+
 extern int cfg_line_num;
 
 #define SHOW_ALL        1
@@ -75,9 +94,8 @@ int  menuStatus(void)  {return menu_plugin.allowed;}
 extern int stopWM;
 void do_off(void * data)
 {
-    /* nothing to do */
-    //stopWM=1; /* use this if you want to be able to quit avwm without hakting the device*/
-    /* to be done: call resume evt on plugin if it exists */
+    menuEvtHandler(BTN_LEFT); /* send a Btn left evt to simulate an up */
+    
 }
 
 void do_on(void * data)
@@ -150,7 +168,10 @@ void do_F3(void * data) // switch to usb
 void mk_submenu_str(void * data,char * str)
 {
     struct cfg_menu * cfg_data = (struct cfg_menu *)data;
-    sprintf(str,"> %s",cfg_data->name);
+    if(cfg_data->type == TYPE_STD)
+        sprintf(str,"> %s",cfg_data->name);
+    else
+        sprintf(str,"%s",cfg_data->name);
 }
 
 void mk_item_str(void * data,char * str)
@@ -161,9 +182,11 @@ void mk_item_str(void * data,char * str)
 
 void avwm_menuEvtHandler(int evt)
 {
+    helperEvt(evt,BTN_JOY);
     if(evt==EVT_REDRAW)
     {
-        /* making sure that menu is on */
+        /* making sure that menu is on */        
+        iniHelperMenu(&menuMenu);
         start_menu(&menu_cfg);
     }
     menuEvtHandler(evt);
@@ -200,6 +223,10 @@ int ini_menu(char * path,struct plugin * plug)
     printMenu();
 #endif
     
+    fprintf(stderr,"Menu loaded, ini helper\n");    
+    iniHelperMenu(&menuMenu);
+    
+    fprintf(stderr,"helper init done, registering\n"); 
     doRegisterPlugin(menu_plug,avwm_menuEvtHandler,0);
     
     free(tmpC);
@@ -300,6 +327,7 @@ void addItem(struct cfg_menu ** cfg)
     current_item->link[0]=0;
     current_item->parent[0]=0;
     current_item->param[0]=0;
+    current_item->type=TYPE_STD;
 }
 
 void cfgCleanMenu(struct cfg_menu * cfg)
@@ -369,6 +397,48 @@ int do_parse(struct cfg_menu ** cfg,char * filename)
     return 0;
 }
 
+int doAddBackEntry(char * name,struct menu_item * up,struct menu_item *cur)
+{
+        struct menu_item * ptr;
+        struct menu_item * start=cur;
+        struct cfg_menu * data;
+        
+        if(up && name)
+        {  
+            data=(struct cfg_menu *) malloc(sizeof(struct cfg_menu));
+            if(!data)
+            {
+                fprintf(stderr,"can't malloc back item\n");
+                return 0;
+            }
+            ptr=newItem(data);
+            if(!ptr)
+            {
+                fprintf(stderr,"can't malloc back item\n");
+                return 0;
+            }
+            sprintf(data->name,"<-  %s",name);
+            data->type=TYPE_BACK;
+            if(cur)
+                cur->prev=ptr;            
+            ptr->nxt=cur;
+            cur->up->sub=ptr;
+            ptr->up=cur->up;
+            if(ptr->up->up)
+                ptr->sub=ptr->up->up;
+            else
+                ptr->sub=rootMenu;
+    }
+    
+    for(ptr=start;ptr!=NULL;ptr=ptr->nxt)
+    {
+        if(!doAddBackEntry(((struct cfg_menu *)ptr->data)->name,ptr,ptr->sub))
+            return 0;
+    }
+
+    return 1;
+}
+
 int loadMenu(char * filename)
 {
     struct cfg_menu * data;
@@ -394,6 +464,9 @@ int loadMenu(char * filename)
         }
         data=data->nxt;
     }
+    
+    doAddBackEntry(NULL,NULL,rootMenu);
+    
     return 0;
 }
 

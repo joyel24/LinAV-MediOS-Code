@@ -17,11 +17,15 @@
 #include "menu.h"
 #include "plugin.h"
 
+#define TYPE_STD    0
+#define TYPE_BACK   1
+
 struct cfg_menu {
 	char name[MAX_TOKEN];
 	char parent[MAX_TOKEN];
 	char link[MAX_TOKEN];
 	char param[MAX_TOKEN];
+        int type;
 	struct cfg_menu * nxt;
 };
 

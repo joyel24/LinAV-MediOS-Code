@@ -29,7 +29,7 @@ int posX=320;
 
 pthread_t drawHelper_thread;
 
-extern struct client_operations * cops;
+//extern struct client_operations * cops;
 
 int helperDelay=0;
 int helperSpeed=200;
@@ -68,7 +68,7 @@ void hideHelper(void)
     if (pthread_join(drawHelper_thread, NULL)!=0)
         printf("Error, can't join\n");
     fprintf(stderr,"kill done\n");*/
-    cops->hidePlane(BMAP2);
+    hidePlane(BMAP2);
     posX=320;
 }
 
@@ -105,11 +105,11 @@ void * drawHelperMenu(void* arg)
     int i;    
     inAction=1;
     fprintf(stderr,"IN thread\n");
-    cops->showPlane(BMAP2);
+    showPlane(BMAP2);
     
     while(1)
     {
-        cops->setPos(BMAP2,0x14+posX*2,0x13);
+        setPos(BMAP2,0x14+posX*2,0x13);
         
         if(isOpening)
         {
@@ -127,16 +127,16 @@ void * drawHelperMenu(void* arg)
     }
     
     if(posX>=320)
-        cops->hidePlane(BMAP2);
+        hidePlane(BMAP2);
    
     inAction=0;    
     fprintf(stderr,"OUT thread\n");
     return NULL;
 }
 
-#define prepString(str)        {if(str){ cops->getStringS(str,&w,&h); if(w>maxW) maxW=w;}}
-#define drawString(str,y)      {int _x; if(str){ cops->getStringS(str,&w,&h); _x=menu->align?4:maxW-w-1; \
-                                 cops->putS(menu->txt_color,menu->bg_color,_x,y,str);}}
+#define prepString(str)        {if(str){ getStringS(str,&w,&h); if(w>maxW) maxW=w;}}
+#define drawString(str,y)      {int _x; if(str){ getStringS(str,&w,&h); _x=menu->align?4:maxW-w-1; \
+                                 putS(menu->txt_color,menu->bg_color,_x,y,str);}}
 
 /* draw the edit box */
 void iniHelperMenu(struct helperMenu * menu)
@@ -161,15 +161,15 @@ void iniHelperMenu(struct helperMenu * menu)
         maxW=320;    
     
         
-    cops->setSize(BMAP2,maxW,240, 8);
+    setSize(BMAP2,maxW,240, 8);
     
-    cops->setPlane(BMAP2);
+    setPlane(BMAP2);
     
-    cops->fillRect(menu->bg_color,0,0,maxW,240);
+    fillRect(menu->bg_color,0,0,maxW,240);
     
-    cops->drawRect(menu->border_color,0,0,maxW,2);
-    cops->drawRect(menu->border_color,0,0,2,240);
-    cops->drawRect(menu->border_color,0,238,maxW,2);
+    drawRect(menu->border_color,0,0,maxW,2);
+    drawRect(menu->border_color,0,0,2,240);
+    drawRect(menu->border_color,0,238,maxW,2);
     
     drawString(menu->ON_txt,13);
     drawString(menu->OFF_txt,47);
@@ -178,7 +178,7 @@ void iniHelperMenu(struct helperMenu * menu)
     drawString(menu->F2_txt,180);
     drawString(menu->F3_txt,210);
     
-    cops->setPlane(BMAP1);
+    setPlane(BMAP1);
     
     // hide Box
     endPosX = 320-maxW;
@@ -187,8 +187,8 @@ void iniHelperMenu(struct helperMenu * menu)
     isOpening=0;
     inAction=0;
         
-    cops->setPos(BMAP2,0x14+320*2,0x13);
-    cops->showPlane(BMAP2);
+    setPos(BMAP2,0x14+320*2,0x13);
+    showPlane(BMAP2);
     
 }
 

@@ -6,7 +6,6 @@ ifeq ($(BUILD),X11)
 LDFLAGS  += -shared
 endif
 
-LDFLAGS  += -L../avwm/lib -lavwm
 LDFLAGS  += -lpthread
 
 SRC = $(wildcard *.c)
