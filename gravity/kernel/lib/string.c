@@ -49,28 +49,51 @@ int atoi (const char *str)
         str++;
     }
     
-    if ('-' == *str)
+    if('0' == *str & ('x'==*(str+1) || 'X'==*(str+1))) /* hex specific code */
     {
-        sign = -1;
-        str++;
+        str+=2;
+        while ('0' == *str)
+        {
+            str++;
+        }
+        
+        while (isxdigit(*str))
+        {
+            value = (value << 4);
+            if(isdigit(*str))
+                value += (*str - '0');
+            else
+                value += (__tolower(*str) - 'a' + 10);
+            str++;
+        }
+        
+        return value;
     }
-    else if ('+' == *str)
-    {
-        str++;
-    }
+    else
+    {    
+        if ('-' == *str)
+        {
+            sign = -1;
+            str++;
+        }
+        else if ('+' == *str)
+        {
+            str++;
+        }
+        
+        while ('0' == *str)
+        {
+            str++;
+        }
+        
+        while (isdigit(*str))
+        {
+            value = (value * 10) + (*str - '0');
+            str++;
+        }
     
-    while ('0' == *str)
-    {
-        str++;
+        return value * sign;
     }
-
-    while (isdigit(*str))
-    {
-        value = (value * 10) + (*str - '0');
-        str++;
-    }
-    
-    return value * sign;
 }
 
 
