@@ -32,6 +32,7 @@ needFont(std7x13);
 
 int stopSettingsLoop = 0; /* global variable used to stop the private evt loop*/
 int activeTab = 0;
+struct av_tm date_time_setting;
 
 void drawTabs();
 void drawParameter();
@@ -63,7 +64,7 @@ struct TabNamesT tabData[CNT_SETTINGS_TABS] = { { "Screen", 0 },
 /*                                                    tab, x,  y, label string,       min,max,inc,val,act,changed */
 struct SettingsDataT sData[CNT_SETTINGS_ENTRIES] = { {  0, 5, 50, "Key Repeat",         1, 10,  1,  5,  1, 0},
                                                      {  0, 5, 64, "Key Freq",           0,  6,  1,  5,  0, 0},
-                                                     {  0, 5, 92, "Contrast",           0,  6,  1,  5,  0, 0},
+                                                     {  0, 5, 92, "Contrast",           1, 10,  1,  5,  0, 0},
                                                      {  1, 5, 50, "LCD Bat",            1,180, 10,  1,  0, 0},
                                                      {  1, 5, 64, "LCD DC",             1,180, 10,  1,  0, 0},
                                                      {  1, 5, 78, "Power Bat",          1,180, 10,  1,  0, 0},
@@ -127,10 +128,25 @@ void GetSettings(void)
     // get actual settings
     sData[0].value = get_mouseRepeat();
     sData[1].value = get_mouseFreq();
+    sData[2].value = getBrightness();
 
-    sData[2].value = get_lcd_TimeOutParam (AV_TIMER_ON_BAT);
-    sData[3].value = get_lcd_TimeOutParam (AV_TIMER_ON_DC);
+    sData[3].value = get_lcd_TimeOutParam (AV_TIMER_ON_BAT);
+    sData[4].value = get_lcd_TimeOutParam (AV_TIMER_ON_DC);
 
+    sData[5].value = get_halt_TimeOutParam (AV_TIMER_ON_BAT);
+    sData[6].value = get_halt_TimeOutParam (AV_TIMER_ON_DC);
+
+    sData[7].value = get_hd_TimeOutParam (AV_TIMER_ON_BAT);
+    sData[8].value = get_hd_TimeOutParam (AV_TIMER_ON_DC);
+
+    getTime(&date_time_setting);
+    sData[9].value  = date_time_setting.tm_mday;
+    sData[10].value = date_time_setting.tm_mon;
+    sData[11].value = date_time_setting.tm_year;
+    sData[12].value = date_time_setting.tm_hour;
+    sData[13].value = date_time_setting.tm_min;
+    sData[14].value = date_time_setting.tm_sec;
+    sData[15].value = 1;
 
     set_mouseParam(6,3); // set to 6,3 for the settings screen only
 }
@@ -141,10 +157,48 @@ void SetSettings(void)
         set_mouseParam(sData[1].value,sData[0].value);
 
     if(sData[2].changed)
-        set_lcd_TimeOutParam(AV_TIMER_ON_BAT, sData[2].value);
+        setBrightness(sData[2].value);
 
     if(sData[3].changed)
-        set_lcd_TimeOutParam(AV_TIMER_ON_DC, sData[3].value);
+        set_lcd_TimeOutParam(AV_TIMER_ON_BAT, sData[3].value);
+
+    if(sData[4].changed)
+        set_lcd_TimeOutParam(AV_TIMER_ON_DC, sData[4].value);
+
+    if(sData[5].changed)
+        set_halt_TimeOutParam(AV_TIMER_ON_BAT, sData[5].value);
+
+    if(sData[6].changed)
+        set_halt_TimeOutParam(AV_TIMER_ON_DC, sData[6].value);
+
+    if(sData[7].changed)
+        set_hd_TimeOutParam(AV_TIMER_ON_BAT, sData[7].value);
+
+    if(sData[8].changed)
+        set_hd_TimeOutParam(AV_TIMER_ON_DC, sData[8].value);
+
+    if(sData[9].changed)
+        date_time_setting.tm_mday = sData[9].value;
+    if(sData[10].changed)
+        date_time_setting.tm_mon = sData[10].value;
+    if(sData[11].changed)
+        date_time_setting.tm_year = sData[11].value;
+    if(sData[12].changed)
+        date_time_setting.tm_hour = sData[12].value;
+    if(sData[13].changed)
+        date_time_setting.tm_min = sData[13].value;
+    if(sData[14].changed)
+        date_time_setting.tm_sec = sData[14].value;
+
+    if( (sData[9].changed  == 1) ||
+        (sData[10].changed == 1) ||
+        (sData[11].changed == 1) ||
+        (sData[12].changed == 1) ||
+        (sData[13].changed == 1) ||
+        (sData[14].changed == 1) )
+    {
+        setTime(&date_time_setting);
+    }
 }
 
 int GetNextValidParameter()
@@ -273,7 +327,7 @@ int settingsEvtHandler(int evt)
             sData[active].value-=sData[active].inc;
             if(sData[active].value < sData[active].min)
                 sData[active].value = sData[active].min;
-            
+
             drawSlider(sData[active].x,
                        sData[active].y,
                        sData[active].text,
@@ -341,7 +395,7 @@ void drawSlider(int x, int y, char* text, int min, int max, int value, int activ
     if(filler < 128/2)
         putS(COLOR_BLACK, COLOR_BLUE, x+filler+SLIDER_OFFSET+7, y, tmp);
     else
-        putS(COLOR_BLACK, COLOR_BLUE, x+filler+SLIDER_OFFSET-15, y, tmp);
+        putS(COLOR_BLACK, COLOR_BLUE, x+filler+SLIDER_OFFSET-25, y, tmp);
 
     setPlane(BMAP1);
 }
