@@ -27,6 +27,10 @@ struct menu_data {
         int  useOwnDisp;
         int width;int height;int x;int y;
         int dx;int dy;
+        unsigned int txt_color;
+        unsigned int bg_color;
+        unsigned int select_color;
+        unsigned int sub_color;
         void (*right_action) (void * data);
         void (*on_action)    (void * data);
         void (*off_action)   (void * data);

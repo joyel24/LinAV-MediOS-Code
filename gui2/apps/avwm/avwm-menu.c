@@ -36,6 +36,10 @@ struct cfg_menu * current_item=NULL;
 struct menu_data menu_cfg = {
     useOwnDisp     : 0,
     x:0,y:0,width:320,height:240,
+    txt_color      : COLOR_BLACK,
+    bg_color       : COLOR_WHITE,
+    select_color   : COLOR_BLUE,
+    sub_color      : COLOR_RED,
     root           : NULL,
     right_action   : do_right,
     on_action      : do_on,
