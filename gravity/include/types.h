@@ -83,5 +83,10 @@ typedef struct _MESSAGE
 	unsigned long nParam2;
 } MESSAGE;
 
+typedef enum _E_Z_ORDER
+{
+	eTOPMOST = 0,
+	eFOREGROUND = 1
+} E_Z_ORDER;
 
 #endif

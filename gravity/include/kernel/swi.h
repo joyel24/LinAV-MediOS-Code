@@ -93,10 +93,11 @@
 
 ///////////////////////////////////////////////////////
 ///////////////////// DEVICE API //////////////////////
-
-#define nAPI_TIME              (nAPI_DEVICE_section + 0)
-#define nAPI_POWER             (nAPI_DEVICE_section + 1)
-#define nAPI_EVT               (nAPI_DEVICE_section + 2)
+#define nAPI_TIME                 (nAPI_DEVICE_section + 0)
+#define nAPI_POWER                (nAPI_DEVICE_section + 1)
+#define nAPI_EVT                  (nAPI_DEVICE_section + 2)
+#define nAPI_SET_LCD_BRIGHTNESS   (nAPI_DEVICE_section + 3)
+#define nAPI_GET_LCD_BRIGHTNESS   (nAPI_DEVICE_section + 4)
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 
@@ -121,6 +122,7 @@
 #define nAPI_GFX_GET_PHYS_CONTEXT (nAPI_GFX_section + 4)
 #define nAPI_GFX_SET_DRAWING_RECT (nAPI_GFX_section + 5)
 #define nAPI_GFX_GET_DRAWING_RECT (nAPI_GFX_section + 6)
+#define nAPI_GFX_TASK_FROM_POINT  (nAPI_GFX_section + 7)
 
 #define nAPI_GFX_SET_PLANE        (nAPI_GFX_section + 10)
 #define nAPI_GFX_GET_PLANE        (nAPI_GFX_section + 11)
@@ -159,6 +161,8 @@
 #define nAPI_RENDER_SCENE         (nAPI_GFX_section + 60)
 
 #define nAPI_GFX                  (nAPI_GFX_section + 70)
+
+#define nAPI_GFX_BUILD_SPANS      (nAPI_GFX_section + 80)
 /////////////////////// GFX API ///////////////////////
 ///////////////////////////////////////////////////////
 

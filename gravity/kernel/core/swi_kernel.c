@@ -11,7 +11,7 @@
 #include <kernel/threads.h>
 #include <kernel/evt.h>
 
-__IRAM_CODE int swi_kernel_handler (
+int swi_kernel_handler (
 	unsigned long nCmd,
 	unsigned long nParam1,
 	unsigned long nParam2,
@@ -312,7 +312,7 @@ __IRAM_CODE int swi_kernel_handler (
             return 0;
       default:
          printk("Unknown SWI call %d\n", nCmd);
-         return 0;
+		return ERR_NOT_IMPLEMENTED;
 	}
 
 	return 0;

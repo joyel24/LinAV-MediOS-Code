@@ -16,6 +16,15 @@
 #define MAX(a,b) (a>b?a:b)
 #define MIN(a,b) (a<b?a:b)
 
+__IRAM_CODE TASK_INFO* lock_task ()
+{
+		TASK_INFO* pTask = 0;
+		__cli ();
+		pTask = g_pTaskRing;
+		__sti ();
+		return pTask;
+}
+
 __IRAM_CODE int swi_gfx_handler (
 	unsigned long nCmd,
 	unsigned long nParam1,
@@ -36,11 +45,6 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_CREATE_CONTEXT:   //(int nWidth, int nHeight, int nFlags);
 	{
-		TASK_INFO* pTask = 0;
-		__cli ();
-		pTask = g_pTaskRing;
-		__sti ();
-
 		GFX_CONTEXT* pCtx = 0;
 		API_MALLOC (&pCtx, sizeof(GFX_CONTEXT));
 
@@ -55,10 +59,10 @@ __IRAM_CODE int swi_gfx_handler (
 		API_MALLOC (&pCtx->pixels, pCtx->w * pCtx->h * 4);
 		memset (pCtx->pixels, 0, pCtx->w * pCtx->h * 4);
 
-		pTask->pMemoryContext = pCtx;
+		lock_task()->pMemoryContext = pCtx;
 
 //		kgfx_manager_handler (eGFX_MGR_ADD, 0, 0, pTask);
-		GFX_AddContext (pTask, 0, 0);
+		GFX_AddContext (lock_task(), 0, 0);
 
 /*
 		__cli ();
@@ -91,16 +95,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_UPDATE_RECT:       //(GFX_RECT* pArea);
 	{
-		TASK_INFO* pTask = 0;
-		__cli ();
-		pTask = g_pTaskRing;
-		__sti ();
-//		kgfx_manager_handler (eGFX_MGR_COMMIT, nParam1, 0, pTask);
-		GFX_RECT* pRect = (GFX_RECT*)nParam1;
-
-//printk ("Before GFX_UpdateContext: pRect = %d, \n", pRect, g_pZRectList->pOwnerTask);
-
-		GFX_UpdateContext (pTask, pRect);
+		GFX_UpdateContext (lock_task(), (GFX_RECT*)nParam1);
 
 /*
 		__cli ();
@@ -124,12 +119,8 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_MOVE:         //(GFX_POINT* pOrigin)                                            { swi_call(nAPI_GFX_MOVE); }
 	{
-		TASK_INFO* pTask = 0;
-		__cli ();
-		pTask = g_pTaskRing;
-		__sti ();
 //		kgfx_manager_handler (eGFX_MGR_MOVE, nParam1, 0, pTask);
-		GFX_MoveContext (pTask, ((GFX_POINT*)nParam1)->x, ((GFX_POINT*)nParam1)->y);
+		GFX_MoveContext (lock_task(), ((GFX_POINT*)nParam1)->x, ((GFX_POINT*)nParam1)->y);
 
 /*
 		__cli ();
@@ -152,12 +143,8 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_FOREGROUND:   //()                                                              { swi_call(nAPI_GFX_FOREGROUND); }
 	{
-		TASK_INFO* pTask = 0;
-		__cli ();
-		pTask = g_pTaskRing;
-		__sti ();
 //		kgfx_manager_handler (eGFX_MGR_FOREGROUND, nParam1, 0, pTask);
-		GFX_UpdateZOrder (pTask, 0);
+		GFX_UpdateZOrder (lock_task(), 0);
 
 /*
 		__cli ();
@@ -352,10 +339,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_CHARBLIT:     //(GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, GFX_POINT* pt);
 	{
-		TASK_INFO* pTask = 0;
-		__cli ();
-		pTask = g_pTaskRing;
-		__sti ();
+		TASK_INFO* pTask = lock_task ();
 
 		GFX_CONTEXT* pDst = (GFX_CONTEXT*)nParam1;
 		GFX_CONTEXT* pSrc = (GFX_CONTEXT*)nParam2;
@@ -432,10 +416,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_DRAWPIXEL:        //(int nX, int nY, COLOR Color);
 	{
-		GFX_CONTEXT* pCtx = 0;
-		__cli ();
-		pCtx = g_pTaskRing->pMemoryContext;
-		__sti ();
+		GFX_CONTEXT* pCtx = lock_task ()->pMemoryContext;
 		if (pCtx)
 		{
 			graphics32_DrawPixel (nParam3, nParam1, nParam2, pCtx);
@@ -445,10 +426,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_READPIXEL:        //(int nX, int nY);
 	{
-		GFX_CONTEXT* pCtx = 0;
-		__cli ();
-		pCtx = g_pTaskRing->pMemoryContext;
-		__sti ();
+		GFX_CONTEXT* pCtx = lock_task ()->pMemoryContext;
 		if (pCtx)
 			return graphics32_ReadPixel (nParam1, nParam2, pCtx);
 		else
@@ -458,10 +436,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_DRAWLINE:         //(GFX_POINT* pt1, GFX_POINT* pt2, COLOR Color);
 	{
-		GFX_CONTEXT* pCtx = 0;
-		__cli ();
-		pCtx = g_pTaskRing->pMemoryContext;
-		__sti ();
+		GFX_CONTEXT* pCtx = lock_task ()->pMemoryContext;
 		if (pCtx)
 		{
 			GFX_POINT* pt1 = (GFX_POINT*)nParam1;
@@ -474,10 +449,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_DRAWRECT:         //(GFX_RECT* pRect, COLOR Color);
 	{
-		GFX_CONTEXT* pCtx = 0;
-		__cli ();
-		pCtx = g_pTaskRing->pMemoryContext;
-		__sti ();
+		GFX_CONTEXT* pCtx = lock_task ()->pMemoryContext;
 		if (pCtx)
 		{
 			GFX_RECT* pRect = (GFX_RECT*)nParam1;
@@ -488,10 +460,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_FILLRECT:         //(GFX_RECT* pRect, COLOR Color);
 	{
-		GFX_CONTEXT* pCtx = 0;
-		__cli ();
-		pCtx = g_pTaskRing->pMemoryContext;
-		__sti ();
+		GFX_CONTEXT* pCtx = lock_task ()->pMemoryContext;
 		if (pCtx)
 		{
 			GFX_RECT* pRect = (GFX_RECT*)nParam1;
@@ -533,10 +502,7 @@ __IRAM_CODE int swi_gfx_handler (
 	{
 		printk ("We are inside nAPI_TEXT...\n");
 
-		TASK_INFO* pTask = 0;
-		__cli ();
-		pTask = g_pTaskRing;
-		__sti ();
+		TASK_INFO* pTask = lock_task ();
 		if (!pTask->pFont)
 			return ERR_NO_FONT;
 
@@ -624,9 +590,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_SET_FONT_COLOR:       //(COLOR nColor)                                                     { swi_call(nAPI_SET_FONT_COLOR); }
 	{
-		__cli ();
-		g_pTaskRing->nFontColor = nParam1;
-		__sti ();
+		lock_task ()->nFontColor = nParam1;
 	}
 	break;
 
@@ -640,10 +604,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GET_TEXT_RECT: //(const char* pszText, GFX_RECT* pRect);
 	{
-		TASK_INFO* pTask = 0;
-		__cli ();
-		pTask = g_pTaskRing;
-		__sti ();
+		TASK_INFO* pTask = lock_task ();
 		if (!pTask->pFont)
 			return ERR_NO_FONT;
 		else
@@ -658,10 +619,7 @@ __IRAM_CODE int swi_gfx_handler (
 	{
 		printk ("nAPI_GFX call...\n");
 
-		TASK_INFO* pTask = 0;
-		__cli ();
-		pTask = g_pTaskRing;
-		__sti ();
+		TASK_INFO* pTask = lock_task ();
 
 		if (!pTask->pMemoryContext)
 			return ERR_NO_GFX_CONTEXT;
@@ -675,6 +633,15 @@ __IRAM_CODE int swi_gfx_handler (
 	break;
 
 /// TMP !!!
+
+	case nAPI_GFX_BUILD_SPANS:   //(int nYmin, int nYmax);
+	{
+		GFX_BuildSpanStructure (nParam1, nParam2);
+	}
+	break;
+
+	default:
+		return ERR_NOT_IMPLEMENTED;
 	}
 
 	return 0;

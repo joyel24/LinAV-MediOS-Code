@@ -29,55 +29,81 @@
 
 
 
-ERROR_CODE API_TASK_YIELD       ()                                                              { swi_call(nAPI_TASK_YIELD); }
-ERROR_CODE API_TASK_CREATE      (void* pvCode, void* pParam, HTASK* phTask)                     { swi_call(nAPI_TASK_CREATE); }
-ERROR_CODE API_TASK_SUSPEND     (HTASK hTask)                                                   { swi_call(nAPI_TASK_SUSPEND); }
-ERROR_CODE API_TASK_CONTINUE    (HTASK hTask)                                                   { swi_call(nAPI_TASK_CONTINUE); }
-ERROR_CODE API_TASK_GETHANDLE   (HTASK* phTask)                                                 { swi_call(nAPI_TASK_GETHANDLE); }
-ERROR_CODE API_TASK_SLEEP       (unsigned long nMilliseconds)                                   { swi_call(nAPI_TASK_SLEEP); }
-ERROR_CODE API_TASK_SENDMESSAGE (HTASK hTask, MESSAGE* pMsg)                                    { swi_call(nAPI_TASK_SENDMESSAGE); }
-ERROR_CODE API_TASK_PEEKMESSAGE (MESSAGE* pMsg)                                                 { swi_call(nAPI_TASK_PEEKMESSAGE); }
-ERROR_CODE API_TASK_WAITMESSAGE (MESSAGE* pMsg)                                                 { swi_call(nAPI_TASK_WAITMESSAGE); }
-ERROR_CODE API_TASK_TERMINATE   ()                                                              { swi_call(nAPI_TASK_TERMINATE); }
-ERROR_CODE API_TASK_SETPRIORITY (HTASK hTask, int nPriority)                                    { swi_call(nAPI_TASK_SETPRIORITY); }
+///////////////////////////////////////////////////////
+////////////////////// KERNEL API /////////////////////
+ERROR_CODE API_TASK_YIELD           ()                                                                 { swi_call(nAPI_TASK_YIELD); }
+ERROR_CODE API_TASK_SLEEP           (unsigned long nMilliseconds)                                      { swi_call(nAPI_TASK_SLEEP); }
+ERROR_CODE API_TASK_SUSPEND         (HTASK hTask)                                                      { swi_call(nAPI_TASK_SUSPEND); }
+ERROR_CODE API_TASK_CONTINUE        (HTASK hTask)                                                      { swi_call(nAPI_TASK_CONTINUE); }
+ERROR_CODE API_TASK_SETPRIORITY     (HTASK hTask, int nPriority)                                       { swi_call(nAPI_TASK_SETPRIORITY); }
+ERROR_CODE API_TASK_GETHANDLE       (HTASK* phTask)                                                    { swi_call(nAPI_TASK_GETHANDLE); }
 
-ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes)                        { swi_call(nAPI_MALLOC); }
-ERROR_CODE API_FREE             (void* pvBuffer)                                                { swi_call(nAPI_FREE); }
-ERROR_CODE API_MEMAVAIL         (unsigned long* pnBytes)                                        { swi_call(nAPI_MEMAVAIL); }
-ERROR_CODE API_HEAP_CREATE      (HEAP* phHeap, unsigned long nBytes)                            { swi_call(nAPI_HEAP_CREATE); }
-ERROR_CODE API_HEAP_DESTROY     (HEAP hHeap)                                                    { swi_call(nAPI_HEAP_DESTROY); }
-ERROR_CODE API_HEAP_MALLOC      (HEAP hHeap, void** ppvBuffer, unsigned long nBytes)            { swi_call(nAPI_HEAP_MALLOC); }
-ERROR_CODE API_HEAP_FREE        (HEAP hHeap, void* pvBuffer)                                    { swi_call(nAPI_HEAP_FREE); }
-ERROR_CODE API_HEAP_AVAIL       (HEAP hHeap, unsigned long* pnBytes)                            { swi_call(nAPI_HEAP_AVAIL); }
+ERROR_CODE API_TASK_CREATE          (void* pvCode, void* pParam, HTASK* phTask)                        { swi_call(nAPI_TASK_CREATE); }
+ERROR_CODE API_TASK_TERMINATE       ()                                                                 { swi_call(nAPI_TASK_TERMINATE); }
 
-ERROR_CODE API_PIPE_CREATE      (HPIPE* phPipe)                                                 { swi_call(nAPI_PIPE_CREATE); }
-ERROR_CODE API_PIPE_DELETE      (HPIPE hPipe)                                                   { swi_call(nAPI_PIPE_DELETE); }
-ERROR_CODE API_PIPE_SEND        (HPIPE hPipe, void* pData, unsigned long nBytesToSend)          { swi_call(nAPI_PIPE_SEND); }
-ERROR_CODE API_PIPE_RECV        (HPIPE hPipe, void* pData, unsigned long nBytesToReceive)       { swi_call(nAPI_PIPE_RECV); }
-ERROR_CODE API_PIPE_TEST        (HPIPE hPipe)                                                   { swi_call(nAPI_PIPE_TEST); }
+int        API_OS_VERSION           ()                                                                 { swi_call(nAPI_OS_VERSION); }
 
-ERROR_CODE API_CRITSEC_CREATE   (HCRITSEC* phCritSec)                                           { swi_call(nAPI_CRITSEC_CREATE); }
-ERROR_CODE API_CRITSEC_DELETE   (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_DELETE); }
-ERROR_CODE API_CRITSEC_ENTER    (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_ENTER); }
-ERROR_CODE API_CRITSEC_LEAVE    (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_LEAVE); }
-ERROR_CODE API_CRITSEC_TRYENTER (HCRITSEC hCritSec)                                             { swi_call(nAPI_CRITSEC_TRYENTER); }
+ERROR_CODE API_TASK_SENDMESSAGE     (HTASK hTask, MESSAGE* pMsg)                                       { swi_call(nAPI_TASK_SENDMESSAGE); }
+ERROR_CODE API_TASK_PEEKMESSAGE     (MESSAGE* pMsg)                                                    { swi_call(nAPI_TASK_PEEKMESSAGE); }
+ERROR_CODE API_TASK_WAITMESSAGE     (MESSAGE* pMsg)                                                    { swi_call(nAPI_TASK_WAITMESSAGE); }
 
-ERROR_CODE API_TIME             (int cmd,struct av_tm * time_data)                              { swi_call(nAPI_TIME); }
-ERROR_CODE API_POWER            (int cmd,int * val)                                             { swi_call(nAPI_POWER); }
-ERROR_CODE API_MIXER            (int cmd, int dir, void * arg)                                  { swi_call(nAPI_MIXER); }
-ERROR_CODE API_DSP              (int cmd, void * arg)                                           { swi_call(nAPI_DSP); }
-ERROR_CODE API_EVT              (int cmd, void * arg, void * arg2)                              { swi_call(nAPI_EVT); }
+ERROR_CODE API_PIPE_CREATE          (HPIPE* phPipe)                                                    { swi_call(nAPI_PIPE_CREATE); }
+ERROR_CODE API_PIPE_DELETE          (HPIPE hPipe)                                                      { swi_call(nAPI_PIPE_DELETE); }
+ERROR_CODE API_PIPE_SEND            (HPIPE hPipe, void* pData, unsigned long nBytesToSend)             { swi_call(nAPI_PIPE_SEND); }
+ERROR_CODE API_PIPE_RECV            (HPIPE hPipe, void* pData, unsigned long nBytesToReceive)          { swi_call(nAPI_PIPE_RECV); }
+ERROR_CODE API_PIPE_TEST            (HPIPE hPipe)                                                      { swi_call(nAPI_PIPE_TEST); }
 
-ERROR_CODE API_RUN_GRV          (const char* pGRVPath, HTASK* phTask)                           { swi_call(nAPI_RUN_GRV); }
+ERROR_CODE API_CRITSEC_CREATE       (HCRITSEC* phCritSec)                                              { swi_call(nAPI_CRITSEC_CREATE); }
+ERROR_CODE API_CRITSEC_DELETE       (HCRITSEC hCritSec)                                                { swi_call(nAPI_CRITSEC_DELETE); }
+ERROR_CODE API_CRITSEC_ENTER        (HCRITSEC hCritSec)                                                { swi_call(nAPI_CRITSEC_ENTER); }
+ERROR_CODE API_CRITSEC_LEAVE        (HCRITSEC hCritSec)                                                { swi_call(nAPI_CRITSEC_LEAVE); }
+ERROR_CODE API_CRITSEC_TRYENTER     (HCRITSEC hCritSec)                                                { swi_call(nAPI_CRITSEC_TRYENTER); }
 
-ERROR_CODE API_SOUND_PLAY       (void* pvBuffer, unsigned long nBytes, unsigned long nFlags)    { swi_call(nAPI_SOUND_PLAY); }
-ERROR_CODE API_SOUND_PAUSE      ()                                                              { swi_call(nAPI_SOUND_PAUSE); }
-ERROR_CODE API_SOUND_STOP       ()                                                              { swi_call(nAPI_SOUND_STOP); }
+ERROR_CODE API_VAR_GET              (const char* pVarName, char* pVarValue, int nBufferSize)           { swi_call(nAPI_VAR_GET); }
+ERROR_CODE API_VAR_SET              (const char* pVarName, const char* pVarValue)                      { swi_call(nAPI_VAR_SET); }
+////////////////////// KERNEL API /////////////////////
+///////////////////////////////////////////////////////
 
-ERROR_CODE API_VAR_GET          (const char* pVarName, char* pVarValue, int nBufferSize)        { swi_call(nAPI_VAR_GET); }
-ERROR_CODE API_VAR_SET          (const char* pVarName, const char* pVarValue)                   { swi_call(nAPI_VAR_SET); }
+///////////////////////////////////////////////////////
+////////////////////// MEMORY API /////////////////////
+ERROR_CODE API_MALLOC               (void** ppvBuffer, unsigned long nBytes)                           { swi_call(nAPI_MALLOC); }
+ERROR_CODE API_FREE                 (void* pvBuffer)                                                   { swi_call(nAPI_FREE); }
+ERROR_CODE API_MEMAVAIL             (unsigned long* pnBytes)                                           { swi_call(nAPI_MEMAVAIL); }
+ERROR_CODE API_HEAP_CREATE          (HEAP* phHeap, unsigned long nBytes)                               { swi_call(nAPI_HEAP_CREATE); }
+ERROR_CODE API_HEAP_DESTROY         (HEAP hHeap)                                                       { swi_call(nAPI_HEAP_DESTROY); }
+ERROR_CODE API_HEAP_MALLOC          (HEAP hHeap, void** ppvBuffer, unsigned long nBytes)               { swi_call(nAPI_HEAP_MALLOC); }
+ERROR_CODE API_HEAP_FREE            (HEAP hHeap, void* pvBuffer)                                       { swi_call(nAPI_HEAP_FREE); }
+ERROR_CODE API_HEAP_AVAIL           (HEAP hHeap, unsigned long* pnBytes)                               { swi_call(nAPI_HEAP_AVAIL); }
+////////////////////// MEMORY API /////////////////////
+///////////////////////////////////////////////////////
 
-ERROR_CODE API_FILE             (int cmd,void * data1,void * data2)                             { swi_call(nAPI_FILE); }
+///////////////////////////////////////////////////////
+////////////////////// FILE API ///////////////////////
+ERROR_CODE API_FILE                 (int cmd,void * data1,void * data2)                                { swi_call(nAPI_FILE); }
+ERROR_CODE API_RUN_GRV              (const char* pGRVPath, HTASK* phTask)                              { swi_call(nAPI_RUN_GRV); }
+////////////////////// FILE API ///////////////////////
+///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+///////////////////// DEVICE API //////////////////////
+ERROR_CODE API_TIME                 (int cmd,struct av_tm * time_data)                                 { swi_call(nAPI_TIME); }
+ERROR_CODE API_POWER                (int cmd,int * val)                                                { swi_call(nAPI_POWER); }
+ERROR_CODE API_DSP                  (int cmd, void * arg)                                              { swi_call(nAPI_DSP); }
+ERROR_CODE API_EVT                  (int cmd, void * arg, void * arg2)                                 { swi_call(nAPI_EVT); }
+ERROR_CODE API_SET_LCD_BRIGHTNESS   (int nBrightness)                                                  { swi_call(nAPI_SET_LCD_BRIGHTNESS); }
+ERROR_CODE API_GET_LCD_BRIGHTNESS   (int* pnBrightness)                                                { swi_call(nAPI_GET_LCD_BRIGHTNESS); }
+///////////////////// DEVICE API //////////////////////
+///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+////////////////////// SOUND API //////////////////////
+ERROR_CODE API_SOUND_PLAY           (void* pvBuffer, unsigned long nBytes, unsigned long nFlags)       { swi_call(nAPI_SOUND_PLAY); }
+ERROR_CODE API_SOUND_PAUSE          ()                                                                 { swi_call(nAPI_SOUND_PAUSE); }
+ERROR_CODE API_SOUND_STOP           ()                                                                 { swi_call(nAPI_SOUND_STOP); }
+
+ERROR_CODE API_MIXER                (int cmd, int dir, void * arg)                                     { swi_call(nAPI_MIXER); }
+////////////////////// SOUND API //////////////////////
+///////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////
 /////////////////////// GFX API ///////////////////////
@@ -126,6 +152,8 @@ ERROR_CODE API_GET_FONT_COLOR       (COLOR* pnColor)                            
 ERROR_CODE API_RENDER_SCENE         ()                                                                 { swi_call(nAPI_RENDER_SCENE); }
 
 ERROR_CODE API_GFX                  (int cmd, void* p, void * pvData)                                  { swi_call(nAPI_GFX); }
+
+ERROR_CODE API_GFX_BUILD_SPANS      (int nYmin, int nYmax)                                             { swi_call(nAPI_GFX_BUILD_SPANS); }
 /////////////////////// GFX API ///////////////////////
 ///////////////////////////////////////////////////////
 

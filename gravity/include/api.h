@@ -34,7 +34,7 @@ ERROR_CODE API_TASK_GETHANDLE       (HTASK* phTask);
 ERROR_CODE API_TASK_CREATE          (void* pvCode, void* pParam, HTASK* phTask);
 ERROR_CODE API_TASK_TERMINATE       ();
 
-//#define nAPI_OS_VERSION           (nAPI_KERNEL_section+20)
+int        API_OS_VERSION           ();
 
 ERROR_CODE API_TASK_SENDMESSAGE     (HTASK hTask, MESSAGE* pMsg);
 ERROR_CODE API_TASK_PEEKMESSAGE     (MESSAGE* pMsg);
@@ -62,9 +62,6 @@ ERROR_CODE API_VAR_SET              (const char* pVarName, const char* pVarValue
 ERROR_CODE API_MALLOC               (void** ppvBuffer, unsigned long nBytes);
 ERROR_CODE API_FREE                 (void* pvBuffer);
 ERROR_CODE API_MEMAVAIL             (unsigned long* pnBytes);
-//#define nAPI_MEMSET               (nAPI_MEMORY_section+3)
-//#define nAPI_MEMCPY               (nAPI_MEMORY_section+4)
-
 ERROR_CODE API_HEAP_CREATE          (HEAP* phHeap, unsigned long nBytes);
 ERROR_CODE API_HEAP_DESTROY         (HEAP hHeap);
 ERROR_CODE API_HEAP_MALLOC          (HEAP hHeap, void** ppvBuffer, unsigned long nBytes);
@@ -86,6 +83,8 @@ ERROR_CODE API_TIME                 (int cmd,struct av_tm * time_data);
 ERROR_CODE API_POWER                (int cmd,int * val);
 ERROR_CODE API_DSP                  (int cmd, void * arg);
 ERROR_CODE API_EVT                  (int cmd, void * arg, void * arg2);
+ERROR_CODE API_SET_LCD_BRIGHTNESS   (int nBrightness);
+ERROR_CODE API_GET_LCD_BRIGHTNESS   (int* pnBrightness);
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 
@@ -108,6 +107,7 @@ ERROR_CODE API_GFX_GET_CONTEXT      (GFX_CONTEXT* pCtx);
 ERROR_CODE API_GFX_GET_PHYS_CONTEXT (GFX_CONTEXT* pCtx);
 ERROR_CODE API_GFX_SET_DRAWING_RECT (GFX_RECT* pRect);
 ERROR_CODE API_GFX_GET_DRAWING_RECT (GFX_RECT* pRect);
+ERROR_CODE API_GFX_TASK_FROM_POINT  (int nX, int nY, HTASK* phTask);
 
 ERROR_CODE API_GFX_SET_PLANE        (int nPlane);
 ERROR_CODE API_GFX_GET_PLANE        (int* pnPlane);
@@ -119,7 +119,7 @@ ERROR_CODE API_GFX_GET_PLANE_POS    (int nPlane, int* pnX, int* pnY);
 
 ERROR_CODE API_GFX_UPDATE_RECT      (GFX_RECT* pArea);
 ERROR_CODE API_GFX_MOVE             (GFX_POINT* pOrigin);
-ERROR_CODE API_GFX_FOREGROUND       ();
+ERROR_CODE API_GFX_SET_Z_ORDER      (E_Z_ORDER order);
 
 ERROR_CODE API_GFX_FASTBLIT         (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, GFX_POINT* pOrigin);
 ERROR_CODE API_GFX_BLENDBLIT        (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, GFX_BLENDPARAMS* pParams);
@@ -146,6 +146,8 @@ ERROR_CODE API_GET_FONT_COLOR       (COLOR* pnColor);
 ERROR_CODE API_RENDER_SCENE         ();
 
 ERROR_CODE API_GFX                  (int cmd, void* ptr, void * pvData);
+
+ERROR_CODE API_GFX_BUILD_SPANS      (int nYmin, int nYmax);
 /////////////////////// GFX API ///////////////////////
 ///////////////////////////////////////////////////////
 

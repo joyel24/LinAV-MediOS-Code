@@ -259,7 +259,7 @@ __IRAM_CODE void GFX_BuildSpanStructure (int nYmin, int nYmax)
 	}
 }
 
-__IRAM_CODE void GFX_init ()
+void GFX_init ()
 {
 	printk ("GFX subsystem starting...\n");
 
@@ -321,7 +321,7 @@ __IRAM_CODE void GFX_init ()
 	g_pZRectList = pBackgroundZ;
 	__sti();
 //	printk ("GFX Manager [2]\n");
-	GFX_BuildSpanStructure (0, SCR_HEIGHT);
+	API_GFX_BUILD_SPANS (0, SCR_HEIGHT);
 //	printk ("GFX Manager [3]\n");
 
 	open_graphics ();
@@ -603,6 +603,7 @@ printk ("GFX_UpdateContext [4] UPD:(%d,%d,%d,%d)\n",
 	API_CRITSEC_LEAVE (g_pCS_GFX);
 }
 
+/*
 __IRAM_CODE void GFX_DumpSpans ()
 {
 	API_CRITSEC_ENTER (g_pCS_GFX);
@@ -626,6 +627,7 @@ __IRAM_CODE void GFX_DumpSpans ()
 
 	API_CRITSEC_LEAVE (g_pCS_GFX);
 }
+*/
 
 __IRAM_CODE void GFX_AddContext (TASK_INFO* pOwner, int nX, int nY)
 {
