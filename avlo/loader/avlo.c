@@ -338,15 +338,15 @@ void iniHD(void)
     inifatinfo();
     
     usbDisableA();
-    //for (c=0;c<0x100;c++) {}
+    for (c=0;c<0x1000;c++) {}
     ataSelectHDDA();
-    //for (c=0;c<0x100;c++) {}
-    /*usbEnableA();
-    for (c=0;c<0x14000;c++) {}*/
+    for (c=0;c<0x1000;c++) {}
+    usbEnableA();
+    for (c=0;c<0x1000;c++) {}
     ataPowerUpHDDA();
-    for (c=0;c<0x100;c++) {}
-    /*usbDisableA();
-    for (c=0;c<0x14000;c++) {}*/
+    for (c=0;c<0x1000;c++) {}
+    usbDisableA();
+    for (c=0;c<0x14000;c++) {}
     ataReadMBR();
     
     
