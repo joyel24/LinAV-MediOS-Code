@@ -1,5 +1,5 @@
 /*
-* helloworld.c
+* graph.c
 *
 * linav - http://linav.sourceforge.net
 * Copyright (c) 2004 by Zakk Roberts
