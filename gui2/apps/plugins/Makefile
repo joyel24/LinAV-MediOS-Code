@@ -20,6 +20,8 @@ all: $(TARGET)
 	@$(MAKE) -C bluecube/ all
 	@mv -f bluecube/tetris ../../build/avwm/plugins/
 	@$(MAKE) -C test/ all
+	@$(MAKE) -C mp3_player/ all
+	@mv -f mp3_player/mp3_play ../../build/avwm/plugins/play
 
 $(TARGET) : $(OBJS)
 	$(GCC) $@.o -o $@  $(LDFLAGS)   
@@ -30,6 +32,7 @@ clean:
 	@rm -Rf ../../build/avwm/plugins
 	@$(MAKE) -C bluecube/ clean
 	@$(MAKE) -C test/ clean
+	@$(MAKE) -C mp3_player/ clean
         
 
 .c.o:
