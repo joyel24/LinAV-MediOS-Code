@@ -50,6 +50,11 @@
 #define newSpriteData(name)      char name[]
 #define PALETTE                  unsigned int
 
+#ifndef AV_SCREEN
+#define FORCE_REDRAW    1
+#define UPDATE_ONLY     0
+#endif
+
 struct spriteBuffer {
 	unsigned int  data;
 	int           width;
@@ -129,7 +134,7 @@ void  destroyGC      (GC_ID gc);
 void setPalette      (int palette[256][3],int size);
 
 #ifndef AV_SCREEN
-void lcd_update(void);
+void lcd_update(int type, int x_ini, int y_ini, int w, int h);
 #endif
 
 /* drawings */
