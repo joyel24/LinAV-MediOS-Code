@@ -24,3 +24,6 @@ extern u32 uartGetchT();
 extern void uartOutchT(u32 data);
 extern void uartOutsT(char* string);
 
+extern void stringPutHex(char *buffer, u32 value, u32 num);
+extern void stringPutHexA(char *buffer, u32 value, u32 num);
+
