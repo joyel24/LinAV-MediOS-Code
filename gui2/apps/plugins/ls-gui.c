@@ -102,7 +102,7 @@ void showArrow(int type)
 {
     int h=0,w=0;
     cops->getStringS("M", &w, &h);
-    
+
     switch(type)
     {
         case UP_ARROW:
@@ -271,32 +271,32 @@ int doLs(char * name)
 
     qsort((char *) dir_list, dir_listused, sizeof(char *), namesort);
     qsort((char *) file_list, file_listused, sizeof(char *), namesort);
-    
+
     listused=dir_listused+file_listused;
-    
+
     list=(struct dir_entry*)malloc((sizeof(struct dir_entry))*listused);
-    
+
     if (list == NULL)
     {
         fprintf(stderr, "No memory for ls buffer\n");
         return -1;
     }
-    
+
     for(i=0;i<dir_listused;i++)
     {
         list[i].name=dir_list[i];
         list[i].type=TYPE_DIR;
     }
-    
+
     for(i=0;i<file_listused;i++)
     {
         list[dir_listused+i].name=file_list[i];
         list[dir_listused+i].type=TYPE_FILE;
     }
-       
+
     free(dir_list);
     free(file_list);
-    
+
     return 0;
 }
 
@@ -526,6 +526,7 @@ int eventHandler(int evt)
     cops->putS(BLACK, WHITE,0, 220, tmp);*/
     int w = 0;
     int h = 10;
+    char str[40];
 
     cops->getStringS("M", &w, &h);
 
@@ -533,8 +534,6 @@ int eventHandler(int evt)
     {
         case BTN_UP:
             nselect--;
-            if(listused>MAXPOS)
-                    showArrow(DOWN_ARROW);
 
             if(nselect<0)
             {
@@ -542,14 +541,14 @@ int eventHandler(int evt)
                 pos--;
                 if(pos<0) // we are at the beg => do wrapping
                 {
-                    pos=listused-MAXPOS-1;
+                    pos=listused-MAXPOS;//-1;
                     if(pos<0)
                     {
                         pos=0;
-                        nselect=listused-pos-1;
+                        nselect=listused-1;
                     }
                     else
-                        nselect=listused-pos-2;
+                        nselect=listused-pos-1;
                     printAllName(pos,nselect);
                     //pos=0;
                 }
@@ -565,17 +564,30 @@ int eventHandler(int evt)
                 printAName(pos+nselect+1,nselect+1,0,0);
                 printAName(pos+nselect,nselect,0,1);
             }
-            
-            if(pos == 0 && nselect == 0)
+
+//            if(pos == 0 && nselect == 0)
+            sprintf(str,"pos: %2d select %2d used: %2d", pos, nselect, listused);
+            cops->fillRect(COLOR_BLUE, 0, 229, 250,12);
+            cops->putS(COLOR_WHITE, COLOR_BLUE,5, 230, str);
+
+            if( (listused>MAXPOS) &&
+                (pos+MAXPOS < listused) )
+                showArrow(DOWN_ARROW);
+            else
+                hideArrow(DOWN_ARROW);
+
+            if(pos == 0)
                 hideArrow(UP_ARROW);
+            else
+                showArrow(UP_ARROW);
 
             break;
+
         case BTN_DOWN:
-            if(listused>MAXPOS)
-                    showArrow(UP_ARROW);
             nselect++;
             if(nselect+pos>=listused)
             {
+                // jump to beginning
                 pos=0;
                 nselect=0;
                 printAllName(pos,nselect);
@@ -586,7 +598,7 @@ int eventHandler(int evt)
                 {
                     nselect=MAXPOS-1;
                     pos++;
-                    if(pos>=(listused-MAXPOS)) // we are at the end => do wrapping
+                    if(pos+MAXPOS>listused) // we are at the end => do wrapping
                     {
                         //pos=listused-MAXPOS-1;
                         pos=0;
@@ -606,9 +618,28 @@ int eventHandler(int evt)
                     printAName(pos+nselect,nselect,0,1);
                 }
             }
-            if(pos==(listused-MAXPOS-1) && nselect==(MAXPOS-1))
+
+            sprintf(str,"pos: %2d select %2d used: %2d", pos, nselect, listused);
+            cops->fillRect(COLOR_BLUE, 0, 229, 250,12);
+            cops->putS(COLOR_WHITE, COLOR_BLUE,5, 230, str);
+
+            if(pos>0)
+                showArrow(UP_ARROW);
+            else
+                hideArrow(UP_ARROW);
+/*
+            if(pos+MAXPOS>=listused && nselect==(MAXPOS-1))
                 hideArrow(DOWN_ARROW);
+*/
+            if( (listused>MAXPOS) &&
+                (pos+MAXPOS < listused) )
+                showArrow(DOWN_ARROW);
+            else
+                hideArrow(DOWN_ARROW);
+
+
             break;
+
         case BTN_RIGHT:
             if(chdir(list[pos+nselect].name)<0)
                 handle_type_other(list[pos+nselect].name);
@@ -678,14 +709,22 @@ int main(int argc,char * * argv)
 
         listused = 0;
 
-        chdir(argv[1]);
+        if(strlen(argv[1]) == 1)
+        {
+            if(argv[0] = '/')
+                chdir("./"); // handle spezial case if path only / without dot
+            else
+                chdir(argv[1]);
+        }
+        else
+            chdir(argv[1]);
 
         if(doLs("./")<0)
         {
             listused = 0;
             return -1;
         }
-        
+
 //        cops->getStringS("M", &w, &h);
         //cops->fillRect(WHITE,5, h+6+MENU_SHADOW , 315,240-h-6-MENU_SHADOW);
         printAllName(pos,nselect);
@@ -696,7 +735,7 @@ int main(int argc,char * * argv)
         PACK(cops,NULL);
         
         cleanList();
-        STOPME(cops);
+//        STOPME(cops);
         return 0;
     }
     STOPME(cops)
