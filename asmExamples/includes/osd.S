@@ -31,6 +31,7 @@
 @ osdSetBack2SizeT (r0=width, r1=height)
 @ osdSetBack2PositionT (r0=x, r1=y)
 @
+@ osdSetCursorConfigT (r0=controlReg)
 @ osdSetCursorSizeT (r0=width, r1=height)
 @ osdSetCursorPositionT (r0=x, r1=y)
 @
@@ -94,6 +95,17 @@ osdSetScreenPositionT:
         ldr r2, =0x306a0
         strh r0, [r2]
         strh r1, [r2, #2]
+        pop {r2}
+        bx lr
+
+@ osdSetCursorConfigT r0=config
+@
+.globl osdSetCursorConfigT
+.thumb_func
+osdSetCursorConfigT:
+        push {r2}
+        ldr r2, =0x30688
+        strh r0, [r2]
         pop {r2}
         bx lr
         
@@ -173,7 +185,7 @@ osdSetMainOffsetT:
         lsr r2, #8
         lsl r2, #8
         orr r2, r0
-        strh r0, [r1]
+        strh r2, [r1]
         pop {r0, r1, r2}
         bx lr
 
@@ -195,7 +207,7 @@ osdSetMain2OffsetT:
         lsr r2, #24
         lsl r0, #8
         orr r2, r0
-        strh r0, [r1]
+        strh r2, [r1]
         pop {r0, r1, r2}
         bx lr
 
@@ -216,7 +228,7 @@ osdSetBackOffsetT:
         lsr r2, #8
         lsl r2, #8
         orr r2, r0
-        strh r0, [r1]
+        strh r2, [r1]
         pop {r0, r1, r2}
         bx lr
 
@@ -238,7 +250,7 @@ osdSetBack2OffsetT:
         lsr r2, #24
         lsl r0, #8
         orr r2, r0
-        strh r0, [r1]
+        strh r2, [r1]
         pop {r0, r1, r2}
         bx lr
         

@@ -86,6 +86,10 @@ initGame:
         str r1, [r0, #16]
         str r1, [r0, #20]
 
+        ldr r1, =0x6000
+        ldr r0, =delayVal
+        str r1, [r0]
+
         callThumb r1, lcdClsT
 
 @ Init the brickmap, then draw the bricks...
@@ -129,11 +133,20 @@ loopb:
         add r0, #0x14
         add r1, #0x12
         callThumb r4, osdSetMain2PositionT
-        
-        ldr r2, =0x4000
+
+        ldr r3, =delayVal        
+        ldr r2, [r3]
 del1:   sub r2, #1
         bpl del1
-
+        
+        ldr r2, [r3]
+        sub r2, #1                      @ Speed up...
+        cmp r2, #0
+         blt nosav
+        str r2, [r3]
+nosav:
+        
+        
         callThumb r1, buttonsGetStatusT
         ldr r1, =0x777
         eor r1, r0
@@ -280,7 +293,8 @@ noov2:
 
 lostBall:
         b initGame
-        
+
+delayVal:   .word 0x6000
 
 @ ------------------------------------------------------------------------------
 checkBrick:

@@ -32,7 +32,20 @@ lcdInc = 1
 
 lcdVideoBuffer  = ramStart + 0xfc0000
 lcdVideoBuffer2 = ramStart + 0xc00000
+lcdVideoBuffer3 = ramStart + 0xa00000
 
+@ lcdRectfST
+@
+.globl lcdRectfST
+.thumb_func
+lcdRectfsT:
+        push {lr}
+        push {r4, r5}
+        ldr r4, [sp, #12]
+        callThumb r5, lcdRectfT
+        pop {r4, r5}
+        pop {r0}
+        bx r0
 
 @ lcdScrollUpT r0=lines, r1=color
 @
