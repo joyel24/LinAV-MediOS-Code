@@ -102,12 +102,12 @@ void set_buttondebounce(void)
 
 void set_keyrepeat(void)
 {
-	new_slider_widget(KEY_REPEAT, "Key Repeat", 0, 5);
+	new_slider_widget(KEY_REPEAT, "Key Repeat", 0, 10);
 }
 
 void set_keyfreq(void)
 {
-	new_slider_widget(KEY_FREQ, "Key Freqt", 0, 100);
+	new_slider_widget(KEY_FREQ, "Key Freqt", 0, 20);
 }
 
 static void event_handler(GR_EVENT *event)
@@ -224,10 +224,10 @@ static void draw_batt_status()
    int fd;
    int power = 0;
 
-   fd=open("/dev/avpower",O_RDONLY | O_NONBLOCK);
+   fd=open("/dev/avtsc",O_RDONLY | O_NONBLOCK);
    if (fd < 0)
 	{
-      printf("Can't open /dev/avpower\n");
+      printf("Can't open /dev/avtsc\n");
    }
 
 	if(ioctl(fd,AV_LEVEL_BAT0_IOC,&power)<0)
@@ -338,8 +338,9 @@ main(int argc, char **argv)
 	GrSetGCUseBackground(root_gc, GR_TRUE);
 
 	GrSetGCForegroundPixelVal(root_gc, AV3XX_COLOR_WHITE);
-//	GrSetGCForeground(root_gc, WHITE);
 	GrGetScreenInfo(&screen_info);
+
+//   GrHideCursor();
 
 	root_wid = GrNewWindowEx(GR_WM_PROPS_APPFRAME |
 			    GR_WM_PROPS_CAPTION |

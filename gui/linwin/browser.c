@@ -38,6 +38,7 @@ static GR_SCREEN_INFO screen_info;
 #define FILE_TYPE_DIRECTORY 1
 #define FILE_TYPE_OTHER 2
 #define MAX_ENTRIES 200
+#define MAX_BROWSER_ENTRIES 12
 
 #define PATH "/mnt/LinAv"
 
@@ -138,24 +139,21 @@ static void browser_draw_browser()
 	height += 2;
 
 	y = 5;
-	for (i = begin; i < begin + 6 && i < browser_nbEntries; i++) {
+	for (i = begin; i < begin + MAX_BROWSER_ENTRIES && i < browser_nbEntries; i++)
+	{
 		if (i == browser_currentSelection) {
        	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
-//			GrSetGCForeground(browser_gc, WHITE);
 			GrFillRect(browser_wid, browser_gc, 0, y + 2,
 				   screen_info.cols, height);
        	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
-//			GrSetGCForeground(browser_gc, BLACK);
 			GrSetGCUseBackground(browser_gc, GR_FALSE);
 		} else {
 			GrSetGCUseBackground(browser_gc, GR_TRUE);
 			GrSetGCMode(browser_gc, GR_MODE_SET);
        	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
-//			GrSetGCForeground(browser_gc, BLACK);
 			GrFillRect(browser_wid, browser_gc, 0, y + 2,
 				   screen_info.cols, height);
        	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
-//			GrSetGCForeground(browser_gc, WHITE);
 		}
 
 		y += height;
@@ -170,7 +168,7 @@ static void browser_draw_browser()
 		}
 
      	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_GREY);
-//		GrSetGCForeground(browser_gc, GRAY);
+
 		switch (browser_entries[i].type) {
 		case FILE_TYPE_PROGRAM:
 			GrText(browser_wid, browser_gc, 1, y, "x", -1,
@@ -195,11 +193,8 @@ static void browser_draw_browser()
 	GrSetGCUseBackground(browser_gc, GR_TRUE);
 	GrSetGCMode(browser_gc, GR_MODE_SET);
   	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
-//	GrSetGCForeground(browser_gc, BLACK);
-	GrFillRect(browser_wid, browser_gc, 0, y + 2, screen_info.cols,
-		   screen_info.rows - (y + 2));
+	GrFillRect(browser_wid, browser_gc, 0, y + 2, screen_info.cols, screen_info.rows - (y + 2));
   	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_BLACK);
-//	GrSetGCForeground(browser_gc, WHITE);
 }
 
 static void browser_do_draw(GR_EVENT *event)
@@ -276,27 +271,7 @@ static int browser_do_keystroke(GR_EVENT * event)
    GR_EVENT nextevent;
 	int ret = 0;
 
-	// Filter double Events
-/*	delay(15000);
-   GrPeekEvent(&nextevent);
-
-	do
-	{
-		if(nextevent.type == GR_EVENT_TYPE_KEY_DOWN)
-		{
-			// remove event
-			GrCheckNextEvent(&nextevent);
-		}
-
-		GrPeekEvent(&nextevent);
-	}
-	while(nextevent.type == GR_EVENT_TYPE_KEY_DOWN);
-*/
 	switch (event->keystroke.ch) {
-
-	case 'l':
-
-      browser_currentSelection = 0; // first entry is "go to parent"
 
 	case '2':
 
@@ -316,11 +291,14 @@ static int browser_do_keystroke(GR_EVENT * event)
 		ret = 1;
 		break;
 
+	case 'l':
+
+      browser_currentSelection = 0; // first entry is "go to parent"
+
+		// no break here !!!
+
    case '1':
    case 'r':
-
-//		GrText(browser_wid, browser_gc, 8, yPosDebug,	"pressed f1!", -1, GR_TFASCII);
-//		yPosDebug+=10;
 
 		browser_selection_activated(browser_currentSelection);
 
@@ -339,7 +317,7 @@ static int browser_do_keystroke(GR_EVENT * event)
 		if (browser_currentSelection < browser_nbEntries - 1) {
 			browser_currentSelection++;
 
-			if (browser_top >= 5) {
+			if (browser_top > MAX_BROWSER_ENTRIES-2) {
 				browser_currentBase++;
 			} else
 				browser_top++;
@@ -364,22 +342,6 @@ static int browser_do_keystroke(GR_EVENT * event)
 		break;
 	}
 
-	// Filter double Events
-/*	delay(15000);
-	GrPeekEvent(&nextevent);
-
-	do
-	{
-		if(nextevent.type == GR_EVENT_TYPE_KEY_DOWN)
-		{
-			// remove event
-			GrCheckNextEvent(&nextevent);
-		}
-
-		GrPeekEvent(&nextevent);
-	}
-	while(nextevent.type == GR_EVENT_TYPE_KEY_DOWN);
-*/
 	return ret;
 }
 
@@ -391,7 +353,6 @@ void new_browser_window(void)
 	browser_gc = GrNewGC();
 	GrSetGCUseBackground(browser_gc, GR_TRUE);
   	GrSetGCForegroundPixelVal(browser_gc, AV3XX_COLOR_WHITE);
-//	GrSetGCForeground(browser_gc, WHITE);
 
 	browser_wid = pz_new_window(0, HEADER_TOPLINE + 1, screen_info.cols,
                                     screen_info.rows - (HEADER_TOPLINE + 1),

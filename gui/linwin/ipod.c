@@ -93,17 +93,19 @@ int ipod_get_mouseParam_freq(void)
 {
 	struct mouseParam param;
 
-   int fd;
+   int fd = 0;
 
    fd=open("/dev/mouse",O_RDONLY | O_NONBLOCK);
    if (fd < 0)
 	{
-      printf("Can't open /dev/avrtc\n");
+      printf("Can't open /dev/mouse\n");
+		return fd;
    }
 
 	if(ioctl(fd,AV_GET_MOUSE_PARAM,&param)<0)
 	{
       printf("Error getting mouse params\n");
+		return fd;
    }
    close(fd);
 
@@ -114,17 +116,19 @@ int ipod_get_mouseParam_repeat(void)
 {
 	struct mouseParam param;
 
-   int fd;
+   int fd = 0;
 
    fd=open("/dev/mouse",O_RDONLY | O_NONBLOCK);
    if (fd < 0)
 	{
-      printf("Can't open /dev/avrtc\n");
+      printf("Can't open /dev/mouse\n");
+		return fd;
    }
 
 	if(ioctl(fd,AV_GET_MOUSE_PARAM,&param)<0)
 	{
       printf("Error getting mouse params\n");
+		return fd;
    }
    close(fd);
 
@@ -133,7 +137,7 @@ int ipod_get_mouseParam_repeat(void)
 
 int ipod_set_mouseParam(int freq, int repeat)
 {
-   int fd;
+   int fd = 0;
 	struct mouseParam param;
 	param.freq = freq;
 	param.repeated_press = repeat;
@@ -141,16 +145,18 @@ int ipod_set_mouseParam(int freq, int repeat)
    fd=open("/dev/mouse",O_RDONLY | O_NONBLOCK);
    if (fd < 0)
 	{
-      printf("Can't open /dev/avrtc\n");
+      printf("Can't open /dev/mouse\n");
+		return fd;
    }
 
-	if(ioctl(fd,AV_SET_MOUSE_PARAM,param)<0)
+	if(ioctl(fd,AV_SET_MOUSE_PARAM,&param)<0)
 	{
       printf("Error setting mouse params\n");
+		return fd;
    }
    close(fd);
 
-	return 0;
+	return fd;
 }
 
 int ipod_get_backlight(void)
@@ -234,13 +240,16 @@ int ipod_load_settings(void)
 
 		fclose(fp);
 	}
-	else {
+	else
+	{
 		printf("Failed to open %s to read settings, using defaults.(%d)\n", IPOD_SETTINGS_FILE, errno);
 
-		for (x = 1 ; x <= 100 ; x++) {
+		for (x = 1 ; x <= 100 ; x++)
+		{
 			ipod_set_setting(x, 0);
-		}
+   	}
 
+		// default values if reading fails
 		ipod_set_setting(CONTRAST, ipod_get_contrast());
 		ipod_set_setting(CLICKER, 1);
 		ipod_set_setting(WHEEL_DEBOUNCE, 6);
@@ -248,8 +257,8 @@ int ipod_load_settings(void)
 		ipod_set_setting(BACKLIGHT_TIMER, 0);
 		ipod_set_setting(REPEAT, 1);
 		ipod_set_setting(VOLUME, 80);
-      ipod_set_setting(KEY_FREQ, ipod_get_mouseParam_freq());
-      ipod_set_setting(KEY_REPEAT, ipod_get_mouseParam_repeat());
+      ipod_set_setting(KEY_FREQ, 6);
+      ipod_set_setting(KEY_REPEAT, 3);
 	}
 }
 

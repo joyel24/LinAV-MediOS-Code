@@ -48,7 +48,7 @@ extern void reboot_ipod(void);
 
 extern int yPosDebug;
 
-#define MAX_MENU_ITEMS 5
+#define MAX_MENU_ITEMS 10
 
 struct menu_item {
 	char *text;
@@ -116,8 +116,8 @@ static struct menu_item settings_menu[] = {
 	{"Repeat", ACTION_MENU_CHECK, toggle_mp3_repeat, REPEAT},
 	{"Contrast", ACTION_MENU, set_contrast, -1},
 //	{"Button Debounce", ACTION_MENU, set_buttondebounce, -1},
-//	{"Key Freq", ACTION_MENU, set_keyfreq, -1},
-//	{"Key Repeat", ACTION_MENU, set_keyrepeat, -1},
+	{"Key Freq", ACTION_MENU, set_keyfreq, -1},
+	{"Key Repeat", ACTION_MENU, set_keyrepeat, -1},
 #if 0
 	{"Alarms", SUB_MENU_HEADER, 0, -1},
 	{"Contacts", SUB_MENU_HEADER, 0, -1},
@@ -174,7 +174,7 @@ static void draw_menu()
 	height += 5;
 
 	i = 0;
-	while (i <= 5)
+	while (i <= MAX_MENU_ITEMS)
 	{
 		GrSetGCForegroundPixelVal(menu_gc, AV3XX_COLOR_WHITE);
 		GrFillRect(menu_wid, menu_gc, 0,
@@ -245,45 +245,26 @@ static void draw_menu()
 
 static void menu_do_draw()
 {
-	pz_draw_header("LinWin V0.15");
+   char tmp[20];
 
-	draw_menu();
-}
-
-static int menu_do_keystroke(GR_EVENT * event)
-{
-   char tmp[10];
-
-   GR_EVENT nextevent;
-	static int rcount = 0;
-	static int lcount = 0;
-	int ret = 0;
+	pz_draw_header("LinWin V0.16");
 /*
 	GrSetGCForegroundPixelVal(menu_gc, AV3XX_COLOR_BLACK);
    sprintf(tmp,"freq: %d repeat: %d", ipod_get_mouseParam_freq(), ipod_get_mouseParam_repeat());
    GrText(menu_wid, menu_gc, 8, 220, tmp, -1, GR_TFASCII);
 	GrSetGCForegroundPixelVal(menu_gc, AV3XX_COLOR_WHITE);
 */
-//	char tmp[100];
-//	int i = 0;
-//   int yPosDebug2 = 110;
+	draw_menu();
+}
 
-/*
-	// Filter double Events
-	GrPeekEvent(&nextevent);
-
-	do
-	{
-		if(nextevent.type == GR_EVENT_TYPE_KEY_DOWN)
-		{
-			// remove event
-			GrCheckNextEvent(&nextevent);
-		}
-
-		GrPeekEvent(&nextevent);
-	}
-	while(nextevent.type == GR_EVENT_TYPE_KEY_DOWN);
-*/
+static int menu_do_keystroke(GR_EVENT * event)
+{
+   GR_EVENT nextevent;
+	static int rcount = 0;
+	static int lcount = 0;
+	int ret = 0;
+	int freq = 0;
+	int repeat = 0;
 
 	switch (event->keystroke.ch) {
 	case '1':
@@ -410,22 +391,7 @@ static int menu_do_keystroke(GR_EVENT * event)
 		}
 		break;
 	}
-/*
-	// Filter double Events
-	GrPeekEvent(&nextevent);
 
-	do
-	{
-		if(nextevent.type == GR_EVENT_TYPE_KEY_DOWN)
-		{
-			// remove event
-			GrCheckNextEvent(&nextevent);
-		}
-
-		GrPeekEvent(&nextevent);
-	}
-	while(nextevent.type == GR_EVENT_TYPE_KEY_DOWN);
-*/
 	return ret;
 }
 
@@ -436,7 +402,6 @@ void new_menu_window()
 	menu_gc = GrNewGC();
 	GrSetGCUseBackground(menu_gc, GR_TRUE);
 	GrSetGCForegroundPixelVal(menu_gc, AV3XX_COLOR_WHITE);
-//	GrSetGCForeground(menu_gc, WHITE);
 
 	menu_wid = pz_new_window(0, HEADER_TOPLINE + 1, screen_info.cols, screen_info.rows - (HEADER_TOPLINE + 1), menu_do_draw, menu_do_keystroke);
 
