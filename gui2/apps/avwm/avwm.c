@@ -258,7 +258,7 @@ void drawTime()
 void getTime(char * timeSt)
 {
 	int fd;
-	struct tm date_time;	
+	struct tm date_time;
 
 	fd=open("/dev/avrtc",O_RDONLY | O_NONBLOCK);
 	if (fd < 0)
@@ -273,7 +273,7 @@ void getTime(char * timeSt)
 		return;
 	}
 
-	close(fd);   
+	close(fd);
 
 	sprintf(timeSt, "%02d:%02d:%02d %02d/%02d/%04d", date_time.tm_hour,date_time.tm_min,date_time.tm_sec,
                                                          date_time.tm_mday,date_time.tm_mon,date_time.tm_year);
@@ -284,7 +284,7 @@ void drawMenu(void)
 	int evt,status;
 	if(currentHandler)
 		currentHandler(EVT_SUSPEND);
-	fillRect(COLOR_WHITE,5 , 15, 310, 230);
+	fillRect(COLOR_WHITE,5 , 15, 310, 225);
 	doDraw();
 }
 
@@ -317,22 +317,21 @@ void eventLoop()
 {
 	int ret;
 	int evt;
-		
+
 	while(!stopWM)
 	{
 		//while((evt=nxtEvent())==NO_EVENT) /* wait */;
 		evt=waitEvent();
-		
-		
+
+
 		if(timerOn && evt==EVT_TIMER)
 		{
 			processTimeOut();
 		}
-		
+
 		if(evt==BTN_F3)
 		{
 			clearEventQueue();
-			fillRect(COLOR_WHITE,5 , 15, 310, 230);
 			drawMenu();
 		}
 		else
@@ -392,7 +391,7 @@ static char debugmembuf[200];
 void debug(char *fmt, ...)
 {
 #ifdef DO_DEBUG
-	
+
 	va_list ap;
 	va_start(ap, fmt);
 	vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
