@@ -59,7 +59,7 @@ int fopen(const char* pathname,const char * mode)
     FILE * file = NULL;
 
     if ( pathname[0] != '/' ) {
-        debug("[fopen] only absolute paths supported\n");
+        debug("[fopen] only absolute paths supported '%s'\n", pathname);
         return -1;
     }
 
