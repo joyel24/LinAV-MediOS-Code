@@ -22,6 +22,23 @@
 
 struct client_operations * cops;
 
+/****************************************************************************
+This is an example of config file reading/writting
+to test this example you sould put a config file in /mnt/avwm/plugins/ and
+called cfg_tst.cfg. It should contain something like this:
+v1=3
+v2=7
+str=hello
+At the end of the programme, the content of this file will be updated
+****************************************************************************/
+
+
+/****************************************************************************
+in order to use the config file reader/writer you first need to add 2 
+char buffers with a size of MAX_TOKEN+1
+you'll also need to code 2 functions, one for reading the other for writting
+****************************************************************************/
+
 char item_buff[MAX_TOKEN+1];
 char value_buff[MAX_TOKEN+1];
 
@@ -31,6 +48,15 @@ int var1,var2;
 char str1[MAX_TOKEN+1];
 int mode;
 
+/****************************************************************************
+this function is used for reading the config file
+it's an infinite loop
+in the loop it ask the config reader to give the next item/value couple
+if the reader returns 0, this means no more couple left in the file
+if this happens , we leave the loop
+otherwise, we go through several tests to see which item we have
+and save the corresponding value in the right variable
+****************************************************************************/
 int doParse()
 {
     char *item=item_buff;
@@ -58,6 +84,15 @@ int doParse()
     }
 }
 
+/****************************************************************************
+this function is used to write the config file
+3 functions are available for this:
+putCfg => it takes a item/value couple and save it in the file, if the value
+is a string and has space in it, quotes are added so it can be read by the config reader
+putComment => it takes one string and save it to the file, it adds the comment char at the begining
+and a newline at the end
+newLine => no param it only add a newline in the file
+****************************************************************************/
 int doSave(void)
 {
     cops->putComment("************** Demo cfg *****************");
@@ -110,6 +145,14 @@ int eventHandler(int evt)
             }            
             else if(mode==3)
             {
+/****************************************************************************
+the save sequence should be:
+call openCfg to open the file
+call your writer, here it is called doSave
+call closeCfg to close the file
+if you forget to close the file, its content might not be saved
+****************************************************************************/
+            
                 cops->fillRect(COLOR_WHITE,5,50,315,120);
                 cops->putS(COLOR_BLACK,COLOR_WHITE,5,50,"Saving to cfg file");
                 cops->openCfg("/mnt/avwm/plugins/cfg_tst.cfg",CFG_WRITE);
@@ -134,7 +177,15 @@ int main(int argc,char * * argv)
 
     cops->putS(COLOR_BLACK,COLOR_WHITE,5,50,"Cfg file demo");    
     cops->putS(COLOR_BLACK,COLOR_WHITE,5,60,"Reading file...");
-    
+
+/****************************************************************************
+the read sequence should be:
+call openCfg to open the file
+call your reader, here it is called doParse
+call closeCfg to close the file
+you need to close the file even you know you'll need it once again 
+to write nack the config
+****************************************************************************/
     cops->openCfg("/mnt/avwm/plugins/cfg_tst.cfg",CFG_READ);
     cops->putS(COLOR_BLACK,COLOR_WHITE,5,70,"File open...");
     
