@@ -5,6 +5,7 @@
 #include <osdDSC25.h>
 #include <buttons.h>
 #include <fonts.h>
+#include <usb.h>
 
 void showBuffer(char *source);
 void docmd();
@@ -29,7 +30,8 @@ void docmd();
 int main() {
     int b;
     int source=0;
-    
+    int usbs=0;
+
     osdInit();
 
     osdSetComponentConfig(OSD_VIDEO1, 0);
@@ -88,7 +90,15 @@ int main() {
 
         if (b & BUTTONS_AV300_MENU2) source=!source;
         if (b & BUTTONS_AV300_MENU1) mode=!mode;
-
+        if (b & BUTTONS_AV300_MENU3) {
+            usbs = !usbs;
+            if (usbs) {
+                usbEnable();
+            } else {
+                usbDisable();
+            }
+        }
+        
         do {
             b =buttonsGetStatus();
         } while((b & BUTTONS_AV300_ANY));    
