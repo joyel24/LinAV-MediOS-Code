@@ -52,29 +52,32 @@
 #define newSpriteData(name)      char name[]
 #define PALETTE                  unsigned int
 
+#define LCD_WIDTH 320
+#define LCD_HEIGHT 240
+
 #ifndef AV_SCREEN
 #define FORCE_REDRAW    1
 #define UPDATE_ONLY     0
 #endif
 
 struct spriteBuffer {
-	unsigned int  data;
-	int           width;
-    	int           height;
-	int           type;
-	int           bpline;
+    unsigned int  data;
+    int           width;
+        int           height;
+    int           type;
+    int           bpline;
 };
 
 typedef struct spriteBuffer       SPRITE;
 typedef struct spriteBuffer       BITMAP;
 
 struct graphicsFont {
-	char **  table;
-	int      dx;
-	int      dy;
-	int      width;
-	int      height;
-	int      bpline;
+    char **  table;
+    int      dx;
+    int      dy;
+    int      width;
+    int      height;
+    int      bpline;
 };
 
 typedef struct graphicsFont *     FONT_ID;
@@ -110,16 +113,16 @@ void          (*drawVLine)        (unsigned int color, int x, int y, int height,
 };
 
 struct graphics_context {
-	struct graphicsBuffer *      buffer;
-	struct graphics_operations * gops;
-	struct graphicsFont *        font;
-	unsigned int                 fg;
-	unsigned int                 bg;
-	unsigned int                 transparent;            // Color index that shall be transparent    
+    struct graphicsBuffer *      buffer;
+    struct graphics_operations * gops;
+    struct graphicsFont *        font;
+    unsigned int                 fg;
+    unsigned int                 bg;
+    unsigned int                 transparent;            // Color index that shall be transparent
 } ;
 
 typedef struct graphics_context * GC_ID;
- 
+
 
 
 /* general functions */
@@ -158,7 +161,7 @@ void         clearScreen      (unsigned int color);
 void drawImage        (char * filename);
 
 /* Font */
-#define needFont(name)	 extern FONT_ID name;
+#define needFont(name)     extern FONT_ID name;
 void setFont(FONT_ID font);
 FONT_ID getFont(void);
 
