@@ -26,6 +26,8 @@ int main() {
     ataPowerDownHDDA();
     osdInitA();
 
+    osdSetVideoOutOnA();
+    
     osdSetComponentConfigA(OSD_VIDEO1, 0);
     osdSetComponentConfigA(OSD_VIDEO2, 0);
     osdSetComponentConfigA(OSD_BITMAP1, 0);

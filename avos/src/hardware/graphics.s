@@ -108,6 +108,8 @@ graphicsRGB2Packed:
         lsr r5, #10         @ int y = (306*r + 601*g + 117*b) >> 10;
         lsl r5, #8
         mov r6, r5          @ Ready in r6
+        lsl r5, #16
+        orr r6, r5          @ ***&&& This is for 2nd pixels &&&***
         
         mov r5, r0
         ldr r4, =173

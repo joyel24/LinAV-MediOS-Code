@@ -21,16 +21,18 @@ unsigned int buffmem[1];
 unsigned int dmamem[8];
 
 int main() {
-    unsigned int c, v, b;
+    unsigned int c, v, b, a;
 
     c = gioGetAllDirectionsA();
-    gioSetAllDirectionsA(c & 0xffff00ff);
-    
+    gioSetAllDirectionsA(0x5f7e00f5);       // bits 8-15 output...
+
+    // 10 = /EOD?
+
     uartOutsA("GIO: ");
     c = gioGetAllBitsetsA();
     stringPutHexA(buff, c, 8);
     uartOutsA(buff);
-    
+
     masResetA();
     
     c = masGetVersionA();
@@ -75,22 +77,40 @@ int main() {
         b = buttonsGetStatusA();
         if (b & BUTTONS_AV300_OFF) return;
 
+        uartOutsA("GID: ");
+        c = gioGetAllDirectionsA();
+        stringPutHexA(buff, c, 8);
+        uartOutsA(buff);
+
         uartOutsA("GIO: ");
         c = gioGetAllBitsetsA();
         stringPutHexA(buff, c, 8);
         uartOutsA(buff);
 
         // Try some DMA?
-        uartOutsA("Trying DMA xfer to S4...\n");
-        dmaSetSourceA(dmamem);
-        dmaSetDestA(0);
-        dmaSetSizeA(8);
-        dmaDevSelectA(DMA_DEV_SDRAM, DMA_DEV_CS4);
-        dmaStartA(DMA_ENDIAN_3210);
-        
-        while(dmaIsRunningA()) {
-            uartOutsA(".");
-        }
+        uartOutsA("Trying to send data?\n");    // 1111 0101
+        //for (c=0;c<128;c++) {
+            uartOutsA("-*- GIO: ");
+            b = gioGetAllBitsetsA();
+            stringPutHexA(buff, b, 8);
+            uartOutsA(buff);
+
+            gioSetAllBitclearsA(0xff00);    // Clear the byte
+            gioSetAllBitsetsA(c<<8);        // Set some data...
+
+            gioSetAllBitclearsA(0x2);
+
+            for (a=0;a<20;a++) {
+                uartOutsA("-*- GIO 02: ");
+                b = gioGetAllBitsetsA();
+                stringPutHexA(buff, b, 8);
+                uartOutsA(buff);
+            }
+            
+//            gioSetAllBitclearsA(0x2);
+//            gioSetAllBitclearsA(0x8);
+            
+        //}
         uartOutsA("\nDONE\n");
 
         uartOutsA("\nMasMem 7f0:\n");
@@ -108,5 +128,6 @@ int main() {
             stringPutHexA(buff, buffmem[0], 8);
             uartOutsA(buff);
         }
+        break;
     }
 }

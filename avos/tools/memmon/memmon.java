@@ -47,11 +47,14 @@ public class memmon {
                 
                 // now compare with last one...
                 if (oldbuff!=null) {
-                    for (int j=0;j<512*blocks;j++) {
-                        if (oldbuff[j]!=membuff[j]) {
+                    for (int j=0;j<512*blocks;j+=2) {
+                        int old = ((int)oldbuff[j] & 0xff) | (((int)oldbuff[j+1] & 0xff)<<8);
+                        int mem = ((int)membuff[j] & 0xff) | (((int)membuff[j+1] & 0xff)<<8);
+                        
+                        if (old!=mem) {
                             System.out.println(hex8(startAddr + j)
-                                              +": OLD "+hex2(oldbuff[j])
-                                              +" NEW "+hex2(membuff[j]));
+                                              +": OLD "+hex4(old)
+                                              +" NEW "+hex4(mem));
                         }
                     }
                 }

@@ -512,6 +512,61 @@ osdSetContrast:
         bx lr
 
 @ ------------------------------------------------------------------------------
+@ osdSetBacklight r0=on/off (0/1)
+@
+.globl osdSetBacklightA
+osdSetBacklightA:
+        switchThumb
+.globl osdSetBacklight
+.thumb_func
+
+osdSetBacklight:
+        ldr r1, =0x02600200
+        lsl r0, #2
+        strh r0, [r1]
+        bx lr
+
+@ ------------------------------------------------------------------------------
+@ osdSetVideoOutOn
+@
+.globl osdSetVideoOutOnA
+osdSetVideoOutOnA:
+        switchThumb
+.globl osdSetVideoOutOn
+.thumb_func
+
+osdSetVideoOutOn:
+        ldr r1, =0x30800
+        ldrh r2, [r1]
+        mov r3, #4
+        orr r2, r3
+        strh r2, [r1]
+        ldr r1, =0x3058e
+        ldr r0, =0x2000
+        strh r0, [r1]
+        bx lr
+
+@ ------------------------------------------------------------------------------
+@ osdSetVideoOutOff
+@
+.globl osdSetVideoOutOffA
+osdSetVideoOutOffA:
+        switchThumb
+.globl osdSetVideoOutOff
+.thumb_func
+
+osdSetVideoOutOff:
+        ldr r1, =0x30800
+        ldrh r2, [r1]
+        ldr r3, =0xfffb
+        and r2, r3
+        strh r2, [r1]
+        ldr r1, =0x3058a
+        ldr r0, =0x2000
+        strh r0, [r1]
+        bx lr
+        
+@ ------------------------------------------------------------------------------
 @ UNCLEANED...
 @ ------------------------------------------------------------------------------        
 
