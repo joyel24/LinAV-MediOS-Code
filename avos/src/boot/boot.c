@@ -43,6 +43,9 @@ char timeSt[] = "xx:xx:xx.xx";
 char powerSt[] = "xxxx+";
 
 int main() {
+
+	mvStackA();
+
     int c, b, i, totalEntries;
     int cursorpos=0;
     int dirpos=0;

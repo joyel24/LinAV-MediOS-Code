@@ -52,14 +52,14 @@ int fopen(const char* pathname,const char * mode)
 	int flags;
 	if(!(flags=getFlag(mode)))
 	{
-		debug("Mode is wrong\n");
+		debug("[fopen] mode is wrong\n");
         return -1;
 	}
 
     FILE * file = NULL;
 
     if ( pathname[0] != '/' ) {
-        debug("Only absolute paths supported\n");
+        debug("[fopen] only absolute paths supported\n");
         return -1;
     }
 
@@ -68,7 +68,7 @@ int fopen(const char* pathname,const char * mode)
             break;
 
     if ( fd == MAX_OPEN_FILES ) {
-		debug("Too many files open\n");
+		debug("[fopen] too many files open\n");
         return -2;
     }
 
@@ -91,7 +91,7 @@ int fopen(const char* pathname,const char * mode)
 	{
 		if(flags & (F_RD | F_RDP)) // file open in read-only RD+ => error
 		{
-			debug("File not found %s\n",pathname);
+			debug("[fopen] file not found %s\n",pathname);
 			file->busy = false;
 			return -5;
 		}
@@ -99,7 +99,7 @@ int fopen(const char* pathname,const char * mode)
 		{
 			if(!createEntry(pathname,T_FILE,&entry2)) // file created => ini FILE structure
 			{
-				debug("Failed to create file %s \n",pathname);
+				debug("[fopen] failed to create file %s \n",pathname);
 				file->busy = false;
 				return -6;
 			}
@@ -113,8 +113,12 @@ int fopen(const char* pathname,const char * mode)
 			file->fat_ent.curCluster = -1;
 			file->fat_ent.cacheoffset = 0;
 			file->fat_ent.eof_disk=false;
+			file->fat_ent.isRootDir=false;
 			file->fat_ent.dirCluster=entry2.dirCluster;
 			file->eof=false;
+
+			//debug("file created: start=%d\n",file->fat_ent.startCluster);
+
 			nxtSector(file,DO_READ);
 		}
     }
@@ -128,11 +132,12 @@ int fopen(const char* pathname,const char * mode)
 		file->fat_ent.curCluster = -1;
 		file->fat_ent.cacheoffset = 0;
 		file->fat_ent.eof_disk=false;
+		file->fat_ent.isRootDir=false;
 		file->fat_ent.dirCluster=entry->dirCluster;
 		file->eof=false;
 		file->write_done=false;
 
-		debug("file found: %x\n",file->fat_ent.startCluster);
+		//debug("file found: %x\n",file->fat_ent.startCluster);
 
 		nxtSector(file,DO_READ);
 
@@ -161,7 +166,7 @@ int getFlag(const char * mode)
 	int flag=0;
 	if(len<1 || len >2)
 	{
-		debug("getFlags: mode length is bad (%d)\n",len);
+		debug("[getFlag] mode length is bad (%d)\n",len);
 		return 0;
 	}
 
@@ -177,7 +182,7 @@ int getFlag(const char * mode)
 		flag=F_AP;
 		break;
 		default:
-			debug("getFlag: wrong mode (%s)\n",mode);
+			debug("[getFlag] wrong mode (%s)\n",mode);
 			return 0;
 	}
 
@@ -187,7 +192,7 @@ int getFlag(const char * mode)
 			flag=flag<<3;
 		else
 		{
-			debug("getFlag: bad mode modifier (%s)\n",mode);
+			debug("[getFlag] bad mode modifier (%s)\n",mode);
 			return 0;
 		}
 	}
@@ -222,7 +227,7 @@ int findFileEntry(const char* pathname,struct dirent ** entry,bool remove)
     }
 
     if (dir<0) {
-        debug("Failed to open dir %s\n",pathname);
+        debug("[findFileEntry] failed to open dir %s\n",pathname);
         return 0;
     }
 
@@ -234,16 +239,17 @@ int findFileEntry(const char* pathname,struct dirent ** entry,bool remove)
 			{
 				struct fatent fat_ent;
 				fat_ent.curCluster =(*entry)->startCluster;
+				fat_ent.isRootDir=false;
 
 				if(!fatTruncate(&fat_ent,true))
 				{
-					debug("findFileEntry: error removing file using fatTruncate\n");
+					debug("[findFileEntry] error removing file using fatTruncate\n");
 					return 0;
 				}
 
 				if(!removeEntry(dir))
 				{
-					debug("findFileEntry: error removing entry from fat\n");
+					debug("[findFileEntry] error removing entry from fat\n");
 					return 0;
 				}
 			}
@@ -258,7 +264,7 @@ int findFileEntry(const char* pathname,struct dirent ** entry,bool remove)
 
 //******************************************************
 // fclose
-// close a file, flush the buffer if file open for
+// close a file, the buffer if file open for
 // writing or append
 //
 //******************************************************
@@ -267,7 +273,7 @@ int fclose(int fd)
 	if(openfiles[fd].flags & (F_WR | F_AP | F_RDP | F_RDP | F_APP))
 		if(!flush(&openfiles[fd]))
 		{
-			debug("fclose: error flushing file (file not close)\n");
+			debug("[fclose] error flushing file (=>file not close)\n");
 			return 0;
 		}
 	openfiles[fd].busy=false;
@@ -286,7 +292,7 @@ int remove(const char* pathname)
 
 	if(!findFileEntry(pathname,&entry,true) || entry == NULL)
 	{
-		debug("Can't erase file %s\n",pathname);
+		debug("[remove] can't erase file %s\n",pathname);
 		return 0;
 	}
 
@@ -307,7 +313,7 @@ int fsize(int fd)
 	}
 	else
 	{
-		debug("fsize: error file %d not open\n",fd);
+		debug("[fsize] error file %d not open\n",fd);
 		return -1;
 	}
 }
@@ -326,7 +332,7 @@ int ftell(int fd)
 	}
 	else
 	{
-		debug("ftell: error file %d not open\n",fd);
+		debug("[ftell] error file %d not open\n",fd);
 		return -1;
 	}
 }
@@ -352,7 +358,7 @@ int ftruncate(int fd,int size)
 
 			if(size >= file->size)
 			{
-				debug("Trying to truncate file %d after its end\n",fd);
+				debug("[ftruncate] trying to truncate file %d after its end\n",fd);
 				return 0;
 			}
 
@@ -360,7 +366,7 @@ int ftruncate(int fd,int size)
 
 			if(!fatTruncate(fat_ent,false))
 			{
-				debug("ftruncate: error in fatTruncate\n");
+				debug("[ftruncate] error in fatTruncate\n");
 				return 0;
 			}
 
@@ -368,19 +374,19 @@ int ftruncate(int fd,int size)
 
 			if(!fUpdateEntry(file))
 			{
-				debug("ftruncate: error in fUpdateEntry\n");
+				debug("[ftruncate] error in fUpdateEntry\n");
 				return 0;
 			}
 		}
 		else
 		{
-			debug("File %d not open for writing\n",fd);
+			debug("[ftruncate] file %d not open for writing\n",fd);
 			return 0;
 		}
 	}
 	else
 	{
-		debug("File %d not open yet\n",fd);
+		debug("[ftruncate] file %d not open yet\n",fd);
 		return 0;
 	}
 	return 1;
@@ -401,7 +407,7 @@ int fflush(int fd)
 	}
 	else
 	{
-		debug("File %d not open yet\n",fd);
+		debug("[fflush] file %d not open yet\n",fd);
 		return 0;
 	}
 }
@@ -421,14 +427,14 @@ int flush(FILE * file)
 		{
 			if(!fUpdateEntry(file))
 			{
-				debug("flush: error updating entry\n");
+				debug("[flush] error updating entry\n");
 				return 0;
 			}
 			return 1;
 		}
 		else
 		{
-			debug("error writing file\n");
+			debug("[flush] error writing file\n");
 			return 0;
 		}
 	}
@@ -482,13 +488,13 @@ int fread(int fd, void* buf, int count)
 		}
 		else
 		{
-			debug("File %d not open for reading\n",fd);
+			debug("[fread] file %d not open for reading\n",fd);
 			return -2;
 		}
 	}
 	else
 	{
-		debug("File %d not open yet\n",fd);
+		debug("[fread] file %d not open yet\n",fd);
 		return -1;
 	}
 }
@@ -507,7 +513,7 @@ int fwrite(int fd, void* buf, int count)
 		{
 			if(count == 0)
 			{
-				debug("fwrite: count=0\n");
+				debug("[fwrite] count=0\n");
 				return 0;
 			}
 
@@ -520,13 +526,13 @@ int fwrite(int fd, void* buf, int count)
 		}
 		else
 		{
-			debug("File %d not open for writing\n",fd);
+			debug("[fwrite] file %d not open for writing\n",fd);
 			return -2;
 		}
 	}
 	else
 	{
-		debug("File %d not open yet\n",fd);
+		debug("[fwrite] file %d not open yet\n",fd);
 		return -1;
 	}
 }
@@ -549,6 +555,12 @@ int freadwrite(int fd, char* buf, int count, int mode)
 	if(file->eof)
 		return -1;
 
+	if(mode == DO_READ && (file->pos+count) > file->size)
+	{
+		count=file->size-file->pos;
+		file->eof=true;
+	}
+
 	while(fat_ent->cacheoffset+count > BUFFER_SIZE)
 	{
 		cpySize=BUFFER_SIZE-fat_ent->cacheoffset;
@@ -567,7 +579,8 @@ int freadwrite(int fd, char* buf, int count, int mode)
 			return pos;
 		}
 
-		nxtSector(file,mode);
+		if(!nxtSector(file,mode))
+			return -1;
 	}
 
 	if(fat_ent->cacheoffset+count <= BUFFER_SIZE && count !=0)
@@ -593,6 +606,8 @@ int freadwrite(int fd, char* buf, int count, int mode)
 		}
 	}
 
+
+
 	if(pos > 0 && mode == DO_WRITE)
 		file->write_done=true;
 
@@ -604,30 +619,42 @@ int freadwrite(int fd, char* buf, int count, int mode)
 // internal nxtSectot (uses fat one)
 // flush current buffer if needed
 //
-// no error handled
 //******************************************************
 int nxtSector(FILE * file,int mode)
 {
-	flush(file);
-	if(!fatNxtSector(&(file->fat_ent),mode==DO_WRITE))
+	//debug("[nxtSector] |beg| cluster=%x\n",file->fat_ent.curCluster);
+	if(!flush(file))
 	{
-		debug("nxtSector: error getting nxt sector\n");
+		debug("nxtSector: error flushing to disk\n");
 		return 0;
 	}
 
-	if(mode == DO_READ || (mode == DO_WRITE && file->size < file->pos))
+	//debug("[nxtSector] |aft flush| cluster=%x\n",file->fat_ent.curCluster);
+
+	if(!fatNxtSector(&(file->fat_ent),mode==DO_WRITE))
+	{
+		debug("[nxtSector] error getting nxt sector\n");
+		return 0;
+	}
+
+	//debug("[nxtSector] |aft FatnxtSec| cluster=%x\n",file->fat_ent.curCluster);
+
+	if(mode == DO_READ || (mode == DO_WRITE && file->size >= file->pos))
 	{
 		if(!fatRWSector(&(file->fat_ent),false))
 		{
-			debug("nxtSector: error reading nxt sector\n");
+			debug("[nxtSector] error reading nxt sector\n");
 			return 0;
 		}
 	}
 	else
 	{
-		memcpy(file->fat_ent.cache,0,BUFFER_SIZE);
+		memset(file->fat_ent.cache,0,BUFFER_SIZE);
 		file->fat_ent.cacheoffset=0;
 	}
+
+	//debug("[nxtSector] |end| cluster=%x\n",file->fat_ent.curCluster);
+
 	return 1;
 }
 

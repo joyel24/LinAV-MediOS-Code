@@ -25,7 +25,7 @@
 typedef unsigned long u32;
 #endif
 
-#define FAT_CHAIN_END   0x0ffffff8
+//#define FAT_CHAIN_END   0x0ffffff8
 
 #define FAT_ENTRY_SIZE	32
 #define NAME_SIZE 8
@@ -48,6 +48,7 @@ struct fatent {
 	int prevCluster;
 	bool eof_disk;
 	int dirCluster;
+	bool isRootDir;
 };
 
 struct dirEntry {
@@ -68,7 +69,7 @@ struct dirEntry {
                                 // reading cluster 00080e81
 
 struct fatCache {
-	char fatBuffer[513];
+	char fatBuffer[1024]; // 2* sector size  (for FAT12)
 	int fatBufferLba;
 	bool write_done;
 	int lastFree;
@@ -121,7 +122,10 @@ extern char chkChar(char c);
 
 extern int fatCleanCluster(int cluster);
 
-extern int chkFAT();
+//extern int chkFAT();
+
+extern bool isEOChain(int cluster);
+extern int fatEndValue();
 
 ///////////////////////////////////////////////////////////////////////////////////
 // from initial fat.c

@@ -46,6 +46,8 @@ int opendir(const char* name)
         return -1;
     }
 
+	memset(&opendirs[dd],0,sizeof(DIR));
+
     opendirs[dd].busy = true;
 
     if ( name[0] != '/' ) {
@@ -65,12 +67,14 @@ int opendir(const char* name)
 	{
 		while (1)
 		{
-            if ((entry=readdir(dd))==0)
+            if (!(entry=readdir(dd)))
 			{
                 opendirs[dd].busy = false;
 				debug("Can't find dir %s\n",name);
                 return -1;
           	}
+
+			printBuffer(entry,sizeof(struct dirent));
 
             if ( (entry->attribute & FAT_ATTR_DIR) && (strcasecmp(part, entry->entryName) == 0))
 			{
