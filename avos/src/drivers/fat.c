@@ -42,7 +42,7 @@ int fatDirFilter(struct dirEntry dirIn[], struct dirEntry dirOut[], int n) {
 int fatInit(u32 lba) {
     int c;
     
-    fatCacheLBA=-1
+    fatCacheLBA=-1;
     
     c=ataReadSectors(lba, 1, boot);      // Read the bootsector
 

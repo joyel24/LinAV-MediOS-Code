@@ -144,9 +144,18 @@ int main() {
                 }
                 if (loopDelay>=0x1000) loopDelay-=0x1000;
             } else if (c & BUTTONS_AV300_ON) {
-                cluster = dirBuffer2[dirpos+cursorpos].fatCluHI << 16
+                if (dirBuffer2[dirpos+cursorpos].attr & FAT_ATTR_DIR) {
+                    cluster = dirBuffer2[dirpos+cursorpos].fatCluHI << 16
                         | dirBuffer2[dirpos+cursorpos].fatCluLO;
-                if (cluster==0) cluster=getRootClu();
+                    if (cluster==0) cluster=getRootClu();
+                } else {
+                    // TODO
+                    //  Handle plugins
+                    //  text file reader
+                    //  image reader
+                    //  mp3 player
+                    //  etc
+                }
                 do {
                     c =buttonsGetStatus();
                 } while(c & BUTTONS_AV300_ANY);
@@ -160,7 +169,7 @@ int main() {
                     ataPowerDownHDD();
                     ataSelectMemoryCard();
                 }
-                
+
                 ataReadSectors(0, 1, mbr);
                 part = mbr[0x1c6] | (mbr[0x1c7]<<8) | (mbr[0x1c8]<<16) | (mbr[0x1c9]<<24);
                 stringPutHex(hex82, part, 8);
