@@ -12,6 +12,7 @@
 @
 
         .include "../includes/common.S"
+        .include "../includes/av300.S"
 .text
         add r0, pc, #1
         bx r0

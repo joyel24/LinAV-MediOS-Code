@@ -15,6 +15,8 @@
 
 .text
 
+.include "../includes/av300.S"
+
 loop1:
         add r0, pc, #1
         bx r0                       @ switch to thumb
