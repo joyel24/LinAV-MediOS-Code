@@ -121,10 +121,10 @@ int   ini_graphics   (void);
 void  close_graphics (void);
 GC_ID createGC       (int vplane);
 void  destroyGC      (GC_ID gc);
-void test	     (void);
+
 void lcd_update	     (void);
 void drawPixBuffer   (char color, int x, int y);
-void readPixBuffer   (int x, int y);
+
 
 
 /* drawings */
