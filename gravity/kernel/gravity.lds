@@ -1,10 +1,9 @@
 ENTRY(entry_code)
-INPUT(boot.o)
 
 MEMORY
 {
    DRAM : ORIGIN = 0x03000000,    LENGTH = 0x01000000
-   ARAM : ORIGIN = 0x00000004,    LENGTH = 0x00007C00-0x4
+   IRAM : ORIGIN = 0x00000004,    LENGTH = 0x00007C00-0x4
 }
 
 SECTIONS
@@ -25,17 +24,17 @@ SECTIONS
     .data :    
     {
         *(.data)
-        _real_core_start = .;
+        _real_iram_start = .;
     } > DRAM
     
-    .cores 0x04 : AT ( _real_core_start )
+    .iram 0x04 : AT ( _real_iram_start )
     {    
-        _core_code_start = .;
+        _iram_start = .;
         *(.vectors)
         *(.core)
         *(.cored)
-        _core_code_end = .;
-    } > ARAM
+        _iram_end = .;
+    } > IRAM
     
     .bss :
     {

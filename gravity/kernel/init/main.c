@@ -36,28 +36,12 @@ void print_boot_info(void)
     print_timer();
 }
 
-extern char _real_core_start;
-extern char _core_code_start;
-extern char _core_code_end;
-
-extern void init_stack(void);
-
 void kernel_start(void)
 {
-    int i;    
-    char *src;
-    char *dst;
+    int i;
     
-    init_stack();
-    
-    /* moving core code to lower RAM */    
-    clf();    
-    src = &_real_core_start;
-    dst=&_core_code_start;    
-    while (dst < &_core_code_end) {
-          *dst++ = *src++;
-    }       
-    stf();   /* we need to enable the FIQ so WDT is handled */
+    /* malloc of max space in SDRAM */
+    init_malloc((void*)MALLOC_START,MALLOC_SIZE);   
     
     ata_stop_HD(); /* to allow nice stop of HD in case of crash */
             
@@ -76,10 +60,7 @@ void kernel_start(void)
     
     /* enable the IRQ */
     sti();       
-    printk("[init] int. IRQ enable\n");
-    
-    /* malloc of max space in SDRAM */
-    init_malloc((void*)MALLOC_START,MALLOC_SIZE);
+    printk("[init] int. IRQ enable\n"); 
     
     /* driver init */
     init_cpld();

@@ -9,9 +9,9 @@ SRC2 = $(wildcard *.S)
 OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 
 
-LDFLAGS = -L/home/thomas/Av320/arm-tools/inst_uclibc/toolchain/gcc-3.3.x/toolchain_arm_nofpu/arm-linux/lib/ -lgcc -Map amos.map
+LDFLAGS = -L/home/thomas/Av320/arm-tools/inst_uclibc/toolchain/gcc-3.3.x/toolchain_arm_nofpu/arm-linux/lib/ -lgcc 
 
-TARGET = amos
+TARGET = gravity
 
 SUBDIRS = init core lib driver
 
@@ -22,7 +22,7 @@ force: clean all
 $(TARGET) : $(OBJS)
 	@echo '-----   building kernel'
 #	@cp -f $(OBJS) build/
-	$(LD) -N -Tamos.lds -o $(TARGET).elf build/*.o $(LDFLAGS)
+	$(LD) -N -Tgravity.lds -o $(TARGET).elf *.o build/*.o $(LDFLAGS) -Map gravity.map
 	@$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).bin
 #@$(RM) -f $(TARGET).elf
 clean:  clean-subdirs
