@@ -134,17 +134,21 @@ void drawStatus(void)
     {
         fwExtState=0;
         cfState=0;
+        fprintf(stderr,"FW and CF detected !!!\n");
     }
     
     if(fwExtState)
         drawBITMAP(&fwExtIcon, 242, 4);
-    else
-        fillRect(BG_COLOR,242,4,15,6);
+    /*else
+        fillRect(BG_COLOR,242,4,15,6);*/
         
     if(cfState)
         drawBITMAP(&cfIcon, 242, 4);
-    else
+    /*else
+        fillRect(BG_COLOR,242,4,15,6);*/
+    if(!cfState && !fwExtState)
         fillRect(BG_COLOR,242,4,15,6);
+    
         
     if(usbState)
         drawBITMAP(&usbIcon, 260, 4);
