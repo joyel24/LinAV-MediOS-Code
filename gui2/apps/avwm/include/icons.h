@@ -14,9 +14,9 @@
 #ifndef __ICONS_H
 #define __ICONS_H
 
-#define NEED_ICONE(icone)   extern BITMAP icone;
+#define NEED_ICON(icon)   extern BITMAP icon;
 
-/* icone list
+/* icon list
 - linavLogo
 - usbIcon
 - powerIcon
