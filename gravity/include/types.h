@@ -21,9 +21,11 @@ typedef struct _GFX_DATA
     long w;
     long h;
     int direction;
-    long delta; 
+    long delta;
     unsigned int color;
     unsigned int bg_color;
+    long pixel_size;
+    void* pixels;
 } GFX_DATA;
 
 typedef struct _GFX_POINT
@@ -31,6 +33,11 @@ typedef struct _GFX_POINT
     long x;
     long y;
 } GFX_POINT;
+
+typedef struct _GFX_3DVERTEX
+{
+	long ix, iy, iz, iu, iv;
+} GFX_3DVERTEX;
 
 typedef struct _PLANE_DATA
 {

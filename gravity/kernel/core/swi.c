@@ -24,6 +24,9 @@ extern int gfx_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
 extern int fs_swi(int cmd,void * data1, void * data2);
 extern void user_printf(const char * fmt, va_list args);
 
+#define MAX(a,b) (a>b?a:b)
+#define MIN(a,b) (a<b?a:b)
+
 __IRAM_CODE int kcswi_handler (
 	unsigned long nCmd,
 	unsigned long nParam2,
@@ -348,7 +351,87 @@ __IRAM_CODE int kcswi_handler (
 
 	case nAPI_GFX_FASTBLIT:     //(GFX_DATA* pDst, GFX_DATA* pSrc, GFX_POINT* pOrigin);
 	{
-		// TO DO:
+		GFX_DATA* pDst     = (GFX_DATA*)nParam1;
+		GFX_DATA* pSrc     = (GFX_DATA*)nParam2;
+		GFX_POINT* pOrigin = (GFX_POINT*)nParam3;
+
+		unsigned char nSrcElementSize = pSrc->pixel_size;
+		unsigned char nDstElementSize = pDst->pixel_size;
+
+		int bDoReverse = 0;
+		if (pSrc->direction != pDst->direction)
+			bDoReverse = 1;
+
+		int xmin = MAX(pOrigin->x,0);
+		int ymin = MAX(pOrigin->y,0);
+		int xmax = MIN(pDst->w, pSrc->w + pOrigin->x);
+		int ymax = MIN(pDst->h, pSrc->h + pOrigin->y);
+		int dx = xmax - xmin;
+		int dy = ymax - ymin;
+
+		if ((!dx) || (!dy))
+			break;
+
+		int i,j;
+
+		long st = pSrc->delta;
+		long dt = pDst->delta;
+		unsigned char* sptr;
+		unsigned char* dptr = (unsigned char*)(pDst->pixels + dt*ymin + xmin*nDstElementSize);
+
+		if (bDoReverse)
+		{
+			if (pOrigin->y < 0)
+				sptr = (unsigned char*)(pSrc->pixels + MAX(0,-pOrigin->x)*nSrcElementSize + (dy-1)*st);
+			else
+				sptr = (unsigned char*)(pSrc->pixels + MAX(0,-pOrigin->x)*nSrcElementSize + (pSrc->h-1)*st);
+			st = -st;
+		}
+		else
+		{
+			sptr = (unsigned char*)(pSrc->pixels + MAX(0,-pOrigin->x)*nSrcElementSize + MAX(0,-pOrigin->y)*st);
+		}
+
+		if (nSrcElementSize == nDstElementSize)
+		{
+			int nRow = dx * nDstElementSize;
+			for (i=0;i<dy;i++)
+			{
+				memcpy (dptr, sptr, nRow);
+				dptr += dt;
+				sptr += st;
+			}
+		}
+		else
+			return ERR_INVALID_PARAM;
+	}
+	break;
+
+	case nAPI_GFX_STRETCHBLIT: //GFX_DATA* pDst, GFX_DATA* pSrc
+	{
+		GFX_DATA* pDst = (GFX_DATA*)nParam1;
+		GFX_DATA* pSrc = (GFX_DATA*)nParam2;
+
+		if ((pSrc->pixel_size != 4) || (pDst->pixel_size != 4))
+			return ERR_INVALID_PARAM;
+
+/*		AlphaBilinearInterpolatedStretch (
+			pDst,
+			pSrc,
+			(unsigned long*)nParam3,
+			(unsigned long*)nParam3 + pDst->w);*/
+	}
+	break;
+
+	case nAPI_GFX_PATTERNBLIT: //(GFX_DATA* pDst, GFX_DATA* pSrc);
+	{
+		GFX_DATA* pDst    = (GFX_DATA*)nParam1;
+		GFX_DATA* pSrc    = (GFX_DATA*)nParam2;
+
+		GFX_POINT org;
+		for (org.y=0;org.y<pDst->h+pSrc->h;org.y+=pSrc->h)
+		for (org.x=0;org.x<pDst->w+pSrc->w;org.x+=pSrc->w)
+			kcswi_handler (nParam1, nParam2, (unsigned long)&org, nAPI_GFX_FASTBLIT);
 	}
 	break;
 
