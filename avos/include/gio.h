@@ -16,10 +16,16 @@
 typedef unsigned long u32;
 #endif
 
-#define         GIO_LINE_BUTTON_ON  0x00
-#define         GIO_LINE_I2C_DATA   0x12
-#define         GIO_LINE_I2C_CLOCK  0x13
-#define         GIO_LINE_BUTTON_OFF 0x1c
+#define         GIO_LINE_BUTTON_ON          0x00
+#define         GIO_LINE_MAS_POWER          0x10    // 1 = power
+#define         GIO_LINE_I2C_DATA           0x12
+#define         GIO_LINE_I2C_CLOCK          0x13
+#define         GIO_LINE_MODULE_SENSE       0x15    // 0 if CF card in
+#define         GIO_LINE_MEMCARD_INSERT     0x16    // goes high when card
+                                                    // inserted then goes
+                                                    // back to low.
+#define         GIO_LINE_BACKLIGHT_POWER    0x17    // 0 = power
+#define         GIO_LINE_BUTTON_OFF         0x1c
 
 #define         GIO_OUTPUT       0
 #define         GIO_INPUT        1
