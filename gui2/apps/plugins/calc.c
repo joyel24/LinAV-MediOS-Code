@@ -43,13 +43,21 @@
    in the plugin */
 struct client_operations * cops;
 
+#define OP_UNDEFINED  0
+#define OP_PLUS       1
+#define OP_MINUS      2
+#define OP_MULTI      3
+#define OP_DIV        4
+#define OP_XY         5
+#define OP_EQUAL      6
+
 /* the cursor coordinates */
 int x=0,y=0;
 int matrixSize = 0;
 double tmpErg = 0;        /* Zwischenergebnis */
 double erg = 0;           /* Endergebnis durch = */
-char strCurrentNumber[20]; /* ahl die gerade eingeben wird als String */
-int operation = 0;        /* 1 = + ; 2 = - ; 3 = * ; 4 = /           0 undefined */
+char strCurrentNumber[20]; /* Zahl die gerade eingeben wird als String */
+int operation = OP_UNDEFINED;        /* see defines above */
 
 static unsigned char pair0[PIECE_DIM][PIECE_DIM] = /* identifier = 0 */
 { {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
@@ -567,12 +575,12 @@ static unsigned char pairSQRT[PIECE_DIM][PIECE_DIM] = /* identifier = 16  - */
 { {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
-  {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,23,23,23,23,23},
+  {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9, 9, 9, 9, 9, 9, 9, 9,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23, 9, 9, 9, 9,23,23,23,23,23,23, 9, 9, 9,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23},
-  {23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23},
+  {23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23, 9,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
@@ -581,14 +589,14 @@ static unsigned char pairSQRT[PIECE_DIM][PIECE_DIM] = /* identifier = 16  - */
   {23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
-  {23,23,23,23,23,23, 9, 9,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
-  {23,23,23,23,23,23, 9, 9,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
-  {23,23,23,23,23,23, 9, 9, 9,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
-  {23,23,23,23,23,23, 9, 9, 9,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
-  {23,23,23,23,23,23, 9, 9, 9, 9,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
+  {23,23,23,23,23,23,23, 9,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
+  {23,23,23,23,23,23,23, 9,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
+  {23,23,23,23,23,23,23, 9, 9,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
+  {23,23,23,23,23,23,23, 9, 9,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
+  {23,23,23,23,23,23,23, 9, 9, 9,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23, 9, 9,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
-  {23,23,23,23,23,23,23,23, 9, 9, 9, 9, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
-  {23,23,23,23,23,23,23,23, 9, 9, 9, 9, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
+  {23,23,23,23,23,23,23,23,23, 9, 9, 9, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
+  {23,23,23,23,23,23,23,23,23, 9, 9, 9, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23, 9, 9, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23, 9, 9, 9, 9,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
@@ -663,11 +671,11 @@ static unsigned char pairXY[PIECE_DIM][PIECE_DIM] = /* identifier = 19  / */
 { {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
-  {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23, 9, 9,23,23,23,23,23,23,23,23},
-  {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23, 9, 9,23,23,23,23,23,23,23,23},
-  {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23, 9, 9,23,23,23,23,23,23,23,23},
-  {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23, 9, 9,23,23,23,23,23,23,23,23},
-  {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23, 9, 9,23,23,23,23,23,23,23,23},
+  {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23, 9, 9,23,23,23,23,23,23,23,23},
+  {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23, 9, 9,23,23,23,23,23,23,23,23},
+  {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23, 9, 9,23,23,23,23,23,23,23,23},
+  {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23, 9, 9,23,23,23,23,23,23,23,23},
+  {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9, 9,23, 9, 9,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23},
   {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23, 9, 9,23,23,23,23,23,23,23,23,23,23},
@@ -843,7 +851,7 @@ int eventHandler(int evt)
             case BTN_F3:
                 erg = 0;
                 tmpErg = 0;
-                operation = 0;
+                operation = OP_UNDEFINED;
                 memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
                 output(strCurrentNumber);
                 break;
@@ -852,7 +860,7 @@ int eventHandler(int evt)
 
 void setCursor(int del)
 {
-    char tmp[10];
+//    char tmp[10];
     int ident = 0;
 
     if(del)
@@ -908,92 +916,131 @@ void calculate()
 {
     int l = 0;
     double tmp = 0;
+//    char ch[100];
 
     if(field[y][x] == 0)
     {
-        strcat(strCurrentNumber, "0");
-        output(strCurrentNumber);
+        if(operation != OP_EQUAL)
+        {
+            strcat(strCurrentNumber, "0");
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 1)
     {
-        strcat(strCurrentNumber, "1");
-        output(strCurrentNumber);
+        if(operation != OP_EQUAL)
+        {
+            strcat(strCurrentNumber, "1");
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 2)
     {
-        strcat(strCurrentNumber, "2");
-        output(strCurrentNumber);
+        if(operation != OP_EQUAL)
+        {
+            strcat(strCurrentNumber, "2");
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 3)
     {
-        strcat(strCurrentNumber, "3");
-        output(strCurrentNumber);
+        if(operation != OP_EQUAL)
+        {
+            strcat(strCurrentNumber, "3");
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 4)
     {
-        strcat(strCurrentNumber, "4");
-        output(strCurrentNumber);
+        if(operation != OP_EQUAL)
+        {
+            strcat(strCurrentNumber, "4");
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 5)
     {
-        strcat(strCurrentNumber, "5");
-        output(strCurrentNumber);
+        if(operation != OP_EQUAL)
+        {
+            strcat(strCurrentNumber, "5");
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 6)
     {
-        strcat(strCurrentNumber, "6");
-        output(strCurrentNumber);
+        if(operation != OP_EQUAL)
+        {
+            strcat(strCurrentNumber, "6");
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 7)
     {
-        strcat(strCurrentNumber, "7");
-        output(strCurrentNumber);
+        if(operation != OP_EQUAL)
+        {
+            strcat(strCurrentNumber, "7");
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 8)
     {
-        strcat(strCurrentNumber, "8");
-        output(strCurrentNumber);
+        if(operation != OP_EQUAL)
+        {
+            strcat(strCurrentNumber, "8");
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 9)
     {
-        strcat(strCurrentNumber, "9");
-        output(strCurrentNumber);
+        if(operation != OP_EQUAL)
+        {
+            strcat(strCurrentNumber, "9");
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 10)
     {
-        strcat(strCurrentNumber, ".");
-        output(strCurrentNumber);
+        if(operation != OP_EQUAL)
+        {
+            strcat(strCurrentNumber, ".");
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 11) /* = */
     {
-        if(operation == 1)
+        if(operation == OP_PLUS)
         {
             erg = tmpErg + atof(strCurrentNumber);
         }
-        else if(operation == 2)
+        else if(operation == OP_MINUS)
         {
             erg = tmpErg - atof(strCurrentNumber);
         }
-        else if(operation == 3)
+        else if(operation == OP_MULTI)
         {
             erg = tmpErg * atof(strCurrentNumber);
         }
-        else if(operation == 4)
+        else if(operation == OP_DIV)
         {
             if(atof(strCurrentNumber) != 0)
                 erg = tmpErg / atof(strCurrentNumber);
         }
-        else if(operation == 5)
+        else if(operation == OP_XY)
         {
-            tmp = erg;
+//            sprintf(ch,"Erg=%.2f tmpErg=%.2f strCur=%s op=%d",erg,tmpErg,strCurrentNumber,operation);
+//            cops->putS(COLOR_BLACK, COLOR_WHITE, 5,210, ch);
 
-            for(l = 0; l < tmpErg; l++)
+            erg = tmpErg;
+
+            tmp = atof(strCurrentNumber);
+
+            for(l = 0; l < tmp-1; l++)
             {
-                erg *= tmp;
+                erg *= tmpErg;
             }
         }
 
-        operation = 0;
+        operation = OP_EQUAL;
         tmpErg = 0;
 
         sprintf(strCurrentNumber, "%f", erg);
@@ -1001,36 +1048,70 @@ void calculate()
     }
     else if(field[y][x] == 12)
     {
-        tmpErg = atof(strCurrentNumber);
-        operation = 3; /* x */
-        memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
-        output(strCurrentNumber);
+        if((strlen(strCurrentNumber) == 0) && (operation == OP_UNDEFINED))
+        {
+        }
+        else
+        {
+            if((operation == OP_UNDEFINED) || (operation == OP_EQUAL))
+            {
+                tmpErg = atof(strCurrentNumber);
+            }
+
+            operation = OP_MULTI; /* x */
+            memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 13)
     {
-        tmpErg = atof(strCurrentNumber);
-        operation = 1; /* + */
-        memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
-        output(strCurrentNumber);
+        if((strlen(strCurrentNumber) == 0) && (operation == OP_UNDEFINED))
+        {
+        }
+        else
+        {
+            if((operation == OP_UNDEFINED) || (operation == OP_EQUAL))
+            {
+                tmpErg = atof(strCurrentNumber);
+            }
+
+            operation = OP_PLUS; /* + */
+            memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 14)
     {
-        tmpErg = atof(strCurrentNumber);
-        operation = 4;  /* / */
-        memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
-        output(strCurrentNumber);
+        if((strlen(strCurrentNumber) == 0) && (operation == OP_UNDEFINED))
+        {
+        }
+        else
+        {
+            if((operation == OP_UNDEFINED) || (operation == OP_EQUAL))
+            {
+                tmpErg = atof(strCurrentNumber);
+            }
+
+            operation = OP_DIV;  /* / */
+            memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 15)
     {
-        if((strlen(strCurrentNumber) == 0) && (operation == 0))
+        if((strlen(strCurrentNumber) == 0) && (operation == OP_UNDEFINED))
         {
             /* Minuszeichen vor die erste Zahl */
             strcat(strCurrentNumber, "-");
         }
         else
         {
-            tmpErg = atof(strCurrentNumber);
-            operation = 2; /* - */
+            if((operation == OP_UNDEFINED) || (operation == OP_EQUAL))
+            {
+                tmpErg = atof(strCurrentNumber);
+            }
+
+            operation = OP_MINUS; /* - */
             memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
         }
 
@@ -1039,39 +1120,55 @@ void calculate()
     else if(field[y][x] == 16)
     {
         tmp = atof(strCurrentNumber);
-        erg = mySqrt(tmp);
-        tmpErg = 0;
-        operation = 0;
+        if(tmp > 0)
+        {
+            erg = mySqrt(tmp);
+            tmpErg = 0;
+            operation = OP_UNDEFINED;
 
-        sprintf(strCurrentNumber, "%f", erg);
-        output(strCurrentNumber);
+            sprintf(strCurrentNumber, "%f", erg);
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 17)
     {
         tmp = atof(strCurrentNumber);
-        erg = 1 / tmp;
-        tmpErg = 0;
-        operation = 0;
+        if(tmp != 0)
+        {
+            erg = 1 / tmp;
+            tmpErg = 0;
+            operation = OP_UNDEFINED;
 
-        sprintf(strCurrentNumber, "%f", erg);
-        output(strCurrentNumber);
+            sprintf(strCurrentNumber, "%f", erg);
+            output(strCurrentNumber);
+        }
     }
     else if(field[y][x] == 18)
     {
         tmp = atof(strCurrentNumber);
         erg = tmp * tmp;
         tmpErg = 0;
-        operation = 0;
+        operation = OP_UNDEFINED;
 
         sprintf(strCurrentNumber, "%f", erg);
         output(strCurrentNumber);
     }
     else if(field[y][x] == 19)
     {
-        tmpErg = atof(strCurrentNumber);
-        operation = 5; /* x ^ y */
-        memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
-        output(strCurrentNumber);
+        if((strlen(strCurrentNumber) == 0) && (operation == OP_UNDEFINED))
+        {
+        }
+        else
+        {
+            if((operation == OP_UNDEFINED) || (operation == OP_EQUAL))
+            {
+                tmpErg = atof(strCurrentNumber);
+            }
+
+            operation = OP_XY; /* x ^ y */
+            memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+            output(strCurrentNumber);
+        }
     }
 }
 
