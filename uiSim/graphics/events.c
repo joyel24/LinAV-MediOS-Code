@@ -7,11 +7,14 @@
 #include <X11/Xutil.h>
 
 
-extern Display* display;	/*variable Event */
+extern Display* display;
+extern Window window;	/*variable Event */
 
 int nxtEvent(void)
  {
     XEvent event;
+    
+    XSelectInput(display, window, ExposureMask);
     /* next event */
     XNextEvent(display, &event);
     

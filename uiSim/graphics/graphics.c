@@ -71,14 +71,12 @@ int ini_graphics()
   
   XStoreName(display, window, texte);
 
-  /* Sélection des événements */
-  
-  XSelectInput(display, window, ExposureMask);
-
   /* Affichage de la fenêtre */
   
   XMapWindow(display, window);
-
+  
+  XFlush(display);
+  
 }
 
 void close_graphics()
@@ -118,6 +116,9 @@ void drawRect(int color, int x, int y, int width, int height)
     printf("test2");
        
     XDrawRectangle(display, window, GCDrawRect, x, y, width, height); /* XLib Function */
+    
+    XFlush(display);
+    
     printf("test3");
  
 }
