@@ -44,6 +44,7 @@ struct object_properties
 	int defense;        // ( 0 - 20)
 	int access_radius;  // ( 0 - 3)
 	int hitpoints;      // ( 0 - 5), decreased by every hit by one
+	int buildturns;     // ( 0 - 20)
 
 	// MoveBits
 	// Bit 0 -> cant move
@@ -55,17 +56,15 @@ struct object_properties
 
 static struct object_properties Objects[] =
 {
-// Name              Str  Def Rad Hit  Move
-   {"Town",            0,  10,  0,  5, 0x00},
-   {"Armee",           5,   5,  1,  1, 0x03},
-   {"Tank",           10,   8,  1,  3, 0x01},
-   {"Plane",          10,   3,  3,  2, 0x07},
-   {"Destroyer",      15,   8,  2,  3, 0x04},
-   {"Battleship",     20,  12,  2,  5, 0x04},
-   {"Transportship",   5,   1,  2,  2, 0x04}
+// Name              Str  Def Rad Hit Bld  Move
+   {"Town",            0,  10,  0,  5,  0, 0x00},
+   {"Armee",           5,   5,  1,  1,  3, 0x03},
+   {"Tank",           10,   8,  1,  3,  8, 0x01},
+   {"Plane",          10,   3,  3,  2,  8, 0x07},
+   {"Destroyer",      15,   8,  2,  3, 12, 0x04},
+   {"Battleship",     20,  12,  2,  5, 15, 0x04},
+   {"Transportship",   5,   1,  2,  2, 10, 0x04}
 };
-
-int stop = 0;
 
 int startposX = 1;
 int startposY = 1;
@@ -358,9 +357,8 @@ int eventHandler(int evt)
 
 	switch (evt) {
 			case BTN_OFF:
-         case EVT_QUIT:
-				/* get out of here */
-				stop=1;
+			case EVT_QUIT:
+				RELEASE(cops)
 				break;
 
 			case BTN_F1:
@@ -394,18 +392,14 @@ int eventHandler(int evt)
 *********************************************************/
 int main(int argc,char * * argv)
 {
-    int w, h, i;
-
 	 REGISTER(cops,eventHandler,0);
-    PACK(cops);
 
     cops->hideSBar();
 
     empire_init();
 
-    while (!stop)
- 	 {
-	 }
+    PACK(cops);
+    STOPME(cops)
 
     cops->showSBar();
 
