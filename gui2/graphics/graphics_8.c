@@ -100,8 +100,9 @@ void graphics8_DrawBITMAP  (BITMAP * bitmap, unsigned int trsp, int x, int y, st
     {
         for(j=0;j<bitmap->height;j++)
         {
-            for(i=0;i<bitmap->width;i++)
-                OUTB(INB(src+i),dest+i);
+            /*for(i=0;i<bitmap->width;i++)
+                OUTB(INB(src+i),dest+i);*/
+            memcpy(dest,src,bitmap->width);
             dest+=buff->width;
             src+=bitmap->width;
         }

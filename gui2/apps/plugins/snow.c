@@ -55,6 +55,9 @@ int main(int argc,char * * argv)
 	REGISTER(cops,eventHandler);	
  stop=0;
  blocked=0;
+ cops->stopTimout();
+ cops->hideTime();
+ cops->hideBat();
    snow_init();
 PACK(cops);
 	while (!stop)
@@ -66,6 +69,9 @@ PACK(cops);
 
   		
 	}
+        cops->startTimout();
+        cops->showTime();
+        cops->showBat();
 }
 
 void ClearScreen()
