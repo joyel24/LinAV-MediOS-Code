@@ -1,9 +1,13 @@
 /* 
-*   kernel/uart.c
+*   kernel/core/uart.c
 *
 *   AMOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
 */
 
 #include <kernel/io.h>
@@ -18,7 +22,7 @@ __IRAM_DATA unsigned int uartAdrr[2]={
 
 __IRAM_CODE int uartIn(unsigned char * data,int uartNum)  /* this one is probably buggy */
 {
-    if(inw(uartAdrr[uartNum]+UART_RFCR)&0x3F) /* check if something is in the reception buffer */
+    if(inw(uartAdrr[uartNum]+UART_SR)&0x0004) /* check if something is in the reception buffer */
     {
         *data=(unsigned char)inw(uartAdrr[uartNum]+UART_DTRR);
         return 1;
