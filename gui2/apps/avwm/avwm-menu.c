@@ -102,29 +102,36 @@ void do_F3(void * data) // switch to usb
 {
     int pid,status; 
     
-    pid = vfork();
-    
-    if (pid == 0)
-    {
+    if(getUSB())
+    {    
+        pid = vfork();
         
-        execl("/mnt/avwm/apps/enableUSB","/mnt/avwm/apps/enableUSB",(char *)0);
-        
-        fprintf(stderr, "exec failed!\n");
-        _exit(1);        
-    }
-    else
-    {
-        if (pid > 0)
+        if (pid == 0)
         {
-            int status;
-            close_graphics();            
-            waitpid(pid, &status, 0);
-            ini_graphics();      
+            
+            execl("/mnt/avwm/apps/enableUSB","/mnt/avwm/apps/enableUSB",(char *)0);
+            
+            fprintf(stderr, "exec failed!\n");
+            _exit(1);        
         }
         else
         {
-            fprintf(stderr, "vfork failed %d\n", pid);
+            if (pid > 0)
+            {
+                int status;
+                close_graphics();            
+                waitpid(pid, &status, 0);
+                ini_graphics();      
+            }
+            else
+            {
+                fprintf(stderr, "vfork failed %d\n", pid);
+            }
         }
+    }
+    else
+    {
+        fprintf(stderr, "Warning can't go usb as usb cable absent\n");
     }
 }
 

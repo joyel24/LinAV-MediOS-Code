@@ -7,6 +7,8 @@
 #include "misc.h"
 #include "colordef.h"
 #include "events.h"
+#include "usb_bg.h"
+static BITMAP usbBMAP = {(unsigned int) usb_bg, 320, 240, 0, 0};
 
 needFont(std8x13);
 
@@ -18,10 +20,10 @@ int main(int argc,char ** argv)
     
     clearScreen(COLOR_WHITE);
     
-    putS(COLOR_BLACK,COLOR_WHITE,15,15,"USB CONTROL");
+    //putS(COLOR_BLACK,COLOR_WHITE,15,15,"USB CONTROL");
     fprintf(stderr,"in USB CONTROL\n");
     
-    if(!getUSB())
+    /*if(!getUSB())
     {
         putS(COLOR_RED,COLOR_WHITE,10,60,"USB CABLE NOT PRESENT");
         fprintf(stderr,"USB cable not connected\n");
@@ -43,9 +45,9 @@ int main(int argc,char ** argv)
                 }
         }
         fillRect(COLOR_WHITE,10,60,310,60);
-    }
+    }*/
     
-    putS(COLOR_BLACK,COLOR_WHITE,10,60,"Enabling USB");
+    //putS(COLOR_BLACK,COLOR_WHITE,10,60,"Enabling USB");
     
     if(umount2("/mnt", MNT_FORCE)<0)
     {
@@ -60,7 +62,13 @@ int main(int argc,char ** argv)
     }
     fprintf(stderr,"in usb state\n");
     
-    putS(COLOR_BLACK,COLOR_WHITE,10,60,"Press a key when finished");
+    //putS(COLOR_BLACK,COLOR_WHITE,10,60,"Press a key when finished");
+    
+    
+    setPlane(VID1);
+    drawBITMAP (&usbBMAP, 0, 0);
+    showPlane(VID1);
+    
     while(1)
     {
         evt=waitEvent();
@@ -70,8 +78,8 @@ int main(int argc,char ** argv)
             break;
         }
     }
-    fillRect(COLOR_WHITE,10,60,310,40);
-    putS(COLOR_BLACK,COLOR_WHITE,10,60,"Disabling USB");
+    //fillRect(COLOR_WHITE,10,60,310,40);
+    //putS(COLOR_BLACK,COLOR_WHITE,10,60,"Disabling USB");
     if(setUSB(0)<0)
     {
         fprintf(stderr,"Error disabling USB\n");

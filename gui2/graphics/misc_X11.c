@@ -131,3 +131,21 @@ int getTick(void)
     return ((int)(rawtime)-startTick);
 }
 
+int fmIsConnected(void)
+{    
+        return 0;
+}
+
+int fmSetBat(int val)
+{
+    return 1;
+}
+
+int fmSetVol(int val)
+{
+    return 1;
+}
+
+void print_data(char * data,int length)
+{
+}
