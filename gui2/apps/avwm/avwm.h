@@ -14,6 +14,8 @@
 #ifndef __AVWM_H
 #define __AVWM_H
 
+#include "graphics.h"
+
 #define MENU_SHADOW 2 // height of small shadow under the title
 
 #define EVT_REDRAW  0x0100
@@ -32,8 +34,8 @@ struct client_operations {
     void (*drawLine)          (int color, int x1, int y1, int x2, int y2);
     void (*putS)              (int color, int bg_color,int x, int y, char *s);
     void (*putC)              (int color, int bg_color,int x, int y, char s);
-    //void (*drawSprite)        (PALETTE * palette, SPRITE * sprite, int x, int y);
-    //void (*drawBITMAP)        (BITMAP * bitmap, int x, int y);
+    void (*drawSprite)        (PALETTE * palette, SPRITE * sprite, int x, int y);
+    void (*drawBITMAP)        (BITMAP * bitmap, int x, int y);
     void (*scrollWindowVert)  (int bgColor, int x, int y, int width, int height, int scroll, int UP);
     void (*scrollWindowHoriz) (int bgColor, int x, int y, int width, int height, int scroll, int RIGHT);
     void (*drawImage)         (char * filename);
