@@ -117,8 +117,9 @@ struct av_peak {
 
 #define AV_GET_EVENT           _IOR(AV_OP_IOC_MAGIC,44, int)
 #define AV_CLEAR_EVENTS        _IO(AV_OP_IOC_MAGIC,45)
+#define AV_WAIT_EVENT          _IOR(AV_OP_IOC_MAGIC,46,int)
 
-#define AV_OP_IOC_MAXNR        45
+#define AV_OP_IOC_MAXNR        46
 
 /* MAJOR / MINOR */
 

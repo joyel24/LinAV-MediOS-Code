@@ -80,13 +80,16 @@ struct graphicsBuffer {
 };
 
 struct graphics_operations {
-void (*drawPixel)    (int color, int x, int y, struct graphicsBuffer * buff);
-int  (*readPixel)    (int x, int y, struct graphicsBuffer * buff);
-void (*drawRect)     (int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
-void (*fillRect)     (int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
-void (*drawChar)     (struct graphicsFont * font, int color,int bg_color, int x, int y, char c, struct graphicsBuffer * buff);
-void (*drawSprite)   (SPRITE * sprite, PALETTE * palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
-void (*drawBITMAP)   (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+void (*drawPixel)        (int color, int x, int y, struct graphicsBuffer * buff);
+int  (*readPixel)        (int x, int y, struct graphicsBuffer * buff);
+void (*drawRect)         (int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
+void (*fillRect)         (int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
+void (*drawChar)         (struct graphicsFont * font, int color,int bg_color, int x, int y, char c, struct graphicsBuffer * buff);
+void (*drawSprite)       (SPRITE * sprite, PALETTE * palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+void (*drawBITMAP)       (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+void (*drawString)       (struct graphicsFont * font, int color,int bg_color, int x, int y, char * s, struct graphicsBuffer * buff);
+void (*scrollWindowVert) (int bgColor, int x, int y, int width, int height, int scroll, int UP, struct graphicsBuffer * buff);
+void (*scrollWindowHoriz)(int bgColor, int x, int y, int width, int height, int scroll, int RIGHT, struct graphicsBuffer * buff);
 };
 
 struct graphics_context {
@@ -115,14 +118,17 @@ void setPalette      (int palette[256][3],int size);
 
 /* drawings */
 
-void drawPixel       (int color, int x, int y);
-int  readPixel       (int x, int y);
-void drawRect        (int color, int x, int y, int width, int height);
-void fillRect        (int color, int x, int y, int width, int height);
-void putS            (int color, int bg_color,int x, int y, char *s);
-void putC            (int color, int bg_color,int x, int y, char s);
-void drawSprite      (PALETTE * palette, SPRITE * sprite, int x, int y);
-void drawBITMAP      (BITMAP * bitmap, int x, int y);
+void drawPixel        (int color, int x, int y);
+int  readPixel        (int x, int y);
+void drawRect         (int color, int x, int y, int width, int height);
+void fillRect         (int color, int x, int y, int width, int height);
+void drawLine         (int color, int x1, int y1, int x2, int y2);
+void putS             (int color, int bg_color,int x, int y, char *s);
+void putC             (int color, int bg_color,int x, int y, char s);
+void drawSprite       (PALETTE * palette, SPRITE * sprite, int x, int y);
+void drawBITMAP       (BITMAP * bitmap, int x, int y);
+void scrollWindowVert (int bgColor, int x, int y, int width, int height, int scroll, int UP);
+void scrollWindowHoriz(int bgColor, int x, int y, int width, int height, int scroll, int RIGHT);
 
 /* Font */
 #define needFont(name)	 FONT_ID name;

@@ -28,8 +28,10 @@
 #define        BTN_ON      0x0009
 #define        BTN_OFF     0x000a
 
+
 int iniEvent(void);
 int nxtEvent(void);
+int waitEvent(void);
 int clearEventQueue(void);
 int setRepeate(int val);
 int getRepeate(void);

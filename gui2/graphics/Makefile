@@ -5,7 +5,7 @@ AR=$(TOOL)-ar
 RANLIB=$(TOOL)-ranlib
 
 GCCFLAGS=-I../include
-LDFLAGS=-elf2flt
+LDFLAGS=-elf2flt 
 
 LIB_CONTENT= \
 	graphics.o \
@@ -27,6 +27,7 @@ fontDir:
 clean:
 	@echo "**** Cleaning..."
 	@rm -f *.o *.bak *~ $(TARGET)
+	@rm -f ../include/*~
 	@$(MAKE) -C fonts/ clean
 
 .c.o:

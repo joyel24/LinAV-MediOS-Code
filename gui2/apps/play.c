@@ -3,20 +3,70 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include "av3xx_common.h"
-
+#define MWINCLUDECOLORS
 #include "graphics.h"
 #include "events.h"
+#include "alias.h"
 
+/***********************
+ * Miscellaneous DEFINEs
+ **********************/
 #define MP3_BUFF_SIZE (1020*1000)
+#define COLOR_WHITE    16
+#define COLOR_BLUE     86
+#define COLOR_DARKBLUE 55
+#define COLOR_BLACK    1
+#define COLOR_RED      13
 
-#define MAX(a,b)      (a=a<b?a:b)   // a=max(a,b)
-
+/************
+ * Fonts used
+ ***********/
 needFont(std6x9);
-needFont(shadow);
+needFont(std7x13);
 
-int vol=70, bass = 50, treb = 50, bal = 50, loud = 0;
-int cursor_position = 1, fd_mix;
-char tmp[1000];
+/*************************
+ * Ints for PLAYBACK/SOUND
+ ************************/
+int vol, bass = 50, treb = 50; // sound settings
+int bal = 50, loud = 0;        // sound settings
+int oldvol;                    // used for pause/resume
+int wait, end;
+int fd_dsp, fd_file, fd_mix;
+int pause = 0;                 // 1 if paused
+int repeat;                    // repeat song?
+int settings_applied = 0;      // "1" if settings have been applied
+int frame_cnt;                 // frames elapsed so far
+int evt;                       // button reading
+int fade = 1;                  // fade on stop/pause
+
+/*******************
+ * Ints for GRAPHICS
+ ******************/
+int visualization = 1; // "1" for peak meters, "2" for oscillograph
+int osci_x = 10;       // x position of oscillograph
+
+/******************
+ * Ints for WINDOWS
+ *****************/
+int window = 1;                   // "1" = main, "2" = settings, "3" = sound
+int sound_cursor_position = 1;    // cursor position at sound settings
+int settings_cursor_position = 1; // cursor position at settings
+int main_drawn = 0;               // "1" if has been drawn
+int settings_drawn = 0;           // "1" if has been drawn
+int soundsettings_drawn = 0;      // "1" if has been drawn
+
+/*********************
+ * Miscellaneous CHARs
+ ********************/
+char defFilename[]="/mnt/file.mp3"; // default file location
+char * filename;                    // current file location
+char tmp[100];                      // used for printing text
+
+/*******************
+ * Other
+ ******************/
+struct mp3_play data; // mp3 data
+struct av_peak av_p;  // left/right levels
 
 void usage(void)
 {
@@ -25,226 +75,341 @@ void usage(void)
     printf("usage: play file\n");
 }
 
-GC_ID g_gcWhite;
-GC_ID g_gcBlack;
-GC_ID g_gcBlue;
-GC_ID g_gcRed;
-
-GC_ID g_gcWhite2;
-GC_ID g_gcBlack2;
-GC_ID g_gcRed2;
-
-// arg1 = file; arg2 = volume
-
-void draw_text(void)
+/***************************************
+ * Draws a progress bar on a 0-100 scale
+ **************************************/
+void draw_settings_progressbar(int x, int y, int value)
 {
-    sprintf(tmp,"Vol: %03d",vol);
-    if(cursor_position == 1)
-    	putS(USE_GC,USE_GC,10, 100, tmp, g_gcRed2);        
-    else
-    	putS(USE_GC,USE_GC,10, 100, tmp, g_gcWhite2);
-
-    sprintf(tmp,"Bass: %03d",bass);
-    if(cursor_position == 2)
-        putS(USE_GC,USE_GC,10, 115, tmp, g_gcRed2);        
-    else
-    	putS(USE_GC,USE_GC,10, 115, tmp, g_gcWhite2);
-
-    sprintf(tmp,"Treble: %03d",treb);
-    if(cursor_position == 3)
-        putS(USE_GC,USE_GC,10, 130, tmp, g_gcRed2);        
-    else
-    	putS(USE_GC,USE_GC,10, 130, tmp, g_gcWhite2);
-
-    sprintf(tmp,"Balance: %03d",bal);
-    if(cursor_position == 4)
-        putS(USE_GC,USE_GC,10, 145, tmp, g_gcRed2);        
-    else
-    	putS(USE_GC,USE_GC,10, 145, tmp, g_gcWhite2);
-
-    sprintf(tmp,"Loudness: %03d",loud);
-    if(cursor_position == 5)
-        putS(USE_GC,USE_GC,10, 160, tmp, g_gcRed2);        
-    else
-    	putS(USE_GC,USE_GC,10, 160, tmp, g_gcWhite2);
+    lcd_drawrect(COLOR_WHITE, x, y, 104, 9);
+    lcd_fillrect(COLOR_BLACK, x+2+value, y+2, 100-value, 5);
+    lcd_fillrect(COLOR_BLUE, x+2, y+2, value, 5);
 }
 
+/**************************
+ * Draw sound settings text
+ *************************/
+void draw_soundsettings(void)
+{
+    sprintf(tmp,"Vol: %03d",vol);
+    if(sound_cursor_position == 1)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 100, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 100, tmp);
+
+    sprintf(tmp,"Bass: %03d",bass);
+    if(sound_cursor_position == 2)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 115, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 115, tmp);
+
+    sprintf(tmp,"Treble: %03d",treb);
+    if(sound_cursor_position == 3)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 130, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 130, tmp);
+
+    sprintf(tmp,"Balance: %03d",bal);
+    if(sound_cursor_position == 4)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 145, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 145, tmp);
+
+    sprintf(tmp,"Loudness: %03d",loud);
+    if(sound_cursor_position == 5)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 160, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 160, tmp);
+
+    draw_settings_progressbar(100, 99, vol);
+    draw_settings_progressbar(100, 114, bass);
+    draw_settings_progressbar(100, 129, treb);
+    draw_settings_progressbar(100, 144, bal);
+    draw_settings_progressbar(100, 159, loud);
+}
+
+/**************************
+ * Draw sound settings text
+ *************************/
+void draw_settings(void)
+{
+    if(visualization == 1)
+        sprintf(tmp, "Visualization: Peak Meters ");
+    else
+        sprintf(tmp, "Visualization: Oscillograph");
+    if(settings_cursor_position == 1)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 100, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 100, tmp);
+
+    if(fade == 1)
+        sprintf(tmp, "Fade On Stop/Pause: Yes");
+    else
+        sprintf(tmp, "Fade On Stop/Pause: No ");
+    if(settings_cursor_position == 2)
+        lcd_putsxy(COLOR_RED, COLOR_BLACK, 10, 115, tmp);
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 115, tmp);
+}
+
+/********************
+ * Apply the settings
+ *******************/
 void apply_settings(void)
 {
     // apply volume
-    if(ioctl(fd_mix,AV_SET_MIX_VOLUME,&vol)<0)
-        printf("unable to set vol\n");
-
+    ioctl(fd_mix,AV_SET_MIX_VOLUME,&vol);
     // apply bass
-    if(ioctl(fd_mix,AV_SET_MIX_BASS,&bass)<0)
-        printf("unable to set bass\n");
-
+    ioctl(fd_mix,AV_SET_MIX_BASS,&bass);
     // apply treble
-    if(ioctl(fd_mix,AV_SET_MIX_TREBLE,&treb)<0)
-        printf("unable to set treble\n");
-
+    ioctl(fd_mix,AV_SET_MIX_TREBLE,&treb);
     // apply balance
-    if(ioctl(fd_mix,AV_SET_MIX_BALANCE,&bal)<0)
-        printf("unable to set balance\n");
-
+    ioctl(fd_mix,AV_SET_MIX_BALANCE,&bal);
     // apply loudness
-    if(ioctl(fd_mix,AV_SET_MIX_LOUDNESS,&loud)<0)
-        printf("unable to set loudness\n");
+    ioctl(fd_mix,AV_SET_MIX_LOUDNESS,&loud);
 }
 
-int main(int argc,char * * argv)
+/**************************
+ * Draw text along the side
+ *************************/
+void draw_main_help_text(void)
 {
-    int i, cnt1;
-    int wait;
-    int fd_dsp,fd_file;
-    int old_l=0,old_r=0;
-    
-
-    char defFilename[]="/mnt/file.mp3";
-    char * filename;
-    int frame_cnt; // total frames so far
-    struct mp3_play data;
-    struct av_peak av_p; // used for peakmeters
-    char tmp[100]; // used to print text
-    int seconds=0, minutes=0,hours=0; // elapsed time
-    int time_cnt, last_time_cnt; // elapsed time in seconds
-    int settings_applied = 0; // "1" if settings have been applied
-    int count = 0;
-    int pause=0;
-    int evt;
-    int mode=0;
-
-
-    
-    if(argc<3)
+    if(pause == 0)
     {
-       filename=defFilename;
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275, 16, "Pause    ");
     }
+    else
+        lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275, 16, "Resume");
+
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275,  41, "Stop");
+
+    sprintf(tmp,"Vol:%03d",vol);
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275,  96, tmp);
+
+    //lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275, 160, "Help");
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275, 181, "Options");
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275, 211, "Sound");
+
+    lcd_drawrect(COLOR_WHITE, 272,  14, (320-272), 13);
+    lcd_drawrect(COLOR_WHITE, 272,  39, (320-272), 13);
+    lcd_drawrect(COLOR_WHITE, 272,  94, (320-272), 13);
+    lcd_drawrect(COLOR_WHITE, 272, 149, (320-272), 13);
+    lcd_drawrect(COLOR_WHITE, 272, 179, (320-272), 13);
+    lcd_drawrect(COLOR_WHITE, 272, 209, (320-272), 13);
+}
+
+/**************************
+ * Draw text along the side
+ *************************/
+void draw_settings_help_text(void)
+{
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 10, "Use UP and DOWN to move the cursor.");
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 25, "Use LEFT and RIGHT to change the value.");
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 40, "Press OFF or F3 to exit.");
+
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275,  41, "Back");
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275, 181, "Back");
+
+    lcd_drawrect(COLOR_WHITE, 272,  14, (320-272), 13);
+    lcd_drawrect(COLOR_WHITE, 272,  39, (320-272), 13);
+    lcd_drawrect(COLOR_WHITE, 272, 149, (320-272), 13);
+    lcd_drawrect(COLOR_WHITE, 272, 179, (320-272), 13);
+    lcd_drawrect(COLOR_WHITE, 272, 209, (320-272), 13);
+}
+
+/**************************
+ * Draw text along the side
+ *************************/
+void draw_soundsettings_help_text(void)
+{
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 10, "Use UP and DOWN to move the cursor.");
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 25, "Use LEFT and RIGHT to change the value.");
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 40, "Press OFF or F3 to exit.");
+
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275,  41, "Back");
+    lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 275, 211, "Back");
+
+    lcd_drawrect(COLOR_WHITE, 272,  14, (320-272), 13);
+    lcd_drawrect(COLOR_WHITE, 272,  39, (320-272), 13);
+    lcd_drawrect(COLOR_WHITE, 272, 149, (320-272), 13);
+    lcd_drawrect(COLOR_WHITE, 272, 179, (320-272), 13);
+    lcd_drawrect(COLOR_WHITE, 272, 209, (320-272), 13);
+}
+
+/**********************
+ * Draw an oscillograph
+ *********************/
+void oscillograph(int l, int r)
+{
+    // lower the values
+    l = l/12;
+    r = r/12;
+
+    // make sure the values aren't too high
+    if(l > 16)
+        l = 16;
+    if(r > 16)
+        r = 16;
+
+    // draw a "cursor"
+    lcd_drawline(COLOR_BLACK, osci_x+1, 208, osci_x+1, 240);
+
+    // left
+    lcd_drawline(COLOR_DARKBLUE, osci_x, 224, osci_x, 208);
+    lcd_drawline(COLOR_BLUE, osci_x, 224, osci_x, 224-l);
+
+    // right
+    lcd_drawline(COLOR_DARKBLUE, osci_x, 224, osci_x, 240);
+    lcd_drawline(COLOR_BLUE, osci_x, 224, osci_x, 224+r);
+
+    // move down a pixel, or back to the start
+    if(osci_x < 270)
+        osci_x++;
+    else
+        osci_x = 10;
+}
+
+int main(int argc, char * * argv)
+{
+    printf("argc: %d\n", argc);
+
+    if(argc<3)
+       return 0; // Quit
     else
     {
         filename=argv[1];
         vol=atoi(argv[2]);
+        repeat=atoi(argv[3]);
     }
 
     printf("In soundTest\n");
 
     fd_dsp=open("/dev/dsp",O_WRONLY);
-    if (fd_dsp < 0) {
+    if (fd_dsp < 0)
+    {
         printf("Can't open /dev/dsp\n");
         return -1;
     }
 
     fd_mix=open("/dev/mixer",O_WRONLY);
-    if (fd_mix < 0) {
+    if (fd_mix < 0)
+    {
         printf("Can't open /dev/mixer\n");
         return -1;
-    }    
+    }
 
     data.size=MP3_BUFF_SIZE;
     data.filename=filename;
-    data.pos=0;  
+    data.pos=0;
     data.finished=0;
 
-    if(ioctl(fd_dsp,AV_DSP_INI_MP3,&data)<0)
-    {
-        printf("Error sending data struct\n");
-        return -1;
-    }
+    ioctl(fd_dsp,AV_DSP_INI_MP3,&data);
 
     printf("Ready to play\n");
 
-    
     wait=0;
+    end=0;
     frame_cnt=0;
-    
+
     if(ini_graphics()<0)
     {
-    	printf("Cannot open graphics\n");
-	exit(1);
+        printf("Cannot open graphics\n");
+        exit(1);
     }
-    
-    g_gcWhite = createGC(BMAP1);
-    g_gcBlack = createGC(BMAP1);
-    g_gcBlue = createGC(BMAP1);
-    g_gcRed = createGC(BMAP1);
-    
-    g_gcWhite2 = createGC(BMAP2);
-    g_gcBlack2 = createGC(BMAP2);
-    g_gcRed2 = createGC(BMAP2);
 
-    g_gcWhite->fg=16;
-    g_gcWhite->bg=0;
-    g_gcWhite->font=std6x9;
-    
-    g_gcBlack->fg=0;
-    g_gcBlack->bg=1;
-    g_gcBlack->font=std6x9;
-    
-    g_gcBlue->fg=2;
-    g_gcBlue->bg=2;
-    g_gcBlue->font=std6x9;
-    
-    g_gcRed->fg=5;
-    g_gcRed->bg=0;
-    g_gcRed->font=std6x9;
-    
-    g_gcWhite2->fg=16;
-    g_gcWhite2->bg=0;
-    g_gcWhite2->font=std6x9;
-    
-    g_gcBlack2->fg=0;
-    g_gcBlack2->bg=0;
-    g_gcBlack2->font=std6x9;
-    
-    g_gcRed2->fg=5;
-    g_gcRed2->bg=0;
-    g_gcRed2->font=std6x9;
-    
-    hidePlane(BMAP2);
-    
-    fillRect(USE_GC,0, 0 , 320, 240, g_gcBlack); //clearScr();   
-    fillRect(USE_GC,0, 0 , 320, 240, g_gcBlack2); //clearScr();   
+    // black out the display
+    lcd_clear_display(COLOR_BLACK);
 
-    // "Now Playing: X.mp3"
-    sprintf(tmp,"Now Playing: %s",filename);;
-    putS(USE_GC,USE_GC,10, 15, tmp, g_gcWhite);
-    
-    draw_text();
-    apply_settings();
-    
-	if(ioctl(fd_dsp,AV_DSP_START_MP3,NULL)<0)
-	{
-		printf("Error starting\n");
-		return -1;
-	}
-	
+    // set standard font
+    lcd_setfont(std6x9);
+
+    ioctl(fd_dsp,AV_DSP_START_MP3,NULL);
 
     while(!data.finished)
     {
         while((evt=nxtEvent())>0)
         {
-		if(mode)
-		{
-                switch (evt)
-                {
-                    case BTN_UP: // cursor up
-                        if(cursor_position > 1)
-                            cursor_position--;
+            switch(evt)
+            {
+                case BUTTON_UP: // settings_cursor up
+                    if(window == 1)
+                    {
+                        if(vol < 100)
+                            vol++;
+                        settings_applied = 0;
+                        main_drawn = 0;
+                    }
+                    else if(window == 2)
+                    {
+                        if(settings_cursor_position > 1)
+                            settings_cursor_position--;
                         else
-                            cursor_position = 5;
-                        draw_text();
-                        break;
+                            settings_cursor_position = 2;
 
-                    case BTN_DOWN: // cursor down
-                        if(cursor_position < 5)
-                            cursor_position++;
+                        settings_drawn = 0;
+                    }
+                    else if(window == 3)
+                    {
+                        if(sound_cursor_position > 1)
+                            sound_cursor_position--;
                         else
-                            cursor_position = 1;
-                        draw_text();
-                        break;
+                            sound_cursor_position = 5;
 
-                    case BTN_RIGHT: // adjust up
-                        switch(cursor_position)
+                        soundsettings_drawn = 0;
+                    }
+                    break;
+
+                case BUTTON_DOWN: // settings_cursor down
+                    if(window == 1)
+                    {
+                        if(vol > 0)
+                            vol--;
+                        settings_applied = 0;
+                        main_drawn = 0;
+                    }
+                    else if(window == 2)
+                    {
+                        if(settings_cursor_position < 2)
+                            settings_cursor_position++;
+                        else
+                            settings_cursor_position = 1;
+
+                        settings_drawn = 0;
+                    }
+                    else if(window == 3)
+                    {
+                        if(sound_cursor_position < 5)
+                            sound_cursor_position++;
+                        else
+                            sound_cursor_position = 1;
+
+                        soundsettings_drawn = 0;
+                    }
+                    break;
+
+                case BUTTON_RIGHT: // adjust up
+                    if(window == 2)
+                    {
+                        switch(settings_cursor_position)
+                        {
+                            case 1:
+                                if(visualization == 1)
+                                    visualization = 2;
+                                else
+                                    visualization = 1;
+                                break;
+
+                            case 2:
+                                if(fade == 1)
+                                    fade = 0;
+                                else
+                                    fade = 1;
+                                break;
+                        }
+                        settings_drawn = 0;
+                    }
+                    else if(window == 3)
+                    {
+                        switch(sound_cursor_position)
                         {
                             case 1: if(vol < 100) vol++; break;
                             case 2: if(bass < 100) bass+=5; break;
@@ -252,12 +417,35 @@ int main(int argc,char * * argv)
                             case 4: if(bal < 100) bal++; break;
                             case 5: if(loud < 100) loud+=5; break;
                         }
-                        draw_text();
-                        apply_settings();
-                        break;
+                        settings_applied = 0;
+                        soundsettings_drawn = 0;
+                    }
+                    break;
 
-                    case BTN_LEFT: // adjust down
-                        switch(cursor_position)
+                case BUTTON_LEFT: // adjust down
+                    if(window == 2)
+                    {
+                        switch(settings_cursor_position)
+                        {
+                            case 1:
+                                if(visualization == 2)
+                                    visualization = 1;
+                                else
+                                    visualization = 2;
+                                break;
+
+                            case 2:
+                                if(fade == 1)
+                                    fade = 0;
+                                else
+                                    fade = 1;
+                                break;
+                        }
+                        settings_drawn = 0;
+                    }
+                    else if(window == 3)
+                    {
+                        switch(sound_cursor_position)
                         {
                             case 1: if(vol > 0) vol--; break;
                             case 2: if(bass > 0) bass-=5; break;
@@ -265,143 +453,216 @@ int main(int argc,char * * argv)
                             case 4: if(bal > 0) bal--; break;
                             case 5: if(loud > 0) loud-=5; break;
                         }
-                        draw_text();
-                        apply_settings();
-                        break;
-		case BTN_F1: //switch graphical state
-		    	mode=0;
-			hidePlane(BMAP2);
-			showPlane(BMAP1);
-			break;
-		}
-		}
-		else
-		{
-		switch(evt) {		
-		    case BTN_ON: // pause/resume
-		    	if(pause)
-			{
-				if(ioctl(fd_dsp,AV_DSP_START_MP3,NULL)<0)
-				{
-					printf("Error resuming\n");
-					return -1;
-				}				
-				pause=0;
-			}
-			else
-			{
-				if(ioctl(fd_dsp,AV_DSP_PAUSE_MP3,NULL)<0)
-				{
-					printf("Error pausing\n");
-					return -1;
-				}
-				pause=1;
-			}
-			
-		   	break;
-		    case BTN_OFF: // pause/resume
-		    	if(ioctl(fd_dsp,AV_DSP_STOP_MP3,NULL)<0)
-			{
-				printf("error stoping\n");
-				return -1;
-			}
-			goto end;
-		   	break;
-		    case BTN_F1: //switch graphical state
-		    	mode=1;
-			draw_text();
-			hidePlane(BMAP1);
-			showPlane(BMAP2);
-			break;
-                }
-		}
-            }
-        
+                        settings_applied = 0;
+                        soundsettings_drawn = 0;
+                    }
+                    break;
 
-	/*wait++;
-	if(wait>5000)
-	{
-		wait=0;*/
-        // draw the peak meters
-        if(ioctl(fd_dsp,AV_DSP_OUT_PEAK_REAL,&av_p)<0)
-        {
-            printf("unable to get out peak\n");
+                case BUTTON_ON: // pause/resume
+                    if(window == 1)
+                    {
+                        if(pause) // resume
+                        {
+                            if(ioctl(fd_dsp,AV_DSP_START_MP3,NULL)<0)
+                            {
+                                printf("Error resuming\n");
+                                return -1;
+                            }
+                            pause=0;
+
+                            // fade in
+                            if(fade)
+                            {
+                                vol = 35;
+                                while(vol < oldvol)
+                                {
+                                    vol++;
+                                    apply_settings();
+                                }
+                            }
+                        }
+                        else // pause
+                        {
+                            // fade out
+                            if(fade)
+                            {
+                                oldvol = vol;
+                                while(vol > 35)
+                                {
+                                    vol--;
+                                    apply_settings();
+                                }
+                                vol = oldvol;
+                            }
+
+                            if(ioctl(fd_dsp,AV_DSP_PAUSE_MP3,NULL)<0)
+                            {
+                                printf("Error pausing\n");
+                                return -1;
+                            }
+                            pause=1;
+                        }
+                        main_drawn = 0; // update window
+                    }
+                    break;
+
+                case BUTTON_OFF: // quit
+                    if(window == 1)
+                    {
+                        if(fade)
+                        {
+                            while(vol > 35)
+                            {
+                                vol--;
+                                apply_settings();
+                            }
+                        }
+                        if(ioctl(fd_dsp,AV_DSP_STOP_MP3,NULL)<0)
+                        {
+                            printf("error stopping\n");
+                            return -1;
+                        }
+                        goto end;
+                    }
+                    else if(window == 2 || window == 3)
+                    {
+                        lcd_clear_display(COLOR_BLACK); // clear
+                        main_drawn = 0; // redraw
+                        window = 1;
+                    }
+                    break;
+
+                case BUTTON_F2: // settings
+                    if(window == 1) // switch to settings
+                    {
+                        lcd_clear_display(COLOR_BLACK); // clear
+                        settings_drawn = 0; // redraw
+                        window = 2;
+                    }
+                    else
+                    {
+                        lcd_clear_display(COLOR_BLACK); // clear
+                        main_drawn = 0; // redraw
+                        window = 1;
+                    }
+                    break;
+
+                case BUTTON_F3: // sound settings
+                    if(window == 1) // switch to settings
+                    {
+                        lcd_clear_display(COLOR_BLACK); // clear
+                        soundsettings_drawn = 0; // redraw
+                        window = 3;
+                    }
+                    else
+                    {
+                        lcd_clear_display(COLOR_BLACK); // clear
+                        main_drawn = 0; // redraw
+                        window = 1;
+                    }
+                    break;
+            }
         }
-        else
+
+        // main window
+        if(window == 1)
         {
+            // read peaks
+            ioctl(fd_dsp,AV_DSP_OUT_PEAK_REAL,&av_p);
+
+            // get peak values
             av_p.left=(av_p.left*200)/0x7FFF;
             av_p.right=(av_p.right*200)/0x7FFF;
-	
-	    MAX(av_p.left,310);
-	    MAX(av_p.right,310);
-            // left meter
-	    if(old_l!=av_p.left)
-	    {
-		if(old_l>av_p.left)
-			fillRect(USE_GC,10+av_p.left, 210, old_l-av_p.left, 14, g_gcBlack);
-		else
-			fillRect(USE_GC,10+old_l, 210, av_p.left-old_l, 14, g_gcBlue);
-		old_l=av_p.left;
-	    }
-            // right meter
-	    if(old_r!=av_p.right)
-	    {
-		if(old_r>av_p.right)
-			fillRect(USE_GC,10+av_p.right, 226, old_r-av_p.right, 14, g_gcBlack);
-		else
-			fillRect(USE_GC,10+old_r, 226, av_p.right-old_r, 14, g_gcBlue);
-		old_r=av_p.right;
-	    }
-	    
-	    
-	    
-        }
 
-        // draw the elapsed time display
-        // 40 frames = 1 second
-        if(count == 40)
+            // draw a peak meter or an oscillograph
+            if(visualization == 1)
+            {
+                // left meter
+                lcd_fillrect(COLOR_DARKBLUE, av_p.left+10, 208, 270-(av_p.left+10), 15);
+                lcd_fillrect(COLOR_BLUE, 10, 208, av_p.left, 15);
+
+                // right meter
+                lcd_fillrect(COLOR_DARKBLUE, 10+av_p.right, 224, 270-(av_p.right+10), 15);
+                lcd_fillrect(COLOR_BLUE, 10, 224, av_p.right, 15);
+            }
+            else if(visualization == 2)
+            {
+                if(pause == 0)
+                    oscillograph(av_p.left, av_p.right);
+            }
+
+            // make sure the text is drawn
+            if(main_drawn == 0)
+            {
+                // Print the version at the top
+                sprintf(tmp,"--= MP3 Player v0.40 =--");
+                lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 65, 10, tmp);
+
+                // "Now Playing: X.mp3"
+                lcd_setfont(std7x13);
+                sprintf(tmp,"Now Playing:");
+                lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 40, tmp);
+                sprintf(tmp,"%s",filename);
+                lcd_putsxy(COLOR_WHITE, COLOR_BLACK, 10, 55, tmp);
+                lcd_setfont(std6x9);
+
+                draw_main_help_text();
+
+                main_drawn = 1;
+            }
+
+            // make sure the settings are applied
+            if(settings_applied == 0)
+            {
+                apply_settings();
+                settings_applied = 1;
+            }
+        }
+        else if(window == 2) // settings
         {
-            ioctl(fd_dsp,AV_DSP_FRAME_CNT,&frame_cnt);
-            count = 0;
+            // make sure the text is drawn
+            if(settings_drawn == 0)
+            {
+                draw_settings();
+                draw_settings_help_text();
+                settings_drawn = 1;
+            }
+
+            // make sure the settings are applied
+            if(settings_applied == 0)
+            {
+                apply_settings();
+                settings_applied = 1;
+            }
         }
-        count++;
-
-        time_cnt = (frame_cnt/40);
-
-        // only update this when needed, or it flickers
-        if(last_time_cnt != time_cnt)
+        else if(window == 3) // sound settings
         {
-            sprintf(tmp,"Elapsed Time: %02d:%02d:%02d",time_cnt/3600,time_cnt%3600/60,time_cnt%60);
-	    putS(USE_GC,USE_GC,10, 40, tmp, g_gcWhite); 
-        }
-        last_time_cnt = time_cnt;
+            // make sure the text is drawn
+            if(soundsettings_drawn == 0)
+            {
+                draw_soundsettings();
+                draw_soundsettings_help_text();
+                soundsettings_drawn = 1;
+            }
 
-        // make sure the settings have been applied
-        if(settings_applied == 0)
-        {
-            apply_settings();
-            settings_applied = 1;
+            // make sure the settings are applied
+            if(settings_applied == 0)
+            {
+                apply_settings();
+                settings_applied = 1;
+            }
         }
-	//}
     }
-    
- end:   
-    
- destroyGC(g_gcWhite);
- destroyGC(g_gcBlack);
- destroyGC(g_gcBlue);
- destroyGC(g_gcRed);
- 
+
+    end:
 
     close(fd_dsp);
     close(fd_mix);
     printf("mixer closed\n");
-    
+
     close_graphics();
 
     printf("I'm out \n");
 
     exit(0);
-
-//    return 0;
 }

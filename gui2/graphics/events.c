@@ -20,6 +20,17 @@ int nxtEvent(void)
 	return evt+1;	
 }
 
+int waitEvent(void)
+{
+	int evt;
+	if(fdEv<0)
+		return -1;
+	if(ioctl(fdEv,AV_WAIT_EVENT,&evt)<0)
+		return -1;
+	
+	return evt+1;
+}
+
 int iniEvent(void)
 {
 	if(fdEv<0);
