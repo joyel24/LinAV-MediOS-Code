@@ -1,0 +1,7 @@
+AVLO TODO list
+
+- USB mode
+- delay before loading delay as a config option (need to use a real delay in s not a simple loop)
+- nice background
+- term like console to display error messages while reading the config file
+- error message if can't load default bin
