@@ -11,48 +11,43 @@
 #include <usb.h>
 #include <rtc.h>
 #include <system.h>
-#include <power.h>
 #include <uart.h>
 #include <debug.h>
 #include <mathASM.h>
+
+#include "bgimage.h"
 
 int launchFile(char * fileN);
 int pluginFile(char * fileN, char * ext);
 int exeFile(char * fileN, char * arg);
 
-static int pal32[2] = {0x8080c0e0, 0xffffffff};
+static int pal32[2] = {0x706c93, 0xffffffff};
 static int pal16[2] = {0x0000, 0xffff};
 static int pal16b[5] = {0x1717, 0x3131, 0x0000, 0x1414, 0xcece};
 
-static struct graphicsBuffer screenBitmap;
 static struct graphicsBuffer screenBitmap2;
 static struct graphicsBuffer sprite5_7 = {0, 1, 5, 7, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-static char usbOut[7][13]
-    = {{0x00,0x00,0x00,0x02,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
-       {0x00,0x00,0x00,0x02,0x02,0x02,0x02,0x00,0x00,0x00,0x00,0x00,0x00},
-       {0x00,0x02,0x00,0x00,0x00,0x00,0x00,0x02,0x00,0x00,0x00,0x02,0x00},
-       {0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02},
-       {0x00,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x02,0x00,0x02,0x00},
-       {0x00,0x00,0x00,0x00,0x02,0x02,0x02,0x02,0x02,0x00,0x00,0x00,0x00},
-       {0x00,0x00,0x00,0x00,0x02,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00}};
-static char usbIn[7][13]
-    = {{0x00,0x00,0x00,0x01,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
-       {0x00,0x00,0x00,0x01,0x01,0x01,0x01,0x00,0x00,0x00,0x00,0x00,0x00},
-       {0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x00},
-       {0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01},
-       {0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0x01,0x00},
-       {0x00,0x00,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x00,0x00,0x00,0x00},
-       {0x00,0x00,0x00,0x00,0x01,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00}};
-static char scrollBar[6][6]
-    = {{0x03,0x03,0x03,0x03,0x03,0x03},
-       {0x03,0x04,0x04,0x04,0x04,0x03},
-       {0x03,0x04,0x04,0x04,0x04,0x03},
-       {0x03,0x04,0x04,0x04,0x04,0x03},
-       {0x03,0x04,0x04,0x04,0x04,0x03},
-       {0x03,0x03,0x03,0x03,0x03,0x03}};
-static struct graphicsBuffer usbOutB = {(u32) usbOut, 13, 13, 7, 8, 3, -1, 0, 0, 0, 0, (int**) &pal16b, 0};
-static struct graphicsBuffer usbInB = {(u32) usbIn, 13, 13, 7, 8, 3, -1, 0, 0, 0, 0, (int**) &pal16b, 0};
-static struct graphicsBuffer scrollBarB = {(u32) scrollBar, 6, 6, 6, 8, 3, -1, 0, 0, 0, 0, (int**) &pal16b, 0};
+static struct graphicsBuffer sprite6_9 = {0, 1, 6, 9, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+static struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+
+static unsigned int scrollbar[15][11] = {
+ {0x800380,0x800980,0x800080,0x800a80,0x800380,0x800c80,0x800580,0x800080,0x800080,0x800a80,0x800080},
+ {0x80dc80,0x80e380,0x80d980,0x7fe080,0x7fd580,0x80de80,0x80de80,0x80e380,0x80e080,0x80e580,0x80c280},
+ {0x80de80,0x80de80,0x80d480,0x80de80,0x80d780,0x80e580,0x80de80,0x80e580,0x80db80,0x80dc80,0x80b580},
+ {0x80e380,0x7fe080,0x80de80,0x80e780,0x80dc80,0x80e580,0x7fd580,0x80dc80,0x80dc80,0x7fe080,0x80c080},
+ {0x80d980,0x80e780,0x80d680,0x807d80,0x800380,0x800080,0x802580,0x808a80,0x80db80,0x80de80,0x80bd80},
+ {0x80e580,0x80da80,0x80e580,0x80ea80,0x80de80,0x80e980,0x7fc980,0x80d980,0x7fe080,0x7fe080,0x80b980},
+ {0x80db80,0x80de80,0x80d780,0x807e80,0x800780,0x800080,0x801980,0x808280,0x80de80,0x80de80,0x80b580},
+ {0x80e280,0x80d280,0x80e280,0x80e380,0x80d780,0x80e780,0x80c980,0x80e580,0x80dd80,0x80de80,0x80b980},
+ {0x80d980,0x80e980,0x80d780,0x809280,0x800080,0x800080,0x801480,0x808b80,0x80de80,0x80d780,0x80c080},
+ {0x80ea80,0x80d480,0x80e780,0x80dd80,0x80dc80,0x7fe080,0x80cb80,0x80de80,0x80de80,0x80d680,0x80bd80},
+ {0x80cd80,0x80e980,0x80d280,0x809680,0x800080,0x800080,0x801180,0x808680,0x80e380,0x80dc80,0x80c280},
+ {0x7fed80,0x80d780,0x80da80,0x80e080,0x80e880,0x80f080,0x7fd580,0x80d280,0x80e380,0x80dd80,0x80c280},
+ {0x80d780,0x80de80,0x80ee80,0x80e780,0x80db80,0x80d680,0x80dc80,0x80ee80,0x80de80,0x80da80,0x80c480},
+ {0x80bf80,0x80c280,0x80aa80,0x80c080,0x80a780,0x80c280,0x80b180,0x80bd80,0x80c080,0x80bd80,0x80ad80},
+ {0x800080,0x800080,0x800e80,0x800080,0x801380,0x800080,0x800a80,0x800080,0x800780,0x800a80,0x800080},
+};
+static struct graphicsBuffer scrollBarB = {(u32) scrollbar, 11*4, 11, 15, 32, 5, -1, 0, 0, 0, 0, 0, 0};
 
 struct dispDir {
 	char name[14];
@@ -62,7 +57,7 @@ struct dispDir {
 };
 
 static struct tm* ourTime;
-static char timeSt[] = "xx:xx:xx.xx";
+static char timeSt[] = "xx:xx:xx";
 static char powerSt[] = "xxxx+";
 
 static int source = 0;             // 0 = HDD, 1 = memCard
@@ -71,15 +66,19 @@ static int mode = 0;               // 0 = normal, 1 = usb
 static char callArg1[MAX_PATH];
 static char callArg2[MAX_PATH];
 static char * callArgs[2] = {callArg1, callArg2};
-static struct dispDir dirBuffer[1000];
-static char nameCur[MAX_PATH] = "/";
+
+static struct dispDir dirBufferHDD[1000];
+
+static char nameCurHDD[MAX_PATH] = "/";
+
+static unsigned int * screenDirect = 0x03a00000;
 
 int main() {
     unsigned int a;
     int c, b, i, totalEntries;
-    int cursorpos=0;
-    int dirpos=0;
-    unsigned int cluster=0, parent=0;
+    int cursorposHDD=0;
+    int dirposHDD=0;
+    
     int loopDelay = 0xc000;
     int cursorMoved=1;
     void (*systemRelocateAdjusted)();
@@ -93,69 +92,44 @@ startInit:
 	inidir();
 	inifatinfo();
 
-    cursorpos = 0;
-    dirpos = 0;
-    cluster = 0;
-    parent = 0;
+    cursorposHDD = 0;
+    dirposHDD = 0;
     loopDelay = 0xc000;
                             // Preserve source and dir...
     mode = 0;
     cursorMoved = 1;
 
     osdInitA();
-
     rtcInit();
-    
+
     osdSetComponentConfigA(OSD_VIDEO1, 0);
     osdSetComponentConfigA(OSD_VIDEO2, 0);
     osdSetComponentConfigA(OSD_BITMAP1, 0);
     osdSetComponentConfigA(OSD_BITMAP2, 0);
     osdSetComponentConfigA(OSD_CURSOR1, 0);
     osdSetComponentConfigA(OSD_CURSOR2, 0);
-
-    screenBitmap.offset = 0x03e00000;
-    screenBitmap.bytesPerLine = 96*2;
-    screenBitmap.width = 96;
-    screenBitmap.height = 132;
-    screenBitmap.bitsPerPixelShift = 4;
-    screenBitmap.bitsPerPixel = 16;
-
-    graphicsBoxfA(&screenBitmap, 0, 0, 96, 132, 0xdede);    
-    graphicsBoxfA(&screenBitmap, 2, 2, 92, 128, 0xcece);    
-
-    screenBitmap2.offset = 0x03b00000;
-    screenBitmap2.bytesPerLine = 320*2;
+    
+    screenBitmap2.offset = 0x03a00000;
+    screenBitmap2.bytesPerLine = 320*4;
     screenBitmap2.width = 320;
     screenBitmap2.height =240;
-    screenBitmap2.bitsPerPixelShift = 4;
-    screenBitmap2.bitsPerPixel = 16;
+    screenBitmap2.bitsPerPixelShift = 5;
+    screenBitmap2.bitsPerPixel = 32;
 
-    graphicsBoxfA(&screenBitmap2, 0, 0, 320, 240, 0xa7a7);
-    graphicsBoxfA(&screenBitmap2, 0, 0, 320, 10, 0x1717);
-    graphicsBoxfA(&screenBitmap2, 0, 10, 320, 1, 0x1414);
-    graphicsBoxfA(&screenBitmap2, 0, 228, 320, 1, 0x1414);
-    graphicsBoxfA(&screenBitmap2, 0, 229, 320, 10, 0x1717);
-    pal16[0] = 0x1717;
-    pal16[1] = 0x0000;    
-    graphicsStringA(&screenBitmap2, 4, 231, &sprite5_7, std5x7_, 6, 0,
-                        "[Menu2] HDD/Memcard   [Menu3] UsbMode   [ON] Click");
+    //graphicsSpriteA(&screenBitmap2, 0, 0, &bgimageB);
 
-    osdSetComponentSizeA(OSD_BITMAP1, 320*2, 240);
-    osdSetComponentPositionA(OSD_BITMAP1, 0x14, 0x12);
-    osdSetComponentOffsetA(OSD_BITMAP1, 0x03b00000);
-    osdSetComponentSourceWidthA(OSD_BITMAP1, 0x14);
-    osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
-                                     | OSD_BITMAP_8BIT);
-                                     
-    osdSetComponentSizeA(OSD_BITMAP2, 96*2, 132);
-    osdSetComponentPositionA(OSD_BITMAP2, 0x14 + (2*16), 0x12 + 32);
-    osdSetComponentOffsetA(OSD_BITMAP2, 0x03e00000);
-    osdSetComponentSourceWidthA(OSD_BITMAP2, 6);
-    osdSetComponentConfigA(OSD_BITMAP2, OSD_COMPONENT_ENABLE
-                                     | OSD_BITMAP_MERGEBACK
-                                     | OSD_BITMAP_A6
-                                     | OSD_BITMAP_8BIT);
-
+    for (c=0;c<240;c++) {
+        for (i=0;i<320;i++) {
+            a = ((int)bgimage[c][i*3]) | ((int)bgimage[c][i*3 + 1]<<8) | ((int)bgimage[c][i*3 + 2]<<16);
+            screenDirect[c*320 + i] = a;
+        }
+    }
+    
+    osdSetComponentSizeA(OSD_VIDEO1, 320*2, 240);
+    osdSetComponentPositionA(OSD_VIDEO1, 0x14, 0x12);
+    osdSetComponentOffsetA(OSD_VIDEO1, 0x03a00000);
+    osdSetComponentSourceWidthA(OSD_VIDEO1, 0x28);
+    osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
 
 	// EUGH: TODO - Clean this rubbish up!
     usbDisableA();
@@ -192,30 +166,30 @@ startInit:
 
     while(1) {
         if (mode==0) {
-            graphicsBoxfA(&screenBitmap, 2, 2, 86, 128, 0xcece);    
+            graphicsBoxfA(&screenBitmap2, 21, 52, 96, 152, 0x6c4696);    
 
-            debug("Listing contents of '%s'\n", nameCur);
-            if((dir=opendir(nameCur))<0)
+            debug("Listing contents of '%s'\n", nameCurHDD);
+            if((dir=opendir(nameCurHDD))<0)
 			{
 				uartOutsA("dir not found trying root...\n");
-                nameCur[0] = '/';
-                nameCur[1] = 0;
-                if ((dir=opendir(nameCur))<0) break;
+                nameCurHDD[0] = '/';
+                nameCurHDD[1] = 0;
+                if ((dir=opendir(nameCurHDD))<0) break;
 			}
 
 			int i=0;
 			int len;
 			while((entry=readdir(dir))!=NULL && i<100)
 			{
-                strcpy(dirBuffer[i].name, entry->entryName);
+                strcpy(dirBufferHDD[i].name, entry->entryName);
 
-				for(len=strlen(dirBuffer[i].name);len<12;len++)
-					dirBuffer[i].name[len]=' '; 
-				dirBuffer[i].name[12]=0x0;
+				for(len=strlen(dirBufferHDD[i].name);len<12;len++)
+					dirBufferHDD[i].name[len]=' '; 
+				dirBufferHDD[i].name[12]=0x0;
 
-				strcpy(dirBuffer[i].filename, entry->entryName);
-				strcpy(dirBuffer[i].ext, entry->ext);
-				dirBuffer[i].attr=entry->attribute;
+				strcpy(dirBufferHDD[i].filename, entry->entryName);
+				strcpy(dirBufferHDD[i].ext, entry->ext);
+				dirBufferHDD[i].attr=entry->attribute;
 				i++;
 			}
 			closedir(dir);
@@ -223,98 +197,59 @@ startInit:
 
             debug("dir entries = %d\n", i);
             
-            cursorpos=0;
-            dirpos=0;
-            osdSetComponentConfigA(OSD_BITMAP2, OSD_COMPONENT_ENABLE
-                                     | OSD_BITMAP_MERGEBACK
-                                     | OSD_BITMAP_A6
-                                     | OSD_BITMAP_8BIT);
-        } else {
-            osdSetComponentConfigA(OSD_BITMAP2, 0);
+            cursorposHDD=0;
+            dirposHDD=0;
         }
             
         while(1) {
-            c = usbIsConnectedA();
-            pal16[0] = 0x1717;            
-            pal16[1] = 0xd5d5;
-            if (c) {
-                graphicsSpriteA(&screenBitmap2, 4, 1, &usbInB);                
-            } else {
-                graphicsSpriteA(&screenBitmap2, 4, 1, &usbOutB);
-            }
-
-            if (mode!=0) {
-                graphicsStringA(&screenBitmap2, 4 + 14*6, 2, &sprite5_7, std5x7_, 6, 0,
-                    "[USB mode]");
-                
-            } else {
-                graphicsStringA(&screenBitmap2, 4 + 14*6, 2, &sprite5_7, std5x7_, 6, 0,
-                    "          ");
-            }
-
-            if (source==0) {
-                graphicsStringA(&screenBitmap2, 4 + 25*6, 2, &sprite5_7, std5x7_, 6, 0,
-                    "[HDD]    ");
-                
-            } else {
-                graphicsStringA(&screenBitmap2, 4 + 25*6, 2, &sprite5_7, std5x7_, 6, 0,
-                    "[MemCard]");
-            }
             
             ourTime = rtcGetTime();
-            stringPutHexA(timeSt+9, ourTime->tm_ms, 2);
             stringPutHexA(timeSt+6, ourTime->tm_sec, 2);
             stringPutHexA(timeSt+3, ourTime->tm_min, 2);
             stringPutHexA(timeSt, ourTime->tm_hour, 2);
-            pal16[1] = 0x0000;
-            graphicsStringA(&screenBitmap2, 4 + 41*6, 2, &sprite5_7, std5x7_, 6, 0,
+            pal32[0] = 0x706c93;
+            pal32[1] = 0x80ff80;
+            graphicsStringA(&screenBitmap2, 320-(8*9)-2, 2, &sprite8_13, std8x13_, 9, 0,
                         timeSt);
 
             b = powerGetStatusA();
             stringPutHexA(powerSt, b, 4);
 
-            if (powerIsDCConnectedA()) {
-                powerSt[4] = '+';                
-            } else {
-                powerSt[4] = ' ';
-            }
-            pal16[1] = 0x0000;
-            graphicsStringA(&screenBitmap2, 4 + 35*6, 2, &sprite5_7, std5x7_, 6, 0,
-                        powerSt);
-
-
             // Update file display window if needed,
             
             if (mode==0 && cursorMoved==1) {
-                // Update scrollbar...
-                graphicsBoxfA(&screenBitmap, 88, 2, 6, 128, 0x1717);    
+                // Update scrollbar (Now on VIDEO plane)...
+                graphicsBoxfA(&screenBitmap2, 124, 57, 11, 141, 0x808080);   
+
+// 134, 197
+// 124, 57
                 
-                a = (dirpos+cursorpos) * (128-6);
+                a = (dirposHDD+cursorposHDD) * (140-15);
                 if (totalEntries>1) a = mathDivLUA(0, a, totalEntries-1);
-                graphicsSpriteA(&screenBitmap, 88, 2 + a, &scrollBarB);
+                graphicsSpriteA(&screenBitmap2, 124, 57 + a, &scrollBarB);
 
 
                 for (c=0;c<16;c++) {
-                    if ((dirpos+c)>=totalEntries) break;
+                    if ((dirposHDD+c)>=totalEntries) break;
 
-                    pal16[1] = 0xffff;
-                    if (dirBuffer[dirpos+c].attr & FAT_ATTR_DIR)
-                        pal16[1] = 0x4e4e;
-                    if (c==cursorpos) {
-                        pal16[0] = 0x0000;
+                    pal32[1] = 0x80ff80;
+                    if (dirBufferHDD[dirposHDD+c].attr & FAT_ATTR_DIR)
+                        pal32[1] = 0x76c491;
+                    if (c==cursorposHDD) {
+                        pal32[0] = 0x800080;
                     } else {
-                        pal16[0] = 0xcece;
+                        pal32[0] = 0x6c4696;
                     }
     
-                    graphicsStringA(&screenBitmap, 3, 3 + c*8, &sprite5_7, std5x7_, 5, 0,
-                        dirBuffer[dirpos+c].name);
+                    graphicsStringA(&screenBitmap2, 21, 52 + c*9, &sprite6_9, std6x9_, 6, 0,
+                        dirBufferHDD[dirposHDD+c].name);
                 }
 
-				pal16[1] = 0xffff;
-				pal16[0] = 0xcece;
+				pal32[1] = 0x80ff80;
+				pal32[0] = 0x6c4696;
 
 				for(;c<16;c++)
-					graphicsStringA(&screenBitmap, 3, 3 + c*8, &sprite5_7, std5x7_, 5, 0,
+					graphicsStringA(&screenBitmap2, 21, 52 + c*9, &sprite6_9, std6x9_, 6, 0,
                         "            ");
 
                 cursorMoved=0;
@@ -326,27 +261,27 @@ startInit:
 
             if (mode==0) {
                 if (c & BUTTONS_AV300_DOWN) {
-                    if ((cursorpos<15) && (cursorpos<(totalEntries-1))) {
-                        cursorpos++;
+                    if ((cursorposHDD<15) && (cursorposHDD<(totalEntries-1))) {
+                        cursorposHDD++;
                     } else {
-                        if ((dirpos+15)<(totalEntries-1)) dirpos++;
+                        if ((dirposHDD+15)<(totalEntries-1)) dirposHDD++;
                     }
                     cursorMoved=1;
                     if (loopDelay>=0x1000) loopDelay-=0x1000;
                 } else if (c & BUTTONS_AV300_UP) {
-                    if (cursorpos>0) {
-                        cursorpos--;
+                    if (cursorposHDD>0) {
+                        cursorposHDD--;
                     } else {
-                        if (dirpos>0) dirpos--;
+                        if (dirposHDD>0) dirposHDD--;
                     }
                     if (loopDelay>=0x1000) loopDelay-=0x1000;
                     cursorMoved=1;
                 } else if (c & BUTTONS_AV300_LEFT) {
-					if(strcmp(nameCur,"/")!=0)	{
-						char * namePos=strrchr(nameCur+1,'/');
+					if(strcmp(nameCurHDD,"/")!=0)	{
+						char * namePos=strrchr(nameCurHDD+1,'/');
 						if ( namePos )
 							*namePos = 0;
-						namePos=strrchr(nameCur,'/');
+						namePos=strrchr(nameCurHDD,'/');
 						if ( namePos )
 							*(namePos+1) = 0;
 						cursorMoved=1;
@@ -355,25 +290,25 @@ startInit:
 						break;
                     }
                 } else if (c & BUTTONS_AV300_RIGHT) {
-                    if (dirBuffer[dirpos+cursorpos].attr & FAT_ATTR_DIR) {
-                        if(strcmp(dirBuffer[dirpos+cursorpos].filename,"..")==0)
+                    if (dirBufferHDD[dirposHDD+cursorposHDD].attr & FAT_ATTR_DIR) {
+                        if(strcmp(dirBufferHDD[dirposHDD+cursorposHDD].filename,"..")==0)
 						{
-							char * namePos=strrchr(nameCur+1,'/');
+							char * namePos=strrchr(nameCurHDD+1,'/');
 							if ( namePos )
 							{
 								*namePos = 0;
 							}
-							namePos=strrchr(nameCur,'/');
+							namePos=strrchr(nameCurHDD,'/');
 							if ( namePos )
 							{
 								*(namePos+1) = 0;
 							}
 
 						}
-						else
+						else if (strcmp(dirBufferHDD[dirposHDD+cursorposHDD].filename,".")!=0)
 						{
-							strcat(nameCur, dirBuffer[dirpos+cursorpos].filename);
-							strcat(nameCur, "/");
+							strcat(nameCurHDD, dirBufferHDD[dirposHDD+cursorposHDD].filename);
+							strcat(nameCurHDD, "/");
 						}
                         cursorMoved=1;
                         do {
@@ -381,25 +316,25 @@ startInit:
                         break;
                     }
                 } else if (c & BUTTONS_AV300_ON) {
-                    if (dirBuffer[dirpos+cursorpos].attr & FAT_ATTR_DIR) {
-                        if(strcmp(dirBuffer[dirpos+cursorpos].filename,"..")==0)
+                    if (dirBufferHDD[dirposHDD+cursorposHDD].attr & FAT_ATTR_DIR) {
+                        if(strcmp(dirBufferHDD[dirposHDD+cursorposHDD].filename,"..")==0)
 						{
-							char * namePos=strrchr(nameCur+1,'/');
+							char * namePos=strrchr(nameCurHDD+1,'/');
 							if ( namePos )
 							{
 								*namePos = 0;
 							}
-							namePos=strrchr(nameCur,'/');
+							namePos=strrchr(nameCurHDD,'/');
 							if ( namePos )
 							{
 								*(namePos+1) = 0;
 							}
 
 						}
-						else
+						else if (strcmp(dirBufferHDD[dirposHDD+cursorposHDD].filename,".")!=0)
 						{
-							strcat(nameCur,dirBuffer[dirpos+cursorpos].filename);
-							strcat(nameCur,"/");
+							strcat(nameCurHDD,dirBufferHDD[dirposHDD+cursorposHDD].filename);
+							strcat(nameCurHDD,"/");
 						}
                         cursorMoved=1;
                         do {
@@ -407,16 +342,16 @@ startInit:
                         break;
                     } else {
                         char fileN[MAX_PATH];
-						strcpy(fileN, nameCur);
-						strcat(fileN, dirBuffer[dirpos+cursorpos].filename);
+						strcpy(fileN, nameCurHDD);
+						strcat(fileN, dirBufferHDD[dirposHDD+cursorposHDD].filename);
 
-                        if (strcmp(dirBuffer[dirpos+cursorpos].ext, "BIN")==0) {
+                        if (strcmp(dirBufferHDD[dirposHDD+cursorposHDD].ext, "BIN")==0) {
                             // Launch it...
                             launchFile(fileN);
                             goto startInit;
                         } else {
                             // Try for a plugin...   
-                            if (pluginFile(fileN, dirBuffer[dirpos+cursorpos].ext))
+                            if (pluginFile(fileN, dirBufferHDD[dirposHDD+cursorposHDD].ext))
                                 goto startInit;
                         }
                     }
@@ -470,8 +405,8 @@ startInit:
                     debug("[fatTest.c] fatInit returned = %d\n",fatHD);
                     selectFat(fatHD);
     
-                    nameCur[0]='/';
-                    nameCur[1]=0;
+                    nameCurHDD[0]='/';
+                    nameCurHDD[1]=0;
     
                     do {
                     } while(buttonsGetStatusA() & BUTTONS_AV300_ANY);
