@@ -10,21 +10,26 @@ user can choose a program, and run it.
 What does it not do?
 ====================
     It does NOT support packed files (Such as the official firmware AJZ file).
-So to use the official firmware, you must unpack it yourself first.
+So to use the official firmware, you must unpack it yourself first. avOS does
+NOT distribute an unpacker, as this would be 'distributing a circumvention tool'
+under the DMCA. Now do you see why the DMCA is the worst law ever created in the
+known universe?
 
 Has it been tested thoroughly by an army of testers?
 ====================================================
     So far it has been tested by me, and Oxygen. There don't seem to be any
 critical bugs. If for some reason it did render your box unusable, there is
 always a serial recovery mode which can be used to restore the firmware, if
-you have a serial cable.
+you have a serial cable, and the appropriate know how.
 
 Can I uninstall the bootloader and go back to the official firmware?
 ====================================================================
     Of course you can. IF you have the official firmware in binary unpacked form
 then it's just a case of putting the official cjbm.ajz file on your archos,
 booting the bootloader, running the official firmware unpacked file, then
-select update firmware. This will restore the official firmware.
+select update firmware. This will restore the official firmware. If you do not
+have the official firmware in unpacked form, then no you can't go back to the
+original firmware.
 DO NOT TRY TO RUN THE CJBM.AJZ FILE FROM BOOTLOADER.
 
 So how does it know whats an executable?
@@ -63,3 +68,11 @@ You broke my av300! You owe me $1,000,000
     No I didn't. YOU broke your av300. Anything you do with your hardware is
 totally your problem. I cannot be held responsible for ANY bad things that may
 happen to you or your archos by using this software.
+
+Thanks
+======
+    Thanks to all who continue to help, support, and donate to this project.
+Hopefuly you will be pleased running things on your av300. There's still a
+long way to go before linux is on it, or you can watch videos on avos, but it's
+getting there. At least you can get rid of the official firmware now if you want
+to.
