@@ -327,13 +327,13 @@ osdSetComponentOffset:
 .thumb_func
 
 osdSetComponentSize:
-        push {r0, r2, lr}
+        push {r0, r3, lr}
         lsl r0, #3                      @ component *8
-        ldr r2, =0x306a8
-        add r2, r0
-        strh r1, [r2]
-        strh r2, [r2, #2]
-        pop {r0, r2, pc}
+        ldr r3, =0x306a8
+        add r3, r0
+        strh r1, [r3]
+        strh r2, [r3, #2]
+        pop {r0, r3, pc}
 
 
 @ ------------------------------------------------------------------------------

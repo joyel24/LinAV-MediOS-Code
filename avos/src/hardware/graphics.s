@@ -28,9 +28,9 @@ graphicsInc = 1
         GRAPHICS_BUFFER_PALLETTE2   =   0x0020      @ ->Pallette for 2bit
         GRAPHICS_BUFFER_PALLETTE4   =   0x0024      @ ->Pallette for 4bit
         GRAPHICS_BUFFER_PALLETTE8   =   0x0028      @ ->Pallette for 8bit
-        GRAPHICS_BUFFER_PALLETTE16  =   0x0032      @ ->Pallette for 16bit
-        GRAPHICS_BUFFER_PALLETTE32  =   0x0036      @ ->Pallette for 32bit
-        GRAPHICS_BUFFER_SIZE        =   0x0040
+        GRAPHICS_BUFFER_PALLETTE16  =   0x002c      @ ->Pallette for 16bit
+        GRAPHICS_BUFFER_PALLETTE32  =   0x0030      @ ->Pallette for 32bit
+        GRAPHICS_BUFFER_SIZE        =   0x0034
         
         GRAPHICS_ROUTINE_SETPIXEL   =   0x0000
         GRAPHICS_ROUTINE_GETPIXEL   =   0x0001

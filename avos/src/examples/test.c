@@ -4,6 +4,8 @@
 
 extern char (*std8x13_[]) [];
 
+    char tests[13] = {0xff, 0xff, 0x10, 0x30, 0x50, 0x10, 0x10, 0x10, 0x10, 0x10, 0x7C, 0xff, 0xff};
+
 int main() {
     struct graphicsBuffer screenVideo;
     struct graphicsBuffer screenBitmap;
@@ -31,7 +33,7 @@ int main() {
     osdSetComponentSourceWidth(OSD_VIDEO1, 0x28);
     osdSetComponentConfig(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
 
-    osdSetComponentSize(OSD_BITMAP1, 640, 120);
+    osdSetComponentSize(OSD_BITMAP1, 300, 100);
     osdSetComponentPosition(OSD_BITMAP1, 0x14, 0x13);
     osdSetComponentOffset(OSD_BITMAP1, 0x03800000);
     osdSetComponentSourceWidth(OSD_BITMAP1, 0x14);
@@ -39,7 +41,7 @@ int main() {
                                      | OSD_BITMAP_8BIT
                                      | OSD_BITMAP_MERGEBACK
                                      | OSD_BITMAP_A4);
-    
+
     screenVideo.offset = 0x03c00000;
     screenVideo.bytesPerLine = 320*4;
     screenVideo.width = 320;
@@ -54,6 +56,7 @@ int main() {
     screenBitmap.bitsPerPixelShift = 4;
     screenBitmap.bitsPerPixel = 16;
 
+    sprite1.offset = &tests;
     sprite1.bytesPerLine = 1;
     sprite1.width = 8;
     sprite1.height = 13;
@@ -64,11 +67,19 @@ int main() {
     sprite1.pallette32 = &pal32;
 
     graphicsBoxf(&screenVideo, 0, 0, 320, 240, 0x000000);
+    graphicsBoxf(&screenVideo, 0, 0, 160, 120, 0x800000);
+    graphicsBoxf(&screenVideo, 20, 120, 200, 100, 0xc0c000);
 
-    graphicsBoxf(&screenBitmap, 0, 0, 320, 240, 0x0000);
-    graphicsBoxf(&screenBitmap, 20, 20, 280, 200, 0x0101);
+    graphicsBoxf(&screenBitmap, 0, 0, 160, 120, 0x0000);
+    graphicsBoxf(&screenBitmap, 20, 20, 140, 100, 0x0101);
     
-    graphicsString(&screenBitmap, 2, 20, &sprite1, &std8x13_, 9, 1, "abcdefghijklmnopqrstuvwyxz");
+//    graphicsString(&screenBitmap, 2, 20, &sprite1, &std8x13_, 9, 1, "abcdefghijklmnopqrstuvwyxz");
+
+    graphicsSprite(&screenVideo, 20, 20, &sprite1);
+
+    graphicsBoxf(&screenVideo, 80, 60, 100, 100, 0x40e050);
+    
+    
     graphicsString(&screenVideo, 2, 34, &sprite1, &std8x13_, 9, 1, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     graphicsString(&screenVideo, 2, 48, &sprite1, &std8x13_, 9, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
     pal32[1] = 0x503020;
