@@ -32,11 +32,14 @@ char dirLine[] = "xxxxxxxx.xxx\n";
 struct tm* ourTime;
     char timeSt[] = "xx:xx:xx.xx";
     
+    char parentName[] = "..         ";
+    char ext_bin[] = "BIN";
+
 int main() {
-    int c, i, totalEntries;
+    int c, b, i, totalEntries;
     int cursorpos=0;
     int dirpos=0;
-    unsigned int cluster=0, pcluster=0;
+    unsigned int cluster=0, pcluster=0, parent=0;
     int loopDelay = 0xc000;
     int source = 0;             // 0 = HDD, 1 = memCard
     int mode = 0;               // 0 = normal, 1 = usb
@@ -54,6 +57,7 @@ startInit:
     cursorpos = 0;
     dirpos = 0;
     cluster = 0;
+    parent = 0;
     loopDelay = 0xc000;
                             // Preserve source
     mode = 0;
@@ -91,7 +95,7 @@ startInit:
     pal16[0] = 0x0000;
     pal16[1] = 0xffff;    
     graphicsString(&screenBitmap2, 2, 231, &sprite4_6, std4x6_, 5, 0,
-                        "[Menu1] HDD/Memcard   [OFF] UsbMode   [ON] Click");
+                        "[Menu2] HDD/Memcard   [Menu3] UsbMode   [ON] Click");
 
     osdSetComponentSize(OSD_BITMAP1, 320*2, 240);
     osdSetComponentPosition(OSD_BITMAP1, 0x14, 0x12);
@@ -108,15 +112,31 @@ startInit:
                                      | OSD_BITMAP_A6
                                      | OSD_BITMAP_8BIT);
 
+
     usbDisable();
+    for (c=0;c<0x14000;c++) {}
+//    ataPowerDownHDD();
+    for (c=0;c<0x14000;c++) {}
+    ataSelectMemoryCard();
 
-    ataPowerUpHDD();
+    for (c=0;c<0x14000;c++) {}
     ataSelectHDD();
+    for (c=0;c<0x14000;c++) {}
+    usbEnable();
+    for (c=0;c<0x14000;c++) {}
+    ataPowerUpHDD();
+    for (c=0;c<0x14000;c++) {}
+    usbDisable();
+    for (c=0;c<0x24000;c++) {}
 
-    ataReadSectors(0, 1, mbr);
-    
+    c = ataReadSectors(0, 1, mbr);
+    stringPutHex(hex82, c, 8);
+    uartOuts("[fatTest.c] MBR read returned = ");
+    uartOuts(hex82);
+    uartOuts("\n");
+
     showBuffer(mbr);
-    
+
     part = mbr[0x1c6] | (mbr[0x1c7]<<8) | (mbr[0x1c8]<<16) | (mbr[0x1c9]<<24);
     stringPutHex(hex82, part, 8);
     uartOuts("[fatTest.c] Partition1 = ");
@@ -149,6 +169,25 @@ startInit:
 
             totalEntries = fatDirFilter(dirBuffer, dirBuffer2, 1000);
         
+            parent = cluster;       // Assume no parent...
+            
+            for (c=0;c<totalEntries;c++) {
+                i = 1;              // Assume it matches...
+                for (b=0;b<11;b++) {
+                    if (dirBuffer2[c].name[b]!=parentName[b]) {
+                        i = 0;
+                        break;
+                    }
+                }
+                // i = 1 if we found the parent...
+                if (i==1) {
+                    parent = dirBuffer2[c].fatCluHI << 16
+                            | dirBuffer2[c].fatCluLO;
+                    if (parent==0) parent = getRootClu();
+                    break;
+                }
+            }
+
             //showBuffer((char*) dirBuffer2);
         
             cursorpos=0;
@@ -248,6 +287,26 @@ startInit:
                     }
                     if (loopDelay>=0x1000) loopDelay-=0x1000;
                     cursorMoved=1;
+                } else if (c & BUTTONS_AV300_LEFT) {
+                    if (cluster!=parent) {      // No point then!
+                        cluster = parent;
+                        cursorMoved=1;
+                        do {
+                            c =buttonsGetStatus();
+                        } while(c & BUTTONS_AV300_ANY);                    
+                        break;
+                    }
+                } else if (c & BUTTONS_AV300_RIGHT) {
+                    if (dirBuffer2[dirpos+cursorpos].attr & FAT_ATTR_DIR) {
+                        cluster = dirBuffer2[dirpos+cursorpos].fatCluHI << 16
+                            | dirBuffer2[dirpos+cursorpos].fatCluLO;
+                        if (cluster==0) cluster=getRootClu();
+                        cursorMoved=1;
+                        do {
+                            c =buttonsGetStatus();
+                        } while(c & BUTTONS_AV300_ANY);                    
+                        break;
+                    }
                 } else if (c & BUTTONS_AV300_ON) {
                     if (dirBuffer2[dirpos+cursorpos].attr & FAT_ATTR_DIR) {
                         cluster = dirBuffer2[dirpos+cursorpos].fatCluHI << 16
@@ -269,18 +328,31 @@ startInit:
                         //  etc
 
                         // for now, RUN IT!
+                        i = 1;                  // Assume match
+                        for (c=0;c<3;c++) {
+                            if (dirBuffer2[dirpos+cursorpos].ext[c] != ext_bin[c]) {
+                                i=0;
+                                break;
+                            }
+                        }
                         
-                        c = fatReadFile(pcluster, (char*) 0x03000000);
-                        stringPutHex(hex82, c, 8);
-                        uartOuts("[fatTest.c] fatReadFile returned = ");
-                        uartOuts(hex82);
-                        uartOuts("\n");
-                        
-                        // Now CALL IT!
-                        
-                        codeCaller();           // Go go go!
-
-                        goto startInit;
+                        if (i==1) {
+                            
+                            c = fatReadFile(pcluster, (char*) 0x03000000);
+                            stringPutHex(hex82, c, 8);
+                            uartOuts("[fatTest.c] fatReadFile returned = ");
+                            uartOuts(hex82);
+                            uartOuts("\n");
+                            
+                            // Now CALL IT!
+                            
+                            codeCaller();           // Go go go!
+    
+                            goto startInit;
+                            
+                        } else {
+                            // HANDLE OTHER PLUGINS?    
+                        }
                     }
                     do {
                         c =buttonsGetStatus();
@@ -290,7 +362,7 @@ startInit:
             
             // Other non mode 0 specific stuff...
             
-            if (c & BUTTONS_AV300_OFF) {
+            if (c & BUTTONS_AV300_MENU3) {
                 mode ^= 1;
                 do {
                     c =buttonsGetStatus();
@@ -310,8 +382,10 @@ startInit:
                     ataSelectMemoryCard();
                 }
                 
+                // TODO - reinit? USB could have modified disk...
+                
                 break;
-            } else if (c & BUTTONS_AV300_MENU1) {
+            } else if (c & BUTTONS_AV300_MENU2) {
                 source ^= 1;    
                 if (source==0) {
                     ataPowerUpHDD();
