@@ -66,6 +66,7 @@ int main() {
     screenVideo.bytesPerLine = 320*4;
     screenVideo.width = 320;
     screenVideo.height = 240;
+    screenVideo.bitsPerPixelShift = 5;
     screenVideo.bitsPerPixel = 32;
 
     for (py=0;py<240;py+=8) {

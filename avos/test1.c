@@ -27,12 +27,14 @@ int main() {
     screenVideo1.bytesPerLine = 320*4;
     screenVideo1.width = 320;
     screenVideo1.height = 240;
+    screenVideo1.bitsPerPixelShift = 5;
     screenVideo1.bitsPerPixel = 32;
 
     screenVideo2.offset = 0x03800000;
     screenVideo2.bytesPerLine = 320*4;
     screenVideo2.width = 320;
     screenVideo2.height = 240;
+    screenVideo2.bitsPerPixelShift = 5;
     screenVideo2.bitsPerPixel = 32;
     
     while(1) {

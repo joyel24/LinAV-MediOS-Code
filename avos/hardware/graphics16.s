@@ -78,7 +78,120 @@ g16lx:  strh r5, [r0]
 .thumb_func
 
 graphics16Sprite:
+        push {r6, r7, lr}
+        ldr r7, [r3, #GRAPHICS_BUFFER_BPPSHIFT]
+        lsl r7, #2
+        ldr r6, =graphics16SpriteRoutines
+        ldr r7, [r6, r7]
+        mov lr, pc
+        mov pc, r7
+        pop {r6, r7, pc}
+
+
+@ ------------------------------------------------------------------------------
+@ graphics16Sprite1(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
+@
+.globl graphics16Sprite1
+.thumb_func
+
+graphics16Sprite1:
+        push {r0, r1, r2, r3, r4, r5, r6, r7, lr}
+        mov r4, r0
+        bl graphicsGetOffset                @ r0->TLC on dest...
+        ldr r1, [r3, #GRAPHICS_BUFFER_OFFSET]
+        ldr r6, [r3, #GRAPHICS_BUFFER_HEIGHT]
+g16s1y: ldr r7, [r3, #GRAPHICS_BUFFER_WIDTH]
+        push {r0, r1, r6}
+        mov r5, #7                          @ 0-7 counter
+g16s1x: 
+        ldrb r2, [r1]
+        lsr r2, r5
+        lsl r2, #31
+        lsr r2, #31
+        ldr r6, [r3, #GRAPHICS_BUFFER_TRANSPARENT]
+        cmp r2, r6
+         beq g16s1nd        
+
+        lsl r2, #2
+        ldr r6, [r3, #GRAPHICS_BUFFER_PALLETTE16]
+        ldr r2, [r6, r2]
+        strh r2, [r0]
+g16s1nd:
+        sub r5, #1
+        cmp r5, #0
+         bge g16s1n
+        mov r5, #7
+        add r1, #1
+g16s1n:
+        add r0, #2
+        sub r7, #1
+        cmp r7, #0
+         bne g16s1x
+        pop {r0, r1, r6}
+        ldr r5, [r4, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r0, r5
+        ldr r5, [r3, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r1, r5
+        sub r6, #1
+        cmp r6, #0
+         bne g16s1y
+        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
+
+
+@ ------------------------------------------------------------------------------
+@ graphics16Sprite2(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
+@
+.globl graphics16Sprite2
+.thumb_func
+
+graphics16Sprite2:
         mov pc, lr
+
+        
+@ ------------------------------------------------------------------------------
+@ graphics16Sprite4(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
+@
+.globl graphics16Sprite4
+.thumb_func
+
+graphics16Sprite4:
+        mov pc, lr
+        
+        
+@ ------------------------------------------------------------------------------
+@ graphics32Sprite8(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
+@
+.globl graphics16Sprite8
+.thumb_func
+
+graphics16Sprite8:
+        mov pc, lr
+        
+        
+@ ------------------------------------------------------------------------------
+@ graphics16Sprite16(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
+@
+.globl graphics16Sprite16
+.thumb_func
+
+graphics16Sprite16:
+        mov pc, lr
+        
+        
+@ ------------------------------------------------------------------------------
+@ graphics16Sprite32(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
+@
+.globl graphics16Sprite32
+.thumb_func
+
+graphics16Sprite32:
+        @ DIFFICULT - REQUIRES LOTS OF WORK...
+        mov pc, lr
+        
+        
+graphics16SpriteRoutines:   .word graphics16Sprite1, graphics16Sprite2
+                            .word graphics16Sprite4, graphics16Sprite8
+                            .word graphics16Sprite16,graphics16Sprite32
         
         
         .arm
