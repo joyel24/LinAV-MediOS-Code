@@ -11,14 +11,16 @@ ifeq ($(BUILD),X11)
 LDFLAGS += -L/usr/X11R6/lib -lX11
 endif
 
-LDFLAGS  += -lpthread -Llib -lavwm
+LDFLAGS  += -lpthread -Llib
 
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)
-	
+
+SUBDIRS = gfx hw internal_plugin widgets
+
 TARGET = avwm
 
-all: $(TARGET)
+all: subdirs $(TARGET) 
 	@mkdir -p ../../build/avwm
 	@rm -f ../../build/avwm/avwm
 	@mv $(TARGET) ../../build/avwm/
@@ -32,26 +34,30 @@ endif
 
 
 force: clean all        
-        
-$(TARGET) : $(OBJS) lib_dir
-	$(GCC) $(OBJS)  -o $@  $(LDFLAGS)
+
+subdirs:        
+	@@for p in $(SUBDIRS); do \
+		echo '----- building ' $$p; \
+		make -C $$p --no-print-directory -s all; \
+	done
+
+clean-subdirs:
+	@@for p in $(SUBDIRS); do \
+		echo '----- cleaning ' $$p; \
+		make -C $$p --no-print-directory clean; \
+	done
+                
+$(TARGET) : $(OBJS)
+	@$(GCC) *.o -o $@  $(LDFLAGS)
 ifeq ($(HOST),CYGWIN)
 	@mv $@.elf.bflt $@
 endif
-	rm $@.gdb
+	@rm $@.gdb
 
-browser_dir:
-	@$(MAKE) -C browser/ all
-
-lib_dir:
-	@$(MAKE) -C lib/ all
-
-clean:
-	@echo "**** Cleaning..."
-	@$(MAKE) -C lib/ clean
-	@$(MAKE) -C browser/ clean
+clean:  clean-subdirs
+	@echo "----- Cleaning  avwm ROOT"
 	@rm -f *.o *.bak *~ *.gdb *..elf *.elf2flt $(TARGET) include/*~
 	@rm -Rf ../../build/avwm/
         
 .c.o:
-	$(GCC) $(GCCFLAGS) -c -o $@ $<
+	@$(GCC) $(GCCFLAGS) -c -o $@ $<
