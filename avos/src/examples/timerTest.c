@@ -97,7 +97,7 @@ int main() {
 
 //    interruptsSetCausesA(0xffffffff);
 //    interruptsSetCauses2A(0xffffffff);
-    interruptsSetMaskA(interruptsGetMaskA() | 0xf);
+    interruptsSetMaskA(interruptsGetMaskA() | 0xf); // Enable timer IRQs
 //    interruptsSetMask2A(0x0);
     interruptsSetIRQEnabledA();
     
@@ -164,20 +164,21 @@ int main() {
 
 }
 
-int v=0, i=0, c=0;
+int v=0;
 char hex4[] = "xxxx";
 
 void intsub() {
+    int i=0,c=0;
     c = interruptsGetCausesA();
     debug("INT called %d: ", v);
-    debug("CAUSES %08x MASK %08x ", interruptsGetCausesA(), interruptsGetMaskA());
+    debug("CAUSES %08x MASK %08x ", c, interruptsGetMaskA());
     debug("CAUSES2 %08x MASK2 %08x\n", interruptsGetCauses2A(), interruptsGetMask2A());
     
     for (i=0;i<32;i++) {
         if (!(c&1)) break;
         c = c>>1;
     }
-    
+
     debug("ID=%d\n", i);
 
     stringPutHexA(hex4, v, 4);
