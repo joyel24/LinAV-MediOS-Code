@@ -17,6 +17,7 @@ struct graphicsBuffer sprite5_7 = {0, 1, 5, 7, 1, 0, -1, 0, 0, 0, 0, (int**) &pa
 
 struct dirEntry dirBuffer[1000];
 struct dirEntry dirBuffer2[1000];
+unsigned char mbr[512];
 
 char hex82[] = "xxxxxxxx";
 
@@ -29,7 +30,8 @@ int main() {
     unsigned int cluster=0;
     int loopDelay = 0xc000;
     int source = 0;
-
+    int part;
+    
     osdInit();    
     osdSetComponentConfig(OSD_VIDEO1, 0);
     osdSetComponentConfig(OSD_VIDEO2, 0);
@@ -60,7 +62,18 @@ int main() {
     ataPowerUpHDD();
     ataSelectHDD();
 
-    c = fatInit(0x3f);
+    ataReadSectors(0, 1, mbr);
+    
+    showBuffer(mbr);
+    
+    part = mbr[0x1c6] | (mbr[0x1c7]<<8) | (mbr[0x1c8]<<16) | (mbr[0x1c9]<<24);
+    stringPutHex(hex82, part, 8);
+    uartOuts("[fatTest.c] Partition1 = ");
+    uartOuts(hex82);
+    uartOuts("\n");
+    if (part==0) part=0x3f;
+    
+    c = fatInit(part);
     stringPutHex(hex82, c, 8);
     uartOuts("[fatTest.c] fatInit returned = ");
     uartOuts(hex82);
@@ -70,14 +83,6 @@ int main() {
 
     while(1) {
 
-        if (source==0) {
-            ataPowerUpHDD();
-            ataSelectHDD();
-        } else {
-            ataPowerDownHDD();
-            ataSelectMemoryCard();
-        }
-        
         graphicsBoxf(&screenBitmap, 1, 1, 94, 130, 0x1414);    
 
         for (c=0;c<1000;c++) {
@@ -146,7 +151,7 @@ int main() {
                     c =buttonsGetStatus();
                 } while(c & BUTTONS_AV300_ANY);
                 break;
-            } else if (c & BUTTONS_AV300_OFF) {
+            } else if (c & BUTTONS_AV300_MENU1) {
                 source ^= 1;    
                 if (source==0) {
                     ataPowerUpHDD();
@@ -156,7 +161,15 @@ int main() {
                     ataSelectMemoryCard();
                 }
                 
-                c = fatInit(0x3f);
+                ataReadSectors(0, 1, mbr);
+                part = mbr[0x1c6] | (mbr[0x1c7]<<8) | (mbr[0x1c8]<<16) | (mbr[0x1c9]<<24);
+                stringPutHex(hex82, part, 8);
+                uartOuts("[fatTest.c] Partition1 = ");
+                uartOuts(hex82);
+                uartOuts("\n");
+                if (part==0) part=0x3f;
+
+                c = fatInit(part);
                 stringPutHex(hex82, c, 8);
                 uartOuts("[fatTest.c] fatInit returned = ");
                 uartOuts(hex82);
@@ -185,7 +198,7 @@ void showBuffer(char *source) {
     int i,j;
     char c;
 
-    for (j=0;j<512*10;j+=16) {
+    for (j=0;j<512;j+=16) {
         for (i=0;i<16;i++) {
             c = source[i+j];
             stringPutHex(p+(i*2), c, 2);
