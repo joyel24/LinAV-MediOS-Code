@@ -35,4 +35,5 @@ extern u32 ataWaitForReady();
 extern u32 ataWaitForXfer();
 extern void ataReadData(char *buffer, u32 numHalfWords);
 extern void ataWriteData(char *buffer, u32 numHalfWords);
-
+extern void ataRead(u32 lba, u32 count);
+extern void ataWrite(u32 lba, u32 count);

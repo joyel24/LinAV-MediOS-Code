@@ -7,7 +7,7 @@
 #include <fonts.h>
 
 void showBuffer(char *source);
-void identify();
+void docmd();
 
 //
 //
@@ -23,7 +23,8 @@ void identify();
     char data[512];
     struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, &pal16, &pal32};
     struct graphicsBuffer sprite7_13 = {0, 1, 7, 13, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
-    
+    int mode=0;
+
     
 int main() {
     int b;
@@ -62,35 +63,39 @@ int main() {
                     "ATATest By DoGgEr");
 
         if (source==0) {
+            graphicsString(&screenBitmap, 212, 0, &sprite7_13, &std7x13_, 8, 0,
+                    "F2[HDD]");
             graphicsString(&screenBitmap, 0, 8, &sprite4_6, &std4x6_, 5, 0,
                     "Selecting HDD...        ");
             uartOuts("\nSelecting HDD...\n");
             ataPowerUpHDD();
             ataSelectHDD();
         } else {
+            graphicsString(&screenBitmap, 212, 0, &sprite7_13, &std7x13_, 8, 0,
+                    "F2[MemCard]");
             graphicsString(&screenBitmap, 0, 8, &sprite4_6, &std4x6_, 5, 0,
-                    "Selecting Memory card...        ");
+                    "Selecting MemCard...        ");
             uartOuts("\nSelecting Memory card...\n");
             ataPowerDownHDD();
             ataSelectMemoryCard();
         }
 
-        identify();
+        docmd();
 
         do {
             b =buttonsGetStatus();
         } while(!(b & BUTTONS_AV300_ANY));
 
-        if (b & BUTTONS_AV300_MENU1) source=0;
-        if (b & BUTTONS_AV300_MENU2) source=1;
-        
+        if (b & BUTTONS_AV300_MENU2) source=!source;
+        if (b & BUTTONS_AV300_MENU1) mode=!mode;
+
         do {
             b =buttonsGetStatus();
         } while((b & BUTTONS_AV300_ANY));    
     }
 }
 
-void identify() {
+void docmd() {
     int c;
     int delay;
     c = ataWaitForReady();
@@ -103,7 +108,16 @@ void identify() {
         return;
     }
         
-    ataIdentify();
+    pal16[1] = 0x0101;
+    if (mode==0) {
+        graphicsString(&screenBitmap, 108, 0, &sprite7_13, &std7x13_, 8, 0,
+                    "F1[Identify]");
+        ataIdentify();
+    } else {
+        graphicsString(&screenBitmap, 108, 0, &sprite7_13, &std7x13_, 8, 0,
+                    "F1[Read MBR]");
+        ataRead(0, 1);    
+    }
     
     c = ataWaitForXfer();
     if (c!=0) {
@@ -135,7 +149,7 @@ void showBuffer(char *source) {
         uartOuts(p);
 
         pal16[1] = 0xffff;
-        graphicsString(&screenBitmap, 0, 16 + y*7, &sprite4_6, &std4x6_, 5, 0,
+        graphicsString(&screenBitmap, 4, 16 + y*7, &sprite4_6, &std4x6_, 6, 0,
                     p);
         y++;
     }

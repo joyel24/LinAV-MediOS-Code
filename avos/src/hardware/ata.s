@@ -20,7 +20,10 @@
 @ u32 ataWaitForXfer()
 @ void ataWriteData(r0->buffer, r1=#halfwords)
 @ void ataReadData(r0->buffer, r1=#halfwords)
+@
 @ void ataIdentify()
+@ void ataRead(r0=LBA, r1=number)
+@ void ataWrite(r0=LBA, r1=number)
 @
 
 .ifndef ataInc
@@ -59,6 +62,63 @@ ataSelectLBA                =   0x40
 
         .thumb
 
+@ ------------------------------------------------------------------------------
+@ ataRead(r0=LBA, r1=number)
+@
+.globl ataRead
+.thumb_func
+
+ataRead:
+        push {r0, r2, lr}
+        ldr r2, =ataRegSector
+        strb r0, [r2]
+        ldr r2, =ataRegLCyl
+        lsr r0, #8
+        strb r0, [r2]
+        ldr r2, =ataRegHCyl
+        lsr r0, #8
+        strb r0, [r2]
+        lsr r0, #8
+        ldr r3, =ataSelectLBA        
+        ldr r2, =ataRegSelect
+        orr r0, r3
+        strb r0, [r2]        
+        ldr r2, =ataRegNSector
+        strb r1, [r2]
+        ldr r2, =ataRegCommand
+        mov r0, #ataCommand_READ_SECTORS
+        strb r0, [r2]
+        pop {r0, r2, pc}
+
+@ ------------------------------------------------------------------------------
+@ ataWrite(r0=LBA, r1=number)
+@
+.globl ataWrite
+.thumb_func
+
+ataWrite:
+        push {r0, r2, lr}
+        ldr r2, =ataRegSector
+        strb r0, [r2]
+        ldr r2, =ataRegLCyl
+        lsr r0, #8
+        strb r0, [r2]
+        ldr r2, =ataRegHCyl
+        lsr r0, #8
+        strb r0, [r2]
+        lsr r0, #8
+        ldr r3, =ataSelectLBA        
+        ldr r2, =ataRegSelect
+        orr r0, r3
+        strb r0, [r2]        
+        ldr r2, =ataRegNSector
+        strb r1, [r2]
+        ldr r2, =ataRegCommand
+        mov r0, #ataCommand_WRITE_SECTORS
+        strb r0, [r2]
+        pop {r0, r2, pc}
+        
+        
 @ ------------------------------------------------------------------------------
 @ ataIdentify()
 @
