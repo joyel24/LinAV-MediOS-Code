@@ -22,6 +22,16 @@ __IRAM_CODE int swi_gfx_handler (
 {
 	switch (nCmd)
 	{
+	case nAPI_GFX_OPEN_GRAPHICS:    //();
+	{
+	}
+	break;
+
+	case nAPI_GFX_CLOSE_GRAPHICS:   //();
+	{
+	}
+	break;
+
 	case nAPI_GFX_CREATE_CONTEXT:   //(int nWidth, int nHeight, int nFlags);
 	{
 		TASK_INFO* pTask = 0;
@@ -64,6 +74,11 @@ __IRAM_CODE int swi_gfx_handler (
 		API_TASK_YIELD ();
 		__sti ();
 */
+	}
+	break;
+
+	case nAPI_GFX_GET_CONTEXT:      //(GFX_CONTEXT* pCtx);
+	{
 	}
 	break;
 
@@ -325,6 +340,31 @@ __IRAM_CODE int swi_gfx_handler (
 		for (org.y=0;org.y<pDst->h+pSrc->h;org.y+=pSrc->h)
 		for (org.x=0;org.x<pDst->w+pSrc->w;org.x+=pSrc->w)
 			kcswi_handler (nAPI_GFX_FASTBLIT, nParam2, (unsigned long)&org, nParam1);
+	}
+	break;
+
+	case nAPI_GFX_DRAWPIXEL:        //(int nX, int nY, COLOR Color);
+	{
+	}
+	break;
+
+	case nAPI_GFX_READPIXEL:        //(int nX, int nY);
+	{
+	}
+	break;
+
+	case nAPI_GFX_DRAWLINE:         //(GFX_POINT* pt1, GFX_POINT* pt2, COLOR Color);
+	{
+	}
+	break;
+
+	case nAPI_GFX_DRAWRECT:         //(GFX_RECT* pRect, COLOR Color);
+	{
+	}
+	break;
+
+	case nAPI_GFX_FILLRECT:         //(GFX_RECT* pRect, COLOR Color);
+	{
 	}
 	break;
 

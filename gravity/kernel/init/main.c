@@ -109,8 +109,8 @@ void debug_thread (SDBG* pS)
 
 	while (1)
 	{
-		pt.x = pS->ptOrig.x + (i%125);
-		pt.y = pS->ptOrig.y + (i%83);
+		pt.x = pS->ptOrig.x + (i%140);
+		pt.y = pS->ptOrig.y + (i%85);
 
 		i += 1;
 
@@ -241,15 +241,15 @@ void kernel_startup_thread (void)
 
 	pS2.ptOrig.x = 40;
 	pS2.ptOrig.y = 20;
-	pS2.w = 96;
+	pS2.w = 128;
 	pS2.h = 80;
 	pS2.nDelay = 0;
 	pS2.nStep = 2;
 	API_TASK_CREATE (debug_thread, &pS2, 0);
 
 	GFX_RECT rc1;
-	rc1.x = 50;
-	rc1.y = 50;
+	rc1.x = 200;
+	rc1.y = 100;
 	rc1.w = 32;
 	rc1.h = 32;
 	API_TASK_CREATE (win_thread, &rc1, 0);
@@ -267,6 +267,29 @@ void kernel_startup_thread (void)
 	rc3.w = 80;
 	rc3.h = 64;
 	API_TASK_CREATE (win_thread, &rc3, 0);
+
+	GFX_RECT rc4;
+	rc4.x = 0;
+	rc4.y = 0;
+	rc4.w = 100;
+	rc4.h = 100;
+	API_TASK_CREATE (win_thread, &rc4, 0);
+
+	GFX_RECT rc5;
+	rc5.x = 250;
+	rc5.y = 10;
+	rc5.w = 20;
+	rc5.h = 220;
+	API_TASK_CREATE (win_thread, &rc5, 0);
+
+	GFX_RECT rc6;
+	rc6.x = 10;
+	rc6.y = 150;
+	rc6.w = 48;
+	rc6.h = 48;
+	API_TASK_CREATE (win_thread, &rc6, 0);
+
+	API_GFX_UPDATE_RECT (0);
 
 //    avwm();
 	while (1)
