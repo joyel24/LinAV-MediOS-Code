@@ -14,5 +14,16 @@
 #ifndef __CMD_LINE_H
 #define __CMD_LINE_H
 
+struct cmd_line_s {
+    char * cmd;
+    char * help_str;
+    void   (*cmd_action)(char ** params);
+    int    nb_args;
+};
+
+/* cmd list */
+
+void do_help(char ** params);
+void do_print_info(char ** params);
 
 #endif
