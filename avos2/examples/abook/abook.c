@@ -315,7 +315,7 @@ CompleteUpdate:
    ClearScreen();
    pal16[1] = ADDRESS_TEXTCOLOR_HEAD;
    graphicsBoxfA(&screenBitmap, 0, 0, 640, 20, ADDRESS_BACKCOLOR_HEAD);
-   graphicsStringA(&screenBitmap, 10, 5, &spriteFont6x10, std6x10_, 6, 0, "ADDRESS BOOK V1.31 by SCHOKI");
+   graphicsStringA(&screenBitmap, 10, 5, &spriteFont6x10, std6x10_, 6, 0, "ADDRESS BOOK V1.33 by SCHOKI");
    graphicsBoxfA(&screenBitmap, 0, 21, 595, 2, ADDRESS_BACKCOLOR_SEPERATOR); // schwarzer Schatten
    graphicsBoxfA(&screenBitmap, 0, 23, 595, 297, ADDRESS_BACKCOLOR_LIST); // hellblau
    DisplayDate();
@@ -530,6 +530,7 @@ void ShowNewEntry(int IsNew)
    int yPos = 31;
    int indexChar = 0;
    int currentElement = 0;
+	int cntKeyUpDown = 0;
    bool fUpKey = false;
    bool fDownKey = false;
    bool fValidEntry = false; // wurde ueberhaupt ein Buchstabe ausgewaehlt ?
@@ -752,6 +753,7 @@ void ShowNewEntry(int IsNew)
 
 			if(currentElement == MAX_ELEMENTS)
 			{
+			   // nach vorn springen
 				currentElement = 0;
 				xPos = 70;
 				yPos = 31;
@@ -759,7 +761,7 @@ void ShowNewEntry(int IsNew)
 			else if(currentElement == 4)
 			{
 				// Spezialfall 2 in einer Reihe
-				xPos += 120;
+				xPos = 190;
 			}
 			else
 			{
@@ -794,8 +796,17 @@ void ShowNewEntry(int IsNew)
          fValidEntry = true;
 
          ascii = NextAscii(ascii); // definierte Reihenfolge
+
 			if(fUpKey == true)
-				delay(0x10000);
+			{
+			   if(cntKeyUpDown > 5)
+				   delay(0x5000);
+
+				else
+				   delay(0x10000);
+
+            cntKeyUpDown++;
+			}
 			else
 				delay(0x20000);
 
@@ -810,7 +821,14 @@ void ShowNewEntry(int IsNew)
 			ascii = PrevAscii(ascii);
 
 			if(fDownKey == true)
-				delay(0x10000);
+			{
+			   if(cntKeyUpDown > 5)
+				   delay(0x5000);
+				else
+				   delay(0x10000);
+
+            cntKeyUpDown++;
+			}
 			else
 				delay(0x20000);
 
@@ -879,6 +897,7 @@ void ShowNewEntry(int IsNew)
       {
          fUpKey = false;
          fDownKey = false;
+			cntKeyUpDown = 0;
       }
    }
 }
