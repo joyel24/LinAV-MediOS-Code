@@ -125,7 +125,7 @@ void drawMenu(void)
 	putS(COLOR_DARK_GREY,COLOR_WHITE,110+70,70+45,"Snow");
 	while(1)
 	{
-		while((evt=nxtEvent())==NO_EVENT) /* wait */;
+		evt=waitEvent();
 		switch(evt) {
 			case BTN_UP:
 				if(currentHandler)
