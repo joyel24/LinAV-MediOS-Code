@@ -116,12 +116,12 @@ __IRAM_CODE void chk_uart_in(void)
         else
         {
             /* processing the cmd */
-            printk("[cmd_line] get cmd |%s|\n",cur_cmd);
+            //printk("[cmd_line] get cmd |%s|\n",cur_cmd);
             
             RM_HEAD_SPC(cur_cmd);
             
             /* let's find the cmd name */
-            printk("[cmd_line] 1 - |%s|\n",cur_cmd);
+            //printk("[cmd_line] 1 - |%s|\n",cur_cmd);
             
             ptr=FIND_NXT_TOKEN(cur_cmd);
             
@@ -129,7 +129,7 @@ __IRAM_CODE void chk_uart_in(void)
             {
                 cmd_line=FIND_CMD_LINE(cur_cmd);
                 if(!cmd_line)  UNKNOW_CMD(cur_cmd);
-                printk("[cmd_line] 2 - find cmd |%s|, no args\n",cmd_line->cmd);
+                //printk("[cmd_line] 2 - find cmd |%s|, no args\n",cmd_line->cmd);
             }
             else
             {
@@ -137,7 +137,7 @@ __IRAM_CODE void chk_uart_in(void)
                 cmd_line=FIND_CMD_LINE(cur_cmd);
                 if(!cmd_line)  UNKNOW_CMD(cur_cmd);
                 cur_cmd = ptr+1;
-                printk("[cmd_line] 2 - find cmd |%s|, args: |%s|\n",cmd_line->cmd,cur_cmd);
+                //printk("[cmd_line] 2 - find cmd |%s|, args: |%s|\n",cmd_line->cmd,cur_cmd);
                 /* parse args */
                 while(*cur_cmd)
                 {
@@ -154,10 +154,10 @@ __IRAM_CODE void chk_uart_in(void)
                         }                         
                     }
                 }
-                printk("[cmd_line] 3 - args :|");
+                /*printk("[cmd_line] 3 - args :|");
                 for(i=0;i<nb_args;i++)
                     printk("%s|",arg_list[i]);
-                printk("\n");
+                printk("\n");*/
                 
             }
             
