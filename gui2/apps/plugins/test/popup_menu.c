@@ -67,7 +67,10 @@ struct menu_data menu_cfg = {
     f2_action      : do_F2,
     f3_action      : do_F3,
     item_str       : mk_item_str,
-    submenu_str    : mk_item_str
+    submenu_str    : mk_item_str,
+    getSubIcon     : NULL,
+    getItemIcon    : NULL,
+    isTxtMenu      : 1
 };
 
 struct menu_item rootMenu;
