@@ -80,7 +80,7 @@ NANOXDEMO                = N
 # Applications to build
 #
 ####################################################################
-NANOWM                   = Y
+NANOWM                   = N
 
 ####################################################################
 #
@@ -107,7 +107,7 @@ SCREEN_PIXTYPE           = MWPF_PALETTE
 # or for speed or debugging.  This affects the nano-X server only.
 #
 ####################################################################
-LINK_APP_INTO_SERVER     = N
+LINK_APP_INTO_SERVER     = Y
 
 ####################################################################
 # Shared memory support for Nano-X client/server protocol speedup
@@ -133,7 +133,7 @@ HAVE_XPM_SUPPORT         = N
 ####################################################################
 # JPEG support through libjpeg, see README.txt in contrib/jpeg
 ####################################################################
-HAVE_JPEG_SUPPORT        = Y
+HAVE_JPEG_SUPPORT        = N
 INCJPEG                  = /home/thomas/tmp/linav-pack/nano-X-build-env/jpeg-6b/
 LIBJPEG                  = /home/thomas/tmp/linav-pack/nano-X-build-env/jpeg-6b/libjpeg.a
 
