@@ -72,6 +72,9 @@ ERROR_CODE API_RUN_GRV          (const char* pGRVPath, HTASK* phTask)           
 ERROR_CODE API_CREATE_CONTEXT   (int nWidth, int nHeight, int nFlags)                           { swi_call(nAPI_CREATE_CONTEXT); }
 
 ERROR_CODE API_GFX_COMMIT       (GFX_RECT* pArea)                                               { swi_call(nAPI_GFX_COMMIT); }
+ERROR_CODE API_GFX_MOVE         (GFX_POINT* pOrigin)                                            { swi_call(nAPI_GFX_MOVE); }
+ERROR_CODE API_GFX_FOREGROUND   ()                                                              { swi_call(nAPI_GFX_FOREGROUND); }
+
 ERROR_CODE API_GFX_FASTBLIT     (GFX_DATA* pDst, GFX_DATA* pSrc, GFX_POINT* pOrigin)            { swi_call(nAPI_GFX_FASTBLIT); }
 ERROR_CODE API_GFX_STRETCHBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc, unsigned long* pWorkBuffer)    { swi_call(nAPI_GFX_STRETCHBLIT); }
 ERROR_CODE API_GFX_PATTERNBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc)                                { swi_call(nAPI_GFX_PATTERNBLIT); }

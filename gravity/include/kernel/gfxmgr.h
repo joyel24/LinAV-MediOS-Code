@@ -34,6 +34,15 @@ enum
 	eGFX_MGR_FOREGROUND, // Sets context as foreground context
 	eGFX_MGR_MOVE,       // Moves graphics context to another screen position
 	eGFX_MGR_COMMIT,     // Commit changes in given context
+	eGFX_MGR_REDRAW,     // Redraws whole context's stack
 } E_GFX_MGR_CMD;
+
+void kgfx_init ();
+
+void kgfx_manager_handler (
+	unsigned long nCmd,
+	unsigned long nParam1,
+	unsigned long nParam2,
+	TASK_INFO* pCallingTask);
 
 #endif

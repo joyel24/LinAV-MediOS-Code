@@ -68,12 +68,12 @@ void GetSubContext (GFX_DATA* pSubContext, GFX_DATA* pContext, GFX_RECT* pRect)
 	pSubContext->pixels     = pContext->pixels + pRect->x * pContext->pixel_size + pRect->y * pContext->delta;
 }
 
-// GFX manager runs as separate thread
-// This thread serializes calls to commit changes on common screen area,
-// Made from diffrent threads.
-//__IRAM_CODE int kgfx_manager (void* pvParameters)
-int kgfx_manager (void* pvParameters)
+CRITSEC_INFO* g_pCS_GFX;
+
+void kgfx_init ()
 {
+	API_CRITSEC_CREATE (&g_pCS_GFX);
+
 	g_PhysicalScreen.w = 320;
 	g_PhysicalScreen.h = 240;
 	g_PhysicalScreen.x = 0;
@@ -95,63 +95,159 @@ int kgfx_manager (void* pvParameters)
 	g_CompilingBuffer.pixel_size = 4;
 	g_CompilingBuffer.delta = 320*4;
 	API_MALLOC (&g_CompilingBuffer.pixels, 320 * 240 * 4);
+}
 
-	SYSTEM_CTRL_COMMAND* pGfxCtrl = 0;
-	TASK_INFO* pTCB = 0;
+// GFX manager
+// This thread serializes calls to commit changes on common screen area,
+// Made from diffrent threads.
+//__IRAM_CODE int kgfx_manager (void* pvParameters)
+void kgfx_manager_handler (
+	unsigned long nCmd,
+	unsigned long nParam1,
+	unsigned long nParam2,
+	TASK_INFO* pCallingTask)
+{
+//	printk ("[GFXMGR]: kgfx_manager_handler\n");
+	API_CRITSEC_ENTER (g_pCS_GFX);
+//	printk ("[GFXMGR]: switch %d...\n", nCmd);
 
-	GFX_DATA SubContext;
-
-	while (1)
+	switch (nCmd)
 	{
-		pGfxCtrl = 0;
-//		API_PIPE_RECV ((HPIPE)g_pGFXManagerPipe, &GfxCtrl, sizeof(SYSTEM_CTRL_COMMAND));
+		case eGFX_MGR_NOP:
+			printk ("[GFXMGR]: eGFX_MGR_NOP\n");
+			break;
 
-		__cli ();
-		if (g_pGFXManagerPipe->nReceiver != g_pGFXManagerPipe->nSender)
+		case eGFX_MGR_ADD:
 		{
-			pGfxCtrl = (SYSTEM_CTRL_COMMAND*)(g_pGFXManagerPipe->buffer + g_pGFXManagerPipe->nReceiver);
-			g_pGFXManagerPipe->nReceiver = (g_pGFXManagerPipe->nReceiver + sizeof(SYSTEM_CTRL_COMMAND)) & PIPE_SIZE_MASK;
+			printk ("[GFXMGR]: eGFX_MGR_ADD\n");
+
+			GFX_Z_RECT* pZRect = 0;
+			API_MALLOC (&pZRect, sizeof(GFX_Z_RECT));
+			__cli();
+
+			pZRect->ptLocation.x = nParam1;
+			pZRect->ptLocation.y = nParam2;
+			pZRect->pOwner = pCallingTask;
+			pZRect->pNext = 0;
+
+			GFX_Z_RECT* pTopmost = g_pZRectList;
+			while (pTopmost->pNext)
+			{
+				pTopmost = pTopmost->pNext;
+			};
+
+			pZRect->pPrev = pTopmost;
+			pTopmost->pNext = pZRect;
+			__sti();
 		}
-		else
+		break;
+
+		case eGFX_MGR_DELETE:
+			printk ("[GFXMGR]: eGFX_MGR_DELETE\n");
+			break;
+
+		case eGFX_MGR_FOREGROUND:
+			printk ("[GFXMGR]: eGFX_MGR_FOREGROUND\n");
+			break;
+
+		case eGFX_MGR_MOVE:
 		{
-			API_TASK_YIELD ();
-			continue;
-		}
-		__sti ();
-
-		if (!pGfxCtrl)
-			continue;
-
-		switch (pGfxCtrl->nCmdId)
-		{
-			case eGFX_MGR_NOP:
-				printk ("[GFXMGR]: eGFX_MGR_NOP\n");
-				break;
-
-			case eGFX_MGR_ADD:
-				printk ("[GFXMGR]: eGFX_MGR_ADD\n");
-				break;
-
-			case eGFX_MGR_DELETE:
-				printk ("[GFXMGR]: eGFX_MGR_DELETE\n");
-				break;
-
-			case eGFX_MGR_FOREGROUND:
-				printk ("[GFXMGR]: eGFX_MGR_FOREGROUND\n");
-				break;
-
-			case eGFX_MGR_MOVE:
-				printk ("[GFXMGR]: eGFX_MGR_MOVE\n");
-				break;
-
 /* MOVE ALGORITHM
-// ???
-// ???
-// ???
+// 1. Determine Z-Order position of quering context
+// 2. Find one/two rects of move-from area
+// 3. Updates all stack for move-from area
+// 4. IF context area is not interleaved with any of above contexts,
+//         Put it directly into physical plane, set "no back" flag in Z-struct ???
+//    ELSE
+//         Redraw all above contexts, intersected with new context position area
 */
 
-			case eGFX_MGR_COMMIT:
+//			printk ("[GFXMGR]: eGFX_MGR_MOVE start\n");
+			GFX_Z_RECT* pCurWindow = g_pZRectList;
+			GFX_DATA SubContext;
+
+			// 1.
+			while (pCurWindow)
+			{
+				if (pCurWindow->pOwner == pCallingTask)
+					break;
+
+				pCurWindow = pCurWindow->pNext;
+			};
+
+			if (pCurWindow)
+			{
+				GFX_RECT OldContextRect;
+				OldContextRect.x = 0;
+				OldContextRect.y = 0;
+				OldContextRect.w = pCurWindow->pOwner->pMemoryContext->w;
+				OldContextRect.h = pCurWindow->pOwner->pMemoryContext->h;
+				TranslateRectIntoPhysicalSpace (&OldContextRect, pCurWindow);
+
+				GFX_Z_RECT* pWorkWindow = g_pZRectList;
+				while (pWorkWindow)
 				{
+					if (pWorkWindow->pOwner == pCallingTask)
+						break;
+
+					GetSubContext (&SubContext, &g_CompilingBuffer, &OldContextRect);
+
+//					printk ("BLIT MEM -> COMPILE [ERASE]\n");
+					API_GFX_FASTBLIT (
+						&g_CompilingBuffer,
+						pWorkWindow->pOwner->pMemoryContext,
+						&pWorkWindow->ptLocation);
+
+					pWorkWindow = pWorkWindow->pNext;
+				};
+
+				GetSubContext (&SubContext, &g_PhysicalScreen, &OldContextRect);
+				GFX_POINT pt;
+				pt.x = 0;
+				pt.y = 0;
+//				printk ("BLIT COMPILE -> PHYS [ERASE]\n");
+				API_GFX_FASTBLIT (
+					&g_PhysicalScreen,
+					&g_CompilingBuffer,
+					&pt);
+
+				pCurWindow->ptLocation.x = ((GFX_POINT*)nParam1)->x;
+				pCurWindow->ptLocation.y = ((GFX_POINT*)nParam1)->y;
+
+				GFX_RECT NewContextRect;
+				NewContextRect.x = 0;
+				NewContextRect.y = 0;
+				NewContextRect.w = pCurWindow->pOwner->pMemoryContext->w;
+				NewContextRect.h = pCurWindow->pOwner->pMemoryContext->h;
+				TranslateRectIntoPhysicalSpace (&NewContextRect, pCurWindow);
+
+				while (pWorkWindow)
+				{
+					GetSubContext (&SubContext, &g_CompilingBuffer, &NewContextRect);
+
+//					printk ("BLIT MEM -> COMPILE [DRAW]\n");
+					API_GFX_FASTBLIT (
+						&g_CompilingBuffer,
+						pWorkWindow->pOwner->pMemoryContext,
+						&pWorkWindow->ptLocation);
+
+					pWorkWindow = pWorkWindow->pNext;
+				}
+
+				GetSubContext (&SubContext, &g_PhysicalScreen, &NewContextRect);
+//				printk ("BLIT COMPILE -> PHYS [DRAW]\n");
+				API_GFX_FASTBLIT (
+					&g_PhysicalScreen,
+					&g_CompilingBuffer,
+					&pt);
+			}
+
+//			printk ("[GFXMGR]: eGFX_MGR_MOVE end\n");
+		}
+		break;
+
+		case eGFX_MGR_COMMIT:
+		{
 
 /* COMMIT ALGORITHM
 // 1. Determine Z-Order position of quering context
@@ -163,12 +259,14 @@ int kgfx_manager (void* pvParameters)
 */
 
 //					printk ("[GFXMGR]: eGFX_MGR_COMMIT begin\n");
+
 					GFX_Z_RECT* pCurWindow = g_pZRectList;
+					GFX_DATA SubContext;
 
 					// 1.
 					while (pCurWindow)
 					{
-						if (pCurWindow->pOwner == pGfxCtrl->pSenderThread)
+						if (pCurWindow->pOwner == pCallingTask)
 							break;
 
 						pCurWindow = pCurWindow->pNext;
@@ -184,8 +282,8 @@ int kgfx_manager (void* pvParameters)
 						ContextRect.w = pCurWindow->pOwner->pMemoryContext->w;
 						ContextRect.h = pCurWindow->pOwner->pMemoryContext->h;
 
-						if (pGfxCtrl->nCmdParam1)
-							UpdateRect = *((GFX_RECT*)pGfxCtrl->nCmdParam1);
+						if (nParam1)
+							UpdateRect = *((GFX_RECT*)nParam1);
 						else
 							UpdateRect = ContextRect;
 
@@ -226,13 +324,48 @@ int kgfx_manager (void* pvParameters)
 					}
 
 //					printk ("[GFXMGR]: eGFX_MGR_COMMIT end\n");
-				}
-				break;
-
-			default:
-				printk ("[GFXMGR]: *** UNKNOWN *** (%d)\n", pGfxCtrl->nCmdId);
-				break;
 		}
+		break;
+
+		case eGFX_MGR_REDRAW:
+		{
+			printk ("[GFXMGR]: eGFX_MGR_REDRAW\n");
+		}
+		break;
+
+		default:
+			printk ("[GFXMGR]: *** UNKNOWN *** (%d)\n", nCmd);
+		break;
+	}
+
+	API_CRITSEC_LEAVE (g_pCS_GFX);
+
+/*
+	SYSTEM_CTRL_COMMAND* pGfxCtrl = 0;
+	TASK_INFO* pTCB = 0;
+
+	GFX_DATA SubContext;
+
+	while (1)
+	{
+		pGfxCtrl = 0;
+//		API_PIPE_RECV ((HPIPE)g_pGFXManagerPipe, &GfxCtrl, sizeof(SYSTEM_CTRL_COMMAND));
+
+		__cli ();
+		if (g_pGFXManagerPipe->nReceiver != g_pGFXManagerPipe->nSender)
+		{
+			pGfxCtrl = (SYSTEM_CTRL_COMMAND*)(g_pGFXManagerPipe->buffer + g_pGFXManagerPipe->nReceiver);
+			g_pGFXManagerPipe->nReceiver = (g_pGFXManagerPipe->nReceiver + sizeof(SYSTEM_CTRL_COMMAND)) & PIPE_SIZE_MASK;
+		}
+		else
+		{
+			API_TASK_YIELD ();
+			continue;
+		}
+		__sti ();
+
+		if (!pGfxCtrl)
+			continue;
 
 		/// Unblock calling task...
 		__cli ();
@@ -243,4 +376,5 @@ int kgfx_manager (void* pvParameters)
 	};
 
 	return 0;
+*/
 }

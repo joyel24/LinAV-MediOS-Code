@@ -411,11 +411,38 @@ __IRAM_CODE int kcswi_handler (
 		API_MALLOC (&pCtx->pixels, pCtx->w * pCtx->h * 4);
 
 		pTask->pMemoryContext = pCtx;
+
+		kgfx_manager_handler (eGFX_MGR_ADD, 0, 0, pTask);
+
+/*
+		__cli ();
+
+		SYSTEM_CTRL_COMMAND* pSysCtrl = (SYSTEM_CTRL_COMMAND*)(g_pGFXManagerPipe->buffer + g_pGFXManagerPipe->nSender);
+		pSysCtrl->nCmdId = eGFX_MGR_ADD;
+		pSysCtrl->nCmdParam1 = 0;//Context's X
+		pSysCtrl->nCmdParam2 = 0;//Context's Y
+		pSysCtrl->pSenderThread = g_pTaskRing;
+		g_pGFXManagerPipe->nSender = (g_pGFXManagerPipe->nSender + sizeof(SYSTEM_CTRL_COMMAND)) & PIPE_SIZE_MASK;
+
+		/// Block calling task...
+		g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_GFXMGR;
+		g_pTaskRing->nBlockingValue = 0;
+
+		API_TASK_YIELD ();
+		__sti ();
+*/
 	}
 	break;
 
 	case nAPI_GFX_COMMIT:       //(GFX_RECT* pArea);
 	{
+		TASK_INFO* pTask = 0;
+		__cli ();
+		pTask = g_pTaskRing;
+		__sti ();
+		kgfx_manager_handler (eGFX_MGR_COMMIT, nParam1, 0, pTask);
+
+/*
 		__cli ();
 
 		SYSTEM_CTRL_COMMAND* pSysCtrl = (SYSTEM_CTRL_COMMAND*)(g_pGFXManagerPipe->buffer + g_pGFXManagerPipe->nSender);
@@ -431,6 +458,60 @@ __IRAM_CODE int kcswi_handler (
 
 		API_TASK_YIELD ();
 		__sti ();
+*/
+	}
+	break;
+
+	case nAPI_GFX_MOVE:         //(GFX_POINT* pOrigin)                                            { swi_call(nAPI_GFX_MOVE); }
+	{
+		TASK_INFO* pTask = 0;
+		__cli ();
+		pTask = g_pTaskRing;
+		__sti ();
+		kgfx_manager_handler (eGFX_MGR_MOVE, nParam1, 0, pTask);
+
+/*
+		__cli ();
+
+		SYSTEM_CTRL_COMMAND* pSysCtrl = (SYSTEM_CTRL_COMMAND*)(g_pGFXManagerPipe->buffer + g_pGFXManagerPipe->nSender);
+		pSysCtrl->nCmdId = eGFX_MGR_MOVE;
+		pSysCtrl->nCmdParam1 = nParam1;
+		pSysCtrl->pSenderThread = g_pTaskRing;
+		g_pGFXManagerPipe->nSender = (g_pGFXManagerPipe->nSender + sizeof(SYSTEM_CTRL_COMMAND)) & PIPE_SIZE_MASK;
+
+		/// Block calling task...
+		g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_GFXMGR;
+		g_pTaskRing->nBlockingValue = 0;
+
+		API_TASK_YIELD ();
+		__sti ();
+*/
+	}
+	break;
+
+	case nAPI_GFX_FOREGROUND:   //()                                                              { swi_call(nAPI_GFX_FOREGROUND); }
+	{
+		TASK_INFO* pTask = 0;
+		__cli ();
+		pTask = g_pTaskRing;
+		__sti ();
+		kgfx_manager_handler (eGFX_MGR_FOREGROUND, nParam1, 0, pTask);
+
+/*
+		__cli ();
+
+		SYSTEM_CTRL_COMMAND* pSysCtrl = (SYSTEM_CTRL_COMMAND*)(g_pGFXManagerPipe->buffer + g_pGFXManagerPipe->nSender);
+		pSysCtrl->nCmdId = eGFX_MGR_FOREGROUND;
+		pSysCtrl->pSenderThread = g_pTaskRing;
+		g_pGFXManagerPipe->nSender = (g_pGFXManagerPipe->nSender + sizeof(SYSTEM_CTRL_COMMAND)) & PIPE_SIZE_MASK;
+
+		/// Block calling task...
+		g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_GFXMGR;
+		g_pTaskRing->nBlockingValue = 0;
+
+		API_TASK_YIELD ();
+		__sti ();
+*/
 	}
 	break;
 

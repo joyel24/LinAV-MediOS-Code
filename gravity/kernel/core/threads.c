@@ -31,10 +31,6 @@ __IRAM_CODE KERNEL_ERROR_CODE kinit_tcb ()
 	g_pSystemCtrlPipe->nReceiver = 0;
 	g_pSystemCtrlPipe->nSender = 0;
 
-	g_pGFXManagerPipe = kmalloc (sizeof(PIPE));
-	g_pGFXManagerPipe->nReceiver = 0;
-	g_pGFXManagerPipe->nSender = 0;
-
 	return eOK;
 }
 

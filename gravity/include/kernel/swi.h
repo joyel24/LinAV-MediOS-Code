@@ -60,9 +60,12 @@
 #define nAPI_CREATE_CONTEXT    61
 
 #define nAPI_GFX_COMMIT        70
-#define nAPI_GFX_FASTBLIT      71
-#define nAPI_GFX_STRETCHBLIT   72
-#define nAPI_GFX_PATTERNBLIT   73
+#define nAPI_GFX_MOVE          71
+#define nAPI_GFX_FOREGROUND    72
+
+#define nAPI_GFX_FASTBLIT      75
+#define nAPI_GFX_STRETCHBLIT   76
+#define nAPI_GFX_PATTERNBLIT   77
 
 #define nAPI_SOUND_PLAY        80
 #define nAPI_SOUND_PAUSE       81

@@ -27,7 +27,6 @@ typedef struct _PIPE
 
 extern PIPE* g_pKernelCtrlPipe;
 extern PIPE* g_pSystemCtrlPipe;
-extern PIPE* g_pGFXManagerPipe;
 
 extern void kpipe_write (PIPE* pPipe, void* _pData, unsigned long nBytes);
 extern void kpipe_read  (PIPE* pPipe, void* _pData, unsigned long nBytes);

@@ -65,6 +65,9 @@ ERROR_CODE API_RUN_GRV          (const char* pGRVPath, HTASK* phTask);
 ERROR_CODE API_CREATE_CONTEXT   (int nWidth, int nHeight, int nFlags);
 
 ERROR_CODE API_GFX_COMMIT       (GFX_RECT* pArea);
+ERROR_CODE API_GFX_MOVE         (GFX_POINT* pOrigin);
+ERROR_CODE API_GFX_FOREGROUND   ();
+
 ERROR_CODE API_GFX_FASTBLIT     (GFX_DATA* pDst, GFX_DATA* pSrc, GFX_POINT* pOrigin);
 ERROR_CODE API_GFX_STRETCHBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc, unsigned long* pWorkBuffer);
 ERROR_CODE API_GFX_PATTERNBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc);
