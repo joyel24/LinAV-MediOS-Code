@@ -19,3 +19,6 @@ typedef unsigned long u32;
 extern void systemRelocateMe();
 extern void systemRelocateMeA();
 
+extern void mvStackA();
+extern void mvStack();
+

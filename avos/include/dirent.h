@@ -19,16 +19,24 @@
 #define BAD_ENTRY	3
 #define GOOD_ENTRY	4
 
-#include "fat.h"
+#define T_DIR	1
+#define T_FILE	2
+
+#define NAME_SIZE 8
+#define EXT_SIZE 3
 
 struct dirent {
-	char entryName[NAME_SIZE+EXT_SIZE+2];
-    char name[NAME_SIZE+1];
-	char ext[EXT_SIZE+1];
+	char entryName[NAME_SIZE+EXT_SIZE+2]; // name + '.' + ext + \0
+    char name[NAME_SIZE+1]; // name + \0
+	char ext[EXT_SIZE+1]; // ext + \0
+	char fatName[NAME_SIZE+EXT_SIZE+1];
     int attribute;
-    int startcluster;
+    int startCluster;
 	int size;
+	int dirCluster;
 };
+
+#include "fat.h"
 
 typedef struct {
 	unsigned char name[MAX_PATH];
@@ -39,9 +47,12 @@ typedef struct {
 	struct fatent fat_ent;
 } DIR;
 
-extern int opendir(char* name);
+extern int opendir(const char* name);
 extern void closedir(int dd);
 extern struct dirent* readdir(int dd);
+
+extern int removeEntry(int dir);
+extern int createEntry(const char * pathname,int type,struct dirent* ent);
 
 extern void inidir();
 

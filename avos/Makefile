@@ -10,8 +10,10 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-BUILDDIR=/home/jimmy/archos/uclib/toolchain/gcc-3.3.x/toolchain_arm_nofpu
+BUILDDIR=/home/thomas/Av320/arm-tools/inst_uclibc/toolchain/gcc-3.3.x/toolchain_arm_nofpu
 LDFLAG=-L$(BUILDDIR)/arm-linux/lib
+
+GCCFLAG= -Wa,-R -fno-zero-initialized-in-bss
 
 ##########################
 ## you need to make some special link:
@@ -19,19 +21,20 @@ LDFLAG=-L$(BUILDDIR)/arm-linux/lib
 ## and ln -s ../../lib/libfloat.a
 ## or find a better way to do it ;)
 
+ALL: clean libavos
 
 libavosold:
-	arm-linux-gcc -Wa,-R -c -mthumb-interwork -fno-zero-initialized-in-bss -Iinclude/ src/fonts/*.c
-	arm-linux-gcc -Wa,-R -c -mthumb-interwork -fno-zero-initialized-in-bss -Iinclude/ src/drivers/*.c
+	arm-linux-gcc $(GCCFLAG)  -c -mthumb-interwork  -Iinclude/ -I$(BUILDDIR)/arm-linux/include/ src/fonts/*.c
+	arm-linux-gcc $(GCCFLAG)   -c -mthumb-interwork -Iinclude/ -I$(BUILDDIR)/arm-linux/include/ src/drivers/*.c
 	arm-linux-as -mfpu=softfpa -mthumb-interwork -o lib/libavos.o src/hardware/*.s
 	mv *.o lib
 
 libavos:
-	arm-linux-gcc -Wa,-R -c -fno-zero-initialized-in-bss -Iinclude/ src/fonts/*.c
-	arm-linux-gcc -Wa,-R -c -fno-zero-initialized-in-bss -Iinclude/ src/drivers/*.c
+	arm-linux-gcc $(GCCFLAG)  -c -Iinclude/ src/fonts/*.c
+	arm-linux-gcc $(GCCFLAG)  -c -Iinclude/ src/drivers/*.c
 	arm-linux-as -mfpu=softfpa -o lib/libavos.o src/hardware/*.s
 	mv *.o lib
-    
+
 .PHONY: clean
 clean:
 	rm -f *~ *.o *.elf *.bin

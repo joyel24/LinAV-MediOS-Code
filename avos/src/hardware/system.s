@@ -47,7 +47,17 @@ srmc:   ldr r2, [r0]
         ldr r1, =0x00400000
         add r0, r1
         bx r0                   @ Jump back, but at higher address...
-        
+
+.globl mvStackA
+mvStackA:
+        switchThumb
+.globl mvStack
+.thumb_func
+mvStack:
+		ldr r0, =0x03400000
+		sub r0, #4
+		mov sp, r0
+		bx lr
         .arm
         .ltorg
 

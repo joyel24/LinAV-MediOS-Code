@@ -42,12 +42,12 @@ typedef unsigned long u32;
 struct fatent {
 	unsigned char cache[BUFFER_SIZE];
     int cacheoffset;
-    int fatoffset;
 	int sectorNumber;
 	int startCluster;
 	int curCluster;
-	int nxtCluster;
+	int prevCluster;
 	bool eof_disk;
+	int dirCluster;
 };
 
 struct dirEntry {
@@ -66,27 +66,64 @@ struct dirEntry {
     int size;
 };                              // SOFTWARE - 4B 30 90 2F [08 00] 93 1A 4B 30 [83 0E] <00 00 00 00>
                                 // reading cluster 00080e81
+
+struct fatCache {
+	int fatBuffer[128];
+	int fatBufferLba;
+};
+
 #include "dirent.h"
 
-extern int getRootClu();
 extern int fatInit(u32 lba);
+
 extern int fatReadCluster(int cluster, char* buffer);
 extern int fatTrace(int cluster);
-extern int fatReadFile(int cluster, char* buffer);
-extern int fatDirFilter(struct dirEntry dirIn[], struct dirEntry dirOut[], int num);
 
+extern int fatNxtEntry(struct fatent * fat_ent,struct dirEntry * entry);
+extern int fatCreateEntry(struct fatent * fat_ent,struct dirent* ent,const char * name);
+extern int fatRemoveEntry(struct fatent * fat_ent);
 extern int fatValidateEntry(struct dirEntry * entry);
+extern int fatUpdateEntry(struct dirent * ent);
+
+extern void fatGetData(struct dirent *theent,struct dirEntry * entry);
+
 extern void fatOpendir(struct fatent * fat_ent,int startCluster);
-extern int fatNxtSector(struct fatent * fat_ent);
 
-extern void fatGetName(char * name,struct dirEntry * entry);
-extern void fatGetEntryName(char * entryName,struct dirEntry * entry);
-extern void fatGetExt(char * ext,struct dirEntry * entry);
-extern int fatGetAtr(struct dirEntry * entry);
-extern int fatGetstrtClu(struct dirEntry * entry);
-extern int fatGetSize(struct dirEntry * entry);
+extern int getClusterSize();
 
-int fatloadFile(char * fileN);
+extern int fatTruncate(struct fatent * fat_ent,bool total_remove);
 
+//****************************************
+//* internal function
+
+extern int writeFatCache(struct fatCache * cache);
+extern int updateFatCache(int cluster,struct fatCache * cache,int mode);
+
+extern int fatRWSector(struct fatent * fat_ent,bool write);
+extern int fatNxtSector(struct fatent * fat_ent,bool write);
+extern int fatPrevSector(struct fatent * fat_ent);
+
+extern int getNxtFreeCluster(int cluster);
+extern int addNewCluster(int cluster);
+
+extern int fatRWEntry(struct fatent * fat_ent,struct dirEntry * entry,bool write);
+extern int fatPrevEntry(struct fatent * fat_ent);
+extern int fatFindEntry(struct fatent * fat_ent,struct dirent * ent,struct dirEntry * entry);
+
+extern void createDosName(char *name, char *fatName);
+extern char chkChar(char c);
+
+extern int fatCleanCluster(int cluster);
+
+extern int chkFAT();
+
+extern void printFat();
+
+///////////////////////////////////////////////////////////////////////////////////
+// from initial fat.c
+extern int bootRead(int addr, int n);
+extern int fatDirFilter(struct dirEntry dirIn[], struct dirEntry dirOut[], int n);
+extern int fatReadFile(int cluster, char* buffer);
+extern int getRootClu();
 
 #endif
