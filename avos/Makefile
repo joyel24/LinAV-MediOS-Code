@@ -13,6 +13,6 @@
 
 test: test.c
 	arm-elf-gcc -c -mthumb -mcallee-super-interworking -nostdlib -nodefaultlibs -Iinclude test.c
-	arm-elf-ld -Ttext 0x03000000 -e main -o test.elf test.o lib/libavos.o
+	arm-elf-ld -Ttext 0x03000000 -e main -o test.elf test.o gfx/fonts/*.o lib/libavos.o
 	arm-elf-objcopy -O binary test.elf test.bin
 	rm -f test.elf test.o

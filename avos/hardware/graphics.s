@@ -167,7 +167,6 @@ graphicsString:
         bl graphicsStringR
         pop {r4, r5, r6, r7, pc}
         
-        
 
 graphicsStringR:
         push {r1, r2, r7, lr}        
@@ -177,13 +176,14 @@ gsloop: push {r6}
         ldrb r6, [r7]
         cmp r6, #0
          beq gsdone
-       
+
         lsl r6, #2
         ldr r6, [r4, r6]
+        cmp r6, #0
+         beq gsnochr
         str r6, [r3, #GRAPHICS_BUFFER_OFFSET]
-
         bl graphicsSprite
-
+gsnochr:
         pop {r6}
         add r1, r5
         add r2, r6
@@ -192,7 +192,7 @@ gsloop: push {r6}
         b gsloop
 gsdone: pop {r6}
         pop {r1, r2, r7, pc}
-        
+
         .include "graphics1.s"
         .include "graphics2.s"
         .include "graphics4.s"
