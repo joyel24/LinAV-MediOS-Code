@@ -35,7 +35,7 @@ extern struct plugin edit_box_plugin;
 needFont(std6x9);
 needFont(std7x13);
 
-char* strEdit; // updated in editBoxEvtHandler
+char strEdit[MAX_EDIT_CHARS]; // updated in editBoxEvtHandler
 int current_ascii = ASCII_DEFAULT;
 int xEditPos = 0;
 int yEditPos = 0;
@@ -171,8 +171,12 @@ void editBoxEvtHandler(int evt)
             break;
 
         case BTN_ON:
+            stopEditBoxLoop=1;
+            break;
+
         case BTN_OFF:
             stopEditBoxLoop=1;
+            memset(strEdit, 0, sizeof(strEdit));
             break;
 
         default:
@@ -249,7 +253,7 @@ char* editBox(unsigned char* caption, unsigned char* text, int text_color, int b
     edit_frame_color  = frame_color;
     edit_cursor_color = cursor_color;
 
-    strEdit = text;
+    strcpy(strEdit,text);
 
     if(strlen(strEdit) > 0)
     {

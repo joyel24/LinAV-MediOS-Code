@@ -23,6 +23,7 @@
 #include "cops.h"
 #include "avevents.h"
 #include "msgBox.h"
+#include "editBox.h"
 
 #define    false 0
 #define    true  1
@@ -98,7 +99,8 @@ void do_on(void * data)
 void do_right(void * data)
 {
     char tmp[200];
-    char text[256];
+    char text[MAX_EDIT_CHARS];
+    char* ptext = NULL;
     int reload = false;
     int buttonResult = 0;
 
@@ -129,14 +131,20 @@ void do_right(void * data)
     }
     else if(strcmp((char*)data, "Rename") == 0)
     {
-        strcpy(text,cops->editBox("Rename this file",list[pos+nselect].name, COLOR_BLACK,COLOR_WHITE,COLOR_BLACK,COLOR_RED));
-//        cops->msgBox("Delete Warning", text, MSGBOX_TYPE_OKCANCEL, MSGBOX_ICON_WARNING);
+        ptext = cops->editBox("Rename this file",list[pos+nselect].name, COLOR_BLACK,COLOR_WHITE,COLOR_BLACK,COLOR_RED);
+        if(ptext != 0)
+            strcpy(text,ptext);
+//        cops->msgBox("Test", text, MSGBOX_TYPE_OKCANCEL, MSGBOX_ICON_WARNING);
     }
     else if(strcmp((char*)data, "New Dir") == 0)
     {
-        strcpy(text,cops->editBox("Enter new dir name","", COLOR_BLACK,COLOR_WHITE,COLOR_BLACK,COLOR_RED));
-        mkdir(text, S_IRWXU);
-        reload = true;
+        ptext = cops->editBox("Enter new dir name","", COLOR_BLACK,COLOR_WHITE,COLOR_BLACK,COLOR_RED);
+        if(ptext != 0)
+        {
+            strcpy(text,ptext);
+            mkdir(text, S_IRWXU);
+            reload = true;
+        }
     }
 
     if(reload == true)
