@@ -52,6 +52,7 @@ int main() {
     graphicsString(&screenBitmap, 0, 14, &sprite8_13, std8x13_, 9, 0,
                 masVer);
 
+    c = masWriteCodecReg(0x08, 0x8000);     // MONO input
     c = masWriteCodecReg(0x0e, 0x0000);
     c = masWriteCodecReg(0x11, 0x0000);     // Balance = center
     stringPutHex(masReg, c, 8);
