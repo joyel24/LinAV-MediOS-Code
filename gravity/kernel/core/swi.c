@@ -16,6 +16,7 @@
 #include <kernel/usb_fw.h>
 #include <kernel/bat_power.h>
 #include <kernel/sound.h>
+#include <kernel/evt.h>
 
 extern int gfx_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
 extern int fs_swi(int cmd,void * data1, void * data2);
@@ -358,8 +359,21 @@ __IRAM_CODE int kcswi_handler (
         case nAPI_DSP:
             dsp_ctl((int)nParam1,(void *)nParam2);
             return 0;
-            
-
+        
+        case nAPI_EVT:
+            switch((int)nParam1)
+            {
+                case 0x000:  /* get handling */
+                    *(unsigned int *)nParam2=(unsigned int)get_evt_handling();
+                    break;
+                case 0x001: /* rm handling */
+                    rm_evt_handling((struct evt_pipes_s *)nParam2);
+                    break;
+                case 0x002: /* wait evt */
+                    API_PIPE_RECV(&((struct evt_pipes_s *)nParam2)->evt_pipe, nParam3 , 1);
+                    break;                    
+            }
+            return 0;
       default:
          printk("Unknown SWI call %d\n", nCmd);
          return 0;

@@ -69,17 +69,23 @@ int        do_api_power         (int cmd);
 ERROR_CODE API_MIXER            (int cmd, int dir, void * arg);
 ERROR_CODE API_DSP              (int cmd, void * arg);
 
+ERROR_CODE API_EVT              (int cmd, void * arg, void * arg2);
+
 void       printf               (char *fmt, ...);
 
 void *  malloc(long size);
 void    free(void *buff);
+
+unsigned int register_evt(void);
+void unregister_evt(unsigned int arg);
+int wait_evt(unsigned int arg);
 
 #define  getTime(time_data)     API_TIME(0x000,time_data)
 #define  setTime(time_data)     API_TIME(0x001,time_data)
 
 #define  usbIsConnected()       do_api_power(0x000)
 #define  FWIsConnected()        do_api_power(0x001)
-#define  powerConnected()       do_api_power(0x001)
+#define  powerConnected()       do_api_power(0x002)
 #define  getBatLevel()          do_api_power(0x001)
 
 //ERROR_CODE getTime              (struct av_tm * time_data);

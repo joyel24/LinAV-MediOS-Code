@@ -21,11 +21,11 @@
 #include <kernel/timer.h>
 #include <kernel/hw_chk.h>
 #include <kernel/ata.h>
-//#include <evt.h>
+#include <kernel/evt.h>
 
 #include <kernel/bat_power.h>
 
-/*
+
 int kpowerConnected(void)
 {
     int val=inw(POWER_STATE);
@@ -35,7 +35,7 @@ int kpowerConnected(void)
 int kgetBatLevel(void)
 {
     return tsc2003getVal(CMD_BAT0|INTERNAL_ON);
-}*/
+}
 
 int lcd_state=1;
 int lcd_bright=10;
@@ -78,18 +78,6 @@ int lcd_get_state(void)
 {
     return lcd_state;
 }
-
-/*
-void lcd_off(void)
-{
-    lcd_set_state(0);    
-}
-
-void lcd_on(void)
-{
-    lcd_set_state(1);    
-}
-*/
 
 void lcd_launchTimer(void)
 {
@@ -220,7 +208,7 @@ void chk_DC_connector(void)
         /* change the timers */
         chgTimer();
            
-//        send_evt(EVT_PWR);
+        send_evt(EVT_PWR);
         printk("DC connector %s\n",kpwrState==1?"plugged":"unplugged");
 
     }

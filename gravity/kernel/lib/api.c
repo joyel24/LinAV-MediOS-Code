@@ -76,6 +76,8 @@ ERROR_CODE API_FILE             (int cmd,void * data1,void * data2)             
 ERROR_CODE API_MIXER            (int cmd, int dir, void * arg)                                  { swi_call(nAPI_MIXER); }
 ERROR_CODE API_DSP              (int cmd, void * arg)                                           { swi_call(nAPI_DSP); }
 
+ERROR_CODE API_EVT              (int cmd, void * arg, void * arg2)                              { swi_call(nAPI_EVT); }
+
 void printf(char *fmt, ...)
 {
     va_list ap;
@@ -104,3 +106,21 @@ int do_api_power (int cmd)
     return res;
 }
 
+unsigned int register_evt(void)
+{
+    unsigned int val;
+    API_EVT(0x000,&val,NULL);
+    return val;
+}
+
+void unregister_evt(unsigned int arg)
+{
+    API_EVT(0x001,arg,NULL);
+}
+
+int wait_evt(unsigned int arg)
+{
+    int val=0;
+    API_EVT(0x002,arg,&val);
+    return val;
+}

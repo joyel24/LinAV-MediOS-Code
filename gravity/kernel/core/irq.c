@@ -29,35 +29,30 @@ __IRAM_DATA int clf_var=0;
 __IRAM_DATA struct irq_data_s irq_table[] = {
     {
         irq     : IRQ_MAS_DATA,
-        enable  : 0,
         action  : dsp_interrupt,
         name    : "MAS",
         nb_irq  : 0
     },
     {
         irq     : IRQ_TMR_0,
-        enable  : 0,
         action  : main_timer_action,
         name    : "Tick_timer",
         nb_irq  : 0
     },
     {
         irq     : IRQ_UART0,
-        enable  : 0,
         action  : uart_intr_action,
         name    : "UART0 intr",
         nb_irq  : 0
     },
     {
         irq     : IRQ_UART1,
-        enable  : 0,
         action  : uart_intr_action,
         name    : "UART1 intr",
         nb_irq  : 0
     },
     {
         irq     : -1,
-        enable  : 0,
         action  : NULL,
         name    : NULL,
         nb_irq  : 0
@@ -162,6 +157,14 @@ __IRAM_CODE void enable_irq(int irq)
     }
 }
 
+__IRAM_CODE int irq_state(int irq)
+{
+    if(irq>=0 && irq<NR_IRQS)
+    {
+        return (irq_enabled(irq)!=0);
+    }
+    return 0;
+}
 
 
 void print_irq(void)
@@ -172,7 +175,7 @@ void print_irq(void)
     {
         printk("%d: irq:%d %s, %s (%d irqs)\n",
             i,irq_table[i].irq,irq_table[i].name!=NULL?irq_table[i].name:"UNDEF",
-            irq_table[i].enable==1?"enable":"disable",
+            irq_enabled(irq_table[i].irq)?"enable":"disable",
             irq_table[i].nb_irq);
     }
 }

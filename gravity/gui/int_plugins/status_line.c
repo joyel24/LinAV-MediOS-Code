@@ -18,14 +18,9 @@
 #include <sys_def/colordef.h>
 #include <graphics.h>
 
-/*
-#include <rtc.h>
-#include <bat_power.h>
-#include <fm_remote.h>
-#include <usb_fw.h>
-#include <cf.h>*/
 
 #include <api.h>
+#include <evt.h>
 
 #include <gui/avwm_version.h>
 #include <gui/icons.h>
@@ -212,47 +207,53 @@ void drawStatusLine(void)
     drawLogo();
 }
 
-#if 0
 /* events */
-void statusEvtHandler(int evt)
+void statusEvtHandler(int evt_buffer)
 {
-    switch (evt) {
-        case EVT_REDRAW:
-            drawStatusLine();
-            break;
-        case EVT_TIMER:
-            drawTime();
-            if(batteryRefresh == 0)
-                drawBat();
-            if(batteryRefresh < batteryRefreshValue)
-                batteryRefresh++;
-            else
-                batteryRefresh = 0;
-            break;
-        case EVT_PWR:
-            pwrState=powerConnected();
-            batteryRefresh = 0;
-            drawStatus();
-            break;
-        case EVT_USB:
-            usbState=usbIsConnected();
-            drawStatus();
-            break;
-        case EVT_FW_EXT:
-            fwExtState=FWIsConnected();
-            drawStatus();
-            break;
-        case EVT_CF_IN:
-        case EVT_CF_OUT:
-            cfState=cfIsConnected();
-            drawStatus();
-            break;
+    int evt;
+    while(1)
+    {
+        evt=wait_evt(evt_buffer);
         
+        //printf("get evt: %x\n",evt);
+        
+        switch (evt) {
+            case EVT_REDRAW:
+                drawStatusLine();
+                break;
+            case EVT_TIMER:
+                drawTime();
+                if(batteryRefresh == 0)
+                    drawBat();
+                if(batteryRefresh < batteryRefreshValue)
+                    batteryRefresh++;
+                else
+                    batteryRefresh = 0;
+                break;
+            case EVT_PWR:
+                pwrState=powerConnected();
+                batteryRefresh = 0;
+                drawStatus();
+                break;
+            case EVT_USB:
+                usbState=usbIsConnected();
+                drawStatus();
+                break;
+            case EVT_FW_EXT:
+                fwExtState=FWIsConnected();
+                drawStatus();
+                break;
+ /*           case EVT_CF_IN:
+            case EVT_CF_OUT:
+                cfState=cfIsConnected();
+                drawStatus();
+                break;*/
+            
+        }
     }
 }
 
-struct evt_listener_s status_line_listener;
-#endif
+unsigned int status_evt_buffer;
 
 void ini_status_bar(void)
 {
@@ -270,9 +271,14 @@ void ini_status_bar(void)
     /*cfState=cfIsConnected(); */
     cfState=0;
     
-    #if 0
+
     /* register to evt loop */
-    status_line_listener.action=statusEvtHandler;
-    add_evt_listener(&status_line_listener);
-    #endif
+    /* evt handling */
+    status_evt_buffer=register_evt();
+    if(!status_evt_buffer)
+    {
+        printf("[ini_status_bar] can't register to evt\n");
+        return;
+    }
+    API_TASK_CREATE (statusEvtHandler, status_evt_buffer, NULL);
 }

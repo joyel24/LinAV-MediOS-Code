@@ -12,7 +12,7 @@
 #include <kernel/hw_chk.h>
 #include <kernel/usb_fw.h>
 #include <kernel/kernel.h>
-//#include <evt.h>
+#include <kernel/evt.h>
 
 int kusb_state,kfw_state;
 struct hw_chk_s usb_fw_chker;
@@ -27,7 +27,7 @@ void chk_usb_fw(void)
     {
         kusb_state=new_state;
         printk("[USB FW] usb %s\n",kusb_state==1?"connected":"disconnected");
-        //send_evt(EVT_USB);
+        send_evt(EVT_USB);
     }
     
     new_state=kFWIsConnected();
@@ -35,7 +35,7 @@ void chk_usb_fw(void)
     {
         kfw_state=new_state;
         printk("[USB FW] FW %s\n",kfw_state==1?"connected":"disconnected");
-        //send_evt(EVT_FW_EXT);
+        send_evt(EVT_FW_EXT);
     }
 }
 /*

@@ -33,6 +33,7 @@
 #include <kernel/ext_module.h>
 #include <kernel/sound.h>
 #include <kernel/cmd_line.h>
+#include <kernel/evt.h>
 
 
 #include <kernel/threads.h>
@@ -149,6 +150,8 @@ void kernel_startup_thread (void)
 
     init_cmd_line();
 
+    init_evt();
+    
     init_buttons();
     init_power();
     init_rtc();

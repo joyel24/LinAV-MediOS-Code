@@ -49,7 +49,7 @@ void avwm(void)
     
     ini_status_bar();
     drawStatusLine(); /* should be done via EVT_REDRAW */
-    
+#if 0
     fd=fopen("/file.mp3",O_RDONLY);
     if(fd<0)
     {
@@ -102,7 +102,7 @@ void avwm(void)
             }
         }
     }
-    
+#endif    
     
     
     while(1) /*nothing*/;

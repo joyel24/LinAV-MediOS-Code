@@ -29,12 +29,10 @@
 #define HD_FREQ_DEFAULT_0    10 /* 10s timer */
 #define HD_FREQ_DEFAULT_1    10 /* 10s timer */
 
-/*
+
 int kpowerConnected(void);
 int kgetBatLevel(void);
-*/
-#define kpowerConnected()   (inw(POWER_STATE) & 0x20)
-#define kgetBatLevel()      tsc2003getVal(CMD_BAT0|INTERNAL_ON)
+
 
 #define lcd_off()           lcd_set_state(0)
 #define lcd_on()            lcd_set_state(1)

@@ -169,6 +169,7 @@ void __clf(void);
 #define     mask_irq(IRQ)      ({ unsigned int __addr=INTC_IRQ_ENABLE(IRQ); outw(inw(__addr)&(~(1<<INTC_IRQ_SHIFT(IRQ))),__addr); })
 #define     unmask_irq(IRQ)    ({ unsigned int __addr=INTC_IRQ_ENABLE(IRQ); outw(inw(__addr)|(1<<INTC_IRQ_SHIFT(IRQ)),__addr); })
 #define     mask_ack_irq(IRQ)  ({ mask_irq(IRQ); irq_ack(IRQ); })
+#define     irq_enabled(IRQ)   ({ int __val; __val=(inw(INTC_IRQ_ENABLE(IRQ)) & (1<<INTC_IRQ_SHIFT(IRQ)))!=0; __val;})
 #else
 extern void mask_irq(unsigned int irq);
 extern void unmask_irq(unsigned int irq);
@@ -177,7 +178,6 @@ extern void mask_ack_irq(unsigned int irq);
 
 struct irq_data_s {
     int irq;
-    int enable;
     void (*action)(int irqnr);
     char * name;
     unsigned int nb_irq;

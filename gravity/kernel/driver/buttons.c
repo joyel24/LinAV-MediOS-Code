@@ -38,6 +38,8 @@ __IRAM_DATA int nb_debug_switch;
 
 extern int inHold;
 
+int old_state;
+
 __IRAM_DATA struct hw_chk_s btn_chker;
 
 __IRAM_CODE void chk_button(void)
@@ -50,6 +52,14 @@ __IRAM_CODE void chk_button(void)
     /* ON, OFF keys */
     if(gio_is_set(GIO_ON_BTN))  val |= (0x1<<8);
     if(gio_is_set(GIO_OFF_BTN)) val |= (0x1<<9);
+    
+    if(old_state==0);
+        old_state=val;
+    
+    if(val==old_state && val==0x3FF)
+        return;
+    
+    old_state=val;
     
 /*    val = (~val)&0x3FF;
     
@@ -161,6 +171,8 @@ void init_buttons(void)
     mx_press = MAX_PRESSED;
     nb_off_press=0;
     nb_debug_switch=0;
+    
+    old_state=0;
     
     for(btn=0;btn<NB_BUTTONS;btn++)
         nb_pressed[btn]=0;

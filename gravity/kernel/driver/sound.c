@@ -65,7 +65,7 @@ __IRAM_CODE void dsp_interrupt(int irq)
    int send;
    char * buffer;
    if(playing)
-   {       
+   {     
        /*if(data->buffer_write<data->buffer_read)*/
             toSend=data->buffer_len-data->buffer_read;
        /* else
@@ -81,9 +81,12 @@ __IRAM_CODE void dsp_interrupt(int irq)
             toSend=data->buffer_write-data->buffer_read;
             buffer=data->buffer;
             data->buffer_read+=SEND_TO_MAS(buffer,toSend); */
-            disable_irq(IRQ_MAS_DATA);
+            /*disable_irq(IRQ_MAS_DATA);
             printk("end of playback\n");
-            playing=0;
+            playing=0;*/
+            printk("loop\n");
+            data->buffer_read=0;
+            dsp_interrupt(0); 
         }
     }
 }
