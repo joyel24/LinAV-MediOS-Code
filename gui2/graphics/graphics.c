@@ -564,11 +564,15 @@ void putS(int color, int bg_color, int x, int y, char *s)
 {
     FONT_ID font=default_font;
     int len=strlen(s);
-    int h,w;
+    int h=0,w=0;
     char c;
 
     tstXY(x,y);
 
+#ifndef AV_SCREEN
+    getStringS(s,&w,&h);
+#endif
+    
     if(font->width*len>SCREEN_WIDTH)
     {
         s[SCREEN_WIDTH/font->width]=0;
@@ -581,11 +585,8 @@ void putS(int color, int bg_color, int x, int y, char *s)
     {
         s[SCREEN_WIDTH/font->width]=c;
     }
-    
-#ifndef AV_SCREEN
-    getStringS(s,&w,&h);
+  
     LCD_UPDATE(x,y,w,h)
-#endif
 }
 
 int getStringS(const unsigned char *str, int *w, int *h)

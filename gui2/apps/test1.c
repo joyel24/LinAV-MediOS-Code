@@ -5,13 +5,18 @@
 
 /* premier programme de test */
 
+needFont(std8x13);
+
 int main(int argc,char ** argv)
 {
     int evt;
     char tmp[10];
     
     ini_graphics();
-
+    
+    setFont(std8x13);
+    
+    
     clearScreen(COLOR_BLACK);
     
  while(1)
