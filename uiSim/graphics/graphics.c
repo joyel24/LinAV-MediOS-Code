@@ -34,8 +34,7 @@ char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
 
   Display* display;				/* display */	
   Window window;				/* Create a window */
-  GC gc;					/* Graphic Context */
-  
+  GC gc; 
 
 struct graphicsBuffer BITMAP_1 = {
     offset             : 0,
@@ -154,22 +153,28 @@ int ini_graphics()
          
   return 0;
 }
-
+    
 void drawPixBuffer(char color, int x, int y)
 {
-    int blackColor = BlackPixel(display, DefaultScreen(display));
-    int whiteColor = WhitePixel(display, DefaultScreen(display));
+    int gui_pal[256][3];
+    int r,g,b,stockcolor;
+    int screen;
+    XColor c;
+    Colormap pal = DefaultColormap(display,screen);
+    screen = DefaultScreen(display);
+    gc = DefaultGC(display, screen);
     
-    if(color== 0)
-    {
-        XSetForeground(display, gc, whiteColor);
-        XDrawPoint(display, window, gc, x, y);
-    }
-    else
-    {
-        XSetForeground(display, gc, blackColor);
-        XDrawPoint(display, window, gc, x, y);
-    }
+    stockcolor = color;
+    r = gui_pal[stockcolor][1];
+    g = gui_pal[stockcolor][2];
+    b = gui_pal[stockcolor][3];
+    c.red = r;
+    c.green = g;
+    c.blue = b;
+    
+    XAllocColor(display, pal, &c);
+    XSetForeground(display, gc, c.pixel);
+    XDrawPoint(display, window, gc, x, y);
 }
 	 
 
@@ -184,7 +189,7 @@ void lcd_update()
 
 void close_graphics()
 {
-    XCloseDisplay(dpy);
+    XCloseDisplay(display);
 }
 
 GC_ID createGC(int vplane)

@@ -25,6 +25,9 @@ int nxtEvent(void)
         lcd_update(); 
       break;
     }
+    
+    lcd_update();
+    
     return 0; 
   }  
 
