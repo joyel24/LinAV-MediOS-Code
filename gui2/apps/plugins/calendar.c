@@ -116,6 +116,7 @@ int eventHandler(int evt)
 			break;
 
 	case BTN_OFF:
+	case EVT_QUIT:
 		stop=1;
 		break;
 
@@ -126,6 +127,11 @@ int eventHandler(int evt)
 	case BTN_UP:
 
 		prev_day(&shown, 1);
+		break;
+
+	case EVT_REDRAW:
+      ClearCalendar();
+	   calendar_draw();
 		break;
 	}
 }
@@ -219,7 +225,7 @@ static void calendar_draw()
                         };
     ClearCalendar();
 
-	 cops->fillRect(WHITE,XCALENDARPOS, YCALENDARPOS, LCD_WIDTH-XCALENDARPOS, 2*WeekSpace);
+	 cops->fillRect(WHITE,XCALENDARPOS, YCALENDARPOS, 170, 2*WeekSpace);
 
     snprintf(buffer,9,"%s %04d",Monthname[shown.mon-1],shown.year);
 	 cops->putS(BLACK, WHITE, XCALENDARPOS+2, YCALENDARPOS+1,buffer);
