@@ -42,13 +42,17 @@ mloop:
         cmp r0, r1
         beq mloop               @ no input!
 
-        mov r1, r0
-        ldr r0, =msg1h
-        callThumb r4, hex2T
+        callThumb r2, visorConvertToAscii
+        cmp r0, #0
+         beq mloop               @ key up or something prolly?
+        
+@        mov r1, r0
+@        ldr r0, =msg1h
+@        callThumb r4, hex2T
 
-        callThumb1 r4, terminalPutsT, msg1
+@        callThumb1 r4, terminalPutsT, msg1
 
-@        callThumb r4, terminalPutchT
+        callThumb r4, terminalPutchT
         
         b mloop
 
@@ -60,3 +64,4 @@ msg1h:  .asciz "xx\n"
 .include "../includes/uart.S"
 .include "../includes/terminal.S"
 .include "../includes/hex.S"
+.include "../includes/visorKeyboard.S"
