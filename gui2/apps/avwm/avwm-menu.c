@@ -94,8 +94,7 @@ int  menuStatus(void)  {return menu_plugin.allowed;}
 extern int stopWM;
 void do_off(void * data)
 {
-    menuEvtHandler(BTN_LEFT); /* send a Btn left evt to simulate an up */
-    
+    menuEvtHandler(BTN_LEFT); /* send a Btn left evt to simulate an up */    
 }
 
 void do_on(void * data)
