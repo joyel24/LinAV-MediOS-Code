@@ -13,7 +13,7 @@ LDFLAGS = -L/home/thomas/Av320/arm-tools/inst_uclibc/toolchain/gcc-3.3.x/toolcha
 
 TARGET = gravity
 
-SUBDIRS = init core lib driver
+SUBDIRS = init core lib driver gfx
 
 all: builddir subdirs $(TARGET) 
 

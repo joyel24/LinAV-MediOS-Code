@@ -12,6 +12,6 @@
 
 #define DEBUG_UART              0
 
-//#define USE_DEBUG_ON_SCREEN
+#define USE_DEBUG_ON_SCREEN     1
 
 #endif

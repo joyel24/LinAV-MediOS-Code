@@ -44,7 +44,9 @@ void kernel_start(void)
     init_malloc((void*)MALLOC_START,MALLOC_SIZE);   
     
     ata_stop_HD(); /* to allow nice stop of HD in case of crash */
-            
+    
+    ini_graphics();
+    ini_debugOnScreen();
     /* print banner on uart */ 
     printk("AMOS %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);    
     printk("Initial SP: %08x, kernel end: %08x Malloc start: %08x, size: %08x\n",get_sp(),

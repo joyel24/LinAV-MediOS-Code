@@ -18,8 +18,8 @@
 #include <kernel/uart.h>
 
 #ifdef USE_DEBUG_ON_SCREEN
-#include <graphics.h>
-#include <colordef.h>
+#include <kernel/graphics.h>
+#include <kernel/colordef.h>
 
 #define MAX_COL      78
 #define MAX_LINE     38
