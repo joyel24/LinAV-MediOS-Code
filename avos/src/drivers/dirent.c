@@ -93,7 +93,7 @@ struct dirent* readdir(int dd)
 			}
 			pos=BUFFER_SIZE-fat_ent->cacheoffset;
 			count=FAT_ENTRY_SIZE-pos;
-			fatfatNxtSector(fat_ent);
+			fatNxtSector(fat_ent);
 		}
 
 		if(count>0)

@@ -88,7 +88,7 @@ int fopen(const char* pathname)
 	file->fat_ent.eof_disk=false;
 	file->eof=false;
 
-	fatfatNxtSector(&file->fat_ent);
+	fatNxtSector(&file->fat_ent);
 
     return fd;
 }
@@ -152,7 +152,7 @@ int fread(int fd, void* buf, int count)
 				file->eof=true;
 				return pos;
 			}
-			fatfatNxtSector(fat_ent);
+			fatNxtSector(fat_ent);
 		}
 
 		if(fat_ent->cacheoffset+count <=BUFFER_SIZE && count !=0)
@@ -194,17 +194,17 @@ int mySetPosF(int fd,long int pos)
 	{
 		file->fat_ent.curCluster = 0;
 		file->count=0;
-		fatfatNxtSector(&file->fat_ent);
+		fatNxtSector(&file->fat_ent);
 	}
 	else
 	{
 		file->count+=BUFFER_SIZE-fat_ent->cacheoffset;
-		fatfatNxtSector(&file->fat_ent);
+		fatNxtSector(&file->fat_ent);
 	}
 
 	while((file->count + BUFFER_SIZE) < pos)
 	{
-		fatfatNxtSector(&file->fat_ent);
+		fatNxtSector(&file->fat_ent);
 		file->count +=BUFFER_SIZE;
 	}
 

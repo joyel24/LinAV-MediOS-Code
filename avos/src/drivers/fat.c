@@ -119,21 +119,20 @@ int fatTrace(int cluster) {
     int lba, c;
     lba = LBAFat1 + ((cluster*4) >> 9);   // 4 - 32bit, 9-512 byte sectors.
 
-    stringPutHex(hex8, lba, 8);
-    uartOuts("[fat.c] fatTrace.lba = ");
-    uartOuts(hex8);
-    uartOuts("\n");
-    
+    debug("[fat.c] fatTrace ini:lba = %x, cluster= %x\n",lba,cluster);
+
     if (fatCacheLBA != lba) {
         c = ataReadSectors(lba, 1, (char*) fatCache);    
         if (c!=ATA_ERROR_NONE) return c;    // Error!
         fatCacheLBA = lba;
     }
+
+	debug("[fat.c] fatTrace nxt cluster= %x\n",fatCache[cluster & 127]);
     
     return fatCache[cluster & 127];
 }
 
-int fatfatNxtSector(struct fatent * fat_ent)
+int fatNxtSector(struct fatent * fat_ent)
 {
 
 	if(fat_ent->curCluster==0) // we start a new fat_ent
@@ -250,7 +249,7 @@ void fatOpendir(struct fatent * fat_ent,int startCluster)
 	fat_ent->cacheoffset=0;
 	fat_ent->eof_disk=false;
 
-	fatfatNxtSector(fat_ent);
+	fatNxtSector(fat_ent);
 }
 
 
@@ -285,7 +284,9 @@ int fatloadFile(char * fileN)
 		char * buffer=(char*) 0x03000000;
 
 		while((fread(curFile,&buffer[offset],secPerClu*SECTOR_SIZE))>0)
+		{
 			offset+=secPerClu*SECTOR_SIZE;
+		}
 		fclose(curFile);
 		return 1;
 	}
