@@ -13,11 +13,35 @@
 @
 @ void ataSelectHDD()
 @ void ataSelectMemoryCard()
+@ void ataPowerUpHDD()
+@ void ataPowerDownHDD()
+@ u32 ataStatus()
+@ u32 ataWaitForReady()
 
 .ifndef ataInc
 ataInc = 1
 
 .text
+
+ataWaitForReadyTO           =   0x200000
+
+ataRegSelectSource          =   0x02600000          @ JBMM = 0x02400000
+ataRegPowerUpHDD            =   0x02600300          @ JBMM = 0x02400200
+ataValPowerUpHDD            =   0x0a                @ JBMM = 0x04
+
+ataRegData                  =   0x02400000          @ JBMM = 0x04000800
+ataRegError                 =   0x02400080          @ JBMM = 0x04000900
+ataRegNSector               =   0x02400100          @ JBMM = 0x04000a00
+ataRegSector                =   0x02400180          @ JBMM = 0x04000b00
+ataRegLCyl                  =   0x02400200          @ JBMM = 0x04000c00
+ataRegHCyl                  =   0x02400280          @ JBMM = 0x04000d00
+ataRegSelect                =   0x02400300          @ JBMM = 0x04000e00
+ataRegStatus                =   0x02400340          @ JBMM = 0x04000f00
+ataRegCommand               =   0x02400380          @ JBMM = 0x04000f00
+
+ataCommand_READ_SECTORS     =   0x20
+ataCommand_WRITE_SECTORS    =   0x30
+ataCommand_IDENTIFY         =   0xec
 
 ataStatus_BSY               =   0x80
 ataStatus_RDY               =   0x40
@@ -30,15 +54,85 @@ ataSelectLBA                =   0x40
         .thumb
 
 @ ------------------------------------------------------------------------------
+@ ataWaitForReady()
+@   Waits until Ready ATA is...
+@   returns -1 = Timeout
+.globl ataWaitForReady
+.thumb_func
+
+ataWaitForReady:
+        push {r1, r2, r3, lr}
+        ldr r3, =ataWaitForReadyTO
+ataNotR:sub r3, #1
+        cmp r3, #0
+         beq ataTO1
+        mov r0, #0
+        ldr r1, =ataRegStatus
+        ldrb r0, [r1]
+        mov r2, #ataStatus_BSY
+        tst r0, r2
+         bne ataNotR                @ BSY Set! Can't do much now
+        mov r2, #ataStatus_RDY
+        tst r0, r2
+         beq ataNotR                @ RDY Clear!
+        mov r0, #0
+        pop {r1, r2, r3, pc}
+ataTO1: mov r0, #0
+        sub r0, #1
+        pop {r1, r2, r3, pc}
+        
+@ ------------------------------------------------------------------------------
+@ ataStatus()
+@   Reads the current ATA status
+.globl ataStatus
+.thumb_func
+
+ataStatus:
+        push {r1, lr}
+        mov r0, #0
+        ldr r1, =ataRegStatus
+        ldrb r0, [r1]
+        pop {r1, pc}
+        
+        
+@ ------------------------------------------------------------------------------
+@ ataPowerUpHDD()
+@   Supplys power to the HDD
+.globl ataPowerUpHDD
+.thumb_func
+
+ataPowerUpHDD:
+        push {r0, r1, lr}
+        mov r0, #ataValPowerUpHDD
+        ldr r1, =ataRegPowerUpHDD
+        strh r0, [r1]
+        pop {r0, r1, pc}
+
+
+@ ------------------------------------------------------------------------------
+@ ataPowerDownHDD()
+@   Supplys no power to the HDD
+.globl ataPowerDownHDD
+.thumb_func
+
+ataPowerDownHDD:
+        push {r0, r1, lr}
+        mov r0, #0
+        ldr r1, =ataRegPowerUpHDD
+        strh r0, [r1]
+        pop {r0, r1, pc}
+        
+        
+@ ------------------------------------------------------------------------------
 @ ataSelectHDD()
 @   Selects the HDD for usage
 .globl ataSelectHDD
 .thumb_func
 
 ataSelectHDD:
-        pop {r0, r1, pc}
+        push {r0, r1, lr}
         mov r0, #0
-        ldr r1, =0x02600000
+        ldr r1, =ataRegSelectSource
         strh r0, [r1]       @ Not sure why its done 5 times?
         strh r0, [r1]
         strh r0, [r1]
@@ -54,9 +148,9 @@ ataSelectHDD:
 .thumb_func
 
 ataSelectMemoryCard:
-        pop {r0, r1, pc}
+        push {r0, r1, lr}
         mov r0, #1
-        ldr r1, =0x02600000
+        ldr r1, =ataRegSelectSource
         strh r0, [r1]       @ Not sure why its done 5 times?
         strh r0, [r1]
         strh r0, [r1]

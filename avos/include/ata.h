@@ -16,6 +16,18 @@
 typedef unsigned long u32;
 #endif
 
+#define ATA_BSY 0x80
+#define ATA_RDY 0x40
+#define ATA_DF  0x20
+#define ATA_DRQ 0x08
+#define ATA_ERR 0x01
+
+#define ATA_ERROR_NONE 0
+#define ATA_ERROR_TIMEOUT -1
+
 extern void ataSelectHDD();
 extern void ataSelectMemoryCard();
-
+extern void ataPowerUpHDD();
+extern void ataPowerDownHDD();
+extern u32 ataStatus();
+extern u32 ataWaitForReady();
