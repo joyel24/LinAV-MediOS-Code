@@ -99,8 +99,8 @@ void GetSettings()
     sData[0].value = get_mouseRepeat();
     sData[1].value = get_mouseFreq();
 
-    sData[2].value = get_TimeOutParam (AV_TIMER_ON_BAT);
-    sData[3].value = get_TimeOutParam (AV_TIMER_ON_DC);
+    sData[2].value = get_lcd_TimeOutParam (AV_TIMER_ON_BAT);
+    sData[3].value = get_lcd_TimeOutParam (AV_TIMER_ON_DC);
 
 
     set_mouseParam(6,3); // set to 6,3 for the settings screen only
@@ -112,10 +112,10 @@ void SetSettings()
         set_mouseParam(sData[1].value,sData[0].value);
 
     if(sData[2].changed)
-        set_TimeOutParam(AV_TIMER_ON_BAT, sData[2].value);
+        set_lcd_TimeOutParam(AV_TIMER_ON_BAT, sData[2].value);
 
     if(sData[3].changed)
-        set_TimeOutParam(AV_TIMER_ON_DC, sData[3].value);
+        set_lcd_TimeOutParam(AV_TIMER_ON_DC, sData[3].value);
 }
 
 /* events */

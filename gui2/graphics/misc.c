@@ -171,7 +171,7 @@ int fmSetVol(int val)
     return 1;
 }*/
 
-int set_TimeOutParam(int state, int value)
+int set_lcd_TimeOutParam(int state, int value)
 {   
     struct timer_val param;
     param.num = state;
@@ -180,7 +180,7 @@ int set_TimeOutParam(int state, int value)
     return 1;
 }
 
-int get_TimeOutParam(int state)
+int get_lcd_TimeOutParam(int state)
 {
     struct timer_val param;
     param.num = state;
