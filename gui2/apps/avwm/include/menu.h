@@ -14,31 +14,27 @@
 #ifndef __MENU_H
 #define __MENU_H
 
-#include "plugin.h"
-
 struct menu_item {
-    struct cfg_menu * data;
+    void * data;
     struct menu_item * nxt;
     struct menu_item * prev;
     struct menu_item * sub;
     struct menu_item * up;
 };
 
-struct cfg_menu {
-	char name[MAX_TOKEN];
-	char parent[MAX_TOKEN];
-	char link[MAX_TOKEN];
-	char param[MAX_TOKEN];
-	struct cfg_menu * nxt;
+struct menu_data {
+	struct menu_item * root;
+        void (*right_action) (void * data);
+        void (*on_action)    (void * data);
+        void (*off_action)   (void * data);
+        void (*item_str)     (void * data,char * str);
+        void (*submenu_str)  (void * data,char * str);
 };
 
-int ini_menu(char * path,struct plugin * plug);
-
-int  loadMenu(char * filename);
-void printMenu(void);
-int  do_parse(struct cfg_menu ** cfg,char * filename);
-void cfgCleanMenu(struct cfg_menu * cfg);
-void addItem(struct cfg_menu ** cfg);
-void menuEvtHandler(int evt);
+void menuEvtHandler  (int evt);
+void doPrint         (struct menu_item * ptr,int level);
+void printAName      (struct menu_item * pos, int posY, int clear, int selected);
+void printAllName    (struct menu_item * pos,int nselect);
+int  printName       (struct menu_item * item,int x,int y,int clear,int selected);
 
 #endif

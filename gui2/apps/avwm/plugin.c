@@ -67,7 +67,7 @@ int loadPlugin(char * path, char * param)
     int status;
     fprintf(stderr,"load plug: %s\n",path);
     if(param!=NULL)
-    	fprintf("Param=%s\n",param);
+    	fprintf(stderr,"Param=%s\n",param);
     if(cur_plugin.handler)
     {
         cur_plugin.handler(EVT_RESUME);

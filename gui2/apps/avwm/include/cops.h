@@ -54,7 +54,7 @@ struct client_operations {
     void (*registerPlugin)    (void (*evtHandle),int flag);    
     void (*pack)              (void);
     void (*stop_me)           (void);    
-    void (*release_app)        (void);
+    int  (*release_app)       (void);
     
     void (*showSBar)          (void);
     void (*hideSBar)          (void);
@@ -93,7 +93,7 @@ struct client_operations {
 
     void (*debug)               (char *fmt, ...);
     
-    void (*playMp3)             (char * filename);
+    int  (*playMp3)             (char * filename);
     
 };
 

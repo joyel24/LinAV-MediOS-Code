@@ -12,293 +12,54 @@
 */
 
 #include <stdlib.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#include <dirent.h>
 
 #include "graphics.h"
 #include "events.h"
 #include "cops.h"
-#include "parse_cfg.h"
 #include "menu.h"
 #include "colordef.h"
-#include "plugin.h"
 #include "avevents.h"
-
-#define SHOW_ALL        1
-#define	LISTSIZE        256
-#define	PATHLEN         256
+#include "parse_cfg.h"
 
 #define MAXPOS       10
 #define TITLE_OFFSET  2
 
-#define MENU_FILE_NAME "menu.cfg"
-
-//#define FONT_HEIGHT  10 // now using graphic function for that
-
-struct cfg_menu * cfgMenu=NULL;;
-struct menu_item * rootMenu=NULL;
-
-int stop,nselect;
+int nselect;
 struct menu_item *pos;
 struct menu_item *pselect;
 
-char item_buff[MAX_TOKEN+1];
-char value_buff[MAX_TOKEN+1];
-
-struct cfg_menu * current_item=NULL;
-
-extern int cfg_line_num;
-
-struct plugin * menu_plug;
-
-int ini_menu(char * path,struct plugin * plug)
-{
-	char * tmpC;
-        int i;
-        
-        menu_plug=plug;
-        
-	clearScreen(COLOR_BLACK);
-	putS(COLOR_WHITE,COLOR_BLACK,5,110,"Reading menu file ....");
-    
-        tmpC=(char*)malloc(sizeof(char)*(strlen(path)+1+strlen(MENU_FILE_NAME)));
-        sprintf(tmpC,"%s/%s",path,MENU_FILE_NAME);
-        
-        if(loadMenu(tmpC)<0)
-        {
-            putS(COLOR_RED,COLOR_BLACK,5,120,"Error reading menu => stoping");
-            for(i=0;i<10000;i++) /* nothing */
-            free(tmpC);
-            return 0;
-        }
-        
-#ifdef DO_DEBUG
-        printMenu();
-#endif
-
-        doRegisterPlugin(menu_plug,menuEvtHandler,0);
-        
-        free(tmpC);
-        return 1;
-}
-
-void cleanMenu(struct menu_item * root)
-{
-	struct menu_item * ptr;
-	while(root!=NULL)
-	{
-		cleanMenu(root->sub);
-		ptr=root->nxt;
-		free(root);
-		root=ptr;
-	}
-}
-
-struct menu_item * newItem(struct cfg_menu * data)
-{
-	struct menu_item * ptr=(struct menu_item *) malloc(sizeof(struct menu_item));
-	if(ptr)
-	{
-		ptr->data=data;
-		ptr->nxt=NULL;
-		ptr->prev=NULL;
-		ptr->sub=NULL;
-		ptr->up=NULL;
-	}
-	else
-		fprintf(stderr,"Not enough space in memory, cant malloc\n");
-	return ptr;
-}
-
-struct menu_item * findParent(struct menu_item * ptr, char * name)
-{
-	struct menu_item * ptr2;
-	while(ptr!=NULL)
-	{
-		if(!strcmp(ptr->data->name,name))
-			return ptr;
-		if((ptr2=findParent(ptr->sub,name))!=NULL)
-			return ptr2;
-		ptr=ptr->nxt;
-	}
-	return NULL;
-	
-}
-
-int insertItem(struct menu_item * item)
-{
-	struct menu_item * ptr;
-	if(rootMenu==NULL)
-	{
-		if(item->data->parent[0] != 0) 
-			return -1; // no sub defined and data is not in root => error
-		else
-			rootMenu=item; // no root => item is first item
-	}
-	else
-	{
-		if(item->data->parent[0] == 0) // no parent => add it on top of root
-		{
-			rootMenu->prev=item;
-			item->nxt=rootMenu;
-			rootMenu=item;
-		}
-		else
-		{
-			if((ptr=findParent(rootMenu,item->data->parent))!=NULL)
-			{
-				if(ptr->sub)
-					ptr->sub->prev=item;
-				item->nxt=ptr->sub;
-				ptr->sub=item;
-				item->up=ptr;
-			}
-			else
-				return -1; // parent not found
-		}
-	}
-	return 0;
-}
-
-void addItem(struct cfg_menu ** cfg)
-{
-	struct cfg_menu * ptr =(struct cfg_menu *) malloc(sizeof(struct cfg_menu));
-	if(current_item == NULL)
-		*cfg=ptr;
-	else
-		current_item->nxt=ptr;
-	current_item=ptr;
-	current_item->name[0]=0;
-	current_item->link[0]=0;
-	current_item->parent[0]=0;
-	current_item->param[0]=0;
-}
-
-void cfgCleanMenu(struct cfg_menu * cfg)
-{
-	struct cfg_menu * ptr;
-	while(cfg!=NULL)
-	{
-		ptr=cfg->nxt;
-		free(cfg);
-		cfg=ptr;
-	}
-}
-
-int do_parse(struct cfg_menu ** cfg,char * filename)
-{
-    char *item=item_buff;
-    char *value=value_buff;
-
-    openFile(filename);
-
-    while (1) {
-	if (!nxt_cfg(item,value)) break;
-	if(!strcmp(item,"name"))
-	{
-		addItem(cfg);
-		strcpy(current_item->name,value);
-	}
-	else if(!strcmp(item,"parent"))
-	{
-		if(current_item==NULL)
-		{
-			fprintf(stderr,"'label' param before image\n");
-		}
-		else
-		{
-			strcpy(current_item->parent,value);
-		}
-
-	}
-	else if(!strcmp(item,"link"))
-	{
-		if(current_item==NULL)
-		{
-			fprintf(stderr,"'link' param before image\n");
-		}
-		else
-		{
-			strcpy(current_item->link,value);
-		}
-	}
-	else if(!strcmp(item,"param"))
-	{
-		if(current_item==NULL)
-		{
-			fprintf(stderr,"'param' param before image\n");
-		}
-		else
-		{
-			strcpy(current_item->param,value);
-		}
-	}
-	else
-		fprintf(stderr,"unknown item type: %s on line %d\n",item,cfg_line_num);
-    }
-    closeFile();
-    return 0;
-}
-
-int loadMenu(char * filename)
-{
-	struct cfg_menu * data;
-	struct menu_item * new_item;
-        fprintf(stderr,"Reading: %s\n",filename);
-	cfgCleanMenu(cfgMenu);
-	cfgMenu=NULL;
-	cleanMenu(rootMenu);
-	rootMenu=NULL;
-	if(do_parse(&cfgMenu,filename)<0)
-		return -1;
-	data=cfgMenu;
-	while(data!=NULL)
-	{
-		if(!(new_item=newItem(data)))
-			return -1;
-		if(insertItem(new_item)<0)
-		{
-			/*cfgCleanMenu(cfgMenu); !!!!!!!!!!!!! do clean when everything is working
-			cleanMenu(rootMenu);*/
-			fprintf(stderr,"Error building menu tree\n");
-			return -1;
-		}
-		data=data->nxt;
-	}
-	return 0;
-}
+struct menu_data * current_menu;
 
 char tmp[MAX_TOKEN+5];
 
 int printName(struct menu_item * item,int x,int y,int clear,int selected)
 {
-	int color;
-   int w = 0;
-	int h = 0;
+    int color;
+    int w = 0;
+    int h = 0;
+    
+    getStringS("M", &w, &h);
 
-   getStringS("M", &w, &h);
-
-	if(item->sub)
-	{
-		sprintf(tmp,"> %s",item->data->name);
-		color=COLOR_RED; // => submenu
-	}
-	else
-	{
-		sprintf(tmp,"x %s",item->data->name);
-		color=COLOR_BLACK; // => item
-	}
-		
-	if(clear)
-		fillRect(COLOR_WHITE,x, y , 310, h+1);
+    if(item->sub)
+    {
+        current_menu->submenu_str(item->data,tmp);
+        color=COLOR_RED; /* => submenu */
+    }
+    else
+    {
+        current_menu->item_str(item->data,tmp);
+        color=COLOR_BLACK; /* => item */
+    }
+        
+    if(clear)
+        fillRect(COLOR_WHITE,x, y , 310, h+1);
 
 
 
-	if(selected)
-		putS(color, COLOR_BLUE,x, y, tmp);
-	else
-		putS(color, COLOR_WHITE,x, y, tmp);
+    if(selected)
+        putS(color, COLOR_BLUE,x, y, tmp);
+    else
+        putS(color, COLOR_WHITE,x, y, tmp);
 }
 
 void printAllName(struct menu_item * pos,int nselect)
@@ -320,7 +81,10 @@ void printAName(struct menu_item * pos, int posY, int clear, int selected)
     printName(pos,5,TITLE_OFFSET + posY*(h+1)+ h+6+MENU_SHADOW,clear,selected);
 }
 
-extern int stopWM;
+void start_menu(struct menu_data * client_menu)
+{
+    current_menu=client_menu;
+}
 
 void menuEvtHandler(int evt)
 {
@@ -383,19 +147,7 @@ void menuEvtHandler(int evt)
             }
             else // launch plugin
             {
-                if(pselect->data->link[0]!=0)
-                {
-                    if(pselect->data->param[0]!=0)
-                    {
-                        if(loadPlugin(pselect->data->link,pselect->data->param)>=0)
-                        	menu_plug->handle_on=0;                            
-                    }
-                    else
-                    {
-                        if(loadPlugin(pselect->data->link,NULL)>=0)
-                        	menu_plug->handle_on=0;
-                    }
-                }
+                current_menu->right_action(pselect->data);
             }
             break;
         case BTN_LEFT:
@@ -406,7 +158,7 @@ void menuEvtHandler(int evt)
                     if(pos->up->up)
                         pos=pos->up->up;    
                     else
-                        pos=rootMenu;
+                        pos=current_menu->root;
                     nselect=0;
                     pselect=pos;
                     fillRect(COLOR_WHITE,5, h+6+MENU_SHADOW , 315,(h+1)*MAXPOS);
@@ -417,14 +169,16 @@ void menuEvtHandler(int evt)
             break;
         case EVT_REDRAW:
             fillRect(COLOR_WHITE,0 , h+6+MENU_SHADOW, 320, 240-h-6-MENU_SHADOW);
-            pos=rootMenu;
-            pselect=rootMenu;
+            pos=current_menu->root;
+            pselect=current_menu->root;
             nselect=0;
             printAllName(pos,nselect);
             break;
         case BTN_OFF:
-            //stopWM=1; /* use this if you want to be able to quit avwm without hakting the device*/
-        /* to be done: call resume evt on plugin if it exists */
+            current_menu->off_action(pselect->data);            
+            break;
+        case BTN_ON:
+            current_menu->on_action(pselect->data);
             break;
     }
 }
@@ -433,33 +187,24 @@ void menuEvtHandler(int evt)
 
 void doPrint(struct menu_item * ptr,int level)
 {
-	int i;
-	while(ptr!=NULL)
-	{
-		for(i=0;i<level;i++)
-			printf("  ");
-		if(ptr->sub)
-		{
-			printf("%s ->\n",ptr->data->name);
-			doPrint(ptr->sub,level+1);
-		}
-		else
-			printf("%s\n",ptr->data->name);
-		ptr=ptr->nxt;
-	}
-}
-
-void printMenu(void)
-{
-	struct cfg_menu * ptr=cfgMenu;
-	printf("cfg:\n");
-	while(ptr)
-	{
-		printf("%s %s %s\n",ptr->name,ptr->parent,ptr->link);
-		ptr=ptr->nxt;
-	}
-	printf("Menu:\n");
-	doPrint(rootMenu,0);
+    int i;
+    while(ptr!=NULL)
+    {
+        for(i=0;i<level;i++)
+            printf("  ");
+        if(ptr->sub)
+        {
+            current_menu->submenu_str(ptr->data,tmp);
+            printf("%s\n",tmp);
+            doPrint(ptr->sub,level+1);
+        }
+        else
+        {
+            current_menu->item_str(ptr->data,tmp);
+            printf("%s\n",tmp);
+        }
+        ptr=ptr->nxt;
+    }
 }
 
 
