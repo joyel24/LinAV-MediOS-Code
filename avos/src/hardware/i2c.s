@@ -98,10 +98,12 @@ i2cXA2:
         bx r1
         
 @-------------------------------------------------------------------------------
+@ i2cStop
 @
-@
+.globl i2cStop
 .thumb_func
-i2c_fn2:
+
+i2cStop:
         push {r0, r1, r7, lr}
         ldr r7, =i2cBaseAddress
 
@@ -513,7 +515,7 @@ i2cRN:
         
         bl i2c_fn3
 
-        bl i2c_fn2
+        bl i2cStop
 
         mov r0, #0
         pop {r1, r2, r3, r4, r5, r6, r7}
@@ -555,9 +557,8 @@ i2cWrite:
         ldrh r6, [r7, #i2cRegIN]
         lsr r6, #4
          bcc i2cWE
-      
+
         mov r5, r1
-         
         bl i2c_fn4
         
         lsl r0, #24
@@ -581,11 +582,10 @@ i2cWL:  ldrb r0, [r2]
          beq i2cWN
         add r2, #1
         sub r3, #1
-         bne i2cWL
-        
+         bne i2cWL  
 i2cWN:
 
-        bl i2c_fn2
+        bl i2cStop
 
         mov r0, #0
         pop {r1, r2, r3, r4, r5, r6, r7}

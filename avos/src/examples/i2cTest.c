@@ -68,16 +68,6 @@ int main() {
                     dispAddr);
 
         docmd();
-
-        i2cRead(0x90, 0, batStat, 2);
-        b = (batStat[0] << 8) | batStat[1];
-        
-        pal16[1] = 0x0404;                    
-        stringPutHex(dispBat, b, 4);
-
-        graphicsString(&screenBitmap, 0, 200, &sprite4_6, std4x6_, 5, 0,
-                    dispBat);
-        
         
         b =buttonsGetStatus();
 
@@ -106,18 +96,11 @@ void docmd() {
     
     uartOuts("Getting data...\n");
 
-    c = i2cRead(addr, 0, data, 64);
+    c = i2cRead(addr, 0, data, 256);
 
     if (addr==0xd0) {
         data[0x0c] &= ~0x40;
         i2cWrite(addr, 0x0c, data+0x0c, 1);
-        stringPutHex(timeSt+9, data[0], 2);
-        stringPutHex(timeSt+6, data[1], 2);
-        stringPutHex(timeSt+3, data[2], 2);
-        stringPutHex(timeSt, data[3], 2);
-        pal16[1] = 0x0202;
-        graphicsString(&screenBitmap, 160-(5*14)-7, 120, &spriteShadow, shadow_, 14, 0,
-                    timeSt);
     }
     
     if (c==0) uartOuts("Returned 0\n");
@@ -131,7 +114,7 @@ void showBuffer(char *source) {
     int i,j,y=0;
     char c;
 
-    for (j=0;j<64;j+=16) {
+    for (j=0;j<256;j+=16) {
         for (i=0;i<16;i++) {
             c = source[i+j];
             stringPutHex(p+(i*2), c, 2);
