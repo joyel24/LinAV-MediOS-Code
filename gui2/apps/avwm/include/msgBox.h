@@ -14,11 +14,16 @@
 #ifndef __MSGBOX_H
 #define __MSGBOX_H
 
+    #define MSGBOX_MIN_WIDTH 160
+    #define MSGBOX_HEIGHT     80
+
+
     // Return values
-    #define MSGBOX_CANCEL 0
-    #define MSGBOX_OK     1
-    #define MSGBOX_NO     2
-    #define MSGBOX_YES    3
+    #define MSGBOX_NOTHING 0
+    #define MSGBOX_CANCEL  1
+    #define MSGBOX_OK      2
+    #define MSGBOX_NO      3
+    #define MSGBOX_YES     4
 
     // Messagebox types
     #define MSGBOX_TYPE_OK          0
@@ -27,11 +32,12 @@
     #define MSGBOX_TYPE_YESNOCANCEL 3
 
     // Messagebox icons
-    #define MSGBOX_ICON_EXCLAMATION 0
-    #define MSGBOX_ICON_WARNING     1
-    #define MSGBOX_ICON_INFORMATION 2
-    #define MSGBOX_ICON_QUESTION    3
-    #define MSGBOX_ICON_ERROR       4
+    #define MSGBOX_ICON_NO_ICON     0
+    #define MSGBOX_ICON_EXCLAMATION 1
+    #define MSGBOX_ICON_WARNING     2
+    #define MSGBOX_ICON_INFORMATION 3
+    #define MSGBOX_ICON_QUESTION    4
+    #define MSGBOX_ICON_ERROR       5
 
     void iniMsgBox(void);
     int msgBox(unsigned char* caption, unsigned char* msg, int type, int icon);
