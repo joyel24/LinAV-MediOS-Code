@@ -21,4 +21,50 @@
 
 void ini_font(void);
 
+typedef enum _E_FONT_TYPE
+{
+	eFNT_2BIT_PACK  = 0,
+	eFNT_8BIT_MONO  = 1,
+	eFNT_8BIT_VARY  = 2,
+	eFNT_32BIT_MONO = 3,
+	eFNT_32BIT_VARY = 4,
+} E_FONT_TYPE;
+
+typedef struct _FONT_HEADER
+{
+	char cSignature [4];
+	E_FONT_TYPE nFontType;
+	char cSymbolMap [256];
+} FONT_HEADER;
+
+typedef struct _FONT_2BIT_PACK_HEADER
+{
+	long nSymWidth;
+	long nSymHeight;
+} FONT_2BIT_PACK_HEADER;
+
+typedef struct _FONT_8BIT_MONO_HEADER
+{
+	long nSymWidth;
+	long nSymHeight;
+} FONT_8BIT_MONO_HEADER;
+
+typedef struct _FONT_8BIT_VARY_HEADER
+{
+	long nSymHeight;
+	char abc [256][3];
+} FONT_8BIT_VARY_HEADER;
+
+typedef struct _FONT_32BIT_MONO_HEADER
+{
+	long nSymWidth;
+	long nSymHeight;
+} FONT_32BIT_MONO_HEADER;
+
+typedef struct _FONT_32BIT_VARY_HEADER
+{
+	long nSymHeight;
+	char abc [256][3];
+} FONT_32BIT_VARY_HEADER;
+
 #endif

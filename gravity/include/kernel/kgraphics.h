@@ -15,6 +15,7 @@
 
 #include <kernel/graphics_struct.h>
 #include <api.h>
+#include <kernel/threads.h>
 
 #define getOffset(x,y,buffer,type) ((type*)(x*((buffer->bitsPerPixel)>>3)+y*buffer->width*((buffer->bitsPerPixel)>>3)+buffer->offset))
 
@@ -63,7 +64,7 @@ void          (*drawHLine)        (unsigned int color, int x, int y, int width, 
 void          (*drawVLine)        (unsigned int color, int x, int y, int height, struct graphicsBuffer * buff);
 };
 
-int gfx_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
+int gfx_swi_handler (TASK_INFO* pOwner, int cmd, GFX_CONTEXT* gfxD, void* pvData);
 
 /* general functions */
 void  ini_graphics        (void);

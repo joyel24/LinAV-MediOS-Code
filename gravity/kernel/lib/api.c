@@ -69,16 +69,16 @@ ERROR_CODE API_DSP              (int cmd, void * arg)                           
 ERROR_CODE API_EVT              (int cmd, void * arg, void * arg2)                              { swi_call(nAPI_EVT); }
 
 ERROR_CODE API_RUN_GRV          (const char* pGRVPath, HTASK* phTask)                           { swi_call(nAPI_RUN_GRV); }
-ERROR_CODE API_CREATE_CONTEXT   (int nWidth, int nHeight, int nFlags)                           { swi_call(nAPI_CREATE_CONTEXT); }
+ERROR_CODE API_GFX_CREATE_CONTEXT (int nWidth, int nHeight, int nFlags)                           { swi_call(nAPI_GFX_CREATE_CONTEXT); }
 
-ERROR_CODE API_GFX_COMMIT       (GFX_RECT* pArea)                                               { swi_call(nAPI_GFX_COMMIT); }
+ERROR_CODE API_GFX_UPDATE_RECT  (GFX_RECT* pArea)                                               { swi_call(nAPI_GFX_UPDATE_RECT); }
 ERROR_CODE API_GFX_MOVE         (GFX_POINT* pOrigin)                                            { swi_call(nAPI_GFX_MOVE); }
 ERROR_CODE API_GFX_FOREGROUND   ()                                                              { swi_call(nAPI_GFX_FOREGROUND); }
 
-ERROR_CODE API_GFX_FASTBLIT     (GFX_DATA* pDst, GFX_DATA* pSrc, GFX_POINT* pOrigin)            { swi_call(nAPI_GFX_FASTBLIT); }
-ERROR_CODE API_GFX_BLENDBLIT    (GFX_DATA* pDst, GFX_DATA* pSrc, GFX_BLENDPARAMS* pParams)      { swi_call(nAPI_GFX_BLENDBLIT); }
-ERROR_CODE API_GFX_STRETCHBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc, unsigned long* pWorkBuffer)    { swi_call(nAPI_GFX_STRETCHBLIT); }
-ERROR_CODE API_GFX_PATTERNBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc)                                { swi_call(nAPI_GFX_PATTERNBLIT); }
+ERROR_CODE API_GFX_FASTBLIT     (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, GFX_POINT* pOrigin)      { swi_call(nAPI_GFX_FASTBLIT); }
+ERROR_CODE API_GFX_BLENDBLIT    (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, GFX_BLENDPARAMS* pParams){ swi_call(nAPI_GFX_BLENDBLIT); }
+ERROR_CODE API_GFX_STRETCHBLIT  (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, unsigned long* pWorkBuffer){ swi_call(nAPI_GFX_STRETCHBLIT); }
+ERROR_CODE API_GFX_PATTERNBLIT  (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc)                          { swi_call(nAPI_GFX_PATTERNBLIT); }
 
 ERROR_CODE API_SOUND_PLAY       (void* pvBuffer, unsigned long nBytes, unsigned long nFlags)    { swi_call(nAPI_SOUND_PLAY); }
 ERROR_CODE API_SOUND_PAUSE      ()                                                              { swi_call(nAPI_SOUND_PAUSE); }
@@ -87,9 +87,11 @@ ERROR_CODE API_SOUND_STOP       ()                                              
 ERROR_CODE API_VAR_GET          (const char* pVarName, char* pVarValue, int nBufferSize)        { swi_call(nAPI_VAR_GET); }
 ERROR_CODE API_VAR_SET          (const char* pVarName, const char* pVarValue)                   { swi_call(nAPI_VAR_SET); }
 
-ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData)                       { swi_call(nAPI_GFX); }
+/// TMP !!!
+ERROR_CODE API_GFX              (int cmd, void* p, void * pvData)                                        { swi_call(nAPI_GFX); }
 ERROR_CODE API_PRINTF           (const char * fmt, va_list args)                                { swi_call(nAPI_PRINTF); }
 ERROR_CODE API_FILE             (int cmd,void * data1,void * data2)                             { swi_call(nAPI_FILE); }
+
 
 void printf(char *fmt, ...)
 {
@@ -99,6 +101,7 @@ void printf(char *fmt, ...)
     va_end(ap);
 }
 
+/// TMP !!!
 
 void * malloc(long size)
 {

@@ -14,32 +14,32 @@
 
 // API data type
 
-typedef struct _GFX_DATA
+typedef struct _GFX_CONTEXT
 {
-    long x;
-    long y;
-    long w;
-    long h;
-    int direction;
-    long delta;
-    unsigned int color;
-    unsigned int bg_color;
-    long pixel_size;
-    void* pixels;
-} GFX_DATA;
+	long x;
+	long y;
+	long w;
+	long h;
+	int direction;
+	long delta;
+	unsigned int color;
+	unsigned int bg_color;
+	long pixel_size;
+	void* pixels;
+} GFX_CONTEXT;
 
 typedef struct _GFX_POINT
 {
-    long x;
-    long y;
+	long x;
+	long y;
 } GFX_POINT;
 
 typedef struct _GFX_RECT
 {
-    long w;
-    long h;
-    long x;
-    long y;
+	long w;
+	long h;
+	long x;
+	long y;
 } GFX_RECT;
 
 typedef struct _GFX_3DVERTEX
@@ -75,9 +75,9 @@ typedef unsigned long HEAP;
 
 typedef struct _MESSAGE
 {
-    unsigned long nMsg;
-    unsigned long nParam1;
-    unsigned long nParam2;
+	unsigned long nMsg;
+	unsigned long nParam1;
+	unsigned long nParam2;
 } MESSAGE;
 
 #endif

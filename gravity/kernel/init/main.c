@@ -77,7 +77,7 @@ typedef struct _SDBG
 } SDBG;
 void win_thread (GFX_RECT* rc)
 {
-	API_CREATE_CONTEXT (rc->w, rc->h, 0);
+	API_GFX_CREATE_CONTEXT (rc->w, rc->h, 0);
 	GFX_POINT pt;
 	pt.x = rc->x;
 	pt.y = rc->y;
@@ -98,7 +98,7 @@ void debug_thread (SDBG* pS)
 	printk("*** debug_thread *** [CPSR:%08x, R12:%08x, SP:%08x, LR:%08x]\n", _r7, _r12, _r13, _r8);
 	__sti ();
 
-	API_CREATE_CONTEXT (pS->w, pS->h, 0);
+	API_GFX_CREATE_CONTEXT (pS->w, pS->h, 0);
 
 	TASK_INFO* pTask = 0;
 	API_TASK_GETHANDLE (&pTask);

@@ -14,70 +14,120 @@
 
 #include <kernel/errors.h>
 
-// swi numbers
-#define nAPI_TASK_YIELD         0
-#define nAPI_TASK_CREATE        1
-#define nAPI_TASK_SUSPEND       2
-#define nAPI_TASK_CONTINUE      3
-#define nAPI_TASK_GETHANDLE     4
-#define nAPI_TASK_SLEEP         5
-#define nAPI_TASK_SENDMESSAGE   6
-#define nAPI_TASK_PEEKMESSAGE   7
-#define nAPI_TASK_WAITMESSAGE   8
-#define nAPI_TASK_TERMINATE     9
-#define nAPI_TASK_SETPRIORITY  10
 
-#define nAPI_MALLOC            20
-#define nAPI_FREE              21
-#define nAPI_MEMAVAIL          22
-#define nAPI_MEMSET            23
-#define nAPI_MEMCPY            24
-#define nAPI_HEAP_CREATE       25
-#define nAPI_HEAP_DESTROY      26
-#define nAPI_HEAP_MALLOC       27
-#define nAPI_HEAP_FREE         28
-#define nAPI_HEAP_AVAIL        29
+///////////////////////////////////////////////////////
+///////////////////// API SECTIONS ////////////////////
+#define nAPI_KERNEL_section_code   0
+#define nAPI_GFX_section_code      1
+#define nAPI_SND_section_code      2
+#define nAPI_FILE_section_code     3
+#define nAPI_DEVICE_section_code   4
+#define nAPI_MEMORY_section_code   5
 
-#define nAPI_PIPE_CREATE       30
-#define nAPI_PIPE_DELETE       31
-#define nAPI_PIPE_SEND         32
-#define nAPI_PIPE_RECV         33
-#define nAPI_PIPE_TEST         34
+#define nAPI_KERNEL_section   (nAPI_KERNEL_section_code << 8)
+#define nAPI_GFX_section      (nAPI_GFX_section_code    << 8)
+#define nAPI_SND_section      (nAPI_SND_section_code    << 8)
+#define nAPI_FILE_section     (nAPI_FILE_section_code   << 8)
+#define nAPI_DEVICE_section   (nAPI_DEVICE_section_code << 8)
+#define nAPI_MEMORY_section   (nAPI_MEMORY_section_code << 8)
+///////////////////// API SECTIONS ////////////////////
+///////////////////////////////////////////////////////
 
-#define nAPI_CRITSEC_CREATE    40
-#define nAPI_CRITSEC_DELETE    41
-#define nAPI_CRITSEC_ENTER     42
-#define nAPI_CRITSEC_LEAVE     43
-#define nAPI_CRITSEC_TRYENTER  44
+///////////////////////////////////////////////////////
+////////////////////// KERNEL API /////////////////////
+#define nAPI_TASK_YIELD         (nAPI_KERNEL_section+0)
+#define nAPI_TASK_SLEEP         (nAPI_KERNEL_section+1)
+#define nAPI_TASK_SUSPEND       (nAPI_KERNEL_section+2)
+#define nAPI_TASK_CONTINUE      (nAPI_KERNEL_section+3)
+#define nAPI_TASK_SETPRIORITY   (nAPI_KERNEL_section+4)
+#define nAPI_TASK_GETHANDLE     (nAPI_KERNEL_section+5)
 
-#define nAPI_TIME              50
-#define nAPI_POWER             51
-#define nAPI_MIXER             52
-#define nAPI_DSP               53
-#define nAPI_EVT               54
+#define nAPI_TASK_CREATE        (nAPI_KERNEL_section+10)
+#define nAPI_TASK_TERMINATE     (nAPI_KERNEL_section+11)
 
-#define nAPI_RUN_GRV           60
-#define nAPI_CREATE_CONTEXT    61
+#define nAPI_OS_VERSION         (nAPI_KERNEL_section+20)
 
-#define nAPI_GFX_COMMIT        70
-#define nAPI_GFX_MOVE          71
-#define nAPI_GFX_FOREGROUND    72
+#define nAPI_TASK_SENDMESSAGE   (nAPI_KERNEL_section+30)
+#define nAPI_TASK_PEEKMESSAGE   (nAPI_KERNEL_section+31)
+#define nAPI_TASK_WAITMESSAGE   (nAPI_KERNEL_section+32)
 
-#define nAPI_GFX_FASTBLIT      75
-#define nAPI_GFX_BLENDBLIT     76
-#define nAPI_GFX_STRETCHBLIT   77
-#define nAPI_GFX_PATTERNBLIT   78
+#define nAPI_PIPE_CREATE        (nAPI_KERNEL_section+40)
+#define nAPI_PIPE_DELETE        (nAPI_KERNEL_section+41)
+#define nAPI_PIPE_SEND          (nAPI_KERNEL_section+42)
+#define nAPI_PIPE_RECV          (nAPI_KERNEL_section+43)
+#define nAPI_PIPE_TEST          (nAPI_KERNEL_section+44)
 
-#define nAPI_SOUND_PLAY        80
-#define nAPI_SOUND_PAUSE       81
-#define nAPI_SOUND_STOP        82
+#define nAPI_CRITSEC_CREATE     (nAPI_KERNEL_section+50)
+#define nAPI_CRITSEC_DELETE     (nAPI_KERNEL_section+51)
+#define nAPI_CRITSEC_ENTER      (nAPI_KERNEL_section+52)
+#define nAPI_CRITSEC_LEAVE      (nAPI_KERNEL_section+53)
+#define nAPI_CRITSEC_TRYENTER   (nAPI_KERNEL_section+54)
 
-#define nAPI_VAR_GET           90
-#define nAPI_VAR_SET           91
+#define nAPI_VAR_GET            (nAPI_KERNEL_section+60)
+#define nAPI_VAR_SET            (nAPI_KERNEL_section+61)
+////////////////////// KERNEL API /////////////////////
+///////////////////////////////////////////////////////
 
-#define nAPI_GFX              100
-#define nAPI_PRINTF           101
-#define nAPI_FILE             102
+///////////////////////////////////////////////////////
+////////////////////// MEMORY API /////////////////////
+#define nAPI_MALLOC             (nAPI_MEMORY_section+0)
+#define nAPI_FREE               (nAPI_MEMORY_section+1)
+#define nAPI_MEMAVAIL           (nAPI_MEMORY_section+2)
+#define nAPI_MEMSET             (nAPI_MEMORY_section+3)
+#define nAPI_MEMCPY             (nAPI_MEMORY_section+4)
+
+#define nAPI_HEAP_CREATE        (nAPI_MEMORY_section+10)
+#define nAPI_HEAP_DESTROY       (nAPI_MEMORY_section+11)
+#define nAPI_HEAP_MALLOC        (nAPI_MEMORY_section+12)
+#define nAPI_HEAP_FREE          (nAPI_MEMORY_section+13)
+#define nAPI_HEAP_AVAIL         (nAPI_MEMORY_section+14)
+////////////////////// MEMORY API /////////////////////
+///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+////////////////////// FILE API ///////////////////////
+#define nAPI_FILE              (nAPI_FILE_section + 0)
+#define nAPI_RUN_GRV           (nAPI_FILE_section + 10)
+////////////////////// FILE API ///////////////////////
+///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+///////////////////// DEVICE API //////////////////////
+#define nAPI_TIME              (nAPI_DEVICE_section + 0)
+#define nAPI_POWER             (nAPI_DEVICE_section + 1)
+#define nAPI_DSP               (nAPI_DEVICE_section + 2)
+#define nAPI_EVT               (nAPI_DEVICE_section + 3)
+///////////////////// DEVICE API //////////////////////
+///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+////////////////////// SOUND API //////////////////////
+#define nAPI_SOUND_PLAY        (nAPI_SND_section + 0)
+#define nAPI_SOUND_PAUSE       (nAPI_SND_section + 1)
+#define nAPI_SOUND_STOP        (nAPI_SND_section + 2)
+
+#define nAPI_MIXER             (nAPI_SND_section + 10)
+////////////////////// SOUND API //////////////////////
+///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+/////////////////////// GFX API ///////////////////////
+#define nAPI_GFX_CREATE_CONTEXT (nAPI_GFX_section + 0)
+
+#define nAPI_GFX_UPDATE_RECT    (nAPI_GFX_section + 10)
+#define nAPI_GFX_MOVE           (nAPI_GFX_section + 11)
+#define nAPI_GFX_FOREGROUND     (nAPI_GFX_section + 12)
+
+#define nAPI_GFX_FASTBLIT       (nAPI_GFX_section + 20)
+#define nAPI_GFX_BLENDBLIT      (nAPI_GFX_section + 21)
+#define nAPI_GFX_STRETCHBLIT    (nAPI_GFX_section + 22)
+#define nAPI_GFX_PATTERNBLIT    (nAPI_GFX_section + 23)
+
+#define nAPI_PRINTF             (nAPI_GFX_section + 30)
+
+#define nAPI_GFX                (nAPI_GFX_section + 40)
+/////////////////////// GFX API ///////////////////////
+///////////////////////////////////////////////////////
 
 ERROR_CODE swi_call             (long swi_num,long param1,long param2,long param3) ;
 

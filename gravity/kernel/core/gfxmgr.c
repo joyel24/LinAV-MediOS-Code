@@ -26,7 +26,7 @@ GFX_Z_RECT* g_pZRectList = 0;
 extern char screen_VID1 [SCR_WIDTH * SCR_HEIGHT *4 + 40];
 extern char screen_VID2 [320 * 240 *4 + 40];
 
-GFX_DATA g_PhysicalScreen;
+GFX_CONTEXT g_PhysicalScreen;
 
 #define MAX(a,b) (a>b?a:b)
 #define MIN(a,b) (a<b?a:b)
@@ -281,7 +281,9 @@ __IRAM_CODE void GFX_init ()
 
 	int i;
 
+//	printk ("GFX [a]\n");
 	API_MALLOC (&g_pSpanPool, SCR_HEIGHT * SPAN_POOL_SIZE);
+//	printk ("GFX [b]\n");
 
 	unsigned char* pSpanPoolPtr = g_pSpanPool;
 	for (i=0;i<SCR_HEIGHT;i++)
@@ -297,7 +299,7 @@ __IRAM_CODE void GFX_init ()
 	g_Phys.w = SCR_WIDTH;
 	g_Phys.h = SCR_HEIGHT;
 
-	API_MALLOC (&pTask->pMemoryContext, sizeof(GFX_DATA));
+	API_MALLOC (&pTask->pMemoryContext, sizeof(GFX_CONTEXT));
 	pTask->pMemoryContext->w = SCR_WIDTH;
 	pTask->pMemoryContext->h = SCR_HEIGHT;
 	pTask->pMemoryContext->x = 0;
@@ -333,7 +335,7 @@ __IRAM_CODE void GFX_init ()
 
 	showPlane (VID1);
 
-	API_GFX_COMMIT (0);
+	API_GFX_UPDATE_RECT (0);
 	printk ("GFX subsystem initialized\n");
 }
 

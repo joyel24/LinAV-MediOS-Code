@@ -75,7 +75,7 @@ int getState(int vplane)
 
 void setSize(int vplane,int width,int height,int bitsPerPixel)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     PLANE_DATA p_data;
     g_data.w=width;
     g_data.h=height;
@@ -86,7 +86,7 @@ void setSize(int vplane,int width,int height,int bitsPerPixel)
 
 void getSize(int vplane,int * width,int * height,int * bitsPerPixel)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     PLANE_DATA p_data;
     p_data.vplane=vplane;
     API_GFX(0x108,&g_data,(void*)&p_data);
@@ -100,7 +100,7 @@ void getSize(int vplane,int * width,int * height,int * bitsPerPixel)
 
 void setPos(int vplane,int x,int y)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     g_data.x=x;
     g_data.y=y;
     API_GFX(0x109,&g_data,(void*)&vplane);
@@ -108,7 +108,7 @@ void setPos(int vplane,int x,int y)
 
 void getPos(int vplane,int * x,int * y)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     API_GFX(0x10A,&g_data,(void*)&vplane);  
     if(x)  
         *x=g_data.x;
@@ -125,7 +125,7 @@ void clearScreen(unsigned int color)
 
 void drawPixel(unsigned int color,int x, int y)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     g_data.x=x;
     g_data.y=y;
     g_data.color=color;
@@ -134,7 +134,7 @@ void drawPixel(unsigned int color,int x, int y)
 
 unsigned int readPixel(int x, int y)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     g_data.x=x;
     g_data.y=y;
     API_GFX(0x202,&g_data,NULL);
@@ -143,7 +143,7 @@ unsigned int readPixel(int x, int y)
 
 void drawRect(unsigned int color, int x, int y, int width, int height)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     g_data.x=x;
     g_data.y=y;
     g_data.w=width;
@@ -154,7 +154,7 @@ void drawRect(unsigned int color, int x, int y, int width, int height)
 
 void fillRect(unsigned int color, int x, int y, int width, int height)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     g_data.x=x;
     g_data.y=y;
     g_data.w=width;
@@ -165,7 +165,7 @@ void fillRect(unsigned int color, int x, int y, int width, int height)
 
 void drawLine(unsigned int color, int x1, int y1, int x2, int y2)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     g_data.x=x1;
     g_data.y=y1;
     g_data.w=x2;
@@ -176,7 +176,7 @@ void drawLine(unsigned int color, int x1, int y1, int x2, int y2)
 
 void putS(unsigned int color, unsigned int bg_color, int x, int y, unsigned char *s)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     g_data.x=x;
     g_data.y=y;
     g_data.color=color;
@@ -186,7 +186,7 @@ void putS(unsigned int color, unsigned int bg_color, int x, int y, unsigned char
 
 void getStringS(unsigned char *str, int *w, int *h)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     API_GFX(0x207,&g_data,(void*)str);
     *w=g_data.w;
     *h=g_data.h;
@@ -194,7 +194,7 @@ void getStringS(unsigned char *str, int *w, int *h)
 
 void putC(unsigned int color, unsigned int bg_color, int x, int y, unsigned char s)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     g_data.x=x;
     g_data.y=y;
     g_data.color=color;
@@ -204,7 +204,7 @@ void putC(unsigned int color, unsigned int bg_color, int x, int y, unsigned char
 
 void drawSprite(unsigned int * palette, SPRITE * sprite, int x, int y)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     g_data.x=x;
     g_data.y=y;
     g_data.color=(unsigned int)palette;
@@ -213,7 +213,7 @@ void drawSprite(unsigned int * palette, SPRITE * sprite, int x, int y)
 
 void drawBITMAP(BITMAP * bitmap, int x, int y)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     g_data.x=x;
     g_data.y=y;
     API_GFX(0x20A,&g_data,(void*)bitmap);
@@ -221,7 +221,7 @@ void drawBITMAP(BITMAP * bitmap, int x, int y)
 
 void scrollWindowVert(unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     g_data.x=x;
     g_data.y=y;
     g_data.w=width;
@@ -234,7 +234,7 @@ void scrollWindowVert(unsigned int bgColor, int x, int y, int width, int height,
 
 void scrollWindowHoriz(unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT)
 {
-    GFX_DATA g_data;
+    GFX_CONTEXT g_data;
     g_data.x=x;
     g_data.y=y;
     g_data.w=width;

@@ -314,8 +314,8 @@ __IRAM_CODE void AlphaHorFill (
 }
 
 __IRAM_CODE int AlphaBilinearInterpolatedStretch (
-	GFX_DATA* pDst,
-	GFX_DATA* pSrc,
+	GFX_CONTEXT* pDst,
+	GFX_CONTEXT* pSrc,
 	unsigned long* pBuffer1,
 	unsigned long* pBuffer2)
 {

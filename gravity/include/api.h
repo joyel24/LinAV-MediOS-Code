@@ -68,10 +68,10 @@ ERROR_CODE API_GFX_COMMIT       (GFX_RECT* pArea);
 ERROR_CODE API_GFX_MOVE         (GFX_POINT* pOrigin);
 ERROR_CODE API_GFX_FOREGROUND   ();
 
-ERROR_CODE API_GFX_FASTBLIT     (GFX_DATA* pDst, GFX_DATA* pSrc, GFX_POINT* pOrigin);
-ERROR_CODE API_GFX_BLENDBLIT    (GFX_DATA* pDst, GFX_DATA* pSrc, GFX_BLENDPARAMS* pParams);
-ERROR_CODE API_GFX_STRETCHBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc, unsigned long* pWorkBuffer);
-ERROR_CODE API_GFX_PATTERNBLIT  (GFX_DATA* pDst, GFX_DATA* pSrc);
+ERROR_CODE API_GFX_FASTBLIT     (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, GFX_POINT* pOrigin);
+ERROR_CODE API_GFX_BLENDBLIT    (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, GFX_BLENDPARAMS* pParams);
+ERROR_CODE API_GFX_STRETCHBLIT  (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, unsigned long* pWorkBuffer);
+ERROR_CODE API_GFX_PATTERNBLIT  (GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc);
 
 ERROR_CODE API_SOUND_PLAY       (void* pvBuffer, unsigned long nBytes, unsigned long nFlags);
 ERROR_CODE API_SOUND_PAUSE      ();
@@ -80,7 +80,7 @@ ERROR_CODE API_SOUND_STOP       ();
 ERROR_CODE API_VAR_GET          (const char* pVarName, char* pVarValue, int nBufferSize);
 ERROR_CODE API_VAR_SET          (const char* pVarName, const char* pVarValue);
 
-ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData);
+ERROR_CODE API_GFX              (int cmd, void* ptr, void * pvData);
 ERROR_CODE API_PRINTF           (const char * fmt, va_list args);
 ERROR_CODE API_FILE             (int cmd,void * data1,void * data2);
 

@@ -30,13 +30,13 @@ extern GFX_Z_RECT* g_pZRectList;
 #define SCR_HEIGHT 240
 
 void GFX_init ();
-void GFX_BuildSpanStructure (int nYmin, int nYmax);
+void GFX_BuildSpanStructure   (int nYmin, int nYmax);
 void GFX_DestroySpanStructure (int nYmin, int nYmax);
-int GetRectIntersection (GFX_RECT* pRIn1, GFX_RECT* pRIn2, GFX_RECT* pROut);
-void GFX_MoveContext (TASK_INFO* pOwner, int nX, int nY);
-void GFX_UpdateRect (GFX_RECT* UpdateRect);
-void GFX_UpdateContext (TASK_INFO* pOwner, GFX_RECT* UpdateRect);
-void GFX_AddContext (TASK_INFO* pOwner, int nX, int nY);
-void GFX_UpdateZOrder (TASK_INFO* pOwner, int nZOrder);
+int  GetRectIntersection      (GFX_RECT* pRIn1, GFX_RECT* pRIn2, GFX_RECT* pROut);
+void GFX_MoveContext          (TASK_INFO* pOwner, int nX, int nY);
+void GFX_UpdateRect           (GFX_RECT* UpdateRect);
+void GFX_UpdateContext        (TASK_INFO* pOwner, GFX_RECT* UpdateRect);
+void GFX_AddContext           (TASK_INFO* pOwner, int nX, int nY);
+void GFX_UpdateZOrder         (TASK_INFO* pOwner, int nZOrder);
 
 #endif
