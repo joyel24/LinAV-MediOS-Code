@@ -19,12 +19,13 @@
 #include "graphics.h"
 #include "X11/keysym.h"
 #include "misc.h"
+#include <time.h>
 
 /* Define for battery */
 
 #define BATMAX 1600
 #define BATMIN 1000
-#define INCBAT 10
+#define INCBAT 200
 
 /* Global variables */
 extern Display* display;
@@ -34,15 +35,21 @@ XEvent event;
 int stateUSB = 0;
 int statePWR =0;
 int stateBAT = BATMAX;
+long oldtimes;
 
 int nxtEvent(void)
 {   
-    XSelectInput(display, window, ExposureMask | KeyPressMask | KeyReleaseMask);
-    /* next event */
-    XNextEvent(display, &event);
+ 
+    int pending;
+    pending = XPending(display);
     KeySym keysym;
     unsigned char c = 0;
+    XSelectInput(display, window, ExposureMask | KeyPressMask | KeyReleaseMask);
     
+  if(pending != 0)
+  {
+    /* next event */
+    XNextEvent(display, &event);    
     
     switch (event.type) 
     {
@@ -57,8 +64,27 @@ int nxtEvent(void)
       case KeyRelease :
       break;
     }
-    return 0; 
-}  
+   }  
+    
+    return EvTimer();
+}
+
+
+int EvTimer(void)
+{
+  time_t times;
+  times = time(NULL);
+     
+  if(times > oldtimes)
+   {
+    return EVT_TIMER;
+   }
+  else
+   {
+     return NO_EVENT;
+   }
+   oldtimes = times;
+}
 
 int getKey(int key)
 {
@@ -180,7 +206,7 @@ int waitEvent(void)
      }
   return evt;      
 }
-
+  
 int iniEvent(void)
 {
     return 0;

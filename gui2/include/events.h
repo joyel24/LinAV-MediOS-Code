@@ -38,6 +38,7 @@
 int  iniEvent(void);
 int  nxtEvent(void);
 int  waitEvent(void);
+int  EvTimer(void);
 int  clearEventQueue(void);
 int  wakeUP(void);
 int  halt_device(void);
