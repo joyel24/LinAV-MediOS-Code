@@ -22,6 +22,53 @@
         .thumb
 
         callThumb r1, lcdInitT
+        
+        ldr r3, =lcdVideoBuffer2
+        ldr r4, =sprite
+        ldr r5, =(320*240)
+lcop:   mov r0, #0
+        mov r1, #0
+        mov r2, #0
+        ldrb r0, [r4]
+        ldrb r1, [r4, #1]
+        ldrb r2, [r4, #2]
+        add r4, #3
+        callThumb r6, colorRGB2YCbCrT
+        callThumb r6, colorPackYCbCrT
+
+        str r0, [r3]
+        
+        add r3, #4
+        sub r5, #1
+        bne lcop   
+        
+        callThumb2 r3, osdSetBackConfigT, 0x14, 0x03
+        callThumb2 r3, osdSetMainConfigT, 0x14, 0xd9      
+
+        
+@ Initialise the ball on the 2nd bitmap plane...
+        
+        callThumb2 r4, osdSetMain2ConfigT, 1, 0xd9
+        callThumb2 r4, osdSetMain2SizeT, 16, 8
+        callThumb2 r4, osdSetMain2PositionT, 160, 120
+        callThumb1 r4, osdSetMain2OffsetT, lcdVideoBuffer3
+
+        ldr r0, =theBall
+        ldr r1, =lcdVideoBuffer3
+        mov r2, #8
+lcpyy:  mov r3, #8
+lcpyx:  ldrh r4, [r0]
+        strh r4, [r1]
+        add r0, #2
+        add r1, #2
+        sub r3, #1
+         bne lcpyx
+        add r4, #1
+        add r1, #16
+        sub r2, #1
+         bne lcpyy
+
+        
 initGame:       
         ldr r0, =oposx
         mov r1, #160
@@ -74,20 +121,13 @@ loopb:
 
 
 @ ---------------------------------------@ Draw the ball
-        ldr r0, oposx
-        ldr r1, oposy
-        ldr r2, =0x8
-        ldr r3, =0x8
-        mov r4, #0
-        callThumb r6, lcdRectfT
-
         ldr r0, posx
         ldr r1, posy
-        ldr r2, =0x8
-        ldr r3, =0x8
-        ldr r4, =theBall
-        callThumb r6, lcdSpriteT
-
+        lsl r0, #1
+        add r0, #0x14
+        add r1, #0x12
+        callThumb r4, osdSetMain2PositionT
+        
         ldr r2, =0x4000
 del1:   sub r2, #1
         bpl del1
@@ -263,7 +303,7 @@ checkBrick:
         mov r0, #0
         ldr r3, =(10*12) 
         cmp r1, r3
-         bgt uBricks
+         bge uBricks
         ldrb r0, [r2, r1]
         cmp r0, #0
          beq uBricks
@@ -379,3 +419,7 @@ brickMap:
                 
 .include "../includes/lcd.S"
 .include "../includes/buttons.S"
+.include "../includes/color.S"
+
+sprite:
+.incbin     "image.rgb"
