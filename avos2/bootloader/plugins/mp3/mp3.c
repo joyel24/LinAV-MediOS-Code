@@ -15,23 +15,35 @@
 
 void intsub();
 void feedMas();
+void drawBar(int n);
+void updateParam(int n);
+void drawParams();
 
-    struct graphicsBuffer screenBitmap;
-    static int pal16[2] = {0x0000, 0xffff};
+struct graphicsBuffer screenBitmap;
+static int pal16[2] = {0x0000, 0xffff};
 
-    struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, 0};
+struct graphicsBuffer sprite5_8 = {0, 1, 5, 8, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, 0};
 
 static unsigned int buffmem[1];
 static char * mp3Buff = (void*)0x03600000;
 static int mp3ptr=0;
 static int fileSize;
 static int masReady=0;
+static int cparam=0;
+
+static char paramNames[][20] = {"Volume",     "Bass",
+                              "Treble",     "Loud",
+                              "Balance",    "MDBStrength",
+                              "MDBHarms",   "MDBCFreq",
+                              "MDBShape",   "MDBOn"};
+                              
+static int paramMins[] = {   0,-0x60,-0x60, 0x00,-0x80, 0x00, 0x00, 0x02, 0x05, 0x00};
+static int paramMaxs[] = {0x7f, 0x60, 0x60, 0x44, 0x7f, 0x7f, 0x7f, 30, 30, 0x01};
+static int paramVals[] = {0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x05, 0x00};
 
 int main(int argc, char * * argv) {
     unsigned int c, v, b;
-    unsigned int vol=0x60;
-    unsigned int speed=0x4800;
-    
+
     osdInitA();
 
     osdSetComponentConfigA(OSD_VIDEO1, 0);
@@ -57,14 +69,10 @@ int main(int argc, char * * argv) {
     osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT);
 
-    graphicsStringA(&screenBitmap, 0, 0, &sprite8_13, std8x13_, 9, 0,
+    graphicsStringA(&screenBitmap, 0, 0, &sprite5_8, std5x8_, 6, 0,
                 "Mp3 play v0.01 (c)DoGgEr");
-    graphicsStringA(&screenBitmap, 0, 134, &sprite8_13, std8x13_, 9, 0,
-                "VOL");
-    graphicsStringA(&screenBitmap, 0, 148, &sprite8_13, std8x13_, 9, 0,
-                "OUT L");
-    graphicsStringA(&screenBitmap, 0, 162, &sprite8_13, std8x13_, 9, 0,
-                "OUT R");
+    
+    drawParams();
 
 	inifatinfo();
 	inidir();
@@ -129,7 +137,7 @@ int main(int argc, char * * argv) {
     masConfigInput(MAS_CONFIGINPUT_MONO);
     masConfigOutput(0x0, 0x40, 0);
     masSetBalance(0x00);
-    masSetVolume(vol);
+    masSetVolume(0x60);
 
     for(c=0;c<20;c++) {}
 
@@ -169,102 +177,60 @@ int main(int argc, char * * argv) {
     debug("App started...\n");
 
 //    timersConfigA(0, TIMERS_TMMD_FREERUN, 0, 1023, 0x400);    
-    
-    v = (vol * (320-54)) >> 7;
-    b = 320-54-v;
-    if (b>0) graphicsBoxfA(&screenBitmap, 54 + v, 138, b, 6, 0x0000);
-    if (v>0) graphicsBoxfA(&screenBitmap, 54, 138, v, 6, 0x0202);
             
     while(1) {
         c = buttonsGetStatusA();
         if (c & BUTTONS_AV300_OFF) return 0;
 
         if (c & BUTTONS_AV300_UP) {
-            if (vol<0x7f) {
-                vol++;
-                masSetVolume(vol);
-                v = (vol * (320-54)) >> 7;
-                b = 320-54-v;
-                if (b>0) graphicsBoxfA(&screenBitmap, 54 + v, 138, b, 6, 0x0000);
-                if (v>0) graphicsBoxfA(&screenBitmap, 54, 138, v, 6, 0x0202);
+            if (cparam>0) {
+                pal16[1] = 0xffff;
+                graphicsStringA(&screenBitmap, 0, 10+(cparam*9), &sprite5_8, std5x8_, 6, 0,
+                        paramNames[cparam]);
+                cparam--;
+                pal16[1] = 0x0101;
+                graphicsStringA(&screenBitmap, 0, 10+(cparam*9), &sprite5_8, std5x8_, 6, 0,
+                        paramNames[cparam]);
+                for (c=0;c<20;c++) feedMas();
             }
         } else if (c & BUTTONS_AV300_DOWN) {
-            if (vol>0x00) {
-                vol--;
-                masSetVolume(vol);
-                v = (vol * (320-54)) >> 7;
-                b = 320-54-v;
-                if (b>0) graphicsBoxfA(&screenBitmap, 54 + v, 138, b, 6, 0x0000);
-                if (v>0) graphicsBoxfA(&screenBitmap, 54, 138, v, 6, 0x0202);
+            if (cparam<9) {
+                pal16[1] = 0xffff;
+                graphicsStringA(&screenBitmap, 0, 10+(cparam*9), &sprite5_8, std5x8_, 6, 0,
+                        paramNames[cparam]);
+                cparam++;
+                pal16[1] = 0x0101;
+                graphicsStringA(&screenBitmap, 0, 10+(cparam*9), &sprite5_8, std5x8_, 6, 0,
+                        paramNames[cparam]);
+                for (c=0;c<20;c++) feedMas();
             }
         } else if (c & BUTTONS_AV300_LEFT) {
-            if (speed>0x80) {
-                speed-=0x80;    
-                buffmem[0] = speed;
-                masWriteD0A(0x7f3, buffmem, 1);
-                
-                buffmem[0] = 0x125;
-                masWriteD0A(0x7f1, buffmem, 1);     // Demand mode
-            
-   //             debug("Starting app...");
-
-   //             for(c=0;c<20;c++) {}
-                
-   //             buffmem[0] = 0x0c;
-   //             masWriteD0A(0x7f6, buffmem, 1);     // App select - RUN!
-            
-   //             while(1) {
-   //                 masReadD0A(0x7f7, buffmem, 1);      // App running
-   //                 debug("Waiting for app start [%02x]...\n", buffmem[0]);
-   //                 if (buffmem[0]==0x0c) break;
-   //             }
-                
-                debug("App started...\n");
-                
+            if (paramVals[cparam]>paramMins[cparam]) {
+                paramVals[cparam]--;
+                updateParam(cparam);
             }
         } else if (c & BUTTONS_AV300_RIGHT) {
-            if (speed<0xff80) {
-                speed+=0x80;    
-                buffmem[0] = speed;
-                masWriteD0A(0x7f3, buffmem, 1);
-                
-                buffmem[0] = 0x125;
-                masWriteD0A(0x7f1, buffmem, 1);     // Demand mode
-            
-   //             debug("Starting app...");
-            
-   //             for(c=0;c<20;c++) {}
-                
-   //             buffmem[0] = 0x0c;
-   //             masWriteD0A(0x7f6, buffmem, 1);     // App select - RUN!
-            
-   //             while(1) {
-   //                 masReadD0A(0x7f7, buffmem, 1);      // App running
-   //                 debug("Waiting for app start [%02x]...\n", buffmem[0]);
-   //                 if (buffmem[0]==0x0c) break;
-   //             }
-                
+            if (paramVals[cparam]<paramMaxs[cparam]) {
+                paramVals[cparam]++;
+                updateParam(cparam);
             }
         }
-
         
-        for (c=0;c<20;c++) {
-            feedMas();
-        }
+        for (c=0;c<20;c++) feedMas();
 
 //            debug("gioBitset %08x\n", gioGetAllBitsetsA());
         
         b = (masReadCodecRegA(0x000c) & 0x7fff);
-        v = (b * (320-54)) >> 15;
-        b = 320-54-v;
-        if (b>0) graphicsBoxfA(&screenBitmap, 54 + v, 152, b, 6, 0x0000);
-        if (v>0) graphicsBoxfA(&screenBitmap, 54, 152, v, 6, 0x0202);
+        v = (b * 250) >> 15;
+        b = 250-v;
+        if (b>0) graphicsBoxfA(&screenBitmap, 70 + v, 222, b, 6, 0x0000);
+        if (v>0) graphicsBoxfA(&screenBitmap, 70, 222, v, 6, 0x0202);
 
         b = (masReadCodecRegA(0x000d) & 0x7fff);
-        v = (b * (320-54)) >> 15;
-        b = 320-54-v;
-        if (b>0) graphicsBoxfA(&screenBitmap, 54 + v, 166, b, 6, 0x0000);
-        if (v>0) graphicsBoxfA(&screenBitmap, 54, 166, v, 6, 0x0202);
+        v = (b * 250) >> 15;
+        b = 250-v;
+        if (b>0) graphicsBoxfA(&screenBitmap, 70 + v, 232, b, 6, 0x0000);
+        if (v>0) graphicsBoxfA(&screenBitmap, 70, 232, v, 6, 0x0202);
 
 //        for (c=0xfd0;c<0xfd8;c++) {
 //            c = 0xfd0;
@@ -316,4 +282,38 @@ void feedMas() {
         if (mp3ptr>=fileSize) mp3ptr=0;
     }
     debug("masDataFed %d\n", cnt);
+}
+
+void drawBar(int n) {
+    int x, bx;
+    // 70 start - 320 = width of 250.
+
+    x = (paramVals[n] - paramMins[n]) * 250 / (paramMaxs[n] - paramMins[n]);
+    bx = 250 - x;
+    if (bx>0) graphicsBoxfA(&screenBitmap, 70 + x, 10+(n*9) + 2, bx, 5, 0x0000);
+    if (x>0) graphicsBoxfA(&screenBitmap, 70, 10+(n*9)+2, x, 5, 0x0202);
+}
+
+void drawParams() {
+    int c;
+    for (c=0;c<10;c++) {
+        pal16[1] = 0xffff;
+        if (c==cparam) pal16[1] = 0x0101;
+        graphicsStringA(&screenBitmap, 0, 10+(c*9), &sprite5_8, std5x8_, 6, 0,
+                paramNames[c]);
+        drawBar(c);
+    }
+}
+
+void updateParam(int n) {
+    drawBar(n);
+    // Now update the codec stuff...
+    if (n==0) masSetVolume(paramVals[n]);
+    if (n==1) masSetBass(paramVals[n]);
+    if (n==2) masSetTreble(paramVals[n]);
+    if (n==3) masSetLoudness(MAS_LOUDNESS_NORMAL, paramVals[n]);
+    if (n==4) masSetBalance(paramVals[n]);
+    if (n==5 || n==6 || n==7 || n==8 || n==9) {
+        masConfigMDB(paramVals[5], paramVals[6], paramVals[7], paramVals[8], paramVals[9]); 
+    }
 }
