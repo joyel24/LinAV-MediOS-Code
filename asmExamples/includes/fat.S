@@ -134,11 +134,6 @@ fatCacheHit:
         ldr r4, =fatFATBuffer
         ldr r7, [r4, r5]
 
-        mov r1, r7
-        ldr r0, =(msg500 + 12)
-        callThumb r2, hex8T
-        callThumb2 r2, terminalPutsCT, msg500, 0xfbfb
-
         mov r0, r7        
         pop {r1, r2, r3, r4, r5, r6, r7}
         pop {r1}

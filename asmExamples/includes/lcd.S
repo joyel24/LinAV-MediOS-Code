@@ -160,7 +160,9 @@ lcdLoop3:
         cmp r1, #0
          beq lcdNco
         mov r1, r7          @ non zero! Set to required color.
-lcdNco:
+        b lcdDco
+lcdNco: ldr r1, fontBG
+lcdDco:
         add r4, #2
 
         strh r1, [r5, r6]
@@ -351,7 +353,9 @@ lcdCLS2:
         .arm
         
 @ SYSTEM FONT
-        
+
+fontBG: .word 0         @ eugh
+
 font1tab:
         .word font1_20, font1_21, font1_22, font1_23
         .word font1_24, font1_25, font1_26, font1_27

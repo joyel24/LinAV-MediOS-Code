@@ -136,7 +136,7 @@ nodraw:
         ldr r1, posy
         ldr r2, =0xffff
         callThumb r3, lcdPlotT
-        
+
         ldr r2, =0x4000
 del1:   sub r2, #1
         bne del1
@@ -152,7 +152,7 @@ posy:   .word 120
 oposx:  .word 160
 oposy:  .word 120
 
-pencolor: .word 0x0404
+pencolor: .word 0x0101
 
 drawing:.word 0             @ 1=draw
                             @ 0=move
