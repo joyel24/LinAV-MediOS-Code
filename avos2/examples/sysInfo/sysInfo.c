@@ -7,6 +7,7 @@
 #include <mas.h>
 
 char* cpldVer = "CPLD Version: xxxxxxxx";
+char* modID = "Module ID:    xxxxxxxx";
 char* masVer = "MAS  Version: xxxxxxxx";
 
 struct graphicsBuffer screenBitmap;
@@ -51,8 +52,12 @@ int main() {
     graphicsStringA(&screenBitmap, 0, 9, &sprite5_8, std5x8_, 6, 0,
                 cpldVer);
 
-    sprintf(cpldVer, "MAS  Version: %08X", masGetVersionA());
+    sprintf(modID, "Module ID:    %08X", cpldGetModuleIDA());
     graphicsStringA(&screenBitmap, 0, 18, &sprite5_8, std5x8_, 6, 0,
+                modID);
+                
+    sprintf(masVer, "MAS  Version: %08X", masGetVersionA());
+    graphicsStringA(&screenBitmap, 0, 27, &sprite5_8, std5x8_, 6, 0,
                 masVer);
                 
     while(1) {

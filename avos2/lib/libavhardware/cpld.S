@@ -70,6 +70,29 @@ cpldGetVersion:
         orr r0, r2
         bx lr
 
+@ ------------------------------------------------------------------------------
+@ cpldGetModuleIDA()
+@
+.globl cpldGetModuleIDA
+cpldGetModuleIDA:
+        switchThumb
+.globl cpldGetModuleID
+.thumb_func
+
+cpldGetModuleID:
+        ldr r1, =0x02600000
+cpldnstab:                      // Not stable!!! Wait until it is...
+        ldrh r0, [r1]
+        lsl r0, #28
+        lsr r0, #28
+        ldrh r2, [r1]
+        lsl r2, #28
+        lsr r2, #28
+        cmp r0, r2
+         bne cpldnstab
+cpldstab:
+        bx lr
+        
         .ltorg
         .arm
         

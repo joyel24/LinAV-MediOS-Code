@@ -24,10 +24,21 @@ typedef unsigned long u32;
 #define CPLD_MODE_SMARTMEDIACARD        8       // Not tested yet
 #define CPLD_MODE_MULTIMEDIACARD        9       // Not tested yet
 
+#define CPLD_MODULE_MMC         1       // 5 MMC module
+#define CPLD_MODULE_SSFDC       3       // 2 SSFDC module
+#define CPLD_MODULE_MMC_ALT     5       // 5 MMC module
+#define CPLD_MODULE_SSFDC_ALT   7       // 2 SSFDC module
+#define CPLD_MODULE_CFC         8       // 1 CFC module
+#define CPLD_MODULE_VIDEO       0x0a    // 4|12 Video module
+#define CPLD_MODULE_CAMERA      0x0b    // 7|13|14 Camera module
+#define CPLD_MODULE_CFC_ALT     0x0c    // 1 CFC module
+
+
 extern void cpldSetModeA(u32 mode);
 extern u32 cpldGetVersionA();
     // bit 15 - Some flag or other
     // bits 14-0 - CPLD Version
-
+extern u32 cpldGetModuleIDA();
+    
 #endif
 
