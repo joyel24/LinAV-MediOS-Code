@@ -16,13 +16,81 @@
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
- 
-#define tstXY(x,y)  {if(x>SCREEN_WIDTH) return; if(x<0) return; if(y>SCREEN_HEIGHT) return; if(y<0) return;}
-#define tstWH(x,y,w,h)  {if(x+w>SCREEN_WIDTH)return; if(x+w<0) return; if(y+h>SCREEN_HEIGHT) return; if(y+h<0) return;}
+
+/*
+** declaration des variables utilisées par Xlib 
+*/
+
+  char* displayName = 0;			/* Nom du serveur */
+  Display* display;				/* display */
+  int screen; 					/* numero de l'ecran */
+  Window window;				/* creation de la fenetre */
+  GC gc;					/* contexte graphique */
+  XEvent event;					
+  char texte[] = "LinAV project";		/*pour les evenements */
 
 int ini_graphics()
 {
-/* initialisation X*/
+ /*connexion au serveur X */
+ 
+ display = XOpenDisplay(displayName);
+ 
+ if(!display) 
+ {
+	printf("connexion impossible au serveur X");
+	exit(1);
+ }
+	      
+ /*recuperation du contexte graphique (infos grpahiques) */
+
+ screen = DefaultScreen(display);
+ gc = DefaultGC(display, screen);
+
+ /*creation de la fenetre window*/
+
+ window = XCreateSimpleWindow(
+	  display, 	        	   // Display
+	  DefaultRootWindow(display),  // Fenêtre mère
+	  0, 0, 300, 100, 	   // Géométrie 
+	  10,			   // Largeur du bord
+	  BlackPixel(display, screen), // Couleur du bord
+	  WhitePixel(display, screen)  // Couleur du fond
+	  );
+	  
+ if(!window) 
+ {
+	printf("impossible de creer la fenetre");
+	exit(1);
+ }
+ 
+  /* Mise en place du titre */
+  
+  XStoreName(display, window, texte);
+
+  /* Sélection des événements */
+  
+  XSelectInput(display, window, ExposureMask);
+
+  /* Affichage de la fenêtre */
+  
+  XMapWindow(display, window);
+	    
+ /* Boucle d'attente d'événements */
+  
+  while(1) 
+  {
+    /* Récupération de l'événement suivant*/
+    XNextEvent(display, &event);
+    
+    switch (event.type) 
+    {
+      case Expose : 
+       printf("Événement Expose :)\n");
+      break;
+    }
+  }
+  return 0;
+
 }
 
 void close_graphics()
