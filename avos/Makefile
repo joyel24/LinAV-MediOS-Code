@@ -44,9 +44,10 @@ debug: src/examples/*.c
     done
 
 boot: src/boot/boot.c
+	arm-linux-as -mfpu=softfpa -mthumb-interwork -o bootstart.o src/boot/bootstart.s
 	arm-linux-gcc -mthumb-interwork -static-libgcc -c -Wa,-R\
     -fno-zero-initialized-in-bss -Iinclude/ src/boot/boot.c
-	arm-linux-ld -N -Ttext 0x03400000 -e main -o boot.elf boot.o\
+	arm-linux-ld -N -Ttext 0x03400000 -e main2 -o boot.elf bootstart.o boot.o\
     lib/*.o -lfloat -lgcc -L/home/jimmy/archos/uclib/toolchain/gcc-3.3.x/toolchain_arm_nofpu/lib/gcc-lib/arm-linux-uclibc/3.3.2/
 	arm-linux-objcopy -O binary boot.elf boot.bin
 	rm -f boot.elf boot.o

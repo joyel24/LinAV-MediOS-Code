@@ -31,7 +31,7 @@ char dirLine[] = "xxxxxxxx.xxx\n";
 
 struct tm* ourTime;
     char timeSt[] = "xx:xx:xx.xx";
-
+    
 int main() {
     int c, i, totalEntries;
     int cursorpos=0;
