@@ -130,35 +130,57 @@ __trap_addrexcptn_ptr:  .word do_trap_addrexcptn
 trap_irq:
 @	subs pc, r14, #4
 
-	stmdb sp!, {r0, r1, r2} @// Store temp registers...
-	mrs r1, cpsr            @// Remember current CPU state...
-	orr r1, r1, #0xC0
-	msr cpsr_c, r1          @// Disable all interrupts...
-	mrs r0, spsr            @// Get user's process state word...
-	subs r2, lr, #4         @// Remember address we came from...
-	orr r0, r0, #0xC0       @// Disable all interrupts in user's state...
-	bic r0, r0, #0x20       @// We want ARM mode...
-	msr cpsr_c, r0          @// switch to user's mode...
+    stmdb sp!, {r0, r1, r2} @// Store temp registers...
+    mrs r1, cpsr            @// Remember current CPU state...
+    orr r1, r1, #0xC0
+    msr cpsr_c, r1          @// Disable all interrupts...
+    mrs r0, spsr            @// Get user's process state word...
+    subs r2, lr, #4         @// Remember address we came from...
+    orr r0, r0, #0xC0       @// Disable all interrupts in user's state...
+    bic r0, r0, #0x20       @// We want ARM mode...
+    msr cpsr_c, r0          @// switch to user's mode...
 
-	@// Saving context in user's stack
-	@// Push order:
-	@// pc, lr, r12, r11, ... (sp must not be stored !!!)
-	stmdb sp!, {r2}         @// Store "came from" address as new pc...
-	stmdb sp!, {r3-r12, lr}
-	mov r12, sp             @// Now r12 is our user-mode stack pointer :)
-	msr cpsr_c, r1          @// Switch back to IRQ mode...
+    @// Saving context in user's stack
+    @// Push order:
+    @// pc, lr, r12, r11, ... (sp must not be stored !!!)
+    stmdb sp!, {r2}         @// Store "came from" address as new pc...
+    stmdb sp!, {r3-r12, lr}
+    mov r12, sp             @// Now r12 is our user-mode stack pointer :)
+    msr cpsr_c, r1          @// Switch back to IRQ mode...
 
-	@// Store user registers r0, r1, r2
-	mrs r4, spsr            @// r4 = SPSR...
-	ldmia sp!, {r0, r1, r2} @// Load temp user registers back...
-	stmdb r12!, {r0, r1, r2}@// Store user registers in user stack...
-	stmdb r12!, {r4}        @// Store user SPSR...
-	ldr r1, g_pTaskRing     @// r1 contains now address of active TCB...
-	str r12, [r1]           @// User's top of stack stored in TCB...
+    @// Store user registers r0, r1, r2
+    mrs r4, spsr            @// r4 = SPSR...
+    ldmia sp!, {r0, r1, r2} @// Load temp user registers back...
+    stmdb r12!, {r0, r1, r2}@// Store user registers in user stack...
+    stmdb r12!, {r4}        @// Store user SPSR...
+    ldr r1, g_pTaskRing     @// r1 contains now address of active TCB...
+    str r12, [r1]           @// User's top of stack stored in TCB...
 
-	MSR CPSR_c, #0x92
-	bl __irq_trap
-	bl kset_next_ready_task
+    MSR CPSR_c, #0x92
+    ldr     r0, =0x30506    
+    ldrh    r0, [r0]
+    mov     r0, r0, lsl  #16
+    ldr     r6, =0x30504  @IRQ0_STATUS reg addr
+    ldrh    r6, [r6]               @ get interrupts irq_0 and irq_1
+    
+    orr     r6, r6, r0
+    mvn     r6, r6
+    mov     r0, #0
+irqsearch1:
+    tst     r6, #1                       @ Is IRQ set?
+    bne     irqsearch2                   @ Yes... exit with NEQ
+    add     r0, r0, #1
+    mov     r6, r6, lsr #1
+    cmp     r0, #32
+    bcc     irqsearch1
+irqsearch2:                                          @ EQ will be set if we reach 32                
+    movne   r1, sp
+    @
+    @ routine called with r0 = irq number, r1 = struct pt_regs *
+    @
+
+    blne     do_IRQ
+    bl kset_next_ready_task
 
 .global kload_context
 kload_context:
@@ -265,29 +287,4 @@ avFIQout:
 .avLOOPval2:	.long	0x0
 .avLOOPval3:	.long	0x0
 
-.align	5
-__irq_trap:
-    ldr     r0, =0x30506    
-    ldrh    r0, [r0]
-    mov     r0, r0, lsl  #16
-    ldr     r6, =0x30504  @IRQ0_STATUS reg addr
-    ldrh    r6, [r6]               @ get interrupts irq_0 and irq_1
-    
-    orr     r6, r6, r0
-    mvn     r6, r6
-    mov     r0, #0
-irqsearch1:
-    tst     r6, #1                       @ Is IRQ set?
-    bne     irqsearch2                   @ Yes... exit with NEQ
-    add     r0, r0, #1
-    mov     r6, r6, lsr #1
-    cmp     r0, #32
-    bcc     irqsearch1
-irqsearch2:                                          @ EQ will be set if we reach 32                
-    movne   r1, sp
-    @
-    @ routine called with r0 = irq number, r1 = struct pt_regs *
-    @
 
-    bne     do_IRQ
-    mov pc, lr

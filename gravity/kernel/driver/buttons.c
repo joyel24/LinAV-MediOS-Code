@@ -51,6 +51,18 @@ __IRAM_CODE void chk_button(void)
     if(gio_is_set(GIO_ON_BTN))  val |= (0x1<<8);
     if(gio_is_set(GIO_OFF_BTN)) val |= (0x1<<9);
     
+ /*   if(val == 0x3FF)
+    {
+        for(btn=0;btn<NB_BUTTONS;btn++)
+            if(nb_pressed[btn]!=0)
+                nb_pressed[btn]=0;
+        nb_off_press=0;
+#ifdef USE_DEBUG_ON_SCREEN 
+        nb_debug_switch=0;
+#endif
+        return;
+    }
+    */
 #ifdef USE_DEBUG_ON_SCREEN  
     if(BTN_PRESSED(val,BUTTON_ON) && BTN_PRESSED(val,BUTTON_MENU1))
     {

@@ -13,6 +13,10 @@
 #ifndef __BAT_POWER_H
 #define __BAT_POWER_H
 
+#include <kernel/hardware.h>
+#include <kernel/io.h>
+#include <kernel/tsc2003.h>
+
 #define AV_TIMER_ON_BAT        0
 #define AV_TIMER_ON_DC         1
 
@@ -25,13 +29,22 @@
 #define HD_FREQ_DEFAULT_0    10 /* 10s timer */
 #define HD_FREQ_DEFAULT_1    10 /* 10s timer */
 
+/*
 int kpowerConnected(void);
 int kgetBatLevel(void);
+*/
+#define kpowerConnected()   (inw(POWER_STATE) & 0x20)
+#define kgetBatLevel()      tsc2003getVal(CMD_BAT0|INTERNAL_ON)
+
+#define lcd_off()           lcd_set_state(0)
+#define lcd_on()            lcd_set_state(1)
 
 void lcd_set_state(int state);
 int  lcd_get_state(void);
+/*
 void lcd_off(void);
 void lcd_on(void);
+*/
 void lcd_launchTimer(void);
 void lcd_timer_action(void);
 

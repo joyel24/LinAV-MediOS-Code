@@ -17,5 +17,5 @@
 extern void* kmalloc (int nBytes);
 extern void kfree (void* ptr);
 extern unsigned long kmemavail ();
-
+extern void init_malloc (void *beg, long size);
 #endif

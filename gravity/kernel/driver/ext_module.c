@@ -139,13 +139,10 @@ int ext_module_register_action(struct module_actions * action_struct,int module_
 
 int get_module(void)
 {
-    int res,res2,i;
+    int res,res2;
     res=cpld_read(CPLD0);
     while((res2=(cpld_read(CPLD0)&0xF))!=res) /* wait for the value to become stable */
-    {
-        for(i=0;i<0x10;i++) /*nothing*/ ;
         res=res2;
-    }
     return (res&0xff);
 }
 
@@ -166,6 +163,8 @@ void init_ext_module(void)
     */
         
     /* setting up a chker to watch module state */
+    ini_hw_chker(&ext_module_chker);
+    ext_module_chker.name="ext module";
     ext_module_chker.action=chk_ext_module;
     add_hw_chker(&ext_module_chker);
     

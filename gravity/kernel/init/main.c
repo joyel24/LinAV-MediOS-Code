@@ -29,6 +29,10 @@
 #include <kernel/bat_power.h>
 #include <kernel/buttons.h>
 #include <kernel/disk.h>
+#include <kernel/fm_remote.h>
+#include <kernel/ext_module.h>
+#include <kernel/sound.h>
+#include <kernel/cmd_line.h>
 
 
 #include <kernel/threads.h>

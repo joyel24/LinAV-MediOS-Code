@@ -162,13 +162,19 @@ void __clf(void);
         : "0" (clf_var)                        \
         : "memory");                           \
     })
-        
+
+#if 1        
 #define     irq_ack(IRQ)       ({ outw((1<<INTC_IRQ_SHIFT(IRQ)), INTC_IRQ_STATUS(IRQ)); })
 #define     fiq_ack(FIQ)       ({ outw((1<<INTC_FIQ_SHIFT(FIQ)), INTC_FIQ_STATUS(FIQ)); })
 #define     mask_irq(IRQ)      ({ unsigned int __addr=INTC_IRQ_ENABLE(IRQ); outw(inw(__addr)&(~(1<<INTC_IRQ_SHIFT(IRQ))),__addr); })
 #define     unmask_irq(IRQ)    ({ unsigned int __addr=INTC_IRQ_ENABLE(IRQ); outw(inw(__addr)|(1<<INTC_IRQ_SHIFT(IRQ)),__addr); })
 #define     mask_ack_irq(IRQ)  ({ mask_irq(IRQ); irq_ack(IRQ); })
-    
+#else
+extern void mask_irq(unsigned int irq);
+extern void unmask_irq(unsigned int irq);
+extern void mask_ack_irq(unsigned int irq);
+#endif
+
 struct irq_data_s {
     int enable;
     void (*action)(int irqnr);
@@ -186,10 +192,4 @@ extern int  irq_state(int irq);
 
 extern void print_irq(void);
 
-
-/*
-extern void mask_irq(unsigned int irq);
-extern void unmask_irq(unsigned int irq);
-extern void mask_ack_irq(unsigned int irq);
-*/
 #endif

@@ -18,6 +18,9 @@
 #include <api.h>
 #include <kernel/pipes.h>
 #include <kernel/threads.h>
+#include <kernel/irq.h>
+#include <kernel/timer.h>
+#include <kernel/hw_chk.h>
 
 
 #include <kernel/cmd_line.h>
@@ -55,6 +58,12 @@ struct cmd_line_s cmd_tab[] = {
         help_str   : "restarts device",
         cmd_action : do_restart,
         nb_args    : 0
+    },    
+    {
+        cmd        : "handlerInfo",
+        help_str   : "Prints IRQ, timer, HW chk handler",
+        cmd_action : print_handler_info,
+        nb_args    : 0
     },
     /* this has to be the last entry */
     {
@@ -85,16 +94,16 @@ __IRAM_CODE void cmd_line_task(PIPE * uart_pipe)
 {
     unsigned char c='\0';
     int nb_args=0;
-    int i;
     struct cmd_line_s * cmd_line;
     unsigned  char * ptr;
     
     while(1)
     {
+loop:
         c='\0';
         while(1)
         {
-            API_PIPE_RECV(uart_pipe,&c,1);
+            API_PIPE_RECV((HPIPE)uart_pipe,&c,1);
             
             if(c=='\n' || c=='\r')               /* end of line => add \0 to end the line */
             {
@@ -240,9 +249,7 @@ __IRAM_CODE void cmd_line_task(PIPE * uart_pipe)
             /* Ready to get a new cmd */
             cur_cmd[0]='\0';
             cur_pos=0;
-        }
-loop:
-           
+        } 
     }
     printk("OUT OF CMDLINE LOOP\n");
 }
@@ -253,8 +260,8 @@ void init_cmd_line(void)
 {
     cur_pos=0;
     
-    arg_list = (char**)kmalloc(sizeof(char*)*MAX_ARGS);
-    cur_cmd = (char*)kmalloc(sizeof(char)*MAX_CMD_LEN);
+    arg_list = (unsigned char**)kmalloc(sizeof(unsigned char*)*MAX_ARGS);
+    cur_cmd = (unsigned char*)kmalloc(sizeof(unsigned char)*MAX_CMD_LEN);
     
     cur_cmd[0]='\0';
     
@@ -269,7 +276,7 @@ void init_cmd_line(void)
     printk("[init] cmd line\n");
 }
 
-void do_help(char ** params)
+void do_help(unsigned char ** params)
 {
     int i;
     printk("Available cmd:\n");
@@ -277,36 +284,43 @@ void do_help(char ** params)
         printk("%s: %s\n",cmd_tab[i].cmd,cmd_tab[i].help_str);
 }
 
-void do_mem (char ** params)
+void do_mem (unsigned char ** params)
 {
     unsigned long nBytes;
     API_MEMAVAIL (&nBytes);
     printk("Free memory: %i KB\n", nBytes >> 10);
 }
 
-void do_run (char ** params)
+void do_run (unsigned char ** params)
 {
     API_RUN_GRV (params[0], 0);
 }
 
-void do_tasks (char ** params)
+void do_tasks (unsigned char ** params)
 {
-	int nTasks = 0;
+    int nTasks = 0;
 
-	__cli ();
-	TASK_INFO* pStart = g_pTaskRing;
-	TASK_INFO* pWork = pStart;
-	do
-		pWork = pWork->pNextTask, nTasks ++;
-			while (pStart != pWork);
-	__sti ();
+    __cli ();
+    TASK_INFO* pStart = g_pTaskRing;
+    TASK_INFO* pWork = pStart;
+    do
+            pWork = pWork->pNextTask, nTasks ++;
+                    while (pStart != pWork);
+    __sti ();
 
-	printk("Tasks running: %i\n", nTasks);
+    printk("Tasks running: %i\n", nTasks);
 }
 
-void do_restart (char ** params)
+void do_restart (unsigned char ** params)
 {
     int (*restart_restart)(void);
     restart_restart = 0;
     restart_restart ();
+}
+
+void print_handler_info (unsigned char ** params)
+{
+    print_irq();
+    print_timer();
+    print_HW_chk();
 }

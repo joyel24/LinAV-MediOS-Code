@@ -38,7 +38,7 @@ void chk_usb_fw(void)
         //send_evt(EVT_FW_EXT);
     }
 }
-
+/*
 int kusbIsConnected(void)
 {
    int val=inw(USB_STATE);
@@ -65,6 +65,7 @@ void FW_disable(void)
 {
     cpld_select(CPLD_FW_EXT,0x0);
 }
+*/
 
 void init_usb_fw(void)
 {

@@ -25,6 +25,7 @@
 
 #include <kernel/bat_power.h>
 
+/*
 int kpowerConnected(void)
 {
     int val=inw(POWER_STATE);
@@ -34,7 +35,7 @@ int kpowerConnected(void)
 int kgetBatLevel(void)
 {
     return tsc2003getVal(CMD_BAT0|INTERNAL_ON);
-}
+}*/
 
 int lcd_state=1;
 int lcd_bright=10;
@@ -78,6 +79,7 @@ int lcd_get_state(void)
     return lcd_state;
 }
 
+/*
 void lcd_off(void)
 {
     lcd_set_state(0);    
@@ -87,6 +89,7 @@ void lcd_on(void)
 {
     lcd_set_state(1);    
 }
+*/
 
 void lcd_launchTimer(void)
 {

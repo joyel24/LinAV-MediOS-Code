@@ -17,10 +17,11 @@
 #include <kernel/pipes.h>
 #include <kernel/irq.h>
 #include <kernel/swi.h>
+#include <api.h>
 
 __IRAM_DATA MEMORY_CONTEXT g_MainMemoryContext;
 
-__IRAM_CODE void init_malloc (long beg, long size)
+__IRAM_CODE void init_malloc (void * beg, long size)
 {
 	init_memory_context (&g_MainMemoryContext);
 	bpool (&g_MainMemoryContext, beg, size);

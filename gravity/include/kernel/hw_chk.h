@@ -26,6 +26,7 @@ struct hw_chk_s {
 void ini_hw_chker(struct hw_chk_s * hw_chk_data);
 void add_hw_chker(struct hw_chk_s * hw_chk_data);
 void del_hw_chker(struct hw_chk_s * hw_chk_data);
-
+void print_HW_chk(void);
+void init_HW_chk(void);
 
 #endif

@@ -17,16 +17,18 @@
 struct cmd_line_s {
     char * cmd;
     char * help_str;
-    void   (*cmd_action)(char ** params);
+    void   (*cmd_action)(unsigned char ** params);
     int    nb_args;
 };
 
 /* cmd list */
 
-void do_help(char ** params);
-void do_mem (char ** params);
-void do_run (char ** params);
-void do_tasks (char ** params);
-void do_restart (char ** params);
+void do_help(unsigned char ** params);
+void do_mem (unsigned char ** params);
+void do_run (unsigned char ** params);
+void do_tasks (unsigned char ** params);
+void do_restart (unsigned char ** params);
+void print_handler_info (unsigned char ** params);
+void init_cmd_line(void);
 
 #endif

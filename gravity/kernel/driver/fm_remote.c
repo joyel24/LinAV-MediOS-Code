@@ -89,18 +89,18 @@ void FM_remote_thread(PIPE * fm_remote_pipe)
         //printk("FM loop ");
         if(FM_connected)
         {        
-            API_PIPE_RECV(fm_remote_pipe,&c,1);
+            API_PIPE_RECV((HPIPE)fm_remote_pipe,&c,1);
         }
         else
         {
-            API_PIPE_RECV(fm_remote_pipe,&c,1);
+            API_PIPE_RECV((HPIPE)fm_remote_pipe,&c,1);
             printk("Read: %02x\n",c);
             switch(c)
             {
                 case 0xf8:
-                    while(API_PIPE_TEST(fm_remote_pipe))
+                    while(API_PIPE_TEST((HPIPE)fm_remote_pipe))
                     {
-                        API_PIPE_RECV(fm_remote_pipe,&c,1);
+                        API_PIPE_RECV((HPIPE)fm_remote_pipe,&c,1);
                         if(c!=0xf8)
                             break;
                     }

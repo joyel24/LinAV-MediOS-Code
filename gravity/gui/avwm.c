@@ -34,14 +34,11 @@ extern void drawStatusLine(void);
 
 void avwm(void)
 {
-    DIR * dir;
-    struct dirent* entry;
-    
-
+    /*DIR * dir;
+    struct dirent* entry;*/
     
     int fd,size,cnt;
     struct mp3_play data;
-    
     
     printf("Starting AvWm\n");
     
