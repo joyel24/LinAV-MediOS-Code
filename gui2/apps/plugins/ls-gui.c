@@ -200,6 +200,9 @@ int is_text_type(char * extension)
 int launchBin(char * name)
 {
 	int pid;
+
+	cops->clearEventQueue();
+
 	pid = vfork();
 	if (pid == 0) {
 		execl(name,name,(char*)0);
@@ -227,6 +230,8 @@ void launchSoundPlayer(char *name)
 {
 	int pid;
 
+	cops->clearEventQueue();
+
 	pid = vfork();
 	if (pid == 0) {
 		execl("/mnt/play", "play", name, 70, 0);
@@ -250,6 +255,9 @@ int launchScript(char * name)
 {
 	char tmp[1000];
 	int pid;
+
+	cops->clearEventQueue();
+	
 	pid = vfork();
 	if (pid == 0) {
 		execl("/bin/sh", "sh", name);
