@@ -19,3 +19,5 @@ typedef unsigned long u32;
 extern void masReset();
 extern u32 masGetVersion();
 extern u32 masReadReg(u32 reg);
+extern u32 masReadCodecReg(u32 reg);
+extern u32 masWriteCodecReg(u32 reg, u32 val);

@@ -52,10 +52,28 @@ int main() {
     graphicsString(&screenBitmap, 0, 14, &sprite8_13, std8x13_, 9, 0,
                 masVer);
 
-    for (v=0;v<0x100;v++) {
-    c = masReadReg(v);
+    c = masWriteCodecReg(0x0e, 0x0000);
+    c = masWriteCodecReg(0x11, 0x0000);     // Balance = center
     stringPutHex(masReg, c, 8);
     uartOuts(masReg);
+    c = masWriteCodecReg(0x10, 0x6000);     // Volume
+    stringPutHex(masReg, c, 8);
+    uartOuts(masReg);
+    c = masWriteCodecReg(0x06, 0x4000);     // Input gain
+    stringPutHex(masReg, c, 8);
+    uartOuts(masReg);
+
+    c = masWriteCodecReg(0, 0xffff);        // Enable stuff
+    stringPutHex(masReg, c, 8);
+    uartOuts(masReg);
+    
+    uartOuts("Done write...\n");
+    
+    for (v=0;v<0x40;v++) {
+        //c = masReadReg(v);
+        c = masReadCodecReg(v);
+        stringPutHex(masReg, c, 8);
+        uartOuts(masReg);
     //graphicsString(&screenBitmap, 0, 14*2, &sprite8_13, std8x13_, 9, 0,
     //            masReg);
     }        
