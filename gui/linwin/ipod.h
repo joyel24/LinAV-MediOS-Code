@@ -51,6 +51,16 @@
 #define MIN_CONTRAST	0
 #define MAX_CONTRAST	128
 
+
+#define BOOKMARK_BEGIN 1000
+#define BOOKMARK_DIR 1000
+#define BOOKMARK_MP3 1001
+#define BOOKMARK_PIC 1002
+#define BOOKMARK_DOC 1003
+#define BOOKMARK_END 1003
+
+#define LINWIN_NAME "LinWin V0.18"
+
 int ipod_get_contrast(void);
 int ipod_set_contrast(int contrast);
 

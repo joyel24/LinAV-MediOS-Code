@@ -359,7 +359,7 @@ main(int argc, char **argv)
 
    if(argc>1)
    {
-      goToBrowser=argv[1];
+      goToBrowser=atoi(argv[1]);
    }
 
 	new_menu_window();

@@ -24,6 +24,7 @@
 #include "piezo.h"
 #include "av3xx_colordef.h"
 
+extern void new_bookmark_window(int type);
 extern void new_contrast_window(void);
 extern void new_browser_window(void);
 extern void toggle_backlight(void);
@@ -66,6 +67,7 @@ struct menu_item {
 #define ACTION_MENU_CHECK 5
 
 typedef void (*menu_action_t) (void);
+typedef void (*menu_actiontype_t) (int type);
 
 #if 0
 static struct menu_item browse_menu[] = {
@@ -80,6 +82,14 @@ static struct menu_item browse_menu[] = {
 
 static struct menu_item games_menu[] = {
 	{"Othello", ACTION_MENU, new_oth_window, -1},
+	{0, 0, 0, -1}
+};
+
+static struct menu_item favorites_menu[] = {
+	{"Dirs", ACTION_MENU, new_bookmark_window, BOOKMARK_DIR},
+	{"Mp3s", ACTION_MENU, new_bookmark_window, BOOKMARK_MP3},
+	{"Pics", ACTION_MENU, new_bookmark_window, BOOKMARK_PIC},
+	{"Docs", ACTION_MENU, new_bookmark_window, BOOKMARK_DOC},
 	{0, 0, 0, -1}
 };
 
@@ -147,6 +157,7 @@ static struct menu_item main_menu[] = {
 	{"Extras", SUB_MENU_HEADER, extras_menu, -1},
 	{"Settings", SUB_MENU_HEADER, settings_menu, -1},
 	{"File Browser", ACTION_MENU, new_browser_window, -1},
+	{"Bookmarks", SUB_MENU_HEADER, favorites_menu, -1},
    {"Quit", ACTION_MENU, quit_podzilla, -1},
 //        {"Reboot LinWin", SUB_MENU_HEADER, reboot_menu, -1},
 	{0, 0, 0, -1}
@@ -247,7 +258,7 @@ static void menu_do_draw()
 {
    char tmp[20];
 
-	pz_draw_header("LinWin V0.18");
+	pz_draw_header(LINWIN_NAME);
 /*
 	GrSetGCForegroundPixelVal(menu_gc, AV3XX_COLOR_BLACK);
    sprintf(tmp,"freq: %d repeat: %d", ipod_get_mouseParam_freq(), ipod_get_mouseParam_repeat());
@@ -259,6 +270,7 @@ static void menu_do_draw()
 
 static int menu_do_keystroke(GR_EVENT * event)
 {
+   char tmp[40];
    GR_EVENT nextevent;
 	static int rcount = 0;
 	static int lcount = 0;
@@ -294,8 +306,15 @@ static int menu_do_keystroke(GR_EVENT * event)
 			break;
 
 		case ACTION_MENU:
-			if (menu[current_menu_item].ptr != 0) {
-				((menu_action_t) menu[current_menu_item].ptr) ();
+			if (menu[current_menu_item].ptr != 0)
+			{
+      		if( (menu[current_menu_item].settingtype >= BOOKMARK_BEGIN) &&
+				    (menu[current_menu_item].settingtype <= BOOKMARK_END) )
+            {
+          		((menu_actiontype_t) menu[current_menu_item].ptr) (menu[current_menu_item].settingtype);
+				}
+				else
+          		((menu_action_t) menu[current_menu_item].ptr) ();
 			}
 			break;
 

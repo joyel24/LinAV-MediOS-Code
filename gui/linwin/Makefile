@@ -32,6 +32,7 @@ OBJS=\
 	slider.o \
 	audio.o \
 	calendar.o \
+	bookmark.o \
 	othello.o 
 
 all: linwin
