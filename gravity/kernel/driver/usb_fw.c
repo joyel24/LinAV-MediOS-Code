@@ -17,7 +17,8 @@
 int kusb_state,kfw_state;
 struct hw_chk_s usb_fw_chker;
 
-int kusb_status=0;
+int kusb_fw_status=0;
+int k_usb_fw=0; /* variable to know what is used for connection 1: usb, 2:fw*/
 
 void chk_usb_fw(void)
 {
@@ -38,40 +39,72 @@ void chk_usb_fw(void)
         send_evt(EVT_FW_EXT);
     }
 }
-/*
-int kusbIsConnected(void)
+
+int usbFwEnabled(void)
 {
-   int val=inw(USB_STATE);
-   if((val >> 0x6)&0x1)
-        return 1;
-   return 0;
+    return kusb_fw_status;
 }
 
-int kFWIsConnected(void)
+void setUsbFw(int state)
 {
-    int val=cpld_read(CPLD3);
-    if(val&0x8)
-        return 0;
+    if(kusb_fw_status!=state)
+    {
+        if(state==1)
+        {
+            if(kusbIsConnected())
+            {
+                cpld_set_port_1(CPLD_USB);
+                k_usb_fw=1;
+                printk("[usb-FW_EXT] usb enable\n");
+            }
+            else if(kFWIsConnected())
+            {
+                FW_enable();
+                k_usb_fw=2;
+                printk("[usb-FW_EXT] FW_EXT enable\n");
+            }
+        }
+        else
+        {
+            if(k_usb_fw==1)
+            {
+                cpld_clear_port_1(CPLD_USB);
+                printk("[usb-FW_EXT] usb disable\n");
+            }
+            else if(k_usb_fw==2)
+            {
+                FW_disable();
+                printk("[usb-FW_EXT] FW_EXT disable\n");
+            }
+            k_usb_fw=0;                
+        }
+        kusb_fw_status=state;
+    }
     else
-        return 1;
+    {
+        if(state)
+            printk("[usb state] warning: enabling usb while it is already enabled\n");
+        else
+            printk("[usb state] warning: disabling usb while it is already disabled\n");
+    }
 }
 
-void FW_enable(void)
+
+void enableUsbFw(void)
 {
-    cpld_select(CPLD_FW_EXT,0x1);
+    setUsbFw(1);
 }
 
-void FW_disable(void)
+void disableUsbFw(void)
 {
-    cpld_select(CPLD_FW_EXT,0x0);
+    setUsbFw(0);
 }
-*/
 
 void init_usb_fw(void)
 {
     kusb_state=kusbIsConnected();
     kfw_state=kFWIsConnected();
-    kusb_status=0;
+    kusb_fw_status=0;
     ini_hw_chker(&usb_fw_chker);
     usb_fw_chker.name="usb/fw";
     usb_fw_chker.action=chk_usb_fw;

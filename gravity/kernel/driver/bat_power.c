@@ -142,16 +142,16 @@ void hd_launchTimer(void)
     }
 }
 
-extern int kusb_status;
+extern int kusb_fw_status;
 
 void hd_timer_fct(void)
 {
     int num=getCurrentTimer();
-    if(hd_timer_used[num] && !kusb_status)
+    if(hd_timer_used[num] && !kusb_fw_status)
     {
         ata_stop_HD();
     }
-    if(kusb_status)
+    if(kusb_fw_status)
         hd_launchTimer(); // we have enable the usb => keep the timer running
 }
 
