@@ -22,6 +22,7 @@
 @ u32 masWriteD1(u32 addr, u32 buff, u32 size)
 @ u32 masControlWrite(u32 val)
 @
+@ u32 masReadData()
 
 .macro switchThumb
         .arm
@@ -51,6 +52,95 @@ masInc = 1
         MAS_CMD_WRITE_D1    =   0xf0
 
 .text
+
+@ ------------------------------------------------------------------------------
+@ masWriteData()
+@   
+.globl masWriteDataA
+masWriteDataA:
+        switchThumb
+.globl masWriteData
+.thumb_func
+
+masWriteData:
+    ldr r1, =0x30588
+    ldrh r2, [r1, #0]
+    lsr r2, #5
+     bcs mwdto              @ Not ready to xfer data
+
+    lsl r0, #24
+    lsr r0, #16
+    strh r0, [r1, #0]       @ Set 1 bits
+    
+    mov r2, #0xff
+    lsl r2, #8
+    eor r0, r2
+    strh r0, [r1, #4]       @ Set 0 bits
+    
+    mov r0, #1
+    lsl r0, #15
+    strh r0, [r1, #2]       @ Try to latch data
+    mov r3, #5
+mwdw:
+    sub r3, #1
+     bne mwdw
+     
+    ldrh r2, [r1, #2]       @ See if it worked...
+    lsr r2, #15
+     bcs mwdok
+mwdw2:
+    ldrh r3, [r1, #2]
+    lsr r2, #15
+     bcc mwdw2
+     
+mwdok:
+    strh r0, [r1, #6]       @ Clear latch
+    mov r0, #0
+    bx lr
+mwdto:
+    mov r0, #0
+    sub r0, #1
+    bx lr
+
+@ ------------------------------------------------------------------------------
+@ masReadData()
+@   
+.globl masReadDataA
+masReadDataA:
+        switchThumb
+.globl masReadData
+.thumb_func
+
+masReadData:
+    mov r0, #1
+    lsl r0, #15
+    ldr r1, =0x30588
+    ldrh r2, [r1, #0]
+    lsr r2, #5
+     bcs mrdto              @ Not ready to xfer data
+    strh r0, [r1, #2]       @ Try to latch data
+    ldrh r2, [r1, #2]       @ See if it worked...
+    lsr r2, #15
+     bcc mrdok
+    mov r3, #3
+mrdw:
+    sub r3, #1
+     beq mrdto              @ Timed out
+    ldrh r3, [r1, #2]
+    lsr r2, #15
+     bcs mrdw
+mrdok:
+    ldrh r3, [r1, #0]       @ Get some data
+    lsr r3, #8
+    strh r0, [r1, #6]       @ Clear the latch...    
+    lsl r0, r3, #24
+    lsr r0, #24
+    bx lr
+mrdto:
+    strh r0, [r1, #6]       @ Clear the latch if needed
+    mov r0, #0
+    sub r0, #1
+    bx lr
 
 @ ------------------------------------------------------------------------------
 @ masReset()

@@ -90,3 +90,4 @@ void masConfigMDB(int effectStrength, int harmonics,
     masWriteCodecRegA(0x0024, centerFreq << 8);
     masWriteCodecRegA(0x0021, (shape<<8) | (onoff<<1));
 }
+

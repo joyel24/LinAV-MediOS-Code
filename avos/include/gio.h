@@ -17,7 +17,20 @@ typedef unsigned long u32;
 #endif
 
 #define         GIO_LINE_BUTTON_ON          0x00
+
+#define         GIO_LINE_MAS_EOD            0x04
+
+#define         GIO_LINE_MAS_D0             0x08
+#define         GIO_LINE_MAS_D1             0x09
+#define         GIO_LINE_MAS_D2             0x0a
+#define         GIO_LINE_MAS_D3             0x0b
+#define         GIO_LINE_MAS_D4             0x0c
+#define         GIO_LINE_MAS_D5             0x0d
+#define         GIO_LINE_MAS_D6             0x0e
+#define         GIO_LINE_MAS_D7             0x0f
+
 #define         GIO_LINE_MAS_POWER          0x10    // 1 = power
+
 #define         GIO_LINE_I2C_DATA           0x12
 #define         GIO_LINE_I2C_CLOCK          0x13
 #define         GIO_LINE_MODULE_SENSE       0x15    // 0 if CF card in
@@ -26,6 +39,8 @@ typedef unsigned long u32;
                                                     // back to low.
 #define         GIO_LINE_BACKLIGHT_POWER    0x17    // 0 = power
 #define         GIO_LINE_BUTTON_OFF         0x1c
+#define         GIO_LINE_MAS_RTR            0x1e
+#define         GIO_LINE_MAS_PR             0x1f
 
 #define         GIO_OUTPUT       0
 #define         GIO_INPUT        1
