@@ -54,6 +54,10 @@ struct client_operations {
     void (*hideSBar)          (void);
     int  (*sBarStatus)        (void); 
     
+    void (*setPlane)          (int vplane);
+    void (*hidePlane)         (int vplane);
+    void (*showPlane)         (int vplane);
+    
 };
 
 #endif

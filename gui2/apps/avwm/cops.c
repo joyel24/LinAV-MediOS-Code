@@ -44,5 +44,8 @@ struct client_operations cops={
     showSBar           : showSBar,
     hideSBar           : hideSBar,
     sBarStatus         : sBarStatus,    
-    clearScreen        : clearScreen
+    clearScreen        : clearScreen,
+    setPlane           : setPlane,
+    hidePlane          : hidePlane,
+    showPlane          : showPlane
 };
