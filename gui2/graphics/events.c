@@ -108,3 +108,40 @@ int getSettings(struct mouseParam * param)
 		return -1;
 	return 0;
 }
+
+int setTimerFreq(int val)
+{
+	if(fdEv<0)
+		return -1;
+	if(ioctl(fdEv,AV_SET_TIMER_FREQ,&val)<0)
+		return -1;
+	return 0;
+}
+
+int startTimer()
+{
+	if(fdEv<0)
+		return -1;
+	if(ioctl(fdEv,AV_START_TIMER)<0)
+		return -1;
+	return 0;
+}
+
+int stopTimer()
+{
+	if(fdEv<0)
+		return -1;
+	if(ioctl(fdEv,AV_STOP_TIMER)<0)
+		return -1;
+	return 0;
+}
+
+int timerState()
+{
+	int ret;
+	if(fdEv<0)
+		return -1;
+	if(ioctl(fdEv,AV_TIMER_STATE,&ret)<0)
+		return -1;
+	return 0;
+}
