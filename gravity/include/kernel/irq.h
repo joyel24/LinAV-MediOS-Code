@@ -17,11 +17,20 @@
 extern int cli_var;
 extern int clf_var;
 
+void sti(void);
+void cli(void);
+void stf(void);
+void clf(void);
+void __sti(void);
+void __cli(void);
+void __stf(void);
+void __clf(void);
+
 /*
  * Enable IRQs
  */
 /*********************************** std enable IRQ */
-#define sti()                                  \
+#define pv_sti()                                  \
     ({                                         \
         unsigned long temp;                    \
         __asm__ __volatile__(                  \
@@ -39,7 +48,7 @@ extern int clf_var;
         : "memory");                           \
     })
 /*********************************** force enable IRQ */        
-#define __sti()                                \
+#define __pv_sti()                                \
     ({                                         \
         unsigned long temp;                    \
         __asm__ __volatile__(                  \
@@ -56,7 +65,7 @@ extern int clf_var;
  * Disable IRQs
  */
  /*********************************** std disable IRQ */
-#define cli()                                  \
+#define pv_cli()                                  \
     ({                                         \
         unsigned long temp;                    \
         __asm__ __volatile__(                  \
@@ -72,7 +81,7 @@ extern int clf_var;
         : "memory");                           \
     })
 /*********************************** force disable IRQ */
-#define __cli()                                \
+#define __pv_cli()                                \
     ({                                         \
         unsigned long temp;                    \
         __asm__ __volatile__(                  \
@@ -89,7 +98,7 @@ extern int clf_var;
  * Enable FIQs
  */
  /*********************************** std enable FIQ */
-#define stf()                                  \
+#define pv_stf()                                  \
     ({                                         \
         unsigned long temp;                    \
         __asm__ __volatile__(                  \
@@ -107,7 +116,7 @@ extern int clf_var;
         : "memory");                           \
     })
 /*********************************** force enable FIQ */ 
-#define __stf()                                \
+#define __pv_stf()                                \
     ({                                         \
         unsigned long temp;                    \
         __asm__ __volatile__(                  \
@@ -124,7 +133,7 @@ extern int clf_var;
  * Disable FIQs
  */
 /*********************************** std disable IRQ */
-#define clf()                                  \
+#define pv_clf()                                  \
     ({                                         \
         unsigned long temp;                    \
         __asm__ __volatile__(                  \
@@ -140,7 +149,7 @@ extern int clf_var;
         : "memory");                           \
     })
 /*********************************** force disable IRQ */
-#define __clf()                                \
+#define __pv_clf()                                \
     ({                                         \
         unsigned long temp;                    \
         __asm__ __volatile__(                  \

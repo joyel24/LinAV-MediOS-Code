@@ -21,6 +21,47 @@ __IRAM_DATA struct irq_data_s irq_data[NR_IRQS];
 __IRAM_DATA int cli_var=0;
 __IRAM_DATA int clf_var=0;
 
+__IRAM_CODE void sti(void)
+{
+    pv_sti();
+}
+
+__IRAM_CODE void cli(void)
+{
+    pv_cli();
+}
+
+__IRAM_CODE void stf(void)
+{
+    pv_stf();
+}
+
+__IRAM_CODE void clf(void)
+{
+    pv_clf();
+}
+
+__IRAM_CODE void __sti(void)
+{
+    __pv_sti();
+}
+
+__IRAM_CODE void __cli(void)
+{
+    __pv_cli();
+}
+
+__IRAM_CODE void __stf(void)
+{
+    __pv_stf();
+}
+
+__IRAM_CODE void __clf(void)
+{
+    __pv_clf();
+}
+
+
 __IRAM_CODE void do_IRQ(int irq, struct pt_regs *regs)
 {
     struct irq_data_s * desc;
