@@ -72,6 +72,10 @@ typedef unsigned long u32;
 #define        OSD_CURSOR1_BORDERWIDTH_SHIFT   4
 #define        OSD_CURSOR1_COLOR_SHIFT         8
 
+#define        OSD_CURSOR2_HALFHEIGHT          0x0002
+#define        OSD_CURSOR2_RAMCLUT             0x0004
+#define        OSD_CURSOR2_COLORBANK0          0x0000
+#define        OSD_CURSOR2_COLORBANK1          0x0008   
 #define        OSD_CURSOR2_ZY0                 0x0000
 #define        OSD_CURSOR2_ZY1                 0x0100
 #define        OSD_CURSOR2_ZY2                 0x0200
@@ -89,6 +93,7 @@ extern void osdSetComponentSize(u32 component, u32 width, u32 height);
 extern void osdSetComponentPosition(u32 component, u32 x, u32 y);
 extern void osdSetComponentConfig(u32 component, u32 config);
 extern void osdSetComponentSourceWidth(u32 component, u32 width);
+extern void osdSetCursor2Bitmap(u32 index, u32 data);
 extern void osdSetPallette(u32 y, u32 cr, u32 cb, u32 index);
 extern void osdSet16CPallete(u32 bank, u32 index, u32 value);
 extern void osdSetBrightness(u32 brightness);

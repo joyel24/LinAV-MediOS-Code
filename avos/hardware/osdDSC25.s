@@ -16,6 +16,7 @@
 @ void osdSetComponentPosition (r0=component, r1=x, r2=y)
 @ void osdSetComponentConfig (r0=component, r1=config)
 @ void osdSetComponentSourceWidth (r0=component, r1=width)
+@ void osdSetCursor2Bitmap(r0=index, r1=data)
 @
 @ void osdSetPallette (r0=Y, r1=Cr, r2=Cb, r3=index)
 @ void osdSet16CPallete (r0=bank0/1, r1=index, r2=value)
@@ -33,8 +34,7 @@
 @       30684: {13}
 @       30686: {14, 15}
 @       3068a: {1-7}
-@       306f2: {0-15}
-@       306f4: {0-15}
+@       306f4: {0-6}
 @       306f6: {0-15}
 @       306f8: {0-15}
 @
@@ -109,6 +109,12 @@ osdInc = 1
 
 @ CURSOR2 Configuration options
 
+        OSD_CURSOR2_HALFHEIGHT          =   0x0002
+        OSD_CURSOR2_RAMCLUT             =   0x0004
+        
+        OSD_CURSOR2_COLORBANK0          =   0x0000
+        OSD_CURSOR2_COLORBANK1          =   0x0008   
+
         OSD_CURSOR2_ZY0                 =   0x0000      @ 0000111100000000
         OSD_CURSOR2_ZY1                 =   0x0100
         OSD_CURSOR2_ZY2                 =   0x0200
@@ -132,6 +138,28 @@ osdLookupOffsetHI:  .word 0x30694
                     .word 0x30695
                     .word 0x3069a
                     .word 0x3069b
+
+
+@ ------------------------------------------------------------------------------
+@ osdSetCursor2Bitmap(r0=index, r1=data)
+@
+.globl osdSetCursor2Bitmap
+.thumb_func
+
+osdSetCursor2Bitmap:
+        push {r1, r2, lr}
+        ldr r2, =0x306f2
+        strh r1, [r2]           @ Setup data reg
+        
+        ldrh r1, [r2, #2]
+        lsl r1, #24
+        lsr r1, #24
+        lsl r0, #8
+        orr r1, r0
+        mov r0, #0x80
+        orr r1, r0
+        strh r1, [r2, #2]       @ Set the data...
+        pop {r1, r2, pc}
 
                     
 @ ------------------------------------------------------------------------------
