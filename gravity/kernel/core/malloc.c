@@ -1,15 +1,9 @@
-#define SizeQuant   4		      
+/////////////////////////////////
+//malloc.c
 
-#define BufDump     1	      
-/*#define BufValid    1	*/	      
-/*#define DumpData    1	*/	      
-#define BufStats    1      
-/*#define FreeWipe    1	*/	      
-/*#define BestFit     1	*/	      
-/*#define BECtl	    1	*/	      
+#include <kernel/malloc.h>
 
 #define NDEBUG
-
 #include <assert.h>
 
 //#include <memory.h>
@@ -39,144 +33,8 @@
 
 
 
-#define MemSize     int 
-/* Queue links */
-
-
-
-struct qlinks {
-
-    struct bfhead *flink;	      /* Forward link */
-
-    struct bfhead *blink;	      /* Backward link */
-
-};
-
-
-
-/* Header in allocated and free buffers */
-
-
-
-struct bhead {
-
-    bufsize prevfree;		      /* Relative link back to previous
-
-					 free buffer in memory or 0 if
-
-					 previous buffer is allocated.	*/
-
-    bufsize bsize;		      /* Buffer size: positive if free,
-
-					 negative if allocated. */
-
-};
-
-#define BH(p)	((struct bhead *) (p))
-
-
-
-/*  Header in directly allocated buffers (by acqfcn) */
-
-
-
-struct bdhead {
-
-    bufsize tsize;		      /* Total size, including overhead */
-
-    struct bhead bh;		      /* Common header */
-
-};
-
-#define BDH(p)	((struct bdhead *) (p))
-
-
-
-/* Header in free buffers */
-
-
-
-struct bfhead {
-
-    struct bhead bh;		      /* Common allocated/free header */
-
-    struct qlinks ql;		      /* Links on free list */
-
-};
-
-#define BFH(p)	((struct bfhead *) (p))
-
-
-
-static struct bfhead freelist = {     /* List of free buffers */
-
-    {0, 0},
-
-    {&freelist, &freelist}
-
-};
-
-
-
-
-
-#ifdef BufStats
-
-static bufsize totalloc = 0;	      /* Total space currently allocated */
-
-static long numget = 0, numrel = 0;   /* Number of bget() and brel() calls */
-
-#ifdef BECtl
-
-static long numpblk = 0;	      /* Number of pool blocks */
-
-static long numpget = 0, numprel = 0; /* Number of block gets and rels */
-
-static long numdget = 0, numdrel = 0; /* Number of direct gets and rels */
-
-#endif /* BECtl */
-
-#endif /* BufStats */
-
-
-
-#ifdef BECtl
-
-
-
-/* Automatic expansion block management functions */
-
-
-
-static int (*compfcn) _((bufsize sizereq, int sequence)) = NULL;
-
-static void *(*acqfcn) _((bufsize size)) = NULL;
-
-static void (*relfcn) _((void *buf)) = NULL;
-
-
-
-static bufsize exp_incr = 0;	      /* Expansion block size */
-
-static bufsize pool_len = 0;	      /* 0: no bpool calls have been made
-
-					 -1: not all pool blocks are
-
-					     the same size
-
-					 >0: (common) block size for all
-
-					     bpool calls made so far
-
-				      */
-
-#endif
-
-
 
 /*  Minimum allocation quantum: */
-
-
 
 #define QLSize	(sizeof(struct qlinks))
 
@@ -204,7 +62,7 @@ static bufsize pool_len = 0;	      /* 0: no bpool calls have been made
 
 
 
-void *bget(bufsize requested_size)
+__IRAM_CODE void *bget(MEMORY_CONTEXT* pContext, bufsize requested_size)
 {
     bufsize size = requested_size;
 
@@ -273,11 +131,11 @@ void *bget(bufsize requested_size)
 
 #endif
 
-	b = freelist.ql.flink;
+	b = pContext->freelist.ql.flink;
 
 #ifdef BestFit
 
-	best = &freelist;
+	best = &pContext->freelist;
 
 #endif
 
@@ -293,11 +151,11 @@ void *bget(bufsize requested_size)
 
 #ifdef BestFit
 
-	while (b != &freelist) {
+	while (b != &pContext->freelist) {
 
 	    if (b->bh.bsize >= size) {
 
-		if ((best == &freelist) || (b->bh.bsize < best->bh.bsize)) {
+		if ((best == &pContext->freelist) || (b->bh.bsize < best->bh.bsize)) {
 
 		    best = b;
 
@@ -315,7 +173,7 @@ void *bget(bufsize requested_size)
 
 
 
-	while (b != &freelist) {
+	while (b != &pContext->freelist) {
 //printk("buf %08x size: %d \n",b,b->bh.bsize);
 	    if ((bufsize) b->bh.bsize >= size) {
 
@@ -371,9 +229,9 @@ void *bget(bufsize requested_size)
 
 #ifdef BufStats
 
-		    totalloc += size;
+		    pContext->totalloc += size;
 
-		    numget++;		  /* Increment number of bget() calls */
+		    pContext->numget++;		  /* Increment number of bget() calls */
 
 #endif
 
@@ -411,9 +269,9 @@ void *bget(bufsize requested_size)
 
 #ifdef BufStats
 
-		    totalloc += b->bh.bsize;
+		    pContext->totalloc += b->bh.bsize;
 
-		    numget++;		  /* Increment number of bget() calls */
+		    pContext->numget++;		  /* Increment number of bget() calls */
 
 #endif
 
@@ -457,7 +315,7 @@ void *bget(bufsize requested_size)
 
 
 
-	if ((compfcn == NULL) || (!(*compfcn)(size, ++compactseq))) {
+	if ((pContext->compfcn == NULL) || (!(*pContext->compfcn)(size, ++compactseq))) {
 	    break;
 
 	}
@@ -492,7 +350,7 @@ void *bget(bufsize requested_size)
 
 	    size += sizeof(struct bdhead) - sizeof(struct bhead);
 
-	    if ((bdh = BDH((*acqfcn)((bufsize) size))) != NULL) {
+	    if ((bdh = BDH((*pContext->acqfcn)((bufsize) size))) != NULL) {
 
 
 
@@ -508,11 +366,11 @@ void *bget(bufsize requested_size)
 
 #ifdef BufStats
 
-		totalloc += size;
+		pContext->totalloc += size;
 
-		numget++;	      /* Increment number of bget() calls */
+		pContext->numget++;	      /* Increment number of bget() calls */
 
-		numdget++;	      /* Direct bget() call count */
+		pContext->numdget++;	      /* Direct bget() call count */
 
 #endif
 
@@ -536,11 +394,11 @@ void *bget(bufsize requested_size)
 
 
 
-	    if ((newpool = (*acqfcn)((bufsize) exp_incr)) != NULL) {
+	    if ((newpool = (*pContext->acqfcn)((bufsize) exp_incr)) != NULL) {
 
-		bpool(newpool, exp_incr);
+		bpool(pContext, newpool, exp_incr);
 
-                buf =  bget(requested_size);  /* This can't, I say, can't
+                buf =  bget(pContext, requested_size);  /* This can't, I say, can't
 
 						 get into a loop. */
 
@@ -568,129 +426,8 @@ void *bget(bufsize requested_size)
 
 
 
-/*  BGETZ  --  Allocate a buffer and clear its contents to zero.  We clear
 
-	       the  entire  contents  of  the buffer to zero, not just the
 
-	       region requested by the caller. */
-
-
-
-void *bgetz(bufsize size)
-{
-
-    char *buf = (char *) bget(size);
-
-
-
-    if (buf != NULL) {
-
-	struct bhead *b;
-
-	bufsize rsize;
-
-
-
-	b = BH(buf - sizeof(struct bhead));
-
-	rsize = -(b->bsize);
-
-	if (rsize == 0) {
-
-	    struct bdhead *bd;
-
-
-
-	    bd = BDH(buf - sizeof(struct bdhead));
-
-	    rsize = bd->tsize - sizeof(struct bdhead);
-
-	} else {
-
-	    rsize -= sizeof(struct bhead);
-
-	}
-
-	assert(rsize >= size);
-
-	V memset(buf, 0, (MemSize) rsize);
-
-    }
-
-    return ((void *) buf);
-
-}
-
-
-
-/*  BGETR  --  Reallocate a buffer.  This is a minimal implementation,
-
-	       simply in terms of brel()  and  bget().	 It  could  be
-
-	       enhanced to allow the buffer to grow into adjacent free
-
-	       blocks and to avoid moving data unnecessarily.  */
-
-
-
-void *bgetr(void *buf, bufsize size)
-{
-
-    void *nbuf;
-
-    bufsize osize;		      /* Old size of buffer */
-
-    struct bhead *b;
-
-
-
-    if ((nbuf = bget(size)) == NULL) { /* Acquire new buffer */
-
-	return NULL;
-
-    }
-
-    if (buf == NULL) {
-
-	return nbuf;
-
-    }
-
-    b = BH(((char *) buf) - sizeof(struct bhead));
-
-    osize = -b->bsize;
-
-#ifdef BECtl
-
-    if (osize == 0) {
-
-	/*  Buffer acquired directly through acqfcn. */
-
-	struct bdhead *bd;
-
-
-
-	bd = BDH(((char *) buf) - sizeof(struct bdhead));
-
-	osize = bd->tsize - sizeof(struct bdhead);
-
-    } else
-
-#endif
-
-	osize -= sizeof(struct bhead);
-
-    assert(osize > 0);
-
-    V memcpy((char *) nbuf, (char *) buf, /* Copy the data */
-
-	     (MemSize) ((size < osize) ? size : osize));
-
-    brel(buf);
-
-    return nbuf;
-
-}
 
 
 
@@ -698,7 +435,7 @@ void *bgetr(void *buf, bufsize size)
 
 
 
-void brel(void *buf)
+__IRAM_CODE void brel(MEMORY_CONTEXT* pContext, void *buf)
 {
 
     struct bfhead *b, *bn;
@@ -709,7 +446,7 @@ void brel(void *buf)
 
 #ifdef BufStats
 
-    numrel++;			      /* Increment number of brel() calls */
+    pContext->numrel++;			      /* Increment number of brel() calls */
 
 #endif
 
@@ -731,11 +468,11 @@ void brel(void *buf)
 
 #ifdef BufStats
 
-	totalloc -= bdh->tsize;
+	pContext->totalloc -= bdh->tsize;
 
-	assert(totalloc >= 0);
+	assert(pContext->totalloc >= 0);
 
-	numdrel++;		      /* Number of direct releases */
+	pContext->numdrel++;		      /* Number of direct releases */
 
 #endif /* BufStats */
 
@@ -747,9 +484,9 @@ void brel(void *buf)
 
 #endif /* FreeWipe */
 
-	assert(relfcn != NULL);
+	assert(pContext->relfcn != NULL);
 
-	(*relfcn)((void *) bdh);      /* Release it directly. */
+	(*pContext->relfcn)((void *) bdh);      /* Release it directly. */
 
 	return;
 
@@ -787,9 +524,9 @@ void brel(void *buf)
 
 #ifdef BufStats
 
-    totalloc += b->bh.bsize;
+    pContext->totalloc += b->bh.bsize;
 
-    assert(totalloc >= 0);
+    assert(pContext->totalloc >= 0);
 
 #endif
 
@@ -837,15 +574,15 @@ void brel(void *buf)
 
 
 
-	assert(freelist.ql.blink->ql.flink == &freelist);
+	assert(pContext->freelist.ql.blink->ql.flink == &pContext->freelist);
 
-	assert(freelist.ql.flink->ql.blink == &freelist);
+	assert(pContext->freelist.ql.flink->ql.blink == &pContext->freelist);
 
-	b->ql.flink = &freelist;
+	b->ql.flink = &pContext->freelist;
 
-	b->ql.blink = freelist.ql.blink;
+	b->ql.blink = pContext->freelist.ql.blink;
 
-	freelist.ql.blink = b;
+	pContext->freelist.ql.blink = b;
 
 	b->ql.blink->ql.flink = b;
 
@@ -969,11 +706,11 @@ void brel(void *buf)
 
 #ifdef BufStats
 
-	numprel++;		      /* Nr of expansion block releases */
+	pContext->numprel++;		      /* Nr of expansion block releases */
 
-	numpblk--;		      /* Total number of blocks */
+	pContext->numpblk--;		      /* Total number of blocks */
 
-	assert(numpblk == numpget - numprel);
+	assert(pContext->numpblk == pContext->numpget - pContext->numprel);
 
 #endif /* BufStats */
 
@@ -999,13 +736,13 @@ void bectl(int (*compact) (bufsize sizereq, int sequence),
               bufsize pool_incr)
 {
 
-    compfcn = compact;
+    pContext->compfcn = compact;
 
-    acqfcn = acquire;
+    pContext->acqfcn = acquire;
 
-    relfcn = release;
+    pContext->relfcn = release;
 
-    exp_incr = pool_incr;
+    pContext->exp_incr = pool_incr;
 
 }
 
@@ -1017,7 +754,7 @@ void bectl(int (*compact) (bufsize sizereq, int sequence),
 
 
 
-void bpool(void *buf,bufsize len)
+void bpool(MEMORY_CONTEXT* pContext, void *buf, bufsize len)
 {
 
     struct bfhead *b = BFH(buf);
@@ -1034,23 +771,23 @@ void bpool(void *buf,bufsize len)
 
 #ifdef BECtl
 
-    if (pool_len == 0) {
+    if (pContext->pool_len == 0) {
 
-	pool_len = len;
+	pContext->pool_len = len;
 
-    } else if (len != pool_len) {
+    } else if (len != pContext->pool_len) {
 
-	pool_len = -1;
+	pContext->pool_len = -1;
 
     }
 
 #ifdef BufStats
 
-    numpget++;			      /* Number of block acquisitions */
+    pContext->numpget++;			      /* Number of block acquisitions */
 
-    numpblk++;			      /* Number of blocks total */
+    pContext->numpblk++;			      /* Number of blocks total */
 
-    assert(numpblk == numpget - numprel);
+    assert(pContext->numpblk == pContext->numpget - pContext->numprel);
 
 #endif /* BufStats */
 
@@ -1086,15 +823,15 @@ void bpool(void *buf,bufsize len)
 
 
 
-    assert(freelist.ql.blink->ql.flink == &freelist);
+    assert(pContext->freelist.ql.blink->ql.flink == &pContext->freelist);
 
-    assert(freelist.ql.flink->ql.blink == &freelist);
+    assert(pContext->freelist.ql.flink->ql.blink == &pContext->freelist);
 
-    b->ql.flink = &freelist;
+    b->ql.flink = &pContext->freelist;
 
-    b->ql.blink = freelist.ql.blink;
+    b->ql.blink = pContext->freelist.ql.blink;
 
-    freelist.ql.blink = b;
+    pContext->freelist.ql.blink = b;
 
     b->ql.blink->ql.flink = b;
 
@@ -1150,24 +887,24 @@ void bpool(void *buf,bufsize len)
 
 
 
-void bstats(bufsize *curalloc, bufsize *totfree, bufsize *maxfree,long * nget, long *nrel)
+void bstats (MEMORY_CONTEXT* pContext, bufsize *curalloc, bufsize *totfree, bufsize *maxfree,long * nget, long *nrel)
 {
 
-    struct bfhead *b = freelist.ql.flink;
+    struct bfhead *b = pContext->freelist.ql.flink;
 
 
 
-    *nget = numget;
+    *nget = pContext->numget;
 
-    *nrel = numrel;
+    *nrel = pContext->numrel;
 
-    *curalloc = totalloc;
+    *curalloc = pContext->totalloc;
 
     *totfree = 0;
 
     *maxfree = -1;
 
-    while (b != &freelist) {
+    while (b != &pContext->freelist) {
 
 	assert(b->bh.bsize > 0);
 
@@ -1195,20 +932,20 @@ void bstats(bufsize *curalloc, bufsize *totfree, bufsize *maxfree,long * nget, l
 
 
 
-void bstatse(bufsize *pool_incr, long *npool, long *npget,long * nprel, long *ndget,long * ndrel)
+void bstatse(MEMORY_CONTEXT* pContext, bufsize *pool_incr, long *npool, long *npget,long * nprel, long *ndget,long * ndrel)
 {
 
-    *pool_incr = (pool_len < 0) ? -exp_incr : exp_incr;
+    *pool_incr = (pContext->pool_len < 0) ? -exp_incr : exp_incr;
 
-    *npool = numpblk;
+    *npool = pContext->numpblk;
 
-    *npget = numpget;
+    *npget = pContext->numpget;
 
-    *nprel = numprel;
+    *nprel = pContext->numprel;
 
-    *ndget = numdget;
+    *ndget = pContext->numdget;
 
-    *ndrel = numdrel;
+    *ndrel = pContext->numdrel;
 
 }
 
@@ -1230,7 +967,7 @@ void bstatse(bufsize *pool_incr, long *npool, long *npget,long * nprel, long *nd
 
 
 
-void bufdump(void *buf)
+void bufdump (void *buf)
 {
 
     struct bfhead *b;
@@ -1347,7 +1084,7 @@ void bufdump(void *buf)
 
 
 
-void bpoold(void *buf,int dumpalloc,int dumpfree)
+void bpoold(MEMORY_CONTEXT* pContext, void *buf, int dumpalloc, int dumpfree)
 {
 
     struct bfhead *b = BFH(buf);
@@ -1440,7 +1177,7 @@ void bpoold(void *buf,int dumpalloc,int dumpfree)
 
 
 
-int bpoolv(void *buf)
+int bpoolv(MEMORY_CONTEXT* pContext, void *buf)
 {
 
     struct bfhead *b = BFH(buf);
@@ -1521,3 +1258,58 @@ int bpoolv(void *buf)
 
 #endif /* BufValid */
 
+void init_memory_context (MEMORY_CONTEXT* pContext)
+{
+	pContext->freelist.bh.prevfree = 0;
+	pContext->freelist.bh.bsize    = 0;
+
+	pContext->freelist.ql.flink = &pContext->freelist;
+	pContext->freelist.ql.blink = &pContext->freelist;
+
+#ifdef BufStats
+
+	pContext->totalloc = 0;	      /* Total space currently allocated */
+
+	pContext->numget = 0;
+	pContext->numrel = 0;   /* Number of bget() and brel() calls */
+
+#ifdef BECtl
+
+	pContext->numpblk = 0;	      /* Number of pool blocks */
+
+	pContext->numpget = 0;
+	pContext->numprel = 0; /* Number of block gets and rels */
+
+	pContext->numdget = 0;
+	pContext->numdrel = 0; /* Number of direct gets and rels */
+
+#endif /* BECtl */
+
+#endif /* BufStats */
+
+#ifdef BECtl
+
+/* Automatic expansion block management functions */
+
+	pContext->compfcn = NULL;
+
+	pContext->acqfcn = NULL;
+
+	pContext->relfcn = NULL;
+
+	pContext->exp_incr = 0;	      /* Expansion block size */
+
+	pContext->pool_len = 0;	      /* 0: no bpool calls have been made
+
+					 -1: not all pool blocks are
+
+					     the same size
+
+					 >0: (common) block size for all
+
+					     bpool calls made so far
+
+				      */
+
+#endif
+}

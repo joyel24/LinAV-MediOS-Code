@@ -157,8 +157,8 @@ trap_irq:
 	str r12, [r1]           @// User's top of stack stored in TCB...
 
 	MSR CPSR_c, #0x92
-	bl kset_next_ready_task
 	bl __irq_trap
+	bl kset_next_ready_task
 
 .global kload_context
 kload_context:

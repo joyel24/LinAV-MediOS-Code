@@ -18,21 +18,30 @@
 #include <kernel/irq.h>
 #include <kernel/swi.h>
 
+__IRAM_DATA MEMORY_CONTEXT g_MainMemoryContext;
+
+__IRAM_CODE void init_malloc (long beg, long size)
+{
+	init_memory_context (&g_MainMemoryContext);
+	bpool (&g_MainMemoryContext, beg, size);
+	printk("[init] malloc\n");
+}
+
 __IRAM_CODE void* kmalloc (int nBytes)
 {
-	void* ptr = (void*)bget (nBytes);
+	void* ptr = (void*)bget (&g_MainMemoryContext, nBytes);
 	return ptr;
 }
 
 __IRAM_CODE void kfree (void* ptr)
 {
-	brel (ptr);
+	brel (&g_MainMemoryContext, ptr);
 }
 
 __IRAM_CODE unsigned long kmemavail ()
 {
    long nAllocatedBytes, nFreeBytes, nMaxFree, nAllocCount, nFreeCount;
-   bstats (&nAllocatedBytes, &nFreeBytes, &nMaxFree, &nAllocCount, &nFreeCount);
+   bstats (&g_MainMemoryContext, &nAllocatedBytes, &nFreeBytes, &nMaxFree, &nAllocCount, &nFreeCount);
    return nFreeBytes;
 }
 
