@@ -26,6 +26,7 @@
 Display* display;
 Window window;
 GC gc;
+Colormap pal;
 int screen;
 int colorTab[256];
 #endif
@@ -234,7 +235,9 @@ int ini_graphics()
     }
     XStoreName(display, window, "LinAV project");
     
-    setPalette(gui_pal,256);
+    pal = DefaultColormap(display,screen);
+    
+    setPalette(gui_pal,256);   
     
     /* initializing the tmp buffer and the screen */
     XSetForeground(display, gc, colorTab[0]);
@@ -286,18 +289,32 @@ unsigned int getCurrent(GC_ID Dgc,int X,int Y)
     }
 }
 
-unsigned int getCurrent2(GC_ID Dgc,GC_ID Dgc2,int X,int Y) // get color in Dgc2 using coordinate (X,Y) in Dgc
+int tstGc(GC_ID Dgc,GC_ID Dgc2,int X,int Y) // get color in Dgc2 using coordinate (X,Y) in Dgc
 {
     int x1,y1;
     
-    if(Dgc==gc_vid1 || Dgc==gc_vid2)
+    if(Dgc2->buffer->enable)
     {
-        return ((unsigned int *)Dgc->buffer->offset)[Y*Dgc->buffer->width+X];
+        // coordinates in other plane
+        x1=(Dgc->buffer->x+X)-Dgc2->buffer->x;
+        y1=(Dgc->buffer->y+Y)-Dgc2->buffer->y;
+        
+        if(x1>=0 && x1<Dgc2->buffer->width && y1>=0 && y1<Dgc2->buffer->height)
+        {        
+            if(Dgc==gc_vid1 || Dgc==gc_vid2)
+            {
+                if(((unsigned int *)Dgc->buffer->offset)[Y*Dgc->buffer->width+X]==0)
+                    return 1;
+            }
+            else
+            {
+                if(((char*)Dgc->buffer->offset)[Y*Dgc->buffer->width+X]==0)
+                    return 1;
+            }
+        }
     }
-    else
-    {
-        return (unsigned int)(((char*)Dgc->buffer->offset)[Y*Dgc->buffer->width+X]);
-    }
+    
+    return 0;
 }
 
 unsigned int getSav(GC_ID Dgc,int X,int Y)
@@ -336,19 +353,65 @@ void setSav(GC_ID Dgc,int X,int Y,unsigned int val)
     }
 }
 
-/*
-#define getCurrent(DGC,X,Y)        (((char*)DGC->buffer->offset)[Y*DGC->buffer->width+X])
-#define getSav(DGC,X,Y)            (((char*)DGC->buffer->offset_sav)[Y*DGC->buffer->width+X])
-#define setCurrent(DGC,X,Y,val)    {((char*)DGC->buffer->offset)[Y*DGC->buffer->width+X]=val;}
-#define setSav(DGC,X,Y,val)        {((char*)DGC->buffer->offset_sav)[Y*DGC->buffer->width+X]=val;}
-*/
+#define USE_CACHE
+#define PX_CACHE_SIZE  1000
+int pixel_cache[PX_CACHE_SIZE][2];
+int in_cache=0;
+int cache_size=0;
+
+int match=0;
+int dest=0;
+int tot=0;
+
+void printStat(void)
+{
+    printf("tot=%d match=%d, avghit=%f avgdest=%f\n",tot,match,(float)((match*100)/tot),(float)(dest/match));
+}
+
+unsigned int getColor(unsigned int color)
+{
+    XColor c;
+    int r,g,b,Y,Cr,Cb;
+    int i,j;
+    tot++;
+#ifdef USE_CACHE
+    // trying to find already computed value
+    for(i=0;i<cache_size;i++)
+        if(pixel_cache[i][0]==color)
+        {
+            match++;
+            dest+=i;
+            return pixel_cache[i][1];            
+        }
+#endif    
+    Cb=color&0xFF;
+    Y=(color>>8)&0xFF;
+    Cr=(color>>16)&0xFF;
+    r=Y+1.402*(Cr-128);
+    g=Y-0.34414*(Cb-128)-0.71414*(Cr-128);
+    b=Y+1.772*(Cb-128);
+    c.red = r*0x100+r;
+    c.green = g*0x100+g;
+    c.blue = b*0x100+b;
+    XAllocColor(display, pal, &c);
+
+#ifdef USE_CACHE   
+    pixel_cache[in_cache][0]=color;
+    pixel_cache[in_cache][1]=c.pixel;
+    in_cache++;
+    if(cache_size<PX_CACHE_SIZE)
+        cache_size++;
+    else if(in_cache>=PX_CACHE_SIZE)
+        in_cache=0;
+#endif    
+    return c.pixel;
+}
+
 void lcd_update(int type, int x_ini, int y_ini, int w, int h)
 {
     int x, y, doDraw;
     unsigned int color;
-    XColor c;
-    Colormap pal;
-    int r,g,b,Y,Cr,Cb;
+    
     
     for(y=y_ini; y<(y_ini+h); y++)
         for(x=x_ini; x<(x_ini+w); x++)
@@ -359,39 +422,27 @@ void lcd_update(int type, int x_ini, int y_ini, int w, int h)
                 switch(default_plane)
                 {
                     case VID1:
-                        if(gc_vid2->buffer->enable && getCurrent(gc_vid2,x,y)!=0)
+                        if(tstGc(default_gc,gc_vid2,x,y))
                             break;
                     case VID2:
-                        if(gc_bmap1->buffer->enable && getCurrent(gc_bmap1,x,y)!=0)
+                        if(tstGc(default_gc,gc_bmap1,x,y))
                             break;
                     case BMAP1:
-                        if(gc_bmap2->buffer->enable && getCurrent(gc_bmap2,x,y)!=0)
+                        if(tstGc(default_gc,gc_bmap2,x,y))
                             break;
                     case BMAP2:
                         switch(default_plane)
                         {
                             case VID1:
                             case VID2:
-                                pal = DefaultColormap(display,screen);
-                                Cb=color&0xFF;
-                                Y=(color>>8)&0xFF;
-                                Cr=(color>>16)&0xFF;
-                                r=Y+1.402*(Cr-128);
-                                g=Y-0.34414*(Cb-128)-0.71414*(Cr-128);
-                                b=Y+1.772*(Cb-128);
-                                c.red = r*0x100+r;
-                                c.green = g*0x100+g;
-                                c.blue = b*0x100+b;
-                                XAllocColor(display, pal, &c);
-                                XSetForeground(display, gc, c.pixel);
+                                XSetForeground(display, gc, getColor(color&0xFFFFFF));
                                 break;
                             case BMAP1:
                             case BMAP2:
                                 XSetForeground(display, gc, colorTab[color]);
                                 break;
                         }
-                        //XDrawPoint(display, window, gc, default_gc->buffer->x+x, default_gc->buffer->y+y);
-                        XDrawPoint(display, window, gc, x,y);
+                        XDrawPoint(display, window, gc, default_gc->buffer->x+x-0x14, default_gc->buffer->y+y-0x12);
                 }
                 
                 setSav(default_gc,x,y,color);
@@ -416,8 +467,7 @@ void setPalette(int palette[256][3],int size)
 #else
     int r,g,b,i;
     XColor c;
-    Colormap pal = DefaultColormap(display,screen);
-
+    
     for(i=0; i<size; i++)
     {
         r = palette[i][0];
@@ -916,6 +966,8 @@ void drawImage(char * filename)
     int i,j,x,y;
     unsigned int * screenDirect;
     
+    
+    
     /* Initialize the JPEG decompression object with default error handling. */
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_decompress(&cinfo);
@@ -986,6 +1038,10 @@ void drawImage(char * filename)
     
     jpeg_destroy_decompress(&cinfo);
     fclose(img_file);
+#ifndef AV_SCREEN    
+    printStat();
+#endif
+    
 #endif
 }
 
