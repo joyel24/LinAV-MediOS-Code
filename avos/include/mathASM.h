@@ -16,6 +16,5 @@
 typedef unsigned long u32;
 #endif
 
-extern u32 i2cWrite(u32 device, u32 address, void * buffer, u32 count);
-extern u32 i2cRead(u32 device, u32 address, void * buffer, u32 count);
-
+extern u32 mathDivLU(u32 x, u32 y);
+extern u32 mathModLU(u32 x, u32 y);

@@ -17,7 +17,7 @@
 static struct tm tmStatic = {1,0,0,0,0,0,0,0,0};
 
 struct tm* rtcGetTime() {
-    int c = i2cRead(RTC_ADDR, 0, &tmStatic, 9);
+    int c = i2cRead(RTC_ADDR, 0, (void*)(&tmStatic), 9);
     
     // TODO - Handle i2c errors...
     
@@ -25,7 +25,7 @@ struct tm* rtcGetTime() {
 }
 
 void rtcSetTime(struct tm newTime) {
-    int c = i2cWrite(RTC_ADDR, 0, &newTime, 9);
+    int c = i2cWrite(RTC_ADDR, 0, (void*)(&newTime), 9);
 
     // TODO - Handle i2c errors...
 

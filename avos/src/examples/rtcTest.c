@@ -15,8 +15,8 @@
 
     struct graphicsBuffer screenBitmap;
     char data[512];
-    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, &pal16, &pal32};
-    struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, -1, 0, 0, 0, 0, &pal16, &pal32};
+    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+    struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
     int addr= 0xd0;             // 0x3c, 0x90, 0xd0
     
     struct tm* ourTime;
@@ -53,7 +53,7 @@ int main() {
                                      | OSD_BITMAP_8BIT);
 
     pal16[1] = 0x0202;
-    graphicsString(&screenBitmap, 0, 0, &sprite4_6, &std4x6_, 5, 0,
+    graphicsString(&screenBitmap, 0, 0, &sprite4_6, std4x6_, 5, 0,
                 "RTCTest By DoGgEr");
     while(1) {
         uartOuts("rtcGetTime()\n");
@@ -64,7 +64,7 @@ int main() {
         stringPutHex(timeSt+3, ourTime->tm_min, 2);
         stringPutHex(timeSt, ourTime->tm_hour, 2);
         pal16[1] = 0x0202;
-        graphicsString(&screenBitmap, 160-(5*14)-7, 120, &spriteShadow, &shadow_, 14, 0,
+        graphicsString(&screenBitmap, 160-(5*14)-7, 120, &spriteShadow, shadow_, 14, 0,
                     timeSt);
         uartOuts("Loop\n");
     }

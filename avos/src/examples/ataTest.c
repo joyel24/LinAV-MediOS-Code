@@ -22,8 +22,8 @@ void docmd();
 
     struct graphicsBuffer screenBitmap;
     char data[512];
-    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, &pal16, &pal32};
-    struct graphicsBuffer sprite7_13 = {0, 1, 7, 13, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
+    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+    struct graphicsBuffer sprite7_13 = {0, 1, 7, 13, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
     int mode=0;
 
     
@@ -48,7 +48,7 @@ int main() {
     screenBitmap.bitsPerPixelShift = 4;
     screenBitmap.bitsPerPixel = 16;
 
-    graphicsBoxf(&screenBitmap, 0, 0, 320, 240, 0x0000);    
+    graphicsBoxf(&screenBitmap, 0, 0, 320, 240, 0x0000);
     
     osdSetComponentSize(OSD_BITMAP1, 320*2, 240);
     osdSetComponentPosition(OSD_BITMAP1, 0x14, 0x12);
@@ -61,21 +61,21 @@ int main() {
     while(1) {
         graphicsBoxf(&screenBitmap, 0, 0, 320, 240, 0x0000);    
         pal16[1] = 0x0202;
-        graphicsString(&screenBitmap, 0, 0, &sprite4_6, &std4x6_, 5, 0,
+        graphicsString(&screenBitmap, 0, 0, &sprite4_6, std4x6_, 5, 0,
                     "ATATest By DoGgEr");
 
         if (source==0) {
-            graphicsString(&screenBitmap, 212, 0, &sprite7_13, &std7x13_, 8, 0,
+            graphicsString(&screenBitmap, 212, 0, &sprite7_13, std7x13_, 8, 0,
                     "F2[HDD]");
-            graphicsString(&screenBitmap, 0, 8, &sprite4_6, &std4x6_, 5, 0,
+            graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Selecting HDD...        ");
             uartOuts("\nSelecting HDD...\n");
             ataPowerUpHDD();
             ataSelectHDD();
         } else {
-            graphicsString(&screenBitmap, 212, 0, &sprite7_13, &std7x13_, 8, 0,
+            graphicsString(&screenBitmap, 212, 0, &sprite7_13, std7x13_, 8, 0,
                     "F2[MemCard]");
-            graphicsString(&screenBitmap, 0, 8, &sprite4_6, &std4x6_, 5, 0,
+            graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                     "Selecting MemCard...        ");
             uartOuts("\nSelecting Memory card...\n");
             ataPowerDownHDD();
@@ -111,7 +111,7 @@ void docmd() {
     c = ataWaitForReady();
     if (c!=0) {
         pal16[1] = 0x0101;
-        graphicsString(&screenBitmap, 0, 8, &sprite4_6, &std4x6_, 5, 0,
+        graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                 "ATA Says not ready!        ");            
         uartOuts("ATA Says not ready!\n");
         for (delay=0;delay<0x1000;delay++) {}
@@ -120,11 +120,11 @@ void docmd() {
         
     pal16[1] = 0x0101;
     if (mode==0) {
-        graphicsString(&screenBitmap, 108, 0, &sprite7_13, &std7x13_, 8, 0,
+        graphicsString(&screenBitmap, 108, 0, &sprite7_13, std7x13_, 8, 0,
                     "F1[Identify]");
         ataIdentify();
     } else {
-        graphicsString(&screenBitmap, 108, 0, &sprite7_13, &std7x13_, 8, 0,
+        graphicsString(&screenBitmap, 108, 0, &sprite7_13, std7x13_, 8, 0,
                     "F1[Read MBR]");
         ataRead(0, 1);    
     }
@@ -132,7 +132,7 @@ void docmd() {
     c = ataWaitForXfer();
     if (c!=0) {
         pal16[1] = 0x0101;
-        graphicsString(&screenBitmap, 0, 8, &sprite4_6, &std4x6_, 5, 0,
+        graphicsString(&screenBitmap, 0, 8, &sprite4_6, std4x6_, 5, 0,
                 "ATA Says no xfer!        ");            
         uartOuts("ATA Says no xfer!\n");
         for (delay=0;delay<0x1000;delay++) {}
@@ -159,7 +159,7 @@ void showBuffer(char *source) {
         uartOuts(p);
 
         pal16[1] = 0xffff;
-        graphicsString(&screenBitmap, 4, 16 + y*7, &sprite4_6, &std4x6_, 6, 0,
+        graphicsString(&screenBitmap, 4, 16 + y*7, &sprite4_6, std4x6_, 6, 0,
                     p);
         y++;
     }

@@ -15,11 +15,11 @@
     struct graphicsBuffer screenBitmap;
     struct graphicsBuffer screenBitmap2;
     
-    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, &pal16, &pal32};
-    struct graphicsBuffer sprite5_8 = {0, 1, 5, 8, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
-    struct graphicsBuffer sprite7_13 = {0, 1, 7, 13, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
-    struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
-    struct graphicsBuffer spriteCursive = {0, 2, 9, 15, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
+    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+    struct graphicsBuffer sprite5_8 = {0, 1, 5, 8, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+    struct graphicsBuffer sprite7_13 = {0, 1, 7, 13, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+    struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+    struct graphicsBuffer spriteCursive = {0, 2, 9, 15, 1, 0, 0, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 
     int cursor[256] = {
         0xbb00, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -166,19 +166,19 @@ int main() {
     graphicsBoxf(&screenBitmap, 20, 20, 120, 80, 0x0101);
     graphicsBoxf(&screenBitmap2, 0, 0, 40, 32, 0x0404);
     
-    graphicsString(&screenBitmap, 2, 20, &sprite4_6, &std4x6_, 5, 1, "abcdefghijklmnop");
+    graphicsString(&screenBitmap, 2, 20, &sprite4_6, std4x6_, 5, 1, "abcdefghijklmnop");
 
-    graphicsString(&screenBitmap2, 0, 0, &spriteShadow, &shadow_, 12, 0, "DOG");
+    graphicsString(&screenBitmap2, 0, 0, &spriteShadow, shadow_, 12, 0, "DOG");
 
     graphicsBoxf(&screenVideo, 80, 60, 100, 100, 0xc0c0c000);   //0x4040e050);
     
     
-    graphicsString(&screenVideo, 2, 120, &spriteShadow, &shadow_, 13, 0, "ABC DEF GHI JKL MNOPQ");
-    graphicsString(&screenVideo, 2, 48, &sprite5_8, &std5x8_, 6, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
+    graphicsString(&screenVideo, 2, 120, &spriteShadow, shadow_, 13, 0, "ABC DEF GHI JKL MNOPQ");
+    graphicsString(&screenVideo, 2, 48, &sprite5_8, std5x8_, 6, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
     pal32[1] = 0x50503020;
-    graphicsString(&screenVideo, 100, 30, &sprite7_13, &std7x13_, 0, 14, "Font drawing!");
+    graphicsString(&screenVideo, 100, 30, &sprite7_13, std7x13_, 0, 14, "Font drawing!");
     pal32[1] = 0x202090a0;
-    graphicsString(&screenVideo, 4, 200, &spriteCursive, &cursive_, 10, 0, "BY DoggerMoore");
+    graphicsString(&screenVideo, 4, 200, &spriteCursive, cursive_, 10, 0, "BY DoggerMoore");
 
     while(1) {
         movec++;

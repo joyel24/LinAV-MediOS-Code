@@ -21,8 +21,8 @@ void docmd();
 
     struct graphicsBuffer screenBitmap;
     char data[512];
-    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, &pal16, &pal32};
-    struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, -1, 0, 0, 0, 0, &pal16, &pal32};
+    struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+    struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
     int addr= 0xd0;             // 0x3c, 0x90, 0xd0
     char dispAddr[] = "xx";
     
@@ -60,13 +60,13 @@ int main() {
                                      | OSD_BITMAP_8BIT);
 
     pal16[1] = 0x0202;
-    graphicsString(&screenBitmap, 0, 0, &sprite4_6, &std4x6_, 5, 0,
+    graphicsString(&screenBitmap, 0, 0, &sprite4_6, std4x6_, 5, 0,
                 "I2CTest By DoGgEr");
     while(1) {
         pal16[1] = 0x0202;                    
         stringPutHex(dispAddr, addr, 2);
 
-        graphicsString(&screenBitmap, 160, 0, &sprite4_6, &std4x6_, 5, 0,
+        graphicsString(&screenBitmap, 160, 0, &sprite4_6, std4x6_, 5, 0,
                     dispAddr);
 
         docmd();
@@ -77,7 +77,7 @@ int main() {
         pal16[1] = 0x0404;                    
         stringPutHex(dispBat, b, 4);
 
-        graphicsString(&screenBitmap, 0, 200, &sprite4_6, &std4x6_, 5, 0,
+        graphicsString(&screenBitmap, 0, 200, &sprite4_6, std4x6_, 5, 0,
                     dispBat);
         
         
@@ -118,7 +118,7 @@ void docmd() {
         stringPutHex(timeSt+3, data[2], 2);
         stringPutHex(timeSt, data[3], 2);
         pal16[1] = 0x0202;
-        graphicsString(&screenBitmap, 160-(5*14)-7, 120, &spriteShadow, &shadow_, 14, 0,
+        graphicsString(&screenBitmap, 160-(5*14)-7, 120, &spriteShadow, shadow_, 14, 0,
                     timeSt);
     }
     
@@ -143,7 +143,7 @@ void showBuffer(char *source) {
 //        uartOuts(p);
 
         pal16[1] = 0xffff;
-        graphicsString(&screenBitmap, 4, 16 + y*7, &sprite4_6, &std4x6_, 6, 0,
+        graphicsString(&screenBitmap, 4, 16 + y*7, &sprite4_6, std4x6_, 6, 0,
                     p);
         y++;
     }
