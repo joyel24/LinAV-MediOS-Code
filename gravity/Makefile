@@ -14,7 +14,7 @@ LDFLAGS = -L/home/thomas/Av320/arm-tools/inst_uclibc/toolchain/gcc-3.3.x/toolcha
 
 TARGET = gravity
 
-SUBDIRS = kernel 
+SUBDIRS = kernel gui
 #gui
 LIBS = kernel/build/*.o gui/build/*.o
 #gui/gui.a
