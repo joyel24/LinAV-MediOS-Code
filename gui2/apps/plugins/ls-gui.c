@@ -165,7 +165,7 @@ int launchBin(char * name)
 	if (pid == 0) {
 		execl(name,name,(char*)0);
 		fprintf(stderr, "exec failed!\n");
-		exit(1);
+		_exit(1);
 	}
 	else {
 		if (pid > 0) {
