@@ -1,7 +1,8 @@
 #include "colordef.h"
 #include "graphics.h"
 #include "events.h"
-#include "avwm.h"
+#include "cops.h"
+#include "avevents.h"
 
 #define true 1
 #define false 0
@@ -233,12 +234,10 @@ int main(int argc,char * * argv)
 {
     int w, h, i;
 
-	 REGISTER(cops,eventHandler);
+	 REGISTER(cops,eventHandler,0);
     PACK(cops);
 
-    cops->stopTimout();
-    cops->hideTime();
-    cops->hideBat();
+    cops->hideSBar();
 
     empire_init();
 
@@ -246,9 +245,7 @@ int main(int argc,char * * argv)
  	 {
 	 }
 
-    cops->startTimout();
-    cops->showTime();
-    cops->showBat();
+    cops->showSBar();
 
     return;
 }
