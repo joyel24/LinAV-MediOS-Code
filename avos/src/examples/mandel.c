@@ -51,7 +51,13 @@ int main() {
                                      | OSD_BITMAP_8BIT
                                      | OSD_BITMAP_RAMCLUT);
 
-    
+    cp = 0;
+    for (c=1;c<256;c++) {
+        osdSetPallette(pallette[cp], pallette[cp]>>8, pallette[cp]>>16, c);
+        cp++;
+        cp &= 0xff;
+    }
+
   float i, j;
   for( i = -2; i < 1; i = i + ((float)2.8/320)) {
     for( j = -1.5; j < 1.5; j = j + ((float)2.8/240)) {
@@ -59,14 +65,18 @@ int main() {
     }
   }
   
+  int delay;
   while(1) {
     cpalo++;
+    cpalo &= 0xff;
     cp = cpalo;
-    for (c=0;c<256;c++) {
+    for (c=1;c<256;c++) {
         osdSetPallette(pallette[cp], pallette[cp]>>8, pallette[cp]>>16, c);
         cp++;
-        cp = cp & 0xff;
+        cp &= 0xff;
     }
+
+    for(delay=0;delay<0xc000;delay++) {}
   }
 
 }
@@ -94,4 +104,5 @@ void plot(float x, float y, int c) {
     dy = 120 + y * 80;
 
     graphicsSetPixel(&screenBitmap, dx, dy, c);
+
 }
