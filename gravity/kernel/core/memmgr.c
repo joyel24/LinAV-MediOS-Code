@@ -41,18 +41,23 @@ __IRAM_CODE unsigned long kmemavail ()
 // Made from diffrent threads.
 __IRAM_CODE int kmemory_manager (void* pvParameters)
 {
-//   sti ();
+/*
+   while (1)
+   {
+      API_TASK_YIELD ();
+   };
+*/
 
    while (1)
    {
       SYSTEM_CTRL_COMMAND* pSysCtrl = 0;
-      cli ();
+      __cli ();
       if (g_pSystemCtrlPipe->nReceiver != g_pSystemCtrlPipe->nSender)
       {
          pSysCtrl = (SYSTEM_CTRL_COMMAND*)(g_pSystemCtrlPipe->buffer + g_pSystemCtrlPipe->nReceiver);
          g_pSystemCtrlPipe->nReceiver = (g_pSystemCtrlPipe->nReceiver + sizeof(SYSTEM_CTRL_COMMAND)) & PIPE_SIZE_MASK;
       };
-      sti ();
+      __sti ();
 
       if (pSysCtrl)
       {
@@ -71,13 +76,13 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
       }
 
       /// Unblock calling task...
-      cli ();
-      pSysCtrl->pSenderThread->nActivationTime = 0;
-      pSysCtrl->pSenderThread->pBlockerParameter = 0;
-      pSysCtrl->pSenderThread->pBlocker = 1;
+      __cli ();
+      pSysCtrl->pSenderThread->nBlockingState = TASK_BLOCKED_BY_NONE;
+      pSysCtrl->pSenderThread->nBlockingValue = 0;
+
       API_TASK_YIELD ();
-      sti ();
-   }
+      __sti ();
+   };
 
    return 0;
 }

@@ -29,53 +29,48 @@ __IRAM_CODE int kcswi_handler (
    {
 	case nAPI_TASK_CREATE:      //(void* pvCode, void* pParam, HTASK* phTask)                     { SAVE; asm("swi 1"); LOAD; }
 	{
-		cli ();
+		__cli ();
 		TASK_INFO* pTCB = kcreate_tcb ((void*)nParam1, 16384, (void*)nParam2, "SOFT");
 		if (nParam3)
 			*((TASK_INFO**)nParam3) = pTCB;
-		kadd_tcb (&g_pActiveTask, pTCB);
-		sti ();
+		kadd_tcb (&g_pTaskRing, pTCB);
+		__sti ();
 	}
 	break;
 
 	case nAPI_TASK_SUSPEND:     //(HTASK hTask)                                                              { SAVE; asm("swi 2"); LOAD; }
 	{
-		cli ();
-		unsigned char cmd = KERNEL_CMD_SUSPEND;
-		kpipe_write (g_pKernelCtrlPipe, &cmd, 1);
-		kpipe_write (g_pKernelCtrlPipe, &nParam1, 4);
+		__cli ();
+		((TASK_INFO*)nParam1)->nBlockingState = TASK_BLOCKED_BY_SUSPEND;
 		API_TASK_YIELD ();
-		sti ();
+		__sti ();
 	}
 	break;
 
 	case nAPI_TASK_CONTINUE:    //(HTASK hTask)                                                              { SAVE; asm("swi 3"); LOAD; }
 	{
-		cli ();
-		unsigned char cmd = KERNEL_CMD_CONTINUE;
-		kpipe_write (g_pKernelCtrlPipe, &cmd, 1);
-		kpipe_write (g_pKernelCtrlPipe, &nParam1, 4);
+		__cli ();
+		((TASK_INFO*)nParam1)->nBlockingState = TASK_BLOCKED_BY_NONE;
 		API_TASK_YIELD ();
-		sti ();
+		__sti ();
 	}
 	break;
 
 	case nAPI_TASK_GETHANDLE:   //(HTASK* phTask)                                                              { SAVE; asm("swi 4"); LOAD; }
 	{
-		cli ();
-		*((TASK_INFO**)nParam1) = g_pActiveTask;
-		sti ();
+		__cli ();
+		*((TASK_INFO**)nParam1) = g_pTaskRing;
+		__sti ();
 	}
 	break;
 
 	case nAPI_TASK_SLEEP:       //(unsigned long nMilliseconds)                                   { SAVE; asm("swi 5"); LOAD; }
 	{
-		cli ();
-		g_pActiveTask->nActivationTime = tick + nParam1 / 10;
-		unsigned char cmd = KERNEL_CMD_SLEEP;
-		kpipe_write (g_pKernelCtrlPipe, &cmd, 1);
+		__cli ();
+		g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_SLEEP;
+		g_pTaskRing->nBlockingValue = tick + nParam1 / 10;
 		API_TASK_YIELD ();
-		sti ();
+		__sti ();
 	}
 	break;
 
@@ -94,24 +89,21 @@ __IRAM_CODE int kcswi_handler (
 	case nAPI_FREE:     //void* pvBuffer
 	case nAPI_MEMAVAIL: //unsigned long* pnBytes
 	{
-		cli ();
+		__cli ();
 
 		SYSTEM_CTRL_COMMAND* pSysCtrl = (SYSTEM_CTRL_COMMAND*)(g_pSystemCtrlPipe->buffer + g_pSystemCtrlPipe->nSender);
 		pSysCtrl->nCmdId = nCmd;
 		pSysCtrl->nCmdParam1 = nParam1;
 		pSysCtrl->nCmdParam2 = nParam2;
-		pSysCtrl->pSenderThread = g_pActiveTask;
+		pSysCtrl->pSenderThread = g_pTaskRing;
 		g_pSystemCtrlPipe->nSender = (g_pSystemCtrlPipe->nSender + sizeof(SYSTEM_CTRL_COMMAND)) & PIPE_SIZE_MASK;
 
 		/// Block calling task...
-		g_pActiveTask->nActivationTime = 1;
-		g_pActiveTask->pBlockerParameter = 0;
-		g_pActiveTask->pBlocker = 1;
-		unsigned char cmd = KERNEL_CMD_BLOCK;
-		kpipe_write (g_pKernelCtrlPipe, &cmd, 1);
+		g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_MEMMGR;
+		g_pTaskRing->nBlockingValue = 0;
 
 		API_TASK_YIELD ();
-		sti ();
+		__sti ();
 	}
 	break;
 /// Serialize critical API calls to memory manager
@@ -126,6 +118,7 @@ __IRAM_CODE int kcswi_handler (
                     printk("time swi %d not implemented\n",(int)nParam1);
             }
             return 0;
+
         case nAPI_POWER:
             switch((int)nParam1) {
                 case 0x000:
@@ -145,7 +138,6 @@ __IRAM_CODE int kcswi_handler (
             }
             return 0;
 
-
 	case nAPI_PIPE_DELETE:      //(HPIPE hPipe);
 	{
 		API_FREE ((void*)nParam1);
@@ -154,16 +146,16 @@ __IRAM_CODE int kcswi_handler (
 
 	case nAPI_PIPE_SEND:        //(HPIPE hPipe, void* pData, unsigned long nBytesToSend);
 	{
-		cli ();
+		__cli ();
 		PIPE* pPipe = (PIPE*)nParam1;
 		kpipe_write (pPipe, (void*)nParam2, nParam3);
-		sti ();
+		__sti ();
 	}
 	break;
 
 	case nAPI_PIPE_RECV:        //(HPIPE hPipe, void* pData, unsigned long nBytesToReceive);
 	{
-		cli ();
+		__cli ();
 		PIPE* pPipe = (PIPE*)nParam1;
 		int i=0;
 		unsigned char* pData = (unsigned char*)nParam2;
@@ -178,15 +170,12 @@ __IRAM_CODE int kcswi_handler (
 			}
 			else
 			{
-				g_pActiveTask->nActivationTime = 0;
-				g_pActiveTask->pBlockerParameter = pPipe;
-				g_pActiveTask->pBlocker = 0;
-				unsigned char cmd = KERNEL_CMD_BLOCK;
-				kpipe_write (g_pKernelCtrlPipe, &cmd, 1);
+				g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_PIPE;
+				g_pTaskRing->nBlockingValue = (unsigned long)pPipe;
 				API_TASK_YIELD ();
 			}
 		}
-		sti ();
+		__sti ();
 	}
 	break;
 
@@ -194,7 +183,7 @@ __IRAM_CODE int kcswi_handler (
 	{
 		CRITSEC_INFO* pCS;
 		API_MALLOC (&pCS, sizeof(CRITSEC_INFO));
-		pCS->nBlocked = 0;
+		pCS->pOwnerTask = 0;
 		*(CRITSEC_INFO**)nParam1 = pCS;
 	}
 	break;
@@ -207,18 +196,32 @@ __IRAM_CODE int kcswi_handler (
 
 	case nAPI_CRITSEC_ENTER:    //(HCRITSEC hCritSec);
 	{
-		cli ();
-		sti ();
+		__cli ();
+		CRITSEC_INFO* pCS = (CRITSEC_INFO*)nParam1;
+		if (!pCS->pOwnerTask)
+			pCS->pOwnerTask = g_pTaskRing;
+		else
+		if (pCS->pOwnerTask != g_pTaskRing)
+		{// Block task while critical section is busy...
+			g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_MUTEX;
+			g_pTaskRing->nBlockingValue = nParam1;
+			API_TASK_YIELD ();
+		}
+		__sti ();
 	}
 	break;
 
 	case nAPI_CRITSEC_LEAVE:    //(HCRITSEC hCritSec);
 	{
-		cli ();
-		sti ();
+		__cli ();
+		if (((CRITSEC_INFO*)nParam1)->pOwnerTask == (unsigned long)g_pTaskRing)
+		{
+			((CRITSEC_INFO*)nParam1)->pOwnerTask = 0;
+			API_TASK_YIELD ();
+		}
+		__sti ();
 	}
 	break;
-
 
         case nAPI_GFX:
             return gfw_swi_handler((int)nParam1,(GFX_DATA *)nParam2, (void *)nParam3);

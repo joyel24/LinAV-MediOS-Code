@@ -23,21 +23,22 @@ typedef struct _TASK_INFO
 	unsigned long*     pStack;
 	unsigned long      nStackSize;
 	unsigned long      nTicks;
-	unsigned long      nActivationTime;
 	struct _TASK_INFO* pNextTask;
 	struct _TASK_INFO* pPrevTask;
-	void*              pBlocker;
-	void*              pBlockerParameter;
-	unsigned long      nActiveBackColor;
-	unsigned long      nActiveForeColor;
-	void*              pFont;
+	unsigned long      nBlockingState;
+	unsigned long      nBlockingValue;
 	char               cName [8];
 } TASK_INFO;
 
 typedef struct _CRITSEC_INFO
 {
-	unsigned long nBlocked;
+	TASK_INFO* pOwnerTask;
 } CRITSEC_INFO;
+
+typedef struct _KERNEL_OBJECT_INFO
+{
+	void* pObject;
+} KERNEL_OBJECT_INFO;
 
 typedef struct _SYSTEM_CTRL_COMMAND
 {
@@ -47,20 +48,19 @@ typedef struct _SYSTEM_CTRL_COMMAND
 	TASK_INFO* pSenderThread;
 } SYSTEM_CTRL_COMMAND;
 
-#define KERNEL_CMD_NONE      0
-#define KERNEL_CMD_SLEEP     1
-#define KERNEL_CMD_TERMINATE 2
-#define KERNEL_CMD_BLOCK     3
-#define KERNEL_CMD_SUSPEND   4
-#define KERNEL_CMD_CONTINUE  5
+#define TASK_BLOCKED_BY_NONE    0
+#define TASK_BLOCKED_BY_SLEEP   1
+#define TASK_BLOCKED_BY_PIPE    2
+#define TASK_BLOCKED_BY_MUTEX   3
+#define TASK_BLOCKED_BY_MEMMGR  4
+#define TASK_BLOCKED_BY_SUSPEND 5
 
-extern TASK_INFO* g_pActiveTask; // pointer to current element in ring list
-extern TASK_INFO* g_pBlockedTask; // pointer to current element in ring list
+extern TASK_INFO* g_pTaskRing; // pointer to current element in ring list
 
 #define kload_context()													\
 {																		\
 	/* Set the LR to the task stack. */									\
-	asm volatile ( "LDR		R0, %0" : : "m" (g_pActiveTask) );			\
+	asm volatile ( "LDR		R0, %0" : : "m" (g_pTaskRing) );			\
 	asm volatile ( "LDR		LR, [R0]" );								\
 																		\
 	/* Get the SPSR from the stack. */									\
@@ -84,6 +84,5 @@ extern TASK_INFO* kcreate_tcb (void* pvTaskCode, unsigned long nStackSize, void*
 extern int klist_size (TASK_INFO* pList);
 extern KERNEL_ERROR_CODE kadd_tcb (TASK_INFO** pList, TASK_INFO* pTask);
 extern TASK_INFO* kremove_tcb  (TASK_INFO** pList);
-extern void kremove_tcb_ex  (TASK_INFO** pList, TASK_INFO* pTask);
 
 #endif

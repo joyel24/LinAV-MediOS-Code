@@ -48,44 +48,6 @@ void print_boot_info(void)
     print_data(0x0,0x20);
 }
 
-void kidle (void)
-{
-    int i;
-
-    while (1)
-    {
-#if 0
-        cli(); // for safe multithreaded printing
-        printk("   [ idle ]\n");
-        sti();
-        for(i=0;i<0xC000;i++) /*nothing*/;
-#endif
-    };
-}
-
-#if 0
-int ksomethread (int nParam)
-{
-   int i;
-
-   while (1)
-   {
-//      cli(); // for safe multithreaded printing
-//      printk("      [ thread-3 ]\n");
-//      sti();
-
-      void* pvBuffer = 0;
-      API_MALLOC (&pvBuffer, 16384);
-      for(i=0;i<0x12000;i++) /*nothing*/;
-
-      API_FREE (pvBuffer);
-      for(i=0;i<0x12000;i++) /*nothing*/;
-   };
-
-   return 666;//Return code test...
-}
-#endif
-
 extern void kernel_startup_thread (void);
 extern void ini_debugOnScreen(void);
 
@@ -126,11 +88,9 @@ void kernel_start (void)
    g_pSystemCtrlPipe->nReceiver = 0;
    g_pSystemCtrlPipe->nSender = 0;
 
-    kadd_tcb (&g_pActiveTask, kcreate_tcb (kernel_startup_thread, TASK_STACK_SIZE, 0, "USER"));
-    kadd_tcb (&g_pActiveTask, kcreate_tcb (kmemory_manager, TASK_STACK_SIZE,   0, "SYSTEM"));
+    kadd_tcb (&g_pTaskRing, kcreate_tcb (kernel_startup_thread, TASK_STACK_SIZE, 0, "USER"));
+    kadd_tcb (&g_pTaskRing, kcreate_tcb (kmemory_manager, TASK_STACK_SIZE,   0, "SYSTEM"));
 ///////////////////////////////////////////////////
-
-    //kadd_tcb (&g_pActiveTask, kcreate_tcb (ksomethread, TASK_STACK_SIZE,   0, "THREAD-3"));    
 
     /* init the irq */
     init_irq(); 
