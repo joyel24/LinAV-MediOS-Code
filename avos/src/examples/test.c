@@ -16,7 +16,8 @@
     struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, &pal16, &pal32};
     struct graphicsBuffer sprite5_8 = {0, 1, 5, 8, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
     struct graphicsBuffer sprite7_13 = {0, 1, 7, 13, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
-    struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, 1, 0, 0, 0, 0, &pal16, &pal32};
+    struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
+    struct graphicsBuffer spriteCursive = {0, 2, 9, 15, 1, 0, 0, 0, 0, 0, 0, &pal16, &pal32};
     
 //
 //
@@ -73,12 +74,12 @@ int main() {
     graphicsBoxf(&screenVideo, 80, 60, 100, 100, 0x40e050);
     
     
-    graphicsString(&screenVideo, 2, 34, &sprite8_13, &std8x13_, 9, 1, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    graphicsString(&screenVideo, 2, 34, &spriteShadow, &shadow_, 13, 0, "ABCDEFGHIJKLMNOPQRSTU");
     graphicsString(&screenVideo, 2, 48, &sprite5_8, &std5x8_, 6, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
     pal32[1] = 0x503020;
     graphicsString(&screenVideo, 100, 30, &sprite7_13, &std7x13_, 0, 14, "Font drawing!");
     pal32[1] = 0x2090a0;
-    graphicsString(&screenVideo, 4, 200, &sprite4_6, &std4x6_, 7, 0, "BY DoggerMoore");
+    graphicsString(&screenVideo, 4, 200, &spriteCursive, &cursive_, 10, 0, "BY DoggerMoore");
     
     while(1) {}
 }

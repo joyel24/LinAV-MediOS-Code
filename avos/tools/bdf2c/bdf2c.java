@@ -47,16 +47,18 @@ public class bdf2c {
                 } else if (s.startsWith("ENDCHAR")) {
                     inchar = false;
                     if (all || (encoding<256)) {
-                        chardata += "    static char " + name + encoding + "["+datalen+"] = {" + data + "};\n";
+                        chardata += "    char " + name + encoding + "["+datalen+"] = {" + data + "};\n";
                         defs[encoding] = name + encoding;
                     }
                 }
 
                 if (inchar) {
                     if (inbitmap) {
-                        if (!data.equals("")) data += ", ";
-                        data += "0x" + s;
-                        datalen++;
+                        for (int x=0;x<s.length();x=x+2) {
+                            if (!data.equals("")) data += ", ";
+                            data += "0x" + s.substring(x, x+2);
+                            datalen++;
+                        }
                     }
 
                     if (s.startsWith("ENCODING")) {
@@ -78,7 +80,7 @@ public class bdf2c {
         if (all) pp = 65536;
         
         System.out.println(chardata);
-        System.out.println("static char (*" + name + "[]) [] = {");
+        System.out.println("char (*" + name + "[]) [] = {");
             
         for (int i=0;i<pp;i++) {
             String def = defs[i];
