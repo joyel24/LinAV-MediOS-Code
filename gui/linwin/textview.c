@@ -17,7 +17,7 @@
  */
 /* Changes 2004-06-27 by matz-josh:
 	- fixed crash on dos/windows textfiles containing empty lines
-	- the handle on the scrollbar is now at least 2 Pixels high 
+	- the handle on the scrollbar is now at least 2 Pixels high
 	  it has been sometimes invisible (hight 0) in large files
 	- added support for rewind and forward keys:
 	  rewind scrolls up and forward scrolls down one screen.
@@ -30,7 +30,8 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include "av3xx_colordef.h"
-#define LINESPERSCREEN 16 //7
+
+#define LINESPERSCREEN 16
 
 static GR_GC_ID tv_gc;
 static GR_WINDOW_ID tv_wid;
@@ -43,16 +44,15 @@ static int yPosDebug = 100;
 static unsigned int totalLines = 0;
 static unsigned int currentLine = 0;
 static char ** lineData;
+GR_SIZE g_width, g_height, g_base;
 
 static void printPage(int startLine, int x, int y, int w, int h)
 {
 	int i;
-	GR_SIZE width, height, base;
-	GrGetGCTextSize(tv_gc, "M", -1, GR_TFASCII, &width, &height, &base);
 
 	for (i = startLine; i < startLine + LINESPERSCREEN && i < totalLines; i++)
 	{
-		GrText(tv_wid, tv_gc, 3, (i - startLine + 1) * height + 4, lineData[i], -1, GR_TFASCII);
+		GrText(tv_wid, tv_gc, 3, (i - startLine + 1) * g_height + 4, lineData[i], -1, GR_TFASCII);
 	}
 
 }
@@ -61,7 +61,7 @@ static void printPage(int startLine, int x, int y, int w, int h)
 // I also see many ways to optimize it, but I'm really to lazy to at the moment.
 static void buildLineData()
 {
-	
+
 	char * starttextptr;
 	FILE * fp;
 	long unsigned int file_len;
@@ -176,6 +176,110 @@ static void buildLineData()
 	free(starttextptr);
 }
 
+static void viewer_scrollup()
+{
+   int yBase;
+   int yHeight;
+
+	// calculate scrollbar sizes
+	float pixPerLine = (tv_winfo.height - 16 - 2) / (float) totalLines;
+	int block_start_pix = 9 + pixPerLine * currentLine;
+	int block_height = 9 + pixPerLine * (currentLine + LINESPERSCREEN) - block_start_pix;
+
+	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_BLACK);
+
+	if (block_height < 2)		//for long texts the minimum height of the handle is set to 2
+		block_height = 2;
+
+	// Dont get expose events for the moment
+	GrSelectEvents(tv_wid, GR_EVENT_MASK_KEY_DOWN);
+
+	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_WHITE);
+	GrFillRect(tv_wid, tv_gc, tv_winfo.width - 8, 7, 8, tv_winfo.height - 8); // empty old scroll bar
+	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_BLACK);
+
+	yBase   = 7 + g_height;
+   yHeight = g_height * (LINESPERSCREEN-1);
+
+	// Move the last entries to the bottom
+   GrCopyArea(tv_wid,
+	           tv_gc,
+              0, yBase, tv_winfo.width, yHeight,
+	           tv_wid,
+				  0, 7,
+				  MWROP_SRCCOPY);
+
+	// Add a line at the beginning
+	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_WHITE);
+	GrFillRect(tv_wid, tv_gc, 0, 7, tv_winfo.width, g_height); // empty line
+	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_BLACK);
+	GrSetGCUseBackground(tv_gc, GR_FALSE);
+
+	GrText(tv_wid, tv_gc, 3, g_height + 4, lineData[currentLine], -1, GR_TFASCII);
+
+	// Draw the ScrollBar track
+	GrRect (tv_wid , tv_gc , tv_winfo.width - 6, 8, 2, tv_winfo.height - 16 );
+
+	// Draw the Handle on the ScrollBar
+	GrRect (tv_wid , tv_gc , tv_winfo.width - 7, block_start_pix, 4, block_height);
+	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_BLACK);
+	GrRect (tv_wid , tv_gc , tv_winfo.width - 6, block_start_pix + 1, 2, block_height - 2);
+
+	GrSelectEvents(tv_wid, GR_EVENT_MASK_EXPOSURE|GR_EVENT_MASK_KEY_DOWN);
+}
+
+static void viewer_scrolldown()
+{
+   int yBase;
+   int yHeight;
+
+	// calculate scrollbar sizes
+	float pixPerLine = (tv_winfo.height - 16 - 2) / (float) totalLines;
+	int block_start_pix = 9 + pixPerLine * currentLine;
+	int block_height = 9 + pixPerLine * (currentLine + LINESPERSCREEN) - block_start_pix;
+
+	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_BLACK);
+
+	if (block_height < 2)		//for long texts the minimum height of the handle is set to 2
+		block_height = 2;
+
+	// Dont get expose events for the moment
+	GrSelectEvents(tv_wid, GR_EVENT_MASK_KEY_DOWN);
+
+	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_WHITE);
+	GrFillRect(tv_wid, tv_gc, tv_winfo.width - 8, 7, 8, tv_winfo.height - 8); // empty old scroll bar
+	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_BLACK);
+
+	yBase   = 7 + g_height;
+   yHeight = g_height * (LINESPERSCREEN-1);
+
+	// Move the last entries to the bottom
+   GrCopyArea(tv_wid,
+	           tv_gc,
+              0, 7, tv_winfo.width, yHeight,
+	           tv_wid,
+				  0, yBase,
+				  MWROP_SRCCOPY);
+
+	// Add a line at the end
+	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_WHITE);
+	GrFillRect(tv_wid, tv_gc, 0, 7+yHeight, tv_winfo.width, g_height); // empty line
+	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_BLACK);
+	GrSetGCUseBackground(tv_gc, GR_FALSE);
+
+	GrText(tv_wid, tv_gc, 3, yHeight+g_height+4, lineData[currentLine+LINESPERSCREEN-1], -1, GR_TFASCII);
+
+	// Draw the ScrollBar track
+	GrRect (tv_wid , tv_gc , tv_winfo.width - 6, 8, 2, tv_winfo.height - 16 );
+
+	// Draw the Handle on the ScrollBar
+	GrRect (tv_wid , tv_gc , tv_winfo.width - 7, block_start_pix, 4, block_height);
+	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_BLACK);
+	GrRect (tv_wid , tv_gc , tv_winfo.width - 6, block_start_pix + 1, 2, block_height - 2);
+
+	GrSelectEvents(tv_wid, GR_EVENT_MASK_EXPOSURE|GR_EVENT_MASK_KEY_DOWN);
+}
+
 static void drawtext(void)
 {
 	// calculate scrollbar sizes
@@ -184,7 +288,6 @@ static void drawtext(void)
 	int block_height = 9 + pixPerLine * (currentLine + LINESPERSCREEN) - block_start_pix;
 
 	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_BLACK);
-//	GrSetGCForeground(tv_gc, WHITE);
 
 	if (block_height < 2)		//for long texts the minimum height of the handle is set to 2
 		block_height = 2;
@@ -201,7 +304,6 @@ static void drawtext(void)
 	// Draw the Handle on the ScrollBar
 	GrRect (tv_wid , tv_gc , tv_winfo.width - 7, block_start_pix, 4, block_height);
 	GrSetGCForegroundPixelVal(tv_gc, AV3XX_COLOR_BLACK);
-//	GrSetGCForeground(tv_gc, BLACK);
 	GrRect (tv_wid , tv_gc , tv_winfo.width - 6, block_start_pix + 1, 2, block_height - 2);
 }
 
@@ -214,27 +316,8 @@ static void textview_do_draw(GR_EVENT * event)
 static int textview_do_keystroke(GR_EVENT * event){
 	int i;
 	int ret = 0;
-   GR_EVENT nextevent;
-
-	// Filter double Events
-	delay(15000);
-   GrPeekEvent(&nextevent);
-
-	do
-	{
-		if(nextevent.type == GR_EVENT_TYPE_KEY_DOWN)
-		{
-			// remove event
-			GrCheckNextEvent(&nextevent);
-		}
-
-		GrPeekEvent(&nextevent);
-	}
-	while(nextevent.type == GR_EVENT_TYPE_KEY_DOWN);
 
 	switch (event->keystroke.ch) {
-//		case 'm':
-//		case 'q':
       case 'f':
 			pz_close_window(tv_wid);
 			for (i = 0; i < totalLines; i++)
@@ -242,64 +325,54 @@ static int textview_do_keystroke(GR_EVENT * event){
 			free (lineData);
 			break;
 
-		case 'u':
+		case 'd':
 			if (currentLine + LINESPERSCREEN < totalLines) {
 				currentLine ++;
-				drawtext();
+            viewer_scrolldown();
+//				drawtext();
 			}
 			ret = 1;
 			break;
 
-		case 'd':
+		case 'u':
 
 			if (currentLine > 0) {
 				currentLine --;
-				drawtext();
-			}
-			ret = 1;
-			break;
-
-//      case 'f':
-      case '1':
-                        // forward key pressed:  go down one screen
-			if (currentLine + LINESPERSCREEN < totalLines) {
-	                        currentLine = currentLine + LINESPERSCREEN;
-				if (currentLine + LINESPERSCREEN > totalLines)  // if we went down beyond the end of the text
-					currentLine = totalLines - LINESPERSCREEN; // we go to the end of the text
-		                drawtext();
+            viewer_scrollup();
+//				drawtext();
 			}
 			ret = 1;
 			break;
 
       case '2':
+                        // forward key pressed:  go down one screen
+			if (currentLine + LINESPERSCREEN < totalLines)
+			{
+	         currentLine = currentLine + LINESPERSCREEN;
+
+				if (currentLine + LINESPERSCREEN > totalLines)  // if we went down beyond the end of the text
+					currentLine = totalLines - LINESPERSCREEN; // we go to the end of the text
+
+		      drawtext();
+			}
+			ret = 1;
+			break;
+
+      case '1':
 			// rewind key pressed:  go up one screen
                         // if it's already the first line, nothing is done
-			if (currentLine > 0) {
+			if (currentLine > 0)
+			{
 				if (currentLine < LINESPERSCREEN) // if there is no full screen above the current one
 					currentLine = 0;	  // go up to the very first line
 				else	// go up on screen
 					currentLine = currentLine - LINESPERSCREEN;
+
 				drawtext();
 			}
 			ret = 1;
 			break;
 	}
-
-	// Filter double Events
-	delay(15000);
-   GrPeekEvent(&nextevent);
-
-	do
-	{
-		if(nextevent.type == GR_EVENT_TYPE_KEY_DOWN)
-		{
-			// remove event
-			GrCheckNextEvent(&nextevent);
-		}
-
-		GrPeekEvent(&nextevent);
-	}
-	while(nextevent.type == GR_EVENT_TYPE_KEY_DOWN);
 
 	return ret;
 }
@@ -340,6 +413,8 @@ void new_textview_window(char * filename)
 	tv_wid = pz_new_window(0, HEADER_TOPLINE + 1, screen_info.cols, screen_info.rows - (HEADER_TOPLINE + 1), textview_do_draw, textview_do_keystroke);
 
 	GrSelectEvents(tv_wid, GR_EVENT_MASK_EXPOSURE|GR_EVENT_MASK_KEY_DOWN);
+
+	GrGetGCTextSize(tv_gc, "M", -1, GR_TFASCII, &g_width, &g_height, &g_base);
 
 	GrMapWindow(tv_wid);
 	GrGetWindowInfo( tv_wid, &tv_winfo);

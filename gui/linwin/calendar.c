@@ -202,11 +202,11 @@ static void calendar_init()
       printf("Error getting time and date\n");
    }
    close(fd);
-/*
+
 	GrSetGCForegroundPixelVal(calendar_gc, AV3XX_COLOR_BLACK);
 	sprintf(tmp, "%d %d %d %d %d %d %d",tm.tm_wday,tm.tm_year,tm.tm_mon,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
 	GrText(calendar_wid, calendar_gc, 10, 200,tmp, -1, GR_TFASCII);
-*/
+
 
 
 
