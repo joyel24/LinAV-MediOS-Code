@@ -63,7 +63,7 @@ int hour2;
  ******/
 struct av_tm current_time;
 char modayyr[10];
-char time[10];
+char curr_time[10];
 char settings_text[50];
 
 /***********************************
@@ -271,10 +271,13 @@ void draw_analog(void)
     cops->drawLine(COLOR_WHITE, (LCD_WIDTH/2)-1 , (LCD_HEIGHT/2)-3,
                         (LCD_WIDTH/2)+1, (LCD_HEIGHT/2)-3);
 
-    sprintf(time, "%02d:%02d:%02d", hour, minute, second);
-    cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 10, time);
+    sprintf(curr_time, "%02d:%02d:%02d", hour, minute, second);
+    cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 10, curr_time);
 }
 
+/***************
+ * Mode Selector
+ **************/
 void mode_selector(void)
 {
     cops->putS(COLOR_WHITE, COLOR_BLACK, LCD_WIDTH/2-(13*13/2), 10, "MODE SELECTOR");
@@ -293,46 +296,6 @@ void mode_selector(void)
         cops->putS(COLOR_RED, COLOR_BLACK, 10, 90, "LCD-style Clock");
     else
         cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 90, "LCD-style Clock");
-}
-
-void clock(void)
-{
-    cops->getTime(&current_time);
-    hour = current_time.tm_hour;
-    hour2 = current_time.tm_hour;
-    minute = current_time.tm_min;
-    second = current_time.tm_sec;
-
-    if(settings.clock == MODE_DIGITAL || settings.clock == MODE_LCD)
-    {
-        if(last_m != minute || last_h != hour)
-        {
-            cops->fillRect(COLOR_BLACK, 0, 0, 320, 120);
-        }
-    }
-
-    switch(settings.clock)
-    {
-        case MODE_ANALOG:
-            draw_analog();
-            break;
-
-        case MODE_DIGITAL:
-            draw_7seg_time(hour, minute, LCD_WIDTH/2-(32*5)/2, 16, 32, 64, TRUE, FALSE);
-            break;
-
-        case MODE_LCD:
-            draw_7seg_time(hour, minute, LCD_WIDTH/2-(32*5)/2, 16, 32, 64, TRUE, TRUE);
-            break;
-
-        case MODE_SELECTOR:
-            mode_selector();
-            break;
-    }
-
-    last_s = second;
-    last_m = minute;
-    last_h = hour;
 }
 
 /*************************************************************
@@ -644,6 +607,49 @@ int eventHandler(int evt)
             break;
 
     }
+}
+
+/***************
+ * Main function
+ **************/
+void clock(void)
+{
+    cops->getTime(&current_time);
+    hour = current_time.tm_hour;
+    hour2 = current_time.tm_hour;
+    minute = current_time.tm_min;
+    second = current_time.tm_sec;
+
+    if(settings.clock == MODE_DIGITAL || settings.clock == MODE_LCD)
+    {
+        if(last_m != minute || last_h != hour)
+        {
+            cops->fillRect(COLOR_BLACK, 0, 0, 320, 120);
+        }
+    }
+
+    switch(settings.clock)
+    {
+        case MODE_ANALOG:
+            draw_analog();
+            break;
+
+        case MODE_DIGITAL:
+            draw_7seg_time(hour, minute, LCD_WIDTH/2-(32*5)/2, 16, 32, 64, TRUE, FALSE);
+            break;
+
+        case MODE_LCD:
+            draw_7seg_time(hour, minute, LCD_WIDTH/2-(32*5)/2, 16, 32, 64, TRUE, TRUE);
+            break;
+
+        case MODE_SELECTOR:
+            mode_selector();
+            break;
+    }
+
+    last_s = second;
+    last_m = minute;
+    last_h = hour;
 }
 
 /****************
