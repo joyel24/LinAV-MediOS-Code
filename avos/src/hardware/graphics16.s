@@ -165,8 +165,39 @@ graphics16Sprite4:
 .thumb_func
 
 graphics16Sprite8:
-        mov pc, lr
-        
+        push {r0, r1, r2, r3, r4, r5, r6, r7, lr}
+        mov r4, r0
+        bl graphicsGetOffset                @ r0->TLC on dest...
+        ldr r1, [r3, #GRAPHICS_BUFFER_OFFSET]
+        ldr r6, [r3, #GRAPHICS_BUFFER_HEIGHT]
+g16s8y: ldr r7, [r3, #GRAPHICS_BUFFER_WIDTH]
+        push {r0, r1, r6}
+g16s8x: mov r2, #0
+        ldrb r2, [r1]
+        ldr r6, [r3, #GRAPHICS_BUFFER_TRANSPARENT]
+        cmp r2, r6
+         beq g16s8nd        
+
+        lsl r2, #2
+        ldr r6, [r3, #GRAPHICS_BUFFER_PALLETTE16]
+        ldr r2, [r6, r2]
+        strh r2, [r0]
+g16s8nd:
+        add r1, #1
+        add r0, #2
+        sub r7, #1
+        cmp r7, #0
+         bne g16s8x
+        pop {r0, r1, r6}
+        ldr r5, [r4, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r0, r5
+        ldr r5, [r3, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r1, r5
+        sub r6, #1
+        cmp r6, #0
+         bne g16s8y
+        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
+
         
 @ ------------------------------------------------------------------------------
 @ graphics16Sprite16(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
@@ -175,8 +206,36 @@ graphics16Sprite8:
 .thumb_func
 
 graphics16Sprite16:
-        mov pc, lr
-        
+        push {r0, r1, r2, r3, r4, r5, r6, r7, lr}
+        mov r4, r0
+        bl graphicsGetOffset                @ r0->TLC on dest...
+        ldr r1, [r3, #GRAPHICS_BUFFER_OFFSET]
+        ldr r6, [r3, #GRAPHICS_BUFFER_HEIGHT]
+g16s16y:ldr r7, [r3, #GRAPHICS_BUFFER_WIDTH]
+        push {r0, r1, r6}
+g16s16x:
+        ldrh r2, [r1]
+        ldr r6, [r3, #GRAPHICS_BUFFER_TRANSPARENT]
+        cmp r2, r6
+         beq g16s16nd        
+
+        strh r2, [r0]
+g16s16nd:
+        add r1, #2
+        add r0, #2
+        sub r7, #1
+        cmp r7, #0
+         bne g16s16x
+        pop {r0, r1, r6}
+        ldr r5, [r4, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r0, r5
+        ldr r5, [r3, #GRAPHICS_BUFFER_BYTESPERLINE]
+        add r1, r5
+        sub r6, #1
+        cmp r6, #0
+         bne g16s16y
+        pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
+
         
 @ ------------------------------------------------------------------------------
 @ graphics16Sprite32(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
