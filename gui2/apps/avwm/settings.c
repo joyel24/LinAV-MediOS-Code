@@ -20,6 +20,7 @@
 #include "events.h"
 #include "plugin.h"
 #include "icons.h"
+#include "av3xx_common.h"
 
 extern struct plugin settings_plugin;
 
@@ -39,12 +40,13 @@ struct SettingsDataT {
     int  max;
     int  value;
     int  active;
+    int  changed;
 };
 
 #define CNT_SETTINGS_ENTRIES 3
-struct SettingsDataT sData[CNT_SETTINGS_ENTRIES] = { {0, 5, 30, "Key Repeat", 2, 10, 5, 1},
-                                                     {0, 5, 44, "Key Freq",   1,  6, 5, 0},
-                                                     {0, 5, 58, "LCD Timeout",0, 10, 1, 0} };
+struct SettingsDataT sData[CNT_SETTINGS_ENTRIES] = { {0, 5, 30, "Key Repeat",         1, 10, 5, 1, 0},
+                                                     {0, 5, 44, "Key Freq",           0,  6, 5, 0, 0},
+                                                     {0, 5, 72, "LCD Timeout",        1, 10, 1, 0, 0} };
 
 
 unsigned char SettingsSlider[13][6] =
@@ -88,6 +90,31 @@ void SettingsEvtLoop(void)
     while(!stopSettingsLoop)
         procNxtEvent(waitEvent());
     settings_plugin.handle_on=0;
+}
+
+void GetSettings()
+{
+    CREATE_TIMER_VAR(lcd_timeout);
+
+    // get actual settings
+    sData[0].value = get_mouseRepeat();
+    sData[1].value = get_mouseFreq();
+
+    sData[2].value = GET_VAL_TIMER(lcd_timeout);
+
+    set_mouseParam(6,3); // set to 6,3 for the settings screen only
+}
+
+void SetSettings()
+{
+    CREATE_TIMER_VAR(lcd_timeout);
+
+    if((sData[0].changed) || (sData[1].changed))
+        set_mouseParam(sData[1].value,sData[0].value);
+/*
+    if(sData[2].changed)
+        SET_VAL_TIMER(AV_LCD_SET_TIMOUT,sData[2].value,lcd_timeout)
+*/
 }
 
 /* events */
@@ -171,6 +198,8 @@ int settingsEvtHandler(int evt)
                        sData[active].max,
                        sData[active].value,
                        sData[active].active);
+
+            sData[active].changed = 1;
             break;
 
         case BTN_RIGHT:
@@ -188,9 +217,11 @@ int settingsEvtHandler(int evt)
                        sData[active].value,
                        sData[active].active);
 
+            sData[active].changed = 1;
             break;
 
         case BTN_OFF:
+            SetSettings();
             stopSettingsLoop=1;
             break;
     }
@@ -256,6 +287,8 @@ void drawSettings()
     putS(COLOR_BLACK, COLOR_GREY, 100, 5, "AVWM Settings");
     drawLine(COLOR_RED, 0, 18, SCREEN_WIDTH-40, 18);
     drawLine(COLOR_RED, 0, 20, SCREEN_WIDTH-40, 20);
+
+    GetSettings();
 
     for(i = 0; i < CNT_SETTINGS_ENTRIES; i++)
     {
