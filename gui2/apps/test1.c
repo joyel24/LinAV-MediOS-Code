@@ -7,12 +7,19 @@
 
 int main(int argc,char ** argv)
 {
+    int evt;
+    char tmp[10];
+    
     ini_graphics();
 
-    drawRect(120,10,10,100,50);
+    clearScreen(COLOR_BLACK);
     
  while(1)
   {  
-    nxtEvent();
+       evt=waitEvent();
+       sprintf(tmp,"evt=%04x\n",evt);
+       printf(tmp);
+       drawRect(COLOR_BLACK,10,50,310,10);
+       putS(COLOR_WHITE,COLOR_BLACK,10,50,tmp);
   }
 }
