@@ -58,6 +58,7 @@ double tmpErg = 0;        /* Zwischenergebnis */
 double erg = 0;           /* Endergebnis durch = */
 char strCurrentNumber[20]; /* Zahl die gerade eingeben wird als String */
 int operation = OP_UNDEFINED;        /* see defines above */
+int EntryMode = 0;   /* soll die aktuelle Anzeige vor der neuen Eingabe einer Zahl gelöscht werden oder nicht */
 
 static unsigned char pair0[PIECE_DIM][PIECE_DIM] = /* identifier = 0 */
 { {23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23},
@@ -912,16 +913,55 @@ double mySqrt(double square)
     return root;
 }
 
-void calculate()
+void makeOperation()
 {
     int l = 0;
     double tmp = 0;
-//    char ch[100];
+
+    if(operation == OP_PLUS)
+    {
+        erg = tmpErg + atof(strCurrentNumber);
+    }
+    else if(operation == OP_MINUS)
+    {
+        erg = tmpErg - atof(strCurrentNumber);
+    }
+    else if(operation == OP_MULTI)
+    {
+        erg = tmpErg * atof(strCurrentNumber);
+    }
+    else if(operation == OP_DIV)
+    {
+        if(atof(strCurrentNumber) != 0)
+            erg = tmpErg / atof(strCurrentNumber);
+    }
+    else if(operation == OP_XY)
+    {
+        erg = tmpErg;
+
+        tmp = atof(strCurrentNumber);
+
+        for(l = 0; l < tmp-1; l++)
+        {
+            erg *= tmpErg;
+        }
+    }
+}
+
+void calculate()
+{
+    double tmp = 0;
 
     if(field[y][x] == 0)
     {
         if(operation != OP_EQUAL)
         {
+            if(EntryMode == 1)
+            {
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+                EntryMode = 0;
+            }
+
             strcat(strCurrentNumber, "0");
             output(strCurrentNumber);
         }
@@ -930,6 +970,12 @@ void calculate()
     {
         if(operation != OP_EQUAL)
         {
+            if(EntryMode == 1)
+            {
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+                EntryMode = 0;
+            }
+
             strcat(strCurrentNumber, "1");
             output(strCurrentNumber);
         }
@@ -938,6 +984,12 @@ void calculate()
     {
         if(operation != OP_EQUAL)
         {
+            if(EntryMode == 1)
+            {
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+                EntryMode = 0;
+            }
+
             strcat(strCurrentNumber, "2");
             output(strCurrentNumber);
         }
@@ -946,6 +998,12 @@ void calculate()
     {
         if(operation != OP_EQUAL)
         {
+            if(EntryMode == 1)
+            {
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+                EntryMode = 0;
+            }
+
             strcat(strCurrentNumber, "3");
             output(strCurrentNumber);
         }
@@ -954,6 +1012,12 @@ void calculate()
     {
         if(operation != OP_EQUAL)
         {
+            if(EntryMode == 1)
+            {
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+                EntryMode = 0;
+            }
+
             strcat(strCurrentNumber, "4");
             output(strCurrentNumber);
         }
@@ -962,6 +1026,12 @@ void calculate()
     {
         if(operation != OP_EQUAL)
         {
+            if(EntryMode == 1)
+            {
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+                EntryMode = 0;
+            }
+
             strcat(strCurrentNumber, "5");
             output(strCurrentNumber);
         }
@@ -970,6 +1040,12 @@ void calculate()
     {
         if(operation != OP_EQUAL)
         {
+            if(EntryMode == 1)
+            {
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+                EntryMode = 0;
+            }
+
             strcat(strCurrentNumber, "6");
             output(strCurrentNumber);
         }
@@ -978,6 +1054,12 @@ void calculate()
     {
         if(operation != OP_EQUAL)
         {
+            if(EntryMode == 1)
+            {
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+                EntryMode = 0;
+            }
+
             strcat(strCurrentNumber, "7");
             output(strCurrentNumber);
         }
@@ -986,6 +1068,12 @@ void calculate()
     {
         if(operation != OP_EQUAL)
         {
+            if(EntryMode == 1)
+            {
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+                EntryMode = 0;
+            }
+
             strcat(strCurrentNumber, "8");
             output(strCurrentNumber);
         }
@@ -994,6 +1082,12 @@ void calculate()
     {
         if(operation != OP_EQUAL)
         {
+            if(EntryMode == 1)
+            {
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+                EntryMode = 0;
+            }
+
             strcat(strCurrentNumber, "9");
             output(strCurrentNumber);
         }
@@ -1002,43 +1096,19 @@ void calculate()
     {
         if(operation != OP_EQUAL)
         {
+            if(EntryMode == 1)
+            {
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+                EntryMode = 0;
+            }
+
             strcat(strCurrentNumber, ".");
             output(strCurrentNumber);
         }
     }
     else if(field[y][x] == 11) /* = */
     {
-        if(operation == OP_PLUS)
-        {
-            erg = tmpErg + atof(strCurrentNumber);
-        }
-        else if(operation == OP_MINUS)
-        {
-            erg = tmpErg - atof(strCurrentNumber);
-        }
-        else if(operation == OP_MULTI)
-        {
-            erg = tmpErg * atof(strCurrentNumber);
-        }
-        else if(operation == OP_DIV)
-        {
-            if(atof(strCurrentNumber) != 0)
-                erg = tmpErg / atof(strCurrentNumber);
-        }
-        else if(operation == OP_XY)
-        {
-//            sprintf(ch,"Erg=%.2f tmpErg=%.2f strCur=%s op=%d",erg,tmpErg,strCurrentNumber,operation);
-//            cops->putS(COLOR_BLACK, COLOR_WHITE, 5,210, ch);
-
-            erg = tmpErg;
-
-            tmp = atof(strCurrentNumber);
-
-            for(l = 0; l < tmp-1; l++)
-            {
-                erg *= tmpErg;
-            }
-        }
+        makeOperation();
 
         operation = OP_EQUAL;
         tmpErg = 0;
@@ -1048,6 +1118,7 @@ void calculate()
     }
     else if(field[y][x] == 12)
     {
+        EntryMode = 0;
         if((strlen(strCurrentNumber) == 0) && (operation == OP_UNDEFINED))
         {
         }
@@ -1056,15 +1127,23 @@ void calculate()
             if((operation == OP_UNDEFINED) || (operation == OP_EQUAL))
             {
                 tmpErg = atof(strCurrentNumber);
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+            }
+            else
+            {
+                makeOperation();
+                tmpErg = erg;
+                sprintf(strCurrentNumber, "%f", tmpErg);
+                EntryMode = 1;
             }
 
             operation = OP_MULTI; /* x */
-            memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
             output(strCurrentNumber);
         }
     }
     else if(field[y][x] == 13)
     {
+        EntryMode = 0;
         if((strlen(strCurrentNumber) == 0) && (operation == OP_UNDEFINED))
         {
         }
@@ -1073,15 +1152,23 @@ void calculate()
             if((operation == OP_UNDEFINED) || (operation == OP_EQUAL))
             {
                 tmpErg = atof(strCurrentNumber);
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+            }
+            else
+            {
+                makeOperation();
+                tmpErg = erg;
+                sprintf(strCurrentNumber, "%f", tmpErg);
+                EntryMode = 1;
             }
 
             operation = OP_PLUS; /* + */
-            memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
             output(strCurrentNumber);
         }
     }
     else if(field[y][x] == 14)
     {
+        EntryMode = 0;
         if((strlen(strCurrentNumber) == 0) && (operation == OP_UNDEFINED))
         {
         }
@@ -1090,15 +1177,23 @@ void calculate()
             if((operation == OP_UNDEFINED) || (operation == OP_EQUAL))
             {
                 tmpErg = atof(strCurrentNumber);
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+            }
+            else
+            {
+                makeOperation();
+                tmpErg = erg;
+                sprintf(strCurrentNumber, "%f", tmpErg);
+                EntryMode = 1;
             }
 
             operation = OP_DIV;  /* / */
-            memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
             output(strCurrentNumber);
         }
     }
     else if(field[y][x] == 15)
     {
+        EntryMode = 0;
         if((strlen(strCurrentNumber) == 0) && (operation == OP_UNDEFINED))
         {
             /* Minuszeichen vor die erste Zahl */
@@ -1109,10 +1204,17 @@ void calculate()
             if((operation == OP_UNDEFINED) || (operation == OP_EQUAL))
             {
                 tmpErg = atof(strCurrentNumber);
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+            }
+            else
+            {
+                makeOperation();
+                tmpErg = erg;
+                sprintf(strCurrentNumber, "%f", tmpErg);
+                EntryMode = 1;
             }
 
             operation = OP_MINUS; /* - */
-            memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
         }
 
         output(strCurrentNumber);
@@ -1155,6 +1257,7 @@ void calculate()
     }
     else if(field[y][x] == 19)
     {
+        EntryMode = 0;
         if((strlen(strCurrentNumber) == 0) && (operation == OP_UNDEFINED))
         {
         }
@@ -1163,10 +1266,17 @@ void calculate()
             if((operation == OP_UNDEFINED) || (operation == OP_EQUAL))
             {
                 tmpErg = atof(strCurrentNumber);
+                memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
+            }
+            else
+            {
+                makeOperation();
+                tmpErg = erg;
+                sprintf(strCurrentNumber, "%f", tmpErg);
+                EntryMode = 1;
             }
 
             operation = OP_XY; /* x ^ y */
-            memset(&strCurrentNumber, 0 ,sizeof(strCurrentNumber));
             output(strCurrentNumber);
         }
     }
