@@ -33,7 +33,7 @@ void mainLoop(void)
     if(cnt>1000)
     {
         cnt=0;
-        cops->fillRect(COLOR_WHITE,x,y,20,20);
+        cops->fillRect(COLOR_TRSP,x,y,20,20);
         x+=10;
         if(x>300)
         {
@@ -41,7 +41,7 @@ void mainLoop(void)
             if(y>220)
                 y=0;
         }
-        cops->putS(COLOR_BLUE,COLOR_WHITE,x,y,"T");
+        cops->putS(COLOR_BLUE,COLOR_TRSP,x,y,"T");
     }
     cnt++;
 }
@@ -53,14 +53,17 @@ int main(int argc,char ** argv)
     cops->hideSBar();  
     cops->disableMenu();
      
-    cops->setPlane(BMAP2);
-    cops->clearScreen(COLOR_WHITE);
+    
        
     cops->showPlane(VID1);
     cops->setPlane(VID1);
-    //cops->cfgPlane(BMAP2,MERGE_BACK);
-    cops->showPlane(BMAP2);    
     cops->drawBITMAP (&mp3BMAP, 0, 0);
+    
+    //cops->cfgPlane(BMAP2,BMAP_0TRANS);
+    cops->showPlane(BMAP2); 
+    cops->setPlane(BMAP2);
+    cops->clearScreen(COLOR_TRSP);
+    
     cnt=0;x=0;y=0;
     PACK(cops,mainLoop)
     return 1;

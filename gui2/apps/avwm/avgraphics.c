@@ -123,7 +123,7 @@ void cfgPlane(int vplane,int state)
 {
     if(vplane == VID1 || vplane == VID2)
         return;
-    setState(vplane,state|AV3XX_OSD_BITMAP_8BIT|AV3XX_OSD_BITMAP_ZX1|AV3XX_OSD_BITMAP_RAMCLUT);
+    setState(vplane,state|AV3XX_OSD_BITMAP_8BIT|AV3XX_OSD_BITMAP_ZX1|AV3XX_OSD_BITMAP_RAMCLUT| COLOR_TRSP << AV3XX_OSD_BITMAP_A_SHIFT);
     if(isShown(vplane))
         showPlane(vplane);
 

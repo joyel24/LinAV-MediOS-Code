@@ -61,7 +61,7 @@ struct graphicsBuffer BITMAP_1 = {
     offset             : 0,
 #ifdef AV_SCREEN
     state              : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
-                    AV3XX_OSD_BITMAP_8BIT ,
+                    AV3XX_OSD_BITMAP_8BIT | COLOR_TRSP << AV3XX_OSD_BITMAP_A_SHIFT,
 #else
     offset_sav         : 0,    
 #endif
@@ -78,7 +78,7 @@ struct graphicsBuffer BITMAP_2 = {
     offset             : 0,
 #ifdef AV_SCREEN
     state              : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
-                    AV3XX_OSD_BITMAP_8BIT ,
+                    AV3XX_OSD_BITMAP_8BIT | COLOR_TRSP << AV3XX_OSD_BITMAP_A_SHIFT,
 #else
     offset_sav         : 0,
 #endif

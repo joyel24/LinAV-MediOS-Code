@@ -3,7 +3,7 @@ int gui_pal[256][3] = {
 	{ 0  , 0  , 0   },	/* black*/
 	{ 0  , 0  , 128 },	/* blue*/
 	{ 0  , 128, 0   },	/* green*/
-	{ 0  , 128, 128 },	/* cyan*/ /* COLOR_BACKGROUND*/
+	{ 255, 255, 255 },	/* white used for trsp */
 	{ 128, 0  , 0   },	/* red*/  /* COLOR_ACTIVECAPTION A*/
 	{ 128, 0  , 128 },	/* magenta*/ /* COLOR_ACTIVECAPTION B*/
 	{ 128, 64 , 0   },	/* adjusted brown*/
