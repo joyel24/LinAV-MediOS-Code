@@ -371,16 +371,24 @@ int doLs(char * name)
     if(ini_lists()<0)
         return -1;
 
+       // fprintf(stderr, "[dols] input: %s\n",name);
+        
     dirp = opendir(name);
     if (dirp == NULL) {
+        fprintf(stderr, "[dols] error\n");
         perror(name);
         return -1;
     }
+    
+    i=0;
 
     while ((dp = readdir(dirp)) != NULL)
     {
+        /*if(dp->d_name[0]='\0')
+            continue;*/
         if ((dp->d_name[0] == '.') && !SHOW_ALL)
             continue;
+         
 
         fullname[0] = '\0';
 
@@ -393,6 +401,8 @@ int doLs(char * name)
 
         strcat(fullname, dp->d_name);
 
+        //fprintf(stderr, "[dols] %d processing |%s| (full:%s)\n",i, dp->d_name,fullname);
+        
         if (stat(dp->d_name, &statbuf) < 0)
         {
             perror(dp->d_name);
@@ -409,6 +419,7 @@ int doLs(char * name)
             if(add_file(fullname)<0)
                 return -1;
         }
+        i++;
     }
 
     closedir(dirp);
@@ -529,9 +540,9 @@ void cleanList()
     for (i = 0; i < listused; i++)
     {
         free(list[i].name);
-        free(&list[i]);
+        //free(&list[i]);
     }
-
+    free(list);
     listused=0;
 }
 
@@ -757,16 +768,26 @@ int eventHandler(int evt)
                 break;
 
             case BTN_RIGHT:
-                if(chdir(list[pos+nselect].name)<0)
+                //if(chdir(list[pos+nselect].name)<0)
+                if(list[pos+nselect].type!=TYPE_DIR)
                     handle_type_other(list[pos+nselect].name);
                 else
                 {
-                    cleanList();
-                    if(doLs("./")<0)
+                    //fprintf(stderr,"chdir: %s\n",list[pos+nselect].name);
+                    if(chdir(list[pos+nselect].name)<0)
                     {
-                        listused = 0;
-                        return -1;
+                        fprintf(stderr,"Error going in: %s\n",list[pos+nselect].name);
                     }
+                    else
+                    {
+                        cleanList();
+                        if(doLs("./")<0)
+                        {
+                            listused = 0;
+                            return -1;
+                        }
+                    }
+                    
                     hideArrow(DOWN_ARROW);
                     hideArrow(UP_ARROW);
                     if(listused>MAXPOS)

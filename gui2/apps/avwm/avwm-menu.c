@@ -158,6 +158,7 @@ int ini_menu(char * path,struct plugin * plug)
     menu_plug=plug;
         
     clearScreen(COLOR_BLACK);
+    
     putS(COLOR_WHITE,COLOR_BLACK,5,110,"Reading menu file ....");
     
     tmpC=(char*)malloc(sizeof(char)*(strlen(path)+1+strlen(MENU_FILE_NAME)));

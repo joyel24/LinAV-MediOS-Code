@@ -83,6 +83,17 @@ int set_mouseParam(int freq, int repeat)
 {
     return 1;
 }
+
+int get_mouseFreq()
+{
+    return 1;
+}
+
+int get_mouseRepeat()
+{
+    return 1;
+}
+
 int getBat(void)
 {
         return stateBAT;
