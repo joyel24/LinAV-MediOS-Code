@@ -284,7 +284,7 @@ void drawMenu(void)
 	int evt,status;
 	if(currentHandler)
 		currentHandler(EVT_SUSPEND);
-	fillRect(COLOR_WHITE,5 , 15, 310, 225);
+	fillRect(COLOR_WHITE,5 , 15, 315, 225);
 	doDraw();
 }
 
@@ -332,6 +332,7 @@ void eventLoop()
 		if(evt==BTN_F3)
 		{
 			clearEventQueue();
+         drawGui();
 			drawMenu();
 		}
 		else
