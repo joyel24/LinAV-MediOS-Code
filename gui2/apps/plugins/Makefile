@@ -1,11 +1,6 @@
-TOOL=arm-elf
+include ../../Makefile.conf
 
-GCC=$(TOOL)-gcc
-AR=$(TOOL)-ar
-RANLIB=$(TOOL)-ranlib
-
-GCCFLAGS=-I../../include -I../avwm/include
-LDFLAGS=-elf2flt
+GCCFLAGS += -I../../include -I../avwm/include
 
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)

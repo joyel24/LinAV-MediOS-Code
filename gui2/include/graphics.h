@@ -120,13 +120,17 @@ typedef struct graphics_context * GC_ID;
 
 int   ini_graphics   (void);
 void  close_graphics (void);
+#if (GTYPE==AV_SCREEN)
 void  iniComponent   (struct graphicsBuffer * buff,unsigned int offset);
-void  tstPlane       (struct graphicsBuffer * plane);
+#endif
 GC_ID createGC       (int vplane);
 void  destroyGC      (GC_ID gc);
 
 void setPalette      (int palette[256][3],int size);
 
+#if (GTYPE==X11_SCREEN)
+void lcd_update(void);
+#endif
 
 /* drawings */
 

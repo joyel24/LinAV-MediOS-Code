@@ -12,19 +12,33 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+
+#if (GTYPE==AV_SCREEN)
 #include <fcntl.h>
 #include <sys/ioctl.h>
-
 #include <osd.h>
+#define FBIO_INIT        _IO ('F', 0x26)
+#define LCD_UPDATE       {;}
+#else
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#define LCD_UPDATE       {lcd_update();}
+Display* display;
+Window window;
+GC gc;
+int screen;
+#endif
+
 #include <graphics.h>
 #include "events.h"
 #include "graphics_8.h"
 #include "gui_pal.h"
+
+#ifdef HAVE_JPEG
 #include "jpeglib.h"
+#endif
 
 #define STRING_MAXSIZE 200
-
-#define FBIO_INIT               _IO ('F', 0x26)
 
 #define tstXY(x,y)  {if(x>SCREEN_WIDTH) return; if(x<0) return; if(y>SCREEN_HEIGHT) return; if(y<0) return;}
 #define tstWH(x,y,w,h)  {if(x+w>SCREEN_WIDTH)return; if(x+w<0) return; if(y+h>SCREEN_HEIGHT) return; if(y+h<0) return;}
@@ -36,7 +50,11 @@ char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
 
 struct graphicsBuffer BITMAP_1 = {
     offset             : 0,
+#if (GTYPE==AV_SCREEN)
     component          : AV3XX_OSD_BITMAP1,
+    enable             : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
+                    AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE,
+#endif
     bytesPerLine       : SCREEN_WIDTH*2,
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
@@ -44,14 +62,16 @@ struct graphicsBuffer BITMAP_1 = {
     y                  : 0x12,
     bitsPerPixel       : 8,
     bitsPerPixelShift  : 3,
-    SWidth             : 0xa,
-    enable             : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
-                    AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE
+    SWidth             : 0xa    
 };
 
 struct graphicsBuffer BITMAP_2 = {
     offset             : 0,
+#if (GTYPE==AV_SCREEN)
     component          : AV3XX_OSD_BITMAP2,
+    enable             : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
+                    AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE,
+#endif
     bytesPerLine       : SCREEN_WIDTH*2,
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
@@ -59,14 +79,15 @@ struct graphicsBuffer BITMAP_2 = {
     y                  : 0x12,
     bitsPerPixel       : 8,
     bitsPerPixelShift  : 3,
-    SWidth             : 0xa,
-    enable             : AV3XX_OSD_BITMAP_RAMCLUT | AV3XX_OSD_BITMAP_ZX1 |
-                    AV3XX_OSD_BITMAP_8BIT | AV3XX_OSD_COMPONENT_ENABLE
+    SWidth             : 0xa    
 };        
 
 struct graphicsBuffer VIDEO_1 = {
     offset             : 0,
+#if (GTYPE==AV_SCREEN)
     component          : AV3XX_OSD_VIDEO1,
+    enable             : AV3XX_OSD_COMPONENT_ENABLE,
+#endif
     bytesPerLine       : SCREEN_WIDTH*2,
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
@@ -74,13 +95,15 @@ struct graphicsBuffer VIDEO_1 = {
     y                  : 0x12,
     bitsPerPixel       : 32,
     bitsPerPixelShift  : 5,
-    SWidth             : 0x28,
-    enable             : AV3XX_OSD_COMPONENT_ENABLE
+    SWidth             : 0x28
 };
 
 struct graphicsBuffer VIDEO_2 = {
     offset             : 0,
+#if (GTYPE==AV_SCREEN)
     component          : AV3XX_OSD_VIDEO2,
+    enable             : AV3XX_OSD_COMPONENT_ENABLE,
+#endif
     bytesPerLine       : SCREEN_WIDTH*2,
     width              : SCREEN_WIDTH,
     height             : SCREEN_HEIGHT,
@@ -88,8 +111,7 @@ struct graphicsBuffer VIDEO_2 = {
     y                  : 0x12,
     bitsPerPixel       : 32,
     bitsPerPixelShift  : 5,
-    SWidth             : 0x28,
-    enable             : AV3XX_OSD_COMPONENT_ENABLE
+    SWidth             : 0x28    
 };
 
 GC_ID   default_gc=NULL;
@@ -101,6 +123,7 @@ extern struct graphics_operations g8ops;
 
 int ini_graphics()
 {
+#if (GTYPE==AV_SCREEN)
     osdInit();
     
     /* reset everything */
@@ -111,16 +134,46 @@ int ini_graphics()
     osdSetComponentConfig(AV3XX_OSD_CURSOR1, 0);
     osdSetComponentConfig(AV3XX_OSD_CURSOR2, 0);
     
-    iniComponent(&BITMAP_1,(unsigned int)&screen_BMAP1);    
+    iniComponent(&BITMAP_1,(unsigned int)&screen_BMAP1); 
+    iniComponent(&BITMAP_2,(unsigned int)&screen_BMAP2); 
+    iniComponent(&VIDEO_1,(unsigned int)&screen_VID1);
+    iniComponent(&VIDEO_2,(unsigned int)&screen_VID2);
+#else
+    BITMAP_1.offset=(unsigned int)&screen_BMAP1;
+    BITMAP_2.offset=(unsigned int)&screen_BMAP2;
+    VIDEO_1.offset=(unsigned int)&screen_VID1;
+    VIDEO_2.offset=(unsigned int)&screen_VID2;
+    
+    display = XOpenDisplay(0);  
+    if(!display) 
+    {
+            printf("Error while connecting to X server");
+            exit(1);
+    }
+                
+    screen = DefaultScreen(display);
+    gc = DefaultGC(display, screen);
+    
+    window = XCreateSimpleWindow(
+            display,                               /* Display */
+            DefaultRootWindow(display),            /* Main Window */
+            0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,     /* Geometry */
+            10,                                    /* Width border */
+            BlackPixel(display, screen),	
+            WhitePixel(display, screen)
+            );            
+    if(!window) 
+    {
+            printf("Can't create the window");
+            exit(1);
+    }
+    XStoreName(display, window, "LinAV project");
+    XMapWindow(display, window);
+#endif  
+          
     gc_bmap1=createGC(BMAP1);
-
-    iniComponent(&BITMAP_2,(unsigned int)&screen_BMAP2);    
     gc_bmap2=createGC(BMAP2);
-
-    iniComponent(&VIDEO_1,(unsigned int)&screen_VID1);    
     gc_vid1=createGC(VID1);
-        
-    iniComponent(&VIDEO_2,(unsigned int)&screen_VID2);    
     gc_vid2=createGC(VID2);
     
     if(iniEvent()<0)
@@ -134,8 +187,15 @@ int ini_graphics()
     return 0;
 }
 
+#if (GTYPE==X11_SCREEN)
+void lcd_update(void)
+{
+}
+#endif
+
 void setPalette(int palette[256][3],int size)
 {
+#if (GTYPE==AV_SCREEN)
     int i=0;
     int y,cr,cb;
     for(i=0;i<size;i++)
@@ -146,15 +206,20 @@ void setPalette(int palette[256][3],int size)
     
         osdSetPallette (y, cr, cb, i);
     }
+#else
+#endif
 }
 
 void close_graphics()
 {
+#if (GTYPE==AV_SCREEN)
     int fd=open("/dev/fb0",O_WRONLY);
     if(fd<0)
         printf("error opening /dev/fb\n");
     if(ioctl(fd,FBIO_INIT,NULL)<0)
         fprintf(stderr,"error sending init ioctl\n");
+#else
+#endif
 }
 
 GC_ID createGC(int vplane)
@@ -223,6 +288,7 @@ void setPlane(int vplane)
 
 void hidePlane(int vplane)
 {
+#if (GTYPE==AV_SCREEN)
     switch(vplane) {
         case BMAP1:
             osdSetComponentConfig(AV3XX_OSD_BITMAP1, 0);
@@ -239,10 +305,12 @@ void hidePlane(int vplane)
         default:
             fprintf(stderr,"wrong plane\n");
     }
+#endif
 }
 
 void showPlane(int vplane)
 {
+#if (GTYPE==AV_SCREEN)
     switch(vplane) {
         case BMAP1:
             //tstPlane(&BITMAP_1);
@@ -262,31 +330,11 @@ void showPlane(int vplane)
             break;
         default:
             fprintf(stderr,"wrong plane\n");
-    }            
+    }  
+#endif          
 }
 
-/*void tstPlane(struct graphicsBuffer * plane)
-{
-    int diff;
-    if(plane->offset == 0)
-    {
-        plane->offset=(unsigned int)malloc(sizeof(char)*(SCREEN_WIDTH*SCREEN_HEIGHT*(plane->bitsPerPixel>>3)+40));
-            if(plane->offset)
-            {
-                diff=plane->offset % 32;
-                if(diff)
-                        plane->offset+=(32-diff);
-                osdSetComponentOffset(plane->component, plane->offset);
-            }
-            else
-            {
-                fprintf(stderr,"Can't allocate buffer for new Plane");
-                _exit(0);
-            }
-    }
-}
-*/
-
+#if (GTYPE==AV_SCREEN)
 void iniComponent(struct graphicsBuffer * buff,unsigned int offset)
 {    
     int diff=offset % 32;
@@ -298,23 +346,27 @@ void iniComponent(struct graphicsBuffer * buff,unsigned int offset)
     osdSetComponentPosition(buff->component,buff->x, buff->y);
     osdSetComponentSourceWidth(buff->component, buff->SWidth);
 }
+#endif
 
 /* drawing functions */
 void clearScreen(int color)
 {
     default_gc->gops->fillRect(color,0,0,SCREEN_WIDTH,SCREEN_HEIGHT,default_gc->buffer);
+    LCD_UPDATE
 }
 
 void drawPixel(int color,int x, int y)
 {
     tstXY(x,y);
     default_gc->gops->drawPixel(color, x, y,default_gc->buffer);
+    LCD_UPDATE
 }
 
 int readPixel(int x, int y)
 {
     tstXY(x,y);
     return default_gc->gops->readPixel(x,y,default_gc->buffer);
+    LCD_UPDATE
 }
 
 void drawRect(int color, int x, int y, int width, int height)
@@ -322,6 +374,7 @@ void drawRect(int color, int x, int y, int width, int height)
     tstXY(x,y);
     tstWH(x,y,width,height);
     default_gc->gops->drawRect(color,x,y,width,height,default_gc->buffer);
+    LCD_UPDATE
 }
 
 void fillRect(int color, int x, int y, int width, int height)
@@ -329,6 +382,7 @@ void fillRect(int color, int x, int y, int width, int height)
     tstXY(x,y);
     tstWH(x,y,width,height);
     default_gc->gops->fillRect(color,x,y,width,height,default_gc->buffer);
+    LCD_UPDATE
 }
 
 void drawLine(int color, int x1, int y1, int x2, int y2)
@@ -426,6 +480,7 @@ void drawLine(int color, int x1, int y1, int x2, int y2)
             y += yinc2;
         }
     }
+    LCD_UPDATE
 }
 
 void putS(int color, int bg_color, int x, int y, char *s)
@@ -448,6 +503,7 @@ void putS(int color, int bg_color, int x, int y, char *s)
     {
         s[SCREEN_WIDTH/font->width]=c;
     }
+    LCD_UPDATE
 }
 
 int getStringS(const unsigned char *str, int *w, int *h)
@@ -464,34 +520,40 @@ void putC(int color, int bg_color, int x, int y, char s)
     tstXY(x,y);
 
     default_gc->gops->drawChar(font,color,bg_color,x,y,s,default_gc->buffer);
+    LCD_UPDATE
 }
 
 void drawSprite(unsigned int * palette, SPRITE * sprite, int x, int y)
 {
     tstXY(x,y);
     default_gc->gops->drawSprite(palette,sprite,default_gc->transparent,x,y,default_gc->buffer);
+    LCD_UPDATE
 }
 
 void drawBITMAP(BITMAP * bitmap, int x, int y)
 {
     tstXY(x,y);
     default_gc->gops->drawBITMAP(bitmap,default_gc->transparent,x,y,default_gc->buffer);
+    LCD_UPDATE
 }
 
 void scrollWindowVert(int bgColor, int x, int y, int width, int height, int scroll, int UP)
 {
     default_gc->gops->scrollWindowVert(bgColor,x,y,width,height,scroll,UP,default_gc->buffer);
+    LCD_UPDATE
 }
 
 void scrollWindowHoriz(int bgColor, int x, int y, int width, int height, int scroll, int RIGHT)
 {
     default_gc->gops->scrollWindowHoriz(bgColor,x,y,width,height,scroll,RIGHT,default_gc->buffer);
+    LCD_UPDATE
 }
 
 /* images */
 
 void drawImage(char * filename)
 {
+#ifdef HAVE_JPEG    
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
     FILE * img_file;
@@ -570,6 +632,7 @@ void drawImage(char * filename)
     
     jpeg_destroy_decompress(&cinfo);
     fclose(img_file);
+#endif
 }
 
 /* font */

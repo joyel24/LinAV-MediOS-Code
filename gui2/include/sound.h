@@ -14,16 +14,22 @@
 #ifndef __SOUND_H
 #define __SOUND_H
 
+#if (GTYPE==AV_SCREEN)
 #include "av3xx_common.h"
+#endif
 
 int  ini_sound_connection(void);
+#if (GTYPE==AV_SCREEN)
 int  ini_mp3_playback   (struct mp3_play * mp3_p_data);
+#endif
 void close_mp3_playback (void);
 int  start_playback     (void);
 int  pause_playback     (void);
 int  stop_playback      (void);
 
-int  readPeak          (struct av_peak * peak); 
+#if (GTYPE==AV_SCREEN)
+int  readPeak           (struct av_peak * peak);
+#endif
 
 int  setVolume          (int val);
 int  setBass            (int val);

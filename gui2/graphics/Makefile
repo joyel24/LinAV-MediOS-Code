@@ -1,21 +1,22 @@
-TOOL=arm-elf
+include ../Makefile.conf
 
-GCC=$(TOOL)-gcc
-AR=$(TOOL)-ar
-RANLIB=$(TOOL)-ranlib
-
-GCCFLAGS=-I../include -I../jpeg-6b
-LDFLAGS=-elf2flt
+GCCFLAGS += -I../include
 
 DEST=../lib
 
 LIB_CONTENT= \
 	graphics.o \
-        graphics_8.o \
-	osd.o \
-	events.o \
-        sound.o \
-        misc.o
+        graphics_8.o	
+
+ifeq ($(HAVE_JPEG),y)
+GCCFLAGS += -D'HAVE_JPEG=1' -I../jpeg-6b
+endif
+
+ifeq ($(BUILD),AV)
+LIB_CONTENT += osd.o events.o misc.o sound.o 
+else
+LIB_CONTENT += events_X11.o misc_X11.o sound_X11.o 
+endif
 
 TARGET = libGraphics.a
 	

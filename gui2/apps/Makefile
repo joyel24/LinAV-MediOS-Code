@@ -1,11 +1,12 @@
-TOOL=arm-elf
+include ../Makefile.conf
 
-GCC=$(TOOL)-gcc
-AR=$(TOOL)-ar
-RANLIB=$(TOOL)-ranlib
+GCCFLAGS +=-I../include
 
-GCCFLAGS=-I../include
-LDFLAGS=-elf2flt -L../lib -lGraphics -ljpeg
+LDFLAGS +=-L../lib -lGraphics 
+
+ifeq ($(HAVE_JPEG),y)
+LDFLAGS += -ljpeg
+endif
 
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o)

@@ -1,5 +1,9 @@
+include Makefile.conf
+
 all:
+ifeq ($(BUILD),AV)
 	$(MAKE) -C jpeg-6b/ all
+endif
 	$(MAKE) -C graphics/ all
 	$(MAKE) -C apps/ all
 
