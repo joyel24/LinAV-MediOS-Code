@@ -14,9 +14,9 @@ GCCFLAGS += -I../jpeg-6b
 endif
 
 ifeq ($(BUILD),AV)
-LIB_CONTENT += osd.o events.o misc.o sound.o 
+LIB_CONTENT += osd.o events.o misc.o debug.o sound.o 
 else
-LIB_CONTENT += events_X11.o misc_X11.o sound_X11.o 
+LIB_CONTENT += events_X11.o misc_X11.o debug.o sound_X11.o 
 endif
 
 TARGET = libGraphics.a

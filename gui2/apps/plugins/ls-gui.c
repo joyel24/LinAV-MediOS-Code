@@ -304,6 +304,8 @@ int ini_lists(void)
 int add_dir(char * name)
 {
     char            **newlist;
+    
+    fprintf(stderr,"adding dir: %s\n",name);
 
     if (dir_listused >= dir_listsize)
     {
@@ -333,6 +335,8 @@ int add_file(char * name)
 {
     char            **newlist;
 
+    fprintf(stderr,"adding file: %s\n",name);
+    
     if (file_listused >= file_listsize)
     {
         newlist = malloc((sizeof(char **)) * (file_listsize + LISTSIZE));
@@ -401,7 +405,7 @@ int doLs(char * name)
 
         strcat(fullname, dp->d_name);
 
-        //fprintf(stderr, "[dols] %d processing |%s| (full:%s)\n",i, dp->d_name,fullname);
+        fprintf(stderr, "[dols] %d processing |%s| (full:%s)\n",i, dp->d_name,fullname);
         
         if (stat(dp->d_name, &statbuf) < 0)
         {
@@ -773,7 +777,7 @@ int eventHandler(int evt)
                     handle_type_other(list[pos+nselect].name);
                 else
                 {
-                    //fprintf(stderr,"chdir: %s\n",list[pos+nselect].name);
+                    fprintf(stderr,"chdir: %s\n",list[pos+nselect].name);
                     if(chdir(list[pos+nselect].name)<0)
                     {
                         fprintf(stderr,"Error going in: %s\n",list[pos+nselect].name);

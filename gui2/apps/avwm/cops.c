@@ -24,6 +24,7 @@
 #include "editBox.h"
 #include "misc.h"
 #include "avgraphics.h"
+#include "debug.h"
 
 #include <stdlib.h>
 

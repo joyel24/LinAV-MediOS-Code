@@ -42,8 +42,7 @@ int   fmIsConnected     (void);
 int   fmSetBat          (int val);
 int   fmSetVol          (int val);
 
-int   processFM_cmd     (int cmd,void * param);
+//int   processFM_cmd     (int cmd,void * param);
 
-void  print_data        (char * data,int length);
-
+int   gen_ioctl         (char * dev_name,int ioctl_cmd,void * param);
 #endif
