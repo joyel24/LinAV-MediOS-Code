@@ -17,6 +17,18 @@ typedef unsigned long u32;
 #endif
 
 void interruptsSetMaskA(u32 bitmask);
-void interruptsClearCausesA(u32 bitmask);
+u32 interruptsGetMaskA();
+void interruptsSetCausesA(u32 bitmask);
 u32 interruptsGetCausesA();
+void interruptsSetMask2A(u32 bitmask);
+u32 interruptsGetMask2A();
+void interruptsSetCauses2A(u32 bitmask);
+u32 interruptsGetCauses2A();
+
+void interruptsInitA(u32 fun);
+u32 interruptsGetIRQEnabledA();
+void interruptsSetIRQEnabledA();
+void interruptsSetIRQDisabledA();
+void interruptsResetIRQA(u32 num);
+void interruptsResetMaskA(u32 num);
 

@@ -16,8 +16,6 @@
 char timev[] = "xxxx";
 char ct[] = "F1 Timer: x";
 
-unsigned int* intptr = 0x34;
-
 void intsub();
 
 int main() {
@@ -29,6 +27,8 @@ int main() {
 
     ataPowerDownHDDA();
 
+    interruptsInitA(intsub);
+    
     osdInitA();
 
     osdSetComponentConfigA(OSD_VIDEO1, 0);
@@ -95,9 +95,12 @@ int main() {
         timersConfigA(c, tmode[c], 0, div, tmax[c]);        
     }
 
-    *intptr = intsub;
-    interruptsSetMaskA(0);
-
+//    interruptsSetCausesA(0xffffffff);
+//    interruptsSetCauses2A(0xffffffff);
+    interruptsSetMaskA(interruptsGetMaskA() | 0xf);
+//    interruptsSetMask2A(0x0);
+    interruptsSetIRQEnabledA();
+    
     while(1) {
         graphicsBoxfA(&screenBitmap2, 320, 0, 1, 120, 0x0000);
         graphicsSpriteA(&screenBitmap, 0, 0, &screenBitmap2);
@@ -161,7 +164,33 @@ int main() {
 
 }
 
+int v=0, i=0, c=0;
+char hex4[] = "xxxx";
+
 void intsub() {
-    uartOutsA("INT called\n");
+    c = interruptsGetCausesA();
+    debug("INT called %d: ", v);
+    debug("CAUSES %08x MASK %08x ", interruptsGetCausesA(), interruptsGetMaskA());
+    debug("CAUSES2 %08x MASK2 %08x\n", interruptsGetCauses2A(), interruptsGetMask2A());
+    
+    for (i=0;i<32;i++) {
+        if (!(c&1)) break;
+        c = c>>1;
+    }
+    
+    debug("ID=%d\n", i);
+
+    stringPutHexA(hex4, v, 4);
+    graphicsStringA(&screenTop, 4, 15, &sprite4_6, std4x6_, 5, 0, hex4);
+
+    stringPutHexA(hex4, i, 4);
+    graphicsStringA(&screenTop, 4+(5*5), 15, &sprite4_6, std4x6_, 5, 0, hex4);
+    
+    //interruptsResetMaskA(i);      One shot
+    interruptsResetIRQA(i);
+    
+    debug("INT RET    %d: ", v++);
+    debug("CAUSES %08x MASK %08x ", interruptsGetCausesA(), interruptsGetMaskA());
+    debug("CAUSES2 %08x MASK2 %08x\n", interruptsGetCauses2A(), interruptsGetMask2A());
 }
 
