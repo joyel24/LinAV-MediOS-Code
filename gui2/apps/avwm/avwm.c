@@ -136,14 +136,14 @@ void draw_batt_status()
    }
    close(fd);
 
-	if(power < 1350)
+	if(power < 1320)
 	   color = COLOR_DARK_RED;
-	else if(power < 1420)
+	else if(power < 1380)
    	color = COLOR_RED;
-	else if(power < 1470)
+	else if(power < 1440)
    	color = COLOR_ORANGE2;
-	else if(power < 1520)
-   	color = COLOR_YELLOW;
+	else if(power < 1500)
+   	color = COLOR_LIGHT_YELLOW;
    else
    	color = COLOR_GREEN;
 
