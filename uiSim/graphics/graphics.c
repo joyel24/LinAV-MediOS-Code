@@ -164,17 +164,6 @@ int ini_graphics()
   return 0;
 }
 
-void test()
-{
-	printf("%d\n", SCREEN_WIDTH*SCREEN_HEIGHT);
-}
-
-void readPixBuffer(int x, int y)
-{
-	char element;
-	element = screen_BMAP1[y*SCREEN_WIDTH+x];
-}
-
 void drawPixBuffer(char color, int x, int y)
 {
 	int blackColor = BlackPixel(display, DefaultScreen(display));
@@ -185,7 +174,7 @@ void drawPixBuffer(char color, int x, int y)
 	 XSetForeground(display, gc, whiteColor);
 	 XDrawPoint(display, window, gc, x, y);
 	}
-	if(color == 1)
+	else
 	{
 	 XSetForeground(display, gc, blackColor);
 	 XDrawPoint(display, window, gc, x, y);
@@ -195,18 +184,11 @@ void drawPixBuffer(char color, int x, int y)
 
 void lcd_update()
 {
-	int x, y;
-	char color;
-	
-	for(y=0; y<SCREEN_HEIGHT; y++)
-	{
-	 for(x=0; x<SCREEN_WIDTH; x++)
-	  {
-	   color = *(screen_BMAP1+y*SCREEN_WIDTH+x);
-	   readPixBuffer(x,y);
-	   drawPixBuffer(color, x, y);
-	  }	
-        }
+    int x, y;
+    
+    for(y=0; y<SCREEN_HEIGHT; y++)
+        for(x=0; x<SCREEN_WIDTH; x++)
+            drawPixBuffer(screen_BMAP1[y*SCREEN_WIDTH+x], x, y);
 }	
 
 void close_graphics()

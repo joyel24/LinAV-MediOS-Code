@@ -12,8 +12,7 @@ int main(int argc,char ** argv)
     drawRect(1,10,10,100,50);
     
  while(1)
-  {  
-    lcd_update();
+  {      
     nxtEvent();
   }
 }

@@ -21,8 +21,8 @@ int nxtEvent(void)
     
     switch (event.type) 
     {
-      case Expose : 
-	printf("Événement Expose :)\n");
+      case Expose :
+        lcd_update(); 
       break;
     }
     return 0; 
