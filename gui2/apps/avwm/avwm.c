@@ -74,6 +74,7 @@ int main(int argc,char * * argv)
     ini_sound_connection();
     
     iniMsgBox();
+    iniEditBox();
 
     if(!ini_menu(path,&menu_plugin))
     {

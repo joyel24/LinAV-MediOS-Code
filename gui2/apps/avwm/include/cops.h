@@ -47,7 +47,7 @@
 #define MENU_SHADOW 2 // height of small shadow under the title
 
 struct client_operations { 
-   
+
     void (*closeScreen)       (void);
     int  (*openScreen)        (void);
     void (*clearScreen)       (unsigned int color);
@@ -97,7 +97,7 @@ struct client_operations {
     int  (*pause_playback)      (void);
     int  (*stop_playback)       (void);
     
-    int  (*readPeak)           (struct av_peak * peak); 
+    int  (*readPeak)           (struct av_peak * peak);
     
     int  (*setVolume)           (int val);
     int  (*setBass)             (int val);
@@ -124,6 +124,7 @@ struct client_operations {
     int  (*curLineNum)          (void);
     
     int  (*msgBox)              (unsigned char* caption, unsigned char* msg, int type, int icon);
+    char*(*editBox)             (unsigned char* caption, unsigned char* text, int text_color, int bk_color, int frame_color, int cursor_color);
 
     int  (*getTick)             (void);
     int  (*getTime)             (struct av_tm * date_time);

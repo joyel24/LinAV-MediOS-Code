@@ -129,7 +129,8 @@ void do_right(void * data)
     }
     else if(strcmp((char*)data, "Rename") == 0)
     {
-        cops->putS(COLOR_BLACK, COLOR_WHITE,5, 230, list[pos+nselect].name);
+        cops->editBox("Rename this file","Test entry", COLOR_BLACK,COLOR_WHITE,COLOR_BLACK,COLOR_RED);
+//        cops->putS(COLOR_BLACK, COLOR_WHITE,5, 230, list[pos+nselect].name);
     }
     else if(strcmp((char*)data, "New Dir") == 0)
     {

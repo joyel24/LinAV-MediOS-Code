@@ -21,6 +21,7 @@
 #include "sound.h"
 #include "parse_cfg.h"
 #include "msgBox.h"
+#include "editBox.h"
 #include "misc.h"
 #include "avgraphics.h"
 
@@ -102,7 +103,8 @@ struct client_operations cops={
     curLineNum         : curLineNum,
     
     msgBox             : msgBox,
-    
+    editBox            : editBox,
+
     getTick            : getTick,
     getTime            : getTime,
     getTimeS           : getTimeS,

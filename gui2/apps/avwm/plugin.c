@@ -52,6 +52,13 @@ struct plugin msg_box_plugin={
     flag:0
 };
 
+struct plugin edit_box_plugin={
+    handler:NULL,
+    pid:-1,
+    handle_on:0,
+    flag:0
+};
+
 void registerPlugin(void (*evtHandle),int flag)
 {
 	doRegisterPlugin(&cur_plugin,evtHandle,flag);

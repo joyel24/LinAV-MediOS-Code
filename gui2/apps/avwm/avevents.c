@@ -19,6 +19,7 @@ extern struct plugin cur_plugin;
 extern struct plugin menu_plugin;
 extern struct plugin status_bar_plugin;
 extern struct plugin msg_box_plugin;
+extern struct plugin edit_box_plugin;
 
 extern int stopWM;
 
@@ -93,11 +94,17 @@ void procNxtEvent(int evt)
         sendEvt(&msg_box_plugin,evt);
         return;
     }
-                
+
+    if(edit_box_plugin.handle_on)
+    {
+        sendEvt(&edit_box_plugin,evt);
+        return;
+    }
+
     if(menu_plugin.handle_on)
         sendEvt(&menu_plugin,evt);
     else
-    {        
+    {
         if(evt==BTN_F3 && menuStatus() )
         {
             clearEventQueue();
