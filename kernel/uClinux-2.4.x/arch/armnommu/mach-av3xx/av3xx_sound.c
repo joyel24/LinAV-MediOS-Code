@@ -12,11 +12,15 @@
 */
 #define __KERNEL_SYSCALLS__
 
+#include <linux/module.h>
 #include <linux/config.h>
+#include <linux/version.h>
+#include <linux/kernel.h>
+#include <linux/init.h>
+
 #include <linux/proc_fs.h>
 #include <linux/unistd.h>
 
-#include <linux/init.h>
 #include <asm/io.h>
 #include <asm/irq.h>
 #include <linux/fs.h>
@@ -534,7 +538,7 @@ int av3xx_sound_close(struct inode *inode, struct file *filp) // this one should
 	
 /********************* OSS init               ***************************/
 
-int av3xx_sound_init(void)
+static int __init av3xx_sound_init(void)
 {
 	int ret;
 	struct mas_version version;
@@ -564,8 +568,15 @@ int av3xx_sound_init(void)
 	return 0;
 }
 
-void av3xx_sound_exit(void)
+static void __exit av3xx_sound_exit(void)
 {
 	unregister_chrdev(SOUND_MAJOR, "av3xx_sound");
 	free_irq(MAS_INTERRUPT,NULL);
 }
+
+module_init(av3xx_sound_init);
+module_exit(av3xx_sound_exit);
+
+MODULE_AUTHOR("Christophe THOMAS  <oxygen77@free.fr>");
+MODULE_DESCRIPTION("Sound driver for linav (Archos Av3XX) http://linav.sf.net");
+MODULE_LICENSE("GPL");

@@ -3006,11 +3006,11 @@ static int ide_notify_reboot (struct notifier_block *this, unsigned long event, 
 
 			/* set the drive to standby */
 			printk("%s ", drive->name);
-			/* modified by oxygen77 */
-			/*if (event != SYS_RESTART)*/
+#ifndef CONFIG_ARCH_AV3XX
+			if (event != SYS_RESTART)
+#endif
 				if (DRIVER(drive)->standby(drive))
 					continue;
-			
 
 			DRIVER(drive)->cleanup(drive);
 			continue;

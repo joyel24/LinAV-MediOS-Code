@@ -1,3 +1,9 @@
+#include <linux/module.h>
+#include <linux/config.h>
+#include <linux/version.h>
+#include <linux/kernel.h>
+#include <linux/init.h>
+
 #include <linux/sched.h>
 #include <linux/kbd_ll.h>
 #include <linux/kbd_kern.h>
@@ -348,7 +354,7 @@ void av3xx_set_timer_freq(int val) // in 1/10 of s
 	timerCnt=0;
 }
 
-int av3xx_button_init(void)
+static int __init av3xx_button_init(void)
 {
 	int i;
 	struct event_q * evt;
@@ -393,13 +399,20 @@ int av3xx_button_init(void)
 	av3xx_button_timer.expires = jiffies + freq_rep; /* 1s timer */
 	add_timer(&av3xx_button_timer);
 	
-	printk("[Av3xx init] buttons driver (freq=%d,rep=%d)\n",freq_rep,mx_press);
+	printk("av3xx-buttons driver by oxygen77@free.fr\n");
 
 	return 0;
 }
 
-int av3xx_button_exit(void)
+static void __exit av3xx_button_exit(void)
 {
 	/* remove timer ?? */
-	return 0;
 }
+
+module_init(av3xx_button_init);
+module_exit(av3xx_button_exit);
+
+MODULE_AUTHOR("Christophe THOMAS  <oxygen77@free.fr>");
+MODULE_DESCRIPTION("Button driver for linav (Archos Av3XX) http://linav.sf.net");
+MODULE_LICENSE("GPL");
+

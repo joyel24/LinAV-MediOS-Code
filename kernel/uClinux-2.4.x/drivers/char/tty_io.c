@@ -2009,10 +2009,9 @@ int tty_get_baud_rate(struct tty_struct *tty)
 	cflag = tty->termios->c_cflag;
 
 	i = cflag & CBAUD;
-
 	if (i & CBAUDEX) {
 		i &= ~CBAUDEX;
-		if (i < 1 || i+15 >= n_baud_table)
+		if (i < 1 || i+15 >= n_baud_table) 
 			tty->termios->c_cflag &= ~CBAUDEX;
 		else
 			i += 15;
@@ -2025,7 +2024,7 @@ int tty_get_baud_rate(struct tty_struct *tty)
 		}
 		return(tty->alt_speed);
 	}
-
+	
 	return baud_table[i];
 }
 
@@ -2428,7 +2427,7 @@ void __init tty_init(void)
 
 	if (tty_register_driver(&dev_syscons_driver))
 		panic("Couldn't register /dev/console driver\n");
-		
+
 	/* console calls tty_register_driver() before kmalloc() works.
 	 * Thus, we can't devfs_register() then.  Do so now, instead. 
 	 */

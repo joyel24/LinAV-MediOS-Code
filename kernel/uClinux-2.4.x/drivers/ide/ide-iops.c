@@ -112,7 +112,7 @@ static u8 ide_inb (unsigned long port)
 
 static u16 ide_inw (unsigned long port)
 {
-#if defined(CONFIG_ARCH_IXP425) 
+#if CONFIG_ARCH_IXP425
 	u16 val = inw(port);
 	return ((val << 8) | (val >> 8));
 #else

@@ -28,6 +28,7 @@
  */
 
 #include <linux/types.h>
+#include <asm/system.h>
 #include <asm/arch/irq.h>
 
 
@@ -109,14 +110,6 @@ void av3xx_init_irq(void)
 	outb(0xff,AV3XX_GIO_ENABLE_IRQ);
 // setup corresponding GIO to input
 	outw(inw(AV3XX_GIO_DIRECTION0)|0xFF,AV3XX_GIO_DIRECTION0);
-
-/*
-	printk("GIO IRQ setting: %x, direction: %x\n",inw(AV3XX_GIO_ENABLE_IRQ),inw(AV3XX_GIO_DIRECTION0));
-	printk("FISEL 0:%x 1:%x\n",inw(AV3XX_INTC_FISEL0),inw(AV3XX_INTC_FISEL1));
-	printk("INVERT 0:%x 1:%x\n",inw(AV3XX_GIO_INVERT0),inw(AV3XX_GIO_INVERT1));
-*/
-
-
-
-
+printk("before calling stf\n");
+	stf();
 }

@@ -155,7 +155,7 @@ extern char _flashstart[];
 #define FIXED_ROMARRAY _flashstart
 #else
 #define CAT_ROMARRAY
-#endif
+#endif 
 #endif 
 
 #ifdef CONFIG_COLDFIRE
@@ -192,6 +192,7 @@ extern char _ebss;
 #define SET_COMM_ERROR_LED(x)
 #endif /* CONFIG_TELOS */
 #endif /* CONFIG_COLDFIRE */
+
 
 #if defined(CONFIG_ARCH_DSC21) || defined(CONFIG_ARCH_ATMEL)
 #define FIXED_ROMARRAY (char *)(FLASH_MEM_BASE)

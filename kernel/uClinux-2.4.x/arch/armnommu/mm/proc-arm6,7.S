@@ -302,13 +302,11 @@ ENTRY(cpu_arm7_proc_init)
 
 ENTRY(cpu_arm6_proc_fin)
 ENTRY(cpu_arm7_proc_fin)
-	/* modified by oxygen77 */
 #ifdef CONFIG_ARCH_AV3XX
 		mov	r0, #I_BIT | SVC_MODE
 #else
 		mov	r0, #F_BIT | I_BIT | SVC_MODE
 #endif
-	/**************************/
 		msr	cpsr_c, r0
 #ifndef	NO_MM
 		mov	r0, #0x31			@ ....S..DP...M
@@ -607,13 +605,11 @@ __arm6_setup:	mov	r0, #F_BIT | I_BIT | SVC_MODE
 		mov	pc, lr
 
 __arm7_setup:
-	/* modified by oxygen77 */
 #ifdef CONFIG_ARCH_AV3XX
 		mov	r0, #I_BIT | SVC_MODE
 #else
 		mov	r0, #F_BIT | I_BIT | SVC_MODE
 #endif
-	/**************************/
 		msr	cpsr_c, r0
 		mov	r0, #0
 #ifdef CONFIG_CPU_WITH_CACHE

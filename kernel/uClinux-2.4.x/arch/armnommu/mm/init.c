@@ -559,7 +559,7 @@ void __init paging_init(struct meminfo *mi, struct machine_desc *mdesc)
 #else
 	{
 	  unsigned long zone_size[MAX_NR_ZONES] = {0,0,0};
-	  
+
 	  zone_size[ZONE_DMA] = 0;
 	  zone_size[ZONE_NORMAL] = (END_MEM - PAGE_OFFSET) >> PAGE_SHIFT;
 
@@ -662,10 +662,7 @@ void free_initmem(void)
 	    !machine_is_dm270() &&
 	    !machine_is_ta7v() &&
 	    !machine_is_ta7s() &&
-/* added by oxygen77 */
-		!machine_is_av3xx()
-/*********************/
-		) {
+	    !machine_is_av3xx()) {
 		free_area((unsigned long)(&__init_begin),
 			  (unsigned long)(&__init_end),
 			  "init");

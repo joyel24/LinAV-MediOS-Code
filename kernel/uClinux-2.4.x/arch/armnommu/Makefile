@@ -58,8 +58,11 @@ LDFLAGS		+= -EB
 endif
 
 CFLAGS		+= $(apcs-y) $(arch-y) $(tune-y) -mshort-load-bytes -msoft-float
+ifeq ($(CONFIG_ARCH_AV3XX),y)
 AFLAGS		+= $(apcs-y) $(proc-y) -msoft-float
-# removed by oxygen -mno-fpu   ?? pb in my toolchain
+else
+AFLAGS		+= $(apcs-y) $(proc-y) -msoft-float -mno-fpu
+endif
 
 LIBGCC		:= $(shell $(CC) $(CFLAGS) --print-libgcc-file-name)
 

@@ -205,8 +205,6 @@ if [ "$CONFIG_ARCH_C5471" = "y" ]; then
    define_bool CONFIG_CPU_26 n
    define_bool CONFIG_NO_PGT_CACHE y
    define_bool CONFIG_CPU_WITH_CACHE y
-   define_bool CONFIG_RAMKERNEL y
-   define_bool CONFIG_ROMKERNEL y
    define_bool CONFIG_CPU_WITH_MCR_INSTRUCTION n
    if [ "$CONFIG_SET_MEM_PARAM" = "n" ]; then
       define_hex DRAM_BASE 0x10000000
@@ -227,9 +225,9 @@ if [ "$CONFIG_ARCH_DM270" = "y" ]; then
    define_bool CONFIG_CPU_WITH_CACHE y
    define_bool CONFIG_CPU_WITH_MCR_INSTRUCTION n
    define_bool CONFIG_SERIAL_DM270 y
-
-   int  'CPU clock frequency' CONFIG_ARM_CLK 87750000
-   int  'Timer prescale' CONFIG_DM270_TIMER_PRESCALE 351
+  
+   int  'CPU clock frequency' CONFIG_ARM_CLK 87750000 
+   int  'Timer prescale' CONFIG_DM270_TIMER_PRESCALE 351 
    bool 'Serial Console' CONFIG_SERIAL_DM270_CONSOLE
 
    if [ "$CONFIG_SET_MEM_PARAM" = "n" ]; then
@@ -289,7 +287,7 @@ if [ "$CONFIG_ARCH_ATMEL" = "y" ]; then
    define_bool CONFIG_CPU_WITH_CACHE n
    define_bool CONFIG_CPU_WITH_MCR_INSTRUCTION n
    define_bool CONFIG_SERIAL_ATMEL y
-
+  
    int  'CPU clock frequency' CONFIG_ARM_CLK 40000000 
    bool 'Serial Console' CONFIG_SERIAL_ATMEL_CONSOLE
 
@@ -729,7 +727,6 @@ source drivers/mtd/Config.in
 source drivers/pnp/Config.in
 source drivers/block/Config.in
 source fs/Config.in
-source drivers/input/Config.in
 source drivers/char/Config.in
 source drivers/usb/Config.in
 source drivers/ieee1394/Config.in
@@ -740,6 +737,7 @@ source drivers/message/i2o/Config.in
 #------------------------------------------------------------------------------
 
 if [ "$CONFIG_ARCH_AV3XX" = "y" ]; then
+   source drivers/input/Config.in
    mainmenu_option next_comment
    comment 'Av3XX Stuff'
    bool 'Show linux logo on console' AV3XX_DISP_CONSOLE_LOGO

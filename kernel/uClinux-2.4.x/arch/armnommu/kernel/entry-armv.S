@@ -1268,6 +1268,7 @@ __dabt_svc:	sub	sp, sp, #S_FRAME_SIZE
 		ldmia	sp, {r0 - pc}^			@ load r0 - pc, cpsr
 
 		.align	5
+		
 __irq_svc:	sub	sp, sp, #S_FRAME_SIZE
 		stmia	sp, {r0 - r12}			@ save r0 - r12
 		ldr	r7, .LCirq
@@ -1287,8 +1288,8 @@ __irq_svc:	sub	sp, sp, #S_FRAME_SIZE
 2:		ldr     r0, =AIC_EOICR
                 str     r0, [r0]
 #else
- 		adrsvc	ne, lr, 3f  	    	    	@ 1b
- 		bne	do_IRQ
+		adrsvc	ne, lr, 3f  	    	    	@ 1b
+		bne	do_IRQ
 #endif
 3:
 		ldr	r0, [sp, #S_PSR]		@ irqs are already disabled
@@ -1562,7 +1563,6 @@ ENTRY(__switch_to)
 		ldmfd	sp!, {r4 - sl, fp, pc}^		@ Load all regs saved previously
 
 		.section ".text.init",#alloc,#execinstr
-
 /*
  * Vector stubs.  NOTE that we only align 'vector_IRQ' to a cache line boundary,
  * and we rely on each stub being exactly 48 (1.5 cache lines) in size.  This
@@ -1570,8 +1570,6 @@ ENTRY(__switch_to)
  * lucky.  We also copy this code to 0x200 so that we can use branches in the
  * vectors, rather than ldr's.
  */
-
-
 		.align	5
 __stubs_start:
 /*
@@ -1579,7 +1577,7 @@ __stubs_start:
  * Enter in IRQ mode, spsr = SVC/USR CPSR, lr = SVC/USR PC
  */
 ENTRY(vector_IRQ)
-		@
+    		@
 		@ save mode specific registers
 		@
 		ldr	r13, .LCsirq
@@ -1615,6 +1613,7 @@ ENTRY(vector_IRQ)
 		.word	__irq_invalid			@  d
 		.word	__irq_invalid			@  e
 		.word	__irq_invalid			@  f
+
 		.align	5
 
 /*
@@ -1622,7 +1621,7 @@ ENTRY(vector_IRQ)
  * Enter in ABT mode, spsr = USR CPSR, lr = USR PC
  */
 ENTRY(vector_data)
-    	@
+    		@
 		@ save mode specific registers
 		@
 		ldr	r13, .LCsabt
@@ -1665,7 +1664,6 @@ ENTRY(vector_data)
  * Prefetch abort dispatcher - dispatches it to the correct handler for the processor mode
  * Enter in ABT mode, spsr = USR CPSR, lr = USR PC
  */
-
 ENTRY(vector_prefetch)
 		@
 		@ save mode specific registers
@@ -1710,7 +1708,6 @@ ENTRY(vector_prefetch)
  * Undef instr entry dispatcher - dispatches it to the correct handler for the processor mode
  * Enter in UND mode, spsr = SVC/USR CPSR, lr = SVC/USR PC
  */
-
 ENTRY(vector_undefinstr)
 		@
 		@ save mode specific registers
@@ -1760,7 +1757,6 @@ ENTRY(vector_undefinstr)
  * other mode than FIQ...  Ok you can switch to another mode, but you can't
  * get out of that mode without clobbering one register.
  */
-
 ENTRY(vector_FIQ)
 #ifdef CONFIG_ARCH_AV3XX
 	ldr		r8,[pc]
@@ -1777,6 +1773,7 @@ fiqAdr:	.word __fiqAv3xx
  * These aren't too critical.
  * (they're not supposed to happen, and won't happen in 32-bit data mode).
  */
+
 ENTRY(vector_addrexcptn)
 		b	vector_addrexcptn
 
@@ -1800,6 +1797,7 @@ ENTRY(vector_addrexcptn)
 .INTPRIO_S:  	.word	S3C44B0X_I_PMST
 .INTCON:    	.word	S3C44B0X_INTCON
 #endif
+
 __stubs_end:
 #if defined(CONFIG_ARCH_C5471)
                 /* Since C5471 normally has flash down at the
@@ -1820,7 +1818,7 @@ ENTRY(__trap_init)
 
                 mrs     r0, cpsr
                 bic     r0, r0, #MODE_MASK  @ clear Thumb and mode bits
-				orr     r0, r0, #I_BIT|F_BIT|MODE_SVC  @ +SVC mode -IRQ/FIQ
+                orr     r0, r0, #I_BIT|F_BIT|MODE_SVC  @ +SVC mode -IRQ/FIQ
                 msr     cpsr, r0
                 ldr     r0, =C5471_IRAM_START @ addr of RAM based vector table.
                 adr     r1, .LCvectors
@@ -1830,17 +1828,17 @@ ENTRY(__trap_init)
 #else
 		/* Normal case:  lower memory is writable. */
 		.equ	__real_stubs_start, .LCvectors + 0x200
-swi	SYS_ERROR0
-.LCvectors:
-		swi	SYS_ERROR0													/* 0 */
-		b	__real_stubs_start + (vector_undefinstr - __stubs_start)	/* 4 */
-		ldr	pc, __real_stubs_start + (.LCvswi - __stubs_start)			/* 8 */
-		b	__real_stubs_start + (vector_prefetch - __stubs_start)		/* c */
-		b	__real_stubs_start + (vector_data - __stubs_start)			/* 10 */
-		b	__real_stubs_start + (vector_addrexcptn - __stubs_start)	/* 14 */
-		b	__real_stubs_start + (vector_IRQ - __stubs_start)			/* 18 */
-		b	__real_stubs_start + (vector_FIQ - __stubs_start)			/* 1c */
 
+.LCvectors:
+		swi	SYS_ERROR0
+		b	__real_stubs_start + (vector_undefinstr - __stubs_start)
+		ldr	pc, __real_stubs_start + (.LCvswi - __stubs_start)
+		b	__real_stubs_start + (vector_prefetch - __stubs_start)
+		b	__real_stubs_start + (vector_data - __stubs_start)
+		b	__real_stubs_start + (vector_addrexcptn - __stubs_start)
+		b	__real_stubs_start + (vector_IRQ - __stubs_start)
+		b	__real_stubs_start + (vector_FIQ - __stubs_start)
+		
 #ifdef CONFIG_CPU_S3C44B0X  	/* one jump for non-vectored mode */
     	    	b   	__real_stubs_start + (vector_IRQ - __stubs_start) - 0x60
 #endif
@@ -1881,12 +1879,12 @@ swi	SYS_ERROR0
 		b	__real_stubs_start + (vector_IRQ - __stubs_start) - 0x60
 		b	__real_stubs_start + (vector_IRQ - __stubs_start) - 0x60
 #endif
+
 ENTRY(__trap_init)
 		stmfd	sp!, {r4 - r9, lr}
 
 		mrs	r1, cpsr		@ code from 2.0.38
 		bic	r1, r1, #MODE_MASK	@ clear mode bits
-	/* modified by oxygen77 */
 #ifdef CONFIG_ARCH_AV3XX
 		orr     r1, r1, #I_BIT|F_BIT|MODE_SVC  @ +SVC mode -IRQ/FIQ
 		msr	cpsr, r1
@@ -1894,10 +1892,9 @@ ENTRY(__trap_init)
 		orr     r1, r1, #I_BIT|F_BIT|MODE_SVC  @ +SVC mode -IRQ/FIQ
 		msr	cpsr, r1
 #endif
-	/***********************/
 
 #ifdef CONFIG_CPU_S3C3410
-		/*
+		/* 
 		 * make sure that interrupt priority is not used. Otherwise
 		 * the IRQ and FIQ vector addresses are not writeable
 		 */

@@ -1,3 +1,9 @@
+#include <linux/module.h>
+#include <linux/config.h>
+#include <linux/version.h>
+#include <linux/kernel.h>
+#include <linux/init.h>
+
 #include <asm/io.h>
 #include <asm/irq.h>
 #include <linux/proc_fs.h>
@@ -484,7 +490,7 @@ struct file_operations avop_fops = {
     release:    av_state_release,
 };
 
-int av3xx_state_init(void)
+static int __init av3xx_state_init(void)
 {
 	/* dev entry setup */
 	int result;
@@ -529,6 +535,18 @@ int av3xx_state_init(void)
 	create_proc_read_entry("bat", 0, avop_proc, av3xx_tsc2003_read, NULL);
 
 	/* everything is ok */
-	printk("[Av3xx init] state driver\n");
+	printk("av3xx-state driver by oxygen77@free.fr\n");
     return 0;
 }
+
+static void __exit av3xx_state_exit(void)
+{
+	
+}
+
+module_init(av3xx_state_init);
+module_exit(av3xx_state_exit);
+
+MODULE_AUTHOR("Christophe THOMAS  <oxygen77@free.fr>");
+MODULE_DESCRIPTION("General state driver for linav (Archos Av3XX) http://linav.sf.net");
+MODULE_LICENSE("GPL");
