@@ -36,7 +36,7 @@ systemRelocateMeA:
 systemRelocateMe:
         ldr r0, =0x03000000     @ src
         ldr r1, =0x03400000     @ dest
-        ldr r3, =0x00080000     @ Size (Fixed atm)...
+        ldr r3, =0x00100000     @ Size (Fixed atm)...
 srmc:   ldr r2, [r0]
         str r2, [r1]
         add r0, #4

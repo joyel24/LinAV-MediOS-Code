@@ -16,6 +16,7 @@ static int pal16[2] = {0x0000, 0xffff};
 
 struct graphicsBuffer screenBitmap;
 struct graphicsBuffer screenBitmap2;
+struct graphicsBuffer sprite6_10 = {0, 1, 6, 10, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 struct graphicsBuffer sprite5_7 = {0, 1, 5, 7, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 struct graphicsBuffer sprite4_6 = {0, 1, 4, 6, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
 struct graphicsBuffer spriteShadow = {0, 2, 12, 18, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
@@ -76,12 +77,12 @@ startInit:
     screenBitmap.offset = 0x03e00000;
     screenBitmap.bytesPerLine = 96*2;
     screenBitmap.width = 96;
-    screenBitmap.height = 132;
+    screenBitmap.height = 4 + (11*16);
     screenBitmap.bitsPerPixelShift = 4;
     screenBitmap.bitsPerPixel = 16;
 
-    graphicsBoxfA(&screenBitmap, 0, 0, 96, 132, 0xd5d5);    
-    graphicsBoxfA(&screenBitmap, 1, 1, 94, 130, 0x1414);    
+    graphicsBoxfA(&screenBitmap, 0, 0, 96, 4 + (11*16), 0xd5d5);    
+    graphicsBoxfA(&screenBitmap, 1, 1, 94, 2 + (11*16), 0x1414);    
 
     screenBitmap2.offset = 0x03b00000;
     screenBitmap2.bytesPerLine = 320*2;
@@ -90,7 +91,7 @@ startInit:
     screenBitmap2.bitsPerPixelShift = 4;
     screenBitmap2.bitsPerPixel = 16;
 
-    graphicsBoxfA(&screenBitmap2, 0, 0, 320, 240, 0x0000);
+    graphicsBoxfA(&screenBitmap2, 0, 0, 320, 240, 0xffff);
     graphicsBoxfA(&screenBitmap2, 0, 0, 320, 10, 0xd5d5);
     graphicsBoxfA(&screenBitmap2, 0, 11, 320, 1, 0x1717);
     graphicsBoxfA(&screenBitmap2, 0, 228, 320, 1, 0x1717);
@@ -106,8 +107,8 @@ startInit:
     osdSetComponentSourceWidthA(OSD_BITMAP1, 0x14);
     osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT);
-    osdSetComponentSizeA(OSD_BITMAP2, 96*2, 132);
-    osdSetComponentPositionA(OSD_BITMAP2, 0x14 + (2*16), 0x12 + 32);
+    osdSetComponentSizeA(OSD_BITMAP2, 96*2, 4 + (11*16));
+    osdSetComponentPositionA(OSD_BITMAP2, 0x14 + (2*16), 0x12 + 20);
     osdSetComponentOffsetA(OSD_BITMAP2, 0x03e00000);
     osdSetComponentSourceWidthA(OSD_BITMAP2, 6);
     osdSetComponentConfigA(OSD_BITMAP2, OSD_COMPONENT_ENABLE
@@ -146,7 +147,7 @@ startInit:
     while(1) {
 
         if (mode==0) {
-            graphicsBoxfA(&screenBitmap, 1, 1, 94, 130, 0x1414);    
+            graphicsBoxfA(&screenBitmap, 1, 1, 94, 2 + (11*16), 0x1414);    
 
             for (c=0;c<1000;c++) {
                 dirBuffer[c].name[0] = 0;    
@@ -258,7 +259,7 @@ startInit:
                         pal16[0] = 0x1414;            
                     }
     
-                    graphicsStringA(&screenBitmap, 3, 3 + c*8, &sprite5_7, std5x7_, 5, 0,
+                    graphicsStringA(&screenBitmap, 3, 3 + c*11, &sprite6_10, std6x10_, 6, 0,
                         dirLine);
                 }
                 cursorMoved=0;

@@ -26,7 +26,7 @@ void debug(char *fmt, ...)
     uartOutsA(debugmembuf);
 }
 
-char p[] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | xxxxxxxxxxxxxxxx\n";
+char pbu[] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | xxxxxxxxxxxxxxxx\n";
 
 void printBuffer(char *source,int size) {
     int i,j;
@@ -35,11 +35,11 @@ void printBuffer(char *source,int size) {
     for (j=0;j<size;j+=16) {
         for (i=0;i<16;i++) {
             c = source[i+j];
-            stringPutHexA(p+(i*2), c, 2);
+            stringPutHexA(pbu+(i*2), c, 2);
             if (c<32 || c>126) c='.';
-            p[35+i] = c;
+            pbu[35+i] = c;
         }
-        uartOutsA(p);
+        uartOutsA(pbu);
     }
 	uartOutsA("\n\n");
 }
