@@ -37,13 +37,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <ctype.h>
-/*#include "file.h"
-#include "debug.h"
-#include "atoi.h"*/
 
 #include "id3.h"
 #include "mp3_data.h"
-//#include "system.h"
 
 #define MIN(a, b) (((a)<(b))?(a):(b))
 #define MAX(a, b) (((a)>(b))?(a):(b))

@@ -19,10 +19,11 @@
 #include "cops.h"
 #include "mp3_player.h"
 
+FILE * fd=NULL;
+int file_size;
+
 /*extern variables */
-extern FILE * fd;
 extern struct mp3_play data;
-extern int file_size;
 extern int stopThread;
 extern pthread_t read_thread;
 
@@ -47,6 +48,32 @@ void mp3_read_more(void)
     }
 }
 
+int openFileFromList(struct list_entry * cur_entry)
+{
+    if(!cur_entry)
+    {        
+        printf("no file in list\n");
+        return 0;
+    }
+    if(fd)
+        fclose(fd);
+    fd=fopen(cur_entry->id3.path,"ro");
+    if(fd<0)
+    {
+        fprintf(stderr,"Can't open file %s\n",cur_entry->id3.path);
+        return 0;
+    }
+    
+    fseek(fd,0,SEEK_END);
+    file_size = ftell(fd);
+    fseek(fd,0,SEEK_SET);
+    
+    //fprintf(stderr,"%s (s=%d) opened\n",cur_entry->id3.path,file_size);
+    
+    // fseek(fd,fTag.id3.first_frame_offset,SEEK_SET);
+    return 1;
+}
+
 #define CHUNK_SIZE 512
 
 void * mp3_read_data(void * arg)
@@ -57,6 +84,16 @@ void * mp3_read_data(void * arg)
     threadActive=1;
     
     //fprintf(stderr,"in thread: %d pos:%x/%x (r=%x)\n",size,data.buffer_write,data.buffer_len,data.buffer_read);
+    
+    if(!fd) /* this should only happen for the first file*/
+    {
+        if(!openFileFromList(curEntryInList()))
+        {
+            data.endOfFile=1;
+            return NULL;
+        }
+        
+    }
     
     pos=ftell(fd);
     size = MIN(size,(data.buffer_len*50)/100);
@@ -81,15 +118,25 @@ void * mp3_read_data(void * arg)
     }
 
     if(stopThread)
+    {
         printf("Interupting read\n");
+        threadActive=0;
+        return NULL;  
+    }
     
     if(data.buffer_write>=data.buffer_len)
         data.buffer_write=0;
         
     if(ftell(fd)>=file_size)
     {
-        data.endOfFile=1;
         printf("EOF\n");
+        /* trying to open nxt file */
+        if(!openFileFromList(nxtEntryInList()))
+        {
+            data.endOfFile=1;
+            return NULL;
+        }
+        
     } 
             
     //fprintf(stderr,"out thread: %d\n",size);

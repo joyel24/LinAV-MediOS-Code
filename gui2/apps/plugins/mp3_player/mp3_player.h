@@ -25,11 +25,11 @@
 #include "mp3_data.h"
 #include "id3.h"
 
-struct id3tag
+struct list_entry
 {
-    struct mp3entry id3;
-    int mempos;
-    bool used;
+    struct mp3entry id3;   
+    struct list_entry * nxt;
+    struct list_entry * prev;
 };
 
 /* refresh.c */
@@ -62,7 +62,19 @@ void pause_resume(void);
 
 /* file_reader.c */
 void mp3_read_more(void);
-void * mp3_read_data(void * arg);
+int  openFileFromList(struct list_entry * cur_entry);
+void *mp3_read_data(void * arg);
+
+/* playlist */
+int  addPlaylist(char * filename);
+struct list_entry * curEntryInList(void);
+struct list_entry * nxtEntryInList(void);
+struct list_entry * prevEntryInList(void);
+int  nbEntryInList(void);
+void iniPlaylist(void);
+void cleanPlaylist(void);
+int  addDir(char * dirName);
+void showList(void);
 
 void debug_info(char * filename,struct mp3entry * mp3);
 #endif

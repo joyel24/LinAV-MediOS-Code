@@ -20,6 +20,8 @@
 
 #include "browser.h"
 #include "avstring.h"
+#include "graphics.h"
+#include "colordef.h"
 
 #define LISTSIZE   256
 
@@ -75,6 +77,10 @@ int addEntry(struct browser_data * bdata,char * name,int type,int size)
         if (!newlist)
         {
             fprintf(stderr, "No memory for ls buffer\n");
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "No memory for ls buffer");
+#endif
             return -1;
         }
         memcpy(newlist, bdata->list, sizeof(struct dir_entry) * bdata->listsize);
@@ -87,6 +93,10 @@ int addEntry(struct browser_data * bdata,char * name,int type,int size)
     if (bdata->list[bdata->listused].name == NULL)
     {
         fprintf(stderr, "No memory for filenames\n");
+#ifdef DEBUG_DO_LS
+        fillRect(COLOR_WHITE,2, 220,316,10);
+        putS(COLOR_BLUE, COLOR_WHITE,2, 220, "No memory for filenames");
+#endif
         return -1;
     }
     bdata->list[bdata->listused].type=type;
@@ -96,6 +106,8 @@ int addEntry(struct browser_data * bdata,char * name,int type,int size)
     bdata->listused++;
     return 0;
 }
+
+#define DEBUG_DO_LS
 
 int doLs(struct browser_data * bdata,char * name)
 {
@@ -114,8 +126,13 @@ int doLs(struct browser_data * bdata,char * name)
         return -1;
 
     dirp = opendir(name);
-    if (dirp == NULL) {
+    if(!dirp)
+    {
         fprintf(stderr, "[dols] error\n");
+#ifdef DEBUG_DO_LS
+        fillRect(COLOR_WHITE,2, 220,316,10);
+        putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] error");
+#endif
         perror(name);
         return -1;
     }
@@ -131,14 +148,23 @@ int doLs(struct browser_data * bdata,char * name)
             continue;            
           
         if ((dp->d_name[0] == '.') && !bdata->show_dot_files)
-            continue;            
-
+            continue; 
+                       
+#ifdef DEBUG_DO_LS
+        fillRect(COLOR_WHITE,2, 230,316,10);
+        putS(COLOR_BLUE, COLOR_WHITE,2, 230, dp->d_name);
+#endif
+            
         fullname[0] = '\0';
         strcat(fullname, dp->d_name);
         
         if (stat(dp->d_name, &statbuf) < 0)
         {
             fprintf(stderr, "[dols] error in stat\n");
+#ifdef DEBUG_DO_LS
+            fillRect(COLOR_WHITE,2, 220,316,10);
+            putS(COLOR_BLUE, COLOR_WHITE,2, 220, "[dols] error in stat");
+#endif
             //perror(dp->d_name);
             continue;
         }

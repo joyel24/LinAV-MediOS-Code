@@ -73,6 +73,9 @@ int eventHandler(int evt)
 
 void handleMainWin(int evt)
 {
+    struct list_entry * ptr_entry;
+    int mode=0;
+    
     switch(evt)
     {
         case BTN_UP:  /* Vol UP */
@@ -87,6 +90,28 @@ void handleMainWin(int evt)
             apply_settings();
             refreshScreen(MAIN_WIN);              
             break;
+        case BTN_RIGHT:
+            mode=1;
+        case BTN_LEFT:
+            if(mode)
+                ptr_entry=nxtEntryInList();
+            else
+                ptr_entry=prevEntryInList();
+            if(ptr_entry)
+            {
+                if(!openFileFromList(ptr_entry))
+                    break;
+                cops->pause_playback();
+                stopThread=1;
+                pthread_join(read_thread, NULL);
+                stopThread=0;
+                data.buffer_write=data.buffer_read;
+                mp3_read_more();
+                if(window==MAIN_WIN)
+                    refreshScreen(MAIN_WIN);           
+                cops->start_playback();
+            }
+            break;        
         case BTN_ON: /* Pause/Resume */
             pause_resume();
             break;

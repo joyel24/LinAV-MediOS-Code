@@ -41,8 +41,8 @@ int is_mp3_type(char *extension)
 int is_text_type(char * extension)
 {
    int retVal = 0;
-
-    strlwr(extension);
+   
+   strlwr(extension);
    if(strcmp(extension, ".txt") == 0)
        retVal = 1;
    else if(strcmp(extension, ".cfg") == 0)

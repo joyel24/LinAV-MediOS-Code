@@ -36,6 +36,7 @@ int settings_cursor_position = 1; /* cursor position at settings */
 void refreshScreen(int window)
 {
     char tmp[60];
+    struct list_entry * cur_entry;
     /* main window */
     switch(window)
     {
@@ -48,7 +49,11 @@ void refreshScreen(int window)
             sprintf(tmp,"Now Playing:");
             cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 40, tmp);
             sprintf(tmp,"%s",filename);
-            cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 55, tmp);            
+            cur_entry=curEntryInList();
+            if(!cur_entry)
+                printf("No entry in the list\n");
+            else
+                cops->putS(COLOR_WHITE, COLOR_BLACK, 10, 55, cur_entry->id3.path);            
             cops->setFont(STD6X9);
             /* fill in the peak meter background */
             if(peakmeters)
