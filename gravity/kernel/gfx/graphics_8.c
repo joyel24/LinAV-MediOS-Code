@@ -341,6 +341,40 @@ void graphics8_DrawChar(struct graphicsFont * font,unsigned int color,unsigned i
 
 void graphics8_DrawString(struct graphicsFont * font, unsigned int color,unsigned int bg_color, int x, int y, unsigned char * s, struct graphicsBuffer * buff)
 {
+#if 1
+    int i,j,k,shift,index;
+    unsigned char * src;
+    unsigned char * org=getOffset(x,y,buff,unsigned char);
+    unsigned char * dest;
+    unsigned int palette[2]={bg_color,color};
+    while(*s)
+    {
+        src=font->table[(int)*s];
+        dest=org;
+        for(j=0;j<font->height;j++)
+        {
+            shift=7;
+            k=0;
+            for(i=0;i<font->width;i++)
+            {
+                index=inb(src+k);
+                index=(index>>shift)&0x1;
+                outb(palette[index],dest+i);
+                shift--;
+                if(shift<0)
+                {
+                    shift=7;
+                    k++;
+                }
+            }
+                
+            dest+=buff->width;
+            src+=font->bpline;
+        }
+        s++;
+        org+=font->width;
+    }
+#else
     int i,val,j,k;
     unsigned int color_table[16];
     char * src;
@@ -389,6 +423,7 @@ void graphics8_DrawString(struct graphicsFont * font, unsigned int color,unsigne
         }
         memcpy(dest,tmpLine,font->width*len);
         dest+=buff->width;        
-    }     
+    }
+#endif    
 }
 

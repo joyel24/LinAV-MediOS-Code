@@ -142,6 +142,13 @@ int     current_font=0;
 int     current_plane=0;
 
 
+#define restoreComp(COMP,BUFF)   {  osdSetComponentOffset      (COMP, BUFF.offset); \
+                                    osdSetComponentSize        (COMP, 2*BUFF.width, BUFF.height); \
+                                    osdSetComponentPosition    (COMP, BUFF.x, BUFF.y); \
+                                    osdSetComponentSourceWidth (COMP, ((BUFF.width*BUFF.bitsPerPixel)/32)/8); \
+                                    if(BUFF.enable) \
+                                        osdSetComponentConfig  (COMP, BUFF.state|OSD_COMPONENT_ENABLE); \
+                                 }
 
 /********************************************************* Error screen ******/
 
@@ -172,7 +179,12 @@ void error_scr_switch()
     if(error_scr_state)
     {
         error_scr_state=0;
-        restoreAllComponent();
+        restoreComp(OSD_VIDEO1,  VIDEO_1);
+        restoreComp(OSD_VIDEO2,  VIDEO_2);
+        restoreComp(OSD_BITMAP1, BITMAP_1);
+        restoreComp(OSD_BITMAP2, BITMAP_2);
+        restoreComp(OSD_CURSOR1, CURSOR_1);
+        restoreComp(OSD_CURSOR2, CURSOR_2);
         printk("Switching to normal screen\n");
     }
     else
@@ -184,7 +196,7 @@ void error_scr_switch()
         osdSetComponentConfig(OSD_BITMAP2, 0);
         osdSetComponentConfig(OSD_CURSOR1, 0);
         osdSetComponentConfig(OSD_CURSOR2, 0);
-        restoreComponent(BMAP1,&ERROR_SCR);
+        restoreComp(OSD_BITMAP1,ERROR_SCR);
         printk("Switching to debug screen\n");
     }
 }
@@ -235,23 +247,6 @@ void iniComponent(int vplane,struct graphicsBuffer * buff,unsigned int offset)
         buff->gops=&g8ops;
     if(buff->bitsPerPixel==32)
         buff->gops=&g32ops; 
-}
-
-void restoreComponent(int vplane,struct graphicsBuffer * buff)
-{
-    osdSetComponentOffset(buffers_comp[vplane],buff->offset);
-    osdSetComponentSize(buffers_comp[vplane], 2*buff->width, buff->height);
-    osdSetComponentPosition(buffers_comp[vplane],buff->x, buff->y);
-    osdSetComponentSourceWidth(buffers_comp[vplane], ((buff->width*buff->bitsPerPixel)/32)/8);
-    if(buff->enable)
-        osdSetComponentConfig(buffers_comp[vplane],buff->state|OSD_COMPONENT_ENABLE);
-}
-
-void restoreAllComponent(void)
-{
-    int i;
-    for(i=0;i<NB_BUFFER;i++)
-        restoreComponent(i,buffers[i]);
 }
 
 void KdrawLine(unsigned int color, int x1, int y1, int x2, int y2,struct graphicsBuffer * buff)
@@ -442,7 +437,6 @@ int gfw_swi_handler(int cmd,GFX_DATA * g_data, void * pvData)
                         g_data->x,g_data->y,
                         g_data->w,g_data->h,
                         buffers[current_plane]);
-                        printk("drawRect: (%d,%d) (%d,%d) col=%d\n",g_data->x,g_data->y,g_data->w,g_data->h,g_data->color);
             break;
         case 0x204:                      /* void fillRect(unsigned int color, int x, int y, int width, int height) */
             buffers[current_plane]->gops->fillRect(g_data->color,

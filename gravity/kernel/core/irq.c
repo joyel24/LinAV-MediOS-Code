@@ -18,6 +18,40 @@
 #include <kernel/kernel.h>
 
 __IRAM_DATA struct irq_data_s irq_data[NR_IRQS];
+__IRAM_DATA int cli_var=0;
+__IRAM_DATA int clf_var=0;
+
+__IRAM_CODE void cli(void)
+{
+    if(!cli_var)
+        __cli();
+    cli_var++;
+}
+
+__IRAM_CODE void sti(void)
+{
+    if(!cli_var)
+        return;
+    cli_var--;    
+    if(!cli_var)
+        __sti();
+}
+
+__IRAM_CODE void clf(void)
+{
+    if(!clf_var)
+        __clf();
+    clf_var++;
+}
+
+__IRAM_CODE void stf(void)
+{
+    if(!clf_var)
+        return;
+    clf_var--;    
+    if(!clf_var)
+        __stf();
+}
 
 __IRAM_CODE void do_IRQ(int irq, struct pt_regs *regs)
 {

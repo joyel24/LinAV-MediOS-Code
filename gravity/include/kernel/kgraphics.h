@@ -67,8 +67,7 @@ int gfw_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
 /* general functions */
 void  ini_graphics        (void);
 void  iniComponent        (int vplane,struct graphicsBuffer * buff,unsigned int offset);
-void  restoreComponent    (int vplane,struct graphicsBuffer * buff);
-void  restoreAllComponent (void);
+
 
 /* Error scr */
 void clear_error_scr(int color);

@@ -55,7 +55,7 @@ __IRAM_CODE void chk_button(void)
     {
         if(nb_debug_switch==0)
         {
-            nb_debug_switch=mx_press*2;
+            nb_debug_switch=mx_press*3;
 #if 0            
             if(lcd_get_state()==0)
             {
@@ -84,9 +84,7 @@ __IRAM_CODE void chk_button(void)
             if(nb_pressed[btn]!=0)
                 nb_pressed[btn]=0;   /* reset nb_pressed */
             if(btn==BUTTON_OFF)
-                nb_off_press=0;    /* if off btn released -> reset nb_off_press */
-            if(btn==BUTTON_ON)
-                nb_debug_switch=0;          
+                nb_off_press=0;    /* if off btn released -> reset nb_off_press */             
         }
         else            /* the btn i is pressed */
         {    

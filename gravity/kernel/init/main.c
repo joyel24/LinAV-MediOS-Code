@@ -31,9 +31,10 @@
 #include <kernel/api.h>
 #include <kernel/memmgr.h>
 
+#include <kernel/config.h>
 
 int lcd_state=1;
-int lcd_bright=10;
+int lcd_bright=8;
 
 void print_boot_info(void)
 {
@@ -87,12 +88,16 @@ extern void avwm(void);
 
 extern int kmemory_manager (void* pvParameters);
 
+extern void API_BKT(void);
+
 void kernel_start (void)
 {
     ini_graphics();
     ini_debugOnScreen();
     
+#ifdef DEBUG_INIT
     ata_stop_HD();
+#endif
     
     /* malloc of max space in SDRAM */
     init_malloc((void*)MALLOC_START,MALLOC_SIZE);
@@ -105,6 +110,7 @@ void kernel_start (void)
         (unsigned int)MALLOC_START,
         (unsigned int)MALLOC_SIZE);
 
+           
     /* initialize thread lists and setup first two threads */
     kinit_tcb ();
 
@@ -131,7 +137,7 @@ void kernel_start (void)
     init_timer();
 
     /* enable the IRQ */
-    sti();
+    __sti(); /*using direct*/
 
     /* switch to first task in list */
     kload_context();

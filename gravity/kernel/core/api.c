@@ -21,3 +21,5 @@ ERROR_CODE API_FREE             (void* pvBuffer)                                
 ERROR_CODE API_MEMAVAIL         (unsigned long* pnBytes)                                        { SAVE; asm("swi 22"); LOAD; }
 
 ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData)                       { SAVE; asm("swi 100"); LOAD; }
+
+//void API_BKT                     (void)                { SAVE; asm("bkpt"); LOAD; }

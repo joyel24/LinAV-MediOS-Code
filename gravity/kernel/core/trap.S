@@ -19,7 +19,7 @@ trap_undef:
     movs   pc, lr    
 .align 5
 __trap_undef_ptr:  .word do_trap_undef
-    
+
 .align	5
 .global trap_swi
 trap_swi:
@@ -89,7 +89,6 @@ yielding:
 @    bx     lr
 @    ldmfd  sp!,{lr}
 @    movs   pc, lr
-
 .align 5
 __trap_swi_ptr:  .word do_trap_swi    
     

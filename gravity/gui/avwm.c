@@ -21,5 +21,7 @@ void avwm(void)
     clearScreen(COLOR_WHITE);
     drawRect(COLOR_RED,10,10,100,100);
     putS(COLOR_BLUE,COLOR_WHITE,0,0,"Hello world");
-    while(1) /*nothing*/ ;
+    while(1) {
+        /*NOTHING*/
+    }
 }

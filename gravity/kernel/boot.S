@@ -35,7 +35,7 @@ mv_iram_loop:
     mrs      r0, cpsr
     bic      r0, r0, #0x40
     msr      cpsr_c, r0
-/* launch start_function */        
+/* launch start_function */
     ldr    lr, __kernel_start_ptr
     bx     lr
     
@@ -43,4 +43,3 @@ __kernel_start_ptr:    .word kernel_start
 __real_iram_start_ptr: .word _real_iram_start
 __iram_start_ptr:      .word _iram_start
 __iram_end_ptr:        .word _iram_end
-      

@@ -14,10 +14,15 @@
 
 #define MAX_IRQ_CNT  10
 
+extern void cli(void);
+extern void sti(void);
+extern void clf(void);
+extern void stf(void);
+
 /*
  * Enable IRQs
  */
-#define sti()							\
+#define __sti()							\
 	({							\
 		unsigned long temp;				\
 	__asm__ __volatile__(					\
@@ -32,7 +37,7 @@
 /*
  * Disable IRQs
  */
-#define cli()							\
+#define __cli()							\
 	({							\
 		unsigned long temp;				\
 	__asm__ __volatile__(					\
@@ -47,7 +52,7 @@
 /*
  * Enable FIQs
  */
-#define stf()							\
+#define __stf()							\
 	({							\
 		unsigned long temp;				\
 	__asm__ __volatile__(					\
@@ -62,7 +67,7 @@
 /*
  * Disable FIQs
  */
-#define clf()							\
+#define __clf()							\
 	({							\
 		unsigned long temp;				\
 	__asm__ __volatile__(					\

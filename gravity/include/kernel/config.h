@@ -14,4 +14,6 @@
 
 #define USE_DEBUG_ON_SCREEN     1
 
+#define DEBUG_INIT              1
+
 #endif
