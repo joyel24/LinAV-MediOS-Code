@@ -39,9 +39,9 @@ int nxtEvent(void)
         lcd_update(FORCE_REDRAW,0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
       break;
       case KeyPress :
-	  XLookupString (event.xkey, &c, 1, &keysym, 0);
+	  XLookupString (&event.xkey, &c, 1, &keysym, 0);
           key = keysym;
-          getKey(key);
+          return getKey(key);
       break;
       case KeyRelease :
       break;
