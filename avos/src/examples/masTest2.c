@@ -80,8 +80,7 @@ int main() {
     c = masWriteCodecReg(0x06, 0x4000);     // Input gain
 
     c = masWriteCodecReg(0, 0xffff);        // Enable stuff
-    
-    
+
     while(1) {
         graphicsBoxf(&screenBitmap2, 320, 0, 1, 120, 0x0000);
         graphicsSprite(&screenBitmap, 0, 0, &screenBitmap2);

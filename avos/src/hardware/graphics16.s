@@ -54,22 +54,30 @@ graphics16GetPixel:
 .thumb_func
 
 graphics16BoxfR:
-        push {r0, r1, r2, r4, r7, lr}
+        push {r0, r1, r2, r4, r5, r7, lr}
         ldr r7, [r0, #GRAPHICS_BUFFER_BYTESPERLINE]
         bl graphicsGetOffset
+        lsl r2, r5, #16
+        lsr r5, r2, #16
+        orr r5, r2                  @ r5 = | cc | cc |
+                                    @ For word writes...
 g16ly:  mov r1, r0
         mov r2, r3
-g16lx:  strh r5, [r0]
-        add r0, #2
-        sub r2, #1
-        cmp r2, #0
-         bne g16lx
-        mov r0, r1
-        add r0, r7
+        cmp r2, #2
+         blt g16n1
+g16lx:  str r5, [r0]
+        add r0, #4
+        sub r2, #2
+        cmp r2, #2
+         bge g16lx
+g16n1:  cmp r2, #0
+         beq g16dn                   @ r2=0, so no more needed
+        strh r5, [r0]               @ Store last one...
+g16dn:
+        add r0, r1, r7
         sub r4, #1
-        cmp r4, #0
          bne g16ly
-        pop {r0, r1, r2, r4, r7, pc}
+        pop {r0, r1, r2, r4, r5, r7, pc}
         
 @ ------------------------------------------------------------------------------
 @ graphics16Sprite(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
@@ -301,33 +309,34 @@ graphics16Sprite16:
         bl graphicsGetOffset                @ r0->TLC on dest...
         ldr r1, [r3, #GRAPHICS_BUFFER_OFFSET]
         ldr r6, [r3, #GRAPHICS_BUFFER_HEIGHT]
-g16s16y:ldr r7, [r3, #GRAPHICS_BUFFER_WIDTH]
-        push {r0, r1, r6}
-g16s16x:
-        ldrh r2, [r1]
-        ldr r6, [r3, #GRAPHICS_BUFFER_TRANSPARENT]
-        cmp r2, r6
-         beq g16s16nd        
-
-        strh r2, [r0]
-g16s16nd:
-        add r1, #2
-        add r0, #2
-        sub r7, #1
-        cmp r7, #0
-         bne g16s16x
-        pop {r0, r1, r6}
         ldr r5, [r4, #GRAPHICS_BUFFER_BYTESPERLINE]
+        ldr r4, [r3, #GRAPHICS_BUFFER_TRANSPARENT]
+
+        ldr r7, [r3, #GRAPHICS_BUFFER_WIDTH]
+        lsl r7, #1
+        ldr r2, [r3, #GRAPHICS_BUFFER_BYTESPERLINE]
+g16s16y:
+        push {r0, r1, r2, r6, r7}
+        mov r6, #0
+g16s16x:
+        ldrh r2, [r1, r6]
+@        ldr r2, =0x0101
+        cmp r2, r4
+         beq g16s16nd
+        strh r2, [r0, r6]
+g16s16nd:
+        add r6, #2
+        cmp r6, r7
+         bne g16s16x
+        pop {r0, r1, r2, r6, r7}
         add r0, r5
-        ldr r5, [r3, #GRAPHICS_BUFFER_BYTESPERLINE]
-        add r1, r5
+        add r1, r2
         sub r6, #1
-        cmp r6, #0
          bne g16s16y
         pop {r0, r1, r2, r3, r4, r5, r6, r7}
         pop {r1}
         bx r1
-
+        
         
 @ ------------------------------------------------------------------------------
 @ graphics16Sprite32(r0->bufferDefDest, r1=x, r2=y, r3->bufferDefSrc)
