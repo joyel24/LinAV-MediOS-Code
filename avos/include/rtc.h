@@ -29,5 +29,5 @@ struct tm {
 };
 
 extern void rtcInit();
-extern struct tm rtcGetTime();
+extern struct tm* rtcGetTime();
 extern void rtcSetTime(struct tm newTime);

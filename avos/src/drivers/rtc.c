@@ -16,12 +16,12 @@
 
 static struct tm tmStatic = {1,0,0,0,0,0,0,0,0};
 
-struct tm rtcGetTime() {
+struct tm* rtcGetTime() {
     int c = i2cRead(RTC_ADDR, 0, &tmStatic, 9);
     
     // TODO - Handle i2c errors...
     
-    return tmStatic;
+    return &tmStatic;
 }
 
 void rtcSetTime(struct tm newTime) {
