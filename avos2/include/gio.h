@@ -18,6 +18,7 @@ typedef unsigned long u32;
 #define         GIO_LINE_BUTTON_ON          0x00
 
 #define         GIO_LINE_MAS_EOD            0x04
+#define         GIO_LINE_UNKNOWN            0x06    // Could be remote stuff?
 
 #define         GIO_LINE_MAS_D0             0x08
 #define         GIO_LINE_MAS_D1             0x09

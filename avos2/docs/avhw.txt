@@ -1,0 +1,132 @@
+Overview of AV300 hardware
+--------------------------
+
+ata.h
+    The archos av300 uses an ATA/USB2 bridge chip. This can be switched to 2
+    modes of operation. 1, where the av300 can read and write from and to the
+    hard disk drive, and 2, where the hard drive is available to a host computer
+    over USB.
+    Aditionally if a memory card reader is used, the av300 can read and write
+    data to and from the card.
+    
+buttons.h
+    The av300 has 3 menu buttons, a joystick, an on buttons, and an off button.
+    The joystick can also be pressed. Diagonals are impossible in hardware.
+    The menu buttons, directions of joystick, and joystick press, are all
+    readable at any time.
+    The on and off buttons are also readable at any time, but additiionally can
+    be used to generate an interrupt. (These 2 buttons go through the GIO).
+    
+dma.h
+    The av300 has a general purpose dma system. This can be used to move large
+    amounts of data, without it having to go through the cpu. The 2 uses of this
+    that are currently know are:
+    1. To move data from sdram to ATA, and vica versa. This could speed up disk
+       access, especially where we can do other things while the DMA is taking
+       place such as playing an mp3 file. We can just tell the DMA system to
+       load the rest of the file while we play it.
+    2. To move data around in SDRAM. This could be extremely useful for many
+       things. Especially where we can pipeline things so that the cpu can be
+       doing one job while the dma is preparing data for the next frame/etc
+
+ecr.h
+    The cpu contains a dedicated Endianness Conversion Register. This allows us
+    to quickly convert data from big endian to little endian byte order. It also
+    allows us to convert on a bit basis. eg.
+    01234567 89abcdef -> swapBytes -> 89abcdef 01234567
+    01234567 89abcdef -> swapBits  -> fedcba98 76543210
+    
+gio.h
+    The general purpose input output lines are an extremely important part of
+    the archos av300. They give us access to 32 general purpose input output
+    lines.
+    The i2c bus is accessed through the gio, so is mas data etc.
+    We can set lines, get input lines, configure lines as input output.
+    Aditionally we can set an interrupt to occur on gio lines 0-7.
+    
+i2c.h
+    The i2c bus is a simple bus that allows us to talk to some other hardware.
+    devices on the i2c bus are:
+    1. The real time clock (RTC).
+    2. The battery meter.
+    3. The mas (mp3 encoder decoder).
+    
+interrupts.h
+    The cpu has a number of interrupts that can be generated such as gio lines,
+    OSD sync, uart data recieved interrupts, timers etc
+    We can setup an interrupt handler, get the cause of an interrupt. We can
+    also enable or disable each interrupt individually.
+    
+mas.h
+    The mas chip is our gateway to all audio processing on the av300. It is
+    directly connected to the audio input, audio output, and microphone.
+    It is a general purpose dsp, and can have custom code written for it to
+    support many audio codecs etc. It has mp3 decoding and encoding in ROM
+    which we can use at the moment.
+    We can control parameters such as volume, bass, treble, balance, etc and
+    additionally we can get VU meter type input and output values to display.
+    
+osdDSC25.h
+    The TMS320DSC25 has a built in on screen display (OSD). This is how we
+    configure the LCD. Also, in conjuction with a gio output line, we can
+    switch on external video.
+    The OSD has 2 video planes (YCbCr colorspace), 2 bitmap planes (2,4,16 or
+    256 colors taken from a YCbCr pallette), a bitmap cursor, a rectangle
+    cursor, and a background border color.
+    Bitmap planes can either be merged with the video planes to get a partially
+    see through effect, or the bitmap can be transparent where the color is 0.
+    Each of these components can be moved around the display, and resized as
+    required. Also the planes can be hardware scaled x2 or x4 independently in
+    the horizontal and vertical directions.
+    In components that use a pallette, either the default ROM pallette can be
+    used, or a user configurable ram pallette can be chosen.
+    The addresses in SDRAM can be configured for each component, and can be
+    switched easily to provide things like double buffering, scrolling around
+    a large image etc.
+
+power.h
+    The current 'ac adapter plugged in' status can be retrieved, and also the
+    current charge of the battery can be read via i2c. At the moment the
+    calibration of the output values is not known, and more experimentation
+    must be done to be able to use it effectively.
+    
+rtc.h
+    The Real time clock has around 64 bytes of memory. It stores the current
+    time and date in some of this, the rest can be used to store program
+    configuration settings etc. The current time and date can be retreived and
+    set.
+    
+timers.h
+    The CPU contains 4 general purpose timers. The function of each can be
+    chosen from [off, one shot, and continuous]. Each timer also has a maximal
+    count configured for it, which will determine the frequency of the timer,
+    or the time taken for a one shot mode.
+    The current count of each timer can be read. Additionally each timer
+    generates an interrupt when the current value reaches the maximal count
+    value for that timer. Then if it's set to continuous mode, it resets the
+    current count and starts counting again.
+    
+uart.h
+    The CPU has support for 2 serial uart ports. One is connected directly to
+    the serial port on the bottom of the unit. It is unknown if the other one
+    is used for anything such as the fm remote or not.
+    Data can be read and written, the baud rate and line options can be set.
+    The uart can be configured to generate an interrupt upon reception or
+    transmission of data.
+    
+usb.h
+    The usb port is wired directly to an ATA/USB2 bridge. The only function the
+    usb can do is mount the hard drive as a usb mass storage device. This is
+    all done in hardware and cannot be changed. Additionally the usb port is
+    a host only, not a master. So adding usb periferals is not an option.
+    The current 'is usb lead connected' status can be retrieved (Note it must
+    also be plugged into something the other end of the cable).
+    The current ata mode can be changed from the av300 reading/writing data to
+    ATA, to the USB host being able to mount the drive.
+    Note these 2 cannot happen at the same time. As far as I know the hardware
+    does not allow it, but also you would get 2 things modifying the hard drive
+    at the same time which would lead to errors.
+    Also note that I don't know of any way to be able to mount a memory card
+    over udb via a memory card reader plugged into the av300. This also may not
+    be possible in hardware.
+

@@ -27,7 +27,11 @@ typedef unsigned long u32;
 #define INTERRUPTS_UART1    13
 
 #define INTERRUPTS_EXT0     18  // ON button when enabled in gio
-#define INTERRUPTS_EXT1     19
+#define INTERRUPTS_EXT1     19  //
+#define INTERRUPTS_EXT2     20  //
+#define INTERRUPTS_EXT3     21  //
+#define INTERRUPTS_EXT4     22  // MAS_EOD
+
 
 
 void interruptsSetMaskA(u32 bitmask);
