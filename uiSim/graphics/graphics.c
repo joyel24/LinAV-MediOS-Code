@@ -17,21 +17,26 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#define tstXY(x,y)  {if(x>SCREEN_WIDTH) return; if(x<0) return; if(y>SCREEN_HEIGHT) return; if(y<0) return;}
+#define tstWH(x,y,w,h)  {if(x+w>SCREEN_WIDTH)return; if(x+w<0) return; if(y+h>SCREEN_HEIGHT) return; if(y+h<0) return;}
+
 /*
-** declaration des variables utilisées par Xlib 
+** variables declarations for X
 */
 
-  char* displayName = 0;			/* Nom du serveur */
-  Display* display;				/* display */
-  int screen; 					/* numero de l'ecran */
-  Window window;				/* creation de la fenetre */
-  GC gc;					/* contexte graphique */
-  XEvent event;					
-  char texte[] = "LinAV project";		/*pour les evenements */
+  Display* display;				/* display */	
+  Window window;				/* Create a window */
+  char texte[] = "LinAV project";		/* for events  */
 
 int ini_graphics()
 {
- /*connexion au serveur X */
+
+ XEvent event;
+ char* displayName = 0;
+ int screen; 					/* screen number */
+ GC gc;		
+ 
+ /*connect to X server */
  
  display = XOpenDisplay(displayName);
  
@@ -41,20 +46,20 @@ int ini_graphics()
 	exit(1);
  }
 	      
- /*recuperation du contexte graphique (infos grpahiques) */
+ /*Graphics informations */
 
  screen = DefaultScreen(display);
  gc = DefaultGC(display, screen);
 
- /*creation de la fenetre window*/
+ /*window Creation*/
 
  window = XCreateSimpleWindow(
-	  display, 	        	   // Display
-	  DefaultRootWindow(display),  // Fenêtre mère
-	  0, 0, 300, 100, 	   // Géométrie 
-	  10,			   // Largeur du bord
-	  BlackPixel(display, screen), // Couleur du bord
-	  WhitePixel(display, screen)  // Couleur du fond
+	  display, 	        	   	/* Display */
+	  DefaultRootWindow(display),  		/* Main Window */
+	  0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 	/* Geometry */
+	  10,			                /* Width border */
+	  BlackPixel(display, screen), 		
+	  WhitePixel(display, screen)
 	  );
 	  
  if(!window) 
@@ -116,9 +121,19 @@ int readPixel(int x, int y)
 
 void drawRect(int color, int x, int y, int width, int height)
 {
-    tstXY(x,y);
-    tstWH(x,y,width,height);
-    //default_gc->gops->drawRect(color,x,y,width,height,default_gc->buffer);
+    tstXY(x,y);		/* x,y, test */
+    tstWH(x,y,width,height); /* x,y,width,height */
+    
+    GC GCDrawRect;
+    
+    XGCValues gcv;
+    unsigned long gcm = GCForeground;
+    gcv.foreground = color;
+    GCDrawRect = XCreateGC(display, window, gcm, &gcv);		/* create a new GC */
+       
+    XDrawRectangle(display, window, GCDrawRect, x, y, width, height); /* XLib Function */
+ 
+
 }
 
 void fillRect(int color, int x, int y, int width, int height)
