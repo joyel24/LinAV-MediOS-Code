@@ -84,5 +84,6 @@ extern TASK_INFO* kcreate_tcb (void* pvTaskCode, unsigned long nStackSize, void*
 extern int klist_size (TASK_INFO* pList);
 extern KERNEL_ERROR_CODE kadd_tcb (TASK_INFO** pList, TASK_INFO* pTask);
 extern TASK_INFO* kremove_tcb  (TASK_INFO** pList);
+extern void kremove_tcb_ex  (TASK_INFO** pList, TASK_INFO* pTask);
 
 #endif

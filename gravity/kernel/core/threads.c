@@ -175,6 +175,12 @@ __IRAM_CODE TASK_INFO* kremove_tcb  (TASK_INFO** pList)
 	return pDeleted;
 }
 
+__IRAM_CODE void kremove_tcb_ex  (TASK_INFO** pList, TASK_INFO* pTask)
+{
+	*pList = pTask;
+	kremove_tcb  (pList);
+}
+
 __IRAM_CODE void kset_next_ready_task ()
 {
 //    g_pActiveTask = g_pActiveTask->pNextTask;
@@ -203,6 +209,24 @@ __IRAM_CODE void kset_next_ready_task ()
 			{
 				TASK_INFO* pTask = kremove_tcb (&g_pActiveTask);
 				kadd_tcb (&g_pBlockedTask, pTask);
+			}
+			break;
+		case KERNEL_CMD_SUSPEND:
+			{
+				TASK_INFO* pTaskToSuspend;
+				kpipe_read (g_pKernelCtrlPipe, &pTaskToSuspend, 4);
+
+				kremove_tcb_ex (&g_pActiveTask, pTaskToSuspend);
+				kadd_tcb (&g_pBlockedTask, pTaskToSuspend);
+			}
+			break;
+		case KERNEL_CMD_CONTINUE:
+			{
+				TASK_INFO* pTaskToContinue;
+				kpipe_read (g_pKernelCtrlPipe, &pTaskToContinue, 4);
+
+				kremove_tcb_ex (&g_pBlockedTask, pTaskToContinue);
+				kadd_tcb (&g_pActiveTask, pTaskToContinue);
 			}
 			break;
 		}

@@ -31,3 +31,13 @@ __IRAM_CODE void kpipe_write  (PIPE* pPipe, void* _pData, unsigned long nBytes)
 		pPipe->nSender &= PIPE_SIZE_MASK;
 	}
 }
+
+__IRAM_CODE void kpipe_read  (PIPE* pPipe, void* _pData, unsigned long nBytes)
+{
+	unsigned char* pOut = (unsigned char*)_pData;
+	while (nBytes --)
+	{
+		*pOut++ = pPipe->buffer[pPipe->nReceiver ++];
+		pPipe->nReceiver &= PIPE_SIZE_MASK;
+	};
+}
