@@ -313,22 +313,20 @@ graphics32Sprite32:
         ldr r1, [r3, #GRAPHICS_BUFFER_OFFSET]
         ldr r6, [r3, #GRAPHICS_BUFFER_HEIGHT]
 g32s32y:ldr r7, [r3, #GRAPHICS_BUFFER_WIDTH]
-        push {r0, r1, r6}
-g32s32x: 
+        push {r0, r1}
+g32s32x:
         ldr r2, [r1]
         str r2, [r0]
         add r1, #4
         add r0, #4
         sub r7, #1
-        cmp r7, #0
          bne g32s32x
-        pop {r0, r1, r6}
+        pop {r0, r1}
         ldr r5, [r4, #GRAPHICS_BUFFER_BYTESPERLINE]
         add r0, r5
         ldr r5, [r3, #GRAPHICS_BUFFER_BYTESPERLINE]
         add r1, r5
         sub r6, #1
-        cmp r6, #0
          bne g32s32y
         pop {r0, r1, r2, r3, r4, r5, r6, r7, pc}
 

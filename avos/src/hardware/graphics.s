@@ -11,7 +11,26 @@
 @ Date:     10/02/2004
 @ Author:   By DoggerMoore
 @
+@ Whats done?       Destinateion bits per pixel
+@              |  1 |  2 |  4 |  8 | 16 | 32 |
+@ -------------+----+----+----+----+----+----+
+@ setPixel     |    |    |    |  Y |  Y |  Y |
+@ getPixel     |    |    |    |  Y |  Y |  Y |
+@ boxf         |    |    |    |  Y |  Y |  Y |
+@ sprite1      |    |    |    |    |  Y |  Y |
+@ sprite2      |    |    |    |    |  Y |  Y |
+@ sprite4      |    |    |    |    |  Y |  Y |
+@ sprite8      |    |    |    |    |  Y |  Y |
 @
+@ sprite16     |    |    |    |    |  Y |    |
+@ sprite32     |    |    |    |    |    |  Y |
+@
+@
+@ NB 16bit per pixel is actually kindof 8 bit per pixel.
+@ it's just 2* 8 bit pixels side by side. This is used when hardware zoom is
+@ set to x2
+@ Also, 32 bit is actually likewise 2 pixels. Y0 Cb Y1 Cr.
+@ This is again used for hardware zoom x2/x4.
 
 .ifndef graphicsInc
 graphicsInc = 1

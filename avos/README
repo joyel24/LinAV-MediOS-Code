@@ -7,3 +7,6 @@ individual .h files, so you can easily use them one by one if you want.
 
 make examples
 This will make any .c files in the src/examples directory.
+
+make boot
+Makes the bootloader
