@@ -34,7 +34,7 @@ int main() {
     osdSetComponentConfig(OSD_CURSOR2, 0);
 
     screenBitmap.offset = 0x03800000;
-    screenBitmap.bytesPerLine = 320*2;
+    screenBitmap.bytesPerLine = 336*2;
     screenBitmap.width = 320;
     screenBitmap.height = 120;
     screenBitmap.bitsPerPixelShift = 4;
@@ -48,8 +48,8 @@ int main() {
     screenTop.bitsPerPixel = 16;
 
     screenBitmap2.offset = 0x03800000 + 2;       // So we can shift left a pix
-    screenBitmap2.bytesPerLine = 320*2;
-    screenBitmap2.width = 320;
+    screenBitmap2.bytesPerLine = 336*2;
+    screenBitmap2.width = 321;
     screenBitmap2.height = 120;
     screenBitmap2.transparent = -1;
     screenBitmap2.bitsPerPixelShift = 4;
@@ -61,7 +61,7 @@ int main() {
     osdSetComponentSize(OSD_BITMAP1, 320*2, 120);
     osdSetComponentPosition(OSD_BITMAP1, 0x14, 0x12 + 120);
     osdSetComponentOffset(OSD_BITMAP1, 0x03800000);
-    osdSetComponentSourceWidth(OSD_BITMAP1, 0x14);
+    osdSetComponentSourceWidth(OSD_BITMAP1, 0x15);
     osdSetComponentConfig(OSD_BITMAP1, OSD_COMPONENT_ENABLE
                                      | OSD_BITMAP_8BIT);
 
@@ -91,8 +91,8 @@ int main() {
     }
 
     while(1) {
+        graphicsBoxf(&screenBitmap2, 320, 0, 1, 120, 0x0000);
         graphicsSprite(&screenBitmap, 0, 0, &screenBitmap2);
-        graphicsBoxf(&screenBitmap, 319, 0, 1, 120, 0x0000);
         
         for (c=0;c<4;c++) {
             v = timersGetValue(c);

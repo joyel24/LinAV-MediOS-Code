@@ -10,7 +10,7 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-BUILDDIR=/home/thomas/Av320/arm-tools/inst_uclibc/toolchain/gcc-3.3.x/toolchain_arm_nofpu
+BUILDDIR=/home/jimmy/archos/uclib/toolchain/gcc-3.3.x/toolchain_arm_nofpu
 LDFLAG=-L$(BUILDDIR)/arm-linux/lib
 
 ##########################
