@@ -328,6 +328,7 @@ pz_close_window(GR_WINDOW_ID wid)
 int
 main(int argc, char **argv)
 {
+   int goToBrowser = 0;
 
 	if (GrOpen() < 0) {
 		fprintf(stderr, "GrOpen failed");
@@ -356,7 +357,17 @@ main(int argc, char **argv)
 
 	ipod_load_settings();
 
+   if(argc>1)
+   {
+      goToBrowser=argv[1];
+   }
+
 	new_menu_window();
+
+	if(goToBrowser)
+	{
+      new_browser_window();
+	}
 
 	while (1) {
 		GR_EVENT event;

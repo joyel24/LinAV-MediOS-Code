@@ -247,7 +247,7 @@ static void menu_do_draw()
 {
    char tmp[20];
 
-	pz_draw_header("LinWin V0.17");
+	pz_draw_header("LinWin V0.18");
 /*
 	GrSetGCForegroundPixelVal(menu_gc, AV3XX_COLOR_BLACK);
    sprintf(tmp,"freq: %d repeat: %d", ipod_get_mouseParam_freq(), ipod_get_mouseParam_repeat());
