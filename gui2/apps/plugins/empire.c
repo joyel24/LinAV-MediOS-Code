@@ -12,7 +12,6 @@
 
 /* ToDos:
 - remember all fields which are already visible for each player(auch evtl Objekte die darauf plaziert sind)
-- make world invisble at the beginning
 - define bitmaps of all objects (maybe sprites for different colors)
 - Manage list of objects for each player (xPos,yPos,Already-moved-flag)
 - Property list for each available object in the game (Strange,access radius,name, move flag for the different world elements)
@@ -139,6 +138,23 @@ static unsigned char hill[PIECE_DIM][PIECE_DIM] = { // 3
   {0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b},
   {0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b} };
 
+static unsigned char tank[PIECE_DIM][PIECE_DIM] = {
+  {0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x05,0x05,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x05,0x05,0x05,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x05,0x05,0x05,0x05,0x0b,0x0b,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x0b,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x0b,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x0b,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x0b,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x0b,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x0b,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x0b,0x0b,0x0b,0x05,0x05,0x05,0x05,0x05,0x0b,0x0b,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b},
+  {0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b} };
+
 static unsigned char worldmap[WORLD_X][WORLD_Y] = {
   {0,0,0,0,0,0,3,3,3,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,3,3,0,0,0,0,0,0},
@@ -161,31 +177,43 @@ static BITMAP townB   = {(unsigned int) town,   PIECE_DIM, PIECE_DIM, 0, 0};
 static BITMAP waterB  = {(unsigned int) water,  PIECE_DIM, PIECE_DIM, 0, 0};
 static BITMAP hillB   = {(unsigned int) hill,   PIECE_DIM, PIECE_DIM, 0, 0};
 
-static int border_check(int evt, int x, int y)
+static BITMAP tankB   = {(unsigned int) tank,   PIECE_DIM, PIECE_DIM, 0, 0};
+
+/*********************************************************
+/
+/ border_check
+/
+*********************************************************/
+static int border_check(int evt, int x, int y, int offset)
 {
 	if(evt == BTN_RIGHT)
 	{
-      if(x+1 >= WORLD_X) return 0;
+      if(x+offset >= WORLD_X) return 0;
    }
 	else if( evt == BTN_LEFT)
 	{
-      if(x-1 < 0)
+      if(x-offset < 0)
 		{
 		   return 0;
 		}
 	}
 	else if( evt == BTN_DOWN)
 	{
-      if(y+1 >= WORLD_Y) return 0;
+      if(y+offset >= WORLD_Y) return 0;
 	}
 	else if( evt == BTN_UP)
 	{
-      if(y-1 < 0) return 0;
+      if(y-offset < 0) return 0;
    }
 
 	return 1;
 }
 
+/*********************************************************
+/
+/ drawDifferentPieces
+/
+*********************************************************/
 static void drawDifferentPieces(int x, int y)
 {
 	if(worldmap[y][x] ==  0)
@@ -198,6 +226,11 @@ static void drawDifferentPieces(int x, int y)
 		cops->drawBITMAP (&hillB,   x*PIECE_DIM, y*PIECE_DIM);
 }
 
+/*********************************************************
+/
+/ draw_piece
+/
+*********************************************************/
 static void draw_piece(int x, int y, int withRadius)
 {
    int i = 0;
@@ -209,33 +242,38 @@ static void draw_piece(int x, int y, int withRadius)
 	{
       for(i=1;i<=withRadius;i++)
 		{
-		   if(border_check(BTN_LEFT,x-i+1,y))
+		   if(border_check(BTN_LEFT,x-i,y,0))
       	   drawDifferentPieces(x-i, y);
 
-		   if(border_check(BTN_RIGHT,x+i-1,y))
+		   if(border_check(BTN_RIGHT,x+i,y,0))
          	drawDifferentPieces(x+i, y);
 
-		   if(border_check(BTN_UP,x,y-i+1))
+		   if(border_check(BTN_UP,x,y-i,0))
          	drawDifferentPieces(x, y-i);
 
-		   if(border_check(BTN_DOWN,x,y+i-1))
+		   if(border_check(BTN_DOWN,x,y+i,0))
          	drawDifferentPieces(x, y+i);
 
-		   if(border_check(BTN_LEFT,x-i+1,y) && border_check(BTN_UP,x,y-i+1))
+		   if(border_check(BTN_LEFT,x-i,y,0) && border_check(BTN_UP,x,y-i,0))
          	drawDifferentPieces(x-i, y-i);
 
-		   if(border_check(BTN_RIGHT,x+i-1,y) && border_check(BTN_DOWN,x,y+i-1))
+		   if(border_check(BTN_RIGHT,x+i,y,0) && border_check(BTN_DOWN,x,y+i,0))
          	drawDifferentPieces(x+i, y+i);
 
-		   if(border_check(BTN_RIGHT,x+i-1,y) && border_check(BTN_UP,x,y-i+1))
+		   if(border_check(BTN_RIGHT,x+i,y,0) && border_check(BTN_UP,x,y-i,0))
          	drawDifferentPieces(x+i, y-i);
 
-		   if(border_check(BTN_LEFT,x-i+1,y) && border_check(BTN_DOWN,x,y+i-1))
+		   if(border_check(BTN_LEFT,x-i,y,0) && border_check(BTN_DOWN,x,y+i,0))
          	drawDifferentPieces(x-i, y+i);
 		}
 	}
 }
 
+/*********************************************************
+/
+/ draw_world
+/
+*********************************************************/
 static void draw_world()
 {
    int x = 0;
@@ -251,13 +289,19 @@ static void draw_world()
 	}
 }
 
+/*********************************************************
+/
+/ empire_init
+/
+*********************************************************/
 static void empire_init(void)
 {
     cops->clearScreen(COLOR_WHITE);
 
 	 // ToDo: Draw Map out of a file or just generated by prog
 //    draw_world();
-    draw_piece(startposX, startposY, 1);
+//    draw_piece(startposX, startposY, 1);
+  	 cops->drawBITMAP (&tankB, startposX*PIECE_DIM, startposY*PIECE_DIM);
 
     // Startposition einzeichnen
 	 cops->drawRect(COLOR_RED, startposX*PIECE_DIM, startposY*PIECE_DIM, PIECE_DIM, PIECE_DIM);
@@ -266,12 +310,17 @@ static void empire_init(void)
     cops->putS(COLOR_BLACK, COLOR_WHITE, 239, 20, "by Schoki");
 }
 
+/*********************************************************
+/
+/ move_position
+/
+*********************************************************/
 static void move_position(int evt)
 {
    char tmp[10];
    int ret = 0;
 
-	ret = border_check(evt,startposX,startposY);
+	ret = border_check(evt,startposX,startposY,1);
 	if(ret == 0)
 	   return;
 
@@ -298,7 +347,11 @@ static void move_position(int evt)
 	cops->drawRect(COLOR_RED, startposX*PIECE_DIM, startposY*PIECE_DIM, PIECE_DIM, PIECE_DIM);
 }
 
-/* the main game loop */
+/*********************************************************
+/
+/ eventHandler
+/
+*********************************************************/
 int eventHandler(int evt)
 {
    int i;
@@ -334,6 +387,11 @@ int eventHandler(int evt)
 	}
 }
 
+/*********************************************************
+/
+/ main
+/
+*********************************************************/
 int main(int argc,char * * argv)
 {
     int w, h, i;
