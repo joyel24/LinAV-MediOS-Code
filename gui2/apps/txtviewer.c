@@ -25,14 +25,10 @@
 #include "graphics.h"
 #include "events.h"
 #include "alias.h"
+#include "colordef.h"
 
 #define true 1
 #define false 0
-#define COLOR_WHITE    16
-#define COLOR_BLUE     38
-#define COLOR_BLACK    1
-#define LCD_WIDTH 320
-#define LCD_HEIGHT 240
 #define TEXT_HEIGHT  13
 #define TEXT_WIDTH   7
 
@@ -727,8 +723,8 @@ static int viewer_init(char* file)
   int w=TEXT_WIDTH,h=TEXT_HEIGHT;
 
 //xxx    cops->getStringS("M", &w, &h);
-    display_lines = (LCD_HEIGHT / h) - 1;  // -1 for reserve status line
-    display_columns = LCD_WIDTH / w ;
+    display_lines = (SCREEN_HEIGHT / h) - 1;  // -1 for reserve status line
+    display_columns = SCREEN_WIDTH / w ;
 
     /*********************
     * (Could re-initialize settings here, if you
