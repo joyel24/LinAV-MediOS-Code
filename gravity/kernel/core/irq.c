@@ -76,7 +76,7 @@ __IRAM_CODE void do_IRQ(int irq, struct pt_regs *regs)
 }
 
 /* Acknowlede the IRQ. */
-
+#if 0
 static inline void irq_ack(unsigned int irq, struct pt_regs * regs)
 {
     outw((1<<INTC_IRQ_SHIFT(irq)), INTC_IRQ_STATUS(irq));
@@ -91,7 +91,7 @@ static inline void fiq_ack(unsigned int irq)
 
 /* Mask the IRQ. */
 
-__IRAM_CODE void mask_irq(unsigned int irq)
+static inline void mask_irq(unsigned int irq)
 {
     unsigned int eint;
     int mask;
@@ -104,7 +104,7 @@ __IRAM_CODE void mask_irq(unsigned int irq)
 
 /* Unmask the IRQ. */
 
-__IRAM_CODE void unmask_irq(unsigned int irq)
+static inline void unmask_irq(unsigned int irq)
 {
     unsigned int eint;
     int mask;
@@ -117,7 +117,7 @@ __IRAM_CODE void unmask_irq(unsigned int irq)
 
 /* Mask the IRQ and acknowledge it. */
 
-__IRAM_CODE void mask_ack_irq(unsigned int irq)
+static inline void mask_ack_irq(unsigned int irq)
 {
     unsigned int eint;
     int mask;
@@ -129,6 +129,7 @@ __IRAM_CODE void mask_ack_irq(unsigned int irq)
 
     outw((1<<INTC_IRQ_SHIFT(irq)), INTC_IRQ_STATUS(irq));
 }
+#endif
 
 void init_irq(void)
 {

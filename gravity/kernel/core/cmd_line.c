@@ -67,24 +67,15 @@ struct cmd_line_s cmd_tab[] = {
 
 #define RM_HEAD_SPC(ptr)      ({while(*ptr && *ptr==' ') ptr++;})
 #define FIND_NXT_TOKEN(ptr)   ({char * __v=ptr; while(*__v && *__v!=' ') __v++; __v;})
-#define FIND_CMD_LINE(ptr)                                                                 \
+#define FIND_CMD_LINE(PTR,CMD_TAB)                                                                 \
         ({                                                                                 \
             int __v=0;                                                                     \
             struct cmd_line_s * __w=NULL;                                                  \
-            for(__v=0;cmd_tab[__v].cmd!=NULL && strcmp(cmd_tab[__v].cmd,ptr);__v++) ;    \
-            if(cmd_tab[__v].cmd!=NULL) __w=&cmd_tab[__v];                                 \
+            for(__v=0;CMD_TAB[__v].cmd!=NULL && strcmp(CMD_TAB[__v].cmd,PTR);__v++) ;    \
+            if(CMD_TAB[__v].cmd!=NULL) __w=&CMD_TAB[__v];                                 \
             __w;                                                                           \
         })
         
-#define UNKNOW_CMD(cmd)                                                                       \
-        ({                                                                                 \
-            printk("Unknown command: %s\nType help to have the list of command\n",cmd);        \
-            cur_cmd[0]='\0';                                                               \
-            cur_pos=0;                                                                      \
-            printk("grv> ");                                                                  \
-            goto loop;                                                                        \
-        })
-
 __IRAM_DATA unsigned char * cur_cmd;
 __IRAM_DATA int cur_pos;
 
@@ -98,14 +89,11 @@ __IRAM_CODE void cmd_line_task(PIPE * uart_pipe)
     struct cmd_line_s * cmd_line;
     unsigned  char * ptr;
     
-    //printk(" c ");
     while(1)
     {
         c='\0';
         while(1)
         {
-            //printk(" d ");
-        
             API_PIPE_RECV(uart_pipe,&c,1);
             
             if(c=='\n' || c=='\r')               /* end of line => add \0 to end the line */
@@ -162,7 +150,6 @@ __IRAM_CODE void cmd_line_task(PIPE * uart_pipe)
                 break;
                 
             }
-            //printk("read %c %d\n",c,(int)c);
             
             if(cur_pos>MAX_CMD_LEN)            /* can't add more chars => reset everything */
             {
@@ -184,26 +171,37 @@ __IRAM_CODE void cmd_line_task(PIPE * uart_pipe)
             else
             {
                 /* processing the cmd */
-                //printk("[cmd_line] get cmd |%s|\n",cur_cmd);
                 nb_args=0;
                 RM_HEAD_SPC(cur_cmd);
                 
-                /* let's find the cmd name */
-                //printk("[cmd_line] 1 - |%s|\n",cur_cmd);
-                
+                /* let's find the cmd name */                
                 ptr=FIND_NXT_TOKEN(cur_cmd);
                 
                 if(!*ptr)   /* cmd with no args */
                 {
-                    cmd_line=FIND_CMD_LINE(cur_cmd);
-                    if(!cmd_line)  UNKNOW_CMD(cur_cmd);
-                    //printk("[cmd_line] 2 - find cmd |%s|, no args\n",cmd_line->cmd);
+                    cmd_line=FIND_CMD_LINE(cur_cmd,cmd_tab);
+                    if(!cmd_line)
+                    {
+                        printk("Unknown command: %s\nType help to have the list of command\n",cur_cmd);
+                        cur_cmd[0]='\0';
+                        cur_pos=0;
+                        printk("grv> ");
+                        goto loop;
+                    }                    
                 }
                 else
                 {
                     *ptr='\0';
-                    cmd_line=FIND_CMD_LINE(cur_cmd);
-                    if(!cmd_line)  UNKNOW_CMD(cur_cmd);
+                    cmd_line=FIND_CMD_LINE(cur_cmd,cmd_tab);
+                    if(!cmd_line)
+                    {
+                        printk("Unknown command: %s\nType help to have the list of command\n",cur_cmd);
+                        cur_cmd[0]='\0';
+                        cur_pos=0;
+                        printk("grv> ");
+                        goto loop;
+                    }
+                    
                     cur_cmd = ptr+1;
                     //printk("[cmd_line] 2 - find cmd |%s|, args: |%s|\n",cmd_line->cmd,cur_cmd);
                     /* parse args */
