@@ -147,6 +147,15 @@ __IRAM_CODE int kcswi_handler (
 	}
 	break;
 
+	case nAPI_TASK_SETPRIORITY: //(HTASK hTask, int nPriority);
+	{
+		__cli ();
+		((TASK_INFO*)nParam1)->nPriority = nParam2;
+		((TASK_INFO*)nParam1)->nCurrentScore = nParam2;
+		__sti ();
+	}
+	break;
+
 /// Serialize critical API calls to memory manager
 	case nAPI_TASK_TERMINATE:   //()
 	case nAPI_MALLOC:   //void** ppvBuffer, unsigned long nBytes

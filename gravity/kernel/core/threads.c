@@ -52,8 +52,7 @@ __IRAM_CODE void kthread_final_trap (int nRetCode)
 	printk("%s[%08x]: REGISTERS: r12=%08x r13=%08x lr=%08x\n", pTCB->cName, pTCB, _r12, _r13, _lr);
 	__sti ();
 
-	while (1);
-//API_TASK_TERMINATE ();
+	API_TASK_TERMINATE ();
 }
 
 __IRAM_CODE void kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackSize, const char* pszTaskName)
@@ -75,14 +74,18 @@ __IRAM_CODE void kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackS
 	pTCB->pContext     = 0;
 	pTCB->pTaskCode    = 0;
 	pTCB->pEntry       = 0;
+	pTCB->nPriority     = 10;
+	pTCB->nCurrentScore = 10;
 }
 
 __IRAM_CODE unsigned long* kInitialiseStack (unsigned long* pxTopOfStack, void* pvCode, void *pvParameters)
 {
 	printk ("TCB stack set to %08x\n", pxTopOfStack);
 
+	pxTopOfStack --;
+
 	// store [pc]
-	*pxTopOfStack = (unsigned long)pvCode + 4;
+	*pxTopOfStack = (unsigned long)pvCode;
 	pxTopOfStack--;
 	// store [lr]
 	*pxTopOfStack = (unsigned long)kthread_final_trap;
@@ -201,7 +204,13 @@ __IRAM_CODE TASK_INFO* kremove_tcb  (TASK_INFO** pList)
 
 __IRAM_CODE void kset_next_ready_task ()
 {
-	while (1)
+	TASK_INFO* pStart = g_pTaskRing;
+	TASK_INFO* pOptimalTask = 0;
+	unsigned long nOptimalScore = 0;
+
+	g_pTaskRing->nCurrentScore = g_pTaskRing->nPriority;
+
+	do
 	{
 		g_pTaskRing = g_pTaskRing->pNextTask;
 
@@ -239,6 +248,22 @@ __IRAM_CODE void kset_next_ready_task ()
 		}
 
 		if (g_pTaskRing->nBlockingState == TASK_BLOCKED_BY_NONE)
-			break;
-	};
+		{
+			if (g_pTaskRing->nCurrentScore > nOptimalScore)
+			{
+				nOptimalScore = g_pTaskRing->nCurrentScore;
+				pOptimalTask = g_pTaskRing;
+			}
+			else
+			{
+				g_pTaskRing->nCurrentScore ++;
+			}
+		}
+		else
+		{
+		}
+	}
+	while (pStart != g_pTaskRing);
+
+	g_pTaskRing = pOptimalTask;
 }

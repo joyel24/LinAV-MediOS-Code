@@ -25,6 +25,7 @@
 #define nAPI_TASK_PEEKMESSAGE   7
 #define nAPI_TASK_WAITMESSAGE   8
 #define nAPI_TASK_TERMINATE     9
+#define nAPI_TASK_SETPRIORITY  10
 
 #define nAPI_MALLOC            20
 #define nAPI_FREE              21

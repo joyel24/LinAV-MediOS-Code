@@ -34,6 +34,8 @@ typedef struct _TASK_INFO
 	PIPE*              pMessagePipe;
 	GFX_DATA*          pContext;
 	char               cName [8];
+	unsigned long      nPriority;
+	unsigned long      nCurrentScore;
 } TASK_INFO;
 
 typedef struct _CRITSEC_INFO
