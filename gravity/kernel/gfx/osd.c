@@ -14,6 +14,7 @@
 #include <kernel/hardware.h>
 #include <kernel/osd.h>
 
+
 int osdLookupOffsetLO[4] = { OSD_SDRAM_OFF_VID0 ,
                              OSD_SDRAM_OFF_VID1 ,
 							 OSD_SDRAM_OFF_BITMAP0 ,
@@ -105,6 +106,7 @@ void osdSet16CPallette (int bankN, int index, int value)
 	outw(val,GET_BANK_ADDR(bankN,index));
 }
 
+
 void osdSetAltOffset (int address)
 {
 	int offset = address - 0x03000000;
@@ -163,12 +165,37 @@ void osdSetComponentConfig (int component, int config)
 	}
 }
 
-void osdSetBacklight(int val) /* val = 0/1 */
+void osdRestorePlane(int component, unsigned int address, int x, int y, int w, int h, int bpp, int state,int enable)
 {
-	if(val)
-		outw(4,LCD_BACK_LIGHT);
-	else
-		outw(0,LCD_BACK_LIGHT);
+    unsigned int val;
+    
+    outw(((address&0x00FFFFFF)>>5),osdLookupOffsetLO[component]);
+    val=inw(osdLookupOffsetHI[component]);
+    val &= 0xFF00 >> OSD_OFF_HI_SHIFT[component];
+    val |= ((address&0x00FFFFFF)>>21) << OSD_OFF_HI_SHIFT[component];
+    
+    outw(2*w,OSD_COMP_W(component));
+    outw(h,OSD_COMP_H(component));
+    
+    outw(x,OSD_COMP_X(component));
+    outw(y,OSD_COMP_Y(component));
+
+    outw((((w*bpp)/32)/8),OSD_COMP_BUFF_W(component));
+
+    if(enable)
+    {
+        switch(component)
+        {
+            case OSD_VIDEO1:
+                outw((inl(OSD_VID0_1_CONF) & 0xFF00) | (state|OSD_COMPONENT_ENABLE),OSD_VID0_1_CONF);
+                break;
+            case OSD_VIDEO2:
+                outw((inl(OSD_VID0_1_CONF) & 0xFF) | ((state|OSD_COMPONENT_ENABLE)<<8),OSD_VID0_1_CONF);
+                break;
+            default:
+                outw((state|OSD_COMPONENT_ENABLE),OSD_COMP_CONF(component));
+        }
+    }
 }
 
 void osdInit()

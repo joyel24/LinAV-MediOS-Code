@@ -12,6 +12,7 @@
 
 
 #include <sys_def/stddef.h>
+#include <kernel/io.h>
 #include <kernel/malloc.h>
 #include <kernel/kernel.h>
 
@@ -174,17 +175,36 @@ void scroll_error_scr(unsigned int bg_color,int x,int y,int height,int UP)
     g8ops.scrollWindowVert(bg_color, x, y, SCREEN_WIDTH-x, SCREEN_HEIGHT-y, height, UP, &ERROR_SCR);
 }
 
+/*void restoreComponent(int vplane,struct graphicsBuffer * buff)
+{
+    osdSetComponentOffset(buffers_comp[vplane],buff->offset);
+    osdSetComponentSize(buffers_comp[vplane], 2*buff->width, buff->height);
+    osdSetComponentPosition(buffers_comp[vplane],buff->x, buff->y);
+    osdSetComponentSourceWidth(buffers_comp[vplane], ((buff->width*buff->bitsPerPixel)/32)/8);
+    if(buff->enable)
+        osdSetComponentConfig(buffers_comp[vplane],buff->state|OSD_COMPONENT_ENABLE);
+}*/
+
+#define restoreComponent(VPLANE,BUFF) osdRestorePlane(buffers_comp[VPLANE],BUFF->offset, \
+                BUFF->x, BUFF->y,                                                        \
+                BUFF->width,BUFF->height,                                                \
+                BUFF->bitsPerPixel, BUFF->state, BUFF->enable)                           \
+
+
+
+void restoreAllComponent(void)
+{
+    int i;
+    for(i=0;i<4;i++)
+        restoreComponent(i,buffers[i]);
+}
+
 void error_scr_switch()
 {
     if(error_scr_state)
     {
         error_scr_state=0;
-        restoreComp(OSD_VIDEO1,  VIDEO_1);
-        restoreComp(OSD_VIDEO2,  VIDEO_2);
-        restoreComp(OSD_BITMAP1, BITMAP_1);
-        restoreComp(OSD_BITMAP2, BITMAP_2);
-        restoreComp(OSD_CURSOR1, CURSOR_1);
-        restoreComp(OSD_CURSOR2, CURSOR_2);
+        restoreAllComponent();
         printk("Switching to normal screen\n");
     }
     else
@@ -196,7 +216,7 @@ void error_scr_switch()
         osdSetComponentConfig(OSD_BITMAP2, 0);
         osdSetComponentConfig(OSD_CURSOR1, 0);
         osdSetComponentConfig(OSD_CURSOR2, 0);
-        restoreComp(OSD_BITMAP1,ERROR_SCR);
+        restoreComp(OSD_BITMAP1,ERROR_SCR);        
         printk("Switching to debug screen\n");
     }
 }

@@ -29,5 +29,5 @@ void avwm(void)
     ini_status_bar();
     drawStatusLine(); /* should be done via EVT_REDRAW */
     
-    while(1) /*NOTHING*/;
+    while(1) /*printk(" a ")*/;
 }

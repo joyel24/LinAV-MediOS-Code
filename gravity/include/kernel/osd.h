@@ -201,6 +201,7 @@
 
 //#define     OSD_OFF_HI_SHIFT(index)        ((( index<<31 ) >>31)<<3)
 
+        
 void setPalette      (int palette[256][3],int size);
 int  osdRGB2Packed(int r, int g, int b);
 void osdSetCursor2Bitmap (int index, int data);
@@ -214,8 +215,9 @@ void osdSetComponentSize (int component, int width, int height);
 void osdSetComponentPosition (int component, int x, int y);
 void osdSetComponentSourceWidth (int component, int width);
 void osdSetComponentConfig (int component, int config);
-void osdSetBacklight(int val); /* val = 0/1 */
 void osdInit();
+
+void osdRestorePlane(int component, unsigned int address, int x, int y, int w, int h, int bpp, int state,int enable);
 
 #endif
 
