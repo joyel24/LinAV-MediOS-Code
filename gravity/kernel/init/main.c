@@ -25,6 +25,7 @@
 #include <kernel/version.h>
 
 #include <kernel/threads.h>
+#include <kernel/pipes.h>
 #include <kernel/graphics.h>
 
 
@@ -57,9 +58,15 @@ int ksomethread (int nParam)
 
    while (1)
    {
-      cli(); // for safe multithreaded printing
-      printk("      [ thread-3 ]\n");
-      sti();
+//      cli(); // for safe multithreaded printing
+//      printk("      [ thread-3 ]\n");
+//      sti();
+
+      void* pvBuffer = 0;
+      API_MALLOC (&pvBuffer, 16384);
+      for(i=0;i<0x12000;i++) /*nothing*/;
+
+      API_FREE (pvBuffer);
       for(i=0;i<0x12000;i++) /*nothing*/;
    };
 
@@ -68,13 +75,15 @@ int ksomethread (int nParam)
 
 void kernel_startup_thread (void);
 
+extern int kmemory_manager (void* pvParameters);
+
 void kernel_start (void)
 {
     /* malloc of max space in SDRAM */
     init_malloc((void*)MALLOC_START,MALLOC_SIZE);
 
     /* print banner on uart */ 
-    printk("AMOS %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);    
+    printk("GRAVITY %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);
     printk("Initial SP: %08x, kernel end: %08x, size in IRAM: %08x  Malloc start: %08x, size: %08x\n",get_sp(),
         (unsigned int)&_end_kernel,
         (unsigned int)&_iram_end - (unsigned int)&_iram_start,
@@ -83,8 +92,21 @@ void kernel_start (void)
 
     /* initialize thread lists and setup first two threads */
     kinit_tcb ();
+
+///////////////////////////////////////////////////
+/// TODO: This code gows to kinit_tcb ()...
+   g_pKernelCtrlPipe = kmalloc (sizeof(PIPE));
+   g_pKernelCtrlPipe->nReceiver = 0;
+   g_pKernelCtrlPipe->nSender = 0;
+
+   g_pSystemCtrlPipe = kmalloc (sizeof(PIPE));
+   g_pSystemCtrlPipe->nReceiver = 0;
+   g_pSystemCtrlPipe->nSender = 0;
+
     kadd_tcb (&g_pActiveTask, kcreate_tcb (kernel_startup_thread, TASK_STACK_SIZE, 0, "USER"));
-    kadd_tcb (&g_pActiveTask, kcreate_tcb (kidle, TASK_STACK_SIZE,   0, "IDLE"));
+    kadd_tcb (&g_pActiveTask, kcreate_tcb (kmemory_manager, TASK_STACK_SIZE,   0, "SYSTEM"));
+///////////////////////////////////////////////////
+
     kadd_tcb (&g_pActiveTask, kcreate_tcb (ksomethread, TASK_STACK_SIZE,   0, "THREAD-3"));
 
     ini_graphics();
@@ -109,11 +131,14 @@ void kernel_startup_thread (void)
 
     while (1)
     {
+	unsigned long nBytes = 0;
+	API_MEMAVAIL (&nBytes);
+
         cli(); // for safe multithreaded printing
-        printk("[ startup ]\n");
+        printk("[ FREE MEMORY: %08x bytes ]\n", nBytes);
         sti();
 
-        for(i=0;i<0x8000;i++) /*nothing*/;
+        for(i=0;i<0x10000;i++) /*nothing*/;
     };
 
     /* driver init */

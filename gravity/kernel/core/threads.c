@@ -14,22 +14,14 @@
 
 #include <kernel/kernel.h>
 #include <kernel/threads.h>
+#include <kernel/pipes.h>
 #include <kernel/errors.h>
 #include <kernel/irq.h>
 
 //TASK_INFO* g_pActiveTask  __IRAM_DATA = 0; // pointer to current element in ring list
 TASK_INFO* g_pBlockedTask __IRAM_DATA = 0; // pointer to current element in ring list
 
-__IRAM_CODE void* kmalloc (int nBytes)
-{
-	void* ptr = (void*)bget (nBytes);
-	return ptr;
-}
-
-__IRAM_CODE void kfree (void* ptr)
-{
-	brel (ptr);
-}
+unsigned long g_nTicks __IRAM_DATA = 0;
 
 __IRAM_CODE KERNEL_ERROR_CODE kinit_tcb ()
 {
@@ -185,9 +177,93 @@ __IRAM_CODE TASK_INFO* kremove_tcb  (TASK_INFO** pList)
 
 __IRAM_CODE void kset_next_ready_task ()
 {
-    g_pActiveTask = g_pActiveTask->pNextTask;
-
+//    g_pActiveTask = g_pActiveTask->pNextTask;
 //    printk("CURRENT TCB: %s\n", g_pActiveTask->cName);
-
 //    asm volatile ("MSR CPSR_c, #0x92");
+
+	if (g_pKernelCtrlPipe->nReceiver != g_pKernelCtrlPipe->nSender)
+	{
+		unsigned char cmd = g_pKernelCtrlPipe->buffer[g_pKernelCtrlPipe->nReceiver ++];
+		g_pKernelCtrlPipe->nReceiver &= PIPE_SIZE_MASK;
+		switch (cmd)
+		{
+		case KERNEL_CMD_SLEEP:
+			{
+				TASK_INFO* pTask = kremove_tcb (&g_pActiveTask);
+				kadd_tcb (&g_pBlockedTask, pTask);
+			}
+			break;
+		case KERNEL_CMD_TERMINATE:
+			{
+				TASK_INFO* pTask = kremove_tcb (&g_pActiveTask);
+				// ... delete all structures here ...
+			}
+			break;
+		case KERNEL_CMD_BLOCK:
+			{
+				TASK_INFO* pTask = kremove_tcb (&g_pActiveTask);
+				kadd_tcb (&g_pBlockedTask, pTask);
+			}
+			break;
+		}
+	}
+	else
+		g_pActiveTask = g_pActiveTask->pNextTask;
+
+	if (g_pBlockedTask)
+	{
+		int nSize = klist_size (g_pBlockedTask);
+
+		int i;
+		for (i=0;i<nSize;i++)
+		{
+			if (!g_pBlockedTask)
+				break;
+
+			int nAdvance = 1;
+
+			if (g_pBlockedTask->pBlocker)
+			{// We have blocked be serialized API call...
+				if (!g_pBlockedTask->nActivationTime)
+				{// Wake-up ready-to-go thread...
+					g_pBlockedTask->nActivationTime = 0;
+					TASK_INFO* pTask = kremove_tcb (&g_pBlockedTask);
+					nAdvance = 0;
+					kadd_tcb (&g_pActiveTask, pTask);
+				}
+			}
+			else
+			{
+				if (g_pBlockedTask->nActivationTime)
+				{
+					if (g_nTicks > g_pBlockedTask->nActivationTime)
+					{
+						// Wake-up sleeping thread...
+						g_pBlockedTask->nActivationTime = 0;
+						TASK_INFO* pTask = kremove_tcb (&g_pBlockedTask);
+						nAdvance = 0;
+						kadd_tcb (&g_pActiveTask, pTask);
+					}
+				}
+				else
+				{
+					// Check pipe blocker...
+					if (g_pBlockedTask->pBlockerParameter)
+					{
+						PIPE* pPipe = (PIPE*)g_pBlockedTask->pBlockerParameter;
+						if (pPipe->nReceiver != pPipe->nSender)
+						{
+							// Wake-up thread, we have received something...
+							TASK_INFO* pTask = kremove_tcb (&g_pBlockedTask);
+							nAdvance = 0;
+							kadd_tcb (&g_pActiveTask, pTask);
+						}
+					}
+				}
+			}
+
+			if (nAdvance)
+				g_pBlockedTask = g_pBlockedTask->pNextTask;
+		}
+	}
 }

@@ -13,6 +13,8 @@
 #define __API_H
 
 
+#include <kernel/errors.h>
+
 typedef struct _POINT
 {
 	long x;
@@ -104,6 +106,29 @@ typedef struct _IMAGE
 
 #define SAVE asm volatile ("stmdb sp!, {r3-r12}")
 #define LOAD asm volatile ("ldmia sp!, {r3-r12}")
+
+
+
+// API definition
+
+ERROR_CODE API_TASK_YIELD       ();
+
+ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes);
+ERROR_CODE API_FREE             (void* pvBuffer);
+ERROR_CODE API_MEMAVAIL         (unsigned long* pnBytes);
+
+/*
+inline ERROR_CODE API_TASK_YIELD       ()                                                              { SAVE; asm("swi 0"); LOAD; }
+
+inline ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes)                        { SAVE; asm("swi 20"); LOAD; }
+inline ERROR_CODE API_FREE             (void* pvBuffer)                                                { SAVE; asm("swi 21"); LOAD; }
+inline ERROR_CODE API_MEMAVAIL         (unsigned long* pnBytes)                                        { SAVE; asm("swi 22"); LOAD; }
+*/
+
+
+
+
+
 
 
 /*

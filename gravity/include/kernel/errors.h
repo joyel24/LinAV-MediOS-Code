@@ -14,8 +14,11 @@ typedef enum _KERNEL_ERROR_CODE
 	ePOINTER,
 	eNOMEMORY,
 	eNOTFOUND
+} KERNEL_ERROR_CODE;
 
-/*
+typedef enum _ERROR_CODE
+{
+	ERR_OK              = 0,
 	ERR_FATAL           = 1,
 	ERR_NOMEMORY        = 2,
 	ERR_INVALID_HANDLE  = 3,
@@ -25,8 +28,6 @@ typedef enum _KERNEL_ERROR_CODE
 	ERR_INVALID_PATH    = 7,
 	ERR_FILE_NOT_FOUND  = 8,
 	ERR_END_OF_FILE     = 9
-*/
-
-} KERNEL_ERROR_CODE;
+} ERROR_CODE;
 
 #endif
