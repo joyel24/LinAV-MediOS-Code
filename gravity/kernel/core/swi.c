@@ -12,6 +12,8 @@
 #include <kernel/api.h>
 #include <kernel/irq.h>
 
+extern int gfw_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
+
 __IRAM_CODE int kcswi_handler (
 	unsigned long nParam1,
 	unsigned long nParam2,
@@ -57,7 +59,8 @@ __IRAM_CODE int kcswi_handler (
 	}
 	break;
 /// Serialize critical API calls to memory manager
-
+        case nAPI_GFX:
+            return gfw_swi_handler((int)nParam1,(GFX_DATA *)nParam2, (void *)nParam3);
       default:
          return 0;
    }

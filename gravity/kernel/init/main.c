@@ -26,7 +26,10 @@
 
 #include <kernel/threads.h>
 #include <kernel/pipes.h>
-#include <kernel/graphics.h>
+#include <kernel/kgraphics.h>
+
+#include <kernel/api.h>
+#include <kernel/memmgr.h>
 
 
 int lcd_state=1;
@@ -45,13 +48,16 @@ void kidle (void)
 
     while (1)
     {
+#if 0
         cli(); // for safe multithreaded printing
         printk("   [ idle ]\n");
         sti();
         for(i=0;i<0xC000;i++) /*nothing*/;
+#endif
     };
 }
 
+#if 0
 int ksomethread (int nParam)
 {
    int i;
@@ -72,16 +78,25 @@ int ksomethread (int nParam)
 
    return 666;//Return code test...
 }
+#endif
 
-void kernel_startup_thread (void);
+extern void kernel_startup_thread (void);
+extern void ini_debugOnScreen(void);
+
+extern void avwm(void);
 
 extern int kmemory_manager (void* pvParameters);
 
 void kernel_start (void)
 {
+    ini_graphics();
+    ini_debugOnScreen();
+    
+    ata_stop_HD();
+    
     /* malloc of max space in SDRAM */
     init_malloc((void*)MALLOC_START,MALLOC_SIZE);
-
+    
     /* print banner on uart */ 
     printk("GRAVITY %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);
     printk("Initial SP: %08x, kernel end: %08x, size in IRAM: %08x  Malloc start: %08x, size: %08x\n",get_sp(),
@@ -107,10 +122,7 @@ void kernel_start (void)
     kadd_tcb (&g_pActiveTask, kcreate_tcb (kmemory_manager, TASK_STACK_SIZE,   0, "SYSTEM"));
 ///////////////////////////////////////////////////
 
-    kadd_tcb (&g_pActiveTask, kcreate_tcb (ksomethread, TASK_STACK_SIZE,   0, "THREAD-3"));
-
-    ini_graphics();
-    ini_debugOnScreen();
+    //kadd_tcb (&g_pActiveTask, kcreate_tcb (ksomethread, TASK_STACK_SIZE,   0, "THREAD-3"));    
 
     /* init the irq */
     init_irq(); 
@@ -128,7 +140,7 @@ void kernel_start (void)
 void kernel_startup_thread (void)
 {
     int i;
-
+#if 0
     while (1)
     {
 	unsigned long nBytes = 0;
@@ -140,14 +152,16 @@ void kernel_startup_thread (void)
 
         for(i=0;i<0x10000;i++) /*nothing*/;
     };
-
+#endif
     /* driver init */
-//    init_cpld();
-//    init_HW_chk();
+    init_cpld();
+    init_HW_chk();
 
-//    init_buttons();
+    init_buttons();
 
     printk("[init] ------------ all drivers\n");
 
-//    print_boot_info();    
+    print_boot_info();
+    
+    avwm();       
 }

@@ -23,7 +23,7 @@
 #include <kernel/buttons.h>
 
 #ifdef USE_DEBUG_ON_SCREEN
-#include <kernel/graphics.h>
+#include <kernel/kgraphics.h>
 #endif
 
 #define BTN_NOT_PRESSED(val,btn)    (val&(0x1<<btn))

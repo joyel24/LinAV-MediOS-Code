@@ -201,7 +201,7 @@
 
 //#define     OSD_OFF_HI_SHIFT(index)        ((( index<<31 ) >>31)<<3)
 
-
+void setPalette      (int palette[256][3],int size);
 int  osdRGB2Packed(int r, int g, int b);
 void osdSetCursor2Bitmap (int index, int data);
 void osdSetMainConfig (int config);

@@ -18,7 +18,8 @@
 #include <kernel/uart.h>
 
 #ifdef USE_DEBUG_ON_SCREEN
-#include <kernel/graphics.h>
+#include <kernel/kgraphics.h>
+#include <kernel/font.h>
 #include <kernel/colordef.h>
 
 #define MAX_COL      78
@@ -131,7 +132,6 @@ void ini_debugOnScreen(void)
     cur_col = 0;
     fontW=std4x6->width;
     fontH=std4x6->height;
-    ini_error_scr();
     clear_error_scr(COLOR_BLACK);
 }
 #endif

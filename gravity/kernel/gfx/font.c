@@ -1,5 +1,5 @@
 /* 
-*   gui/avwm.c
+*   kernel/gfx/font.c
 *
 *   AMOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,16 +10,15 @@
 * KIND, either express of implied.
 */
 
-#include <kernel/graphics.h>
-#include <kernel/colordef.h>
+#include <kernel/font.h>
+#include <kernel/kgraphics.h>
 
-void avwm(void)
+needFont(std4x6);
+
+FONT_ID font_table[NBFONT] ;
+
+
+void ini_font(void)
 {
-    printk("Starting AvWm\n");
-    
-    open_graphics();
-    clearScreen(COLOR_WHITE);
-    drawRect(COLOR_RED,10,10,100,100);
-    putS(COLOR_BLUE,COLOR_WHITE,0,0,"Hello world");
-    while(1) /*nothing*/ ;
+    font_table[0]=std4x6;
 }

@@ -19,3 +19,5 @@ ERROR_CODE API_TASK_YIELD       ()                                              
 ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes)                        { SAVE; asm("swi 20"); LOAD; }
 ERROR_CODE API_FREE             (void* pvBuffer)                                                { SAVE; asm("swi 21"); LOAD; }
 ERROR_CODE API_MEMAVAIL         (unsigned long* pnBytes)                                        { SAVE; asm("swi 22"); LOAD; }
+
+ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData)                       { SAVE; asm("swi 100"); LOAD; }

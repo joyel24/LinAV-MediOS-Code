@@ -13,7 +13,7 @@
 #include <kernel/io.h>
 #include <sys_def/string.h>
 
-#include <kernel/graphics.h>
+#include <kernel/kgraphics.h>
 
 void         graphics8_DrawPixel         (unsigned int color, int x, int y, struct graphicsBuffer * buff);
 unsigned int graphics8_ReadPixel         (int x, int y, struct graphicsBuffer * buff);
@@ -21,7 +21,7 @@ void         graphics8_DrawRect          (unsigned int color, int x, int y, int 
 void         graphics8_FillRect          (unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
 void         graphics8_DrawChar          (struct graphicsFont * font, unsigned int color,unsigned int bg_color, int x, int y,
                                             unsigned char c, struct graphicsBuffer * buff);
-void         graphics8_DrawSprite        (PALETTE * palette, SPRITE * sprite, unsigned int trsp,int x, int y, 
+void         graphics8_DrawSprite        (unsigned int * palette, SPRITE * sprite, unsigned int trsp,int x, int y, 
                                             struct graphicsBuffer * buff);
 void         graphics8_DrawBITMAP        (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
 void         graphics8_ScrollWindowVert  (unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP,
@@ -116,7 +116,7 @@ void graphics8_DrawHorizLine(unsigned int color, int width,unsigned char * offse
     memset((void*)offset,(unsigned char)color,width);
 }
 
-void graphics8_DrawSprite(PALETTE * palette,SPRITE * sprite, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
+void graphics8_DrawSprite(unsigned int * palette,SPRITE * sprite, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
 {    
     int i,j,index;
     unsigned char * dest=getOffset(x,y,buff,unsigned char);
@@ -224,8 +224,7 @@ void graphics8_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, i
             dest+=inc*buff->width;
         }
     
-    }
-    
+    }   
     
 }
 

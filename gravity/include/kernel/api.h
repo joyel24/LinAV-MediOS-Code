@@ -12,7 +12,6 @@
 #ifndef __API_H
 #define __API_H
 
-
 #include <kernel/errors.h>
 
 typedef struct _POINT
@@ -38,6 +37,25 @@ typedef struct _IMAGE
 	long pixel_size;
 	long row_order; // 0=top first, 1=bottom first
 } IMAGE;
+
+typedef struct _GFX_DATA
+{
+    long x;
+    long y;
+    long w;
+    long h;
+    int direction;
+    long delta; 
+    unsigned int color;
+    unsigned int bg_color;
+} GFX_DATA;
+
+typedef struct _PLANE_DATA
+{
+    int vplane;
+    int state;
+    int bpp;
+} PLANE_DATA;
 
 // Interrupt numbers
 #define nAPI_TASK_YIELD       0
@@ -101,7 +119,7 @@ typedef struct _IMAGE
 #define nAPI_FILE_READ       86
 #define nAPI_FILE_WRITE      87
 
-
+#define nAPI_GFX             100
 
 
 #define SAVE asm volatile ("stmdb sp!, {r3-r12}")
@@ -116,7 +134,7 @@ ERROR_CODE API_TASK_YIELD       ();
 ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes);
 ERROR_CODE API_FREE             (void* pvBuffer);
 ERROR_CODE API_MEMAVAIL         (unsigned long* pnBytes);
-
+ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData);
 /*
 inline ERROR_CODE API_TASK_YIELD       ()                                                              { SAVE; asm("swi 0"); LOAD; }
 
