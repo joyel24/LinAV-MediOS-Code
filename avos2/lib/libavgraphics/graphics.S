@@ -272,13 +272,13 @@ graphicsString:
 
 graphicsStringR:
         push {r1, r2, r7, lr}        
-        
+
 gsloop: push {r6}
         mov r6, #0
         ldrb r6, [r7]
         cmp r6, #0
          beq gsdone
-         
+
         lsl r6, #2
         ldr r6, [r4, r6]
         cmp r6, #0
@@ -289,12 +289,13 @@ gsloop: push {r6}
         mov r1, r6
 gsnochr:
         pop {r6}
-        add r1, r5
-        add r2, r6
+        add r1, r5      @ r1+=Dx
+        add r2, r6      @ r2+=Dy
 
         add r7, #1
         b gsloop
 gsdone: pop {r6}
+        
         pop {r1, r2, r7}
         pop {r1}
         bx r1

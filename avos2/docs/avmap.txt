@@ -115,7 +115,7 @@ together, and to handle nonstandard hardware such as the plugin modules.
 3038c   Uart #1 SR
 
   ++----------------------------------------------------------------------------
- // 
+ // USB? (Not used on AV300)?
 ++------------------------------------------------------------------------------
 30400   ?
 30404   0-3ff
@@ -139,8 +139,14 @@ TODO
 || IRQ3  00000008 Timer3
 || IRQ4  00000010
 || IRQ5  00000020
+|| IRQ6  00000040
 || IRQ7  00000080
-|| IRQ11 00000800
+|| IRQ8  00000100
+|| IRQ9  00000200
+|| IRQ10 00000400
+|| IRQ11 00000800 HDI?
+|| IRQ12 00001000 UART0
+|| IRQ13 00002000 UART1?
 || IRQ14 00004000
 || IRQ15 00008000
 || IRQ18 00040000 GIO0 ON button
@@ -365,36 +371,45 @@ TODO
 3068e   Video1 buffer width
 30690   Bitmap0 buffer width
 30692   Bitmap1 buffer width
+
 30694   SDRAM offset HI Video0 | Video1
 30696   SDRAM offset video0
 30698   SDRAM offset video1
 3069a   SDRAM offset HI Bitmap0 | Bitmap1
 3069c   SDRAM offset Bitmap0
 3069e   SDRAM offset Bitmap1
+
 306a0   Main shift horizontal
 306a2   Main shift vertical
+
 306a4   Video0 X
 306a6   Video0 Y
 306a8   Video0 width
 306aa   Video0 height
+
 306ac   Video1 X
 306ae   Video1 Y
 306b0   Video1 width
 306b2   Video1 height
+
 306b4   Bitmap0 X
 306b6   Bitmap0 Y
 306b8   Bitmap0 width
 306ba   Bitmap0 height
+
 306bc   Bitmap1 X
 306be   Bitmap1 Y
 306c0   Bitmap1 width
 306c2   Bitmap1 height
+
 306c4   Cursor0 X
 306c6   Cursor0 Y
 306c8   Cursor0 width
 306ca   Cursor0 height
+
 306cc   Cursor1 X
 306ce   Cursor1 Y
+
 306d0   16c bank1 pallette #0 | #1
 306d2   16c bank1 pallette #2 | #3
 306d4   16c bank1 pallette #4 | #5
@@ -411,6 +426,7 @@ TODO
 306ea   16c bank2 pallette #a | #b
 306ec   16c bank2 pallette #c | #d
 306ee   16c bank2 pallette #e | #f
+
 306f0   ? Unknown
 306f2   Cursor2 data
 306f4   Pallette access status | cursor2 address/latch
@@ -436,8 +452,8 @@ TODO
 30716   0-ffff
 30718   0-ff
 3071a   0-7ff
-3071c   0-3f
-3071e   0-ffff
+3071c   0-3f    sdram hi?
+3071e   0-ffff  sdram lo?
 30720   0-7fff
 30722   0-fff
 30724   0-ffff
@@ -458,10 +474,13 @@ TODO
 ++------------------------------------------------------------------------------
 30780   0-1
 30782   0-1f
+
 30784   0-3f        // SDRAM HI?
 30786   0-ffff      // LO
-30788   0-3f        // SDRAM HI?
+
+30788   0-3f        // SDRAM HI?        // Either video in, or DSP stuff
 3078a   0-ffff      // LO
+
 3078c   0-fff
 3078e   0-fff
 30790   0-fff
@@ -663,8 +682,11 @@ TODO
 309a0   0-13f
 309a2   0-ffff
 
-309a6
-309a8   0-11ff
+309a6               - 1901 - Normal screen
+                    - 1101 - Some strange interleave on screen and hangs!
+                             Seems to jump to odd code. IRQ?
+                    - 0901 - Nothing on screen!
+309a8   0-11ff      - blanked screen!!! right-corrupt screen then off
 309aa   0-1ff
 
 309ac           (80)

@@ -21,7 +21,8 @@ ALL:$(TARGET)
 $(TARGET): $(OBJS)
 	$(LD) -N -Ttext 0x03000000 -e main -o $(TARGET).elf $(OBJS) $(LDFLAG)
 	$(OBJCOPY) -O binary $(TARGET).elf $(TARGET)
-	@$(RM) -f $(TARGET).elf
+
+#	@$(RM) -f $(TARGET).elf
 
 clean:
 	@echo "**** Cleaning..."
