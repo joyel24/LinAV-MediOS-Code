@@ -26,6 +26,9 @@ void docmd();
     int addr= 0xd0;             // 0x3c, 0x90, 0xd0
     char dispAddr[] = "xx";
     
+    unsigned char batStat[2];
+    char dispBat[] = "xxxx";
+    
 int main() {
     int b;
 
@@ -68,6 +71,16 @@ int main() {
 
         docmd();
 
+        i2cRead(0x90, 0, batStat, 2);
+        b = (batStat[0] << 8) | batStat[1];
+        
+        pal16[1] = 0x0404;                    
+        stringPutHex(dispBat, b, 4);
+
+        graphicsString(&screenBitmap, 0, 200, &sprite4_6, &std4x6_, 5, 0,
+                    dispBat);
+        
+        
         b =buttonsGetStatus();
 
         if (b & BUTTONS_AV300_RIGHT) {
