@@ -163,7 +163,8 @@ int SaveSettings(void)
     for(i=0;i<CNT_SETTINGS_ENTRIES;i++)
     {
         if(sData[i].do_save)
-        {
+        {        
+            /*printf("Saving %s : %d\n",sData[i].cfg_name,sData[i].value);*/
             sprintf(tmp,"%d",sData[i].value);
             write_cfg(sData[i].cfg_name,tmp);                       
         }
@@ -274,7 +275,7 @@ void GetSettings(void)
     set_mouseParam(6,3); // set to 6,3 for the settings screen only
 }
 
-void SetSettings(void)
+void SetSettings(int saveInFile)
 {
     if((sData[0].changed) || (sData[1].changed))
         set_mouseParam(sData[1].value,sData[0].value);
@@ -329,7 +330,8 @@ void SetSettings(void)
     if(sData[15].changed || sData[16].changed) 
         drawTime();
         
-    SaveSettings();
+    if(saveInFile)  
+        SaveSettings();
 }
 
 int GetNextValidParameter()
@@ -488,7 +490,7 @@ int settingsEvtHandler(int evt)
             break;
 
         case BTN_OFF:
-            SetSettings();
+            SetSettings(1);
             stopSettingsLoop=1;
             break;
     }
@@ -637,7 +639,7 @@ void ini_settings(void)
         for(i=0;i<CNT_SETTINGS_ENTRIES;i++)
             if(sData[i].do_save)
                 sData[i].changed=1;
-        SetSettings();
+        SetSettings(0);
     }
     doRegisterPlugin(&settings_plugin,settingsEvtHandler,0);
 }

@@ -17,7 +17,7 @@
 int  GetActiveSetting    (void);
 void SettingsEvtLoop     (void);
 void GetSettings         (void);
-void SetSettings         (void);
+void SetSettings         (int saveInFile);
 int  settingsEvtHandler  (int evt);
 void drawSlider          (int x, int y, char* text, int min, int max, int value, int active);
 void drawSettings        (void);
