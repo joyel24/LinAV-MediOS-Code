@@ -35,7 +35,6 @@ force: clean all
         
 $(TARGET) : $(OBJS) lib_dir
 	$(GCC) $(OBJS)  -o $@  $(LDFLAGS)
-#browser_dir browser/*.o
 ifeq ($(HOST),CYGWIN)
 	@mv $@.elf.bflt $@
 endif
