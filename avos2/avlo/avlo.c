@@ -13,7 +13,7 @@
 
 #include "parse_cfg.h"
 
-#define MAX_OFF_PRESS	100
+#define MAX_OFF_PRESS	500
 
 #define __clf()							\
 	({							\
@@ -64,6 +64,7 @@ int * wdt = (int*)0x30a1a;
 int main(int argc,char **argv)
 {
 	int ret,nbCfg,key,redraw;
+	int i;
 	
 	void (*systemRelocateAdjusted)();
 
@@ -94,7 +95,7 @@ loop:
 	
 	
 	graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AVLO");	
-	graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader Version 0.5 by OxyGen");	
+	graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader Version 0.6 by OxyGen");	
 		
 	
 	usbstate=!usbIsConnectedA();
@@ -171,6 +172,7 @@ loop:
 						pal32[1]=0xc476c491;
 						pal32[0] = 0x466c4696;
 			graphicsStringA(&screenBitmap2,   65, 120, &sprite6_9, std6x9_, 6, 0,"USB Enable, PRESS F3 to resume");
+						for(i=0;i<10000;i++); /* Nothing */
 						usbEnableA();
 					}
 				}
@@ -190,6 +192,7 @@ void err()
 	graphicsStringA(&screenBitmap2, 65, 120, &sprite6_9, std6x9_, 6, 0,"USB Forced, reboot when done");
 	usbEnableA();
 	while(1) ;
+		//waitKeyReleased();
 	
 }
 
@@ -204,7 +207,9 @@ void chkOFF(int key)
 			graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);	
 			pal32[1]=0xc476c491;
 			pal32[0] = 0x466c4696;
-	graphicsStringA(&screenBitmap2,   65, 120, &sprite6_9, std6x9_, 6, 0,"Shutting down NOW !!");		
+	graphicsStringA(&screenBitmap2,   65, 120, &sprite6_9, std6x9_, 6, 0,"Shutting down NOW !!");	
+			if(usbenable)
+				usbDisableA();
 			ataSleepCmdA();
 			for(i=0;i<10000;i++); /* Nothing */
 			ataPowerDownHDDA();

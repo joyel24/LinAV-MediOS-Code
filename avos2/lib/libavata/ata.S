@@ -314,7 +314,9 @@ ataSleepCmd:
         mov r1, #ataCommand_SLEEP
         strb r1, [r2]
 	bl ataWaitForReady
-        pop {r1, r2, pc}
+        pop {r1, r2}
+	pop {r1}
+	bx r1
 	
 @ ------------------------------------------------------------------------------
 @ ataReadData(r0->buffer, r1=#halfwords)
