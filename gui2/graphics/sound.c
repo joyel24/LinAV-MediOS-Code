@@ -76,7 +76,7 @@ int stop_playback(void)
 
 int readPeak(struct av_peak * peak)
 {
-    return execDSP_ioctl(AV_DSP_OUT_PEAK_REAL,peak);  
+    return execDSP_ioctl(AV_DSP_OUT_PEAK_REAL,(unsigned int)peak);  
 }
 
 int setVolume(int val)

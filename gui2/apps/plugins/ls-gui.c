@@ -117,7 +117,7 @@ int printName(char * name,int x,int y,int clear,int selected)
 
    cops->getStringS("M", &w, &h);
 
-    cp = strrchr(name, '/');
+    cp = strrchr(name,(int) '/');
     if (cp)
         cp++;
     else

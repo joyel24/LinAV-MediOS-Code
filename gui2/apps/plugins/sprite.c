@@ -23,8 +23,8 @@ static unsigned char test[7][7] =
 static SPRITE testS = {(unsigned int) test, 7, 7, 1, 2};
 
 //                    Index    0,    1,    2,    3    for the test matrix
-static unsigned int pal1[4] = {0x00, 0x01, 0xB9, 0xFF};
-static unsigned int pal2[4] = {0xB9, 0xFF, 0x00, 0x01};
+PALETTE pal1[4] = {0x00, 0x01, 0xB9, 0xFF};
+PALETTE pal2[4] = {0xB9, 0xFF, 0x00, 0x01};
 
 
 int eventHandler(int evt)
@@ -33,9 +33,9 @@ int eventHandler(int evt)
 
         switch (evt) {
             case BTN_OFF:
-	         case EVT_QUIT:
+             case EVT_QUIT:
                 /* get out of here */
-          		 RELEASE(cops)
+                   RELEASE(cops)
                 break;
         }
 }
@@ -45,28 +45,28 @@ int main(int argc,char * * argv)
 {
     int w, h, c;
 
-	 REGISTER(cops,eventHandler,0);
+     REGISTER(cops,eventHandler,0);
     cops->hideSBar();
 
     
 
-	 cops->clearScreen(COLOR_WHITE);
+     cops->clearScreen(COLOR_WHITE);
 
-	 c = 0;
+     c = 0;
 
-	 for(w = 0; w < SCREEN_WIDTH; w+=7)
-	 {
-	    if(c == 1) c=0; else c=1;
+     for(w = 0; w < SCREEN_WIDTH; w+=7)
+     {
+        if(c == 1) c=0; else c=1;
 
-   	 for(h = 0; h < SCREEN_HEIGHT; h+=7)
-		 {
-		    // Switch see palettes for each line
-		    if(c==0)
-            cops->drawSprite (&pal1, &testS, w, h);
-			 else
-            cops->drawSprite (&pal2, &testS, w, h);
-		 }
-	 }
+        for(h = 0; h < SCREEN_HEIGHT; h+=7)
+         {
+            // Switch see palettes for each line
+            if(c==0)
+                        cops->drawSprite ((PALETTE*)&pal1, &testS, w, h);
+                    else
+                        cops->drawSprite ((PALETTE*)&pal2, &testS, w, h);
+         }
+     }
          
          PACK(cops)
          
