@@ -98,6 +98,20 @@ void drawBat(void)
     fillRect(COLOR_BLACK,315,4,3,6);
     fillRect(BG_COLOR,294,3,20,8);
     fillRect(color,294,3,level,8);
+    
+    if(fmIsConnected()) /* show bat status on FM remote */
+    {
+        if(level<7)
+            fmSetBat(1);
+        else if(level<14)
+            fmSetBat(2);
+        else if(level<20)
+            fmSetBat(3);
+        else
+            fmSetBat(4);
+            
+    }
+    
 }
 
 void drawStatus(void)

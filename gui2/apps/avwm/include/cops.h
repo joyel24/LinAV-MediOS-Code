@@ -138,6 +138,7 @@ struct client_operations {
     void (*start_menu)          (struct menu_data * client_menu);
     void (*menuEvtHandler)      (int evt);
     
+    void (*print_data)          (char * data,int length);
 };
 
 #endif

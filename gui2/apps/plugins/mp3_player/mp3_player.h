@@ -45,6 +45,11 @@ void erase_peak(void);
 /* player_actions.c */
 void pause_resume(void);
 
+/* file_reader.c */
+void mp3_read_more(int size);
+int  read_from_HD(int size);
+int  mp3_need_more(void);
+
 #endif
 
 

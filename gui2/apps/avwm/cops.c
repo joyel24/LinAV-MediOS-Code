@@ -115,6 +115,8 @@ struct client_operations cops={
 
     stop_menu          : stop_menu,
     start_menu         : start_menu,
-    menuEvtHandler     : menuEvtHandler
+    menuEvtHandler     : menuEvtHandler,
+    
+    print_data         : print_data
 
 };

@@ -78,15 +78,6 @@ int wakeUP(void)
     return 0;    
 }
 
-int halt_device(void)
-{    
-    if(fdEv<0)
-        return -1;
-    if(ioctl(fdEv,AV_HALT_DEVICE,NULL)<0)
-        return -1;    
-    return 0;    
-}
-
 int pause_app(void)
 {    
     if(fdEv<0)

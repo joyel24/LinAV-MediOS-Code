@@ -80,7 +80,9 @@ int window = MAIN_WIN;                   /* "1" = main, "2" = settings, "3" = so
  * Miscellaneous CHARs
  ********************/
 char * filename;                    /* current file location */
-
+#ifndef OLD_PLAYER
+FILE * fd;
+#endif
 /*******************
  * Other
  ******************/
@@ -109,27 +111,67 @@ int eventHandler(int evt)
     return 1;
 }
 
+void mainLoop(void)
+{
+    int size;
+    if((size=mp3_need_more())!=0)
+        mp3_read_more(size);
+    drawPeak();
+}
+
 int main(int argc, char * * argv)
 {
     REGISTER(cops,eventHandler,0);
+    
 #ifdef AV_SCREEN
    if(argc<2)
        return 0; 
     else
     {
         filename=argv[1];
-    }    
+    }
+#ifndef OLD_PLAYER
+    fd=fopen(filename,"ro");
+    if(fd<0)
+    {
+            fprintf(stderr,"Can't open file %s\n",filename);
+            return -1;
+    }
+    printf ("File opened\n");
 #endif
     
+#endif
+    
+#ifdef OLD_PLAYER
     data.size=MP3_BUFF_SIZE;
     data.filename=filename;
     data.pos=0;
     data.finished=0;
+#else
+    data.buffer_len=MP3_BUFF_SIZE;
+    data.pos=0;
+    data.finished=0;
+    data.buffer_read=0;
+    data.buffer_write=0;
+    
+    data.buffer=(char*)malloc(data.buffer_len);
+    if(!data.buffer)
+    {
+            fprintf(stderr,"Can't allocate buff (size=%d)\n",data.buffer_len);
+            return -1;
+    }
 
+    printf("buffer created %d\n",data.buffer_len);
+#endif
     /* initialize mp3 playback */
     if(!cops->ini_mp3_playback(&data))  
     	return 0;    
-
+#ifndef OLD_PLAYER
+    printf("ini of mp3 driver done\n");
+    mp3_read_more(10200);
+    
+    printf("I've read 5100 bytes of data: %d %d\n",data.buffer_read,data.buffer_write);
+#endif
     /* initialize the graphics and clear the lcd */
     cops->hideSBar();
     cops->disableMenu();
@@ -141,8 +183,12 @@ int main(int argc, char * * argv)
     apply_settings();  
     /* start mp3 */
     cops->start_playback();
-        
-    PACK(cops,drawPeak);    
+#ifdef OLD_PLAYER        
+    PACK(cops,drawPeak);
+#else
+    PACK(cops,mainLoop);
+    fclose(fd);
+#endif
     
     return 1;
 }

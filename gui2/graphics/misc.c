@@ -11,6 +11,7 @@
 *
 */
 #include <stdlib.h>
+#include <ctype.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
@@ -276,4 +277,113 @@ int getTick(void)
     close(fd);
     
     return tick;
+}
+
+int halt_device(void)
+{
+    int fd,tick;
+    fd=open("/dev/avstate",O_RDONLY | O_NONBLOCK);
+        
+    if (fd < 0)
+    {
+        printf("Can't open /dev/avstate\n");
+        return 0;
+    }
+    
+    if(ioctl(fd,AV_HALT_DEVICE,NULL)<0)
+    {
+        printf("Error halting\n");
+        close(fd);
+        return 0;
+    }
+    
+    close(fd);
+   
+    return 0;    
+}
+
+int fmIsConnected(void)
+{
+    int res;
+    if(processFM_cmd(AV_FM_IS_CONNECTED,&res))
+        return res;
+    else
+        return 0;
+}
+
+int fmSetBat(int val)
+{
+    if(processFM_cmd(AV_FM_SET_BAT,&val))
+        return 1;
+    else
+        return 0;
+}
+
+int fmSetVol(int val)
+{
+    if(processFM_cmd(AV_FM_SET_VOL,&val))
+        return 1;
+    else
+        return 0;
+}
+
+int processFM_cmd(int cmd,void * param)
+{
+    int fd;
+    fd=open("/dev/avfm",O_RDONLY | O_NONBLOCK);
+    if (fd < 0)
+    {
+        printf("Can't open /dev/avfm\n");
+        return 0;
+    }
+    
+    if(ioctl(fd,cmd,param)<0)
+    {
+        printf("Error getting tick value\n");
+        close(fd);
+        return 0;
+    }
+    
+    close(fd);
+    return 1;
+}
+
+void print_nonhexa(char * str)
+{
+    int i;
+    for(i=0;i<16;i++)
+    {
+        if(isprint(str[i]))
+            printf("%c",str[i]);
+        else
+            printf(".");
+    }
+}
+
+void print_data(char * data,int length)
+{    
+    char str[17];
+    int i;
+    for(i=0;i<length;i++)
+    {
+        if(i%16==0) // new line
+        {
+            if(i!=0) /* do we need to end the previous line? */
+            {
+                printf(" ] ");
+                print_nonhexa(str);
+                printf("\n");
+            }
+            printf("%p: [",&data[i]);
+        }
+        
+        if(i%4==0)
+            printf(" ");
+        
+        printf("%02X",(unsigned char)data[i]);
+        str[i%16]=data[i];        
+    }
+    printf(" ] ");
+    print_nonhexa(str);
+    printf("\n");
 }

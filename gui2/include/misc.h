@@ -32,4 +32,12 @@ int   getPwr            (void);
 int   getUSB            (void);
 int   setUSB            (int state);
 
+int   fmIsConnected     (void);
+int   fmSetBat          (int val);
+int   fmSetVol          (int val);
+
+int   processFM_cmd     (int cmd,void * param);
+
+void  print_data        (char * data,int length);
+
 #endif
