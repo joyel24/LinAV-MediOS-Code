@@ -24,7 +24,7 @@ int main(int argc,char ** argv)
  while(1)
   {  
        evt=waitEvent();
-       sprintf(tmp,"evt=%04x\n",evt);
+       sprintf(tmp,"evt=%04x tick=%d",evt,getTick());
        printf(tmp);
        drawRect(COLOR_BLACK,10,50,310,10);
        putS(COLOR_WHITE,COLOR_BLACK,10,50,tmp);
