@@ -36,12 +36,10 @@ struct position {
 struct position cursor_pos={3,2};
 
 #define CELL_SIZE  20
-#define PIECE_SIZE 8
+#define PIECE_SIZE 12
 #define NB_CELL    8
 #define X_INI      10
 #define Y_INI      ((240-((CELL_SIZE+1)*NB_CELL)-1)/2)
-
-
 
 #define NB_PIECE_POS 90
 
@@ -70,32 +68,40 @@ int board[NB_CELL][NB_CELL];
 int allowedHuman[NB_CELL][NB_CELL];
 int nbPieces[2]={2,2};
 int endOfGame=0;
-int cursorMoveMode=0;
+int cursorMoveMode=0; /* 0 = move anywhere, 1 = move to possible locations */
 
-unsigned char human_bmap[8][8]= {
-{00,00,00,15,15,00,00,00},
-{00,00,15,15,15,15,00,00},
-{00,15,15,00,00,15,15,00},
-{15,15,00,00,00,00,15,15},
-{15,15,00,00,00,00,15,15},
-{00,15,15,00,00,15,15,00},
-{00,00,15,15,15,15,00,00},
-{00,00,00,15,15,00,00,00}
+unsigned char human_bmap[12][12]= {
+{00,00,00,00,24,24,24,24,00,00,00,00},
+{00,00,24,24,24,24,24,24,24,24,00,00},
+{00,24,24,24,24,24,24,24,24,24,24,00},
+{00,24,24,24,00,00,00,00,24,24,24,00},
+{24,24,24,00,00,00,00,00,00,24,24,24},
+{24,24,24,00,00,00,00,00,00,24,24,24},
+{24,24,24,00,00,00,00,00,00,24,24,24},
+{24,24,24,00,00,00,00,00,00,24,24,24},
+{00,24,24,24,00,00,00,00,24,24,24,00},
+{00,24,24,24,24,24,24,24,24,24,24,00},
+{00,00,24,24,24,24,24,24,24,24,00,00},
+{00,00,00,00,24,24,24,24,00,00,00,00},
 };
 
-unsigned char av3xx_bmap[8][8]= {
-{00,00,00,15,15,00,00,00},
-{00,00,15,15,15,15,00,00},
-{00,15,15,15,15,15,15,00},
-{15,15,15,15,15,15,15,15},
-{15,15,15,15,15,15,15,15},
-{00,15,15,15,15,15,15,00},
-{00,00,15,15,15,15,00,00},
-{00,00,00,15,15,00,00,00}
+unsigned char av3xx_bmap[12][12]= {
+{00,00,00,00,25,25,25,25,00,00,00,00},
+{00,00,25,25,25,25,25,25,25,25,00,00},
+{00,25,25,25,25,25,25,25,25,25,25,00},
+{00,25,25,25,25,25,25,25,25,25,25,00},
+{25,25,25,25,25,25,25,25,25,25,25,25},
+{25,25,25,25,25,25,25,25,25,25,25,25},
+{25,25,25,25,25,25,25,25,25,25,25,25},
+{25,25,25,25,25,25,25,25,25,25,25,25},
+{00,25,25,25,25,25,25,25,25,25,25,00},
+{00,25,25,25,25,25,25,25,25,25,25,00},
+{00,00,25,25,25,25,25,25,25,25,00,00},
+{00,00,00,00,25,25,25,25,00,00,00,00},
 };
 
-BITMAP hBitmap = {(unsigned int) human_bmap, 8, 8, 0, 0};
-BITMAP aBitmap = {(unsigned int) av3xx_bmap, 8, 8, 0, 0};
+BITMAP hBitmap = {(unsigned int) human_bmap, 12, 12, 0, 0};
+BITMAP aBitmap = {(unsigned int) av3xx_bmap, 12, 12, 0, 0};
 
 #define PIECE_OFFSET (CELL_SIZE-PIECE_SIZE)/2+1
 
@@ -154,17 +160,12 @@ void drawNbPiece()
     int w=0,h=0;
 
     sprintf(tmp,"You: %02d",nbPieces[HUMAN]);
-    cops->getStringS(tmp, &w, &h);
-    cops->putS(TXT_COLOR,BG_COLOR,320-w-15,NB_PIECE_POS,tmp);
-    cops->drawBITMAP(&hBitmap, 310, 90);
-    sprintf(tmp,"AV3XX: %02d",nbPieces[AV3XX]);
-    cops->getStringS(tmp, &w, &h);
-    cops->putS(TXT_COLOR,BG_COLOR,320-w-15,NB_PIECE_POS+h+2,tmp);
-    cops->drawBITMAP(&aBitmap, 310, 90+h+2);
+    cops->putS(TXT_COLOR, BG_COLOR, 20, 220, tmp);
+    cops->drawBITMAP(&hBitmap, 4, 220);
 
-#ifdef DEBUG
-    printf("NB:(%d,%d)\n",nbPieces[HUMAN],nbPieces[AV3XX]);
-#endif
+    sprintf(tmp,"Archos: %02d",nbPieces[AV3XX]);
+    cops->putS(TXT_COLOR, BG_COLOR, 120, 220, tmp);
+    cops->drawBITMAP(&aBitmap, 104, 220);
 }
 
 void drawMenu()
@@ -172,13 +173,27 @@ void drawMenu()
     int w=0,h=0;
 
     cops->getStringS("New game", &w, &h);
-    cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,17, "New game");
+    cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,15, "New game");
 
     cops->getStringS("Quit", &w, &h);
-    cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,47, "Quit");
+    cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,45, "Quit");
 
     cops->getStringS("Play", &w, &h);
-    cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,152, "Play");
+    cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,150, "Play");
+
+    cops->getStringS("Nav Mode:", &w, &h);
+    cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,210, "Nav Mode:");
+
+    if(cursorMoveMode == 0)
+    {
+        cops->getStringS("Traditional", &w, &h);
+        cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,225, "Traditional");
+    }
+    else
+    {
+        cops->getStringS("Standard   ", &w, &h);
+        cops->putS(TXT_COLOR, BG_COLOR, 320-w-5,225, "Standard   ");
+    }
 }
 
 void iniBoard(void)
@@ -192,9 +207,13 @@ void iniBoard(void)
         }
     i=NB_CELL/2-1;
 
-    /*setting initial piece*/
+    /* setting initial piece */
     board[i][i]=AV3XX;board[i+1][i]=HUMAN;
     board[i][i+1]=HUMAN;board[i+1][i+1]=AV3XX;
+
+    /* reset scores */
+    nbPieces[1] = 2;
+    nbPieces[2] = 2;
 }
 
 void moveCursor(int dx, int dy)
@@ -227,7 +246,6 @@ int tstMove(int player,int x, int y,int dx, int dy,int dispMove)
     {
         if(dispMove)
         {
-            printf("display, get %d, dx=%d dy=%d\n",tot,dx,dy);
             for(i=0;i<tot;i++)
             {
                 x-=dx;y-=dy;
@@ -343,51 +361,19 @@ void doMove(int x,int y)
 
 void endGame(void)
 {
-    int w,h,h2;
+    int w,h;
 
-    cops->getStringS("M",&w,&h);
+    cops->getStringS("Game Over... ",&w,&h);
 
-    w=100;
-    h2=(h+2)*2+8;
+    cops->putS(COLOR_WHITE,COLOR_BLACK,10,2,"Game Over...");
 
-    cops->fillRect(COLOR_BLACK,(SCREEN_WIDTH-w)/2,(SCREEN_HEIGHT-h2)/2,w,h2);
-    cops->putS(COLOR_WHITE,COLOR_BLACK,(SCREEN_WIDTH-w)/2+5,(SCREEN_HEIGHT-h2)/2+5,"Game Over..");
     if(nbPieces[HUMAN]>nbPieces[AV3XX])
-         cops->putS(COLOR_WHITE,COLOR_BLACK,(SCREEN_WIDTH-w)/2+5,(SCREEN_HEIGHT-h2)/2+5+2+h,"You won!");
+         cops->putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You won! :D");
     else if(nbPieces[HUMAN]<nbPieces[AV3XX])
-        cops->putS(COLOR_WHITE,COLOR_BLACK,(SCREEN_WIDTH-w)/2+5,(SCREEN_HEIGHT-h2)/2+5+2+h,"You lost.");
+        cops->putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You lost. :(");
     else
-        cops->putS(COLOR_WHITE,COLOR_BLACK,(SCREEN_WIDTH-w)/2+5,(SCREEN_HEIGHT-h2)/2+5+2+h,"Tie.");
-
-
+        cops->putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You tied. :|");
 }
-
-#ifdef DEBUG
-void printBoardAllowed(void)
-{
-    int i,j;
-
-    for(j=0;j<NB_CELL;j++)
-    {
-        for(i=0;i<NB_CELL;i++)
-            printf("--");
-        printf("-\n");
-        for(i=0;i<NB_CELL;i++)
-            if(board[i][j]==HUMAN)
-                printf("|o");
-            else if(board[i][j]==AV3XX)
-                printf("|x");
-            else if(allowedHuman[i][j])
-                printf("|a");
-            else if(board[i][j]==EMPTY)
-                printf("| ");
-            printf("|\n");
-    }
-    for(i=0;i<NB_CELL;i++)
-        printf("--");
-    printf("-\n");
-}
-#endif
 
 void nxtCursosPos(int direction,int dispMove)
 {
@@ -396,7 +382,6 @@ void nxtCursosPos(int direction,int dispMove)
 
     if(direction == PREV_POS)
     {
-        printf("Find prev pos\n");
         stop=0;
         j=cursor_pos.y;
         i=cursor_pos.x-1;
@@ -422,7 +407,6 @@ void nxtCursosPos(int direction,int dispMove)
             {
                 if(dispMove==DO_MOVE)
                 {
-                    printf("doing Move (%d,%d)->(%d,%d)\n",cursor_pos.x,cursor_pos.y,i,j);
                     moveCursor(i-cursor_pos.x,j-cursor_pos.y);
                 }
                 break;
@@ -433,7 +417,6 @@ void nxtCursosPos(int direction,int dispMove)
     }
     else
     {
-        printf("Find nxt pos\n");
         stop=0;
         j=cursor_pos.y;
         i=cursor_pos.x+1;
@@ -459,13 +442,9 @@ void nxtCursosPos(int direction,int dispMove)
             if(stop)
             {
                 if(dispMove==DO_MOVE)
-                {
-                    printf("doing Move (%d,%d)->(%d,%d)\n",cursor_pos.x,cursor_pos.y,i,j);
                     moveCursor(i-cursor_pos.x,j-cursor_pos.y);
-                }
                 else
                 {
-                    printf("saving new pos (%d,%d)\n",cursor_pos.x,cursor_pos.y);
                     cursor_pos.x=i;
                     cursor_pos.y=j;
                 }
@@ -479,114 +458,90 @@ void nxtCursosPos(int direction,int dispMove)
 
 void iniCursorPos()
 {
-    printf("[inCursorPos] old:(%d,%d)\n",cursor_pos.x,cursor_pos.y);
     unSelectCell(cursor_pos.x,cursor_pos.y);
     cursor_pos.x=0;
     cursor_pos.y=0;
     nxtCursosPos(NXT_POS,NO_MOVE);
-    printf("[inCursorPos] new:(%d,%d)\n",cursor_pos.x,cursor_pos.y);
     selectCell(cursor_pos.x,cursor_pos.y);
 }
 
 void simpleMove(int dx,int dy)
 {
-    int offsetX=dx;
-    int offsetY=dy;
-    
-    while((cursor_pos.x+offsetX)>=0 && (cursor_pos.y+offsetY)>=0 
-        && (cursor_pos.x+offsetX)<=(NB_CELL-1) && (cursor_pos.y+offsetY)<=(NB_CELL-1)
-        && board[cursor_pos.x+offsetX][cursor_pos.y+offsetY]!=EMPTY)
-    {
-        offsetX+=dx;
-        offsetY+=dy;
-    }
-    if((cursor_pos.x+offsetX)>=0 && (cursor_pos.y+offsetY)>=0
-        && (cursor_pos.x+offsetX)<=(NB_CELL-1) && (cursor_pos.y+offsetY)<=(NB_CELL-1))
-        moveCursor(offsetX,offsetY);
+    int cx = cursor_pos.x;
+    int cy = cursor_pos.y;
+
+    if(cx+dx>=0 && cy+dy>=0 && cx+dx<=NB_CELL-1 && cy+dy<=NB_CELL-1)
+        moveCursor(dx,dy);
 }
 
 int eventHandler(int evt)
 {
-    if(!endOfGame)
-    {
-        switch(evt)
-        {
-            case BTN_UP:
-                if(cursorMoveMode==0)
-                {
-                    simpleMove(0,-1);
-                    break;
-                }
-            case BTN_LEFT:
-                if(cursorMoveMode==0)
-                {
-                    simpleMove(-1,0);
-                    break;
-                }
-                else
-                {
-                    nxtCursosPos(PREV_POS,DO_MOVE);
-                    break;
-                }
-            case BTN_DOWN:
-                if(cursorMoveMode==0)
-                {
-                    simpleMove(0,1);
-                    break;
-                }
-            case BTN_RIGHT:
-                if(cursorMoveMode==0)
-                {
-                    simpleMove(1,0);
-                    break;
-                }
-                else
-                {
-                    nxtCursosPos(NXT_POS,DO_MOVE);
-                    break;
-                }
-            case BTN_F1:
-                if(cursorMoveMode==0 && allowedHuman[cursor_pos.x][cursor_pos.y]!=1)
-                    break;
-                                 
-                doMove(cursor_pos.x,cursor_pos.y);
-                computerMove();
-                drawNbPiece();
-#ifdef DEBUG
-                printBoardAllowed();
-#endif
-                while(!computeAllowed(allowedHuman,HUMAN))
-                {
-                    if(!computerMove())
-                    {
-                        endOfGame=1;
-                        endGame();
-                        break;
-                    }
-                }
-                if(!endOfGame)
-                    iniCursorPos();
-                break;
-        }
-    }
-
     switch(evt)
     {
+        case BTN_UP:
+            if(cursorMoveMode==0)
+                simpleMove(0,-1);
+            break;
+
+        case BTN_LEFT:
+            if(cursorMoveMode==0)
+                simpleMove(-1,0);
+            else
+                nxtCursosPos(PREV_POS,DO_MOVE);
+            break;
+
+        case BTN_DOWN:
+            if(cursorMoveMode==0)
+                simpleMove(0,1);
+            break;
+
+        case BTN_RIGHT:
+            if(cursorMoveMode==0)
+                simpleMove(1,0);
+            else
+                nxtCursosPos(NXT_POS,DO_MOVE);
+            break;
+
+        case BTN_F1:
+            if(cursorMoveMode==0 && allowedHuman[cursor_pos.x][cursor_pos.y]!=1)
+                break;
+
+            doMove(cursor_pos.x,cursor_pos.y);
+            computerMove();
+            drawNbPiece();
+            while(!computeAllowed(allowedHuman,HUMAN))
+            {
+                if(!computerMove())
+                {
+                    endOfGame=1;
+                    endGame();
+                    break;
+                }
+            }
+            if(!endOfGame)
+                iniCursorPos();
+            break;
+
+        case BTN_F3:
+            cursorMoveMode = !cursorMoveMode;
+            drawMenu();
+            break;
+
         case BTN_OFF:
         case EVT_QUIT:
-            RELEASE(cops)
+            RELEASE(cops);
             break;
+
         case BTN_ON:
             iniBoard();
             computeAllowed(allowedHuman,HUMAN);
+            break;
+
         case EVT_REDRAW:
             drawBoard();
             drawMenu();
             iniCursorPos();
             drawNbPiece();
-#ifdef DEBUG
-            printBoardAllowed();
-#endif
             break;
     }
     return 1;
@@ -595,11 +550,15 @@ int eventHandler(int evt)
 int main(int argc,char ** argv)
 {
     REGISTER(cops,eventHandler,0);
+
     cops->hideSBar();
     cops->disableMenu();
+    cops->setFont(STD8X13);
+
     iniBoard();
     computeAllowed(allowedHuman,HUMAN);
     eventHandler(EVT_REDRAW);
+
     PACK(cops,NULL);
     return 1;
 }
