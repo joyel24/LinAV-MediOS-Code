@@ -211,6 +211,16 @@ __IRAM_CODE int kcswi_handler (
             }
             return 0;
 
+	case nAPI_PIPE_CREATE:      //(HPIPE* phPipe);
+	{
+		PIPE* pPipe = 0;
+		API_MALLOC (&pPipe, sizeof(PIPE));
+		pPipe->nReceiver = 0;
+		pPipe->nSender = 0;
+		*((PIPE**)nParam1) = pPipe;
+	}
+	break;
+
 	case nAPI_PIPE_DELETE:      //(HPIPE hPipe);
 	{
 		API_FREE ((void*)nParam1);

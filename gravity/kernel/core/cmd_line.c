@@ -17,6 +17,7 @@
 #include <kernel/memmgr.h>
 #include <api.h>
 #include <kernel/pipes.h>
+#include <kernel/threads.h>
 
 
 #include <kernel/cmd_line.h>
@@ -36,6 +37,30 @@ struct cmd_line_s cmd_tab[] = {
         help_str   : "print the list of args (3 args needed)",
         cmd_action : do_print_info,
         nb_args    : 3
+    },
+    {
+        cmd        : "mem",
+        help_str   : "shows free memory",
+        cmd_action : do_mem,
+        nb_args    : 0
+    },
+    {
+        cmd        : "run",
+        help_str   : "runs specified file",
+        cmd_action : do_run,
+        nb_args    : 1
+    },
+    {
+        cmd        : "tasks",
+        help_str   : "shows running tasks",
+        cmd_action : do_tasks,
+        nb_args    : 0
+    },
+    {
+        cmd        : "restart",
+        help_str   : "restarts device",
+        cmd_action : do_restart,
+        nb_args    : 0
     },
     /* this has to be the last entry */
     {
@@ -263,4 +288,38 @@ void do_help(char ** params)
 void do_print_info(char ** params)
 {
     printk("Param received: %s %s %s\n",params[0],params[1],params[2]);
+}
+
+void do_mem (char ** params)
+{
+    unsigned long nBytes;
+    API_MEMAVAIL (&nBytes);
+    printk("Free memory: %i KB\n", nBytes >> 10);
+}
+
+void do_run (char ** params)
+{
+    API_RUN_GRV (params[0], 0);
+}
+
+void do_tasks (char ** params)
+{
+	int nTasks = 0;
+
+	__cli ();
+	TASK_INFO* pStart = g_pTaskRing;
+	TASK_INFO* pWork = pStart;
+	do
+		pWork = pWork->pNextTask, nTasks ++;
+			while (pStart != pWork);
+	__sti ();
+
+	printk("Tasks running: %i\n", nTasks);
+}
+
+void do_restart (char ** params)
+{
+    int (*restart_restart)(void);
+    restart_restart = 0;
+    restart_restart ();
 }
