@@ -17,6 +17,7 @@ obj-n			:=
 obj-			:=
 
 obj-y			:= $(obj-y) boot.o
+#mas_prog.o
 
 export-objs		:=
 

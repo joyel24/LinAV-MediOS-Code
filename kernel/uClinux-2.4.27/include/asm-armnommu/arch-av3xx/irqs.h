@@ -50,7 +50,7 @@
 #define AV3XX_IRQ_EXT2          20
 #define AV3XX_IRQ_EXT3          21
 #define AV3XX_IRQ_EXT4          22 // GIO4 MAS_DATA_REQUEST
-#define AV3XX_IRQ_EXT5          24 // GIO6 IR data
+#define AV3XX_IRQ_IR_VDR        24 // GIO6 IR data
 #define AV3XX_IRQ_EXT6			25
 #define AV3XX_IRQ_EXT7			26
 #define AV3XX_IRQ_EXT8			27 // -

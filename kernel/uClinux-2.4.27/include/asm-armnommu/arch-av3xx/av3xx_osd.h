@@ -14,9 +14,6 @@
 #ifndef __ASM_ARCH_AV3XX_OSD_H
 #define __ASM_ARCH_AV3XX_OSD_H
 
-#include <asm/types.h>
-#include <asm/arch/hardware.h>
-
 #define     AV3XX_OSD_VIDEO1                    0
 #define     AV3XX_OSD_VIDEO2                    1
 #define     AV3XX_OSD_BITMAP1                   2
@@ -109,17 +106,17 @@
 
 #define     AV3XX_OSD_OFF_HI_SHIFT(index)        ((( index<<31 ) >>31)<<3)
 
-void osdSetCursor2Bitmap (u16 index, u16 data);
-void osdSetMainConfig (u16 config);
-void osdSetMainShift (u16 horizontal,u16 vertical);
-void osdSetPallette (u16 Y, u16 Cr, u16 Cb, u16 index);
-void osdSet16CPallete (int bankN, u16 index, u16 value);
-void osdSetAltOffset (u32 address);
-void osdSetComponentOffset (int component, u32 address);
-void osdSetComponentSize (int component, u16 width, u16 height);
-void osdSetComponentPosition (int component, u16 x, u16 y);
-void osdSetComponentSourceWidth (int component, u16 width);
-void osdSetComponentConfig (int component, u16 config);
+void osdSetCursor2Bitmap (int index, int data);
+void osdSetMainConfig (int config);
+void osdSetMainShift (int horizontal,int vertical);
+void osdSetPallette (int Y, int Cr, int Cb, int index);
+void osdSet16CPallete (int bankN, int index, int value);
+void osdSetAltOffset (int address);
+void osdSetComponentOffset (int component, int address);
+void osdSetComponentSize (int component, int width, int height);
+void osdSetComponentPosition (int component, int x, int y);
+void osdSetComponentSourceWidth (int component, int width);
+void osdSetComponentConfig (int component, int config);
 void osdSetBacklight(int val); /* val = 0/1 */
 void osdInit();
 

@@ -406,12 +406,18 @@ __lookup_architecture_type:
 L_AV3XX_PID:	.long	0x41007700
 L_AV3XX_MID:	.long	MACH_TYPE_AV3XX
 #endif
-
-#ifdef CONFIG_FB_AV3XX
-.globl av3xx_fb
-av3xx_fb: .space 320*240*2
-#endif
-
+@.align 4
+.globl av3xx_startup_scr
+av3xx_startup_scr:
+.incbin "../mach-av3xx/boot_halt_img/startup_screen.inc"
+@.align 4
+@.globl av3xx_start_scr
+@av3xx_start_scr:
+@.incbin "../mach-av3xx/boot_halt_img/start_screen.inc"
+@.align 4
+.globl av3xx_halt_scr
+av3xx_halt_scr:
+.incbin "../mach-av3xx/boot_halt_img/halt_screen.inc"
 
 #ifdef CONFIG_BLK_DEV_BLKMEM
 .section ".rodata"

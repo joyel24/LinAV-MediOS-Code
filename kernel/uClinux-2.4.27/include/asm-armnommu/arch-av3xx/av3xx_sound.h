@@ -18,8 +18,8 @@
 int av3xx_dsp_open(struct inode *inode, struct file *filp);
 int av3xx_dsp_close(struct inode *inode, struct file *filp);
 void av3xx_dsp_interrupt(int irq, void *dev_id, struct pt_regs *regs);
-int av3xx_dsp_write(struct file *filp, const char *buf, size_t count, loff_t *ppos);
-int av3xx_dsp_read(struct file *filp, const char *buf, size_t count, loff_t *ppos);
+ssize_t av3xx_dsp_write(struct file *filp, const char *buf, size_t count, loff_t *ppos);
+ssize_t av3xx_dsp_read(struct file *filp, const char *buf, size_t count, loff_t *ppos);
 int av3xx_dsp_ioctl(struct inode *inode, struct file *filp,unsigned int cmd, unsigned long arg);
 
 /* mp3 functions */
@@ -41,8 +41,8 @@ int av3xx_sound_open(struct inode *inode, struct file *filp);
 int av3xx_sound_close(struct inode *inode, struct file *filp);
 
 /********************* OSS init               ***************************/
-int av3xx_sound_init(void);
-void av3xx_sound_exit(void);
+static int av3xx_sound_init(void);
+static void av3xx_sound_exit(void);
 
 #endif
 

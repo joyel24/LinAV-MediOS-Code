@@ -2989,6 +2989,10 @@ EXPORT_SYMBOL(ide_geninit);
  */
 devfs_handle_t ide_devfs_handle;
 
+#ifdef CONFIG_ARCH_AV3XX
+extern void av3xx_ide_stop_device(ide_drive_t * drive);
+#endif
+
 EXPORT_SYMBOL(ide_probe);
 EXPORT_SYMBOL(ide_devfs_handle);
 
@@ -3035,8 +3039,6 @@ static int ide_notify_reboot (struct notifier_block *this, unsigned long event, 
 			   which should be sufficient for the disk to expire
 			   its write cache. */
 			if (event == SYS_POWER_OFF)
-#elseif CONFIG_ARCH_AV3XX
-        /* we do flusinh even if event == SYS_RESTART */
 #else
 			if (event != SYS_RESTART)
 #endif
@@ -3044,6 +3046,9 @@ static int ide_notify_reboot (struct notifier_block *this, unsigned long event, 
 					continue;
 
 			DRIVER(drive)->cleanup(drive);
+#ifdef CONFIG_ARCH_AV3XX
+                        av3xx_ide_stop_device(drive); 
+#endif
 			continue;
 		}
 	}

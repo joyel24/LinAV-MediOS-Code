@@ -17,6 +17,7 @@
 
 #include <asm/arch/av3xx_common.h>
 #include <asm/arch/av3xx_buttons.h>
+#include <asm/arch/av3xx_gio.h>
 
 #define NB_BUTTONS 10
 
@@ -27,7 +28,6 @@
 
 DECLARE_WAIT_QUEUE_HEAD(button_queue);
 DECLARE_WAIT_QUEUE_HEAD(app_queue);
-
 
 struct timer_list av3xx_button_timer;
 
@@ -66,37 +66,6 @@ int keys_code[NB_BUTTONS] ={
 };
 #endif
 
-/*int av3xx_button_state(int * button_state)
-{
-	int val,i,pressed,dir;
-	pressed=0;
-	dir=0;
-	val=inw(0x2600680)&0x3;
-	val|=((inw(0x2600700)&0x7)<<2);
-	val|=((inw(0x2600780)&0x7)<<5);
-	val|=((inw(0x30588)&0x1)<<8);
-	val|=((inw(0x3058a)>>3)&0x200);
-
-	for(i=0;i<NB_BUTTONS;i++)
-	{
-		if(val&(0x1<<i))
-		{
-			button_state[i]=0;
-		}
-		else
-		{
-			button_state[i]=1;
-			pressed=1;
-			if(i<4)
-				dir=1;
-		}
-	}
-	if(dir)
-		button_state[BUTTONS_AV300_JOYPRESS]=0;
-
-	return pressed;
-}*/
-
 int nb_pressed[NB_BUTTONS];
 int nb_off_press=0;
 int wakeUP=0;
@@ -105,6 +74,7 @@ int av3xx_chk_button(unsigned long ptr)
 {
     int i,val,fastDir;
     int doWake=0;
+    int keyPressed=0;
     
     fastDir=0;
         
@@ -122,6 +92,7 @@ int av3xx_chk_button(unsigned long ptr)
     val=inw(0x2600680)&0x3;
     val|=((inw(0x2600700)&0x7)<<2);
     val|=((inw(0x2600780)&0x7)<<5);
+#warning should use gio fction
     val|=((inw(0x30588)&0x1)<<8);
     val|=((inw(0x3058a)>>3)&0x200);
     
@@ -135,19 +106,34 @@ int av3xx_chk_button(unsigned long ptr)
                     nb_pressed[i]=0;
                 if(i==9)
                     nb_off_press=0;
+                
             }
             else
             {    
                 if(i==9)
+                {
                     nb_off_press++;
+                    if(nb_off_press>MAX_OFF)
+                        av_halt_system();
+                }
                 if(!(i==4 && fastDir))
                 {
                     if(nb_pressed[i]==0)
                     {
-                        av3xx_add_event(i);
-                        //handle_scancode(keys_code[i], 1);
                         nb_pressed[i]=mx_press;
+                        if(av3xx_lcd_get_state()==0)
+                        {
+                            /* the lcd is off => turn on and discard the event */
+                            av3xx_lcd_keyPress();
+                            break;
+                        }
+                        else
+                            av3xx_lcd_launchTimer(); /* postpone the lcd timer */
+                        av3xx_add_event(i);
+                        //handle_scancode(keys_code[i], 1);                        
                         doWake=1;
+                        keyPressed=1;
+                        
                     }
                     else
                         nb_pressed[i]--;
@@ -162,10 +148,9 @@ int av3xx_chk_button(unsigned long ptr)
         }
     }
     
-    if(nb_off_press>MAX_OFF)
-        av_halt_system();
+    
         //tasklet_schedule(&av_halt);
-     
+    
            
     if(timerState)
     {
@@ -188,12 +173,20 @@ int av3xx_chk_button(unsigned long ptr)
     if(powerConnected()!=pwrState)
     {
         pwrState=powerConnected();
+        /* change the timers */
+        if(pwrState)
+            chgTimer(AV_TIMER_ON_DC);
+        else
+            chgTimer(AV_TIMER_ON_BAT);
+            
         av3xx_add_event(EVT_AV300_PWR);
         doWake=1;
     }
     
     if(doWake)
+    {
         wake_up_interruptible(&button_queue);
+    }
         
     doWake=0;
     
@@ -393,6 +386,10 @@ static int __init av3xx_button_init(void)
         
         usbState=usbConnected();
         pwrState=powerConnected();
+        
+        /* set GIO for ON/OFF to input */
+        av3xx_gio_dir(AV3XX_GIO_ON_BTN,GIO_IN);
+        av3xx_gio_dir(AV3XX_GIO_OFF_BTN,GIO_IN);
 		
 	init_timer(&av3xx_button_timer);
 	av3xx_button_timer.function = av3xx_chk_button;

@@ -14,6 +14,8 @@
 #ifndef __ASM_ARCH_AV3XX_KBD_TST_H
 #define __ASM_ARCH_AV3XX_KBD_TST_H
 
+#include <asm/arch/av3xx_common.h>
+
 /*#define        BUTTONS_AV300_UP            0x0001
 #define        BUTTONS_AV300_LEFT          0x0002
 #define        BUTTONS_AV300_RIGHT         0x0010
@@ -40,16 +42,18 @@
 #define        EVT_AV300_WKUP              0x000b
 #define        EVT_AV300_USB               0x000c
 #define        EVT_AV300_PWR               0x000d
+#define        EVT_AV300_CF_IN             0x000e
+#define        EVT_AV300_CF_OUT            0x000f
 
 #define        MAX_PRESSED                 3
 #define        AV_FREQ                     HZ/50
 
-#define        MAX_OFF                     20
+#define        MAX_OFF                     15
 
 #define        STEP_SIZE                   1
 
 int  av3xx_chk_button(unsigned long ptr);
-int  av3xx_button_state();
+int  av3xx_button_state(void);
 int  av3xx_button_init(void);
 void av3xx_move_mouse(int but);
 int  av3xx_button_get_mouse(struct av3xx_pos * pos);

@@ -95,6 +95,8 @@ int av3xx_mas_get_frame_count(void);
 /********************* Register i2c read/write ***************************/
 int av3xx_mas_read_register(int reg);
 int av3xx_mas_write_register(int reg,int val);
+int av3xx_mas_freeze(void);
+int av3xx_mas_run(void);
 int av3xx_mas_set_D0(int addr,int val);
 int av3xx_mas_get_D0(int addr);
 
@@ -165,6 +167,19 @@ int av3xx_mas_control_read(int control);
 int av3xx_mas_read_codec(int reg);
 int av3xx_mas_write_codec(int reg,int val);
 
+/********************* PCM decoding        ***************************/
+extern char ** wav_chunks;
+extern int * wav_chunk_size;
+extern int nb_wav_chunk;
+extern char * mp3Buff;
+
+int  av3xx_mas_load_PCM_code(void);
+void av3xx_mas_stop_app(void);
+void av3xx_mas_run_app(void);
+
+void av3xx_mas_run_PCM(void);
+
+int av3xx_mas_test_PCM(void);
 
 
 #endif

@@ -25,7 +25,7 @@
 /* uarts (note that the register fields aren't needed by the standard linux
    serial driver -- we only use them for our initial debugging console) */
 #define AV3XX_UART0_BASE                        0x00030300
-#define AV3XX_UART1_BASE                        0x00030800
+#define AV3XX_UART1_BASE                        0x00030380
 
 #define AV3XX_UART_DTRR                         0x00000000
 #define AV3XX_UART_BRSR                         0x00000002
@@ -186,55 +186,45 @@
 /* ide interface */
 #define AV3XX_IDE_BASE                          0x02400000
 
-#define AV3XX_IDE_DATA                          0x000
-#define AV3XX_IDE_ERROR                         0x080
-#define AV3XX_IDE_NSECTOR                       0x100
-#define AV3XX_IDE_SECTOR                        0x180
-#define AV3XX_IDE_LCYL                          0x200
-#define AV3XX_IDE_HCYL                          0x280
-#define AV3XX_IDE_SELECT                        0x300
-#define AV3XX_IDE_CONTROL                       0x340
-#define AV3XX_IDE_STATUS                        0x380
-
-
 #define AV3XX_IDE_IRQ                           1
 
 #define AV3XX_NR_PORTS                          10
 
-/* CPLD		*/
+#define AV3XX_DMA_BASE                          0x30a38
 
+/* CPLD		*/
+#if 0
 #define AV3XX_CPLD_BASE                         0x02600000
 
-#define AV3XX_CPLD_PORT1                        (AV3XX_CPLD_BASE+0x000)
-#define AV3XX_CPLD_PORT2                        (AV3XX_CPLD_BASE+0x100)
-#define AV3XX_CPLD_PORT3                        (AV3XX_CPLD_BASE+0x200)
-#define AV3XX_CPLD_PORT4                        (AV3XX_CPLD_BASE+0x300)
 
-#define AV3XX_SELECT_DEVICE                     AV3XX_CPLD_PORT1
-#define AV3XX_SELECT_HDD_BIT                    0x0 // hard drive
-#define AV3XX_SELECT_CFC_BIT                    0x1 // Compact flash card access
-#define AV3XX_SELECT_VIDIN_BIT                  0x4 // video in
-#define AV3XX_SELECT_SMR_BIT                    0x8 // Smart media reader
-#define AV3XX_SELECT_MCR_BIT                    0x9 // multimedia card reader
+
+#define AV3XX_SELECT_DEVICE(devNum)             outb(devNum,AV3XX_CPLD_PORT0);
+
+#define AV3XX_CPLD_SET_0(val)                   outb(val,AV3XX_CPLD_PORT0);
+#define AV3XX_CPLD_SET_1(val)                   outb(val,AV3XX_CPLD_PORT1);
+#define AV3XX_CPLD_SET_2(val)                   outb(val,AV3XX_CPLD_PORT2);
+#define AV3XX_CPLD_SET_3(val)                   outb(val,AV3XX_CPLD_PORT3);
+
+#define AV3XX_CPLD_GET_0()                      inb(AV3XX_CPLD_PORT0)
+#define AV3XX_CPLD_GET_1()                      inb(AV3XX_CPLD_PORT1)
+#define AV3XX_CPLD_GET_2()                      inb(AV3XX_CPLD_PORT2)
+#define AV3XX_CPLD_GET_3()                      inb(AV3XX_CPLD_PORT3)
+
+#define AV3XX_SELECT_HDD_BIT                    0x0 /* hard drive                   */
+#define AV3XX_SELECT_CFC_BIT                    0x1 /* Compact flash card access    */
+#define AV3XX_SELECT_VIDIN_BIT                  0x4 /* video in                     */
+#define AV3XX_SELECT_IR_BIT                     0x4 /* and IR                       */
+#define AV3XX_SELECT_SMR_BIT                    0x8 /* Smart media reader           */
+#define AV3XX_SELECT_MCR_BIT                    0x9 /* multimedia card reader       */
 
 #define AV3XX_IDE_POWERED                       0x30a24
 
-#define AV3XX_POWER_UP_HDD                      outb(0x0a, AV3XX_CPLD_PORT4);
-#define AV3XX_SELECT_HDD                        outb(AV3XX_SELECT_HDD_BIT,AV3XX_SELECT_DEVICE);
+#define AV3XX_POWER_UP_HDD                      AV3XX_CPLD_SET_3(0xa);
+#define AV3XX_POWER_DOWN_HDD                    AV3XX_CPLD_SET_3(0x0);
+#define AV3XX_SELECT_HDD                        AV3XX_SELECT_DEVICE(AV3XX_SELECT_HDD_BIT);
 
-/* GIO */
+#endif
 
-#define AV3XX_GIO_BASE                          0x30580
-
-#define AV3XX_GIO_DIRECTION0                    (AV3XX_GIO_BASE+0x00)  // GIO 0-15
-#define AV3XX_GIO_DIRECTION1                    (AV3XX_GIO_BASE+0x02)  // GIO 16-31
-#define AV3XX_GIO_INVERT0                       (AV3XX_GIO_BASE+0x04)  // GIO 0-15
-#define AV3XX_GIO_INVERT1                       (AV3XX_GIO_BASE+0x06)  // GIO 16-31
-#define AV3XX_GIO_BITSET0                       (AV3XX_GIO_BASE+0x08)  // GIO 0-15
-#define AV3XX_GIO_BITSET1                       (AV3XX_GIO_BASE+0x0a)  // GIO 16-31
-#define AV3XX_GIO_BITCLEAR0                     (AV3XX_GIO_BASE+0x0c)  // GIO 0-15
-#define AV3XX_GIO_BITCLEAR1                     (AV3XX_GIO_BASE+0x0e)  // GIO 16-31
-#define AV3XX_GIO_ENABLE_IRQ                    (AV3XX_GIO_BASE+0x10)  // GIO 0-7
 
 /* video */
 
@@ -342,7 +332,6 @@
 /** USB state **/
 
 #define AV3XX_USB_STATE                         0x30a24
-#define AV3XX_USB_EN_DIS_ABLE                   0x02600100
 
 /** power state **/
 
@@ -350,18 +339,17 @@
 
 /** I2C **/
 
+#if 0
 #define AV3XX_I2C_BASE                          0x30580
 
 #define AV3XX_I2C_REG_DR                        (AV3XX_I2C_BASE+0x02)
 #define AV3XX_I2C_REG_IN                        (AV3XX_I2C_BASE+0x0A)
 #define AV3XX_I2C_REG_IO                        (AV3XX_I2C_BASE+0x0E)
+#endif
 
-#define AV3XX_RTC_DEVICE                        0xd0
-#define AV3XX_TSC_DEVICE                        0x90
-#define AV3XX_MAS_DEVICE                        0x3c
 
-#define I2C_WRITE_DEVICE(val)                   (val & ~0x01)
-#define I2C_READ_DEVICE(val)                    (val | 0x01)
+
+
 
 
 #endif  /* _ASM_ARCH_HARDWARE_H */

@@ -14,6 +14,7 @@
 #include <asm/io.h>
 #include <asm/arch/hardware.h>
 #include <asm/arch/av3xx_i2c.h>
+#include <asm/arch/av3xx_gio.h>
 
 #include <asm/arch/av3xx_mas.h>
 
@@ -48,9 +49,9 @@ int in_32_val(void)
 int av3xx_mas_reset(void)
 {
 	int i;
-	outw(0x1,AV3XX_GIO_BITCLEAR1);
+        av3xx_gio_clear(AV3XX_GIO_MAS_PWR);      // stop the MAS
 	for(i=0;i<0x40000;i++) /* NOTHING */ ;
-	outw(0x1,AV3XX_GIO_BITSET1);
+        av3xx_gio_set(AV3XX_GIO_MAS_PWR);       // start the MAS
 	for(i=0;i<0x40000;i++) /* NOTHING */ ;
 	av3xx_mas_write_direct_config(MAS_CONTROL,0x8c00);
 	return 0;
@@ -58,11 +59,18 @@ int av3xx_mas_reset(void)
 
 int av3xx_mas_gio_init(void)
 {
-	outw(((inw(AV3XX_GIO_DIRECTION0) & 0x00FF)|0xF5),AV3XX_GIO_DIRECTION0); // removed | 0xF5
-	outw(((inw(AV3XX_GIO_DIRECTION1) & 0x3FFF)|0x4000),AV3XX_GIO_DIRECTION1);
-	outw((inw(AV3XX_GIO_INVERT0) & 0xFFEF) | 0x10,AV3XX_GIO_INVERT0); // EOD inverted
-	outb((inb(AV3XX_GIO_ENABLE_IRQ) & 0xEF) | 0x10,AV3XX_GIO_ENABLE_IRQ); // EOD irq enabled
-	return 0;
+    int i;
+    av3xx_gio_dir(AV3XX_GIO_MAS_EOD,GIO_IN);
+    for(i=0;i<8;i++)
+        av3xx_gio_dir(AV3XX_GIO_MAS_D0+i,GIO_OUT);
+    av3xx_gio_dir(AV3XX_GIO_MAS_PWR,GIO_OUT);   
+    av3xx_gio_dir(AV3XX_GIO_MAS_RTR,GIO_IN);
+    av3xx_gio_dir(AV3XX_GIO_MAS_PR,GIO_OUT);
+    
+    av3xx_gio_inv(AV3XX_GIO_MAS_EOD,GIO_INVERTED);   
+    av3xx_gio_IRQ(AV3XX_GIO_MAS_EOD,GIO_IRQ);
+
+    return 0;
 }
 
 /********************* app functions                ***************************/
@@ -103,19 +111,17 @@ int av3xx_mas_pio_write(void * buffer,int size)
 		return 0;
 	for(i=0;i<size;i++)
 	{
-		if(inw(AV3XX_GIO_BITSET0) & 0x0010) // EOD set => exit
+		if(av3xx_gio_is_set(AV3XX_GIO_MAS_EOD)) // EOD set => exit
 		{
 			break;
 		}
 		data=(buf[i] << 8) & 0xFF00;
-		if(data!=0)
-			outw(data,AV3XX_GIO_BITSET0);
-		data ^= 0xFF00;
-		if(data!=0)
-			outw(data,AV3XX_GIO_BITCLEAR0);
-		outw(0x8000,AV3XX_GIO_BITSET1);     // try to latch data (raise PR)
-		while(!(inw(AV3XX_GIO_BITSET1) & 0x4000)) /* NOTHING */; // wait for RTR to be set
-		outw(0x8000,AV3XX_GIO_BITCLEAR1);   // clear latch (lower raise PR)
+                av3xx_gio_raw(data,GIO_BANK0);
+		av3xx_gio_set(AV3XX_GIO_MAS_PR); // try to latch data (raise PR)
+                    
+		while(!av3xx_gio_is_set(AV3XX_GIO_MAS_RTR)) /* NOTHING */; // wait for RTR to be set
+                
+		av3xx_gio_clear(AV3XX_GIO_MAS_PR);   // clear latch (lower raise PR)
 	}
 	return i;
 }
@@ -155,7 +161,7 @@ int av3xx_mas_read_register(int reg)
 	av3xx_i2c_start();
 	OUT_WRITE_DEVICE
 	OUT_SUBADDRESS(MAS_DATA_WRITE)
-	OUT_16_VAL(0xa000 | ((reg << 4) & 0x0FF0))
+	OUT_16_VAL(0xa000 | ((reg<<4)  & 0x0FF0))
 	av3xx_i2c_stop();	
 	av3xx_i2c_start();
 	OUT_WRITE_DEVICE
@@ -176,6 +182,26 @@ int av3xx_mas_write_register(int reg,int val)
 	OUT_32_VAL(0xb0000000 | ((reg << 20) & 0x0FF00000) | (val & 0x000FFFFF))
 	av3xx_i2c_stop();	
 	return 0;
+}
+
+int av3xx_mas_freeze(void)
+{
+    av3xx_i2c_start();
+    OUT_WRITE_DEVICE
+    OUT_SUBADDRESS(MAS_DATA_WRITE)
+    OUT_16_VAL(0x0000)
+    av3xx_i2c_stop();
+    return 0;
+}
+
+int av3xx_mas_run(void)
+{
+    av3xx_i2c_start();
+    OUT_WRITE_DEVICE
+    OUT_SUBADDRESS(MAS_DATA_WRITE)
+    OUT_16_VAL(0x1000)
+    av3xx_i2c_stop();
+    return 0;
 }
 
 int av3xx_mas_set_D0(int addr,int val)
@@ -259,7 +285,7 @@ int av3xx_mas_write_Di_register(int i,int addr,void * buf,int size) // !!! 20 bi
 {
 	char * buffer = (char*) buf;
 	int j;
-	unsigned outval;
+	unsigned long outval;
 	av3xx_i2c_start();
 	OUT_WRITE_DEVICE
 	OUT_SUBADDRESS(MAS_DATA_WRITE)
@@ -531,3 +557,209 @@ int av3xx_mas_write_codec(int reg,int val)
 	av3xx_i2c_stop();	
 	return 0;
 }
+
+/*********************  PCM  code       ***************************/
+#if 0
+int av3xx_tst_write(int dest,int addr,int size,char * buffer)
+{
+        int j;
+        av3xx_i2c_start();
+	OUT_WRITE_DEVICE
+	OUT_SUBADDRESS(MAS_DATA_WRITE)
+	OUT_16_VAL(MAS_WRITE_Di(dest))
+	OUT_16_VAL(size)
+	OUT_16_VAL(addr)
+
+	for(j=0;j<size*4;j++)
+	{
+            DO_OUTB(buffer[j]&0xff,"I2C - mas","Error")
+ 	}
+	av3xx_i2c_stop();
+        return 0;
+}
+
+int av3xx_tst_read(int dest,int addr,int size,char * buffer)     	
+{
+    int j,ret;
+    av3xx_i2c_start();
+    OUT_WRITE_DEVICE
+    OUT_SUBADDRESS(MAS_DATA_WRITE)
+    OUT_16_VAL(MAS_READ_Di(dest))
+    OUT_16_VAL(size)
+    OUT_16_VAL(addr)	
+    av3xx_i2c_stop();	
+    av3xx_i2c_start();
+    OUT_WRITE_DEVICE
+    OUT_SUBADDRESS(MAS_DATA_READ)
+    av3xx_i2c_start();	
+    OUT_READ_DEVICE
+    for(j=0;j<size*4;j+=4)
+    {
+            ret=IN_32_VAL;
+            buffer[j]=(ret>>24)&0xFF;
+            buffer[j+1]=(ret>>16)&0xFF;
+            buffer[j+2]=(ret>>8)&0xFF;
+            buffer[j+3]=ret&0xFF;
+            if(j+4!=size)
+                    av3xx_i2c_ack();
+    }		
+    av3xx_i2c_notAck();	
+    av3xx_i2c_stop();	
+}
+
+int av3xx_mas_load_PCM_code(void)
+{
+    int i,j,dest,addr,size,err;
+    char * buffer;
+    char tmp[2000];
+    for(i=1;i<nb_wav_chunk;i++)
+    {
+        buffer=wav_chunks[i];
+        if(buffer[0]==0xE0)
+            dest=0;
+        else
+            dest=1;
+        addr=(buffer[4]&0xFF)<<8 | (buffer[5]&0xFF);
+        size=(buffer[2]&0xFF)<<8 | (buffer[3]&0xFF);
+        /*if(i==0)
+            size=1;*/
+        printk("Chunk %d: dest:D%d addr:%04x size:%04x \n",i,dest,addr,size);
+        buffer=buffer+6;
+        av3xx_tst_write(dest,addr,size,buffer);
+        //av3xx_mas_write_Di_register(dest,addr,buffer,size);
+        printk("\n");
+       
+    }
+    return 0;
+}
+
+int av3xx_mas_stop_data[8][2] = {
+    { 0x3B,0x00318 },
+    { 0x43,0x00300 },
+    { 0x4B,0x00000 },
+    { 0x53,0x00318 },
+    { 0x6B,0x00000 },
+    { 0xBB,0x00318 },
+    { 0xC3,0x00300 },
+    { 0x06,0x00000 }
+};
+
+void av3xx_mas_stop_app(void)
+{
+    int i;
+    av3xx_mas_freeze();
+    for(i=0;i<8;i++)
+    {
+        av3xx_mas_write_register(av3xx_mas_stop_data[i][0],av3xx_mas_stop_data[i][1]);        
+    }
+    
+}
+
+void iniData(char * data,int val)
+{
+    int i;
+    for(i=3;i>=0;i--)
+    {
+        data[i]= val & 0xFF;
+        val=val >> 8;
+        
+    }
+    for(i=0;i<4;i++)
+        printk("%02x",data[i]);
+    printk("\n");
+}
+
+int getData(char * data)
+{
+    return ((data[3]<<24) & 0xFF000000) | ((data[2]<<16) & 0x00FF0000) | ((data[1]<<8) & 0x0000FF00) | (data[0]& 0x000000FF);
+}
+
+void av3xx_mas_run_app(void)
+{
+    char data[4];
+    printk("stp 1 ");
+    av3xx_mas_write_register(0x6B,0xC0000);
+    printk("2 ");
+    av3xx_mas_run();
+    printk("3 ");
+    iniData(data,0x125);
+    av3xx_tst_write(0,0x661,0x1,data);
+   // av3xx_mas_write_Di_register(0,0x661,&data,0x1);
+    printk("4 ");
+    iniData(data,0x0);
+    av3xx_tst_write(0,0x347,0x1,data);
+    //av3xx_mas_write_Di_register(0,0x347,&data,0x1);
+    printk("5 ");
+    iniData(data,0x4E5E);
+    av3xx_tst_write(0,0x348,0x1,data);
+    //av3xx_mas_write_Di_register(0,0x348,&data,0x1);
+    printk("6 ");
+    iniData(data,0x01A5);
+    av3xx_tst_write(0,0x344,0x1,data);
+    //av3xx_mas_write_Di_register(0,0x344,&data,0x1);
+}
+
+void av3xx_mas_run_PCM(void)
+{
+    int res;
+    char data[4];
+    
+    int i;
+    while(1)
+    {
+        iniData(data,0x0125);
+        av3xx_tst_write(0,0x661,0x1,data);
+        //av3xx_mas_write_Di_register(0,0x661,&data,0x1);
+        for(i=0;i<5;i++)
+        {
+            iniData(data,0x0);
+            av3xx_tst_read(0,0x666,0x1,data);
+            //av3xx_mas_read_Di_register(0,0x666,data,0x1);
+            printk("res=%x\n",getData(data));
+           if(getData(data)==0)
+                break;
+        }
+        if(getData(data)==0)
+                break;
+        printk("[MAS RUN] Retry stopping\n");
+     }
+     
+     printk("[MAS RUN] mas stopped\n");
+     
+     iniData(data,0x61);
+     av3xx_tst_write(0,0x66B,0x1,data);
+    // av3xx_mas_write_Di_register(0,0x66B,&data,0x1);
+     
+     iniData(data,0x1125);
+     av3xx_tst_write(0,0x661,0x1,data);
+     //av3xx_mas_write_Di_register(0,0x661,&data,0x1);
+     
+     iniData(data,0x0);
+     av3xx_tst_read(0,0x661,0x1,data);
+     //av3xx_mas_read_Di_register(0,0x661,data,0x1);
+     printk("IOC %x\n",getData(data));
+     for(i=0;i<0xff;i++)
+     {
+     iniData(data,0x0);
+     av3xx_tst_read(0,0x666,0x1,data);
+     //av3xx_mas_read_Di_register(0,0x666,data,0x1);
+     printk("APP run %x ",getData(data));
+     }
+     printk("\n");
+}
+
+int av3xx_mas_test_PCM(void)
+{
+    int i;
+    
+    
+    printk("\t\tStopping\n");    
+    av3xx_mas_stop_app();
+    printk("\t\tDownloading\n");
+    av3xx_mas_load_PCM_code();
+    printk("\t\tRuning\n");
+    av3xx_mas_run_app();
+    printk("\t\tLaunching\n");
+    av3xx_mas_run_PCM();
+}
+#endif

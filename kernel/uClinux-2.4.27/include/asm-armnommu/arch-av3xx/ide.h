@@ -12,6 +12,18 @@
 #ifndef __ASM_ARCH_IDE_H
 #define __ASM_ARCH_IDE_H
 
+#include <asm/arch/av3xx_cpld.h>
+
+#define AV3XX_IDE_DATA                          0x000
+#define AV3XX_IDE_ERROR                         0x080
+#define AV3XX_IDE_NSECTOR                       0x100
+#define AV3XX_IDE_SECTOR                        0x180
+#define AV3XX_IDE_LCYL                          0x200
+#define AV3XX_IDE_HCYL                          0x280
+#define AV3XX_IDE_SELECT                        0x300
+#define AV3XX_IDE_CONTROL                       0x340
+#define AV3XX_IDE_STATUS                        0x380
+
 /* we have one controller */
 #undef MAX_HWIFS
 #define MAX_HWIFS	1
@@ -64,9 +76,6 @@ ide_init_hwif_ports(hw_regs_t *hw, int data_port, int ctrl_port, int *irq)
 	}
 }
 
-
-
-
 /*
  * This registers the standard ports for this architecture with the IDE
  * driver.
@@ -81,15 +90,12 @@ ide_init_default_hwifs(void)
 
 	// let's start the HD
 
-	AV3XX_SELECT_HDD			 // select HD, according to libavos ata code need 5 writes ???
-	AV3XX_SELECT_HDD
-	AV3XX_SELECT_HDD
-	AV3XX_SELECT_HDD
-	AV3XX_SELECT_HDD
-	
-	for (c=0;c<0x14000;c++) {}  // need to be fixed
-	AV3XX_POWER_UP_HDD // powerup
+        cpld_select(AV3XX_CPLD_HD_CF,0); // select HD
+        
+	cpld_set_port_3(AV3XX_CPLD_HD_POWER);
+        
 
+        
 	for (index = 0; index < MAX_HWIFS; index++) {
 
 		base = ide_default_io_base(index);
@@ -109,6 +115,7 @@ ide_init_default_hwifs(void)
 	/*outw(0x1,0x30a30);
 	outw(0x8,AV3XX_IDE_CONTROL);*/
 
+        
 	/* 27MHz clock (not ARM clock) */
 	outw(AV3XX_TMR_SEL_EXT, AV3XX_TIMER1_BASE+AV3XX_TIMER_SEL);
 	/* prescale 10 */
@@ -117,6 +124,7 @@ ide_init_default_hwifs(void)
 	outw((CONFIG_ARM_CLK/10000)-1, AV3XX_TIMER1_BASE+AV3XX_TIMER_DIV);
 	/* freerun */
 	outw(AV3XX_TMR_MODE_FREERUN, AV3XX_TIMER1_BASE+AV3XX_TIMER_MODE);
+        
 
 }
 

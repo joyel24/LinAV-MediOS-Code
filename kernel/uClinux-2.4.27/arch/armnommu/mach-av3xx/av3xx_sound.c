@@ -26,8 +26,6 @@
 #include <linux/fs.h>
 #include <linux/interrupt.h>
 #include <linux/types.h>
-/*#include <linux/soundcard.h>
-#include <linux/sound.h>*/
 #include <asm/arch/hardware.h>
 #include <asm/arch/av3xx_common.h>
 #include <asm/arch/av3xx_mas.h>
@@ -48,23 +46,22 @@ static struct file_operations  av3xx_dsp_fops = {
 int av_dsp_dev_count = 0;
 int av_dsp_state_count = 0;
 spinlock_t av_dsp_dev_lock,av_dsp_state_lock;
+
+#ifdef OLD_PLAYER
+int mp3_playback_stoped = 0;
 DECLARE_WAIT_QUEUE_HEAD(dsp_queue);
-
-//int decRunning=0;
-//char * buff=NULL;
 int pos=0;
-//int size=1020*2;
-
 int running=0;
 int lastBuff=0;
-
 char * cur,*tmp,*nxt;
 int cur_s,nxt_s;
 int in_pause=0;
-
 int fd;
-
 DECLARE_TASKLET(do_read_more,mp3_read_more,0);
+#else
+int playing=0;   // 1 if we are sending data to MAS, 0 if no more data to send or Stop mode or Pause mode
+int in_pause=0;     // 1 if in Pause mode
+#endif
 
 struct mp3_play * data;
 
@@ -77,16 +74,19 @@ int av3xx_dsp_open(struct inode *inode, struct file *filp)
 	}
 	av_dsp_dev_count++;
 	spin_unlock(&av_dsp_dev_lock);
-		
+	
+#ifdef OLD_PLAYER	
 	running=0;
 	lastBuff=0;
 	in_pause=0;
 	pos=0;
+#else
+        playing=0;
+        in_pause=0;
+#endif
 	
-	disable_irq(MAS_INTERRUPT);
-	
+	disable_irq(MAS_INTERRUPT);	
 	ini_mas_for_mp3();
-
 	printk("DSP is now open\n");
 	return 0;
 }
@@ -113,36 +113,49 @@ int av3xx_dsp_close(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-int cont=0;
-
 void av3xx_dsp_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 {
-	spin_lock(&av_dsp_state_lock);	
-	if(running)
-	{		
-		if(pos<cur_s)
-		{
-			pos+=av3xx_mas_pio_write((void *) (cur+pos),60);
-		}
-		
-		if(pos>=cur_s)
-		{
-			if(nxt==NULL)
-			{
-				running=0;
-			}
-			else
-			{	
-				tmp=cur;
-				cur=nxt;
-				nxt=NULL;
-				cur_s=nxt_s;
-			}
-			tasklet_schedule(&do_read_more);
-			pos=0;
-		}
-	}
-	spin_unlock(&av_dsp_state_lock);
+#ifdef OLD_PLAYER
+    spin_lock(&av_dsp_state_lock);	
+    if(running)
+    {
+        if(pos<cur_s)
+        {
+            pos+=av3xx_mas_pio_write((void *) (cur+pos),60);
+        }
+        
+        if(pos>=cur_s)
+        {
+            if(nxt==NULL)
+            {
+                running=0;
+            }
+            else
+            {
+                tmp=cur;
+                cur=nxt;
+                nxt=NULL;
+                cur_s=nxt_s;
+            }
+            tasklet_schedule(&do_read_more);
+            pos=0;
+        }
+    }
+    spin_unlock(&av_dsp_state_lock);
+#else
+    if(playing)
+    {
+        data->buffer_read+=av3xx_mas_pio_write((void *) (data->buffer+data->buffer_read),120); 
+            
+        if(data->buffer_read>= data->buffer_len)
+        {
+            data->buffer_read=0;
+        }
+        
+        if(data->buffer_read==data->buffer_write && data->endOfFile)
+            playing=0;
+    }
+#endif
 }
 
 ssize_t av3xx_dsp_write(struct file *filp, const char *buf, size_t count, loff_t *ppos)
@@ -166,13 +179,26 @@ int av3xx_dsp_ioctl(struct inode *inode, struct file *filp,unsigned int cmd, uns
 		case AV_DSP_INI_MP3:
 			return ini_mp3_playback((struct mp3_play *)arg);
 		case AV_DSP_START_MP3:
-			return start_mp3_playback();
+                        return start_mp3_playback();
 		case AV_DSP_STOP_MP3:
-			return stop_mp3_playback();
-			break;
+#ifdef OLD_PLAYER
+                        if(!mp3_playback_stoped)
+                        {
+			    stop_mp3_playback();
+                            mp3_playback_stoped=1;
+                        }
+			return 1;
+#else                        
+                        return stop_mp3_playback();
+#endif
 		case AV_DSP_PAUSE_MP3:
+#ifdef OLD_PLAYER
 			running=0;
 			in_pause=1;
+#else
+                        playing=0;
+			in_pause=1;
+#endif                    
 			break;
 		case AV_DSP_FRAME_CNT:
 			val=(int*)arg;
@@ -205,6 +231,7 @@ int av3xx_dsp_ioctl(struct inode *inode, struct file *filp,unsigned int cmd, uns
 	return 0;
 }
 
+#ifdef OLD_PLAYER
 void mp3_read_more(void)
 {
 	int nb_read;
@@ -238,19 +265,19 @@ void mp3_read_more(void)
 		if(!running)
 		{
 			data->finished=1;
-			stop_mp3_playback();
+                        if(!mp3_playback_stoped)
+                        {
+			    stop_mp3_playback();
+                            mp3_playback_stoped=1;
+                        }
 		}
 	}
 }
-
-//*************************************************************************************************************************
-//*************************************************************************************************************************
-// Appel à close sur fd ??????????????????????????????????????,
-//*************************************************************************************************************************
-//*************************************************************************************************************************
+#endif
 
 int start_mp3_playback()
 {
+#ifdef OLD_PLAYER
 	if(in_pause)
 	{
 		running=1;
@@ -262,27 +289,64 @@ int start_mp3_playback()
 		mp3_read_more();
 	}
 	return 0;
+#else
+        if(in_pause)
+	{
+		playing=1;
+                in_pause=0;
+		av3xx_dsp_interrupt(MAS_INTERRUPT,NULL,NULL);
+	}
+	else
+	{
+                playing=1;
+		enable_irq(MAS_INTERRUPT);
+                av3xx_dsp_interrupt(MAS_INTERRUPT,NULL,NULL);                
+	}
+	return 0;
+#endif        
 }
 
 int stop_mp3_playback(void)
 {
+#ifdef OLD_PLAYER
 	int i=0;
 	running=0;
 	disable_irq(MAS_INTERRUPT);
 	for(i=0;i<100;i++);
 	close(fd);
-	if(nxt==NULL)
-		kfree(tmp);
-	else
-		kfree(nxt);
-	kfree(cur);
+	if(nxt!=NULL)
+        {
+	    kfree(nxt);
+            nxt=NULL;
+        }
+        
+        if(tmp!=NULL)
+        {
+            kfree(tmp);
+            tmp=NULL;
+        }
+        
+        if(cur!=NULL)
+        {
+	    kfree(cur);
+            cur=NULL;
+        }
+            
+        printk("freeing buffers\n");
 	return 0;
+#else
+        int i=0;
+	playing=0;
+	disable_irq(MAS_INTERRUPT);
+	for(i=0;i<100;i++);
+	return 0;
+#endif
 }
 
 int ini_mp3_playback(struct mp3_play * arg)
 {
-	data=arg;
-	
+#ifdef OLD_PLAYER
+	data=arg;	
 	// allocating 2 buffers
 	cur=(char*)kmalloc(data->size,GFP_KERNEL);
 	if(!cur)
@@ -296,16 +360,14 @@ int ini_mp3_playback(struct mp3_play * arg)
 		printk("Can't allocate buff 1\n");
 		goto err_buff1;
 	}
-	nxt=NULL;
-	
+	nxt=NULL;	
 	//opening the file	
 	fd=open(data->filename,O_RDONLY,0);
 	if(fd<0)
 	{
 		printk("Can't open file %s\n",data->filename);
 		goto err_file;
-	}
-	
+	}	
 	//setting up some data
 	data->pos=0;
 	pos=0;
@@ -313,7 +375,7 @@ int ini_mp3_playback(struct mp3_play * arg)
 	in_pause=0;
 	running=0;
 	data->finished=0;
-	
+	mp3_playback_stoped=0;
 	return 0;
 	
 err_file:
@@ -322,6 +384,11 @@ err_buff1:
 	kfree(cur);
 err_buff0:
 	return -1;
+#else
+    data=arg;
+    playing=0;
+    return 0;
+#endif
 }
 
 
@@ -557,6 +624,9 @@ static int __init av3xx_sound_init(void)
 	av3xx_mas_reset();
 	av3xx_mas_read_version(&version);
 	oldVol=av3xx_mas_control_config(MAS_GET,MAS_VOLUME,0);
+#ifndef OLD_PLAYER
+        playing=0;
+#endif
 	disable_irq(MAS_INTERRUPT);
 	if((ret=request_irq(MAS_INTERRUPT,av3xx_dsp_interrupt,0,"av3xx_mas",NULL))<0)
 	{
@@ -564,6 +634,7 @@ static int __init av3xx_sound_init(void)
 		printk(KERN_WARNING "Unable to set our irq handler (irq=%d)\n",MAS_INTERRUPT);
 		return ret;
 	}
+        disable_irq(MAS_INTERRUPT);
 	printk("MAS%x:%d:%c%d\n",version.major_number,version.derivate,version.char_order_version,version.digit_order_version);
 	return 0;
 }

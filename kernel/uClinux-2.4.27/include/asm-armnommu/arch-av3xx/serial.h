@@ -32,21 +32,24 @@
 	type: PORT_UNKNOWN, \
 	iomem_base: (u8*)AV3XX_UART0_BASE, \
 	iomem_reg_shift: 1, \
-	io_type: SERIAL_IO_MEM \
+	io_type: SERIAL_IO_MEM, \
+        line: 0 \
 	}/*,	 \
 	{  \
 	magic: 0, \
         baud_base: BASE_BAUD, \
 	port: 0, \
 	irq: AV3XX_IRQ_UART1, \
-	flags: STD_COM_FLAGS, \
+	flags: STD_COM_FLAGS|B9600, \
 	type: PORT_UNKNOWN, \
 	iomem_base: (u8*)AV3XX_UART1_BASE, \
 	iomem_reg_shift: 1, \
-	io_type: SERIAL_IO_MEM \
-	}	 */ 
+	io_type: SERIAL_IO_MEM, \
+        line: 1 \
+	}	*/ 
 #define EXTRA_SERIAL_PORT_DEFNS
 
+   
 
 /* registers */
 #define UART_DTRR  0  /* Data Transmission/Reception Register */

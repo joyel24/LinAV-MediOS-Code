@@ -10,111 +10,127 @@
 * KIND, either express of implied.
 *
 */
-
 #include <asm/io.h>
-#include <asm/types.h>
-#include <asm/arch/hardware.h>
 #include <asm/arch/av3xx_osd.h>
+#include <asm/arch/hardware.h>
 
-u32 osdLookupOffsetLO[4] = { AV3XX_OSD_SDRAM_OFF_VID0 ,
+int osdLookupOffsetLO[4] = { AV3XX_OSD_SDRAM_OFF_VID0 ,
                              AV3XX_OSD_SDRAM_OFF_VID1 ,
 							 AV3XX_OSD_SDRAM_OFF_BITMAP0 ,
 							 AV3XX_OSD_SDRAM_OFF_BITMAP1 };
-u32 osdLookupOffsetHI[4] = { AV3XX_OSD_SDRAM_OFF_HI_VID0_1 ,
+int osdLookupOffsetHI[4] = { AV3XX_OSD_SDRAM_OFF_HI_VID0_1 ,
                              AV3XX_OSD_SDRAM_OFF_HI_VID0_1 ,
 							 AV3XX_OSD_SDRAM_OFF_HI_BITMAP0_1,
 							 AV3XX_OSD_SDRAM_OFF_HI_BITMAP0_1 };
+							 
+int AV3XX_OSD_OFF_HI_SHIFT[4] = {0,8,0,8};
 
-
-void osdSetCursor2Bitmap (u16 index, u16 data)
+int osdRGB2Packed(int r, int g, int b)
 {
-	outw(data,AV3XX_OSD_CURSOR2_DATA);           /* Setup data reg */
+	int y = (306*r + 601*g + 117*b) >> 10 ; 
+	int cb = ((-173*r -339*g + 512*b) >> 10) + 128;
+	int cr = ((512*r - 429*g - 83*b) >> 10) + 128;
 
-	outw((((inw(AV3XX_OSD_CURSOR2_ADD_LATCH) & 0xFF) << 8) | index) | 0x80,
-			AV3XX_OSD_CURSOR2_ADD_LATCH);       /* Set the data... */
+	return  (cr << 16) | (y << 8) | cb;
 }
 
-void osdSetBorderColor (u16 color)
+void osdSetCursor2Bitmap (int index, int data)
+{
+    int val;
+    outw(data,AV3XX_OSD_CURSOR2_DATA);           /* Setup data reg */
+    val=inw(AV3XX_OSD_CURSOR2_ADD_LATCH) & 0xFF;
+    index=index<<8;
+    outw(val | index | 0x80,AV3XX_OSD_CURSOR2_ADD_LATCH);       /* Set the data... */
+}
+
+void osdSetBorderColor (int color)
 {
 	outw((inw(AV3XX_OSD_CONF) & 0xFF00) | color,AV3XX_OSD_CONF);
 }
 
-void osdSetMainConfig (u16 config)
+void osdSetMainConfig (int config)
 {
 	outw(((inw(AV3XX_OSD_CONF) & 0xFF) << 8) | config,AV3XX_OSD_CONF);
 }
 
-void osdSetMainShift (u16 horizontal,u16 vertical)
+void osdSetMainShift (int horizontal,int vertical)
 {
 	outw(horizontal,AV3XX_OSD_BITMAP0_SHIFT_HORIZ);
 	outw(vertical,AV3XX_OSD_BITMAP0_SHIFT_VERT);
 }
 
-void osdSetPallette (u16 Y, u16 Cr, u16 Cb, u16 index)
+void osdSetPallette (int Y, int Cr, int Cb, int index)
 {
 	int val;
+        Y&=0xFF;
+        Cr&=0xFF;
+        Cb&=0xFF;
+	while((inw(AV3XX_OSD_PAL_ACCESS_STATUS)&0x1) != 0)
+		/* nothing */ ;
+        outw((Y << 8) | Cb,AV3XX_OSD_PAL_DATA_WRITE);
+	//outw((Cr << 8) | index,AV3XX_OSD_PAL_INDEX_WRITE);
+
 	while((inw(AV3XX_OSD_PAL_ACCESS_STATUS)&0x1) != 0)
 		/* nothing */ ;
 
-	outw((Cr << 8) | index,AV3XX_OSD_PAL_INDEX_WRITE);
-
-	while((inw(AV3XX_OSD_PAL_ACCESS_STATUS)&0x1) != 0)
-		/* nothing */ ;
-
-	outw((Y << 8) | Cb,AV3XX_OSD_PAL_DATA_WRITE);
+	//outw((Y << 8) | Cb,AV3XX_OSD_PAL_DATA_WRITE);
+        outw((Cr << 8) | index,AV3XX_OSD_PAL_INDEX_WRITE);
+        
+        while((inw(AV3XX_OSD_PAL_ACCESS_STATUS)&0x1) != 0)
+        /* nothing */ ;
 }
 
-void osdSet16CPallete (int bankN, u16 index, u16 value)
+void osdSet16CPallette (int bankN, int index, int value)
 {
-	u32 val=inw(AV3XX_GET_BANK_ADDR(bankN,index));
+	int val=inw(AV3XX_GET_BANK_ADDR(bankN,index));
 	val &= 0xFF00 >> AV3XX_GET_BANK_SHIFT(index);
 	val |= value << AV3XX_GET_BANK_SHIFT(index);
 	outw(val,AV3XX_GET_BANK_ADDR(bankN,index));
 }
 
-void osdSetAltOffset (u32 address)
+void osdSetAltOffset (int address)
 {
-	u32 offset = address - 0x03000000;
+	int offset = address - 0x03000000;
 	offset = offset >> 5;
 
 	outw(offset,AV3XX_OSD_ALT_VID_OFF_HI);
 	outw(offset>>16,AV3XX_OSD_ALT_VID_OFF_LO);
 }
 
-void osdSetComponentOffset (int component, u32 address)
+void osdSetComponentOffset (int component, int address)
 {
-	u32 val;
-	u32 offset = address - 0x03000000;
+	int val;
+	int offset = address - 0x03000000;
 
 	offset = offset >> 5;
 	outw(offset,osdLookupOffsetLO[component]);
 
 	offset = offset >> 16;
 	val=inw(osdLookupOffsetHI[component]);
-	val &= 0xFF00 >> AV3XX_OSD_OFF_HI_SHIFT(component);
-	val |= offset << AV3XX_OSD_OFF_HI_SHIFT(component);
+	val &= 0xFF00 >> AV3XX_OSD_OFF_HI_SHIFT[component];
+	val |= offset << AV3XX_OSD_OFF_HI_SHIFT[component];
 
 	outw(val,osdLookupOffsetHI[component]);
 }
 
-void osdSetComponentSize (int component, u16 width, u16 height)
+void osdSetComponentSize (int component, int width, int height)
 {
 	outw(width,AV3XX_OSD_COMP_W(component));
 	outw(height,AV3XX_OSD_COMP_H(component));
 }
 
-void osdSetComponentPosition (int component, u16 x, u16 y)
+void osdSetComponentPosition (int component, int x, int y)
 {
 	outw(x,AV3XX_OSD_COMP_X(component));
 	outw(y,AV3XX_OSD_COMP_Y(component));
 }
 
-void osdSetComponentSourceWidth (int component, u16 width)
+void osdSetComponentSourceWidth (int component, int width)
 {
 	outw(width,AV3XX_OSD_COMP_BUFF_W(component));
 }
 
-void osdSetComponentConfig (int component, u16 config)
+void osdSetComponentConfig (int component, int config)
 {
 	if(component == AV3XX_OSD_VIDEO1)
 	{

@@ -107,9 +107,11 @@ void av3xx_init_irq(void)
 	outw(0xffff, AV3XX_INTC_IRQ1_STATUS);
 
 // setup irq on GIO
-	outb(0xff,AV3XX_GIO_ENABLE_IRQ);
+//	outb(0xff,AV3XX_GIO_ENABLE_IRQ);
 // setup corresponding GIO to input
-	outw(inw(AV3XX_GIO_DIRECTION0)|0xFF,AV3XX_GIO_DIRECTION0);
-printk("before calling stf\n");
-	stf();
+//	outw(inw(AV3XX_GIO_DIRECTION0)|0xFF,AV3XX_GIO_DIRECTION0);
+
+       
+        
+	//stf();
 }

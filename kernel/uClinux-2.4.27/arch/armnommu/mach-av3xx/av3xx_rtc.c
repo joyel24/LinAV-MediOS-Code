@@ -28,6 +28,8 @@ int av3xx_rtc_getTime(struct av_tm * valTime)
 	struct tm_pv pv_dt;
         int retVal;
         
+      //  printk("[I2C - rtc] before read\n");
+        
         retVal=av3xx_i2c_read(AV3XX_RTC_DEVICE, 0, (void*)(&pv_dt), 8);
 		
 	if(retVal<0)
@@ -36,6 +38,8 @@ int av3xx_rtc_getTime(struct av_tm * valTime)
 		return retVal;
 	}
 	
+      //  printk("[I2C - rtc] read success\n");
+        
 	pv_dt.tm_wday&=0x7;
     
 	valTime->tm_ms=pvToUser(pv_dt.tm_ms);
@@ -53,6 +57,7 @@ int av3xx_rtc_getTime(struct av_tm * valTime)
 int av3xx_rtc_setTime(struct av_tm *newTime)
 {
 	struct tm_pv pv_dt;
+        int retVal;
 	
 	pv_dt.tm_ms=userToPv(newTime->tm_ms);
 	pv_dt.tm_sec=userToPv(newTime->tm_sec);
@@ -63,9 +68,11 @@ int av3xx_rtc_setTime(struct av_tm *newTime)
 	pv_dt.tm_mon=userToPv(newTime->tm_mon);
 	pv_dt.tm_year=userToPv(newTime->tm_year-2000);
 	
-	if(av3xx_i2c_write(AV3XX_RTC_DEVICE, 0, (void*)(&pv_dt), 8)<0)
+        retVal=av3xx_i2c_write(AV3XX_RTC_DEVICE, 0, (void*)(&pv_dt), 8);
+        
+	if(retVal<0)
 	{
-		printk("[I2C - rtc] Error, writting");
+		printk("[I2C - rtc] Error, writting (err:%d)\n",retVal);
 		return -1;
 	}
 	return 0;
@@ -74,17 +81,45 @@ int av3xx_rtc_setTime(struct av_tm *newTime)
 int av3xx_rtc_init(void)
 {
 	unsigned char cb;
+        int retVal;
 	
-	if(av3xx_i2c_read(AV3XX_RTC_DEVICE, 0x0c, (void*)&cb, 1)<0)
+	cb=0x10;
+        if((retVal=av3xx_i2c_write(AV3XX_RTC_DEVICE, 0x13, (void*)&cb, 1))<0)
 	{
-		printk("[I2C - rtc] Error, reading");
+		printk("[I2C-rtc-ini] Step 1: Error, writting (err:%d)\n",retVal);
 		return -1;
-	}
-	cb &= ~0x40;                         // Make sure HT bit is not set
-	if(av3xx_i2c_write(AV3XX_RTC_DEVICE, 0x0c, (void*)&cb, 1)<0)
+	}  
+
+        /* Clear the Stop bit if it is set */
+        if((retVal=av3xx_i2c_read(AV3XX_RTC_DEVICE, 0x01, (void*)&cb, 1))<0)
 	{
-		printk("[I2C - rtc] Error, writting");
+		printk("[I2C-rtc-ini] Step 2: Error, reading (err:%d)\n",retVal);
 		return -1;
-	}
+	}        
+        if(cb & 0x80)
+        {
+            cb=0x00;
+            if((retVal=av3xx_i2c_write(AV3XX_RTC_DEVICE, 0x01, (void*)&cb, 1))<0)
+            {
+                    printk("[I2C-rtc-ini] Step 3: Error, writting (err:%d)\n",retVal);
+                    return -1;
+            }
+        }
+         
+        if((retVal=av3xx_i2c_read(AV3XX_RTC_DEVICE, 0x0c, (void*)&cb, 1))<0)
+        {
+                printk("[I2C-rtc-ini] Step 4: Error, reading (err:%d)\n",retVal);
+                return -1;
+        }
+        if(cb&0x40)
+        {
+            cb &= ~0x40;                         // Make sure HT bit is not set
+            if((retVal=av3xx_i2c_write(AV3XX_RTC_DEVICE, 0x0c, (void*)&cb, 1))<0)
+            {
+                    printk("[I2C-rtc-ini] Step 5: Error, writting (err:%d)\n",retVal);
+                    return -1;
+            }
+        }
+        printk("av3xx-rtc driver by oxygen77@free.fr\n");
 	return 0;
 }

@@ -394,6 +394,8 @@ static void rest_init(void)
  *	Activate the first processor.
  */
 
+void display_startup_screen(void);
+ 
 asmlinkage void __init start_kernel(void)
 {
 	char * command_line;
@@ -405,6 +407,7 @@ asmlinkage void __init start_kernel(void)
  */
 	lock_kernel();
 	printk(linux_banner);
+        display_startup_screen();
 	setup_arch(&command_line);
 	printk("Kernel command line: %s\n", saved_command_line);
 	parse_options(command_line);
@@ -423,6 +426,7 @@ asmlinkage void __init start_kernel(void)
 	 * this. But we do want output early, in case something goes wrong.
 	 */
 	console_init();
+        
 #ifdef CONFIG_MODULES
 	init_modules();
 #endif
@@ -601,6 +605,8 @@ static void run_init_process(char *init_filename)
 
 extern void prepare_namespace(void);
 
+extern int av3xx_ide_init(void);
+
 static int init(void * unused)
 {
 	struct files_struct *files;
@@ -614,7 +620,7 @@ static int init(void * unused)
 	 * we're essentially up and running. Get rid of the
 	 * initmem segments and start the user-mode stuff..
 	 */
-	free_initmem();
+	//free_initmem();
 	unlock_kernel();
 	
 	/*
@@ -640,6 +646,8 @@ static int init(void * unused)
 	 * trying to recover a really broken machine.
 	 */
 
+        av3xx_ide_init();
+        
 	if (execute_command)
 		run_init_process(execute_command);
 
