@@ -29,10 +29,8 @@ ERROR_CODE API_TASK_GETHANDLE   (HTASK* phTask);
 ERROR_CODE API_TASK_SLEEP       (unsigned long nMilliseconds);
 ERROR_CODE API_TASK_SENDMESSAGE (HTASK hTask, MESSAGE msg);
 ERROR_CODE API_TASK_PEEKMESSAGE ();
-
-ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes);
-ERROR_CODE API_FREE             (void* pvBuffer);
-ERROR_CODE API_MEMAVAIL         (unsigned long* pnBytes);
+ERROR_CODE API_TASK_WAITMESSAGE ();
+ERROR_CODE API_TASK_TERMINATE   ();
 
 ERROR_CODE API_MALLOC           (void** ppvBuffer, unsigned long nBytes);
 ERROR_CODE API_FREE             (void* pvBuffer);
@@ -42,10 +40,13 @@ ERROR_CODE API_PIPE_CREATE      (HPIPE* phPipe);
 ERROR_CODE API_PIPE_DELETE      (HPIPE hPipe);
 ERROR_CODE API_PIPE_SEND        (HPIPE hPipe, void* pData, unsigned long nBytesToSend);
 ERROR_CODE API_PIPE_RECV        (HPIPE hPipe, void* pData, unsigned long nBytesToReceive);
+ERROR_CODE API_PIPE_TEST        (HPIPE hPipe);
+
 ERROR_CODE API_CRITSEC_CREATE   (HCRITSEC* phCritSec);
 ERROR_CODE API_CRITSEC_DELETE   (HCRITSEC hCritSec);
 ERROR_CODE API_CRITSEC_ENTER    (HCRITSEC hCritSec);
 ERROR_CODE API_CRITSEC_LEAVE    (HCRITSEC hCritSec);
+ERROR_CODE API_CRITSEC_TRYENTER (HCRITSEC hCritSec);
 
 ERROR_CODE API_GFX              (int cmd, GFX_DATA * gfxD, void * pvData);
 ERROR_CODE API_PRINTF           (const char * fmt, va_list args);

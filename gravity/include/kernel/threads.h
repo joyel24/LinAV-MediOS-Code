@@ -13,8 +13,9 @@
 #ifndef __THREADS_H
 #define __THREADS_H
 
-#include <kernel/errors.h>
 #include <types.h>
+#include <kernel/errors.h>
+#include <kernel/pipes.h>
 
 #define TASK_STACK_SIZE 16384
 

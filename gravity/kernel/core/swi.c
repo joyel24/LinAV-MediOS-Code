@@ -30,8 +30,19 @@ __IRAM_CODE int kcswi_handler (
    {
 	case nAPI_TASK_CREATE:      //(void* pvCode, void* pParam, HTASK* phTask)                     { SAVE; asm("swi 1"); LOAD; }
 	{
+		TASK_INFO* pTCB = 0;
+		API_MALLOC (&pTCB, sizeof(TASK_INFO));
+		if (!pTCB)
+			return ERR_NOMEMORY;
+
+		API_MALLOC (&pTCB->pStack, 16384 /*nStackSize*/ );
+
+		kInitialiseTCBVariables (pTCB, 16384 /*nStackSize*/, "USER" /*pszTaskName*/);
+		unsigned char* pTopOfStack = (unsigned char*)pTCB->pStack;
+		pTopOfStack += pTCB->nStackSize - 4;
+		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, nParam1 /*pvTaskCode*/, nParam2 /*pParams*/);
+
 		__cli ();
-		TASK_INFO* pTCB = kcreate_tcb ((void*)nParam1, 16384, (void*)nParam2, "SOFT");
 		if (nParam3)
 			*((TASK_INFO**)nParam3) = pTCB;
 		kadd_tcb (&g_pTaskRing, pTCB);
