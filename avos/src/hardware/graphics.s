@@ -181,7 +181,7 @@ gsloop: push {r6}
         ldrb r6, [r7]
         cmp r6, #0
          beq gsdone
-
+         
         lsl r6, #2
         ldr r6, [r4, r6]
         cmp r6, #0

@@ -74,7 +74,7 @@ int main() {
     graphicsBoxf(&screenVideo, 80, 60, 100, 100, 0x40e050);
     
     
-    graphicsString(&screenVideo, 2, 34, &spriteShadow, &shadow_, 13, 0, "ABCDEFGHIJKLMNOPQRSTU");
+    graphicsString(&screenVideo, 2, 34, &spriteShadow, &shadow_, 13, 0, "ABC DEF GHI JKL MNOPQ");
     graphicsString(&screenVideo, 2, 48, &sprite5_8, &std5x8_, 6, 1, " .,<>/?;':[]{}|=-+_)(*&^%$#@!");
     pal32[1] = 0x503020;
     graphicsString(&screenVideo, 100, 30, &sprite7_13, &std7x13_, 0, 14, "Font drawing!");
