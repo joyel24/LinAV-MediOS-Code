@@ -54,7 +54,7 @@ __IRAM_DATA struct mp3_play * data;
         outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);               \
         /* wait for RTR to be set */                          \
         while(!(inw(GIO_BITSET1) & (0x1<<(GIO_MAS_RTR-16))))  \
-            nb_loop++;                                        \
+            /*nothing*/;                                        \
         /* clear latch (lower raise PR) */                    \
         outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);             \
     }                                                         \
@@ -74,8 +74,7 @@ __IRAM_CODE void dsp_interrupt(int irq)
             toSend=data->buffer_write-data->buffer_read;*/
         buffer=data->buffer+data->buffer_read;    
         send=SEND_TO_MAS(buffer,toSend);
-        if(send>0)
-            nb_send++;
+        
         data->buffer_read+=send;
         
         if(data->buffer_read>= data->buffer_len)
@@ -163,11 +162,11 @@ int mas_stop_mp3_app(void)
     while(1)
     {
         i=mas_app_running(MASS_APP_ANY);
-        if(i<0)
+        /*if(i<0)
         {
             printk("error getting app status (trying to stop)\n");
             return 0;
-        }
+        }*/
         if(i==0)
             break;
     }
@@ -177,15 +176,16 @@ int mas_stop_mp3_app(void)
 int mas_start_mp3_app(void)
 {
     int i;
-    mas_app_select(MASS_APP_MPEG3_DEC | MASS_APP_MPEG2_DEC);	
+    mas_app_select(MASS_APP_MPEG3_DEC | MASS_APP_MPEG2_DEC);
     while(1)
     {
         i=mas_get_D0(MAS_APP_SELECT);
-        if(i<0)
+        /*if(i<0)
         {
             printk("error getting app status (trying to start)\n");
+            
             return 0;
-        }
+        }*/
         if((i & MASS_APP_MPEG3_DEC) && (i & MASS_APP_MPEG2_DEC))
             break;
     }
