@@ -28,7 +28,7 @@ static int fileSize;
 static int masReady=0;
 
 int main(int argc, char * * argv) {
-    unsigned int c, v, b, a, i;
+    unsigned int c, v, b;
     unsigned int vol=0x60;
     unsigned int speed=0x4800;
     
@@ -77,10 +77,10 @@ int main(int argc, char * * argv) {
 	int fileHandle;
 	fileHandle = fopen(argv[1], "r");
 
-	if (fileHandle < 0) return;
+	if (fileHandle < 0) return -1;
 
 	fileSize = fsize(fileHandle);
-	if (fileSize > 0x00600000) return;
+	if (fileSize > 0x00600000) return -1;
 
     fread(fileHandle, mp3Buff, fileSize);
 	fclose(fileHandle);
@@ -109,7 +109,7 @@ int main(int argc, char * * argv) {
     
     debug("gioDirections %08x\n", c);
     
-    gioSetAllDirectionsA(c & 0xffff00ff | 0xf5);
+    gioSetAllDirectionsA((c & 0xffff00ff) | 0xf5);
 
     c = gioGetAllDirectionsA();
     
@@ -177,7 +177,7 @@ int main(int argc, char * * argv) {
             
     while(1) {
         c = buttonsGetStatusA();
-        if (c & BUTTONS_AV300_OFF) return;
+        if (c & BUTTONS_AV300_OFF) return 0;
 
         if (c & BUTTONS_AV300_UP) {
             if (vol<0x7f) {

@@ -19,11 +19,13 @@ ALL:$(TARGET)
 
 # Rule to make executable
 $(TARGET): $(OBJS)
+	$(MAKE) -C plugins
 	$(LD) -N -Ttext 0x03400000 -e main2 -o $(TARGET).elf $(OBJS) $(LDFLAG)
 	$(OBJCOPY) -O binary $(TARGET).elf $(TARGET)
 	@$(RM) -f $(TARGET).elf
 
 clean:
+	$(MAKE) -C plugins clean
 	@echo "**** Cleaning..."
 	@rm -f include/*~ include/*.bak
 	@rm -f *.o *.O *.bak *~

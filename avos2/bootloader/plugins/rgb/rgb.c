@@ -15,7 +15,7 @@ static char imBuff[320*240*3];
 static unsigned int * screenDirect = (unsigned int*) 0x03c00000;
 
 int main(int argc, char * * argv) {
-    int i, j, r, g, b, v, c, vmode=0;
+    int i, j=0, c, vmode=0;
 
 	inifatinfo();
 	inidir();
@@ -28,10 +28,10 @@ int main(int argc, char * * argv) {
 	int fileHandle;
 	fileHandle = fopen(argv[1], "r");
 
-	if (fileHandle < 0) return;
+	if (fileHandle < 0) return -1;
 
 	int fileSize = fsize(fileHandle);
-	if (fileSize != 320*240*3) return;
+	if (fileSize != 320*240*3) return -1;
 
     fread(fileHandle, imBuff, fileSize);
 	fclose(fileHandle);
@@ -65,7 +65,7 @@ int main(int argc, char * * argv) {
 
     while(1) {
         while(!((c=buttonsGetStatusA()) & BUTTONS_AV300_ANY)) {}
-        if (c&BUTTONS_AV300_OFF) break;
+        if (c&BUTTONS_AV300_OFF) return 0;
         if (c&BUTTONS_AV300_MENU1) {
             vmode++;
             if (vmode==3) vmode=0;
