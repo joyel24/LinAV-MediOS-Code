@@ -22,11 +22,7 @@ loop1:
         
         .thumb
         
-        ldr r0, =(lcdInitT+1)
-        mov r1, #1
-        mov lr, r1
-        add lr, pc
-        bx r0
+        callThumb r0, lcdInitT
    
         ldr r3, =lcdVideoBuffer2
         ldr r4, =sprite
@@ -52,40 +48,22 @@ lcop:   mov r0, #0
         mov r1, #0
         ldr r2, =message1a
         ldr r3, =0xfcfc
-        ldr r4, =(lcdPutsT+1)
-        mov r5, #1
-        mov lr, r5
-        add lr, pc
-        bx r4
+        callThumb r4, lcdPutsT
 
         mov r0, #4
         mov r1, #12
         ldr r2, =message1c
         ldr r3, =0xfafa
-        ldr r4, =(lcdPutsT+1)
-        mov r5, #1
-        mov lr, r5
-        add lr, pc
-        bx r4
+        callThumb r4, lcdPutsT
         
         mov r0, #4
         ldr r1, =36*6
         ldr r2, =message2a
         ldr r3, =0xfbfb
-        ldr r4, =(lcdPutsT+1)
-        mov r5, #1
-        mov lr, r5
-        add lr, pc
-        bx r4
-        
-        
+        callThumb r4, lcdPutsT
+                
 loopr:
-        
-        ldr r0, =(buttonsGetStatusT+1)
-        mov r1, #1
-        mov lr, r1
-        add lr, pc
-        bx r0
+        callThumb r0, buttonsGetStatusT
 
         ldr r1, =0x777
         eor r0, r1
@@ -181,23 +159,13 @@ notmenu3:
         
         ldr r0, =message1bh
         mov r1, r7
-        ldr r2, =(hex8T+1)
-        mov r3, #1
-        mov lr, r3
-        add lr, pc
-        bx r2
-        
+        callThumb r2, hex8T        
         
         mov r0, #4
         mov r1, #6
         ldr r2, =message1b
         ldr r3, =0xfbfb
-        ldr r4, =(lcdPutsT+1)
-        mov r5, #1
-        mov lr, r5
-        add lr, pc
-        bx r4
-        
+        callThumb r4, lcdPutsT
         
         ldr r0, saoff
         ldr r1, =caoff
@@ -207,11 +175,7 @@ notmenu3:
         str r0, [r1, #0]
 lfop:
         ldr r0, caoff
-        ldr r2, =(buildLine+1)
-        mov r1, #1
-        mov lr, r1
-        add lr, pc
-        bx r2
+        callThumb r2, buildLine
 
         ldr r0, caoff
         add r0, r0, #0x10
@@ -222,11 +186,7 @@ lfop:
         ldr r1, cyoff
         ldr r2, =messagf1
         ldr r3, =0xffff
-        ldr r4, =(lcdPutsT+1)
-        mov r5, #1
-        mov lr, r5
-        add lr, pc
-        bx r4
+        callThumb r4, lcdPutsT
         
         ldr r1, cyoff
         add r1, r1, #6
@@ -253,11 +213,7 @@ buildLine:
 
         ldr r0, =messagf1
         mov r1, r7
-        ldr r2, =(hex2T+1)
-        mov r3, #1
-        mov lr, r3
-        add lr, pc
-        bx r2
+        callThumb r2, hex2T
         
         mov r6, #8
         ldr r5, =messagf1h
@@ -289,14 +245,9 @@ good3:  cmp r2, #0x7e
         mov r2, #0x2e
 good4:
         strb r2, [r4, #1]       @ store a chr
-        
-        
+                
         mov r0, r5
-        ldr r2, =(hex4T+1)
-        mov r3, #1
-        mov lr, r3
-        add lr, pc
-        bx r2
+        callThumb r2, hex4T
         
         add r5, #4
         add r4, #2
