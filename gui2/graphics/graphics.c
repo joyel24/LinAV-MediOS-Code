@@ -405,7 +405,7 @@ void putC(int color, int bg_color, int x, int y, char s)
 void drawSprite(unsigned int * palette, SPRITE * sprite, int x, int y)
 {
 	tstXY(x,y);
-	default_gc->gops->drawSprite(sprite,palette,default_gc->transparent,x,y,default_gc->buffer);
+	default_gc->gops->drawSprite(palette,sprite,default_gc->transparent,x,y,default_gc->buffer);
 }
 
 void drawBITMAP(BITMAP * bitmap, int x, int y)
@@ -507,7 +507,7 @@ void drawImage(char * filename)
 	
 	x=(SCREEN_WIDTH-cinfo.output_width)/2;
 	y=(SCREEN_HEIGHT-cinfo.output_height)/2;
-	offset=buff->offset+x*4+y*buff->width*4;
+	offset=(char*)(buff->offset+x*4+y*buff->width*4);
 	
 	while(cinfo.output_scanline < cinfo.output_height)
 	{

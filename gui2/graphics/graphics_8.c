@@ -64,7 +64,7 @@ void graphics8_DrawHorizLine(int color, int width,char * offset)
 
 void graphics8_DrawSprite(PALETTE * palette,SPRITE * sprite, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
 {
-    void (*routine)(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+    /*void (*routine)(char * src, int width, int height, int bpline, PALETTE *palette, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
     if(sprite->type == 8)
     {
         graphics8_DrawBITMAP  (sprite,trsp,x,y, buff);
@@ -73,7 +73,23 @@ void graphics8_DrawSprite(PALETTE * palette,SPRITE * sprite, unsigned int trsp, 
     {
         routine=graphics8_Sprite_routines[sprite->type];
         routine(sprite->data,sprite->width,sprite->height,sprite->bpline,palette,trsp,x,y,buff);
+    }*/
+    
+    int i,j,index;
+    char * dest=getOffset(x,y,buff,char);
+    char * src=(char*)sprite->data;
+    
+    for(j=0;j<sprite->height;j++)
+    {
+    	for(i=0;i<sprite->width;i++)
+        {
+            index=INB(src+i);
+            OUTB(palette[index],dest+i);
+        }
+        dest+=buff->width;
+        src+=sprite->width; 
     }
+        
 }
 
 void graphics8_DrawBITMAP  (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
