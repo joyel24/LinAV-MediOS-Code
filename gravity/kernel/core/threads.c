@@ -55,7 +55,7 @@ void kthread_final_trap (int nRetCode)
 	API_TASK_TERMINATE ();
 }
 
-kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackSize, const char* pszTaskName)
+void kInitialiseTCBVariables (TASK_INFO* pTCB, unsigned long nStackSize, const char* pszTaskName)
 {
 	pTCB->nStackSize = nStackSize;
 	pTCB->pPrevTask  = 0;

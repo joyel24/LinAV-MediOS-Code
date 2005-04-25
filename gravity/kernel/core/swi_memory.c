@@ -9,6 +9,8 @@
 #include <kernel/kernel.h>
 #include <kernel/swi.h>
 #include <kernel/threads.h>
+#include <kernel/irq.h>
+#include <api.h>
 
 __IRAM_CODE int swi_memory_handler (
 	unsigned long nCmd,

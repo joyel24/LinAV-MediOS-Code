@@ -9,6 +9,8 @@
 #include <kernel/kernel.h>
 #include <kernel/swi.h>
 #include <kernel/usb_fw.h>
+#include <kernel/rtc.h>
+#include <kernel/bat_power.h>
 
 __IRAM_CODE int swi_device_handler (
 	unsigned long nCmd,

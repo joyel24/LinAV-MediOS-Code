@@ -24,7 +24,7 @@
 #include <kernel/gfxmgr.h>
 
 extern int gfx_swi_handler(int cmd,GFX_CONTEXT * gfxD, void * pvData);
-extern int fs_swi(int cmd,void * data1, void * data2);
+
 extern void user_printf(const char * fmt, va_list args);
 
 #define MAX(a,b) (a>b?a:b)

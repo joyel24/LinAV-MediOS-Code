@@ -12,6 +12,9 @@
 #include <stdarg.h>
 
 #include <sys_def/colordef.h>
+#include <kernel/irq.h>
+#include <api.h>
+#include <kernel/gfxmgr.h>
 
 #define MAX(a,b) (a>b?a:b)
 #define MIN(a,b) (a<b?a:b)
@@ -35,6 +38,7 @@ __IRAM_CODE int swi_gfx_handler (
 	{
 	case nAPI_GFX_OPEN_GRAPHICS:    //();
 	{
+            
 	}
 	break;
 
@@ -682,7 +686,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX:
 	{
-		printk ("nAPI_GFX call...\n");
+		//printk ("nAPI_GFX call...\n");
 
 		TASK_INFO* pTask = lock_task ();
 

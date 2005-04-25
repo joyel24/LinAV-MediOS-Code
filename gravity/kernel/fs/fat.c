@@ -22,6 +22,8 @@
 #include <kernel/disk.h>
 #include <kernel/kernel.h>
 
+#include <api.h>
+
 #define BYTES2INT16(array,pos) \
           (array[pos] | (array[pos+1] << 8 ))
 #define BYTES2INT32(array,pos) \

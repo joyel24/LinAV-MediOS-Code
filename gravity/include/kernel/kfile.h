@@ -34,13 +34,13 @@ extern void     init_file   (void);
 extern int      kfopen      (const char* pathname, int flags);
 extern int      kfclose     (int fd);
 extern int      kfsync      (int fd);
-extern ssize_t  kread       (int fd, void *buf, size_t count);
+extern ssize_t  kfread      (int fd, void *buf, size_t count);
 extern off_t    klseek      (int fildes, off_t offset, int whence);
 extern off_t    kftell      (int fd);
-extern int      kcreat      (const char *pathname, mode_t mode);
-extern ssize_t  kwrite      (int fd, const void *buf, size_t count);
-extern int      kremove     (const char* pathname);
-extern int      krename     (const char* path, const char* newname);
+extern int      kfcreat      (const char *pathname, mode_t mode);
+extern ssize_t  kfwrite      (int fd, const void *buf, size_t count);
+extern int      kfremove     (const char* pathname);
+extern int      kfrename     (const char* path, const char* newname);
 extern int      kftruncate  (int fd, off_t length);
 extern int      kfilesize   (int fd);
 

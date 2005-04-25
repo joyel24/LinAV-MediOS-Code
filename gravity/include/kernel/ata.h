@@ -63,7 +63,7 @@ typedef struct __ATA_CMD {
 } ata_cmd_s;
 
 //int  ata_RW_Sector     (unsigned int lba,int count,void * buffer,int direction);
-int  ata_RW_sector     (ata_cmd_s * ata_cmd);
+int  ata_process_cmd   (ata_cmd_s * ata_cmd);
 void ata_RW_Data       (void * buffer,int count,int direction,int use_dma);
 
 int  ata_identify      (int drive,char * buffer);

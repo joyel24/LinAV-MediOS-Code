@@ -10,7 +10,9 @@
 #include <kernel/kernel.h>
 #include <kernel/dsp.h>
 #include <kernel/io.h>
-#include <sys_def/file.h>
+#include <kernel/kfile.h>
+#include <api.h>
+#include <sys_def/string.h>
 
 void dsp_on ()
 {
@@ -62,9 +64,9 @@ ERROR_CODE load_dsp_program_hdd (const char* pszFilename)
 	}
 	else
 	{
-		nSize = filesize (fDSPCode);
-		API_MALLOC (&pDSPCode, nSize);
-		int nReaded = fread (fDSPCode, pDSPCode, nSize);
+		nSize = kfilesize (fDSPCode);
+		API_MALLOC ((void**)&pDSPCode, nSize);
+		int nReaded = kfread (fDSPCode, pDSPCode, nSize);
 		printk ("Program loaded into sdram (%d bytes)\n", nReaded);
 		kfclose (fDSPCode);
 	}

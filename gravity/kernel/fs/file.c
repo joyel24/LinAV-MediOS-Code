@@ -56,7 +56,7 @@ void init_file(void)
         openfiles[fd].busy=false;
 }
 
-int kcreat(const char *pathname, mode_t mode)
+int kfcreat(const char *pathname, mode_t mode)
 {
     (void)mode;
     return kfopen(pathname, O_WRONLY|O_CREAT|O_TRUNC);
@@ -243,7 +243,7 @@ int kfsync(int fd)
     return 0;
 }
 
-int kremove(const char* name)
+int kfremove(const char* name)
 {
     int rc;
     struct filedesc* file;
@@ -267,7 +267,7 @@ int kremove(const char* name)
     return 0;
 }
 
-int krename(const char* path, const char* newpath)
+int kfrename(const char* path, const char* newpath)
 {
     int rc, fd;
     DIR* dir;
@@ -531,7 +531,7 @@ static int readwrite(int fd, void* buf, int count, bool write)
     return nread;
 }
 
-ssize_t kwrite(int fd, const void* buf, size_t count)
+ssize_t kfwrite(int fd, const void* buf, size_t count)
 {
     if (!openfiles[fd].write) {
         return -1;
@@ -539,7 +539,7 @@ ssize_t kwrite(int fd, const void* buf, size_t count)
     return readwrite(fd, (void *)buf, count, true);
 }
 
-ssize_t kread(int fd, void* buf, size_t count)
+ssize_t kfread(int fd, void* buf, size_t count)
 {
     return readwrite(fd, buf, count, false);
 }

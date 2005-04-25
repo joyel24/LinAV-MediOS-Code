@@ -28,6 +28,8 @@
 #include <kernel/kernel.h>
 #include <kernel/bat_power.h>
 
+#include <api.h>
+
 /* Partition table entry layout:
    -----------------------
    0: 0x80 - active
@@ -187,6 +189,7 @@ void identify_disk(int drive, struct hd_info_s * hd_info)
     kfree(buffer);
 }  
 
+/*
 int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direction)
 {
     ata_cmd_s * cmd=(ata_cmd_s *)kmalloc(sizeof(ata_cmd_s));
@@ -199,10 +202,11 @@ int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direct
     cmd->use_dma=ATA_WITH_DMA;
     cmd->drive=drive;
             
-    res=ata_RW_sector(cmd);
+    res=ata_process_cmd(cmd);
     kfree(cmd);
     return res;
 }
+*/
 
 void printPartition_info(struct partition_info * partition_list)
 {

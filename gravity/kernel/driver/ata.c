@@ -55,7 +55,7 @@ extern struct timer_s hd_timer;
     }                           \
     })
 
-int ata_RW_sector(ata_cmd_s * ata_cmd)
+int ata_process_cmd(ata_cmd_s * ata_cmd)
 {
     int i,j;
     
@@ -151,7 +151,7 @@ int ata_RW_sector(ata_cmd_s * ata_cmd)
     }    
     return 0;
 }
-
+#if 0
 void ata_RW_Data(void * buffer,int count,int direction,int use_dma)
 {
     int i;   
@@ -215,6 +215,7 @@ void ata_RW_Data(void * buffer,int count,int direction,int use_dma)
             }
     }
 }
+#endif
 
 int ata_sleep(void)
 {
@@ -321,7 +322,7 @@ int ata_identify(int drive,char * buffer)
     
     cmd->data=buffer;
     cmd->xfer_dir=ATA_DO_IDENT;
-    res=ata_RW_sector(cmd);
+    res=ata_process_cmd(cmd);
     kfree(cmd);
     return res;
 }

@@ -23,6 +23,8 @@
 
 #include <kernel/bflat.h>
 
+#include <api.h>
+
 #define swap_val(x) (                \
             ((x>>24) & 0x000000FF) |   \
             ((x>> 8) & 0x0000FF00) |   \
@@ -82,7 +84,7 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
         return -1;
     }
     
-    if((ret=kread(fd_bflat,(void*)&header,sizeof(struct bflat_header)))<sizeof(struct bflat_header))
+    if((ret=kfread(fd_bflat,(void*)&header,sizeof(struct bflat_header)))<sizeof(struct bflat_header))
     {
         printk("[load_bflat] Can't read completly the header (read %d)\n",ret);
         kfclose(fd_bflat);
@@ -140,7 +142,7 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
     
     klseek(fd_bflat, 0, SEEK_SET);
     
-    ret = kread(fd_bflat,(void*)text_pos,text_len);
+    ret = kfread(fd_bflat,(void*)text_pos,text_len);
     
     if(ret<text_len)
     {
@@ -152,7 +154,7 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
     
     klseek(fd_bflat, header.data_start, SEEK_SET);
     
-    ret = kread(fd_bflat,(void*)data_pos,data_len+header.reloc_count*sizeof(unsigned long));
+    ret = kfread(fd_bflat,(void*)data_pos,data_len+header.reloc_count*sizeof(unsigned long));
     
     if(ret<(data_len+header.reloc_count*sizeof(unsigned long)))
     {

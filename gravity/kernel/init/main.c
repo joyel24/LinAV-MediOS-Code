@@ -48,7 +48,8 @@
 
 #include <kernel/config.h>
 
-#include <sys_def/file.h>
+#include <kernel/kfile.h>
+#include <kernel/kdir.h>
 #include <sys_def/colordef.h>
 
 #include <kernel/dsp.h>
@@ -88,9 +89,9 @@ void SetSkin (int w, int h)
 	API_TASK_GETHANDLE (&pTI);
 
 	pTI->pRegionLeft = 0;
-	API_MALLOC (&pTI->pRegionLeft, h * 4);
+	API_MALLOC ((void**)&pTI->pRegionLeft, h * 4);
 	pTI->pRegionRight = 0;
-	API_MALLOC (&pTI->pRegionRight, h * 4);
+	API_MALLOC ((void**)&pTI->pRegionRight, h * 4);
 
 	int i;
 	for (i=0;i<h;i++)
@@ -298,8 +299,9 @@ void kernel_startup_thread (void)
 	__sti ();
 */
 
-    char * ptr1,*ptr2,*ptr3,*ptr4;
-    int i,count,j;
+    int i;
+    DIR* myDir;
+    struct dirent* entry;
 
     /* driver init */
 
@@ -358,7 +360,7 @@ void kernel_startup_thread (void)
 		printk ("Background not loaded.\n");
 	else
 	{
-		int nReaded = fread (fBack, screen_VID2, 307200);
+		int nReaded = kfread (fBack, screen_VID2, 307200);
 		printk ("Background loaded (%d bytes, %d)\n", nReaded, screen_VID2[0]);
 		kfclose (fBack);
 	}
@@ -368,6 +370,11 @@ void kernel_startup_thread (void)
 	GFX_init ();
 	////////////////////////////////////////////////////
 
+        
+        myDir=opendir("/");
+        while(entry=readdir(myDir))
+            printk("%s\n",entry->d_name);
+        closedir(myDir);
 //	API_RUN_GRV ("/jpeg_view.grv", 0);
 
 /*
@@ -458,7 +465,7 @@ void kernel_startup_thread (void)
 	}
 */
 
-//    avwm();
+    //avwm();
 	while (1)
 	{
 		API_TASK_SLEEP (10000);

@@ -39,4 +39,6 @@ void GFX_UpdateContext        (TASK_INFO* pOwner, GFX_RECT* UpdateRect);
 void GFX_AddContext           (TASK_INFO* pOwner, int nX, int nY);
 void GFX_UpdateZOrder         (TASK_INFO* pOwner, int nZOrder);
 
+void gfxmemcpy (void *to,const void *from,unsigned long n32pads);
+
 #endif

@@ -10,6 +10,8 @@
 #include <kernel/swi.h>
 #include <kernel/threads.h>
 #include <kernel/evt.h>
+#include <api.h>
+#include <kernel/irq.h>
 
 int swi_kernel_handler (
 	unsigned long nCmd,

@@ -41,8 +41,6 @@ struct hd_info_s {
 
 #define NUM_VOLUMES  2 /* we can only mount 2 volumes */
 
-int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direction);
-
 void init_disk(void);
 
 int disk_mount(int drive);

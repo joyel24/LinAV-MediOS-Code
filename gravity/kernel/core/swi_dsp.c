@@ -12,6 +12,8 @@
 #include <kernel/dsp.h>
 #include <kernel/irq.h>
 
+#include <api.h>
+
 #include <stdarg.h>
 
 static HCRITSEC g_hDSPLock = 0;

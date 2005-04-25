@@ -16,9 +16,11 @@
 #include <kernel/errors.h>
 
 #include <sys_def/time.h>
+
 #include <types.h>
 
 #include <kernel/sound.h>
+#include <kernel/ata.h>
 
 // API definition
 
@@ -77,6 +79,8 @@ ERROR_CODE API_HEAP_AVAIL           (HEAP hHeap, unsigned long* pnBytes);
 ////////////////////// FILE API ///////////////////////
 ERROR_CODE API_FILE                 (int cmd,void * data1,void * data2);
 ERROR_CODE API_RUN_GRV              (const char* pGRVPath, HTASK* phTask);
+ERROR_CODE API_ATA                  (ata_cmd_s * cmd);
+int        disk_RW_sector           (int drive,unsigned int lba,int count,void * buffer,int direction);
 ////////////////////// FILE API ///////////////////////
 ///////////////////////////////////////////////////////
 
@@ -176,8 +180,6 @@ ERROR_CODE API_SOUND_BUFFER_WRITE   (sound_buffer_s * sound_buffer,sound_api_par
 
 ////////////////////// SOUND API //////////////////////
 ///////////////////////////////////////////////////////
-
-ERROR_CODE API_FILE             (int cmd,void * data1,void * data2);
 
 int        do_api_power         (int cmd);
 
