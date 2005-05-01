@@ -90,7 +90,6 @@
 ////////////////////// FILE API ///////////////////////
 #define nAPI_FILE                 (nAPI_FILE_section + 0)
 #define nAPI_RUN_GRV              (nAPI_FILE_section + 10)
-#define nAPI_ATA                  (nAPI_FILE_section + 20)
 ////////////////////// FILE API ///////////////////////
 ///////////////////////////////////////////////////////
 

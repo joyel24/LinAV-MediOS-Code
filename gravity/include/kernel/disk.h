@@ -43,6 +43,8 @@ struct hd_info_s {
 
 void init_disk(void);
 
+int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direction);
+
 int disk_mount(int drive);
 int disk_umount(int drive,bool flush);
 

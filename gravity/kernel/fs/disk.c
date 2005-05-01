@@ -189,7 +189,7 @@ void identify_disk(int drive, struct hd_info_s * hd_info)
     kfree(buffer);
 }  
 
-/*
+
 int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direction)
 {
     ata_cmd_s * cmd=(ata_cmd_s *)kmalloc(sizeof(ata_cmd_s));
@@ -206,7 +206,6 @@ int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direct
     kfree(cmd);
     return res;
 }
-*/
 
 void printPartition_info(struct partition_info * partition_list)
 {

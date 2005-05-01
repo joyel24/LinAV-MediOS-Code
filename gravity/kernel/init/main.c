@@ -345,23 +345,24 @@ void kernel_startup_thread (void)
     ///////////////////////////////////////////////////////////
 
 	printk ("Accessing registry file /gravity.cnf...\n");
-	int fReg = kfopen ("/gravity.cnf",O_RDONLY);
+	int fReg = fopen ("/gravity.cnf",O_RDONLY);
 	if (fReg < 0)
 		printk ("Setting not loaded.\n");
 	else
 	{
 		printk ("Setting loaded.\n");
-		kfclose (fReg);
+		fclose (fReg);
 	}
 
 	printk ("Loading background image...\n");
-	int fBack = kfopen ("/back.img",O_RDONLY);
+	int fBack = fopen ("/back.img",O_RDONLY);
 	if (fBack < 0)
 		printk ("Background not loaded.\n");
 	else
 	{
-		int nReaded = kfread (fBack, screen_VID2, 307200);
-		printk ("Background loaded (%d bytes, %d)\n", nReaded, screen_VID2[0]);
+                printk ("Reading background image...\n");
+		int nReaded = fread (fBack, screen_VID2, 307200);
+		printk ("Background loaded (%d bytes, %x @%08x)\n", nReaded, screen_VID2[0], screen_VID2);
 		kfclose (fBack);
 	}
 
@@ -371,10 +372,10 @@ void kernel_startup_thread (void)
 	////////////////////////////////////////////////////
 
         
-        myDir=opendir("/");
+/*        myDir=opendir("/");
         while(entry=readdir(myDir))
             printk("%s\n",entry->d_name);
-        closedir(myDir);
+        closedir(myDir);*/
 //	API_RUN_GRV ("/jpeg_view.grv", 0);
 
 /*

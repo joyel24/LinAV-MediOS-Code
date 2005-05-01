@@ -63,8 +63,6 @@ __IRAM_CODE int swi_file_handler (
 	}
 	break;
         
-        case nAPI_ATA:            
-            return ata_process_cmd((ata_cmd_s *) nParam1);
         case nAPI_FILE:
             return fs_swi((int)nParam1,(void *)nParam2, (void *)nParam3);
 	}
@@ -77,6 +75,7 @@ int fs_swi(int cmd,void * data1, void * data2)
     COUPLE_DATA * data=((COUPLE_DATA *)data1);
     off_t * off;
     ssize_t * size;
+    //printk("FS swi (%d)\n",cmd);
     switch(cmd) {
         case 0x000:            
             *(int*)data2=kfopen((const char*) data1, *(int*)data2);

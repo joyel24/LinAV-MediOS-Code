@@ -83,21 +83,7 @@ ERROR_CODE API_HEAP_AVAIL           (HEAP hHeap, unsigned long* pnBytes)        
 ///////////////////////////////////////////////////////
 ////////////////////// FILE API ///////////////////////
 ERROR_CODE API_FILE                 (int cmd,void * data1,void * data2)                                { swi_call(nAPI_FILE); }
-ERROR_CODE API_ATA                  (ata_cmd_s * cmd)                                                  { swi_call(nAPI_ATA); }
 ERROR_CODE API_RUN_GRV              (const char* pGRVPath, HTASK* phTask)                              { swi_call(nAPI_RUN_GRV); }
-
-int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direction)
-{
-    ata_cmd_s cmd;
-    
-    cmd.drive=drive;
-    cmd.use_dma=ATA_WITH_DMA;
-    cmd.xfer_dir=direction;
-    cmd.data=buffer;
-    cmd.count=count;
-    cmd.lba=lba;
-    return API_ATA(&cmd);
-}
 
 ////////////////////// FILE API ///////////////////////
 ///////////////////////////////////////////////////////

@@ -37,6 +37,8 @@ __IRAM_CODE int kcswi_handler (
 	unsigned long nParam3,
 	unsigned long nParam1)
 {
+
+        //printk("SWI (%x) class: %x n: %x\n",nCmd,nCmd>>8,nCmd-((nCmd>>8)<<8));
 	switch (nCmd >> 8)
 	{
 	case nAPI_KERNEL_section_code:

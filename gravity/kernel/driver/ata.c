@@ -59,8 +59,6 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
 {
     int i,j;
     
-    //printk("[RW_Sector] mode:%d lba=0x%x count=%d buffer=%08x\n",direction, lba,count,buffer);
-    
     /*select the right drive*/
     
     SELECT_DRIVE(ata_cmd->drive);
@@ -96,6 +94,8 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
         ata_cmd->use_dma=ATA_NO_DMA;
     }
 
+    //ata_cmd->use_dma=ATA_NO_DMA;
+    
     for(i=0;i<ata_cmd->count;i++)
     {
         if(ata_waitForXfer()<0)
@@ -111,21 +111,20 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
             
             if((unsigned int)(ata_cmd->data) < 0x03000000)
             {
-                printk("Error dma is still running\n");    
+                printk("Error buffer not in SDRAM\n");    
                 return -2;
             }
            
-            //printk("dma xfer: base=%08x (buffer=%08x)size=%x\n",base,(unsigned int)buffer,count);    
             if(ata_cmd->xfer_dir==ATA_DO_READ)
             {
                 dma_set_src(0x10400000);
-                dma_set_dest(CALC_BASE(ata_cmd->data));
+                dma_set_dest(CALC_BASE(ata_cmd->data)+i*SECTOR_SIZE);
                 dma_set_size(SECTOR_SIZE);
                 dma_set_dev(DMA_ATA,DMA_SDRAM)
             }
             else
             {            
-                dma_set_src(CALC_BASE(ata_cmd->data));
+                dma_set_src(CALC_BASE(ata_cmd->data)+i*SECTOR_SIZE);
                 dma_set_dest(0x10400000);
                 dma_set_size(SECTOR_SIZE);
                 dma_set_dev(DMA_SDRAM,DMA_ATA)
