@@ -20,6 +20,7 @@
 #include <api.h>
 #include <kernel/gfxmgr.h>
 #include <kernel/kgraphics.h>
+#include <graphics.h>
 
 GFX_Z_RECT* g_pZRectList = 0;
 
@@ -42,7 +43,7 @@ typedef struct _GFX_SPAN
 
 #define SPAN_POOL_SIZE 1024
 
-static GFX_SPAN** g_ppSpan [SCR_HEIGHT];
+static GFX_SPAN* g_ppSpan [SCR_HEIGHT];
 static MEMORY_CONTEXT g_SpanContext [SCR_HEIGHT];
 
 static GFX_RECT g_Phys;
@@ -151,7 +152,7 @@ __IRAM_CODE void GFX_BuildSpanStructure (int nYmin, int nYmax)
 			GFX_SPAN* pNewSpan = (GFX_SPAN*)bget (g_SpanContext + j, sizeof(GFX_SPAN));//new GFX_SPAN ();
 			pNewSpan->x = nX;
 			pNewSpan->n = nN;
-			pNewSpan->w = pCtx->pOwner;
+			pNewSpan->w = (int)pCtx->pOwner;
 			pNewSpan->p = pP;
 			pNewSpan->pNext = 0;
 
@@ -270,10 +271,13 @@ void GFX_init ()
 {
 	printk ("GFX subsystem starting...\n");
 
-	TASK_INFO* pTask = 0;
-	API_TASK_GETHANDLE (&pTask);
+	HTASK hTask = 0;
+	API_TASK_GETHANDLE (&hTask);
+	TASK_INFO* pTask = (TASK_INFO*)hTask;
 
-	API_CRITSEC_CREATE (&g_pCS_GFX);
+	HCRITSEC hSec = 0;
+	API_CRITSEC_CREATE (&hSec);
+	g_pCS_GFX = (CRITSEC_INFO*)hSec;
 
 	g_PhysicalScreen.w = SCR_WIDTH;
 	g_PhysicalScreen.h = SCR_HEIGHT;
@@ -289,7 +293,10 @@ void GFX_init ()
 	int i;
 
 //	printk ("GFX [a]\n");
-	API_MALLOC (&g_pSpanPool, SCR_HEIGHT * SPAN_POOL_SIZE);
+	void* pSpanPool = 0;
+	API_MALLOC (&pSpanPool, SCR_HEIGHT * SPAN_POOL_SIZE);
+	g_pSpanPool = (unsigned char*)pSpanPool;
+
 //	printk ("GFX [b]\n");
 
 	unsigned char* pSpanPoolPtr = g_pSpanPool;
@@ -306,7 +313,7 @@ void GFX_init ()
 	g_Phys.w = SCR_WIDTH;
 	g_Phys.h = SCR_HEIGHT;
 
-	API_MALLOC (&pTask->pMemoryContext, sizeof(GFX_CONTEXT));
+	API_MALLOC ((void**)&pTask->pMemoryContext, sizeof(GFX_CONTEXT));
 	pTask->pMemoryContext->w = SCR_WIDTH;
 	pTask->pMemoryContext->h = SCR_HEIGHT;
 	pTask->pMemoryContext->x = 0;
@@ -318,11 +325,12 @@ void GFX_init ()
 	pTask->pMemoryContext->pixels = screen_VID2;
 	pTask->pMemoryContext->delta = SCR_WIDTH*4;
 
-	API_MALLOC (&pTask->pDrawingContext, sizeof(GFX_CONTEXT));
+	API_MALLOC ((void**)&pTask->pDrawingContext, sizeof(GFX_CONTEXT));
 	*pTask->pDrawingContext = *pTask->pMemoryContext;
 
-	GFX_Z_RECT* pBackgroundZ = 0;
-	API_MALLOC (&pBackgroundZ, sizeof(GFX_Z_RECT));
+	void* pvBackgroundZ = 0;
+	API_MALLOC (&pvBackgroundZ, sizeof(GFX_Z_RECT));
+	GFX_Z_RECT* pBackgroundZ = (GFX_Z_RECT*)pvBackgroundZ;
 	pBackgroundZ->ptLocation.x = 0;
 	pBackgroundZ->ptLocation.y = 0;
 	pBackgroundZ->pPrev = 0;
@@ -354,7 +362,7 @@ __IRAM_CODE void GFX_MoveContext (TASK_INFO* pOwner, int nX, int nY)
 {
 //printk ("GFX_MoveContext [0] (%i, %i)\n", nX, nY);
 
-	API_CRITSEC_ENTER (g_pCS_GFX);
+	API_CRITSEC_ENTER ((HCRITSEC)g_pCS_GFX);
 
 //API_TASK_SLEEP (1000);
 //printk ("GFX_MoveContext [1] (%i, %i)\n", nX, nY);
@@ -430,18 +438,18 @@ __IRAM_CODE void GFX_MoveContext (TASK_INFO* pOwner, int nX, int nY)
 //API_TASK_SLEEP (1000);
 //printk ("GFX_MoveContext [5]\n");
 
-	API_CRITSEC_LEAVE (g_pCS_GFX);
+	API_CRITSEC_LEAVE ((HCRITSEC)g_pCS_GFX);
 }
 
 __IRAM_CODE void GFX_UpdateRect (GFX_RECT* UpdateRect)
 {
-	API_CRITSEC_ENTER (g_pCS_GFX);
+	API_CRITSEC_ENTER ((HCRITSEC)g_pCS_GFX);
 
 	if (UpdateRect)
 	{
 		if (!GetRectIntersection (UpdateRect, &g_Phys, UpdateRect))
 		{
-			API_CRITSEC_LEAVE (g_pCS_GFX);
+			API_CRITSEC_LEAVE ((HCRITSEC)g_pCS_GFX);
 			return;
 		}
 	}
@@ -510,12 +518,12 @@ printk ("GFX_UpdateRect UPD:(%d,%d,%d,%d)\n",
 		pOutput += SCR_WIDTH;
 	}
 
-	API_CRITSEC_LEAVE (g_pCS_GFX);
+	API_CRITSEC_LEAVE ((HCRITSEC)g_pCS_GFX);
 }
 
 __IRAM_CODE void GFX_UpdateContext (TASK_INFO* pOwner, GFX_RECT* UpdateRect)
 {
-	API_CRITSEC_ENTER (g_pCS_GFX);
+	API_CRITSEC_ENTER ((HCRITSEC)g_pCS_GFX);
 
 //printk ("GFX_UpdateContext [1] pRect: %d\n", UpdateRect);
 
@@ -548,7 +556,7 @@ printk ("GFX_UpdateContext [2] CTX:(%d,%d,%d,%d)\n",
 		{
 			if (!GetRectIntersection (UpdateRect, &ctx, UpdateRect))
 			{
-				API_CRITSEC_LEAVE (g_pCS_GFX);
+				API_CRITSEC_LEAVE ((HCRITSEC)g_pCS_GFX);
 				return;
 			}
 		}
@@ -571,7 +579,7 @@ printk ("GFX_UpdateContext [4] UPD:(%d,%d,%d,%d)\n",
 
 		if (!GetRectIntersection (UpdateRect, &g_Phys, UpdateRect))
 		{
-			API_CRITSEC_LEAVE (g_pCS_GFX);
+			API_CRITSEC_LEAVE ((HCRITSEC)g_pCS_GFX);
 			return;
 		}
 
@@ -589,7 +597,7 @@ printk ("GFX_UpdateContext [4] UPD:(%d,%d,%d,%d)\n",
 				if (pSpan->x >= UpdateRect->x + UpdateRect->w)
 					break;
 
-				if (pSpan->w == pOwner/*nWinID*/)
+				if (pSpan->w == (int)pOwner/*nWinID*/)
 				{
 
 					unsigned long* po = pOutput + pSpan->x;
@@ -615,13 +623,13 @@ printk ("GFX_UpdateContext [4] UPD:(%d,%d,%d,%d)\n",
 		}
 	}
 
-	API_CRITSEC_LEAVE (g_pCS_GFX);
+	API_CRITSEC_LEAVE ((HCRITSEC)g_pCS_GFX);
 }
 
 /*
 __IRAM_CODE void GFX_DumpSpans ()
 {
-	API_CRITSEC_ENTER (g_pCS_GFX);
+	API_CRITSEC_ENTER ((HCRITSEC)g_pCS_GFX);
 
 	int i;
 	for (i=0;i<SCR_HEIGHT;i+=8)
@@ -640,13 +648,13 @@ __IRAM_CODE void GFX_DumpSpans ()
 		API_TASK_SLEEP (10);
 	}
 
-	API_CRITSEC_LEAVE (g_pCS_GFX);
+	API_CRITSEC_LEAVE ((HCRITSEC)g_pCS_GFX);
 }
 */
 
 __IRAM_CODE void GFX_AddContext (TASK_INFO* pOwner, int nX, int nY)
 {
-	API_CRITSEC_ENTER (g_pCS_GFX);
+	API_CRITSEC_ENTER ((HCRITSEC)g_pCS_GFX);
 
 //API_TASK_SLEEP (1000);
 //printk ("GFX_AddContext [1] (%i, %i)\n", nX, nY);
@@ -656,8 +664,9 @@ __IRAM_CODE void GFX_AddContext (TASK_INFO* pOwner, int nX, int nY)
 	while (pCtx->pNext)
 		pCtx = pCtx->pNext;
 
-	GFX_Z_RECT* pZRect = 0;
-	API_MALLOC (&pZRect, sizeof(GFX_Z_RECT));
+	void* pvZRect = 0;
+	API_MALLOC (&pvZRect, sizeof(GFX_Z_RECT));
+	GFX_Z_RECT* pZRect = (GFX_Z_RECT*)pvZRect;
 
 	pZRect->ptLocation.x = nX;
 	pZRect->ptLocation.y = nY;
@@ -682,14 +691,14 @@ __IRAM_CODE void GFX_AddContext (TASK_INFO* pOwner, int nX, int nY)
 
 //	GFX_DumpSpans ();
 
-	API_CRITSEC_LEAVE (g_pCS_GFX);
+	API_CRITSEC_LEAVE ((HCRITSEC)g_pCS_GFX);
 }
 
 void GFX_UpdateZOrder (TASK_INFO* pOwner, int nZOrder)
 {
-	API_CRITSEC_ENTER (g_pCS_GFX);
+	API_CRITSEC_ENTER ((HCRITSEC)g_pCS_GFX);
 
 	// ...
 
-	API_CRITSEC_LEAVE (g_pCS_GFX);
+	API_CRITSEC_LEAVE ((HCRITSEC)g_pCS_GFX);
 }

@@ -23,8 +23,9 @@ int swi_kernel_handler (
 	{
 	case nAPI_TASK_CREATE:      //(void* pvCode, void* pParam, HTASK* phTask)                     { SAVE; asm("swi 1"); LOAD; }
 	{
-		TASK_INFO* pTCB = 0;
-		API_MALLOC ((void**)&pTCB, sizeof(TASK_INFO));
+		void* pvTCB = 0;
+		API_MALLOC (&pvTCB, sizeof(TASK_INFO));
+		TASK_INFO* pTCB = pvTCB;
 		if (!pTCB)
 			return ERR_NOMEMORY;
 
@@ -33,8 +34,8 @@ int swi_kernel_handler (
 		kInitialiseTCBVariables (pTCB, 16384, "USER");
 		unsigned char* pTopOfStack = (unsigned char*)pTCB->pStack;
 		pTopOfStack += pTCB->nStackSize - 4;
-		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, nParam1, nParam2);
-		API_MALLOC (&pTCB->pMessagePipe, sizeof(PIPE));
+		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, (void*)nParam1, (void*)nParam2);
+		API_MALLOC ((void**)&pTCB->pMessagePipe, sizeof(PIPE));
 		pTCB->pMessagePipe->nReceiver = 0;
 		pTCB->pMessagePipe->nSender = 0;
 
@@ -112,7 +113,7 @@ int swi_kernel_handler (
 		__sti ();
 
 		if (nDataAvailable)
-			API_TASK_WAITMESSAGE (nParam1);
+			API_TASK_WAITMESSAGE ((MESSAGE*)nParam1);
 		else
 			return ERR_RECEIVER_EMPTY;
 	}
@@ -126,7 +127,7 @@ int swi_kernel_handler (
 		if (pPipe->nReceiver == pPipe->nSender)
 		{
 			g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_PIPE;
-			g_pTaskRing->nBlockingValue = pPipe;
+			g_pTaskRing->nBlockingValue = (unsigned long)pPipe;
 			API_TASK_YIELD ();
 		}
 
@@ -176,8 +177,9 @@ int swi_kernel_handler (
 
 	case nAPI_PIPE_CREATE:      //(HPIPE* phPipe);
 	{
-		PIPE* pPipe = 0;
-		API_MALLOC (&pPipe, sizeof(PIPE));
+		void* pvPipe = 0;
+		API_MALLOC (&pvPipe, sizeof(PIPE));
+		PIPE* pPipe = (PIPE*)pvPipe;
 		pPipe->nReceiver = 0;
 		pPipe->nSender = 0;
 		*((PIPE**)nParam1) = pPipe;
@@ -227,8 +229,9 @@ int swi_kernel_handler (
 
 	case nAPI_CRITSEC_CREATE:   //(HCRITSEC* phCritSec);
 	{
-		CRITSEC_INFO* pCS;
-		API_MALLOC (&pCS, sizeof(CRITSEC_INFO));
+		void* pvCS = 0;
+		API_MALLOC (&pvCS, sizeof(CRITSEC_INFO));
+		CRITSEC_INFO* pCS = (CRITSEC_INFO*)pvCS;
 		pCS->pOwnerTask = 0;
 		*(CRITSEC_INFO**)nParam1 = pCS;
 	}
@@ -236,7 +239,7 @@ int swi_kernel_handler (
 
 	case nAPI_CRITSEC_DELETE:   //(HCRITSEC hCritSec);
 	{
-		API_FREE (nParam1);
+		API_FREE ((void*)nParam1);
 	}
 	break;
 
@@ -267,7 +270,7 @@ int swi_kernel_handler (
 	case nAPI_CRITSEC_LEAVE:    //(HCRITSEC hCritSec);
 	{
 		__cli ();
-		if (((CRITSEC_INFO*)nParam1)->pOwnerTask == (unsigned long)g_pTaskRing)
+		if ((unsigned long)(((CRITSEC_INFO*)nParam1)->pOwnerTask) == (unsigned long)g_pTaskRing)
 		{
 			if (((CRITSEC_INFO*)nParam1)->nLockCounter == 0)
 			{
@@ -312,7 +315,7 @@ int swi_kernel_handler (
                     rm_evt_handling((struct evt_pipes_s *)nParam2);
                     break;
                 case 0x002: /* wait evt */
-                    API_PIPE_RECV(&((struct evt_pipes_s *)nParam2)->evt_pipe, nParam3 , 1);
+                    API_PIPE_RECV((HPIPE)(&((struct evt_pipes_s *)nParam2)->evt_pipe), (void*)nParam3 , 1);
                     break;
                 case 0x003: /* send evt */
                     send_evt(*(int*)nParam2);

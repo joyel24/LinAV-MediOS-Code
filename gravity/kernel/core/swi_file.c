@@ -28,9 +28,9 @@ __IRAM_CODE int swi_file_handler (
 	{
 	case nAPI_RUN_GRV:          //(const char* pGRVPath, HTASK* phTask)
 	{
-		TASK_INFO* pTCB = 0;
-
-		API_MALLOC (&pTCB, sizeof(TASK_INFO));
+		void* pvTCB = 0;
+		API_MALLOC (&pvTCB, sizeof(TASK_INFO));
+		TASK_INFO* pTCB = (TASK_INFO*)pvTCB;
 		if (!pTCB)
 			return ERR_NOMEMORY;
 
@@ -38,12 +38,18 @@ __IRAM_CODE int swi_file_handler (
 
 		ERROR_CODE code = load_bflat ((const char *)nParam1, pTCB);
 
-		API_MALLOC (&pTCB->pStack, 16384);//nStackSize
+		void* pStack = 0;
+		API_MALLOC (&pStack, 16384);//nStackSize
+		pTCB->pStack = (unsigned long*)pStack;
 
 		unsigned char* pTopOfStack = (unsigned char*)pTCB->pStack;
 		pTopOfStack += pTCB->nStackSize - 4;
 		pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, pTCB->pEntry, 0);
-		API_MALLOC (&pTCB->pMessagePipe, sizeof(PIPE));
+
+		void* pPipe = 0;
+		API_MALLOC (&pPipe, sizeof(PIPE));
+		pTCB->pMessagePipe = (PIPE*)pPipe;
+
 		pTCB->pMessagePipe->nReceiver = 0;
 		pTCB->pMessagePipe->nSender = 0;
 

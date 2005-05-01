@@ -49,8 +49,9 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_CREATE_CONTEXT:   //(int nWidth, int nHeight, int nFlags);
 	{
-		GFX_CONTEXT* pCtx = 0;
-		API_MALLOC (&pCtx, sizeof(GFX_CONTEXT));
+		void* pvCtx = 0;
+		API_MALLOC (&pvCtx, sizeof(GFX_CONTEXT));
+		GFX_CONTEXT* pCtx = (GFX_CONTEXT*)pvCtx;
 
 		pCtx->w = nParam1;
 		pCtx->h = nParam2;
@@ -65,7 +66,8 @@ __IRAM_CODE int swi_gfx_handler (
 
 		TASK_INFO* pTask = lock_task();
 
-		API_MALLOC (&pTask->pDrawingContext, sizeof(GFX_CONTEXT));
+		API_MALLOC (&pvCtx, sizeof(GFX_CONTEXT));
+		pTask->pDrawingContext = (GFX_CONTEXT*)pvCtx;
 
 		pTask->pMemoryContext = pCtx;
 
@@ -419,7 +421,7 @@ __IRAM_CODE int swi_gfx_handler (
 		}
 
 		unsigned long nForeColor = pTask->nFontColor;//0x80808080;
-		unsigned char* pForeColor = (unsigned char*)&nForeColor;
+//		unsigned char* pForeColor = (unsigned char*)&nForeColor;
 
 		if ((nSrcElementSize == 1) && (nDstElementSize == 4))
 		{
@@ -557,7 +559,7 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_SET_FONT:             //(HFONT hFont);
 	{
-		lock_task()->pFont = nParam1;
+		lock_task()->pFont = (FONT_HEADER*)nParam1;
 	}
 	break;
 
