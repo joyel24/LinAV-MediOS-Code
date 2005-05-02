@@ -228,8 +228,8 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
 //    FLAT_PRINT("[load_bflat] about to launch: %08x\n",run_flat);
 //    run_flat(0,NULL);
 
-    pTCB->pTaskCode = text_pos;
-    pTCB->pEntry    = text_pos + header.entry;
+    pTCB->pTaskCode = (void*)text_pos;
+    pTCB->pEntry    = (void*)(text_pos + header.entry);
 
 //header.stack_size
 

@@ -23,11 +23,11 @@ KERNEL_ERROR_CODE kinit_tcb ()
 {
 	g_pTaskRing = 0;
 
-	g_pKernelCtrlPipe = kmalloc (sizeof(PIPE));
+	g_pKernelCtrlPipe = (PIPE*)kmalloc (sizeof(PIPE));
 	g_pKernelCtrlPipe->nReceiver = 0;
 	g_pKernelCtrlPipe->nSender = 0;
 
-	g_pSystemCtrlPipe = kmalloc (sizeof(PIPE));
+	g_pSystemCtrlPipe = (PIPE*)kmalloc (sizeof(PIPE));
 	g_pSystemCtrlPipe->nReceiver = 0;
 	g_pSystemCtrlPipe->nSender = 0;
 
@@ -124,7 +124,7 @@ TASK_INFO* kcreate_tcb (void* pvTaskCode, unsigned long nStackSize, void* pParam
 	pTopOfStack += pTCB->nStackSize - 4;
 	pTCB->pTopOfStack = kInitialiseStack ((unsigned long*)pTopOfStack, pvTaskCode, pParams);
 
-	pTCB->pMessagePipe = kmalloc (sizeof(PIPE));
+	pTCB->pMessagePipe = (PIPE*)kmalloc (sizeof(PIPE));
 	pTCB->pMessagePipe->nReceiver = 0;
 	pTCB->pMessagePipe->nSender = 0;
 

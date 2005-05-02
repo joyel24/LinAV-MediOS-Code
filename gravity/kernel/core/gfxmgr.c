@@ -12,6 +12,7 @@
 #include <sys_def/stddef.h>
 #include <kernel/malloc.h>
 
+#include <graphics.h>
 #include <kernel/kernel.h>
 #include <kernel/threads.h>
 #include <kernel/pipes.h>
@@ -20,7 +21,6 @@
 #include <api.h>
 #include <kernel/gfxmgr.h>
 #include <kernel/kgraphics.h>
-#include <graphics.h>
 
 GFX_Z_RECT* g_pZRectList = 0;
 

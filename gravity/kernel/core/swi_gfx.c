@@ -11,10 +11,12 @@
 #include <kernel/threads.h>
 #include <stdarg.h>
 
+#include <kernel/kgraphics.h>
 #include <sys_def/colordef.h>
 #include <kernel/irq.h>
 #include <api.h>
 #include <kernel/gfxmgr.h>
+#include <kernel/rendering.h>
 
 #define MAX(a,b) (a>b?a:b)
 #define MIN(a,b) (a<b?a:b)
@@ -268,9 +270,9 @@ __IRAM_CODE int swi_gfx_handler (
 
 	case nAPI_GFX_BLENDBLIT:     //(GFX_CONTEXT* pDst, GFX_CONTEXT* pSrc, GFX_BLENDPARAMS* pParams);
 	{
-		GFX_CONTEXT* pDst           = (GFX_CONTEXT*)nParam1;
-		GFX_CONTEXT* pSrc           = (GFX_CONTEXT*)nParam2;
-		GFX_BLENDPARAMS* pParams = (GFX_POINT*)nParam3;
+		GFX_CONTEXT* pDst        = (GFX_CONTEXT*)nParam1;
+		GFX_CONTEXT* pSrc        = (GFX_CONTEXT*)nParam2;
+		GFX_BLENDPARAMS* pParams = (GFX_BLENDPARAMS*)nParam3;
 
 		unsigned char nSrcElementSize = pSrc->pixel_size;
 		unsigned char nDstElementSize = pDst->pixel_size;
@@ -581,7 +583,7 @@ __IRAM_CODE int swi_gfx_handler (
 			return ERR_INVALID_HANDLE;
 
 		unsigned char* pCharMap = ((unsigned char*)pTask->pFont) + sizeof(FONT_HEADER);
-		FONT_32BIT_VARY_HEADER* pVarMap = pCharMap + 256;
+		FONT_32BIT_VARY_HEADER* pVarMap = (FONT_32BIT_VARY_HEADER*)(pCharMap + 256);
 
 		char* text = (char*)nParam1;
 		int x = nParam2;

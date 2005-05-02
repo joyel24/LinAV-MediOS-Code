@@ -13,7 +13,7 @@
 
 #include <api.h>
 
-static int RenderTriangle (
+int RenderTriangle (
 	GFX_3DVERTEX* v0,
 	GFX_3DVERTEX* v1,
 	GFX_3DVERTEX* v2,
@@ -31,9 +31,9 @@ static int RenderTriangle (
 	const long nStride,
 	long* pZBuffer);
 
-static int AlphaBilinearInterpolatedStretch (
-	GFX_DATA* pDst,
-	GFX_DATA* pSrc,
+int AlphaBilinearInterpolatedStretch (
+	GFX_CONTEXT* pDst,
+	GFX_CONTEXT* pSrc,
 	unsigned long* pBuffer1,
 	unsigned long* pBuffer2);
 

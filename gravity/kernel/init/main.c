@@ -85,8 +85,9 @@ int random ()
 
 void SetSkin (int w, int h)
 {
-	TASK_INFO* pTI = 0;
-	API_TASK_GETHANDLE (&pTI);
+	HTASK hTask = 0;
+	API_TASK_GETHANDLE (&hTask);
+	TASK_INFO* pTI = (TASK_INFO*)hTask;
 
 	pTI->pRegionLeft = 0;
 	API_MALLOC ((void**)&pTI->pRegionLeft, h * 4);
@@ -299,9 +300,9 @@ void kernel_startup_thread (void)
 	__sti ();
 */
 
-    int i;
-    DIR* myDir;
-    struct dirent* entry;
+//    int i;
+//    DIR* myDir;
+//    struct dirent* entry;
 
     /* driver init */
 
