@@ -48,6 +48,8 @@ int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direct
 int disk_mount(int drive);
 int disk_umount(int drive,bool flush);
 
+int kata_manager (void* pvParameters);
+
 struct partition_info * setup_disk(int drive);
 
 void identify_disk(int drive, struct hd_info_s * hd_info);

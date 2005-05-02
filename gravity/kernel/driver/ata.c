@@ -61,6 +61,8 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
     
     /*select the right drive*/
     
+    //printk("[ata_process_cmd]: mode:%d lba=0x%x count=%d buffer=%08x\n",ata_cmd->xfer_dir,ata_cmd->lba,ata_cmd->count,ata_cmd->data);
+    
     SELECT_DRIVE(ata_cmd->drive);
     
     if(ata_waitForReady()<0)
@@ -118,13 +120,13 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
             if(ata_cmd->xfer_dir==ATA_DO_READ)
             {
                 dma_set_src(0x10400000);
-                dma_set_dest(CALC_BASE(ata_cmd->data)+i*SECTOR_SIZE);
+                dma_set_dest((CALC_BASE(ata_cmd->data))+i*SECTOR_SIZE);
                 dma_set_size(SECTOR_SIZE);
                 dma_set_dev(DMA_ATA,DMA_SDRAM)
             }
             else
             {            
-                dma_set_src(CALC_BASE(ata_cmd->data)+i*SECTOR_SIZE);
+                dma_set_src((CALC_BASE(ata_cmd->data))+i*SECTOR_SIZE);
                 dma_set_dest(0x10400000);
                 dma_set_size(SECTOR_SIZE);
                 dma_set_dev(DMA_SDRAM,DMA_ATA)
@@ -147,7 +149,9 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
                     outw(inw(ata_cmd->data+j+i*SECTOR_SIZE),IDE_DATA);
                 }
         }
-    }    
+    }   
+    
+        
     return 0;
 }
 #if 0

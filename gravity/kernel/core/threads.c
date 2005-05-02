@@ -30,6 +30,10 @@ KERNEL_ERROR_CODE kinit_tcb ()
 	g_pSystemCtrlPipe = (PIPE*)kmalloc (sizeof(PIPE));
 	g_pSystemCtrlPipe->nReceiver = 0;
 	g_pSystemCtrlPipe->nSender = 0;
+        
+        g_pAtaCtrlPipe = kmalloc (sizeof(PIPE));
+	g_pAtaCtrlPipe->nReceiver = 0;
+	g_pAtaCtrlPipe->nSender = 0;
 
 	return eOK;
 }
@@ -248,6 +252,8 @@ __IRAM_CODE void kset_next_ready_task ()
 				break;
 
 			case TASK_BLOCKED_BY_MEMMGR:
+				break;
+                        case TASK_BLOCKED_BY_ATA:
 				break;
 		}
 

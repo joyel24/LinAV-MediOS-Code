@@ -14,6 +14,7 @@
 #define __ATA_H
 
 #include <kernel/hardware.h>
+#include <kernel/threads.h>
 //#include <kernel/disk.h>
 
 #define IDE_DATA                          (IDE_BASE+0x000)
@@ -60,6 +61,7 @@ typedef struct __ATA_CMD {
     int count;
     unsigned int lba;
     struct __ATA_CMD * nxt;
+    TASK_INFO* pSenderThread;
 } ata_cmd_s;
 
 //int  ata_RW_Sector     (unsigned int lba,int count,void * buffer,int direction);

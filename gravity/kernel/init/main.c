@@ -71,6 +71,8 @@ extern void avwm(void);
 
 extern int kmemory_manager (void* pvParameters);
 
+extern int kata_manager (void* pvParameters);
+
 extern void API_BKT(void);
 
 #if 1
@@ -261,7 +263,9 @@ void kernel_start (void)
 ///////////////////////////////////////////////////
 /// TODO: This code gows to kinit_tcb ()...
     kadd_tcb (&g_pTaskRing, kcreate_tcb (kmemory_manager,       TASK_STACK_SIZE,   0, "MEMMGR"));
-    kadd_tcb (&g_pTaskRing, kcreate_tcb (kernel_startup_thread, TASK_STACK_SIZE, 0, "USER"));
+    kadd_tcb (&g_pTaskRing, kcreate_tcb (kata_manager,          TASK_STACK_SIZE,   0, "ATAMGR"));
+    kadd_tcb (&g_pTaskRing, kcreate_tcb (kernel_startup_thread, TASK_STACK_SIZE,   0, "USER"));
+
 
 #if 0
     kadd_tcb (&g_pTaskRing, kcreate_tcb (debug_thread, TASK_STACK_SIZE, 0, "DEBUG"));

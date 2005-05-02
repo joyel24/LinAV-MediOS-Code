@@ -26,6 +26,8 @@
 #include <kernel/kfile.h>
 #include <kernel/kdir.h>
 #include <kernel/kernel.h>
+#include <kernel/pipes.h>
+#include <kernel/threads.h>
 #include <kernel/bat_power.h>
 
 #include <api.h>
@@ -189,22 +191,58 @@ void identify_disk(int drive, struct hd_info_s * hd_info)
     kfree(buffer);
 }  
 
+__IRAM_CODE int kata_manager (void* pvParameters)
+{
+    ata_cmd_s * cmd;
+    printk("Launching ATA manager\n");
+    while(1)
+    {
+        cmd=0;
+        __cli ();
+        if (g_pAtaCtrlPipe->nReceiver != g_pAtaCtrlPipe->nSender)
+        {
+           
+            cmd = (ata_cmd_s *)(g_pAtaCtrlPipe->buffer + g_pAtaCtrlPipe->nReceiver);
+            
+            //printk("We have a ata cmd: mode:%d lba=0x%x count=%d buffer=%08x\n",cmd->xfer_dir,cmd->lba,cmd->count,cmd->data);
+            
+            ata_process_cmd(cmd);
+            g_pAtaCtrlPipe->nReceiver = (g_pAtaCtrlPipe->nReceiver + sizeof(ata_cmd_s)) & PIPE_SIZE_MASK;
+            cmd->pSenderThread->nBlockingState = TASK_BLOCKED_BY_NONE;
+            cmd->pSenderThread->nBlockingValue = 0;
+        
+            API_TASK_YIELD ();
+        }
+        __sti ();
+    }
+}
 
 int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direction)
 {
-    ata_cmd_s * cmd=(ata_cmd_s *)kmalloc(sizeof(ata_cmd_s));
-    int res;    
-    
-    cmd->lba=lba;
-    cmd->count=count;
-    cmd->data=buffer;
-    cmd->xfer_dir=direction;
-    cmd->use_dma=ATA_WITH_DMA;
-    cmd->drive=drive;
+    __cli ();
+    ata_cmd_s * cmd=(ata_cmd_s *)(g_pAtaCtrlPipe->buffer+g_pAtaCtrlPipe->nSender);
+       
+    cmd->lba = lba;
+    cmd->count = count;
+    cmd->data = buffer;
+    cmd->xfer_dir = direction;
+    cmd->use_dma = ATA_WITH_DMA;
+    cmd->drive = drive;
+    cmd->pSenderThread = g_pTaskRing;
             
-    res=ata_process_cmd(cmd);
-    kfree(cmd);
-    return res;
+    g_pAtaCtrlPipe->nSender = (g_pAtaCtrlPipe->nSender + sizeof(ata_cmd_s)) & PIPE_SIZE_MASK;
+
+    //printk("cmd send in pipe, about to block task\n");
+        
+    g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_ATA;
+    g_pTaskRing->nBlockingValue = 0;
+
+    API_TASK_YIELD ();
+    __sti ();
+    
+    //res=ata_process_cmd(cmd);
+    //kfree(cmd);
+    return 0;
 }
 
 void printPartition_info(struct partition_info * partition_list)
