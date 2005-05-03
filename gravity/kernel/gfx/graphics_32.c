@@ -15,55 +15,41 @@
 
 #include <kernel/kgraphics.h>
 
-/*
-void         graphics32_DrawPixel         (unsigned int color, int x, int y, struct graphicsBuffer * buff);
-unsigned int graphics32_ReadPixel         (int x, int y, struct graphicsBuffer * buff);
-void         graphics32_DrawRect          (unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
-void         graphics32_FillRect          (unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
-void         graphics32_DrawChar          (struct graphicsFont * font, unsigned int color,unsigned int bg_color, int x, int y,
-                                                unsigned char c, struct graphicsBuffer * buff);
-void         graphics32_DrawSprite        (unsigned int * palette, SPRITE * sprite, unsigned int trsp,int x, int y,
-                                                struct graphicsBuffer * buff);
-void         graphics32_DrawBITMAP        (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
-void         graphics32_ScrollWindowVert  (unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP,
-                                                struct graphicsBuffer * buff);
-void         graphics32_ScrollWindowHoriz (unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT,
-                                                struct graphicsBuffer * buff);
-void         graphics32_DrawHLine         (unsigned int color, int x, int y, int width, struct graphicsBuffer * buff);
-void         graphics32_DrawVLine         (unsigned int color, int x, int y, int height, struct graphicsBuffer * buff);
-void         graphics32_DrawHorizLine (unsigned int color, int width,unsigned int * offset);
-void         graphics32_DrawString    (struct graphicsFont * font, unsigned int color,unsigned int bg_color, int x, int y,
-                                            unsigned char * s, struct graphicsBuffer * buff);
-
-struct graphics_operations g32ops =  {
-	drawPixel         : graphics32_DrawPixel,
-	readPixel         : graphics32_ReadPixel,
-	drawRect          : graphics32_DrawRect,
-	fillRect          : graphics32_FillRect,
-	drawSprite        : graphics32_DrawSprite,
-	drawChar          : graphics32_DrawChar,
-	drawBITMAP        : graphics32_DrawBITMAP,
-	drawString        : graphics32_DrawString,
-	scrollWindowVert  : graphics32_ScrollWindowVert,
-	scrollWindowHoriz : graphics32_ScrollWindowHoriz,
-	drawHLine         : graphics32_DrawHLine,
-	drawVLine         : graphics32_DrawVLine
-};
-*/
-
 void graphics32_DrawPixel (COLOR color, int x, int y, GFX_CONTEXT* pCtx)
 {
-//	outl(color,getOffset(x,y,buff,unsigned int));
 	outl (color, getCtxOffset (x, y, pCtx));
 }
 
 COLOR graphics32_ReadPixel (int x, int y, GFX_CONTEXT* pCtx)
 {
-//	return inl(getOffset(x,y,buff,unsigned int));
 	return inl (getCtxOffset (x, y, pCtx));
 }
 
-//void graphics32_DrawRect (unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff)
+void graphics32_DrawVLine (COLOR color, int x, int y, int height, GFX_CONTEXT* pCtx)
+{
+	int i;
+	COLOR* offset = getCtxOffset (x, y, pCtx);
+	for(i=0;i<height;i++)
+	{
+		outl (color, offset);
+		offset += (pCtx->delta >> 2);
+	}
+}
+
+/* draw an horizontal line starting at (x,y) */
+void graphics32_DrawHorizLine (COLOR color, int width, COLOR* offset)
+{
+	int i;
+	for(i=0;i<width;i++)
+		outl (color,offset++);
+}
+
+void graphics32_DrawHLine (COLOR color, int x, int y, int width, GFX_CONTEXT* pCtx)
+{
+	COLOR* offset = getCtxOffset (x, y, pCtx);
+	graphics32_DrawHorizLine (color, width, offset);
+}
+
 void graphics32_DrawRect (COLOR color, int x, int y, int width, int height, GFX_CONTEXT* pCtx)
 {
 	int i;
@@ -84,7 +70,6 @@ void graphics32_DrawRect (COLOR color, int x, int y, int width, int height, GFX_
 	graphics32_DrawHorizLine (color, width, offset);
 }
 
-//void graphics32_FillRect(unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff)
 void graphics32_FillRect (COLOR color, int x, int y, int width, int height, GFX_CONTEXT* pCtx)
 {
 	int j;
@@ -120,10 +105,6 @@ int CohenSutherlandLineClipping (int* x0, int* y0, int* x1, int* y1, int xmin, i
 
 	while (1)
 	{
-//		printk ("CohenSutherlandLineClipping [1] outs: (%i,%i,%i,%i)\n", outx0, outy0, outx1, outy1);
-
-//		int _x0 = *x0, _y0 = *y0, _x1 = *x1, _y1 = *y1;
-
 		if ((outx0 == 0) && (outx1 == 0) && (outy0 == 0) && (outy1 == 0))
 			return 1;
 
@@ -160,11 +141,6 @@ int CohenSutherlandLineClipping (int* x0, int* y0, int* x1, int* y1, int xmin, i
 		if (outx1 < 0)
 			{ *y1 = *y0 + (*y1 - *y0) * (xmin - *x0) / (*x1 - *x0); *x1 = xmin; }
 
-//		*x0 = _x0;
-//		*y0 = _y0;
-//		*x1 = _x1;
-//		*y1 = _y1;
-
 		outx0 = GetCohenSutherlandOutCode (*x0, xmin, xmax);
 		outy0 = GetCohenSutherlandOutCode (*y0, ymin, ymax);
 		outx1 = GetCohenSutherlandOutCode (*x1, xmin, xmax);
@@ -176,14 +152,8 @@ int CohenSutherlandLineClipping (int* x0, int* y0, int* x1, int* y1, int xmin, i
 
 void graphics32_DrawLine (COLOR color, int x1, int y1, int x2, int y2, GFX_CONTEXT* pCtx)
 {
-//	printk ("graphics32_DrawLine [1] input: (%i,%i,%i,%i)\n", x1, y1, x2, y2);
-//	API_TASK_SLEEP (500);
-
 	if (!CohenSutherlandLineClipping (&x1, &y1, &x2, &y2, 0, pCtx->w-1, 0, pCtx->h-1))
 		return;
-
-//	printk ("graphics32_DrawLine [2] clipped to: (%i,%i,%i,%i)\n", x1, y1, x2, y2);
-//	API_TASK_SLEEP (500);
 
 	int numpixels;
 	int i;
@@ -255,9 +225,6 @@ void graphics32_DrawLine (COLOR color, int x1, int y1, int x2, int y2, GFX_CONTE
 		yinc2 = -yinc2;
 	}
 
-//	printk ("graphics32_DrawLine [3] numpixels:%i\n", numpixels);
-//	API_TASK_SLEEP (500);
-
 	x = x1;
 	y = y1;
 
@@ -292,9 +259,6 @@ void graphics32_DrawAALine (
 	if (!CohenSutherlandLineClipping (&x1, &y1, &x2, &y2, 0, pCtx->w-1, 0, pCtx->h-1))
 		return;
 
-//	printk ("graphics32_DrawAALine [1] clipped to: (%i,%i,%i,%i)\n", x1, y1, x2, y2);
-//	API_TASK_SLEEP (1000);
-
 	int dX, dY;
 	int Xinc, Yinc;
 	int X, Y;
@@ -324,9 +288,6 @@ void graphics32_DrawAALine (
 	X = x1;
 	Y = y1;
 
-//	unsigned char* ptr = &(*m_pImage)[Y][X][0];
-//	for (i=0;i<m_pImage->Channels();i++)
-//		ptr[i] = (color.m_Values[i] * opacity + ptr[i] * (255 - opacity)) >> 8;
 	unsigned char* ptr = (unsigned char*)getCtxOffset (X, Y, pCtx);
 	unsigned char* pColor = (unsigned char*)&color;
 	for (j=0;j<4;j++)
@@ -369,22 +330,10 @@ void graphics32_DrawAALine (
 			I_s = (Cp * opacity + 128) / 256;
 			I_p = opacity - I_s;
 
-/*
-			unsigned char* ptra = &(*m_pImage)[Y][X][0];
-			unsigned char* ptrb = 0;
-			if ((Ys >= 0) && (Ys < m_pImage->Height()))
-				ptrb = &(*m_pImage)[Ys][X][0];
-			for (int i=0;i<m_pImage->Channels();i++)
-			{
-				ptra[i] = (I_p * color.m_Values[i] + (255 - I_p) * ptra[i]) >> 8;
-				if (ptrb)
-					ptrb[i] = (I_s * color.m_Values[i] + (255 - I_s) * ptrb[i]) >> 8;
-			}
-*/
-			unsigned char* ptra = getCtxOffset (X, Y, pCtx);
+			unsigned char* ptra = (unsigned char*)getCtxOffset (X, Y, pCtx);
 			unsigned char* ptrb = 0;
 			if ((Ys >= 0) && (Ys < pCtx->h))
-				ptrb = getCtxOffset (X, Ys, pCtx);
+				ptrb = (unsigned char*)getCtxOffset (X, Ys, pCtx);
 			unsigned char* pColor = (unsigned char*)&color;
 			for (j=0;j<4;j++)
 			{
@@ -427,22 +376,10 @@ void graphics32_DrawAALine (
 			I_s = (Cp * opacity + 128) / 256;
 			I_p = opacity - I_s;
 
-/*
-			unsigned char* ptra = &(*m_pImage)[Y][X][0];
-			unsigned char* ptrb = 0;
-			if ((Xs >= 0) && (Xs < m_pImage->Width()))
-				ptrb = &(*m_pImage)[Y][Xs][0];
-			for (int i=0;i<m_pImage->Channels();i++)
-			{
-				ptra[i] = (I_p * color.m_Values[i] + (255 - I_p) * ptra[i]) >> 8;
-				if (ptrb)
-					ptrb[i] = (I_s * color.m_Values[i] + (255 - I_s) * ptrb[i]) >> 8;
-			}
-*/
-			unsigned char* ptra = getCtxOffset (X, Y, pCtx);
+			unsigned char* ptra = (unsigned char*)getCtxOffset (X, Y, pCtx);
 			unsigned char* ptrb = 0;
 			if ((Xs >= 0) && (Xs < pCtx->w))
-				ptrb = getCtxOffset (Xs, Y, pCtx);
+				ptrb = (unsigned char*)getCtxOffset (Xs, Y, pCtx);
 			unsigned char* pColor = (unsigned char*)&color;
 			for (j=0;j<4;j++)
 			{
@@ -452,31 +389,6 @@ void graphics32_DrawAALine (
 			}
 		}
 	}
-}
-
-void graphics32_DrawHLine (COLOR color, int x, int y, int width, GFX_CONTEXT* pCtx)
-{
-	COLOR* offset = getCtxOffset (x, y, pCtx);
-	graphics32_DrawHorizLine (color, width, offset);
-}
-
-void graphics32_DrawVLine (COLOR color, int x, int y, int height, GFX_CONTEXT* pCtx)
-{
-	int i;
-	COLOR* offset = getCtxOffset (x, y, pCtx);
-	for(i=0;i<height;i++)
-	{
-		outl (color, offset);
-		offset += (pCtx->delta >> 2);
-	}
-}
-
-/* draw an horizontal line starting at (x,y) */
-void graphics32_DrawHorizLine (unsigned int color, int width,unsigned int * offset)
-{
-	int i;
-	for(i=0;i<width;i++)
-		outl (color,offset++);
 }
 
 void graphics32_DrawSprite(unsigned int * palette,SPRITE * sprite, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
@@ -538,8 +450,6 @@ void graphics32_DrawBITMAP(BITMAP * bitmap, unsigned int trsp, int x, int y, str
     {
         for(j=0;j<bitmap->height;j++)
         {
-            /*for(i=0;i<bitmap->width;i++)
-                outl(inl(src+i),dest+i);*/
             memcpy(dest,src,bitmap->width*4);
             dest+=buff->width;
             src+=bitmap->width;
@@ -583,7 +493,7 @@ void graphics32_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, 
     { // clear the freed zone
         for(j=0;j<scroll;j++)
         {
-            graphics32_DrawHorizLine(bgColor,width,dest);
+            graphics32_DrawHorizLine((COLOR)bgColor,width,(COLOR*)dest);
             dest+=inc*buff->width;
         }
     
@@ -615,7 +525,7 @@ void graphics32_ScrollWindowHoriz(unsigned int bgColor, int x, int y, int width,
                     outl(inl(src+i),tmp+i);
                 for(i=0;i<(width-scroll);i++)
                     outl(inl(tmp+i),dest+i);
-                graphics32_DrawHorizLine(bgColor,scroll,offset);
+                graphics32_DrawHorizLine((COLOR)bgColor,scroll,(COLOR*)offset);
                 dest+=buff->width;
                 src+=buff->width;
                 offset+=buff->width;
@@ -632,7 +542,7 @@ void graphics32_ScrollWindowHoriz(unsigned int bgColor, int x, int y, int width,
             {
                 for(i=0;i<(width-scroll);i++)
                     outl(inl(src+i),dest+i);
-                graphics32_DrawHorizLine(bgColor,scroll,offset);
+                graphics32_DrawHorizLine((COLOR)bgColor,scroll,(COLOR*)offset);
                 dest+=buff->width;
                 src+=buff->width;
                 offset+=buff->width;

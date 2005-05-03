@@ -611,7 +611,11 @@ __IRAM_CODE int swi_gfx_handler (
 			char_ctx.pixel_size = 1;
 			char_ctx.pixels = ((unsigned char*)pTask->pFont) + pVarMap[nSym].offset;
 			char_ctx.delta = pVarMap[nSym].w * 1;
-			swi_gfx_handler (nAPI_GFX_CHARBLIT, pTask->pDrawingContext, &char_ctx, &char_pos);
+			swi_gfx_handler (
+				nAPI_GFX_CHARBLIT,
+				(unsigned long)pTask->pDrawingContext,
+				(unsigned long)&char_ctx,
+				(unsigned long)&char_pos);
 
 			x += pVarMap[nSym].a + pVarMap[nSym].b + pVarMap[nSym].c;
 
@@ -698,7 +702,7 @@ __IRAM_CODE int swi_gfx_handler (
 			return ERR_NO_GFX_CONTEXT;
 
 		return gfx_swi_handler (
-			pTask->pDrawingContext,
+			pTask,
 			(int)nParam1,
 			(GFX_CONTEXT*)nParam2,
 			(void*)nParam3);

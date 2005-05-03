@@ -9,28 +9,6 @@
 #include <kernel/kernel.h>
 #include <kernel/swi.h>
 
-/*
-#include <sys_def/stddef.h>
-
-#include <kernel/threads.h>
-#include <kernel/pipes.h>
-#include <api.h>
-#include <kernel/irq.h>
-#include <kernel/rtc.h>
-#include <kernel/usb_fw.h>
-#include <kernel/bat_power.h>
-#include <kernel/sound.h>
-#include <kernel/evt.h>
-#include <kernel/gfxmgr.h>
-
-extern int gfx_swi_handler(int cmd,GFX_CONTEXT * gfxD, void * pvData);
-
-extern void user_printf(const char * fmt, va_list args);
-
-#define MAX(a,b) (a>b?a:b)
-#define MIN(a,b) (a<b?a:b)
-*/
-
 __IRAM_CODE int kcswi_handler (
 	unsigned long nCmd,
 	unsigned long nParam2,
