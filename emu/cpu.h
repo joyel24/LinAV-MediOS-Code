@@ -13,8 +13,43 @@
 #ifndef CPU_H
 #define CPU_H
 
-class cpu {
+#include "emu.h"
 
+#include "memory.h"
+
+
+class Cpu {
+    public:
+        Cpu(Memory * mem);
+        
+        void go(uint32_t start_address,uint32_t stack_address);
+        
+        void printState(void);
+        void test_ini(void);
+        
+    private:
+        uint32_t ** current_reg;
+        uint32_t * mode_regs[7][18];        
+        uint32_t regs_data[37];
+        
+        uint32_t old_PC;
+        
+        Memory * mem;
+        
+        bool checkCondition(int condCode);
+        void doThumb(uint32_t instruction);
+        void doARM(uint32_t instruction);
+        
+        void arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction);
+        
+        void arm_DataProcessing(int condCode,int instr_num,uint32_t instruction);        
+        void arm_LoadStore(int condCode,int instr_num,uint32_t instruction);
+        void arm_LoadStoreMulti(uint32_t instruction);
+        void arm_Mul(int condCode,uint32_t instruction);
+        void arm_Swap(uint32_t instruction);
+        void arm_CoProcessor(uint32_t instruction);
+        void arm_DSP(int condCode,uint32_t instruction);
+        
 };
 
 #endif

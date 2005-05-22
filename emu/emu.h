@@ -15,4 +15,6 @@
 
 #include "emu_types.h"
 
+#define DEBUG
+
 #endif

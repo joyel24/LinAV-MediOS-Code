@@ -14,9 +14,9 @@
 #include <stdio.h>
 #include <string.h>
 //#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <iostream>
+//#include <fcntl.h>
+//#include <sys/stat.h>
+//#include <iostream>
 
 #include "memory.h"
 
@@ -90,6 +90,8 @@ Memory::Memory(char * flash,char * sdram)
     reset_init();
     flash_init();
     sdram_init();
+    
+    printf("Init of Memory object      DONE\n");
 }
 
 Memory::~Memory()
@@ -107,7 +109,7 @@ Memory::~Memory()
     }
 }
 
-uint32_t Memory::read_m(uint32_t addr,int size)
+uint32_t Memory::read(uint32_t addr,int size)
 {
     for(int i=0;i<NB_MEM_ZONE;i++)
     {
@@ -150,7 +152,7 @@ uint32_t Memory::read_m(uint32_t addr,int size)
     return 0;
 }
 
-void Memory::write_m(uint32_t addr,uint32_t val,int size)
+void Memory::write(uint32_t addr,uint32_t val,int size)
 {
     for(int i=0;i<NB_MEM_ZONE;i++)
     {
@@ -204,20 +206,22 @@ void Memory::reset_init(void)
 
 void Memory::flash_init(void)
 {
-    int fd;
-    struct stat s;
+    FILE * fd;
+    int fsize;
   
     if(flash_file)
     {
-        fd = open(flash_file, O_RDONLY);
-        if (fd == -1)
+        fd = fopen(flash_file, "rb");
+        if (!fd)
             printf("ERROR: Loading flash init: %s\n",flash_file);
         else
         {        
-            fstat(fd, &s);
-            read(fd, mem_zone[FLASH_ZONE].mem, s.st_size);
-            close(fd);
-            printf("Loading file %s in flash done (%d bytes read)\n",flash_file,s.st_size);
+            fseek (fd , 0 , SEEK_END);
+            fsize = ftell (fd);
+            rewind (fd);
+            fread(mem_zone[FLASH_ZONE].mem, 1, fsize,fd);
+            fclose(fd);
+            printf("Loading file %s in flash done (%d bytes read)\n",flash_file,fsize);
         }
     }
     else
@@ -226,22 +230,34 @@ void Memory::flash_init(void)
 
 void Memory::sdram_init(void)
 {
-    int fd;
-    struct stat s;
+    FILE * fd;
+    int fsize;
   
     if(sdram_file)
     {
-        fd = open(sdram_file, O_RDONLY);
-        if (fd == -1)
+        fd = fopen(sdram_file, "rb");
+        if (!fd)
             printf("Error: Loading sdram init: %s\n",sdram_file);
         else
         {        
-            fstat(fd, &s);
-            read(fd, mem_zone[SDRAM_ZONE].mem, s.st_size);
-            close(fd);
-            printf("Loading file %s in SDRAM done (%d bytes read)\n",sdram_file,s.st_size);
+            fseek (fd , 0 , SEEK_END);
+            fsize = ftell (fd);
+            rewind (fd);
+            fread(mem_zone[SDRAM_ZONE].mem, 1, fsize,fd);
+            fclose(fd);
+            printf("Loading file %s in SDRAM done (%d bytes read)\n",sdram_file,fsize);
         }
     }
     else
         printf("INFO: no file to load in SDRAM\n");
+}
+
+void Memory::test_ini(void)
+{
+    unsigned int data;
+    for(unsigned int i = 0;i<0x10;i++)
+    {
+        data=read(0x03000000+i*0x4,4);
+        printf("%d|%08x\n",i,data);
+    }
 }

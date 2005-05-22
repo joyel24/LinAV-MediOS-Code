@@ -15,17 +15,19 @@
 
 #include "emu.h"
 #include "memory.h"
+#include "cpu.h"
 
 Memory * mem;
+Cpu    * cpu;
 
 int main(int argc, char* argv[])
 {
     mem = new Memory(NULL,"gravity.bin");
-    unsigned int data;
-    for(unsigned int i = 0;i<0x10;i++)
-    {
-        data=mem->read_m(0x03000000+i*0x4,4);
-        printf("%d|%08x\n",i,data);
-    }
+    
+    cpu = new Cpu(mem);
+    
+    cpu->go(0x03000000,0x000080000-0x4);
+    
     delete(mem);
+    delete(cpu);
 }

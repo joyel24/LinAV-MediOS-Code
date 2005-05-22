@@ -35,8 +35,11 @@ class Memory {
         Memory(char * flash,char * sdram);
         ~Memory();
     
-        uint32_t read_m(uint32_t addr,int size);
-        void write_m(uint32_t addr,uint32_t val,int size); 
+        uint32_t read(uint32_t addr,int size);
+        void write(uint32_t addr,uint32_t val,int size); 
+        
+        void test_ini(void);
+        
     private:
         struct MemZone * mem_zone;
         char * flash_file;
