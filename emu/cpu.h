@@ -50,6 +50,10 @@ class Cpu {
         void arm_CoProcessor(uint32_t instruction);
         void arm_DSP(int condCode,uint32_t instruction);
         
+        int signExtend1(int data);
+        int signExtend11(int data);
+        int signExtend2(int data);
+        
 };
 
 #endif

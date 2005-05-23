@@ -15,6 +15,14 @@
 
 #include "emu_types.h"
 
-#define DEBUG
+#define DEBUG_MODE
+
+#ifdef DEBUG_MODE
+#define DEBUG printf
+#define MKDEBUG sprintf
+#else
+#define DEBUG(...)
+#define MKDEBUG(...)
+#endif
 
 #endif

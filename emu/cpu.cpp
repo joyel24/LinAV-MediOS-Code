@@ -25,6 +25,12 @@ enum REGS {R_R0 = 0x00, R_R1 = 0x01, R_R2 = 0x02, R_R3 = 0x03,
 	   R_R8 = 0x08, R_R9 = 0x09, R_R10 = 0x0A, R_FP = 0x0B,
 	   R_IP = 0x0C, R_SP = 0x0D, R_LR = 0x0E, R_PC = 0x0F,
 	   R_CPSR = 0x10,R_SPSR = 0x11};
+           
+char * reg_str[] = {"R0", "R1", "R2", "R3",
+                    "R4", "R5", "R6", "R7",
+                    "R8", "R9", "R10", "R11",
+                    "R12", "SP", "LR", "PC",
+                    "CPSR", "SPSR"};
 
 enum MODES {M_USER=0x00,M_SYS=0x01,M_SVC=0x02,M_ABT=0x03,M_UND=0x04,M_IRQ=0x05,M_FIQ=0x06};
 
@@ -36,7 +42,7 @@ int cpsr_tab[16] = { M_USER , M_FIQ, M_IRQ, M_SVC,
 int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
                     
 
-#define MODE          (mode_tab[*mode_regs[M_USER][R_CPSR] & 0xF])
+#define MODE          (cpsr_tab[*mode_regs[M_USER][R_CPSR] & 0xF])
 #define SET_MODE(val) {*mode_regs[M_USER][R_CPSR]=(*mode_regs[M_USER][R_CPSR] & 0xFFFFFFF0)|mode_tab[val];}
 
 #define GET_FLAG(mask) (*mode_regs[M_USER][R_CPSR] & mask)
@@ -61,7 +67,11 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 #define Z_FLAG        GET_FLAG(Z_MASK)
 #define N_FLAG        GET_FLAG(N_MASK)
 
+#define GET_REG(N)        (N==15?*current_reg[N]+4/(T_FLAG+1):*current_reg[N])
 #define REG(N)        (*current_reg[N])
+#define PC_REAL       (*current_reg[15])
+
+#define RR(N)         (reg_str[N])
            
 Cpu::Cpu(Memory * mem)
 {
@@ -115,7 +125,6 @@ Cpu::Cpu(Memory * mem)
 }
 
 
-
 void Cpu::go(uint32_t start_address,uint32_t stack_address)
 {
     uint32_t instruction;
@@ -123,17 +132,17 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
     REG(R_SP)=stack_address;
     for(int i=0;i<0x20;i++)
     {        
-        old_PC=REG(R_PC);
+        old_PC=PC_REAL;
         if(T_FLAG)  /* THUMB */
         {            
-            instruction=mem->read(REG(R_PC)&0xfffffffe,2);
-            REG(R_PC)+=2;
+            instruction=mem->read(PC_REAL&0xfffffffe,2);
+            PC_REAL+=2;
             doThumb(instruction);
         }
         else       /* ARM */
         {
-            instruction=mem->read((REG(R_PC)+2)&0xfffffffc,4);
-            REG(R_PC)+= 4;
+            instruction=mem->read((PC_REAL+2)&0xfffffffc,4);
+            PC_REAL+= 4;
             doARM(instruction);
         }
         
@@ -144,9 +153,7 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
 
 void Cpu::doThumb(uint32_t instruction)
 {
-#ifdef DEBUG
-    printf("Thumb => PC: %08x inst: %08x\n",old_PC,instruction);
-#endif
+    DEBUG("Thumb => PC: %08x inst: %08x\n",old_PC,instruction);
 }
 
 bool Cpu::checkCondition(int condCode)
@@ -215,26 +222,26 @@ void Cpu::doARM(uint32_t instruction)
                                 {                           /* BIT 22 == 0 */ /* BX */
                                     if(checkCondition(condCode))
                                     {
-                                        printf("%08x-%08x BX ",old_PC,instruction);
+                                        DEBUG("%08x-%08x BX ",old_PC,instruction);
                                         
                                         int Rm = instruction & 0xF;
                                         
-                                        if(REG(Rm) & 0x1)
+                                        if(GET_REG(Rm) & 0x1)
                                         {
                                             SET_FLAG(T_MASK);
-                                            printf("Thumb - ");
+                                            DEBUG("Thumb - ");
                                         }
                                         else
                                         {
                                             CLR_FLAG(T_MASK);
-                                            printf("ARM - ");
+                                            DEBUG("ARM - ");
                                         }
-                                        REG(R_PC) = REG(Rm) & 0xFFFFFFE;
-                                        printf("=> %08x\n",REG(R_PC));
+                                        REG(R_PC) = GET_REG(Rm) & 0xFFFFFFE;
+                                        DEBUG("=> %08x\n",GET_REG(R_PC));
                                     }
                                     else
                                     {
-                                        printf("%08x-%08x BX CC not met\n",old_PC,instruction);
+                                        DEBUG("%08x-%08x BX CC not met\n",old_PC,instruction);
                                     }
                                 }
                                 break;
@@ -266,7 +273,7 @@ void Cpu::doARM(uint32_t instruction)
                             if(checkCondition(condCode))
                                 arm_Swap(instruction);
                             else
-                                printf("%08x-%08x SWP CC not met\n",old_PC,instruction);
+                                DEBUG("%08x-%08x SWP CC not met\n",old_PC,instruction);
                         }
                     }                           /* BIT 5 == 1 */ /* Multiply / swap */
                     else
@@ -310,40 +317,38 @@ void Cpu::doARM(uint32_t instruction)
             if(checkCondition(condCode))
                 arm_LoadStoreMulti(instruction);
             else
-                printf("%08x-%08x Load/Store multi CC not met\n",old_PC,instruction);
+                DEBUG("%08x-%08x Load/Store multi CC not met\n",old_PC,instruction);
             break;
         case 0x5:            
             if(checkCondition(condCode))       /* B, BL */
             {   
                 if ((instruction>>24)&0x1)
                 {
-                    REG(R_LR) = REG(R_PC);
-                    printf("%08x-%08x BL => ",old_PC,instruction);
+                    REG(R_LR) = GET_REG(R_PC);
+                    DEBUG("%08x-%08x BL => ",old_PC,instruction);
                 }
                 else
-                    printf("%08x-%08x B => ",old_PC,instruction);
+                    DEBUG("%08x-%08x B => ",old_PC,instruction);
     
                 uint32_t offset = (instruction & 0xffffff);
                 
                 if (offset > 0x7fffff)
                     offset = offset - 0x1000000 ;
                 
-                printf("%08x + %08x(%d) = ",REG(R_PC),offset *4,offset *4);
-                    
-                REG(R_PC) = REG(R_PC) + offset *4 + 4;
+                REG(R_PC) = GET_REG(R_PC) + offset *4;
                 
-                printf("%08x\n",REG(R_PC));
+                DEBUG("%08x\n",PC_REAL);
             }
             else
             {
-                printf("%08x-%08x B/BL CC not met\n",old_PC,instruction);
+                DEBUG("%08x-%08x B/BL CC not met\n",old_PC,instruction);
             }
             break;
         case 0x6:
             if(checkCondition(condCode))
                 arm_CoProcessor(instruction);
             else
-                printf("%08x-%08x CoProcessor CC not met\n",old_PC,instruction);
+                DEBUG("%08x-%08x CoProcessor CC not met\n",old_PC,instruction);
             break;
         case 0x7:
             if((instruction>>24)&0x1)
@@ -351,13 +356,13 @@ void Cpu::doARM(uint32_t instruction)
                 if(checkCondition(condCode))
                     arm_CoProcessor(instruction);
                 else
-                    printf("%08x-%08x CoProcessor CC not met\n",old_PC,instruction);
+                    DEBUG("%08x-%08x CoProcessor CC not met\n",old_PC,instruction);
             }
             else
             {
                 if(checkCondition(condCode))
                 {
-                    printf("SWI :%08x\n",instruction & 0x00FFFFFF);
+                    DEBUG("SWI :%08x\n",instruction & 0x00FFFFFF);
 /*
                     regs[14][2]=regs[15][0];
                     SPSR[2]=CPSR;
@@ -368,7 +373,7 @@ void Cpu::doARM(uint32_t instruction)
 */
                 }
                 else
-                    printf("%08x-%08x SWI CC not met\n",old_PC,instruction);
+                    DEBUG("%08x-%08x SWI CC not met\n",old_PC,instruction);
             }
             break;
          default:
@@ -381,103 +386,113 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
 {
     if (checkCondition(condCode))
     {   
+        int old_mode = MODE;
+    
         if((instruction >> 21) & 0x1)           /* MSR */
         {
             int opVal;
-            printf("%08x-%08x MSR ",old_PC,instruction);            
+            DEBUG("%08x-%08x MSR ",old_PC,instruction);            
             
             if((instruction>>25) & 0x1)
             {
                 opVal=((instruction&0xFF) << (32-(((instruction>>8) & 0xF)*2))) | ((instruction&0xFF) >> (((instruction>>8) & 0xF)*2));
-                printf("[%08x] -> ",opVal);
+                DEBUG("[%08x] -> ",opVal);
             }
             else
             {
-                opVal = REG(instruction&0xF);
-                printf("R%d (%08x) -> ",instruction&0xF,REG(instruction&0xF));
+                opVal = GET_REG(instruction&0xF);
+                DEBUG("R%d (%08x) -> ",instruction&0xF,GET_REG(instruction&0xF));
             }
             int mask = (instruction >> 16) & 0xF;
             if((instruction >> 22) & 0x1)
             {
-                printf("SPSR (mask =%08x)",mask);
+                DEBUG("SPSR (mask =%08x)",mask);
                 if( (mask & 0x1) == 0x1)
-                    REG(R_SPSR) = (REG(R_SPSR) & ~0x000000FF) | (opVal & 0x000000FF);
+                    REG(R_SPSR) = (GET_REG(R_SPSR) & ~0x000000FF) | (opVal & 0x000000FF);
                 if( (mask & 0x2) == 0x2)
-                    REG(R_SPSR) = (REG(R_SPSR) & ~0x0000FF00) | (opVal & 0x0000FF00);
+                    REG(R_SPSR) = (GET_REG(R_SPSR) & ~0x0000FF00) | (opVal & 0x0000FF00);
                 if( (mask & 0x4) == 0x4)
-                    REG(R_SPSR) = (REG(R_SPSR) & ~0x00FF0000) | (opVal & 0x00FF0000);
+                    REG(R_SPSR) = (GET_REG(R_SPSR) & ~0x00FF0000) | (opVal & 0x00FF0000);
                 if( (mask & 0x8) == 0x8)
-                    REG(R_SPSR) = (REG(R_SPSR) & ~0xFF000000) | (opVal & 0xFF000000);
-                printf(" => %08x\n",REG(R_SPSR));
+                    REG(R_SPSR) = (GET_REG(R_SPSR) & ~0xFF000000) | (opVal & 0xFF000000);
+                DEBUG(" => %08x\n",GET_REG(R_SPSR));
             }
             else
             {
-                printf("CPSR (%08x)",mask);
+                DEBUG("CPSR (%08x)",mask);
                 if( (mask & 0x1) == 0x1)
-                    REG(R_CPSR) = (REG(R_CPSR) & ~0x000000FF) | (opVal & 0x000000FF);
+                    REG(R_CPSR) = (GET_REG(R_CPSR) & ~0x000000FF) | (opVal & 0x000000FF);
                 if( (mask & 0x2) == 0x2)
-                    REG(R_CPSR) = (REG(R_CPSR) & ~0x0000FF00) | (opVal & 0x0000FF00);
+                    REG(R_CPSR) = (GET_REG(R_CPSR) & ~0x0000FF00) | (opVal & 0x0000FF00);
                 if( (mask & 0x4) == 0x4)
-                    REG(R_CPSR) = (REG(R_CPSR) & ~0x00FF0000) | (opVal & 0x00FF0000);
+                    REG(R_CPSR) = (GET_REG(R_CPSR) & ~0x00FF0000) | (opVal & 0x00FF0000);
                 if( (mask & 0x8) == 0x8)
-                    REG(R_CPSR) = (REG(R_CPSR) & ~0xFF000000) | (opVal & 0xFF000000);
-                printf(" => %08x\n",REG(R_CPSR));
+                    REG(R_CPSR) = (GET_REG(R_CPSR) & ~0xFF000000) | (opVal & 0xFF000000);
+                DEBUG(" => %08x\n",GET_REG(R_CPSR));
             }
         }
         else                                   /* MRS */
         {
-            printf("%08x-%08x MRS ",old_PC,instruction);
+            DEBUG("%08x-%08x MRS ",old_PC,instruction);
             
             int Rd = (instruction >> 12) & 0xF;
             if((instruction >> 22) & 0x1)             /* SPSR */
             {
-                printf("R%d <- SPSR (%08x)\n",Rd,REG(R_SPSR));
-                REG(Rd) = REG(R_SPSR);
+                DEBUG("R%d <- SPSR (%08x)\n",Rd,GET_REG(R_SPSR));
+                REG(Rd) = GET_REG(R_SPSR);
                 
             }
             else                                      /* CPSR */
             {
-                printf("R%d <- CPSR (%08x)\n",Rd,REG(R_CPSR));
-                REG(Rd) = REG(R_CPSR);
+                DEBUG("R%d <- CPSR (%08x)\n",Rd,GET_REG(R_CPSR));
+                REG(Rd) = GET_REG(R_CPSR);
             }
+        }
+        
+        /* checking mode change */
+        if(old_mode != MODE)
+        {
+            DEBUG("Mode has changed from %s to %s\n",mode_str[old_mode],mode_str[MODE]);
+            current_reg = mode_regs[MODE];
         }
     }
     else
     {
-        printf("%08x-%08x MSR/MRS CC not met\n",old_PC,instruction);
+        DEBUG("%08x-%08x MSR/MRS CC not met\n",old_PC,instruction);
     }
+    
+    
             
 }
 
 void Cpu::arm_DataProcessing(int condCode,int instr_num,uint32_t instruction)
 {
-    printf("%08x-%08x data processing\n",old_PC,instruction);
+    DEBUG("%08x-%08x data processing\n",old_PC,instruction);
 }
 
-void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
-{
-    printf("%08x-%08x load store\n",old_PC,instruction);
-}
+/* load store */
+
+#include "cpu_load_store.h"
 
 void Cpu::arm_LoadStoreMulti(uint32_t instruction)
 {
-    printf("%08x-%08x load store multi\n",old_PC,instruction);
+    DEBUG("%08x-%08x load store multi\n",old_PC,instruction);
 }
 
 void Cpu::arm_Mul(int condCode,uint32_t instruction)
 {
-    printf("%08x-%08x multiply\n",old_PC,instruction);
+    DEBUG("%08x-%08x multiply\n",old_PC,instruction);
 }
         
 void Cpu::arm_CoProcessor(uint32_t instruction)
 {
-    printf("%08x-%08x coprocessor instruction: %08x\n",old_PC,instruction);
+    DEBUG("%08x-%08x coprocessor instruction: %08x\n",old_PC,instruction);
 }
 
 
 void Cpu::arm_DSP(int condCode,uint32_t instruction)
 {
-    printf("%08x-%08x DSP instruction: %08x\n",old_PC,instruction);
+    DEBUG("%08x-%08x DSP instruction: %08x\n",old_PC,instruction);
 }
 
 void Cpu::arm_Swap(uint32_t instruction)
@@ -488,67 +503,91 @@ void Cpu::arm_Swap(uint32_t instruction)
     
     uint32_t data;  
     
-    printf("%08x-%08x SWP",old_PC,instruction); 
+    DEBUG("%08x-%08x SWP",old_PC,instruction); 
 
     if((instruction>>22) & 0x1)           // SWPB
     {
-        printf("B [R%d] = R%d R%d = [R%d]\n",Rn,Rm,Rd);
-        data = mem->read(REG(Rn),1);
-        mem->write(REG(Rn),REG(Rm) & 0xFF,1);
+        DEBUG("B [R%d] = R%d R%d = [R%d]\n",Rn,Rm,Rd);
+        data = mem->read(GET_REG(Rn),1);
+        mem->write(GET_REG(Rn),GET_REG(Rm) & 0xFF,1);
         REG(Rd) = data;
     }
     else                                  // SWP
     {
-        printf(" [R%d] = R%d R%d = [R%d] (rot right:",Rn,Rm,Rd);
-        switch(REG(Rn) & 0x3)
+        DEBUG(" [R%d] = R%d R%d = [R%d] (rot right:",Rn,Rm,Rd);
+        switch(GET_REG(Rn) & 0x3)
         {
             case 0x0:
-                data = mem->read(REG(Rn),4);
-                printf("0)\n");
+                data = mem->read(GET_REG(Rn),4);
+                DEBUG("0)\n");
                 break;
             case 0x1:
-                data = mem->read(REG(Rn),4);
+                data = mem->read(GET_REG(Rn),4);
                 data = ((data << 24) & 0xFF000000) | ((data >> 8) & 0x00FFFFFF);
-                printf("8)\n");
+                DEBUG("8)\n");
                 break;
             case 0x2:
-                data = mem->read(REG(Rn),4);
+                data = mem->read(GET_REG(Rn),4);
                 data = ((data << 16) & 0xFFFF0000)  | ((data >> 16) & 0x0000FFFF);
-                printf("16)\n");
+                DEBUG("16)\n");
                 break;
             case 0x3:
-                data = mem->read(REG(Rn),4);
+                data = mem->read(GET_REG(Rn),4);
                 data = ((data << 8) & 0xFFFFFF00)  | ((data >> 24) & 0xFF000000);
-                printf("24)\n");
+                DEBUG("24)\n");
                 break;
         }
-        mem->write(REG(Rn),REG(Rm),4);
+        mem->write(GET_REG(Rn),GET_REG(Rm),4);
         REG(Rd)=data;
     }
+}
+
+////////////////////////////// signExtend
+int Cpu::signExtend1(int data)
+{
+    if(data > 0x7F) // neg
+        data -=  0x100;
+    return data;
+}
+
+int Cpu::signExtend11(int data)
+{
+    if(data > 0x3FF) // neg
+    {
+        data -=  0x800;
+    }
+    return data;
+}
+
+int Cpu::signExtend2(int data)
+{
+    if(data> 0x7FFF) // neg
+        data -=  0x10000;
+    return data;
 }
 
 void Cpu::printState(void)
 {
     int i=0;
     printf("Mode : %s (%d) - PC:%08x, LR:%08x, SP:%08x\n",mode_str[MODE],MODE,
-            REG(R_PC),
-            REG(R_LR),
-            REG(R_SP));
+            GET_REG(R_PC),
+            GET_REG(R_LR),
+            GET_REG(R_SP));
     for(i=0;i<5;i++)
-        printf("R%d:%08x ",i,REG(i));
+        printf("R%d:%08x ",i,GET_REG(i));
     printf("\n");
     
     for(i;i<9;i++)
-        printf("R%d:%08x ",i,REG(i));
+        printf("R%d:%08x ",i,GET_REG(i));
     printf("\n");
     for(i;i<13;i++)
-        printf("R%d:%08x ",i,REG(i));
+        printf("R%d:%08x ",i,GET_REG(i));
     printf("\n");
     
-    printf("CPSR: %08x\n",REG(R_CPSR));
+    printf("CPSR: %08x\n",GET_REG(R_CPSR));
     
     if(MODE != M_USER && MODE != M_SYS)
-        printf("SPSR: %08x\n",REG(R_SPSR));
+        printf("SPSR: %08x\n",GET_REG(R_SPSR));
     
 }
 
