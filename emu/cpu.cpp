@@ -67,12 +67,33 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 #define Z_FLAG        GET_FLAG(Z_MASK)
 #define N_FLAG        GET_FLAG(N_MASK)
 
-#define GET_REG(N)        (N==15?*current_reg[N]+4/(T_FLAG+1):*current_reg[N])
+#define SET_Q(COND)   {if(COND) SET_FLAG(Q_MASK) else CLR_FLAG(Q_MASK)}
+#define SET_V(COND)   {if(COND) SET_FLAG(V_MASK) else CLR_FLAG(V_MASK)}
+#define SET_C(COND)   {if(COND) SET_FLAG(C_MASK) else CLR_FLAG(C_MASK)}
+#define SET_Z(COND)   {if(COND) SET_FLAG(Z_MASK) else CLR_FLAG(Z_MASK)}
+#define SET_N(COND)   {if(COND) SET_FLAG(N_MASK) else CLR_FLAG(N_MASK)}
+
+#define GET_REG(N)    (N==15?*current_reg[N]+4/(T_FLAG+1):*current_reg[N])
 #define REG(N)        (*current_reg[N])
 #define PC_REAL       (*current_reg[15])
 
 #define RR(N)         (reg_str[N])
+
+#ifdef DEBUG_MODE
+#define DEBUG_HEAD   {printf("@%08x:%08x| ",old_PC,instruction);}
+#else
+#define DEBUG_HEAD
+#endif
            
+#define CHG_MODE     {   int __old_mode=MODE;      \
+                         REG(R_CPSR)=REG(R_SPSR);  \
+                         if(__old_mode != MODE)    \
+                         { \
+                            DEBUG("Mode has changed from %s to %s\n",mode_str[__old_mode],mode_str[MODE]); \
+                            current_reg = mode_regs[MODE]; \
+                         } \
+                     }
+
 Cpu::Cpu(Memory * mem)
 {
     int i,j;
@@ -130,7 +151,8 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
     uint32_t instruction;
     REG(R_PC)=start_address;
     REG(R_SP)=stack_address;
-    for(int i=0;i<0x20;i++)
+    //for(int i=0;i<0x20;i++)
+    while(1)
     {        
         old_PC=PC_REAL;
         if(T_FLAG)  /* THUMB */
@@ -202,6 +224,8 @@ void Cpu::doARM(uint32_t instruction)
     int condCode = (instruction >> 28) & 0xf;
     int instr_num = (instruction >> 25) & 0x7;
     
+    DEBUG_HEAD;
+    
     switch(instr_num)
     {
         case 0x0:
@@ -209,6 +233,28 @@ void Cpu::doARM(uint32_t instruction)
             {                           /* BIT 4 == 1 */
                 if((instruction>>7)&0x1)
                 {                           /* BIT 7 == 1 */
+                    if((instruction>>5)&0x1==0 && (instruction>>6)&0x1==0)
+                    {                           /* Multiply / swap */
+                        if((instruction>>24)&0x1==0)
+                        {                           /* BIT 24 == 1 */ /* Multiply */
+                            arm_Mul(condCode,instruction);
+                        }
+                        else
+                        {                           /* BIT 24 == 0 */ /* Swap */
+                            if(checkCondition(condCode))
+                                arm_Swap(instruction);
+                            else
+                                DEBUG("SWP CC not met\n");
+                        }
+                    }                            /* Multiply / swap */
+                    else
+                    {                            /* extra Load/Store */
+                        arm_LoadStore(condCode,instr_num,instruction);
+                    }                            /* extra Load/Store */
+                    
+                }                           /* BIT 7 == 1 */
+                else
+                {                           /* BIT 7 == 0 */ /* Multiplies extra Load/Store */
                     if((instruction & 0x01900000) == 0x01000000) /* MISC instructions */
                     {
                         switch((instruction>>5)&0x3)
@@ -216,13 +262,13 @@ void Cpu::doARM(uint32_t instruction)
                             case 0:
                                 if((instruction>>22)&0x1)
                                 {                           /* BIT 22 == 1 */ /* CLZ */
-                                    printf("CLZ-%08x : Undef instruction\n",instruction);
+                                    printf("CLZ : Undef instruction\n");
                                 }
                                 else
                                 {                           /* BIT 22 == 0 */ /* BX */
                                     if(checkCondition(condCode))
                                     {
-                                        DEBUG("%08x-%08x BX ",old_PC,instruction);
+                                        DEBUG("BX ");
                                         
                                         int Rm = instruction & 0xF;
                                         
@@ -241,45 +287,23 @@ void Cpu::doARM(uint32_t instruction)
                                     }
                                     else
                                     {
-                                        DEBUG("%08x-%08x BX CC not met\n",old_PC,instruction);
+                                        DEBUG("BX CC not met\n");
                                     }
                                 }
                                 break;
                             case 1:
-                                printf("%08x-%08x BLX: Undef instruction\n",old_PC,instruction);
+                                printf("BLX: Undef instruction\n");
                                 break;
                             case 2:
                                 arm_DSP(condCode,instruction);
                                 break;
                             case 3:
-                                printf("%08x-%08x BKPT: Undef instruction\n",old_PC,instruction);
+                                printf("BKPT: Undef instruction\n");
                                 break;
                         }
                     }
                     else                                         /* data processing register shift*/
-                        arm_DataProcessing(condCode,instr_num,instruction);
-                
-                }                           /* BIT 7 == 1 */
-                else
-                {                           /* BIT 7 == 0 */ /* Multiplies extra Load/Store */
-                    if((instruction>>5)&0x1)
-                    {                           /* BIT 5 == 1 */ /* Multiply / swap */
-                        if((instruction>>24)&0x1)
-                        {                           /* BIT 24 == 1 */ /* Multiply */
-                            arm_Mul(condCode,instruction);
-                        }
-                        else
-                        {                           /* BIT 24 == 0 */ /* Swap */
-                            if(checkCondition(condCode))
-                                arm_Swap(instruction);
-                            else
-                                DEBUG("%08x-%08x SWP CC not met\n",old_PC,instruction);
-                        }
-                    }                           /* BIT 5 == 1 */ /* Multiply / swap */
-                    else
-                    {                           /* BIT 5 == 0 */ /* extra Load/Store */
-                        arm_LoadStore(condCode,instr_num,instruction);
-                    }                           /* BIT 5 == 0 */ /* extra Load/Store */
+                        arm_DataProcessing(condCode,instruction);
                 }                           /* BIT 7 == 0 */ /* Multiplies extra Load/Store */
             }                           /* BIT 4 == 1 */
             else
@@ -292,7 +316,7 @@ void Cpu::doARM(uint32_t instruction)
                         arm_MSR_MRS(condCode,instr_num,instruction); 
                 }
                 else                                         /* data processing immediate shift*/
-                    arm_DataProcessing(condCode,instr_num,instruction);
+                    arm_DataProcessing(condCode,instruction);
             }                           /* BIT 4 == 0 */
             break;
         case 0x1:
@@ -300,14 +324,14 @@ void Cpu::doARM(uint32_t instruction)
                 if((instruction>>21)&0x1)   /* Move immediate to status reg */
                     arm_MSR_MRS(condCode,instr_num,instruction);                    
                 else
-                    printf("%08x-%08x Undef instruction\n",old_PC,instruction);                   
+                    printf("Undef instruction\n");                   
             else   /* data processing immediate */
-                arm_DataProcessing(condCode,instr_num,instruction);
+                arm_DataProcessing(condCode,instruction);
             break;
         case 0x3:
             if(condCode == 0xf)
             {
-                printf("%08x-%08x Undef instruction\n",old_PC,instruction);
+                printf("Undef instruction\n");
                 break;
             }
         case 0x2:
@@ -317,7 +341,7 @@ void Cpu::doARM(uint32_t instruction)
             if(checkCondition(condCode))
                 arm_LoadStoreMulti(instruction);
             else
-                DEBUG("%08x-%08x Load/Store multi CC not met\n",old_PC,instruction);
+                DEBUG("Load/Store multi CC not met\n");
             break;
         case 0x5:            
             if(checkCondition(condCode))       /* B, BL */
@@ -325,10 +349,10 @@ void Cpu::doARM(uint32_t instruction)
                 if ((instruction>>24)&0x1)
                 {
                     REG(R_LR) = GET_REG(R_PC);
-                    DEBUG("%08x-%08x BL => ",old_PC,instruction);
+                    DEBUG("BL => ");
                 }
                 else
-                    DEBUG("%08x-%08x B => ",old_PC,instruction);
+                    DEBUG("B => ");
     
                 uint32_t offset = (instruction & 0xffffff);
                 
@@ -341,14 +365,14 @@ void Cpu::doARM(uint32_t instruction)
             }
             else
             {
-                DEBUG("%08x-%08x B/BL CC not met\n",old_PC,instruction);
+                DEBUG("B/BL CC not met\n");
             }
             break;
         case 0x6:
             if(checkCondition(condCode))
                 arm_CoProcessor(instruction);
             else
-                DEBUG("%08x-%08x CoProcessor CC not met\n",old_PC,instruction);
+                DEBUG("CoProcessor CC not met\n");
             break;
         case 0x7:
             if((instruction>>24)&0x1)
@@ -356,7 +380,7 @@ void Cpu::doARM(uint32_t instruction)
                 if(checkCondition(condCode))
                     arm_CoProcessor(instruction);
                 else
-                    DEBUG("%08x-%08x CoProcessor CC not met\n",old_PC,instruction);
+                    DEBUG("CoProcessor CC not met\n");
             }
             else
             {
@@ -373,7 +397,7 @@ void Cpu::doARM(uint32_t instruction)
 */
                 }
                 else
-                    DEBUG("%08x-%08x SWI CC not met\n",old_PC,instruction);
+                    DEBUG("SWI CC not met\n");
             }
             break;
          default:
@@ -391,7 +415,7 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
         if((instruction >> 21) & 0x1)           /* MSR */
         {
             int opVal;
-            DEBUG("%08x-%08x MSR ",old_PC,instruction);            
+            DEBUG("MSR ");            
             
             if((instruction>>25) & 0x1)
             {
@@ -433,7 +457,7 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
         }
         else                                   /* MRS */
         {
-            DEBUG("%08x-%08x MRS ",old_PC,instruction);
+            DEBUG("MRS ");
             
             int Rd = (instruction >> 12) & 0xF;
             if((instruction >> 22) & 0x1)             /* SPSR */
@@ -458,41 +482,43 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
     }
     else
     {
-        DEBUG("%08x-%08x MSR/MRS CC not met\n",old_PC,instruction);
+        DEBUG("MSR/MRS CC not met\n");
     }
     
     
             
 }
 
-void Cpu::arm_DataProcessing(int condCode,int instr_num,uint32_t instruction)
-{
-    DEBUG("%08x-%08x data processing\n",old_PC,instruction);
-}
+/* special ops */
+
+#include "cpu_ops.h"
+
+/* load store */
+
+#include "data_processing.h"
 
 /* load store */
 
 #include "cpu_load_store.h"
 
-void Cpu::arm_LoadStoreMulti(uint32_t instruction)
-{
-    DEBUG("%08x-%08x load store multi\n",old_PC,instruction);
-}
+/* load store MULTI */
+
+#include "cpu_load_store_multi.h"
 
 void Cpu::arm_Mul(int condCode,uint32_t instruction)
 {
-    DEBUG("%08x-%08x multiply\n",old_PC,instruction);
+    DEBUG("multiply\n");
 }
         
 void Cpu::arm_CoProcessor(uint32_t instruction)
 {
-    DEBUG("%08x-%08x coprocessor instruction: %08x\n",old_PC,instruction);
+    DEBUG("coprocessor instruction: %08x\n",instruction);
 }
 
 
 void Cpu::arm_DSP(int condCode,uint32_t instruction)
 {
-    DEBUG("%08x-%08x DSP instruction: %08x\n",old_PC,instruction);
+    DEBUG("DSP instruction: %08x\n",instruction);
 }
 
 void Cpu::arm_Swap(uint32_t instruction)
@@ -503,7 +529,7 @@ void Cpu::arm_Swap(uint32_t instruction)
     
     uint32_t data;  
     
-    DEBUG("%08x-%08x SWP",old_PC,instruction); 
+    DEBUG("SWP"); 
 
     if((instruction>>22) & 0x1)           // SWPB
     {

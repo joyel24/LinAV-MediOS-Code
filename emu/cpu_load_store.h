@@ -57,7 +57,7 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
     if(!bit_I) // immediate
     {
         offset=offset_12;
-        MKDEBUG(debugShifter,"X 0x%08x ",offset);
+        MKDEBUG(debugShifter,"X 0x%x ",offset);
     }
     else // register
     {
@@ -65,7 +65,7 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
         if(shift == 0 && shift_imm==0x0) // no shift
         {
                 offset=RmVal;
-                MKDEBUG(debugShifter,"X %s (0x%08x) ",RR(Rm),offset);
+                MKDEBUG(debugShifter,"X %s (0x%x) ",RR(Rm),offset);
         }
         else // with shift
         {
@@ -157,21 +157,18 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
     {
         address = RnVal;
         if (!checkCondition(condCode)) {
-            //hh = hh + "(cc not met)";
             printf("CC not met\n");
             return;
         }
         if(bit_U)
         {
             REG(Rn) =  RnVal + offset;
-            debugShifter[0] = '+';
-            debugShifter[1] = '+';
+            debugShifter[0] = ',';
         }
         else
         {
             REG(Rn) = RnVal - offset;
-            debugShifter[0] = '-';
-            debugShifter[1] = '-';
+            debugShifter[0] = ',';
         }
     }
 
@@ -191,18 +188,18 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
             {
                 if(bit_L)				// LDRH
                 {
-                    DEBUG("%08x-%08x LDRH %s, %s %s\n" ,old_PC,instruction,RR(Rd),RR(Rn),debugShifter);
+                    DEBUG("LDRH %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                     REG(Rd)=mem->read(address,2);
                 }
                 else					// STRH
                 {
-                    DEBUG("%08x-%08x STRH %s, %s %s\n" ,old_PC,instruction,RR(Rd),RR(Rn),debugShifter);
+                    DEBUG("STRH %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                     mem->write(address,GET_REG(Rd) & 0xFFFF,2);
                 }
             }
             else
             {
-                printf("%08x-%08x Unpredictable\n",old_PC,instruction );
+                printf("@%08x:%08x| Unpredictable\n",old_PC,instruction );
                 return;
             }
         }
@@ -210,13 +207,13 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
         {
             if(bit_L)				// LDRSB
             {
-                DEBUG("%08x-%08x LDRSB %s, %s %s\n" ,old_PC,instruction,RR(Rd),RR(Rn),debugShifter);
+                DEBUG("LDRSB %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                 data = mem->read(address,1);
                 REG(Rd) = signExtend1(data);
             }
             else					// STRSB
             {
-                printf("%08x-%08x Undefined STRSB\n",old_PC,instruction);
+                printf("@%08x:%08x| Undefined STRSB\n",old_PC,instruction);
             }
         }
         else 						//SH
@@ -225,19 +222,19 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
             {
                 if((address & 0x1) ==0x0)
             {
-                    DEBUG("%08x-%08x LDRSH %s, %s %s\n" ,old_PC,instruction,RR(Rd),RR(Rn),debugShifter);
+                    DEBUG("LDRSH %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                     data = mem->read(address,2);
                     REG(Rd)=signExtend2(data);
                 }
                 else
                 {
-                    printf("%08x-%08x Unpredictable\n",old_PC,instruction);
+                    printf("@%08x:%08x| Unpredictable\n",old_PC,instruction);
                     return;
                 }
             }
             else					// STRSH
             {
-                printf("%08x-%08x Undefined STRSH \n",old_PC,instruction);
+                printf("@%08x:%08x| Undefined STRSH \n",old_PC,instruction);
                 return;
             }
         }
@@ -256,12 +253,12 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
             {
                     if(bit_L)				// LDRBT
                     {
-                        DEBUG("%08x-%08x LDRBT %s, %s %s\n" ,old_PC,instruction,RR(Rd),RR(Rn),debugShifter);
+                        DEBUG("LDRBT %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                         REG(Rd) = mem->read(address,1);
                     }
                     else					// STRBT
                     {
-                        DEBUG("%08x-%08x STRBT %s, %s %s\n" ,old_PC,instruction,RR(Rd),RR(Rn),debugShifter);
+                        DEBUG("STRBT %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                         mem->write(address,GET_REG(Rd) & 0xFF,1);
                     }
             }
@@ -269,7 +266,7 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
             {
                 if(bit_L)				// LDRT
                 {
-                    DEBUG("%08x-%08x LDRT %s, %s %s\n" ,old_PC,instruction,RR(Rd),RR(Rn),debugShifter);
+                    DEBUG("LDRT %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                         
                     data=mem->read(address,4);
                     int tst = address & 0x3;
@@ -291,7 +288,7 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
                 }
                 else					// STRT
                 {
-                    DEBUG("%08x-%08x STRT %s, %s %s\n" ,old_PC,instruction,RR(Rd),RR(Rn),debugShifter);
+                    DEBUG("STRT %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                         
                     mem->write(address,GET_REG(Rd),4);
                 }
@@ -303,7 +300,7 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
             {
                 if(bit_L)				// LDR
                 {
-                    DEBUG("%08x-%08x LDR %s, %s %s\n" ,old_PC,instruction,RR(Rd),RR(Rn),debugShifter);
+                    DEBUG("LDR %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                         
                     data=mem->read(address,4);
                     int tst = address & 0x3;
@@ -325,7 +322,7 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
                     }
                     if(Rd==15)
                     {
-                        printf("LDR loaded: 0x%08x org: 0x%08x", value,address);
+                        printf("@%08x:%08x| LDR loaded: 0x%08x org: 0x%08x",old_PC,instruction, value,address);
                         if(value & 0x1)
                         {
                             SET_FLAG(T_MASK);
@@ -341,7 +338,7 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
                 }
                 else					// STR
                 {
-                    DEBUG("%08x-%08x STR %s, %s %s\n" ,old_PC,instruction,RR(Rd),RR(Rn),debugShifter);
+                    DEBUG("STR %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                         
                     mem->write(address,GET_REG(Rd),4);
                 }
@@ -350,13 +347,13 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
             {
                 if(bit_L)				// LDRB
                 {
-                    DEBUG("%08x-%08x LDRB %s, %s %s\n" ,old_PC,instruction,RR(Rd),RR(Rn),debugShifter);
+                    DEBUG("LDRB %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                         
                     REG(Rd)=mem->read(address,1);
                 }
                 else					// STRB
                 {
-                    DEBUG("%08x-%08x STRB %s, %s %s\n" ,old_PC,instruction,RR(Rd),RR(Rn),debugShifter);
+                    DEBUG("STRB %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                         
                     mem->write(address,GET_REG(Rd) & 0xFF,1);
                 }

@@ -135,21 +135,21 @@ uint32_t Memory::read(uint32_t addr,int size)
                         
                     default:
                         printf("Error: trying bad size (%d) reading memory %s at %08x\n",size,mem_zone[i].name,addr);
-                        return 0;
+                        exit(0);
                 }
             }
             else            
             {
-                printf("HW access: %s, at %08x (size: %d)\n",mem_zone[i].name,addr,size);
+                printf("HW access: %s, READ at %08x (size: %d)\n",mem_zone[i].name,addr,size);
                 return 0;
             }
             printf("Memory::read(%08x,%d) ERROR should not come here\n",addr,size);            
-            return 0;
+            exit(0);
         }
     }
     
     printf("Memory::read(%08x,%d) ERROR addr out of defined mem zone\n",addr,size);            
-    return 0;
+    exit(0);
 }
 
 void Memory::write(uint32_t addr,uint32_t val,int size)
@@ -183,7 +183,7 @@ void Memory::write(uint32_t addr,uint32_t val,int size)
             }
             else            
             {
-                printf("HW access: %s, at %08x (size: %d)\n",mem_zone[i].name,addr,size);
+                printf("HW access: %s, WRITE at %08x (size: %d)\n",mem_zone[i].name,addr,size);
                 return;
             }
             printf("Memory::read(%08x,%d) ERROR should not come here\n",addr,size);            
