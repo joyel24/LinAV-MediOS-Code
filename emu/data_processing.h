@@ -294,7 +294,7 @@ uint32_t Cpu::getShifterData(uint32_t instruction,char *debugShifter,int *shifte
         int shift = (instruction >> 5) & 0x3;
         uint32_t RmVal=GET_REG(Rm);
 
-        if((instruction >> 4) & 0x1) // immediate shifts
+        if(((instruction >> 4) & 0x1)==0) // immediate shifts
         {
             int shift_imm = (instruction >> 7) & 0x1F;
 
@@ -308,6 +308,7 @@ uint32_t Cpu::getShifterData(uint32_t instruction,char *debugShifter,int *shifte
                             *shifter_carry_out = 1;
                         else
                             *shifter_carry_out = 0;
+                        MKDEBUG(debugShifter,"%s",RR(Rm));
                     }
                     else
                     {

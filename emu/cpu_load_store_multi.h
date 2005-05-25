@@ -118,6 +118,10 @@ void Cpu::arm_LoadStoreMulti(uint32_t instruction)
             REG(R_PC)=mem->read(address,4) & 0xFFFFFFFC;
             address+=4;
         }
+        else
+        {
+            DEBUG("\n");
+        }
     }
     else                                          // Store
     {
