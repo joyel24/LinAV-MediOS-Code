@@ -15,12 +15,12 @@
 
 #include "emu.h"
 
-#include "memory.h"
+#include "mem_space.h"
 
 
 class Cpu {
     public:
-        Cpu(Memory * mem);
+        Cpu(mem_space * mem);
         
         void go(uint32_t start_address,uint32_t stack_address);
         
@@ -34,7 +34,7 @@ class Cpu {
         
         uint32_t old_PC;
         
-        Memory * mem;
+        mem_space * mem;
         
         bool checkCondition(int condCode);
         void doThumb(uint32_t instruction);

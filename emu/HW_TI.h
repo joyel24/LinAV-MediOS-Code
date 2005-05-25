@@ -1,5 +1,5 @@
 /* 
-*   hw.h
+*   HW_TI.h
 *
 *   AV3XX emulator
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,14 +10,19 @@
 * KIND, either express of implied.
 */
 
-#ifndef __HW_H
-#define __HW_H
+#ifndef __HW_TI_H
+#define __HW_TI_H
 
+#include "emu.h"
+#include "HW_access.h"
 
-class HW {
+class HW_TI:public HW_access {
     public:
-        HW();
-        ~HW();
+        HW_TI();
+        ~HW_TI();  
+        
+        /*uint32_t read(uint32_t addr,int size);
+        void write(uint32_t addr,uint32_t val,int size);      */
 };
 
-#endif // __HW_H
+#endif

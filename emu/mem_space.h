@@ -1,5 +1,5 @@
 /* 
-*   main.cpp
+*   mem_space.h
 *
 *   AV3XX emulator
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,24 +10,16 @@
 * KIND, either express of implied.
 */
 
-#include <stdlib.h>
-#include <stdio.h>
+#ifndef __MEM_SPACE_H
+#define __MEM_SPACE_H
 
 #include "emu.h"
-#include "mem_space.h"
-#include "cpu.h"
+#include "HW_access.h"
 
-mem_space * mem;
-Cpu    * cpu;
+class mem_space:public HW_access {
+    public:
+        mem_space(char * flash,char * sdram);
+        ~mem_space();        
+};
 
-int main(int argc, char* argv[])
-{
-    mem = new mem_space(NULL,"gravity.bin");
-    
-    cpu = new Cpu(mem);
-    
-    cpu->go(0x03000000,0x000080000-0x4);
-    
-    delete(mem);
-    delete(cpu);
-}
+#endif

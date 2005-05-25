@@ -14,7 +14,7 @@
 #include <string.h>
 
 #include "emu.h"
-#include "memory.h"
+#include "mem_space.h"
 
 #include "cpu.h"
 
@@ -94,7 +94,7 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
                          } \
                      }
 
-Cpu::Cpu(Memory * mem)
+Cpu::Cpu(mem_space * mem)
 {
     int i,j;
     

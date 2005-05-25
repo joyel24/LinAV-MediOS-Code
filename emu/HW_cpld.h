@@ -1,5 +1,5 @@
 /* 
-*   main.cpp
+*   HW_cpld.h
 *
 *   AV3XX emulator
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,24 +10,19 @@
 * KIND, either express of implied.
 */
 
-#include <stdlib.h>
-#include <stdio.h>
+#ifndef __HW_CPLD_H
+#define __HW_CPLD_H
 
 #include "emu.h"
-#include "mem_space.h"
-#include "cpu.h"
+#include "HW_access.h"
 
-mem_space * mem;
-Cpu    * cpu;
+class HW_cpld:public HW_access {
+    public:
+        HW_cpld();
+        ~HW_cpld();  
+        
+        uint32_t read(uint32_t addr,int size);
+        void write(uint32_t addr,uint32_t val,int size);      
+};
 
-int main(int argc, char* argv[])
-{
-    mem = new mem_space(NULL,"gravity.bin");
-    
-    cpu = new Cpu(mem);
-    
-    cpu->go(0x03000000,0x000080000-0x4);
-    
-    delete(mem);
-    delete(cpu);
-}
+#endif

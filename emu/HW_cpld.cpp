@@ -1,5 +1,5 @@
 /* 
-*   main.cpp
+*   mem_space.cpp
 *
 *   AV3XX emulator
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -9,25 +9,29 @@
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
 */
-
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "emu.h"
-#include "mem_space.h"
-#include "cpu.h"
+#include "HW_cpld.h"
 
-mem_space * mem;
-Cpu    * cpu;
 
-int main(int argc, char* argv[])
+HW_cpld::HW_cpld(void):HW_access(0x02000000,0x02ffffff,"CPLD")
 {
-    mem = new mem_space(NULL,"gravity.bin");
+    exit_on_not_match = false;
+}
+
+HW_cpld::~HW_cpld()
+{
     
-    cpu = new Cpu(mem);
-    
-    cpu->go(0x03000000,0x000080000-0x4);
-    
-    delete(mem);
-    delete(cpu);
+}
+
+uint32_t HW_cpld::read(uint32_t addr,int size)
+{
+    printf("CPLD read @0x%08x, size %x\n",addr,size);
+    return 0;
+}
+
+void HW_cpld::write(uint32_t addr,uint32_t val,int size)
+{
+    printf("CPLD write %x @0x%08x, size %x\n",val,addr,size);
 }

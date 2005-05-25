@@ -1,5 +1,5 @@
 /* 
-*   main.cpp
+*   HW_null.cpp
 *
 *   AV3XX emulator
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -9,25 +9,23 @@
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
 */
-
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "emu.h"
-#include "mem_space.h"
-#include "cpu.h"
+#include "HW_null.h"
 
-mem_space * mem;
-Cpu    * cpu;
-
-int main(int argc, char* argv[])
+HW_null::HW_null(uint32_t start,uint32_t end,char * name):HW_access(start,end,name)
 {
-    mem = new mem_space(NULL,"gravity.bin");
     
-    cpu = new Cpu(mem);
-    
-    cpu->go(0x03000000,0x000080000-0x4);
-    
-    delete(mem);
-    delete(cpu);
+}
+
+uint32_t HW_null::read(uint32_t addr,int size)
+{
+    printf("%s read @0x%08x, size %x\n",name,addr,size);
+    return 0;
+}
+
+void HW_null::write(uint32_t addr,uint32_t val,int size)
+{
+    printf("%s write %x @0x%08x, size %x\n",name,val,addr,size);
 }
