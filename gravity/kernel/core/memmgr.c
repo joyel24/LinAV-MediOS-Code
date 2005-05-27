@@ -138,8 +138,11 @@ __IRAM_CODE int kmemory_manager (void* pvParameters)
 
       /// Unblock calling task...
       __cli ();
-      pSysCtrl->pSenderThread->nBlockingState = TASK_BLOCKED_BY_NONE;
-      pSysCtrl->pSenderThread->nBlockingValue = 0;
+      if (pSysCtrl)
+      {
+          pSysCtrl->pSenderThread->nBlockingState = TASK_BLOCKED_BY_NONE;
+          pSysCtrl->pSenderThread->nBlockingValue = 0;
+      }
 
       API_TASK_YIELD ();
       __sti ();
