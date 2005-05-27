@@ -40,6 +40,8 @@ class Cpu {
         void doThumb(uint32_t instruction);
         void doARM(uint32_t instruction);
         
+        char * dispCond(int condition);
+                
         void arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction);
         
         void arm_DataProcessing(int condCode,uint32_t instruction);        
@@ -65,7 +67,7 @@ class Cpu {
         void ARM_AddCOverflow(uint32_t a, uint32_t b, uint32_t c);
         void ARM_SubCCarry(uint32_t a, uint32_t b,uint32_t c);
         void ARM_SubCOverflow(uint32_t a, uint32_t b,uint32_t c);
-        
+                
 };
 
 #endif

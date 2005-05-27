@@ -322,7 +322,7 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
                     }
                     if(Rd==15)
                     {
-                        printf("@%08x:%08x| LDR loaded: 0x%08x org: 0x%08x",old_PC,instruction, value,address);
+                        //printf("@%08x:%08x| LDR loaded: 0x%08x org: 0x%08x\n",old_PC,instruction, value,address);
                         if(value & 0x1)
                         {
                             SET_FLAG(T_MASK);

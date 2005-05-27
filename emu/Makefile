@@ -1,4 +1,4 @@
 all:
-	g++ *.cpp -o emu
+	g++ -ggdb3 *.cpp -o emu
 clean:
 	rm -f *~ emu

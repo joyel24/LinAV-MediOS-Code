@@ -45,9 +45,9 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 #define MODE          (cpsr_tab[*mode_regs[M_USER][R_CPSR] & 0xF])
 #define SET_MODE(val) {*mode_regs[M_USER][R_CPSR]=(*mode_regs[M_USER][R_CPSR] & 0xFFFFFFF0)|mode_tab[val];}
 
-#define GET_FLAG(mask) (*mode_regs[M_USER][R_CPSR] & mask)
-#define SET_FLAG(mask) {*mode_regs[M_USER][R_CPSR] = (*mode_regs[M_USER][R_CPSR] & ~mask) | mask;}
-#define CLR_FLAG(mask) {*mode_regs[M_USER][R_CPSR] = (*mode_regs[M_USER][R_CPSR] & ~mask); }
+#define GET_FLAG(mask) (*mode_regs[M_USER][R_CPSR] & (mask))
+#define SET_FLAG(mask) {*mode_regs[M_USER][R_CPSR] = (*mode_regs[M_USER][R_CPSR] & ~(mask)) | (mask); current_reg = mode_regs[MODE];}
+#define CLR_FLAG(mask) {*mode_regs[M_USER][R_CPSR] = (*mode_regs[M_USER][R_CPSR] & ~(mask)); }
 
 #define T_MASK        (0x00000020)
 #define FIQ_MASK      (0x00000040)
@@ -73,14 +73,16 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 #define SET_Z(COND)   {if(COND) SET_FLAG(Z_MASK) else CLR_FLAG(Z_MASK)}
 #define SET_N(COND)   {if(COND) SET_FLAG(N_MASK) else CLR_FLAG(N_MASK)}
 
-#define GET_REG(N)    (N==15?*current_reg[N]+4/(T_FLAG+1):*current_reg[N])
+#define GET_REG(N)    ((N)==15?*current_reg[N]+(T_FLAG?2:4):*current_reg[N])
 #define REG(N)        (*current_reg[N])
 #define PC_REAL       (*current_reg[15])
 
 #define RR(N)         (reg_str[N])
 
 #ifdef DEBUG_MODE
-#define DEBUG_HEAD   {printf("@%08x:%08x| ",old_PC,instruction);}
+#define DEBUG_HEAD   {printf("@%08x:%08x|%s%s%s%s%s|%s| ",old_PC,instruction, \
+            N_FLAG?"N":" ",Z_FLAG?"Z":" ",C_FLAG?"C":" ",V_FLAG?"V":" ",Q_FLAG?"Q":" ", \
+            cond_str[condCode&0xF]);}
 #else
 #define DEBUG_HEAD
 #endif
@@ -94,6 +96,8 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
                          } \
                      }
 
+char * cond_str[] = {"EQ","NE","CS","CC","MI","PL","VS","VC","HI","LS","GE","LT","GT","LE","  ","ERR"};
+                     
 Cpu::Cpu(mem_space * mem)
 {
     int i,j;
@@ -176,6 +180,7 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
 void Cpu::doThumb(uint32_t instruction)
 {
     DEBUG("Thumb => PC: %08x inst: %08x\n",old_PC,instruction);
+    exit(0);
 }
 
 bool Cpu::checkCondition(int condCode)
@@ -231,11 +236,12 @@ void Cpu::doARM(uint32_t instruction)
         case 0x0:
             if((instruction>>4)&0x1)
             {                           /* BIT 4 == 1 */
+                
                 if((instruction>>7)&0x1)
                 {                           /* BIT 7 == 1 */
-                    if((instruction>>5)&0x1==0 && (instruction>>6)&0x1==0)
+                    if(((instruction>>5)&0x1)==0 && ((instruction>>6)&0x1)==0)
                     {                           /* Multiply / swap */
-                        if((instruction>>24)&0x1==0)
+                        if(((instruction>>24)&0x1)==0)
                         {                           /* BIT 24 == 1 */ /* Multiply */
                             arm_Mul(condCode,instruction);
                         }
@@ -348,7 +354,7 @@ void Cpu::doARM(uint32_t instruction)
             {   
                 if ((instruction>>24)&0x1)
                 {
-                    REG(R_LR) = GET_REG(R_PC);
+                    REG(R_LR) = PC_REAL;
                     DEBUG("BL => ");
                 }
                 else
@@ -375,7 +381,7 @@ void Cpu::doARM(uint32_t instruction)
                 DEBUG("CoProcessor CC not met\n");
             break;
         case 0x7:
-            if((instruction>>24)&0x1)
+            if(((instruction>>24)&0x1)==0)
             {
                 if(checkCondition(condCode))
                     arm_CoProcessor(instruction);
@@ -387,14 +393,12 @@ void Cpu::doARM(uint32_t instruction)
                 if(checkCondition(condCode))
                 {
                     DEBUG("SWI :%08x\n",instruction & 0x00FFFFFF);
-/*
-                    regs[14][2]=regs[15][0];
-                    SPSR[2]=CPSR;
-                    mode(2);
-                    flagT(false);
-                    flagI(false);
-                    regs[15][0]=0x6;
-*/
+                    *mode_regs[M_SVC][R_LR]=PC_REAL;
+                    *mode_regs[M_SVC][R_SPSR]=REG(R_CPSR);
+                    SET_MODE(M_SVC);
+                    CLR_FLAG(T_MASK);
+                    SET_FLAG(IRQ_MASK);
+                    REG(R_PC)=0x8;
                 }
                 else
                     DEBUG("SWI CC not met\n");
@@ -404,6 +408,8 @@ void Cpu::doARM(uint32_t instruction)
              printf("You should not be here\n");
              exit(0);
     }
+    
+    //printState();
 }
 
 void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
@@ -411,10 +417,11 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
     if (checkCondition(condCode))
     {   
         int old_mode = MODE;
-    
+        
         if((instruction >> 21) & 0x1)           /* MSR */
         {
             int opVal;
+            int Rm=instruction&0xF;
             DEBUG("MSR ");            
             
             if((instruction>>25) & 0x1)
@@ -424,22 +431,30 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
             }
             else
             {
-                opVal = GET_REG(instruction&0xF);
-                DEBUG("R%d (%08x) -> ",instruction&0xF,GET_REG(instruction&0xF));
+                opVal = GET_REG(Rm);
+                DEBUG("R%d (%08x) -> ",Rm,GET_REG(Rm));
             }
             int mask = (instruction >> 16) & 0xF;
             if((instruction >> 22) & 0x1)
             {
+                
                 DEBUG("SPSR (mask =%08x)",mask);
-                if( (mask & 0x1) == 0x1)
-                    REG(R_SPSR) = (GET_REG(R_SPSR) & ~0x000000FF) | (opVal & 0x000000FF);
-                if( (mask & 0x2) == 0x2)
-                    REG(R_SPSR) = (GET_REG(R_SPSR) & ~0x0000FF00) | (opVal & 0x0000FF00);
-                if( (mask & 0x4) == 0x4)
-                    REG(R_SPSR) = (GET_REG(R_SPSR) & ~0x00FF0000) | (opVal & 0x00FF0000);
-                if( (mask & 0x8) == 0x8)
-                    REG(R_SPSR) = (GET_REG(R_SPSR) & ~0xFF000000) | (opVal & 0xFF000000);
-                DEBUG(" => %08x\n",GET_REG(R_SPSR));
+                if(old_mode == M_USER || old_mode == M_SYS)
+                {
+                    DEBUG(" !! ERROR, no SPSR in %s mode\n",mode_str[old_mode]);
+                }
+                else
+                {
+                    if( (mask & 0x1) == 0x1)
+                        REG(R_SPSR) = (GET_REG(R_SPSR) & ~0x000000FF) | (opVal & 0x000000FF);
+                    if( (mask & 0x2) == 0x2)
+                        REG(R_SPSR) = (GET_REG(R_SPSR) & ~0x0000FF00) | (opVal & 0x0000FF00);
+                    if( (mask & 0x4) == 0x4)
+                        REG(R_SPSR) = (GET_REG(R_SPSR) & ~0x00FF0000) | (opVal & 0x00FF0000);
+                    if( (mask & 0x8) == 0x8)
+                        REG(R_SPSR) = (GET_REG(R_SPSR) & ~0xFF000000) | (opVal & 0xFF000000);
+                    DEBUG(" => %08x\n",GET_REG(R_SPSR));
+                }
             }
             else
             {
@@ -462,8 +477,15 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
             int Rd = (instruction >> 12) & 0xF;
             if((instruction >> 22) & 0x1)             /* SPSR */
             {
-                DEBUG("R%d <- SPSR (%08x)\n",Rd,GET_REG(R_SPSR));
-                REG(Rd) = GET_REG(R_SPSR);
+                 if(old_mode == M_USER || old_mode == M_SYS)
+                {
+                    DEBUG("ERROR, no SPSR in %s mode\n",mode_str[old_mode]);
+                }
+                else
+                {
+                    DEBUG("R%d <- SPSR (%08x)\n",Rd,GET_REG(R_SPSR));
+                    REG(Rd) = GET_REG(R_SPSR);
+                }
                 
             }
             else                                      /* CPSR */

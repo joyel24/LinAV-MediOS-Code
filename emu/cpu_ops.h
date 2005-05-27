@@ -1,6 +1,24 @@
 void Cpu::ARM_NegZero(uint32_t result)
 {
-    if (result < 0) {
+    if(result == 0)
+    {
+        SET_Z(true);
+    }
+    else
+    {
+        SET_Z(false);
+    }
+    
+    if((result>>31)&0x1)
+    {
+        SET_N(true);
+    }
+    else
+    {
+        SET_N(false);
+    }
+
+  /*  if (result < 0) {
         SET_N(true);
         SET_Z(false);
     } else if (result == 0) {
@@ -9,7 +27,7 @@ void Cpu::ARM_NegZero(uint32_t result)
     } else {
         SET_N(false);
         SET_Z(false);
-    }
+    }*/
 }
 
 

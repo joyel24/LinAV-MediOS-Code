@@ -50,7 +50,7 @@ void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0x2: ///////////////////////////////////////////// SUB
-            DEBUG("SUB %s, %s, %s\n",RR(Rd),RR(Rn),debugShifter);
+            DEBUG("SUB%s %s, %s, %s => %d\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter,GET_REG(Rd));
             REG(Rd)=GET_REG(Rn) - shifter_operand;
             if(fl_s && Rd==15)
             {
@@ -240,7 +240,7 @@ void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
         case 0xE: ///////////////////////////////////////////// BIC => Bit clear
             DEBUG("BIC %s, %s, %s\n",RR(Rd),RR(Rn),debugShifter);
             REG(Rd)=GET_REG(Rn) & (~shifter_operand);
-
+            //printf("R dest(%d) = %08x %x %x\n",Rd,GET_REG(Rd),shifter_operand,~shifter_operand);
             if(fl_s && Rd==15)
             {
                 CHG_MODE
