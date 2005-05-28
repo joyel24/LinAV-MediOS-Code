@@ -38,6 +38,7 @@ uint32_t HW_access::read(uint32_t addr,int size)
     printf("%s::read(0x%08x,%d) ERROR addr does not belong to a known zone\n",name,addr,size);
     if(exit_on_not_match)
         exit(0);
+    return 0;
 }
 
 void HW_access::write(uint32_t addr,uint32_t val,int size)

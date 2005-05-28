@@ -14,6 +14,7 @@
 #define EMU_TYPES_H
 
 typedef unsigned int uint32_t;
+typedef unsigned long uint64_t;
 typedef signed long long sint64_t;
 
 #endif
