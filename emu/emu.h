@@ -16,6 +16,7 @@
 #include "emu_types.h"
 
 #define DEBUG_MODE
+//#define PRINTSTATE
 
 #ifdef DEBUG_MODE
 #define DEBUG printf

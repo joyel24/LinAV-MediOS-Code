@@ -200,7 +200,7 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
             else
             {
                 printf("@%08x:%08x| Unpredictable\n",old_PC,instruction );
-                return;
+                exit(0);
             }
         }
         else if(!bit_H && bit_S) 	// SB
@@ -214,6 +214,7 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
             else					// STRSB
             {
                 printf("@%08x:%08x| Undefined STRSB\n",old_PC,instruction);
+                exit(0);
             }
         }
         else 						//SH
@@ -229,13 +230,13 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
                 else
                 {
                     printf("@%08x:%08x| Unpredictable\n",old_PC,instruction);
-                    return;
+                    exit(0);
                 }
             }
             else					// STRSH
             {
                 printf("@%08x:%08x| Undefined STRSH \n",old_PC,instruction);
-                return;
+                exit(0);
             }
         }
     }

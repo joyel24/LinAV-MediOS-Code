@@ -26,11 +26,19 @@ mem_space::mem_space(char * flash,char * sdram):HW_access(0x0,0xFFFFFFFF,"AVMEM"
     reset_vector->write(0x0,0xEA03FFFE,4);
     
     add_item(new HW_mem(NULL,0x4,0x7fff,"IRAM"));
+    add_item(new HW_mem(flash,0x40000,0x4ffff,"DSP MEM"));    
     add_item(new HW_mem(flash,0x100000,0x17ffff,"FLASH"));
     add_item(new HW_mem(sdram,0x3000000,0x3FFFFFF,"SDRAM"));
     
     add_item(new HW_cpld());
     add_item(new HW_TI());
+    
+    /* special init for uart */
+    char * str="DeBuGuNlOcKeD_42";
+    for(int i=0;*(str+i);i++)
+    {
+        write((0x107FF0+i),(char)*(str+i),1);
+    }
     
 }
 

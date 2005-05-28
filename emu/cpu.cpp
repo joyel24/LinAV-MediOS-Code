@@ -56,6 +56,8 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 #define FIQ_FLAG      GET_FLAG(FIQ_MASK)
 #define IRQ_FLAG      GET_FLAG(IRQ_MASK)
 
+#define SET_T(COND)   {if(COND) SET_FLAG(T_MASK) else CLR_FLAG(T_MASK)}
+
 #define Q_MASK        (0x08000000)
 #define V_MASK        (0x10000000)
 #define C_MASK        (0x20000000)
@@ -73,7 +75,7 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 #define SET_Z(COND)   {if(COND) SET_FLAG(Z_MASK) else CLR_FLAG(Z_MASK)}
 #define SET_N(COND)   {if(COND) SET_FLAG(N_MASK) else CLR_FLAG(N_MASK)}
 
-#define GET_REG(N)    ((N)==15?*current_reg[N]+(T_FLAG?2:4):*current_reg[N])
+#define GET_REG(N)    ((N)==15?((*current_reg[N])&(T_FLAG?0xFFFFFFFE:0xFFFFFFFF))+(T_FLAG?2:4):*current_reg[N])
 #define REG(N)        (*current_reg[N])
 #define PC_REAL       (*current_reg[15])
 
@@ -83,9 +85,14 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 #define DEBUG_HEAD   {printf("@%08x:%08x|%s%s%s%s%s|%s| ",old_PC,instruction, \
             N_FLAG?"N":" ",Z_FLAG?"Z":" ",C_FLAG?"C":" ",V_FLAG?"V":" ",Q_FLAG?"Q":" ", \
             cond_str[condCode&0xF]);}
+#define DEBUG_HEAD_THUMB   {printf("@%08x:%04x|%s%s%s%s%s| ",old_PC,instruction, \
+            N_FLAG?"N":" ",Z_FLAG?"Z":" ",C_FLAG?"C":" ",V_FLAG?"V":" ",Q_FLAG?"Q":" ");}
 #else
 #define DEBUG_HEAD
+#define DEBUG_HEAD_THUMB
 #endif
+
+#define TST_BIT(V,N)   (((V)>>(N))&0x1)
            
 #define CHG_MODE     {   int __old_mode=MODE;      \
                          REG(R_CPSR)=REG(R_SPSR);  \
@@ -177,11 +184,7 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
     }
 }
 
-void Cpu::doThumb(uint32_t instruction)
-{
-    DEBUG("Thumb => PC: %08x inst: %08x\n",old_PC,instruction);
-    exit(0);
-}
+
 
 bool Cpu::checkCondition(int condCode)
 {
@@ -269,6 +272,7 @@ void Cpu::doARM(uint32_t instruction)
                                 if((instruction>>22)&0x1)
                                 {                           /* BIT 22 == 1 */ /* CLZ */
                                     printf("CLZ : Undef instruction\n");
+                                    exit(0);
                                 }
                                 else
                                 {                           /* BIT 22 == 0 */ /* BX */
@@ -299,12 +303,14 @@ void Cpu::doARM(uint32_t instruction)
                                 break;
                             case 1:
                                 printf("BLX: Undef instruction\n");
+                                exit(0);
                                 break;
                             case 2:
                                 arm_DSP(condCode,instruction);
                                 break;
                             case 3:
                                 printf("BKPT: Undef instruction\n");
+                                exit(0);
                                 break;
                         }
                     }
@@ -330,7 +336,10 @@ void Cpu::doARM(uint32_t instruction)
                 if((instruction>>21)&0x1)   /* Move immediate to status reg */
                     arm_MSR_MRS(condCode,instr_num,instruction);                    
                 else
+                {
                     printf("Undef instruction\n");                   
+                    exit(0);
+                }
             else   /* data processing immediate */
                 arm_DataProcessing(condCode,instruction);
             break;
@@ -338,7 +347,7 @@ void Cpu::doARM(uint32_t instruction)
             if(condCode == 0xf)
             {
                 printf("Undef instruction\n");
-                break;
+                exit(0);
             }
         case 0x2:
             arm_LoadStore(condCode,instr_num,instruction);
@@ -408,8 +417,9 @@ void Cpu::doARM(uint32_t instruction)
              printf("You should not be here\n");
              exit(0);
     }
-    
-    //printState();
+#ifdef PRINTSTATE    
+    printState();
+#endif
 }
 
 void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
@@ -480,6 +490,7 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
                  if(old_mode == M_USER || old_mode == M_SYS)
                 {
                     DEBUG("ERROR, no SPSR in %s mode\n",mode_str[old_mode]);
+                    
                 }
                 else
                 {
@@ -535,12 +546,14 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
 void Cpu::arm_CoProcessor(uint32_t instruction)
 {
     DEBUG("coprocessor instruction: %08x\n",instruction);
+    exit(0);
 }
 
 
 void Cpu::arm_DSP(int condCode,uint32_t instruction)
 {
     DEBUG("DSP instruction: %08x\n",instruction);
+    exit(0);
 }
 
 void Cpu::arm_Swap(uint32_t instruction)
@@ -590,15 +603,200 @@ void Cpu::arm_Swap(uint32_t instruction)
     }
 }
 
+void Cpu::doThumb(uint32_t instruction)
+{
+    int instr_num = (instruction >> 13) & 0x7;
+    
+    DEBUG_HEAD_THUMB;
+    
+    switch(instr_num)
+    {
+        case 0x0:
+            switch((instruction>>10)&0x7)
+            {
+                case 0x6:
+                    thumb_data_process(0x0,(instruction>>9)&0x1,instruction);
+                    break;
+                case 0x7:
+                    thumb_data_process(0x1,(instruction>>9)&0x1,instruction);
+                    break;
+                default:
+                    thumb_data_process(0x3,(instruction>>11)&0x3,instruction);
+                    break;
+            }
+            break;
+        case 0x1:
+            thumb_data_process(0x2,(instruction>>11)&0x3,instruction);
+            break;
+        case 0x2:
+            if(TST_BIT(instruction,12) == 0)
+            {
+                if(TST_BIT(instruction,11) == 0)
+                {
+                    if(TST_BIT(instruction,10) == 0)
+                    {
+                        thumb_data_process(0x4,(instruction>>6)&0xF,instruction);
+                    }
+                    else
+                    {
+                        if(((instruction>>8)&0x3)!=0x3)
+                        {
+                            thumb_data_process(0x7,(instruction>>8)&0x3,instruction);
+                        }
+                        else
+                        {
+                            if(TST_BIT(instruction,7) == 1)
+                            {
+                                DEBUG("BLX undefined in armV4\n");
+                                exit(0);
+                            }
+                            else                    /* BX */
+                            {
+                                int Rm = (instruction>>3)&0xF;
+                                uint32_t dest = GET_REG(Rm) & 0xFFFFFFFE;
+                                SET_T(GET_REG(Rm) & 0x1);
+                                REG(R_PC) = dest;
+                                DEBUG("BX %s => 0x%08x\n",GET_REG(Rm) & 0x1?"THUMB":"ARM",dest);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    thumb_load_store(0x2,0x0,instruction);
+                }
+            }
+            else
+            {
+                thumb_load_store(0x1,(instruction>>9)&0x7,instruction);
+            }
+            break;
+        case 0x3:
+            thumb_load_store(0x0,(instruction>>11)&0x1F,instruction);
+            break;
+        case 0x4:
+            if(TST_BIT(instruction,12) == 0)
+                thumb_load_store(0x0,(instruction>>11)&0x1F,instruction);
+            else
+                thumb_load_store(0x3,(instruction>>11)&0x1,instruction);
+            break;
+        case 0x5:
+            if(TST_BIT(instruction,12) == 0)
+            {
+                thumb_data_process(0x5,0,instruction);
+            }
+            else
+            {
+                switch((instruction>>9)&0x3)
+                {
+                    case 0x0:
+                        thumb_data_process(0x6,(instruction>>7)&0x1,instruction);
+                        break;
+                    case 0x2:
+                        thumb_load_store_multi(0x1,(instruction>>11)&0x1,instruction);
+                        break;
+                    case 0x3:
+                        DEBUG("BKT undef for ARMv4\n");
+                        exit(0);
+                    default:
+                        printf("Error: MISC instruction with undef op: %x\n",(instruction>>9)&0x3);
+                        exit(0);
+                }                
+            }
+            break;
+        case 0x6:
+            if(TST_BIT(instruction,12) == 0)
+            {
+                thumb_load_store_multi(0x0,(instruction>>11)&0x1,instruction);
+            }
+            else
+            {
+                int cond=(instruction>>8)&0xF;
+                switch(cond)
+                {
+                    case 0xF:                            /* SWI */
+                        DEBUG("SWI :%08x\n",instruction & 0x000000FF);
+                        *mode_regs[M_SVC][R_LR]=PC_REAL;
+                        *mode_regs[M_SVC][R_SPSR]=REG(R_CPSR);
+                        SET_MODE(M_SVC);
+                        CLR_FLAG(T_MASK);
+                        SET_FLAG(IRQ_MASK);
+                        REG(R_PC)=0x8;
+                        break;
+                    case 0xE:
+                        DEBUG("undefined instruction\n");
+                        exit(0);
+                        break;
+                    default:                             /* B <cond> */
+                        DEBUG("B<%s> ",cond_str[cond&0xF]);
+                        if(checkCondition(cond))
+                        {
+                            uint32_t offset=(instruction&0xFF);
+                            offset=signExtend1(offset)<<1;
+                            REG(R_PC) = GET_REG(R_PC) + offset;
+                            DEBUG("=> 0x%08x\n",PC_REAL);                            
+                        }
+                        else
+                            DEBUG("CC not met\n");
+                        break;
+                        
+                }
+            }
+            break;
+        case 0x7:
+                uint32_t offset = instruction & 0x7FF;
+                switch((instruction>>11)&0x3)
+                {
+                    
+                    case 0x0:                /* B */
+                        offset=signExtend11(offset)<<1;
+                        REG(R_PC)=GET_REG(R_PC) + offset;
+                        DEBUG("B => 0x%08x\n",PC_REAL);                        
+                        break;
+                    case 0x1:                /* BLX step 2 => not defined */
+                        DEBUG("BLX undefined instruction\n");
+                        exit(0);
+                        break;
+                    case 0x2:                /* BL(X) step 1 */
+                        offset=signExtend11(offset)<<12;
+                        REG(R_LR)=GET_REG(R_PC)+offset;
+                        DEBUG("BL stp1 off 0x%08x\n",offset);
+                        break;
+                    case 0x3:                /* BL step 2 */
+                        offset=GET_REG(R_LR)+(offset<<1);
+                        REG(R_LR) = PC_REAL | 1 ;
+                        REG(R_PC) = offset;
+                        DEBUG("BL => 0x%08x\n",offset);
+                        break;
+                }
+            break;
+    }
+#ifdef PRINTSTATE    
+    printState();
+#endif
+}
+
+/* thumb data processing */
+
+#include "thumb_data_processing.h"
+
+/* thumb load/store */
+
+#include "thumb_load_store.h"
+
+/* thumb load/store multi*/
+
+#include "thumb_load_store_multi.h"
+
 ////////////////////////////// signExtend
-int Cpu::signExtend1(int data)
+uint32_t Cpu::signExtend1(uint32_t data)
 {
     if(data > 0x7F) // neg
         data -=  0x100;
     return data;
 }
 
-int Cpu::signExtend11(int data)
+uint32_t Cpu::signExtend11(uint32_t data)
 {
     if(data > 0x3FF) // neg
     {
@@ -607,7 +805,7 @@ int Cpu::signExtend11(int data)
     return data;
 }
 
-int Cpu::signExtend2(int data)
+uint32_t Cpu::signExtend2(uint32_t data)
 {
     if(data> 0x7FFF) // neg
         data -=  0x10000;

@@ -107,8 +107,11 @@ void Cpu::arm_LoadStoreMulti(uint32_t instruction)
             if(bit_S)
             {
                 int old_mode=MODE;
-                if(old_mode == M_USER || old_mode == M_SYS)                
-                    DEBUG("Unpredictable\n");
+                if(old_mode == M_USER || old_mode == M_SYS)  
+                {              
+                    DEBUG("Unpredictable, wrong mode\n");
+                    exit(0);
+                }
                 else                
                     REG(R_CPSR)=REG(R_SPSR);
                 if(old_mode != MODE)

@@ -54,9 +54,9 @@ class Cpu {
         
         uint32_t getShifterData(uint32_t instruction,char *debugShifter,int *shifter_carry_out);
         
-        int signExtend1(int data);
-        int signExtend11(int data);
-        int signExtend2(int data);
+        uint32_t signExtend1(uint32_t data);
+        uint32_t signExtend11(uint32_t data);
+        uint32_t signExtend2(uint32_t data);
         
         void ARM_NegZero(uint32_t result);
         void ARM_AddCarry(uint32_t a, uint32_t b, uint32_t result);
@@ -67,6 +67,11 @@ class Cpu {
         void ARM_AddCOverflow(uint32_t a, uint32_t b, uint32_t c);
         void ARM_SubCCarry(uint32_t a, uint32_t b,uint32_t c);
         void ARM_SubCOverflow(uint32_t a, uint32_t b,uint32_t c);
+        
+        void thumb_data_process(int format,int opcode,uint32_t instruction);
+        void thumb_load_store(int format,int opcode,uint32_t instruction);
+        void thumb_load_store_multi(int format,int opcode,uint32_t instruction);
+        
                 
 };
 
