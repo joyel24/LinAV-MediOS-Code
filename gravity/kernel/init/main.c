@@ -251,6 +251,7 @@ void kernel_start (void)
 
     /* print banner on uart */
     printk("GRAVITY %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);
+  
     printk("Initial SP: %08x, kernel end: %08x, size in IRAM: %08x  Malloc start: %08x, size: %08x\n",get_sp(),
         (unsigned int)&_end_kernel,
         (unsigned int)&_iram_end - (unsigned int)&_iram_start,

@@ -19,6 +19,7 @@
 #include <kernel/memmgr.h>
 
 #include <kernel/ata.h>
+#include <kernel/irq.h>
 #include <kernel/kernel.h>
 #include <kernel/disk.h>
 #include <kernel/timer.h>
@@ -123,8 +124,8 @@ struct partition_info * setup_disk(int drive)
         return NULL;            
     /* identify disk */
     identify_disk(drive,&disk_info[drive]);
-    printk("[init IDE-CF] reading drive %d info: %s (%s|%s)\n",drive,disk_info[drive].model,
-                disk_info[drive].firmware,disk_info[drive].serial); 
+    printk("[init IDE-CF] reading drive %d\n     %s\n     %s|%s\n     %d sectors per ata request\n",drive,disk_info[drive].model,
+                disk_info[drive].firmware,disk_info[drive].serial,disk_info[drive].multi_sector); 
                    
     /* Read MBR */
     if(disk_RW_sector(drive,0,1,sector,ATA_DO_READ)<0) /* read 1 sector at LBA 0 */
@@ -180,6 +181,7 @@ void identify_disk(int drive, struct hd_info_s * hd_info)
         strncpy(hd_info->model, &buffer[54], 40);
         dd_swapChar(hd_info->model,40);
         dd_findEnd(hd_info->model,40);
+        hd_info->multi_sector = buffer[47] & 0xff ;
     }
     else
     {
@@ -198,21 +200,24 @@ __IRAM_CODE int kata_manager (void* pvParameters)
     while(1)
     {
         cmd=0;
-        __cli ();
-        if (g_pAtaCtrlPipe->nReceiver != g_pAtaCtrlPipe->nSender)
+        __cli();
+        if (g_pAtaCtrlPipe->nReceiver != g_pAtaCtrlPipe->nSender )
         {
-           
-            cmd = (ata_cmd_s *)(g_pAtaCtrlPipe->buffer + g_pAtaCtrlPipe->nReceiver);
+           cmd = (ata_cmd_s *)(g_pAtaCtrlPipe->buffer + g_pAtaCtrlPipe->nReceiver);
+           /*if(cmd->xfer_dir!=ATA_IN_PROGRESS)
+           {*/
+            
             
             //printk("We have a ata cmd: mode:%d lba=0x%x count=%d buffer=%08x\n",cmd->xfer_dir,cmd->lba,cmd->count,cmd->data);
             
             ata_process_cmd(cmd);
+            
             g_pAtaCtrlPipe->nReceiver = (g_pAtaCtrlPipe->nReceiver + sizeof(ata_cmd_s)) & PIPE_SIZE_MASK;
             cmd->pSenderThread->nBlockingState = TASK_BLOCKED_BY_NONE;
             cmd->pSenderThread->nBlockingValue = 0;
-        
-            API_TASK_YIELD ();
+            /*}*/
         }
+        API_TASK_YIELD ();
         __sti ();
     }
 }

@@ -37,6 +37,7 @@ struct hd_info_s {
 	char firmware[9];
 	char model [41];
         unsigned long size;
+        int multi_sector;
 };
 
 #define NUM_VOLUMES  2 /* we can only mount 2 volumes */
