@@ -20,9 +20,64 @@
 mem_space * mem;
 Cpu    * cpu;
 
+enum cmd_type {NO_CMD=0x0,F_SDRM='s',F_FLASH='f',C_HELP='h'};
+
+void usage(char * name)
+{
+    printf("Usage: %s -f name|-s name|-h\n-f : file to be loaded in flash\n-s : file to be loaded in sdram\n-h: help\n",name);
+    exit(0);
+}
+
 int main(int argc, char* argv[])
 {
-    mem = new mem_space(NULL,"gravity.bin");
+    int i;
+    char * sdram_file = NULL;
+    char * flash_file = NULL;
+    
+    int cur_cmd = NO_CMD;
+    
+    for(i=1;i<argc;i++)
+    {
+        printf("cur_cmd= %c\n",cur_cmd==0?' ':cur_cmd);
+        if(cur_cmd!=NO_CMD)
+        {            
+            switch(cur_cmd)
+            {
+                case F_SDRM:
+                    sdram_file = argv[i];
+                    break;
+                case F_FLASH:
+                    flash_file = argv[i];
+                    break;
+            }
+            cur_cmd = NO_CMD;
+        }
+        else
+        {        
+            if(argv[i][0] == '-')
+            {
+                switch(argv[i][1])
+                {
+                    case F_SDRM:
+                    case F_FLASH:
+                        cur_cmd = argv[i][1];
+                        break;
+                    case C_HELP:
+                        usage(argv[0]);
+                    default:
+                        cur_cmd = NO_CMD;                
+                }
+            }
+        }
+    }
+    
+    if(sdram_file == NULL)
+    {
+        usage(argv[0]);
+    }
+    
+
+    mem = new mem_space(flash_file,sdram_file);
     
     cpu = new Cpu(mem);
     

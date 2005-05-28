@@ -1,3 +1,5 @@
+#define isNeg(VAL)   (((VAL)>>31)&0x1)
+
 void Cpu::ARM_NegZero(uint32_t result)
 {
     if(result == 0)
@@ -9,7 +11,7 @@ void Cpu::ARM_NegZero(uint32_t result)
         SET_Z(false);
     }
     
-    if((result>>31)&0x1)
+    if(isNeg(result))
     {
         SET_N(true);
     }
@@ -17,26 +19,15 @@ void Cpu::ARM_NegZero(uint32_t result)
     {
         SET_N(false);
     }
-
-  /*  if (result < 0) {
-        SET_N(true);
-        SET_Z(false);
-    } else if (result == 0) {
-        SET_N(false);
-        SET_Z(true);
-    } else {
-        SET_N(false);
-        SET_Z(false);
-    }*/
 }
 
 
 void Cpu::ARM_AddCarry(uint32_t a, uint32_t b, uint32_t result)
 {
     bool tmpflag = false;
-    if (((a < 0) && (b < 0)) ||
-        ((a < 0) && (result >= 0)) ||
-        ((b < 0) && (result >= 0))) {
+    if ((isNeg(a) && isNeg(b)) ||
+        (isNeg(a) && !isNeg(result)) ||
+        (isNeg(b) && !isNeg(result))) {
         tmpflag = true;
     }
     SET_C(tmpflag);
@@ -46,8 +37,8 @@ void Cpu::ARM_AddCarry(uint32_t a, uint32_t b, uint32_t result)
 void Cpu::ARM_AddOverflow(uint32_t a, uint32_t b, uint32_t result)
 {
     bool tmpflag = false;
-    if ((a < 0) && (b < 0) && (result >= 0) ||
-        (a >= 0) && (b >= 0) && (result < 0)) {
+    if (isNeg(a) && isNeg(b) && !isNeg(result) ||
+        !isNeg(a) && !isNeg(b) && isNeg(result)) {
         tmpflag  = true;
     }
     SET_V(tmpflag);
@@ -57,9 +48,9 @@ void Cpu::ARM_AddOverflow(uint32_t a, uint32_t b, uint32_t result)
 void Cpu::ARM_SubCarry(uint32_t a, uint32_t b, uint32_t result)
 {
     bool tmpflag = false;
-    if (((a < 0) && (b >= 0)) ||
-        ((a < 0) && (result >= 0)) ||
-        ((b >= 0) && (result >= 0))) {
+    if ((isNeg(a) && !isNeg(b)) ||
+        (isNeg(a) && !isNeg(result)) ||
+        (!isNeg(b) && !isNeg(result))) {
         tmpflag = true;
     }
     SET_C(tmpflag);
@@ -69,8 +60,8 @@ void Cpu::ARM_SubCarry(uint32_t a, uint32_t b, uint32_t result)
 void Cpu::ARM_SubOverflow(uint32_t a, uint32_t b, uint32_t result)
 {
     bool tmpflag = false;
-    if ((a < 0) && (b >= 0) && (result >= 0) ||
-        (a >= 0) && (b < 0) && (result < 0)) {
+    if (isNeg(a) && !isNeg(b) && !isNeg(result) ||
+        !isNeg(a) && isNeg(b) && isNeg(result)) {
         tmpflag = true;
     }
     SET_V(tmpflag);

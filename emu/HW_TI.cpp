@@ -15,10 +15,14 @@
 #include "HW_TI.h"
 #include "HW_null.h"
 
+#include "HW_uart.h"
+
 HW_TI::HW_TI():HW_access(0x30000,0x3FFFF,"DSC25")
 {
     exit_on_not_match = false;
     add_item(new HW_null(0x30680,0x30700,"OSD"));
+    add_item(new HW_uart(0x30300,0x30310,"UART0"));
+    add_item(new HW_uart(0x30380,0x30390,"UART1"));
 }
 
 HW_TI::~HW_TI()

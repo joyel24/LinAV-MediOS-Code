@@ -527,11 +527,11 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
 
 #include "cpu_load_store_multi.h"
 
-void Cpu::arm_Mul(int condCode,uint32_t instruction)
-{
-    DEBUG("multiply\n");
-}
-        
+/* multiply */
+
+#include "cpu_multiply.h"
+
+       
 void Cpu::arm_CoProcessor(uint32_t instruction)
 {
     DEBUG("coprocessor instruction: %08x\n",instruction);
