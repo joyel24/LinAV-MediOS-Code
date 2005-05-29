@@ -1,0 +1,17 @@
+subdirs:        
+	@@for p in $(SUBDIRS); do \
+		echo '-----   building ' $$p; \
+		make -C $$p --no-print-directory -s all; \
+		echo '-----   end      ' $$p; \
+	done
+
+clean-subdirs:
+	@@for p in $(SUBDIRS); do \
+		echo '-----   cleaning ' $$p; \
+		make -C $$p --no-print-directory clean; \
+	done
+
+.cpp.o:
+	@echo "[$@]"
+	@$(GPP) $(GPPFLAGS) -c -o $@ $<
+        
