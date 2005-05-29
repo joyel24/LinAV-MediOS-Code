@@ -99,12 +99,3 @@ void HW_mem::write(uint32_t addr,uint32_t val,int size)
     exit(0);        
 }
 
-/*
-void Memory::reset_init(void)
-{
-    mem_zone[RESET_ZONE].mem[0]=0xFE;
-    mem_zone[RESET_ZONE].mem[1]=0xFF;
-    mem_zone[RESET_ZONE].mem[2]=0x03;
-    mem_zone[RESET_ZONE].mem[3]=0xEA;
-}
-*/

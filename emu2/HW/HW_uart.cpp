@@ -55,7 +55,7 @@ uint32_t HW_uart::read(uint32_t addr,int size)
         case 0xc:
             return 0xffff;
         default:        
-            printf("%s read @0x%08x, size %x\n",name,addr,size);
+            DEBUG_HW("%s read @0x%08x, size %x\n",name,addr,size);
             break;
     }
     return 0;
@@ -71,7 +71,7 @@ void HW_uart::write(uint32_t addr,uint32_t val,int size)
                 fflush(fd);
             break;
         default:
-            printf("%s write %x @0x%08x, size %x\n",name,val,addr,size);
+            DEBUG_HW("%s write %x @0x%08x, size %x\n",name,val,addr,size);
             break;
     }
 }

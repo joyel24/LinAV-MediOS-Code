@@ -27,11 +27,11 @@ HW_cpld::~HW_cpld()
 
 uint32_t HW_cpld::read(uint32_t addr,int size)
 {
-    printf("CPLD read @0x%08x, size %x\n",addr,size);
+    DEBUG_HW("CPLD read @0x%08x, size %x\n",addr,size);
     return 0;
 }
 
 void HW_cpld::write(uint32_t addr,uint32_t val,int size)
 {
-    printf("CPLD write %x @0x%08x, size %x\n",val,addr,size);
+    DEBUG_HW("CPLD write %x @0x%08x, size %x\n",val,addr,size);
 }

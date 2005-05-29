@@ -16,6 +16,8 @@
 #include <HW_null.h>
 
 #include <HW_uart.h>
+#include <HW_clock.h>
+#include <HW_gpio.h>
 
 HW_TI::HW_TI():HW_access(0x30000,0x3FFFF,"DSC25")
 {
@@ -23,6 +25,8 @@ HW_TI::HW_TI():HW_access(0x30000,0x3FFFF,"DSC25")
     add_item(new HW_null(0x30680,0x30700,"OSD"));
     add_item(new HW_uart(0x30300,0x30310,"UART0"));
     add_item(new HW_uart(0x30380,0x30390,"UART1"));
+    add_item(new HW_clock());
+    add_item(new HW_gpio());
 }
 
 HW_TI::~HW_TI()
@@ -30,14 +34,3 @@ HW_TI::~HW_TI()
     
 }
 
-/*uint32_t HW_TI::read(uint32_t addr,int size)
-{
-    printf("DSC25 HW read @0x%08x, size %x\n",addr,size);
-    return 0;
-}
-
-void HW_TI::write(uint32_t addr,uint32_t val,int size)
-{
-    printf("DSC25 HW write %x @0x%08x, size %x\n",val,addr,size);
-}
-*/

@@ -1,5 +1,5 @@
 /* 
-*   emu.h
+*   HW_clock.h
 *
 *   AV3XX emulator
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,27 +10,19 @@
 * KIND, either express of implied.
 */
 
-#ifndef EMU_H
-#define EMU_H
+#ifndef __HW_CLOCK_H
+#define __HW_CLOCK_H
 
-#include "emu_types.h"
+#include "emu.h"
+#include "HW_access.h"
 
-#define DEBUG_MODE
-#define DEBUG_MODE_HW
-//#define PRINTSTATE
 
-#ifdef DEBUG_MODE
-#define DEBUG printf
-#define MKDEBUG sprintf
-#else
-#define DEBUG(...)
-#define MKDEBUG(...)
-#endif
+class HW_clock : public HW_access {
+    public:
+        HW_clock(void);
+                
+        uint32_t read(uint32_t addr,int size);
+        void write(uint32_t addr,uint32_t val,int size);
+};
 
-#ifdef DEBUG_MODE_HW
-#define DEBUG_HW printf
-#else
-#define DEBUG_HW
-#endif
-
-#endif
+#endif // __HW_CLOCK_H

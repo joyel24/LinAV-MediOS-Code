@@ -39,6 +39,7 @@ void Cpu::thumb_load_store(int format,int opcode,uint32_t instruction)
         case 0x3:
             Rd = (instruction >> 8) & 0x7;
             Rn = R_SP;
+            opcode=opcode==1?0:5;
             op2 = (instruction & 0xFF)*4;
             MKDEBUG(debugShifter,"%s, [%s, 0x%08x]",RR(Rd),RR(Rn),op2);
             break;            
