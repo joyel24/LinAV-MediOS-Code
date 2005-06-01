@@ -147,7 +147,7 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
         {
             if (!checkCondition(condCode)) {
                 //hh = hh + "(cc not met)";
-                printf("CC not met\n");
+                DEBUG("CC not met\n");
                 return;
             }
             REG(Rn)=address;
@@ -157,7 +157,7 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
     {
         address = RnVal;
         if (!checkCondition(condCode)) {
-            printf("CC not met\n");
+            DEBUG("CC not met\n");
             return;
         }
         if(bit_U)
@@ -178,7 +178,7 @@ void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
     {
         if(!checkCondition(condCode)) {
             //hh = hh + "(cc not met)";
-            printf("CC not met\n");
+            DEBUG("CC not met\n");
             return;
         }
 

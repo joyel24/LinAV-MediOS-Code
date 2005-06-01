@@ -27,6 +27,7 @@ HW_TI::HW_TI():HW_access(0x30000,0x3FFFF,"DSC25")
     add_item(new HW_uart(0x30380,0x30390,"UART1"));
     add_item(new HW_clock());
     add_item(new HW_gpio());
+    add_item(new HW_null(0x30a24,0x30a25,"UKN-30A24"));
 }
 
 HW_TI::~HW_TI()

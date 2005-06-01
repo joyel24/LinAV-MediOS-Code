@@ -30,6 +30,10 @@ class HW_gpio : public HW_access {
         
         /* using variables for now */
         int BITSET_0,BITSET_1,BITCLR_0,BITCLR_1;
+        
+        bool is_gpio_set(int gpio_num);
+        void set_gpio(int gpio_num);
+        void clr_gpio(int gpio_num);
 };
 
 #endif // __HW_GPIO_H
