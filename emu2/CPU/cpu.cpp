@@ -430,7 +430,7 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
         
         if((instruction >> 21) & 0x1)           /* MSR */
         {
-            int opVal;
+            uint32_t  opVal;
             int Rm=instruction&0xF;
             DEBUG("MSR ");            
             
@@ -469,15 +469,29 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
             else
             {
                 DEBUG("CPSR (%08x)",mask);
+                uint32_t R_CPSR_SAV=GET_REG(R_CPSR);
+                uint32_t R_CPSR_CUR;
+                
                 if( (mask & 0x1) == 0x1)
+                {
                     REG(R_CPSR) = (GET_REG(R_CPSR) & ~0x000000FF) | (opVal & 0x000000FF);
-                if( (mask & 0x2) == 0x2)
-                    REG(R_CPSR) = (GET_REG(R_CPSR) & ~0x0000FF00) | (opVal & 0x0000FF00);
-                if( (mask & 0x4) == 0x4)
-                    REG(R_CPSR) = (GET_REG(R_CPSR) & ~0x00FF0000) | (opVal & 0x00FF0000);
-                if( (mask & 0x8) == 0x8)
-                    REG(R_CPSR) = (GET_REG(R_CPSR) & ~0xFF000000) | (opVal & 0xFF000000);
-                DEBUG(" => %08x\n",GET_REG(R_CPSR));
+                    R_CPSR_CUR=GET_REG(R_CPSR);
+                    DEBUG(" => %08x\n",GET_REG(R_CPSR));
+                    DEBUG_HW("%s",((R_CPSR_SAV&0x80) == (R_CPSR_CUR&0x80)) ? "" : (R_CPSR_CUR&0x80)?"DISABLE IRQ\n":"ENABLE IRQ\n");
+                    DEBUG_HW("%s",((R_CPSR_SAV&0x40) == (R_CPSR_CUR&0x40)) ? "" : (R_CPSR_CUR&0x40)?"DISABLE FIQ\n":"ENABLE FIQ\n");
+                }
+                else
+                {
+                    if( (mask & 0x2) == 0x2)
+                        REG(R_CPSR) = (GET_REG(R_CPSR) & ~0x0000FF00) | (opVal & 0x0000FF00);
+                    if( (mask & 0x4) == 0x4)
+                        REG(R_CPSR) = (GET_REG(R_CPSR) & ~0x00FF0000) | (opVal & 0x00FF0000);
+                    if( (mask & 0x8) == 0x8)
+                        REG(R_CPSR) = (GET_REG(R_CPSR) & ~0xFF000000) | (opVal & 0xFF000000);
+                    DEBUG(" => %08x\n",GET_REG(R_CPSR));
+                }
+                
+                
             }
         }
         else                                   /* MRS */

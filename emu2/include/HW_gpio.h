@@ -16,6 +16,22 @@
 #include "emu.h"
 #include "HW_access.h"
 
+class gpio_port {
+    public:
+        gpio_port(int num,char * name);
+        gpio_port(int num);
+        virtual bool is_set(void);
+        virtual void set_gpio(void);
+        virtual void clear_gpio(void);
+        virtual void gpio_dir_chg(int dir);
+        
+        const char * name;
+        
+        int state;
+        
+    protected:
+        int gpio_num;
+};
 
 class HW_gpio : public HW_access {
     public:
@@ -23,6 +39,9 @@ class HW_gpio : public HW_access {
                 
         uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);
+        
+        void register_port(int num,gpio_port * port);
+        
     private:
         int DIR_0,DIR_1,INV_0,INV_1;
         int FSEL,BITRATE;
@@ -30,13 +49,8 @@ class HW_gpio : public HW_access {
                 
         int BITSET_0,BITSET_1,BITCLR_0,BITCLR_1;
         
-        /* using variables for now */
-        int BITSET_0_T,BITSET_1_T,BITCLR_0_T,BITCLR_1_T;
-        
-        bool is_gpio_set(int gpio_num);
-        void set_gpio(int gpio_num);
-        void clr_gpio(int gpio_num);
-        void gpio_dir_chg(int gpio_num,int dir);
+        gpio_port * port_list[32];       
 };
+
 
 #endif // __HW_GPIO_H

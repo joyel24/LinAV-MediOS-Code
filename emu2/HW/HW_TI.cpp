@@ -18,6 +18,8 @@
 #include <HW_uart.h>
 #include <HW_clock.h>
 #include <HW_gpio.h>
+#include <HW_timer.h>
+#include <i2c_gpio.h>
 
 HW_TI::HW_TI():HW_access(0x30000,0x3FFFF,"DSC25")
 {
@@ -26,8 +28,16 @@ HW_TI::HW_TI():HW_access(0x30000,0x3FFFF,"DSC25")
     add_item(new HW_uart(0x30300,0x30310,"UART0"));
     add_item(new HW_uart(0x30380,0x30390,"UART1"));
     add_item(new HW_clock());
-    add_item(new HW_gpio());
+    HW_gpio * gpio = new HW_gpio();
+    add_item(gpio);
     add_item(new HW_null(0x30a24,0x30a25,"UKN-30A24"));
+    add_item(new HW_timer(0x0));
+    add_item(new HW_timer(0x1));
+    add_item(new HW_timer(0x2));
+    add_item(new HW_timer(0x3));
+    
+    new i2C_master(gpio);
+    
 }
 
 HW_TI::~HW_TI()

@@ -20,6 +20,8 @@ char * gpio_str[] = { "ON" , "SPDIF/UART1_RX", "UKN", "UKN", "MAS_EOD", "UKN", "
                     "MAS_PWR", "UKN", "I2C_CLK", "I2C_DA", "UKN", "CPLD_MOD_SENSE", "CPLD_SIGNAL", "BCK_LIGHT",
                     "UKN", "UKN", "UKN", "UKN", "OFF", "VIDEO/UART1_TX", "MAS_RTR", "MAS_PR"};
 
+
+                    
 HW_gpio::HW_gpio(void):HW_access(0x30580,0x30593,"GPIO")
 {
     DIR_0    = 0xFFFF;
@@ -33,11 +35,10 @@ HW_gpio::HW_gpio(void):HW_access(0x30580,0x30593,"GPIO")
     BITSET_1 = 0x0;
     BITCLR_0 = 0x0;
     BITCLR_1 = 0x0;
+       
+    for(int i=0;i<32;i++)
+        port_list[i]=new gpio_port(i);
     
-    BITSET_0_T = 0x0;
-    BITSET_1_T = 0x0;
-    BITCLR_0_T = 0x0;
-    BITCLR_1_T = 0x0;
 }
 
 uint32_t gpio_mask[]={  0X00000001, 0X00000002,0X00000004,0X00000008,
@@ -50,41 +51,55 @@ uint32_t gpio_mask[]={  0X00000001, 0X00000002,0X00000004,0X00000008,
             0X01000000, 0X02000000,0X04000000,0X08000000,
             0X10000000, 0X20000000,0X40000000,0X80000000};
 
-bool HW_gpio::is_gpio_set(int gpio_num)
+gpio_port::gpio_port(int gpio_num)
 {
-    return (gpio_num<0x10?(BITSET_0_T & gpio_mask[gpio_num])!=0:(BITSET_1_T & gpio_mask[gpio_num-0x10])!=0);
+    this->gpio_num=gpio_num;
+    this->name = "UKN";
+    state = 0;
 }
 
-void HW_gpio::set_gpio(int gpio_num)
+gpio_port::gpio_port(int gpio_num,char * name)
 {
-    if(gpio_num<0x10)
-    {
-        BITSET_0_T |= gpio_mask[gpio_num];
-    }
-    else
-    {
-        gpio_num-=0x10;
-        BITSET_1_T |= gpio_mask[gpio_num];
-    }
+    this->gpio_num=gpio_num;
+    this->name = name;
+    state = 0;
+}
+           
+bool gpio_port::is_set(void)
+{
+    //DEBUG_HW("GPIO%x reading state: %s\n",gpio_num,state?"SET":"CLR");
+    return state;
 }
 
-void HW_gpio::clr_gpio(int gpio_num)
+void gpio_port::set_gpio(void)
 {
-    if(gpio_num<0x10)
-    {
-        BITSET_0_T = (BITSET_0_T & (~gpio_mask[gpio_num])) & 0xFFFF;
-    }
-    else
-    {
-        gpio_num-=0x10;
-        BITSET_1_T &= (BITSET_1_T & (~gpio_mask[gpio_num])) & 0xFFFF;
-    }
+    state = 1;
+    DEBUG_HW("GPIO%x is being set\n",gpio_num);
 }
 
-void HW_gpio::gpio_dir_chg(int gpio_num,int dir)
+void gpio_port::clear_gpio(void)
 {
+    state = 0;
+    DEBUG_HW("GPIO%x is being clear\n",gpio_num);
 }
-            
+
+void gpio_port::gpio_dir_chg(int dir)
+{
+    DEBUG_HW("GPIO%x : dir chg to %s\n",gpio_num,dir?"input":"output");
+}
+
+void HW_gpio::register_port(int num,gpio_port * port)
+{
+    delete port_list[num];
+    port_list[num] = port;
+    //DEBUG_HW("Registering gpio port %x for %s\n",num,port->name);
+}
+
+#define IS_GPIO_SET(NUM)        (port_list[NUM]->is_set())
+#define SET_GPIO(NUM)           {port_list[NUM]->set_gpio();}
+#define CLR_GPIO(NUM)           {port_list[NUM]->clear_gpio();}
+#define GPIO_DIR_CHG(NUM,DIR)   {port_list[NUM]->gpio_dir_chg(DIR);}
+  
 uint32_t HW_gpio::read(uint32_t addr,int size)
 {    
     switch(addr)
@@ -108,13 +123,13 @@ uint32_t HW_gpio::read(uint32_t addr,int size)
                 {
                     if(DIR_0 & gpio_mask[k])
                     {
-                        int res=is_gpio_set(k);
+                        int res=IS_GPIO_SET(k);
                         if((res && !(INV_0 & gpio_mask[k])) || (!res && (INV_0 & gpio_mask[k])))
                             tmp_val |= gpio_mask[k];
                     }
                 
                 }
-                DEBUG_HW("GPIO read state 0: %04x\n",tmp_val);
+                //DEBUG_HW("GPIO read state 0: %04x\n",tmp_val);
                 return tmp_val;
             }
         case 0x3058A:                                              /* SET 1 */
@@ -124,12 +139,12 @@ uint32_t HW_gpio::read(uint32_t addr,int size)
                 {
                     if(DIR_1 & gpio_mask[k])
                     {
-                        int res=    is_gpio_set(k+0x10);
+                        int res=IS_GPIO_SET(k+0x10);
                         if((res && !(INV_1 & gpio_mask[k])) || (!res && (INV_1 & gpio_mask[k])))
                             tmp_val |= gpio_mask[k];
                     }                
                 }
-                DEBUG_HW("GPIO read state 1: %04x\n",tmp_val);
+                //DEBUG_HW("GPIO read state 1: %04x\n",tmp_val);
                 return tmp_val;
             }
         case 0x3058C:                                              /* CLR 0 */
@@ -139,13 +154,13 @@ uint32_t HW_gpio::read(uint32_t addr,int size)
                 {
                     if(DIR_0 & gpio_mask[k])
                     {
-                        int res=    is_gpio_set(k);
+                        int res=IS_GPIO_SET(k);
                         if((res && !(INV_0 & gpio_mask[k])) || (!res && (INV_0 & gpio_mask[k])))
                             tmp_val |= gpio_mask[k];
                     }
                 
                 }
-                DEBUG_HW("GPIO read state 0: %04x (WARNING:uses clr to read)\n",tmp_val);
+                //DEBUG_HW("GPIO read state 0: %04x\n",tmp_val);
                 return tmp_val;
             }
         case 0x3058E:                                              /* CLR 1 */
@@ -155,13 +170,13 @@ uint32_t HW_gpio::read(uint32_t addr,int size)
                 {
                     if(DIR_1 & gpio_mask[k])
                     {
-                        int res=    is_gpio_set(k+0x10);
+                        int res=IS_GPIO_SET(k+0x10);
                         if((res && !(INV_1 & gpio_mask[k])) || (!res && (INV_1 & gpio_mask[k])))
                             tmp_val |= gpio_mask[k];
                     }
                 
                 }
-                DEBUG_HW("GPIO read state 1: %04x (WARNING:uses clr to read)\n",tmp_val);
+                //DEBUG_HW("GPIO read state 1: %04x\n",tmp_val);
                 return tmp_val;
             }
         case 0x30590:                                              /* IRQ */
@@ -189,28 +204,28 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
             {        
                 int tmp = val ^ DIR_0;          // compute what has changed
                 int tmp2 = val;
-                DEBUG_HW("GPIO write DIR_0 (%04x): ",val);
+                //DEBUG_HW("GPIO write DIR_0 (%04x): ",val);
                 for(int k = 0; k<0x10;k++)
                 {
                     if(tmp&0x1)
                     {
-                        DEBUG_HW("%s(GPIO%x)=> %s",gpio_str[k],k,(tmp2&0x1)?"READ":"WRITE");
+                        //DEBUG_HW("%s(GPIO%x)=> %s",gpio_str[k],k,(tmp2&0x1)?"READ":"WRITE");
                         if((tmp2&0x1)!=0x1) /* we are in write mode now */
                         {
                             if(BITSET_0 & gpio_mask[k])
                             {
-                                DEBUG_HW(" & SET");
-                                set_gpio(k);
+                                //DEBUG_HW(" & SET");
+                                SET_GPIO(k);
                             }
                             
                             if(BITCLR_0 & gpio_mask[k])
                             {
-                                DEBUG_HW(" & CLR");
-                                clr_gpio(k);
+                                //DEBUG_HW(" & CLR");
+                                CLR_GPIO(k);
                             }                         
                         }   
-                        gpio_dir_chg(k,tmp2&0x1);
-                        DEBUG_HW("|");                     
+                        GPIO_DIR_CHG(k,tmp2&0x1);
+                        //DEBUG_HW("|");                     
                     }
                     tmp=tmp >> 1;
                     tmp2=tmp2 >> 1;
@@ -223,28 +238,28 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
             {        
                 int tmp = val ^ DIR_1;          // compute what has changed
                 int tmp2 = val;
-                DEBUG_HW("GPIO write DIR_1 (%04x): ",val);
+                //DEBUG_HW("GPIO write DIR_1 (%04x): ",val);
                 for(int k = 0; k<0x10;k++)
                 {
                     if(tmp&0x1)
                     {
-                        DEBUG_HW("%s(GPIO%x)=> %s",gpio_str[k+0x10],k+0x10,(tmp2&0x1)?"READ":"WRITE");
+                        //DEBUG_HW("%s(GPIO%x)=> %s",gpio_str[k+0x10],k+0x10,(tmp2&0x1)?"READ":"WRITE");
                         if((tmp2&0x1)!=0x1) /* we are in write mode now */
                         {
                             if(BITSET_1 & gpio_mask[k])
                             {
-                                DEBUG_HW(" & SET");
-                                set_gpio(k+0x10);
+                                //DEBUG_HW(" & SET");
+                                SET_GPIO(k+0x10);
                             }
                             
                             if(BITCLR_1 & gpio_mask[k])
                             {
-                                DEBUG_HW(" & CLR");
-                                clr_gpio(k+0x10);
+                                //DEBUG_HW(" & CLR");
+                                CLR_GPIO(k+0x10);
                             }
-                            gpio_dir_chg(k,tmp2&0x1);
+                            GPIO_DIR_CHG(k,tmp2&0x1);
                         }   
-                        DEBUG_HW("|");
+                        //DEBUG_HW("|");
                     }
                     tmp=tmp >> 1;
                     tmp2=tmp2 >> 1;
@@ -263,95 +278,95 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
             break;
         case 0x30588:                                              /* SET 0 */
             {
-                DEBUG_HW("GPIO set 0: %04x (with DIR mask:%08x): ",val,DIR_0);        
+                //DEBUG_HW("GPIO set 0: %04x (with DIR mask:%08x): ",val,DIR_0);        
                 //val &= ~DIR_0;        
                 for(int k=0;k<0x10;k++)
                 {
                     if(val & 0x1)
                     {
-                        DEBUG_HW("%s(GPIO%x)",gpio_str[k],k);
+                        //DEBUG_HW("%s(GPIO%x)",gpio_str[k],k);
                         if(DIR_0 & gpio_mask[k])
                         {
                             BITSET_0 |=gpio_mask[k];
-                            DEBUG_HW("(delayed)");
+                            //DEBUG_HW("(delayed)");
                         }
                         else
-                            set_gpio(k);
-                        DEBUG_HW("|");
+                            SET_GPIO(k);
+                        //DEBUG_HW("|");
                     }
                     val = val >> 1;                
                 }
             }
-            DEBUG_HW("\n");
+            //DEBUG_HW("\n");
             break;
         case 0x3058A:                                              /* SET 1 */
             {
-                DEBUG_HW("GPIO set 1: %04x (with DIR mask:%08x): ",val,DIR_1);        
+                //DEBUG_HW("GPIO set 1: %04x (with DIR mask:%08x): ",val,DIR_1);        
                 //val &= ~DIR_1;        
                 for(int k=0;k<0x10;k++)
                 {
                     if(val & 0x1)
                     {
-                        DEBUG_HW("%s(GPIO%x)",gpio_str[k+0x10],k+0x10);
+                        //DEBUG_HW("%s(GPIO%x)",gpio_str[k+0x10],k+0x10);
                         if(DIR_1 & gpio_mask[k])
                         {
                             BITSET_1 |=gpio_mask[k];
-                            DEBUG_HW("(delayed)");
+                            //DEBUG_HW("(delayed)");
                         }
                         else
-                            set_gpio(k+0x10);
-                        DEBUG_HW("|");
+                            SET_GPIO(k+0x10);
+                        //DEBUG_HW("|");
                     }
                     val = val >> 1;                
                 }
             }
-            DEBUG_HW("\n");
+            //DEBUG_HW("\n");
             break;
         case 0x3058C:                                              /* CLR 0 */
             {
-                DEBUG_HW("GPIO clr 0: %04x (with DIR mask:%08x): ",val,DIR_0);        
+                //DEBUG_HW("GPIO clr 0: %04x (with DIR mask:%08x): ",val,DIR_0);        
                 //val &= ~DIR_0;        
                 for(int k=0;k<0x10;k++)
                 {
                     if(val & 0x1)
                     {
-                        DEBUG_HW("%s(GPIO%x)",gpio_str[k+0x10],k+0x10);
+                        //DEBUG_HW("%s(GPIO%x)",gpio_str[k+0x10],k+0x10);
                         if(DIR_0 & gpio_mask[k])
                         {
                             BITCLR_0 |=gpio_mask[k];
-                            DEBUG_HW("(delayed)");
+                            //DEBUG_HW("(delayed)");
                         }
                         else
-                            clr_gpio(k+0x10);
-                        DEBUG_HW("|");
+                            CLR_GPIO(k+0x10);
+                        //DEBUG_HW("|");
                     }
                     val = val >> 1;                
                 }
             }
-            DEBUG_HW("\n");
+            //DEBUG_HW("\n");
             break;
         case 0x3058E:                                              /* CLR 1 */
             {
-                DEBUG_HW("GPIO clr 1: %04x (with DIR mask:%08x): ",val,DIR_1);        
+                //DEBUG_HW("GPIO clr 1: %04x (with DIR mask:%08x): ",val,DIR_1);        
                 //val &= ~DIR_1;        
                 for(int k=0;k<0x10;k++)
                 {
                     if(val & 0x1)
                     {
-                        DEBUG_HW("%s(GPIO%x)",gpio_str[k+0x10],k+0x10);
+                        //DEBUG_HW("%s(GPIO%x)",gpio_str[k+0x10],k+0x10);
                         if(DIR_1 & gpio_mask[k])
                         {
                             BITCLR_1 |=gpio_mask[k];
-                            DEBUG_HW("(delayed)");
+                            //DEBUG_HW("(delayed)");
                         }
                         else
-                            clr_gpio(k+0x10);
-                        DEBUG_HW("|");
+                            CLR_GPIO(k+0x10);
+                        //DEBUG_HW("|");
                     }
                     val = val >> 1;                
                 }
             }
-            DEBUG_HW("\n");
+            //DEBUG_HW("\n");
             break;
         case 0x30590:                                              /* IRQ */            
             IRQPORT=val & 0xFF;
