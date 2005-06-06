@@ -81,12 +81,15 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 
 #define RR(N)         (reg_str[N])
 
-#ifdef DEBUG_MODE
-#define DEBUG_HEAD   {printf("@%08x:%08x|%s%s%s%s%s|%s| ",old_PC,instruction, \
+#define INT_DEBUG_HEAD   {printf("@%08x:%08x|%s%s%s%s%s|%s| ",old_PC,instruction, \
             N_FLAG?"N":" ",Z_FLAG?"Z":" ",C_FLAG?"C":" ",V_FLAG?"V":" ",Q_FLAG?"Q":" ", \
             cond_str[condCode&0xF]);}
-#define DEBUG_HEAD_THUMB   {printf("@%08x:%04x|%s%s%s%s%s| ",old_PC,instruction, \
+#define INT_DEBUG_HEAD_THUMB   {printf("@%08x:%04x|%s%s%s%s%s| ",old_PC,instruction, \
             N_FLAG?"N":" ",Z_FLAG?"Z":" ",C_FLAG?"C":" ",V_FLAG?"V":" ",Q_FLAG?"Q":" ");}
+            
+#ifdef DEBUG_MODE
+#define DEBUG_HEAD         INT_DEBUG_HEAD
+#define DEBUG_HEAD_THUMB   INT_DEBUG_HEAD_THUMB
 #else
 #define DEBUG_HEAD
 #define DEBUG_HEAD_THUMB
@@ -385,7 +388,7 @@ void Cpu::doARM(uint32_t instruction)
             break;
         case 0x6:
             if(checkCondition(condCode))
-                arm_CoProcessor(instruction);
+                arm_CoProcessor(condCode,instruction);
             else
                 DEBUG("CoProcessor CC not met\n");
             break;
@@ -393,7 +396,7 @@ void Cpu::doARM(uint32_t instruction)
             if(((instruction>>24)&0x1)==0)
             {
                 if(checkCondition(condCode))
-                    arm_CoProcessor(instruction);
+                    arm_CoProcessor(condCode,instruction);
                 else
                     DEBUG("CoProcessor CC not met\n");
             }
@@ -557,16 +560,18 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
 #include "cpu_multiply.h"
 
        
-void Cpu::arm_CoProcessor(uint32_t instruction)
+void Cpu::arm_CoProcessor(int condCode,uint32_t instruction)
 {
-    DEBUG("coprocessor instruction: %08x\n",instruction);
+    INT_DEBUG_HEAD
+    printf("coprocessor instruction: %08x\n",instruction);
     exit(0);
 }
 
 
 void Cpu::arm_DSP(int condCode,uint32_t instruction)
 {
-    DEBUG("DSP instruction: %08x\n",instruction);
+    INT_DEBUG_HEAD
+    printf("DSP instruction: %08x\n",instruction);
     exit(0);
 }
 

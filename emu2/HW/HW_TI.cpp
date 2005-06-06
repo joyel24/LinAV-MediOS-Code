@@ -36,7 +36,7 @@ HW_TI::HW_TI():HW_access(0x30000,0x3FFFF,"DSC25")
     add_item(new HW_timer(0x2));
     add_item(new HW_timer(0x3));
     
-    new i2C_master(gpio);
+    new i2c_master(gpio);
     
 }
 

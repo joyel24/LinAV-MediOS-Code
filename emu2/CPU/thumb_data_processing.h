@@ -276,7 +276,10 @@ void Cpu::thumb_data_process(int format,int opcode,uint32_t instruction)
                 break;
             case 0xA:                                                                              // MOV
                 DEBUG("MOV %s\n",debugShifter);
-                REG(Rd)=shifter_operand;
+                if(format == 0x7 && op2Reg == R_PC)
+                    REG(Rd)=shifter_operand+1;
+                else
+                    REG(Rd)=shifter_operand;
                 if(format == 2 | format == 4)
                 {
                     ARM_NegZero(GET_REG(Rd));

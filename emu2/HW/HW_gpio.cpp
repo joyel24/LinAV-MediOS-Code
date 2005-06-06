@@ -129,7 +129,7 @@ uint32_t HW_gpio::read(uint32_t addr,int size)
                     }
                 
                 }
-                //DEBUG_HW("GPIO read state 0: %04x\n",tmp_val);
+                DEBUG_HW("GPIO read state 0: %04x\n",tmp_val);
                 return tmp_val;
             }
         case 0x3058A:                                              /* SET 1 */
@@ -144,7 +144,7 @@ uint32_t HW_gpio::read(uint32_t addr,int size)
                             tmp_val |= gpio_mask[k];
                     }                
                 }
-                //DEBUG_HW("GPIO read state 1: %04x\n",tmp_val);
+                DEBUG_HW("GPIO read state 1: %04x\n",tmp_val);
                 return tmp_val;
             }
         case 0x3058C:                                              /* CLR 0 */
@@ -160,7 +160,7 @@ uint32_t HW_gpio::read(uint32_t addr,int size)
                     }
                 
                 }
-                //DEBUG_HW("GPIO read state 0: %04x\n",tmp_val);
+                DEBUG_HW("GPIO read state 0: %04x\n",tmp_val);
                 return tmp_val;
             }
         case 0x3058E:                                              /* CLR 1 */
@@ -176,7 +176,7 @@ uint32_t HW_gpio::read(uint32_t addr,int size)
                     }
                 
                 }
-                //DEBUG_HW("GPIO read state 1: %04x\n",tmp_val);
+                DEBUG_HW("GPIO read state 1: %04x\n",tmp_val);
                 return tmp_val;
             }
         case 0x30590:                                              /* IRQ */
@@ -226,7 +226,7 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
                         }   
                         GPIO_DIR_CHG(k,tmp2&0x1);
                         //DEBUG_HW("|");                     
-                    }
+                    }                    
                     tmp=tmp >> 1;
                     tmp2=tmp2 >> 1;
                 }
@@ -256,16 +256,16 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
                             {
                                 //DEBUG_HW(" & CLR");
                                 CLR_GPIO(k+0x10);
-                            }
-                            GPIO_DIR_CHG(k,tmp2&0x1);
+                            }                            
                         }   
+                        GPIO_DIR_CHG(k+0x10,tmp2&0x1);
                         //DEBUG_HW("|");
                     }
                     tmp=tmp >> 1;
                     tmp2=tmp2 >> 1;
                 }
                 DIR_1 = val & 0xFFFF;
-                DEBUG_HW("\n");
+                //DEBUG_HW("\n");
                 break;
             }
         case 0x30584:                                              /* INV 0 */

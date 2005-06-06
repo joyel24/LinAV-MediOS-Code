@@ -5,11 +5,12 @@ GPPFLAGS += -I../../include -I./
 SRC = $(wildcard *.cpp)
 OBJS = $(SRC:%.cpp=%.o)
 
+SUBDIRS = i2c
 
-all: $(OBJS)
+all: subdirs $(OBJS)
 	$(MV) *.o ../../build/
 
-clean:
+clean: clean-subdirs
 	@rm -f *.o *~ 
                         
 include ../../default.rule

@@ -49,7 +49,7 @@ class Cpu {
         void arm_LoadStoreMulti(uint32_t instruction);
         void arm_Mul(int condCode,uint32_t instruction);
         void arm_Swap(uint32_t instruction);
-        void arm_CoProcessor(uint32_t instruction);
+        void arm_CoProcessor(int condCode,uint32_t instruction);
         void arm_DSP(int condCode,uint32_t instruction);
         
         uint32_t getShifterData(uint32_t instruction,char *debugShifter,int *shifter_carry_out);

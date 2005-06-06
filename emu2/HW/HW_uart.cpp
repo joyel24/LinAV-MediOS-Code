@@ -69,6 +69,7 @@ void HW_uart::write(uint32_t addr,uint32_t val,int size)
             if(fd)
                 fputc(val&0xFF,fd);
                 fflush(fd);
+                //DEBUG_HW("%c",val&0xFF);
             break;
         default:
             DEBUG_HW("%s write %x @0x%08x, size %x\n",name,val,addr,size);
