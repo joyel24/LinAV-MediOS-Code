@@ -24,11 +24,17 @@ class i2c_RTC:i2c_device {
         void write(int val);
         
         void start(int direction);
+        void stop(void);
         
         i2c_device * nxt;
         
         int address;
         char * name;
+    private:
+        bool has_address;
+        int index;
+        
+        int rtc_reg[0x14];
 };
 
 #endif /* __I2C_RTC_H */

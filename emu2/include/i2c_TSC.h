@@ -24,6 +24,7 @@ class i2c_TSC:i2c_device {
         void write(int val);
         
         void start(int direction);
+        void stop(void);
         
         i2c_device * nxt;
         

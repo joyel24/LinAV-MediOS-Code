@@ -39,3 +39,8 @@ void i2c_device::start(int direction)
 {
     DEBUG_HW("WARN general I2C start\n");
 }
+
+void i2c_device::stop(void)
+{
+    DEBUG_HW("WARN general I2C stop\n");
+}

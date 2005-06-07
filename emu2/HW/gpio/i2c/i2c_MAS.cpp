@@ -35,3 +35,8 @@ void i2c_MAS::start(int direction)
 {
 
 }
+
+void i2c_MAS::stop(void)
+{
+    
+}

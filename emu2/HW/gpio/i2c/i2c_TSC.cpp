@@ -83,3 +83,8 @@ void i2c_TSC::start(int direction)
         wait_cmd = true;
     }
 }
+
+void i2c_TSC::stop(void)
+{
+    
+}

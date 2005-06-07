@@ -27,6 +27,7 @@ class i2c_device {
         virtual void write(int val);
         
         virtual void start(int direction);
+        virtual void stop(void);
         
         i2c_device * nxt;
         

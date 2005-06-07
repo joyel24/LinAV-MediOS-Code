@@ -159,8 +159,10 @@ void i2c_master::i2c_state_has_changed(void)
     {
         /*if(!wait_ack)
         {*/
-            DEBUG_HW("I2C - STOP\n");
-            active = false;
+        DEBUG_HW("I2C - STOP\n");
+        active = false;
+        if(cur_device)
+            cur_device->stop();
         /*}
         else
             DEBUG_HW("I2C - get ACK\n");*/
