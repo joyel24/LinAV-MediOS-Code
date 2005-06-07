@@ -204,6 +204,7 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
             {        
                 int tmp = val ^ DIR_0;          // compute what has changed
                 int tmp2 = val;
+                DIR_0 = val & 0xFFFF;
                 //DEBUG_HW("GPIO write DIR_0 (%04x): ",val);
                 for(int k = 0; k<0x10;k++)
                 {
@@ -230,7 +231,6 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
                     tmp=tmp >> 1;
                     tmp2=tmp2 >> 1;
                 }
-                DIR_0 = val & 0xFFFF;
                 DEBUG_HW("\n");                
                 break;
             }
@@ -238,6 +238,7 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
             {        
                 int tmp = val ^ DIR_1;          // compute what has changed
                 int tmp2 = val;
+                DIR_1 = val & 0xFFFF;
                 //DEBUG_HW("GPIO write DIR_1 (%04x): ",val);
                 for(int k = 0; k<0x10;k++)
                 {
@@ -263,8 +264,7 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
                     }
                     tmp=tmp >> 1;
                     tmp2=tmp2 >> 1;
-                }
-                DIR_1 = val & 0xFFFF;
+                }                
                 //DEBUG_HW("\n");
                 break;
             }

@@ -169,7 +169,7 @@ void i2c_master::i2c_state_has_changed(void)
     if(!CL_HI && CL_OLD_HI && wait_ack)
     {
         gpio->DIR_1 = (gpio->DIR_1 & ~0x8);
-        DEBUG_HW("I2C - chg dir: %x\n",gpio->DIR_1);
+        //DEBUG_HW("I2C - chg dir: %x\n",gpio->DIR_1);
     }
     
        
@@ -185,9 +185,14 @@ void i2c_master::i2c_state_has_changed(void)
         else if(wait_ack)
         {
             if(DA_HI)
+            {
                 DEBUG_HW("I2C - get NACK\n");
+                active = false;
+            }
             else
+            {
                 DEBUG_HW("I2C - get ACK\n");
+            }
             wait_ack = false;
         }
         else
@@ -225,7 +230,7 @@ void i2c_master::i2c_state_has_changed(void)
                     }                    
                     break;
                 case GET_DATA:
-                    DEBUG_HW("I2C - GET_DATA\n");
+                    //DEBUG_HW("I2C - GET_DATA\n");
                     if(address&0x1)   /* read */
                     {
                         if(clock == 0)
