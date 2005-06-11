@@ -102,7 +102,7 @@ __IRAM_CODE void GFX_DestroySpanStructure (int nYmin, int nYmax)
 
 __IRAM_CODE void GFX_BuildSpanStructure (int nYmin, int nYmax)
 {
-	printk ("GFX_BuildSpanStructure [1] (%d, %d)\n", nYmin, nYmax);
+//	printk ("GFX_BuildSpanStructure [1] (%d, %d)\n", nYmin, nYmax);
 
 	GFX_Z_RECT* pCtx = g_pZRectList;
 	while (pCtx)//for (i=0;i<m_stack.size();i++)
@@ -378,17 +378,27 @@ __IRAM_CODE void GFX_MoveContext (TASK_INFO* pOwner, int nX, int nY)
 
 	if (pCtx->pOwner == pOwner)
 	{
+//printk ("GFX_MoveContext   owner:%.8x   mctx:%.8x\n",
+//		(unsigned long)pOwner,
+//		(unsigned long)pOwner->pMemoryContext);
+
 		GFX_RECT rc1;
 		rc1.x = pCtx->ptLocation.x;//m_stack[nWinID].x;
 		rc1.y = pCtx->ptLocation.y;//m_stack[nWinID].y;
 		rc1.w = pCtx->pOwner->pMemoryContext->w;//m_stack[nWinID].w;
 		rc1.h = pCtx->pOwner->pMemoryContext->h;//m_stack[nWinID].h;
 
+//printk ("GFX mctx w/h: %i, %i\n", pCtx->pOwner->pMemoryContext->w, pCtx->pOwner->pMemoryContext->h);
+
+//printk ("GFX rc1: %i, %i, %i, %i\n", rc1.x, rc1.y, rc1.w, rc1.h);
+
 		GFX_RECT rc2;
 		rc2.x = nX;
 		rc2.y = nY;
 		rc2.w = rc1.w;
 		rc2.h = rc1.h;
+
+//printk ("GFX rc2: %i, %i, %i, %i\n", rc2.x, rc2.y, rc2.w, rc2.h);
 
 		long nYmin = MAX(MIN(rc1.y, rc2.y), 0);
 		long nYmax = MIN(MAX(rc1.y + rc1.h, rc2.y + rc2.h), SCR_HEIGHT);

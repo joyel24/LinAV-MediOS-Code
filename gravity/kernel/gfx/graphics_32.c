@@ -70,9 +70,36 @@ void graphics32_DrawRect (COLOR color, int x, int y, int width, int height, GFX_
 	graphics32_DrawHorizLine (color, width, offset);
 }
 
+void graphics32_ProtectContextRect (int *x, int *y, int *width, int *height, GFX_CONTEXT* pCtx)
+{
+	if (*x < 0)
+	{
+		*width += *x;
+		*x = 0;
+	}
+
+	if (*y < 0)
+	{
+		*height += *y;
+		*y = 0;
+	}
+
+	if (*x + *width > pCtx->w)
+	{
+		*width = pCtx->w - *x;
+	}
+
+	if (*y + *height > pCtx->h)
+	{
+		*height = pCtx->h - *y;
+	}
+}
+
 void graphics32_FillRect (COLOR color, int x, int y, int width, int height, GFX_CONTEXT* pCtx)
 {
 	int j;
+
+	graphics32_ProtectContextRect (&x, &y, &width, &height, pCtx);
 
 	COLOR* offset = getCtxOffset (x, y, pCtx);
 

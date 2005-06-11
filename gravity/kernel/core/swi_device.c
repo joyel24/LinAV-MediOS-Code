@@ -12,6 +12,8 @@
 #include <kernel/rtc.h>
 #include <kernel/bat_power.h>
 
+extern int lcd_bright;
+
 __IRAM_CODE int swi_device_handler (
 	unsigned long nCmd,
 	unsigned long nParam1,
@@ -51,6 +53,13 @@ __IRAM_CODE int swi_device_handler (
             return 0;
 
         
+		case nAPI_SET_LCD_BRIGHTNESS:
+			lcd_bright = nParam1;
+			return 0;
+
+		case nAPI_GET_LCD_BRIGHTNESS:
+			*((int*)nParam1) = lcd_bright;
+			return 0;
 	}
 
 	return 0;
