@@ -16,6 +16,8 @@
 #include <fs_io.h>
 #include <kernel/sound.h>
 
+#if 0
+
 #define MP3_BUFF_SIZE (1020*500)
 
 #define MIN(a, b) (((a)<(b))?(a):(b))
@@ -69,7 +71,7 @@ void mp3_file_reader_thread(void * param)
     int free_space;
     while(!file_eof)
     {
-        free_space=mp3_buffer.read-mp3_buffer.write;
+        free_space = mp3_buffer.read - mp3_buffer.write;
         if(free_space<=0)
             free_space+=mp3_buffer.size;
         if(free_space>mp3_buffer.size/2)
@@ -131,3 +133,4 @@ printf("MP3 Before exit\n");
 }
 
 
+#endif

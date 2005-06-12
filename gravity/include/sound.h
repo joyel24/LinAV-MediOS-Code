@@ -23,6 +23,10 @@
 #define DSP_OUT_PEAK            0x0107
 #define DSP_IN_PEAK_REAL        0x0108
 #define DSP_OUT_PEAK_REAL       0x0109
+#define DSP_SETCURR_MP3_BUFFER  0x010A
+#define DSP_GETCURR_MP3_BUFFER  0x010B
+#define DSP_ADD_MP3_BUFFER      0x010C
+#define DSP_REMOVE_MP3_BUFFER   0x010D
 
 /********************** mp3 player                 **********************/
 

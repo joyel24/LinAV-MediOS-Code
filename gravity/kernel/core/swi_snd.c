@@ -22,7 +22,7 @@ __IRAM_CODE int swi_snd_handler (
     switch (nCmd)
     {
         case nAPI_SOUND_BUFFER_WRITE:            
-            api_param->count=sound_buff_write((sound_buffer_s *) nParam1, api_param->reader_fct,api_param->count,(void*) nParam3);
+//            api_param->count=sound_buff_write((sound_buffer_s *) nParam1, api_param->reader_fct,api_param->count,(void*) nParam3);
             return 0;
         
         case nAPI_MIXER:

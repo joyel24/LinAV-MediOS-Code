@@ -415,6 +415,7 @@ void kernel_startup_thread (void)
 	GFX_init ();
 	////////////////////////////////////////////////////
 
+//	start_mp3_player ("/test.mp3");
 
 /*        myDir=opendir("/");
         while(entry=readdir(myDir))
@@ -435,6 +436,9 @@ void kernel_startup_thread (void)
 	pS1.color = COLOR32_PINK;
 	API_TASK_CREATE (debug_thread, &pS1, 0);
 
+//	gpsnav ();
+
+/*
 //	GFX_RECT rc1;
 //	rc1.x = 200;
 //	rc1.y = 100;
@@ -474,7 +478,7 @@ void kernel_startup_thread (void)
 	pS5.h = 16;
 	pS5.color = COLOR32_BLACK;
 	API_TASK_CREATE (debug_thread, &pS5, 0);
-
+*/
 
 /*
 	GFX_RECT rc5;

@@ -28,19 +28,20 @@
             __free_space;                                  \
     })
 
-    
 typedef struct _SOUND_BUFFER
 {
-    unsigned int write;
-    unsigned int read;
-    unsigned char * data;
-    unsigned int size;
+	unsigned char* data;
+	unsigned long  size;
+	unsigned long  bytes_played;
+	unsigned long  loop_counter;
+	unsigned long  loops_played;
+	struct _SOUND_BUFFER* next_buffer;
 } sound_buffer_s;
 
 typedef struct _sound_api_param
 {
-    int (*reader_fct)(char * data,int count,void* param);
-    int count;
+	int (*reader_fct)(char * data,int count,void* param);
+	int count;
 } sound_api_param;
 
 extern int sound_buff_write(sound_buffer_s * sound_buffer, int (*reader_fct)(char * data,int count,void* param),
