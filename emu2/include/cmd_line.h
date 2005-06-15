@@ -1,5 +1,5 @@
 /* 
-*   emu.h
+*   cmd_line.h
 *
 *   AV3XX emulator
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,26 +10,26 @@
 * KIND, either express of implied.
 */
 
-#ifndef EMU_H
-#define EMU_H
+#ifndef __CMD_LINE_H
+#define __CMD_LINE_H
 
-#include "emu_types.h"
-#define DEBUG_MODE
-#define DEBUG_MODE_HW
-#define PRINTSTATE
+#include <readline/readline.h>
+#include <readline/history.h>
 
-#ifdef DEBUG_MODE
-#define DEBUG printf
-#define MKDEBUG sprintf
-#else
-#define DEBUG(...)
-#define MKDEBUG(...)
+#include "emu.h"
+
+class Cpu;
+
+typedef struct cmd_line_elem {
+  char *name;
+  int (*func)(char * arg);
+  char *doc;
+  cmd_line_elem * nxt;
+} COMMAND;
+
+void init_cmd_line(void);
+void cmd_line(void);
+void add_cmd_fct(char * name,int(*fct)(char*));
+
 #endif
 
-#ifdef DEBUG_MODE_HW
-#define DEBUG_HW printf
-#else
-#define DEBUG_HW
-#endif
-
-#endif

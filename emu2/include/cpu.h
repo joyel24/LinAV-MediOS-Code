@@ -27,6 +27,9 @@ class Cpu {
         void printState(void);
         void test_ini(void);
         
+        /* cmd_line functions */
+        int do_cmd_help(char * arg);
+        
     private:
         uint32_t ** current_reg;
         uint32_t * mode_regs[7][18];        
@@ -71,6 +74,7 @@ class Cpu {
         void thumb_data_process(int format,int opcode,uint32_t instruction);
         void thumb_load_store(int format,int opcode,uint32_t instruction);
         void thumb_load_store_multi(int format,int opcode,uint32_t instruction);
+        
         
                 
 };

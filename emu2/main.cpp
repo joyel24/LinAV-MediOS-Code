@@ -16,6 +16,7 @@
 #include <emu.h>
 #include <mem_space.h>
 #include <cpu.h>
+#include <cmd_line.h>
 
 mem_space * mem;
 Cpu    * cpu;
@@ -27,6 +28,8 @@ void usage(char * name)
     printf("Usage: %s -f name|-s name|-h\n-f : file to be loaded in flash\n-s : file to be loaded in sdram\n-h: help\n",name);
     exit(0);
 }
+
+void cmd_line(void);
 
 int main(int argc, char* argv[])
 {
@@ -71,12 +74,15 @@ int main(int argc, char* argv[])
         }
     }
     
-    if(sdram_file == NULL)
+    /*if(sdram_file == NULL)
     {
         usage(argv[0]);
-    }
+    }*/
     
-
+    init_cmd_line();
+    
+    sdram_file = "CJBM_v2.depack";
+    
     mem = new mem_space(flash_file,sdram_file);
     
     cpu = new Cpu(mem);

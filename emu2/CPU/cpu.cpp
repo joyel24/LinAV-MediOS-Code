@@ -18,6 +18,8 @@
 
 #include <cpu.h>
 
+#include <cmd_line.h>
+
 char * mode_str[] = {"User","System","Supervisor","Abort","Undefined","IRQ","FIQ"};
 
 enum REGS {R_R0 = 0x00, R_R1 = 0x01, R_R2 = 0x02, R_R3 = 0x03,
@@ -107,6 +109,10 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
                      }
 
 char * cond_str[] = {"EQ","NE","CS","CC","MI","PL","VS","VC","HI","LS","GE","LT","GT","LE","  ","ERR"};
+
+Cpu * cur_cpu;
+
+void init_static_fct(Cpu * cpu);
                      
 Cpu::Cpu(mem_space * mem)
 {
@@ -155,10 +161,30 @@ Cpu::Cpu(mem_space * mem)
     SET_MODE(M_SVC);
     current_reg = mode_regs[M_SVC];
     
+    /* init the cmd line */
+    
+    init_static_fct(this);
+    
     printf("Init of Cpu object      DONE\n");
     
 }
 
+int do_cmd_help_s(char * arg)
+{
+    return cur_cpu->do_cmd_help(arg);
+}
+
+int Cpu::do_cmd_help(char * arg)
+{
+    printf("HELP\n");
+    return 1;
+}
+
+void init_static_fct(Cpu * cpu)
+{
+    cur_cpu = cpu;
+    add_cmd_fct("help",do_cmd_help_s);
+}
 
 void Cpu::go(uint32_t start_address,uint32_t stack_address)
 {
@@ -168,6 +194,7 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
     //for(int i=0;i<0x20;i++)
     while(1)
     {        
+        cmd_line();
         old_PC=PC_REAL;
         if(T_FLAG)  /* THUMB */
         {            
