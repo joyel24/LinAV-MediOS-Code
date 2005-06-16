@@ -17,6 +17,7 @@
 
 #include "mem_space.h"
 
+#include <bkpt_list.h>
 
 class Cpu {
     public:
@@ -29,6 +30,10 @@ class Cpu {
         
         /* cmd_line functions */
         int do_cmd_help(char * arg);
+        int do_cmd_quit(char * arg);
+        int do_cmd_step(char * arg);
+        int do_cmd_run(char * arg);
+        int do_cmd_add_bkpt(char * arg);
         
     private:
         uint32_t ** current_reg;
@@ -39,6 +44,8 @@ class Cpu {
         
         mem_space * mem;
         
+        bkpt_list * bkpt;
+               
         bool checkCondition(int condCode);
         void doThumb(uint32_t instruction);
         void doARM(uint32_t instruction);

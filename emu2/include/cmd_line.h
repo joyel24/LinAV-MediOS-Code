@@ -29,7 +29,8 @@ typedef struct cmd_line_elem {
 
 void init_cmd_line(void);
 void cmd_line(void);
-void add_cmd_fct(char * name,int(*fct)(char*));
+void add_cmd_fct(char * name,int(*fct)(char*),char * help_str);
+void print_cmd_list(void);
 
 #endif
 

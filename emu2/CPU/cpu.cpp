@@ -19,6 +19,7 @@
 #include <cpu.h>
 
 #include <cmd_line.h>
+#include <bkpt_list.h>
 
 char * mode_str[] = {"User","System","Supervisor","Abort","Undefined","IRQ","FIQ"};
 
@@ -90,8 +91,8 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
             N_FLAG?"N":" ",Z_FLAG?"Z":" ",C_FLAG?"C":" ",V_FLAG?"V":" ",Q_FLAG?"Q":" ");}
             
 #ifdef DEBUG_MODE
-#define DEBUG_HEAD         INT_DEBUG_HEAD
-#define DEBUG_HEAD_THUMB   INT_DEBUG_HEAD_THUMB
+#define DEBUG_HEAD         if(run_mode==STEP) INT_DEBUG_HEAD
+#define DEBUG_HEAD_THUMB   if(run_mode==STEP) INT_DEBUG_HEAD_THUMB
 #else
 #define DEBUG_HEAD
 #define DEBUG_HEAD_THUMB
@@ -108,6 +109,8 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
                          } \
                      }
 
+int run_mode;
+                                        
 char * cond_str[] = {"EQ","NE","CS","CC","MI","PL","VS","VC","HI","LS","GE","LT","GT","LE","  ","ERR"};
 
 Cpu * cur_cpu;
@@ -165,46 +168,53 @@ Cpu::Cpu(mem_space * mem)
     
     init_static_fct(this);
     
+    /* init bkpt_list */
+    
+    bkpt= new bkpt_list();
+    bkpt->add(0x0304f054);
+    
     printf("Init of Cpu object      DONE\n");
     
 }
 
-int do_cmd_help_s(char * arg)
-{
-    return cur_cpu->do_cmd_help(arg);
-}
-
-int Cpu::do_cmd_help(char * arg)
-{
-    printf("HELP\n");
-    return 1;
-}
-
-void init_static_fct(Cpu * cpu)
-{
-    cur_cpu = cpu;
-    add_cmd_fct("help",do_cmd_help_s);
-}
+#include "cpu_cmd_line_fct.h"
 
 void Cpu::go(uint32_t start_address,uint32_t stack_address)
 {
     uint32_t instruction;
     REG(R_PC)=start_address;
     REG(R_SP)=stack_address;
+    
+    run_mode = STEP;
+    uint32_t address;
+    
     //for(int i=0;i<0x20;i++)
     while(1)
     {        
-        cmd_line();
+    
+        address = T_FLAG ? PC_REAL&0xfffffffe : (PC_REAL+2)&0xfffffffc;
+        
+        if(bkpt->has_bkpt(address))
+        {
+            run_mode = STEP;
+            printState();
+            cmd_line();
+        }
+        else if(run_mode == STEP)
+        {
+            cmd_line();
+        }
+                
         old_PC=PC_REAL;
         if(T_FLAG)  /* THUMB */
         {            
-            instruction=mem->read(PC_REAL&0xfffffffe,2);
+            instruction=mem->read(address,2);
             PC_REAL+=2;
             doThumb(instruction);
         }
         else       /* ARM */
         {
-            instruction=mem->read((PC_REAL+2)&0xfffffffc,4);
+            instruction=mem->read(address,4);
             PC_REAL+= 4;
             doARM(instruction);
         }
@@ -447,9 +457,8 @@ void Cpu::doARM(uint32_t instruction)
              printf("You should not be here\n");
              exit(0);
     }
-#ifdef PRINTSTATE    
-    printState();
-#endif
+    if(run_mode==STEP)
+        printState();
 }
 
 void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
@@ -817,9 +826,8 @@ void Cpu::doThumb(uint32_t instruction)
                 }
             break;
     }
-#ifdef PRINTSTATE    
-    printState();
-#endif
+    if(run_mode==STEP)   
+        printState();
 }
 
 /* thumb data processing */

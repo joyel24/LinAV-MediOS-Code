@@ -1,3 +1,15 @@
+/* 
+*   cmd_line_parser.cpp
+*
+*   AV3XX emulator
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -13,6 +25,7 @@ char * stripwhite (char * string);
 COMMAND *find_command (char *name);
 int execute_line (char *line);
 char ** my_completion __P((const char *text,int start,int end));
+char * dupstr (char * s);
 
 int done;
 
@@ -26,13 +39,28 @@ void init_cmd_line(void)
   head_cmd = NULL;
 }
 
-void add_cmd_fct(char * name,int(*fct)(char*))
+void add_cmd_fct(char * name,int(*fct)(char*),char * help_str)
 {
-    COMMAND * ptr = new COMMAND();
-    ptr->name = name;
-    ptr->func = fct;
-    ptr->nxt = head_cmd;
-    head_cmd =ptr;
+    if(name!=NULL)
+    {
+        COMMAND * ptr = new COMMAND();
+        ptr->name = dupstr(name);
+        if(help_str!=NULL)
+            ptr->doc = dupstr(help_str);
+        else
+            ptr->doc=NULL;
+        ptr->func = fct;
+        ptr->nxt = head_cmd;
+        head_cmd =ptr;
+    }
+}
+
+void print_cmd_list(void)
+{
+    for(COMMAND * ptr = head_cmd;ptr!=NULL;ptr=ptr->nxt)
+    {
+        printf("%s: %s\n",ptr->name,ptr->doc!=NULL?ptr->doc:"");
+    }
 }
 
 char * dupstr (char * s)
@@ -66,7 +94,7 @@ int execute_line (char *line)
   if (!command)
     {
       fprintf (stderr, "%s: No such command for Emu.\n", word);
-      return (-1);
+      return 0;
     }
 
   while (whitespace (line[i]))

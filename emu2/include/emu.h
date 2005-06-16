@@ -14,12 +14,17 @@
 #define EMU_H
 
 #include "emu_types.h"
+
+#define STEP 0
+#define RUN  1
+
+extern int run_mode;
+
 #define DEBUG_MODE
 #define DEBUG_MODE_HW
-#define PRINTSTATE
 
 #ifdef DEBUG_MODE
-#define DEBUG printf
+#define DEBUG(fmt, arg...) if(run_mode==STEP) printf(fmt,## arg);
 #define MKDEBUG sprintf
 #else
 #define DEBUG(...)
@@ -27,9 +32,9 @@
 #endif
 
 #ifdef DEBUG_MODE_HW
-#define DEBUG_HW printf
+#define DEBUG_HW(fmt, arg...) if(run_mode==STEP) printf(fmt,## arg);
 #else
-#define DEBUG_HW
+#define DEBUG_HW(...)
 #endif
 
 #endif
