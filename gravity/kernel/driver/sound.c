@@ -23,7 +23,9 @@
 #include <kernel/mas.h>
 #include <kernel/sound.h>
 
-#define MAS_DELAY        {int __i; for(__i=0;__i<20;__i++);}
+#include <kernel/threads.h>
+
+#define MAS_DELAY        {int ___i; for(___i=0;___i<20;___i++);}
 #define MIN(a, b)        (((a)<(b))?(a):(b))
 #define MAX(a, b)        (((a)<(b))?(b):(a))
 
@@ -34,6 +36,23 @@
 __IRAM_DATA long g_nPaused = 0;     // 1 if in Pause mode
 
 __IRAM_DATA sound_buffer_s * g_CurrentBuffer;
+
+CRITSEC_INFO* g_pCS_SOUND = 0;
+
+// For 32kbps [unstable]
+//#define GIO_SEND_MAS_DELAY {int ___i; for(___i=0;___i<20;___i++);}
+
+// For 32kbps [stable]
+//#define GIO_SEND_MAS_DELAY {int ___i; for(___i=0;___i<40;___i++);}
+
+// For 128kbps [unstable]
+//#define GIO_SEND_MAS_DELAY {int ___i; for(___i=0;___i<5;___i++);}
+
+// For 128kbps [stable]
+//#define GIO_SEND_MAS_DELAY {int ___i; for(___i=0;___i<20;___i++);}
+
+// For 128kbps [stable]
+#define GIO_SEND_MAS_DELAY {int ___i; for(___i=0;___i<30;___i++);}
 
 #define SEND_TO_MAS(BUFFER,SIZE)                              \
  ({                                                           \
@@ -57,6 +76,7 @@ __IRAM_DATA sound_buffer_s * g_CurrentBuffer;
             /*nothing*/;                                      \
         /* clear latch (lower raise PR) */                    \
         outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);             \
+		GIO_SEND_MAS_DELAY\
     }                                                         \
     __i;                                                      \
   })
@@ -67,7 +87,7 @@ __IRAM_CODE void dsp_interrupt(int irq)
 
 	if (!g_CurrentBuffer)
 	{
-		disable_irq(IRQ_MAS_DATA);
+//		disable_irq(IRQ_MAS_DATA);
 		return;
 	}
 
@@ -199,6 +219,9 @@ __IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
 {
     int * val;
     struct av_peak * av_p;
+
+	API_CRITSEC_ENTER ((HCRITSEC)g_pCS_SOUND);
+
     switch(cmd)
     {
         case DSP_INI_MP3:
@@ -206,6 +229,7 @@ __IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
 //            current_buffer=(sound_buffer_s *)arg;
 //            playing_sound=1;
 //            in_pause=0;
+			enable_irq(IRQ_MAS_DATA);
             break;
 
 		case DSP_SETCURR_MP3_BUFFER:
@@ -239,16 +263,24 @@ __IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
 
 			g_nPaused = 0;
 			enable_irq(IRQ_MAS_DATA);
+
+//			mas_write_direct_config (MAS_CONTROL,0x8C00);
+//			mas_write_direct_config (MAS_CONTROL,0x0C00);
+
+//			mas_start_mp3_app ();
+
+//			printk("MP3 playing\n");
+
 			__cli ();
 			dsp_interrupt (IRQ_MAS_DATA);
 			__sti ();
 
-			printk("MP3 playing\n");
 			break;
 
         case DSP_STOP_MP3:
             g_nPaused = 1;
             disable_irq (IRQ_MAS_DATA);
+//			mas_stop_mp3_app();
             break;
 
         case DSP_PAUSE_MP3:
@@ -285,6 +317,8 @@ __IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
             av_p->right=mas_read_codec(MAS_REG_OUTPEAK_RIGHT);
             break;
     }
+
+	API_CRITSEC_LEAVE ((HCRITSEC)g_pCS_SOUND);
 }
 
 int mas_stop_mp3_app(void)
@@ -357,24 +391,26 @@ int ini_mas_for_mp3(void)
     mas_write_codec(MAS_REG_MIX_DSP_SCALE,0x40 << 8);
     mas_write_codec(MAS_REG_DA_OUTPUT_MODE,0x0);
     mas_control_config(MAS_SET,MAS_BALANCE,50);
-    mas_control_config(MAS_SET,MAS_VOLUME,70);
-    
+    mas_control_config(MAS_SET,MAS_VOLUME,/*70*/80);
+
     MAS_DELAY
-        
+
+    printk("mas_stop_mp3_app\n");
     if(!mas_stop_mp3_app())
-        return -1;        
-    
+        return -1;
+
     mas_set_D0(MAS_INTERFACE_CONTROL,0x04);
     mas_set_clk_speed(0x4800);
     mas_set_D0(MAS_MAIN_IO_CONTROL,0x125);
-    
+
     MAS_DELAY
-        
+
+    printk("mas_start_mp3_app\n");
     if(!mas_start_mp3_app())
-        return -1;	
-            
+        return -1;
+
     printk("MAS configured for mp3 playing, waiting for start\n");
-    
+
     return 0;
 }
 
@@ -386,6 +422,9 @@ void mixer_ctl(unsigned int cmd, int dir, void * arg)
 {
     int * val=(int*)arg;
     int tmp;
+
+	API_CRITSEC_ENTER ((HCRITSEC)g_pCS_SOUND);
+
     switch(cmd)
     {
         case MIXER_VOLUME:
@@ -461,6 +500,8 @@ void mixer_ctl(unsigned int cmd, int dir, void * arg)
         default:
                 printk("[ctl MIX] bad ctl\n");
     }
+
+	API_CRITSEC_LEAVE ((HCRITSEC)g_pCS_SOUND);
 }
 
 
@@ -469,8 +510,13 @@ void mixer_ctl(unsigned int cmd, int dir, void * arg)
 void init_sound (void)
 {
     struct mas_version version;
-    
+
     printk("[init] Loading av3xx sound driver: ");
+
+	HCRITSEC hSec = 0;
+	API_CRITSEC_CREATE (&hSec);
+	g_pCS_SOUND = (CRITSEC_INFO*)hSec;
+
     mas_gio_init();
     printk("M");
     mas_reset();
@@ -513,7 +559,7 @@ void init_sound (void)
     
     while(1)
     {
-        cnt = mas_pio_write(mp3Buff + mp3ptr, 2000); 
+        cnt = mas_pio_write(mp3Buff + mp3ptr, 2000);
         printk("%d ",cnt); 
         //mp3ptr+=cnt;
         //if (mp3ptr>=65000){mp3ptr=0; printk("loop ");}

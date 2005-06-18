@@ -149,7 +149,9 @@ void hd_timer_fct(void)
     int num=getCurrentTimer();
     if(hd_timer_used[num] && !kusb_fw_status)
     {
-        ata_stop_HD();
+//        ata_stop_HD();
+		printk("exec_disk_cmd_from_irq\n");
+		exec_disk_cmd_from_irq (ATA_SLEEP);
     }
     if(kusb_fw_status)
         hd_launchTimer(); // we have enable the usb => keep the timer running
