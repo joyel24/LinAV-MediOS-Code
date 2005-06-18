@@ -253,7 +253,7 @@ __IRAM_CODE void kset_next_ready_task ()
 
 			case TASK_BLOCKED_BY_MEMMGR:
 				break;
-                        case TASK_BLOCKED_BY_ATA:
+			case TASK_BLOCKED_BY_ATA:
 				break;
 		}
 

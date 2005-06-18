@@ -30,13 +30,14 @@ __IRAM_DATA unsigned int uartAdrr[2]={
 __IRAM_CODE void uart_intr_action(int irq)
 {
     char c;
-    int uart=irq-IRQ_UART0;
-    
-    if(inw(uartAdrr[uart]+UART_SR)&0x0004)
+    int uart = irq - IRQ_UART0;
+
+//    if(inw(uartAdrr[uart]+UART_SR)&0x0004)
+    while(inw(uartAdrr[uart]+UART_SR)&0x0004)
     {
         c=(unsigned char)(inw(uartAdrr[uart]+UART_DTRR)&0xFF);
         kpipe_write (&UART_PIPES[uart], &c, 1);
-    }        
+    }
 }
 
 __IRAM_CODE int uartIn(unsigned char * data,int uartNum) 

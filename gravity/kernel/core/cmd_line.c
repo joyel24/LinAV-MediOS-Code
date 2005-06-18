@@ -102,7 +102,7 @@ __IRAM_CODE void cmd_line_task(PIPE * uart_pipe)
     int nb_args=0;
     struct cmd_line_s * cmd_line;
     unsigned  char * ptr;
-    
+
     while(1)
     {
 loop:
@@ -110,13 +110,13 @@ loop:
         while(1)
         {
             API_PIPE_RECV((HPIPE)uart_pipe,&c,1);
-            
+
             if(c=='\n' || c=='\r')               /* end of line => add \0 to end the line */
             {
                 cur_cmd[cur_pos++]='\0';
                 break;
             }
-            
+
             if(c>=0x20 && c<0xFF && c!=0x7F)
                 cur_cmd[cur_pos++]=c;               /* we have a char => add it in the cmd string */
             else
@@ -255,7 +255,7 @@ loop:
             /* Ready to get a new cmd */
             cur_cmd[0]='\0';
             cur_pos=0;
-        } 
+        }
     }
     printk("OUT OF CMDLINE LOOP\n");
 }

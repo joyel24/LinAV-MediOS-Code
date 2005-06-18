@@ -16,6 +16,8 @@
 #include <kernel/kdir.h>
 #include <kernel/irq.h>
 
+CRITSEC_INFO* g_pCS_FS = 0;
+
 int fs_swi(int cmd,void * data1, void * data2);
 
 __IRAM_CODE int swi_file_handler (
@@ -78,10 +80,22 @@ __IRAM_CODE int swi_file_handler (
 
 int fs_swi(int cmd,void * data1, void * data2)
 {
+
     COUPLE_DATA * data=((COUPLE_DATA *)data1);
     off_t * off;
     ssize_t * size;
+
+	if (!g_pCS_FS)
+	{
+		HCRITSEC hSec = 0;
+		API_CRITSEC_CREATE (&hSec);
+		g_pCS_FS = (CRITSEC_INFO*)hSec;
+	}
+
+	API_CRITSEC_ENTER ((HCRITSEC)g_pCS_FS);
+
     //printk("FS swi (%d)\n",cmd);
+
     switch(cmd) {
         case 0x000:            
             *(int*)data2=kfopen((const char*) data1, *(int*)data2);
@@ -92,7 +106,7 @@ int fs_swi(int cmd,void * data1, void * data2)
         case 0x002:
             *(int*)data2=kfsync((int)data1);
             break;
-        case 0x003:            
+        case 0x003:
             *(ssize_t *)data2=kfread((int)data->a,data->b,*(ssize_t *)data2);
             break;
         case 0x004:
@@ -141,6 +155,9 @@ int fs_swi(int cmd,void * data1, void * data2)
          default:
              printk("FS undefined swi (%d)\n",cmd);
     }
-    return 0;
+
+	API_CRITSEC_LEAVE ((HCRITSEC)g_pCS_FS);
+
+	return 0;
 }
 

@@ -29,6 +29,18 @@ __IRAM_DATA int clf_var=0;
 
 __IRAM_DATA struct irq_data_s irq_table[] = {
     {
+        irq     : IRQ_UART0,
+        action  : uart_intr_action,
+        name    : "UART0 intr",
+        nb_irq  : 0
+    },
+    {
+        irq     : IRQ_UART1,
+        action  : uart_intr_action,
+        name    : "UART1 intr",
+        nb_irq  : 0
+    },
+    {
         irq     : IRQ_MAS_DATA,
         action  : dsp_interrupt,
         name    : "MAS",
@@ -44,18 +56,6 @@ __IRAM_DATA struct irq_data_s irq_table[] = {
         irq     : IRQ_IDE,
         action  : ide_intr_action,
         name    : "IDE intr",
-        nb_irq  : 0
-    },
-    {
-        irq     : IRQ_UART0,
-        action  : uart_intr_action,
-        name    : "UART0 intr",
-        nb_irq  : 0
-    },
-    {
-        irq     : IRQ_UART1,
-        action  : uart_intr_action,
-        name    : "UART1 intr",
         nb_irq  : 0
     },
     {
@@ -113,18 +113,17 @@ __IRAM_CODE void do_IRQ(void)
     unsigned int mask;
     for(i=0;irq_table[i].irq!=-1;i++)
     {
-        irq=irq_table[i].irq;
-        mask=0x1 << INTC_IRQ_SHIFT(irq);
-        
+        irq = irq_table[i].irq;
+        mask = 0x1 << INTC_IRQ_SHIFT(irq);
+
         if(((~inw(INTC_IRQ_STATUS(irq))) & mask) && (inw(INTC_IRQ_ENABLE(irq)) & mask))
         {
             irq_table[i].nb_irq++;
             irq_ack(irq);
-            irq_table[i].action(irq); 
+            irq_table[i].action(irq);
+			break;
         }
     }
-    
-    
 }
 
 void init_irq(void)
