@@ -44,6 +44,7 @@
 #define ATA_DO_READ                       0
 #define ATA_DO_WRITE                      1
 #define ATA_DO_IDENT                      2
+#define ATA_SLEEP                         3
 
 #define ATA_WITH_DMA                             1
 #define ATA_NO_DMA                               0
