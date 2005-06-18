@@ -209,12 +209,22 @@ __IRAM_CODE int kata_manager (void* pvParameters)
             
             
             //printk("We have a ata cmd: mode:%d lba=0x%x count=%d buffer=%08x\n",cmd->xfer_dir,cmd->lba,cmd->count,cmd->data);
-            
-            ata_process_cmd(cmd);
-            
-            g_pAtaCtrlPipe->nReceiver = (g_pAtaCtrlPipe->nReceiver + sizeof(ata_cmd_s)) & PIPE_SIZE_MASK;
-            cmd->pSenderThread->nBlockingState = TASK_BLOCKED_BY_NONE;
-            cmd->pSenderThread->nBlockingValue = 0;
+
+			g_pAtaCtrlPipe->nReceiver = (g_pAtaCtrlPipe->nReceiver + sizeof(ata_cmd_s)) & PIPE_SIZE_MASK;
+
+			if (!cmd->pSenderThread)
+				printk("Executing command [%i] from non task...\n", cmd->xfer_dir);
+
+			__sti ();
+			ata_process_cmd(cmd);
+			__cli();
+
+			if (cmd->pSenderThread)
+			{
+				cmd->pSenderThread->nBlockingState = TASK_BLOCKED_BY_NONE;
+				cmd->pSenderThread->nBlockingValue = 0;
+			}
+
             /*}*/
         }
         API_TASK_YIELD ();
@@ -222,11 +232,11 @@ __IRAM_CODE int kata_manager (void* pvParameters)
     }
 }
 
-int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direction)
+int disk_RW_sector (int drive,unsigned int lba,int count,void * buffer,int direction)
 {
     __cli ();
     ata_cmd_s * cmd=(ata_cmd_s *)(g_pAtaCtrlPipe->buffer+g_pAtaCtrlPipe->nSender);
-       
+
     cmd->lba = lba;
     cmd->count = count;
     cmd->data = buffer;
@@ -234,11 +244,11 @@ int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direct
     cmd->use_dma = ATA_WITH_DMA;
     cmd->drive = drive;
     cmd->pSenderThread = g_pTaskRing;
-            
+
     g_pAtaCtrlPipe->nSender = (g_pAtaCtrlPipe->nSender + sizeof(ata_cmd_s)) & PIPE_SIZE_MASK;
 
     //printk("cmd send in pipe, about to block task\n");
-        
+
     g_pTaskRing->nBlockingState = TASK_BLOCKED_BY_ATA;
     g_pTaskRing->nBlockingValue = 0;
 
@@ -248,6 +258,23 @@ int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direct
     //res=ata_process_cmd(cmd);
     //kfree(cmd);
     return 0;
+}
+
+int exec_disk_cmd_from_irq (int command)
+{
+	ata_cmd_s * cmd = (ata_cmd_s *)(g_pAtaCtrlPipe->buffer+g_pAtaCtrlPipe->nSender);
+
+	cmd->lba   = 0;
+	cmd->count = 0;
+	cmd->data  = 0;
+	cmd->xfer_dir = command;
+	cmd->use_dma  = 0;
+	cmd->drive    = 0;
+	cmd->pSenderThread = 0;
+
+	g_pAtaCtrlPipe->nSender = (g_pAtaCtrlPipe->nSender + sizeof(ata_cmd_s)) & PIPE_SIZE_MASK;
+
+	return 1;
 }
 
 void printPartition_info(struct partition_info * partition_list)
