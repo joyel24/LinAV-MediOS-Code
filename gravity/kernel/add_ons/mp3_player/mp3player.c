@@ -134,3 +134,85 @@ printf("MP3 Before exit\n");
 
 
 #endif
+
+int g_hMP3File;
+
+int start_mp3_player (char *path)
+{
+	sound_buffer_s bufZ;
+	sound_buffer_s bufA;
+
+	int file_pos,file_size,file_eof;
+
+    g_hMP3File = fopen(path,O_RDONLY);
+    if(g_hMP3File<0)
+    {
+        printf("Error opening file %s\n",path);
+    }
+
+    file_pos=0;
+    file_size=filesize(g_hMP3File);
+    file_eof=0;
+	int nVolume = 0x57, i;
+
+    printf("about to play: %s, size=%d\n",path,file_size);
+
+	bufA.size = file_size;
+	bufA.loops_played = 0;
+	bufA.next_buffer = 0;
+	bufA.loop_counter = 0x7FFFFFFF;
+	bufA.bytes_played = 0;
+    bufA.data=(char*)malloc(file_size);
+    if(!bufA.data)
+    {
+        printf("Error, can't allocate buffer\n");
+        return 0;
+    }
+
+	fread (g_hMP3File, bufA.data, file_size);
+
+	bufZ.size = 8192;
+	bufZ.loop_counter = 1;
+	bufZ.loops_played = 0;
+	bufZ.bytes_played = 0;
+	bufZ.next_buffer = &bufA;
+	bufZ.data = (char*)malloc(8192);
+
+	for (i=0;i<8192;i++)
+		bufZ.data[i] = 0;
+
+//	printf("DSP_SETCURR_MP3_BUFFER...\n");
+	dsp_ctl (DSP_SETCURR_MP3_BUFFER, &bufZ);
+//	printf("DSP_INI_MP3...\n");
+	dsp_ctl (DSP_INI_MP3,0);
+//	printf("DSP_START_MP3...\n");
+	dsp_ctl (DSP_START_MP3,0);
+
+// 0x30 - 0x60 - LOUD!
+
+	mixer_ctl (MIXER_VOLUME, MAS_SET, &nVolume);
+
+	while (1)
+	{
+		API_TASK_SLEEP (1000);
+
+/*
+		__cli ();
+		for (i=0;i<8192;i++)
+			bufZ.data[i] = 0;
+		for (i=0;i<8192;i++)
+			bufZ.data[i] = 0;
+		for (i=0;i<8192;i++)
+			bufZ.data[i] = 0;
+		for (i=0;i<8192;i++)
+			bufZ.data[i] = 0;
+		__sti ();
+*/
+
+//		printf ("Set volume: 0x%x\n", nVolume);
+//		mixer_ctl (MIXER_VOLUME, MAS_SET, &nVolume);
+//		nVolume += 1;
+	}
+
+	return 1;
+}
