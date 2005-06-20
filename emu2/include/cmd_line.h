@@ -32,5 +32,7 @@ void cmd_line(void);
 void add_cmd_fct(char * name,int(*fct)(char*),char * help_str);
 void print_cmd_list(void);
 
+int my_atoi(char * string);
+
 #endif
 

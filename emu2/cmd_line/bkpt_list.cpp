@@ -34,18 +34,16 @@ void bkpt_list::add(uint32_t address)
     }
     else                                        /* let's find where to insert */
     {
+        ptr=head;
         while(ptr->nxt!=NULL && ptr->nxt->address<address)
             ptr=ptr->nxt;
-        
-        if(ptr->nxt==NULL)
-        {
-            ptr_new->nxt = ptr->nxt;
-            ptr->nxt = ptr_new;
-        }
-        
+                
+        ptr_new->nxt = ptr->nxt;
+        ptr->nxt = ptr_new;        
     }
     
     printf("adding bkpt for 0x%08x\n",address);
+    print_bkpt_list();
 }
 
 void bkpt_list::del(uint32_t address)
@@ -75,7 +73,7 @@ bool bkpt_list::has_bkpt(uint32_t address)
 {
     BKPT * ptr=head;
 
-    while(ptr && ptr->address >= address)
+    while(ptr && ptr->address <= address)
     {
         if(ptr->address == address)
         {

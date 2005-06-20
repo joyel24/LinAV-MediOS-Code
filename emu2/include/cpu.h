@@ -34,6 +34,8 @@ class Cpu {
         int do_cmd_step(char * arg);
         int do_cmd_run(char * arg);
         int do_cmd_add_bkpt(char * arg);
+        int do_cmd_print_stack(char * arg);
+        int do_cmd_print_state(char * arg);
         
     private:
         uint32_t ** current_reg;

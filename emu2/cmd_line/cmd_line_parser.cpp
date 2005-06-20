@@ -134,6 +134,53 @@ char * stripwhite (char * string)
   return s;
 }
 
+int my_atoi(char * string)
+{
+    bool is_hex = false;
+    string=stripwhite(string);
+    uint32_t val = 0;
+    int cnt=0;
+    
+    if(string[0] == '0' && (string[1] == 'x' || string[1] == 'X'))
+    {
+        string +=2;
+        is_hex=true;
+    }
+    
+    while(string)
+    {
+        if(string[cnt] > 0x2F && string[cnt] < 0x3A) /* we have a normal digit */
+        {
+            if(is_hex)
+            {
+                val = val << 4;
+                val |= (string[cnt]-0x30)&0xf;
+            }
+            else
+            {
+                val = val * 10;
+                val += string[cnt]-0x30;
+            }
+            cnt ++;
+        }
+        else if(is_hex && string[cnt] > 0x40 && string[cnt] < 0x47) /* A - F */
+        {
+            val = val << 4;
+            val |= (string[cnt]-0x37)&0xf;
+            cnt ++;
+        }
+        else if(is_hex && string[cnt] > 0x60 && string[cnt] < 0x67) /* A - F */
+        {
+            val = val << 4;
+            val |= (string[cnt]-0x57)&0xf;
+            cnt ++;
+        }
+        else
+            break;
+    }
+    return val;
+}
+
 char * command_generator __P((const char *text, int state))
 {
   static COMMAND *ptr;

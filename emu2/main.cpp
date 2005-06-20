@@ -74,14 +74,14 @@ int main(int argc, char* argv[])
         }
     }
     
-    if(sdram_file == NULL)
+    /*if(sdram_file == NULL)
     {
         usage(argv[0]);
-    }
+    }*/
     
     init_cmd_line();
     
-    //sdram_file = "CJBM_v2.depack";
+    sdram_file = "CJBM_v2.depack";
     
     mem = new mem_space(flash_file,sdram_file);
     

@@ -170,8 +170,7 @@ Cpu::Cpu(mem_space * mem)
     
     /* init bkpt_list */
     
-    bkpt= new bkpt_list();
-    bkpt->add(0x0304f054);
+    bkpt= new bkpt_list();    
     
     printf("Init of Cpu object      DONE\n");
     
@@ -197,7 +196,7 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
         if(bkpt->has_bkpt(address))
         {
             run_mode = STEP;
-            printState();
+            //printState();
             cmd_line();
         }
         else if(run_mode == STEP)
@@ -457,8 +456,8 @@ void Cpu::doARM(uint32_t instruction)
              printf("You should not be here\n");
              exit(0);
     }
-    if(run_mode==STEP)
-        printState();
+    /*if(run_mode==STEP)
+        printState();*/
 }
 
 void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
@@ -826,8 +825,8 @@ void Cpu::doThumb(uint32_t instruction)
                 }
             break;
     }
-    if(run_mode==STEP)   
-        printState();
+    /*if(run_mode==STEP)   
+        printState();*/
 }
 
 /* thumb data processing */

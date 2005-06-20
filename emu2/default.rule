@@ -13,5 +13,5 @@ clean-subdirs:
 
 .cpp.o:
 	@echo "[$@]"
-	@$(GPP) $(GPPFLAGS) -c -o $@ $<
+	@$(GPP) -ggdb3 $(GPPFLAGS) -c -o $@ $<
         
