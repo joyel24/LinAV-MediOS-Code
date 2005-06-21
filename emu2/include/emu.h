@@ -20,12 +20,13 @@
 
 extern int run_mode;
 extern int HW_mode;
+extern int disp_mode;
 
 #define DEBUG_MODE
 #define DEBUG_MODE_HW
 
 #ifdef DEBUG_MODE
-#define DEBUG(fmt, arg...) if(run_mode==STEP) printf(fmt,## arg);
+#define DEBUG(fmt, arg...) if(disp_mode==1 || run_mode==STEP) printf(fmt,## arg);
 #define MKDEBUG sprintf
 #else
 #define DEBUG(...)
@@ -33,7 +34,7 @@ extern int HW_mode;
 #endif
 
 #ifdef DEBUG_MODE_HW
-#define DEBUG_HW(fmt, arg...) if(HW_mode==1) printf(fmt,## arg);
+#define DEBUG_HW(fmt, arg...) if(HW_mode==1 || run_mode==STEP) printf(fmt,## arg);
 #else
 #define DEBUG_HW(...)
 #endif

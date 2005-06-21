@@ -106,7 +106,7 @@ int execute_line (char *line)
   //word = line + i;
   
   argc=parse_args(argv,line + i);
-  printf("Found cmd, %d args\n",argc);
+  //printf("Found cmd, %d args\n",argc);
 
   res=command->func(argc,argv);
   

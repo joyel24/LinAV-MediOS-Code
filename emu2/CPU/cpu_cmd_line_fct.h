@@ -88,6 +88,33 @@ int Cpu::do_cmd_print_stack(int argc,char ** argv)
     return 0;
 }
 
+int do_cmd_chg_disp_s(int argc,char ** argv) 
+{ 
+    return cur_cpu->do_cmd_chg_disp(argc,argv);
+}
+
+
+int Cpu::do_cmd_chg_disp(int argc,char ** argv)
+{
+    int i;
+    if(argc>0)
+    {
+        i = my_atoi(argv[0]);
+        if(i)
+            disp_mode=1;
+        else
+            disp_mode=0;
+    }
+    else
+    {
+        if(disp_mode)            
+            printf("displaying instruction\n");
+        else
+            printf("Not displaying instruction\n");
+    }
+    return 0;
+}
+
 int do_cmd_print_state_s(int argc,char ** argv) 
 { 
     return cur_cpu->do_cmd_print_state(argc,argv);
@@ -100,6 +127,7 @@ int Cpu::do_cmd_print_state(int argc,char ** argv)
     return 0;
 }
 
+
 void init_static_fct(Cpu * cpu)
 {
     cur_cpu = cpu;
@@ -110,12 +138,12 @@ void init_static_fct(Cpu * cpu)
     add_cmd_fct("exit",do_cmd_quit_s,"Exit");
     add_cmd_fct("step",do_cmd_step_s,"Execute next instruction");
     add_cmd_fct("run",do_cmd_run_s,"Execute code");
-    add_cmd_fct("bkpt",do_cmd_add_bkpt_s,"Add a breakpoint");
+    add_cmd_fct("bkpt",do_cmd_add_bkpt_s,"Add/display a breakpoint");
     add_cmd_fct("stack",do_cmd_print_stack_s,"Show stack");
     add_cmd_fct("sp",do_cmd_print_stack_s,"Show stack");
     add_cmd_fct("SP",do_cmd_print_stack_s,"Show stack");
     add_cmd_fct("state",do_cmd_print_state_s,"Show reg value");
     add_cmd_fct("reg",do_cmd_print_state_s,"Show reg value");
-    
+    add_cmd_fct("disp",do_cmd_chg_disp_s,"Change/display display mode");
     
 }
