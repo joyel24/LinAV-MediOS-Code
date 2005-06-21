@@ -43,7 +43,6 @@ void bkpt_list::add(uint32_t address)
     }
     
     printf("adding bkpt for 0x%08x\n",address);
-    print_bkpt_list();
 }
 
 void bkpt_list::del(uint32_t address)

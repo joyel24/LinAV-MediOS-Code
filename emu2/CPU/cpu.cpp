@@ -109,7 +109,7 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
                          } \
                      }
 
-int run_mode;
+int run_mode,HW_mode=0;
                                         
 char * cond_str[] = {"EQ","NE","CS","CC","MI","PL","VS","VC","HI","LS","GE","LT","GT","LE","  ","ERR"};
 

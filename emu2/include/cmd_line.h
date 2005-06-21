@@ -22,17 +22,20 @@ class Cpu;
 
 typedef struct cmd_line_elem {
   char *name;
-  int (*func)(char * arg);
+  int (*func)(int argc,char ** argv);
   char *doc;
   cmd_line_elem * nxt;
 } COMMAND;
 
 void init_cmd_line(void);
 void cmd_line(void);
-void add_cmd_fct(char * name,int(*fct)(char*),char * help_str);
+void add_cmd_fct(char * name,int(*fct)(int,char**),char * help_str);
 void print_cmd_list(void);
 
 int my_atoi(char * string);
+bool is_number(char * str);
+
+int parse_args(char ** argv, char * str);
 
 #endif
 

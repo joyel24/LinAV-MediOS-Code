@@ -29,13 +29,13 @@ class Cpu {
         void test_ini(void);
         
         /* cmd_line functions */
-        int do_cmd_help(char * arg);
-        int do_cmd_quit(char * arg);
-        int do_cmd_step(char * arg);
-        int do_cmd_run(char * arg);
-        int do_cmd_add_bkpt(char * arg);
-        int do_cmd_print_stack(char * arg);
-        int do_cmd_print_state(char * arg);
+        int do_cmd_help(int argc,char ** argv);
+        int do_cmd_quit(int argc,char ** argv);
+        int do_cmd_step(int argc,char ** argv);
+        int do_cmd_run(int argc,char ** argv);
+        int do_cmd_add_bkpt(int argc,char ** argv);
+        int do_cmd_print_stack(int argc,char ** argv);
+        int do_cmd_print_state(int argc,char ** argv);
         
     private:
         uint32_t ** current_reg;

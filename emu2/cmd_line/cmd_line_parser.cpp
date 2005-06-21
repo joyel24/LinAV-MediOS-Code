@@ -39,7 +39,7 @@ void init_cmd_line(void)
   head_cmd = NULL;
 }
 
-void add_cmd_fct(char * name,int(*fct)(char*),char * help_str)
+void add_cmd_fct(char * name,int(*fct)(int,char**),char * help_str)
 {
     if(name!=NULL)
     {
@@ -77,6 +77,9 @@ int execute_line (char *line)
   register int i;
   COMMAND *command;
   char *word;
+  int res;
+  char * argv[50];
+  int argc;
 
   i = 0;
   while (line[i] && whitespace (line[i]))
@@ -100,9 +103,14 @@ int execute_line (char *line)
   while (whitespace (line[i]))
     i++;
 
-  word = line + i;
+  //word = line + i;
+  
+  argc=parse_args(argv,line + i);
+  printf("Found cmd, %d args\n",argc);
 
-  return (command->func(word));
+  res=command->func(argc,argv);
+  
+  return res;
 }
 
 COMMAND * find_command (char *name)
@@ -134,6 +142,62 @@ char * stripwhite (char * string)
   return s;
 }
 
+int parse_args(char ** argv, char * str)
+{
+  int k=0;int i=0;
+  
+  while(1)
+  {
+    /* erase spaces at begin */
+    while(str[i] == ' ') i++;
+
+    if(str[i] == '\0') /* we have reached end of string */
+        break;
+    
+    /* we are at the start of a new arg */
+    argv[k] = str+i;
+    k++;
+
+    /* looking for the end of arg */
+    while(str[i] != '\0' && str[i] != ' ') i++;
+
+    if(str[i] == '\0') /* we have reached end of string */
+        break;
+
+    /* add end of string at end of arg */
+    str[i] = '\0';
+    i++;
+  }
+  return k;
+}
+
+bool is_number(char * str)
+{    
+    int cnt=0;
+    bool is_hex = false;
+    bool res=true;
+    if(str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
+    {
+        str +=2;
+        is_hex=true;
+    }
+    
+    while(str[cnt])
+    {
+        if(str[cnt] > 0x2F && str[cnt] < 0x3A)
+            cnt++;
+        else if(is_hex && str[cnt] > 0x40 && str[cnt] < 0x47)
+            cnt++;
+        else if(is_hex && str[cnt] > 0x60 && str[cnt] < 0x67)
+            cnt++;
+        else
+        {
+            res=false;
+            break;
+        }
+    }
+}
+
 int my_atoi(char * string)
 {
     bool is_hex = false;
@@ -147,7 +211,7 @@ int my_atoi(char * string)
         is_hex=true;
     }
     
-    while(string)
+    while(1)
     {
         if(string[cnt] > 0x2F && string[cnt] < 0x3A) /* we have a normal digit */
         {

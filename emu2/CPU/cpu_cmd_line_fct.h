@@ -1,10 +1,10 @@
 
-int do_cmd_help_s(char * arg) 
+int do_cmd_help_s(int argc,char ** argv)
 { 
-    return cur_cpu->do_cmd_help(arg);
+    return cur_cpu->do_cmd_help(argc,argv);
 }
 
-int Cpu::do_cmd_help(char * arg)
+int Cpu::do_cmd_help(int argc,char ** argv)
 {
     printf("Av3XX emulator by OxyGen\n");
     /* print all cmd */
@@ -12,13 +12,13 @@ int Cpu::do_cmd_help(char * arg)
     return 0;
 }
 
-int do_cmd_quit_s(char * arg) 
+int do_cmd_quit_s(int argc,char ** argv)
 { 
-    return cur_cpu->do_cmd_quit(arg);
+    return cur_cpu->do_cmd_quit(argc,argv);
 }
 
 
-int Cpu::do_cmd_quit(char * arg)
+int Cpu::do_cmd_quit(int argc,char ** argv)
 {
 #warning we can do a better stop
     printf("Bye\n\n");
@@ -26,51 +26,56 @@ int Cpu::do_cmd_quit(char * arg)
     return 0;
 }
 
-int do_cmd_step_s(char * arg) 
+int do_cmd_step_s(int argc,char ** argv) 
 { 
-    return cur_cpu->do_cmd_step(arg);
+    return cur_cpu->do_cmd_step(argc,argv);
 }
 
 
-int Cpu::do_cmd_step(char * arg)
+int Cpu::do_cmd_step(int argc,char ** argv)
 {
     return 1;
 }
 
-int do_cmd_run_s(char * arg) 
+int do_cmd_run_s(int argc,char ** argv) 
 { 
-    return cur_cpu->do_cmd_run(arg);
+    return cur_cpu->do_cmd_run(argc,argv);
 }
 
 
-int Cpu::do_cmd_run(char * arg)
+int Cpu::do_cmd_run(int argc,char ** argv)
 {
     run_mode=RUN;
     return 1;
 }
 
-int do_cmd_add_bkpt_s(char * arg) 
+int do_cmd_add_bkpt_s(int argc,char ** argv) 
 { 
-    return cur_cpu->do_cmd_add_bkpt(arg);
+    return cur_cpu->do_cmd_add_bkpt(argc,argv);
 }
 
 
-int Cpu::do_cmd_add_bkpt(char * arg)
+int Cpu::do_cmd_add_bkpt(int argc,char ** argv)
 {
     /*get first arg*/
-    
-    int i = my_atoi(arg);
-    bkpt->add(i);
+    uint32_t i=0;
+    if(argc>0)
+    {
+        i = my_atoi(argv[0]);          
+        bkpt->add(i);
+    }
+    else
+        bkpt->print_bkpt_list();
     return 0;
 }
 
-int do_cmd_print_stack_s(char * arg) 
+int do_cmd_print_stack_s(int argc,char ** argv) 
 { 
-    return cur_cpu->do_cmd_print_stack(arg);
+    return cur_cpu->do_cmd_print_stack(argc,argv);
 }
 
 
-int Cpu::do_cmd_print_stack(char * arg)
+int Cpu::do_cmd_print_stack(int argc,char ** argv)
 {
     uint32_t SP_val = GET_REG(R_SP);
     printf("Stack content:\n");
@@ -83,13 +88,13 @@ int Cpu::do_cmd_print_stack(char * arg)
     return 0;
 }
 
-int do_cmd_print_state_s(char * arg) 
+int do_cmd_print_state_s(int argc,char ** argv) 
 { 
-    return cur_cpu->do_cmd_print_state(arg);
+    return cur_cpu->do_cmd_print_state(argc,argv);
 }
 
 
-int Cpu::do_cmd_print_state(char * arg)
+int Cpu::do_cmd_print_state(int argc,char ** argv)
 {
     printState();    
     return 0;
