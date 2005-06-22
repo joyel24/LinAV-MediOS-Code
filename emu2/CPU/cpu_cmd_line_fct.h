@@ -93,7 +93,6 @@ int do_cmd_chg_disp_s(int argc,char ** argv)
     return cur_cpu->do_cmd_chg_disp(argc,argv);
 }
 
-
 int Cpu::do_cmd_chg_disp(int argc,char ** argv)
 {
     int i;
@@ -111,6 +110,32 @@ int Cpu::do_cmd_chg_disp(int argc,char ** argv)
             printf("displaying instruction\n");
         else
             printf("Not displaying instruction\n");
+    }
+    return 0;
+}
+
+int do_cmd_chg_hw_disp_s(int argc,char ** argv) 
+{ 
+    return cur_cpu->do_cmd_chg_hw_disp(argc,argv);
+}
+
+int Cpu::do_cmd_chg_hw_disp(int argc,char ** argv)
+{
+    int i;
+    if(argc>0)
+    {
+        i = my_atoi(argv[0]);
+        if(i)
+            HW_mode=1;
+        else
+            HW_mode=0;
+    }
+    else
+    {
+        if(HW_mode)            
+            printf("displaying HW output\n");
+        else
+            printf("Not displaying HW output\n");
     }
     return 0;
 }
@@ -145,5 +170,5 @@ void init_static_fct(Cpu * cpu)
     add_cmd_fct("state",do_cmd_print_state_s,"Show reg value");
     add_cmd_fct("reg",do_cmd_print_state_s,"Show reg value");
     add_cmd_fct("disp",do_cmd_chg_disp_s,"Change/display display mode");
-    
+    add_cmd_fct("hw",do_cmd_chg_hw_disp_s,"Change/display HW display mode");
 }

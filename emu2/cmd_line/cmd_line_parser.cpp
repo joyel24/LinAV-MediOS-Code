@@ -72,6 +72,16 @@ char * dupstr (char * s)
   return (r);
 }
 
+void toLower(char * str)
+{
+    while(*str)
+    {
+        if(*str >= 'A' && *str <= 'Z')
+            *str = *str + ('a'-'A');
+        str++;
+    }
+}
+
 int execute_line (char *line)
 {
   register int i;
@@ -92,6 +102,7 @@ int execute_line (char *line)
   if (line[i])
     line[i++] = '\0';
 
+  toLower(word);
   command = find_command (word);
 
   if (!command)
@@ -184,11 +195,11 @@ bool is_number(char * str)
     
     while(str[cnt])
     {
-        if(str[cnt] > 0x2F && str[cnt] < 0x3A)
+        if(str[cnt] >= '0' && str[cnt] <= '9')
             cnt++;
-        else if(is_hex && str[cnt] > 0x40 && str[cnt] < 0x47)
+        else if(is_hex && str[cnt] >= 'A' && str[cnt] <= 'F')
             cnt++;
-        else if(is_hex && str[cnt] > 0x60 && str[cnt] < 0x67)
+        else if(is_hex && str[cnt] >= 'a' && str[cnt] <= 'f')
             cnt++;
         else
         {
@@ -213,30 +224,30 @@ int my_atoi(char * string)
     
     while(1)
     {
-        if(string[cnt] > 0x2F && string[cnt] < 0x3A) /* we have a normal digit */
+        if(string[cnt] >= '0' && string[cnt] <= '9') /* we have a normal digit */
         {
             if(is_hex)
             {
                 val = val << 4;
-                val |= (string[cnt]-0x30)&0xf;
+                val |= (string[cnt]-'0')&0xf;
             }
             else
             {
                 val = val * 10;
-                val += string[cnt]-0x30;
+                val += string[cnt]-'0';
             }
             cnt ++;
         }
-        else if(is_hex && string[cnt] > 0x40 && string[cnt] < 0x47) /* A - F */
+        else if(is_hex && string[cnt] >= 'A' && string[cnt] <= 'F') /* A - F */
         {
             val = val << 4;
-            val |= (string[cnt]-0x37)&0xf;
+            val |= (string[cnt]-'A'+0xa)&0xf;
             cnt ++;
         }
-        else if(is_hex && string[cnt] > 0x60 && string[cnt] < 0x67) /* A - F */
+        else if(is_hex && string[cnt] >= 'a' && string[cnt] <= 'f') /* a - f */
         {
             val = val << 4;
-            val |= (string[cnt]-0x57)&0xf;
+            val |= (string[cnt]-'a'+0xa)&0xf;
             cnt ++;
         }
         else

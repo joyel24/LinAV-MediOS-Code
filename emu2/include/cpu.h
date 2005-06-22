@@ -37,6 +37,7 @@ class Cpu {
         int do_cmd_print_stack(int argc,char ** argv);
         int do_cmd_print_state(int argc,char ** argv);
         int do_cmd_chg_disp(int argc,char ** argv);
+        int do_cmd_chg_hw_disp(int argc,char ** argv);
         
     private:
         uint32_t ** current_reg;
