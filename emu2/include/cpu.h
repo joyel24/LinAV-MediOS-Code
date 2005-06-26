@@ -28,6 +28,8 @@ class Cpu {
         void printState(void);
         void test_ini(void);
         
+        void sigint(void);
+        
         /* cmd_line functions */
         int do_cmd_help(int argc,char ** argv);
         int do_cmd_quit(int argc,char ** argv);

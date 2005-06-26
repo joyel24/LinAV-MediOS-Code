@@ -31,6 +31,7 @@ class i2c_gpio : gpio_port {
         
         void init_i2c_gpio(int num,i2c_master * master);
         void i2c_gpio_force_state(int state);
+        void i2c_gpio_set_state(int state);
         
         int new_state;
         int old_state;

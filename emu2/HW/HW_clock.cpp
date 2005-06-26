@@ -14,14 +14,14 @@
 
 #include <HW_clock.h>
 
-HW_clock::HW_clock(void):HW_access(0x30880,0x3088C,"CLOCK")
+HW_clock::HW_clock(void):HW_access(0x30880,0x30890,"CLOCK")
 {
     
 }
 
 uint32_t HW_clock::read(uint32_t addr,int size)
 {
-    DEBUG_HW("%s read @0x%08x, size %x\n",name,addr,size);
+    DEBUG_HW(CLOCK_HW_DEBUG,"%s read @0x%08x, size %x\n",name,addr,size);
     switch(addr)
     {
         case 0x30880:
@@ -39,5 +39,5 @@ uint32_t HW_clock::read(uint32_t addr,int size)
 
 void HW_clock::write(uint32_t addr,uint32_t val,int size)
 {
-    DEBUG_HW("%s write %x @0x%08x, size %x\n",name,val,addr,size);
+    DEBUG_HW(CLOCK_HW_DEBUG,"%s write %x @0x%08x, size %x\n",name,val,addr,size);
 }

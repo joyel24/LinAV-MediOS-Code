@@ -91,8 +91,8 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
             N_FLAG?"N":" ",Z_FLAG?"Z":" ",C_FLAG?"C":" ",V_FLAG?"V":" ",Q_FLAG?"Q":" ");}
             
 #ifdef DEBUG_MODE
-#define DEBUG_HEAD         if(run_mode==STEP) INT_DEBUG_HEAD
-#define DEBUG_HEAD_THUMB   if(run_mode==STEP) INT_DEBUG_HEAD_THUMB
+#define DEBUG_HEAD         if(run_mode==STEP || disp_mode==1) INT_DEBUG_HEAD
+#define DEBUG_HEAD_THUMB   if(run_mode==STEP || disp_mode==1) INT_DEBUG_HEAD_THUMB
 #else
 #define DEBUG_HEAD
 #define DEBUG_HEAD_THUMB
@@ -178,6 +178,11 @@ Cpu::Cpu(mem_space * mem)
     
 }
 
+void Cpu::sigint(void)
+{
+    run_mode = STEP;
+}
+
 #include "cpu_cmd_line_fct.h"
 
 void Cpu::go(uint32_t start_address,uint32_t stack_address)
@@ -191,7 +196,8 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
     
     //for(int i=0;i<0x20;i++)
     while(1)
-    {        
+    {       
+       
     
         address = T_FLAG ? PC_REAL&0xfffffffe : (PC_REAL+2)&0xfffffffc;
         
@@ -517,8 +523,8 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
                     REG(R_CPSR) = (GET_REG(R_CPSR) & ~0x000000FF) | (opVal & 0x000000FF);
                     R_CPSR_CUR=GET_REG(R_CPSR);
                     DEBUG(" => %08x\n",GET_REG(R_CPSR));
-                    DEBUG_HW("%s",((R_CPSR_SAV&0x80) == (R_CPSR_CUR&0x80)) ? "" : (R_CPSR_CUR&0x80)?"DISABLE IRQ\n":"ENABLE IRQ\n");
-                    DEBUG_HW("%s",((R_CPSR_SAV&0x40) == (R_CPSR_CUR&0x40)) ? "" : (R_CPSR_CUR&0x40)?"DISABLE FIQ\n":"ENABLE FIQ\n");
+                    DEBUG_HW(CPU_DEBUG,"%s",((R_CPSR_SAV&0x80) == (R_CPSR_CUR&0x80)) ? "" : (R_CPSR_CUR&0x80)?"DISABLE IRQ\n":"ENABLE IRQ\n");
+                    DEBUG_HW(CPU_DEBUG,"%s",((R_CPSR_SAV&0x40) == (R_CPSR_CUR&0x40)) ? "" : (R_CPSR_CUR&0x40)?"DISABLE FIQ\n":"ENABLE FIQ\n");
                 }
                 else
                 {

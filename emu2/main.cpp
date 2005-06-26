@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <signal.h>
+
 #include <emu.h>
 #include <mem_space.h>
 #include <cpu.h>
@@ -30,6 +32,13 @@ void usage(char * name)
 }
 
 void cmd_line(void);
+
+void signal_handler( int num ) {
+   if(num == SIGINT)
+   {
+       cpu->sigint();
+   }   
+}
 
 int main(int argc, char* argv[])
 {
@@ -86,6 +95,8 @@ int main(int argc, char* argv[])
     mem = new mem_space(flash_file,sdram_file);
     
     cpu = new Cpu(mem);
+    
+    signal(SIGINT,&signal_handler);
     
     cpu->go(0x03000000,0x000080000-0x4);
     

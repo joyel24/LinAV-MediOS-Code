@@ -21,11 +21,11 @@ HW_null::HW_null(uint32_t start,uint32_t end,char * name):HW_access(start,end,na
 
 uint32_t HW_null::read(uint32_t addr,int size)
 {
-    DEBUG_HW("%s read @0x%08x, size %x\n",name,addr,size);
+    DEBUG_HW(NULL_HW_DEBUG,"%s read @0x%08x, size %x\n",name,addr,size);
     return 0;
 }
 
 void HW_null::write(uint32_t addr,uint32_t val,int size)
 {
-    DEBUG_HW("%s write %x @0x%08x, size %x\n",name,val,addr,size);
+    DEBUG_HW(NULL_HW_DEBUG,"%s write %x @0x%08x, size %x\n",name,val,addr,size);
 }

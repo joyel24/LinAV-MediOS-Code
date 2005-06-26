@@ -46,7 +46,7 @@ i2c_gpio::i2c_gpio(int num,char * name,i2c_master * master):gpio_port(num)
 
 void i2c_gpio::init_i2c_gpio(int num,i2c_master * master)
 {
-    DEBUG_HW("Creating I2C master %s (%x)\n",master_str[num-0x12],num);
+    printf("Creating I2C master %s (%x)\n",master_str[num-0x12],num);
     this->name = master_str[num-0x12];
     new_state = old_state = state = 0;
     this->master=master;
@@ -54,45 +54,51 @@ void i2c_gpio::init_i2c_gpio(int num,i2c_master * master)
 
 bool i2c_gpio::is_set(void)
 {
-    //DEBUG_HW("GPIO%x reading state: %s\n",gpio_num,state?"SET":"CLR");
+    //DEBUG_HW(I2C1_HW_DEBUG,"GPIO%x reading state: %s\n",gpio_num,state?"SET":"CLR");
     return state;
 }
 
 void i2c_gpio::set_gpio(void)
 {
-    old_state = state;
+    /*old_state = state;
     new_state = state = 1;
-    DEBUG_HW("I2C %s HI\n",name);
+    DEBUG_HW(I2C1_HW_DEBUG,"I2C %s HI (old = %s)\n",name,state?"HI":"LO");
     master->i2c_state_has_changed();
-    old_state = new_state;
+    old_state = new_state;*/
 }
 
 void i2c_gpio::clear_gpio(void)
 {
-    old_state = state;
+    /*old_state = state;
     new_state = state = 0;
-    DEBUG_HW("I2C %s LO\n",name);
+    DEBUG_HW(I2C1_HW_DEBUG,"I2C %s LO (old = %s)\n",name,state?"HI":"LO");
     master->i2c_state_has_changed();
-    old_state = new_state;
+    old_state = new_state;*/
 }
 
 void i2c_gpio::gpio_dir_chg(int dir)
 {
-    DEBUG_HW("I2C GPIO Chg dir of %s to %s\n",name,dir?"input":"output");
-    if(dir)
+    /*DEBUG_HW(I2C1_HW_DEBUG,"I2C GPIO Chg dir of %s to %s (cur state: %s\n",name,dir?"input":"output",state?"HI":"LO");
+    if(dir && !state)
     {
-        DEBUG_HW("I2C %s HI\n",name);
+        DEBUG_HW(I2C1_HW_DEBUG,"I2C %s HI (old = %s)\n",name,state?"HI":"LO");
         old_state = state;
         new_state = state = 1;
         master->i2c_state_has_changed();
         old_state = new_state;
-    }
+    }*/
+    master->i2c_state_has_changed();
 }
 
 void i2c_gpio::i2c_gpio_force_state(int state)
 {
     this->state=state;
     old_state = new_state = state;
+}
+
+void i2c_gpio::i2c_gpio_set_state(int state)
+{
+    this->state=state;
 }
 
 i2c_master::i2c_master(HW_gpio * gpio)
@@ -142,9 +148,19 @@ i2c_device * i2c_master::find_device(int address)
 
 void i2c_master::i2c_state_has_changed(void)
 {
+    CL_OLD_HI = CL_HI;
+    DA_OLD_HI = DA_HI;
+    
+    CL_HI = (gpio->DIR_1 & 0x4)==0x4;
+    DA_HI = (gpio->DIR_1 & 0x8)==0x8;
+    
+    clk->i2c_gpio_set_state(CL_HI);
+    data->i2c_gpio_set_state(DA_HI);
+
+
     if(CL_OLD_HI && CL_HI && DA_OLD_HI && !DA_HI)
     {
-        DEBUG_HW("I2C - START\n");
+        DEBUG_HW(I2C2_HW_DEBUG,"I2C - START\n");
         active = true;
         do_ack = false;
         wait_ack = false;
@@ -159,7 +175,7 @@ void i2c_master::i2c_state_has_changed(void)
     {
         /*if(!wait_ack)
         {*/
-        DEBUG_HW("I2C - STOP\n");
+        DEBUG_HW(I2C2_HW_DEBUG,"I2C - STOP\n");
         active = false;
         if(cur_device)
             cur_device->stop();
@@ -180,7 +196,7 @@ void i2c_master::i2c_state_has_changed(void)
         //wait_ack = false;
         if(do_ack)
         {
-            DEBUG_HW("I2C - send ACK\n");
+            DEBUG_HW(I2C2_HW_DEBUG,"I2C - send ACK\n");
             data->i2c_gpio_force_state(0x0);
             do_ack = false;
         }
@@ -188,12 +204,12 @@ void i2c_master::i2c_state_has_changed(void)
         {
             if(DA_HI)
             {
-                DEBUG_HW("I2C - get NACK\n");
+                DEBUG_HW(I2C2_HW_DEBUG,"I2C - get NACK\n");
                 active = false;
             }
             else
             {
-                DEBUG_HW("I2C - get ACK\n");
+                DEBUG_HW(I2C2_HW_DEBUG,"I2C - get ACK\n");
             }
             wait_ack = false;
         }
@@ -215,16 +231,16 @@ void i2c_master::i2c_state_has_changed(void)
                     
                     if(clock==8)
                     {
-                        DEBUG_HW("I2C - addr = 0x%02x | %s",address,(address&0x1)?"READ":"WRITE");
+                        DEBUG_HW(I2C2_HW_DEBUG,"I2C - addr = 0x%02x | %s",address,(address&0x1)?"READ":"WRITE");
                         //exit(0);
                         cur_device = find_device(address);
                         if(cur_device)
                         {
-                            DEBUG_HW(" found %s\n",cur_device->name);
+                            DEBUG_HW(I2C2_HW_DEBUG," found %s\n",cur_device->name);
                             cur_device->start(address&0x1);
                         }
                         else
-                            DEBUG_HW(" no devcice found\n",cur_device->name);
+                            DEBUG_HW(I2C2_HW_DEBUG," no devcice found\n",cur_device->name);
                         clock = 0;
                         step = GET_DATA;
                         sav_val = val = 0;
@@ -243,9 +259,9 @@ void i2c_master::i2c_state_has_changed(void)
                                 sav_val = val = 0;
                         }
                         
-                        data->i2c_gpio_force_state(val&0x1);
-                        
-                        val = val >> 1;
+                        data->i2c_gpio_force_state(((val >> (7-clock))&0x1));
+                        //DEBUG_HW(I2C2_HW_DEBUG,"sending %x clk:%d|%d val=%x\n",val,clock,7-clock,((val >> (7-clock) )&0x1));
+                        //val = val >> 1;
                         clock++;
                         //wait_ack = true;
                     }
@@ -260,11 +276,11 @@ void i2c_master::i2c_state_has_changed(void)
                         if(address&0x1)
                         {
                             wait_ack = true;                            
-                            DEBUG_HW("I2C - READ %x ... done\n",sav_val);
+                            DEBUG_HW(I2C2_HW_DEBUG,"I2C - READ %x ... done\n",sav_val);
                         }
                         else
                         {
-                            DEBUG_HW("I2C - WRITE %x ... done\n",val);
+                            DEBUG_HW(I2C2_HW_DEBUG,"I2C - WRITE %x ... done\n",val);
                             do_ack = true;
                             if(cur_device)
                                cur_device->write(val);
@@ -280,7 +296,7 @@ void i2c_master::i2c_state_has_changed(void)
     /*if(!CL_HI && CL_OLD_HI)
     {
         wait_ack = false;
-        DEBUG_HW("I2C - WaitAck done\n");
+        DEBUG_HW(I2C2_HW_DEBUG,"I2C - WaitAck done\n");
     }*/
     
 }

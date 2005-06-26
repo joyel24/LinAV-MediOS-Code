@@ -86,9 +86,17 @@ bool bkpt_list::has_bkpt(uint32_t address)
 
 void bkpt_list::print_bkpt_list(void)
 {
-    printf("Breakpoint list:\n");
-    for(BKPT * ptr=head;ptr!=NULL;ptr=ptr->nxt)
+    printf("Breakpoint list");
+    if(head)
     {
-        printf("0x%08x\n",ptr->address);
+        printf(":\n");
+        for(BKPT * ptr=head;ptr!=NULL;ptr=ptr->nxt)
+        {
+            printf("0x%08x\n",ptr->address);
+        }
+    }
+    else
+    {
+        printf(" empty\n");
     }
 }

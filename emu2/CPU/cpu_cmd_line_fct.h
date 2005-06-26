@@ -59,10 +59,19 @@ int Cpu::do_cmd_add_bkpt(int argc,char ** argv)
 {
     /*get first arg*/
     uint32_t i=0;
+    bool do_del = false;
     if(argc>0)
     {
-        i = my_atoi(argv[0]);          
-        bkpt->add(i);
+        if(argv[0][0] == '-')
+        {
+            do_del=true;
+            argv[0]++;
+        }
+        i = my_atoi(argv[0]);
+        if(do_del)
+            bkpt->del(i);
+        else
+            bkpt->add(i);
     }
     else
         bkpt->print_bkpt_list();
@@ -125,15 +134,12 @@ int Cpu::do_cmd_chg_hw_disp(int argc,char ** argv)
     if(argc>0)
     {
         i = my_atoi(argv[0]);
-        if(i)
-            HW_mode=1;
-        else
-            HW_mode=0;
+        HW_mode=i;
     }
     else
     {
         if(HW_mode)            
-            printf("displaying HW output\n");
+            printf("displaying HW output level: %x\n",HW_mode);
         else
             printf("Not displaying HW output\n");
     }

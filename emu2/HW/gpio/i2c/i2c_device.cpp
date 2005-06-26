@@ -27,20 +27,20 @@ i2c_device::i2c_device(int address,char * name)
 
 int i2c_device::read(void)
 {
-    DEBUG_HW("WARN general I2C read\n");
+    printf("WARN general I2C read\n");
 }
 
 void i2c_device::write(int val)
 {
-    DEBUG_HW("WARN general I2C write\n");
+    printf("WARN general I2C write\n");
 }
         
 void i2c_device::start(int direction)
 {
-    DEBUG_HW("WARN general I2C start\n");
+    printf("WARN general I2C start\n");
 }
 
 void i2c_device::stop(void)
 {
-    DEBUG_HW("WARN general I2C stop\n");
+    printf("WARN general I2C stop\n");
 }

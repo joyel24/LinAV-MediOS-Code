@@ -39,7 +39,7 @@ int i2c_TSC::read(void)
         case 1:
             if(M)
             {
-                DEBUG_HW("I2C - TSC - ERROR : we are in 8 bit mode\n");
+                DEBUG_HW(TSC_HW_DEBUG,"I2C - TSC - ERROR : we are in 8 bit mode\n");
                 val = 0;
             }
             else
@@ -47,7 +47,7 @@ int i2c_TSC::read(void)
             step++;
             break;
         default:
-            DEBUG_HW("I2C - TSC - ERROR : should not be here: address = %d\n",step);
+            DEBUG_HW(TSC_HW_DEBUG,"I2C - TSC - ERROR : should not be here: address = %d\n",step);
             val = 0;
             break;
     }
@@ -63,12 +63,12 @@ void i2c_TSC::write(int val)
         cmd = (val>>4)&0xF;
         param = (val>>2)&0x3;
         M=(val>>1)&0x1;
-        DEBUG_HW("I2C - TSC - get cmd %s(%x), param: %x, mode: %x\n",tsc_str[cmd],cmd,param,M);
+        DEBUG_HW(TSC_HW_DEBUG,"I2C - TSC - get cmd %s(%x), param: %x, mode: %x\n",tsc_str[cmd],cmd,param,M);
         step = 0;
     }
     else
     {
-        DEBUG_HW("I2C - TSC - Should not be here\n");
+        DEBUG_HW(TSC_HW_DEBUG,"I2C - TSC - Should not be here\n");
     }
 }
         

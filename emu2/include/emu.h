@@ -22,6 +22,20 @@ extern int run_mode;
 extern int HW_mode;
 extern int disp_mode;
 
+#define CPU_DEBUG       (0x1)
+#define NULL_HW_DEBUG   (0x1<< 1)
+#define CLOCK_HW_DEBUG  (0x1<< 2)
+#define UART_HW_DEBUG   (0x1<< 3)
+#define RTC_HW_DEBUG    (0x1<< 4)
+#define TSC_HW_DEBUG    (0x1<< 5)
+#define I2C1_HW_DEBUG   (0x1<< 6)
+#define I2C2_HW_DEBUG   (0x1<< 7)
+#define TMR_HW_DEBUG    (0x1<< 8)
+#define GPIO_HW_DEBUG   (0x1<< 9)
+#define MEM_HW_DEBUG    (0x1<< 10)
+#define MAS_HW_DEBUG    (0x1<< 11)
+#define CPLD_HW_DEBUG   (0x1<< 12)
+
 #define DEBUG_MODE
 #define DEBUG_MODE_HW
 
@@ -34,7 +48,7 @@ extern int disp_mode;
 #endif
 
 #ifdef DEBUG_MODE_HW
-#define DEBUG_HW(fmt, arg...) if(HW_mode==1 || run_mode==STEP) printf(fmt,## arg);
+#define DEBUG_HW(level,fmt, arg...) if(HW_mode&level || run_mode==STEP) printf(fmt,## arg);
 #else
 #define DEBUG_HW(...)
 #endif

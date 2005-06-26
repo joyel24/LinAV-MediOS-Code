@@ -34,7 +34,12 @@ class i2c_RTC:i2c_device {
         bool has_address;
         int index;
         
-        int rtc_reg[0x14];
+        void readTime(void);
+        
+        int int2bcd(int v);
+        int bcd2int(int v);
+        
+        int rtc_reg[0x42];
 };
 
 #endif /* __I2C_RTC_H */

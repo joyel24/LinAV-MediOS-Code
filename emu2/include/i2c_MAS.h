@@ -14,6 +14,7 @@
 #define __I2C_MAS_H
 
 #include <emu.h>
+#include <HW_mem.h>
 #include <i2c_device.h>
 
 class i2c_MAS:i2c_device {
@@ -30,6 +31,22 @@ class i2c_MAS:i2c_device {
         
         int address;
         char * name;
+        
+    private:
+        int index;
+        int cmd;
+        int reg_addr;
+        int xfer_size;
+        int xfer_addr;
+        
+        int mas_data;
+        
+        int control_reg,DCCF_reg,DCFR_reg;
+        
+        int codec_reg[0x30];
+              
+        HW_mem * D0_ram;
+        HW_mem * D1_ram;
         
 };
 
