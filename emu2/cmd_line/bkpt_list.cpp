@@ -18,23 +18,44 @@
 
 bkpt_list::bkpt_list(void)
 {
-    head=NULL;
+    head[0]=NULL;
+    head[1]=NULL;
+    
+    bkpt_str[0] = "CPU";
+    bkpt_str[1] = "MEM";
 }
 
-void bkpt_list::add(uint32_t address)
+void bkpt_list::add(uint32_t address,int type,char * cause)
+{
+    add(address,0,type,cause);
+}
+
+void bkpt_list::add(uint32_t address,int type)
+{
+    add(address,0,type,NULL);
+}
+
+void bkpt_list::add(uint32_t address,uint32_t size,int type)
+{
+    add(address,size,type,NULL);
+}
+
+void bkpt_list::add(uint32_t address,uint32_t size,int type,char * cause)
 {
     BKPT * ptr;
     BKPT * ptr_new = new BKPT();
     ptr_new->address = address;
+    ptr_new->size = size;
+    ptr_new->cause = cause;
     
-    if(head == NULL || head->address > address) /* list empty or address < => insert at the beg*/
+    if(head[type] == NULL || head[type]->address > address) /* list empty or address < => insert at the beg*/
     {
         ptr_new->nxt = NULL;
-        head = ptr_new;
+        head[type] = ptr_new;
     }
     else                                        /* let's find where to insert */
     {
-        ptr=head;
+        ptr=head[type];
         while(ptr->nxt!=NULL && ptr->nxt->address<address)
             ptr=ptr->nxt;
                 
@@ -42,41 +63,46 @@ void bkpt_list::add(uint32_t address)
         ptr->nxt = ptr_new;        
     }
     
-    printf("adding bkpt for 0x%08x\n",address);
+    printf("adding %s bkpt for 0x%08x %s%s%s\n",bkpt_str[type],address,cause!=NULL?"(":"",cause!=NULL?cause:"",cause!=NULL?")":"");
 }
 
-void bkpt_list::del(uint32_t address)
+void bkpt_list::del(uint32_t address,int type)
 {
-    BKPT * ptr=head;
+    BKPT * ptr=head[type];
     
-    if(head->address == address)
+    if(head[type]->address == address)
     {
-        head=head->nxt;
-        printf("Removed bkpt for 0x%08x\n",address);
+        head[type]=head[type]->nxt;
+        printf("Removed %s bkpt for 0x%08x %s%s%s\n",
+            bkpt_str[type],address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",ptr->cause!=NULL?")":"");
+        delete ptr;
         return;
     }
     
     while(ptr->nxt && ptr->nxt->address != address)
         ptr=ptr->nxt;
     if(!ptr->nxt)
-        printf("Didn't find bkpt for 0x%08x\n",address);
+        printf("Didn't find %s bkpt for 0x%08x\n",bkpt_str[type],address);
     else
     {
         BKPT * ptr2=ptr->nxt;
-        ptr->nxt = ptr->nxt->nxt;
-        printf("Removed bkpt for 0x%08x\n",address);
+        printf("Removed %s bkpt for 0x%08x %s%s%s\n",
+            bkpt_str[type],address,ptr->nxt->cause!=NULL?"(":"",ptr->nxt->cause!=NULL?ptr->nxt->cause:"",ptr->nxt->cause!=NULL?")":"");
+        ptr->nxt = ptr->nxt->nxt;        
+        delete ptr2;
     }
 }
 
-bool bkpt_list::has_bkpt(uint32_t address)
+bool bkpt_list::has_bkpt(uint32_t address,int type)
 {
-    BKPT * ptr=head;
+    BKPT * ptr=head[type];
 
     while(ptr && ptr->address <= address)
     {
-        if(ptr->address == address)
+        if(address >= ptr->address && address <= (ptr->address+ptr->size))
         {
-            printf("BREAKPOINT at 0x%08x\n",ptr->address);
+            printf("%s BREAKPOINT at 0x%08x %s%s%s\n",
+                bkpt_str[type],address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",ptr->cause!=NULL?")":"");
             return true;
         }
         ptr=ptr->nxt;
@@ -84,15 +110,15 @@ bool bkpt_list::has_bkpt(uint32_t address)
     return false;
 }
 
-void bkpt_list::print_bkpt_list(void)
+void bkpt_list::print_bkpt_list(int type)
 {
-    printf("Breakpoint list");
+    printf("%s Breakpoint list",bkpt_str[type]);
     if(head)
     {
         printf(":\n");
-        for(BKPT * ptr=head;ptr!=NULL;ptr=ptr->nxt)
+        for(BKPT * ptr=head[type];ptr!=NULL;ptr=ptr->nxt)
         {
-            printf("0x%08x\n",ptr->address);
+            printf("0x%08x %s%s%s\n",ptr->address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",ptr->cause!=NULL?")":"");
         }
     }
     else

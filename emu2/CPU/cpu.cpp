@@ -112,19 +112,21 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 int run_mode;
 int HW_mode=0;
 int disp_mode=0;
-                                        
+                     
+uint32_t old_PC;
+                   
 char * cond_str[] = {"EQ","NE","CS","CC","MI","PL","VS","VC","HI","LS","GE","LT","GT","LE","  ","ERR"};
 
 Cpu * cur_cpu;
 
-void init_static_fct(Cpu * cpu);
+void init_cpu_static_fct(Cpu * cpu);
                      
 Cpu::Cpu(mem_space * mem)
 {
     int i,j;
     
     this->mem=mem;
-      
+    
     /*init regs data*/
     for(i=0;i<38;i++)
         regs_data[i]=0;
@@ -168,7 +170,7 @@ Cpu::Cpu(mem_space * mem)
     
     /* init the cmd line */
     
-    init_static_fct(this);
+    init_cpu_static_fct(this);
     
     /* init bkpt_list */
     
@@ -194,14 +196,11 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
     run_mode = STEP;
     uint32_t address;
     
-    //for(int i=0;i<0x20;i++)
     while(1)
     {       
-       
-    
         address = T_FLAG ? PC_REAL&0xfffffffe : (PC_REAL+2)&0xfffffffc;
         
-        if(bkpt->has_bkpt(address))
+        if(bkpt->has_bkpt(address,BKPT_CPU))
         {
             run_mode = STEP;
             //printState();
@@ -464,8 +463,8 @@ void Cpu::doARM(uint32_t instruction)
              printf("You should not be here\n");
              exit(0);
     }
-    /*if(run_mode==STEP)
-        printState();*/
+    if(disp_mode==1 || run_mode==STEP)
+        printState();
 }
 
 void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
@@ -833,8 +832,8 @@ void Cpu::doThumb(uint32_t instruction)
                 }
             break;
     }
-    /*if(run_mode==STEP)   
-        printState();*/
+    if(disp_mode==1 || run_mode==STEP)
+        printState();
 }
 
 /* thumb data processing */

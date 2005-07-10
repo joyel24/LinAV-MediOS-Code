@@ -21,6 +21,7 @@
 extern int run_mode;
 extern int HW_mode;
 extern int disp_mode;
+extern uint32_t old_PC;
 
 #define CPU_DEBUG       (0x1)
 #define NULL_HW_DEBUG   (0x1<< 1)
@@ -35,12 +36,17 @@ extern int disp_mode;
 #define MEM_HW_DEBUG    (0x1<< 10)
 #define MAS_HW_DEBUG    (0x1<< 11)
 #define CPLD_HW_DEBUG   (0x1<< 12)
+#define HW_30A24_DEBUG  (0x1<< 13)
+#define ATA_HW_DEBUG    (0x1<< 14)
+#define DMA_HW_DEBUG    (0x1<< 15)
+#define ECR_HW_DEBUG    (0x1<< 16)
+#define OSD_HW_DEBUG    (0x1<< 17)
 
 #define DEBUG_MODE
 #define DEBUG_MODE_HW
 
 #ifdef DEBUG_MODE
-#define DEBUG(fmt, arg...) if(disp_mode==1 || run_mode==STEP) printf(fmt,## arg);
+#define DEBUG(fmt, arg...) if(disp_mode==1 || run_mode==STEP) printf(fmt,## arg) ;
 #define MKDEBUG sprintf
 #else
 #define DEBUG(...)
@@ -48,7 +54,7 @@ extern int disp_mode;
 #endif
 
 #ifdef DEBUG_MODE_HW
-#define DEBUG_HW(level,fmt, arg...) if(HW_mode&level || run_mode==STEP) printf(fmt,## arg);
+#define DEBUG_HW(level,fmt, arg...) if(HW_mode&level || run_mode==STEP) {printf("@%08x:",old_PC); printf(fmt,## arg); }
 #else
 #define DEBUG_HW(...)
 #endif

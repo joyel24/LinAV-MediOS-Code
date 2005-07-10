@@ -46,7 +46,7 @@ class Cpu {
         uint32_t * mode_regs[7][18];        
         uint32_t regs_data[37];
         
-        uint32_t old_PC;
+        uint32_t my_data;
         
         mem_space * mem;
         

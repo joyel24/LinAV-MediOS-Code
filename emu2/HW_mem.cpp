@@ -17,7 +17,6 @@
 
 #include <HW_mem.h>
 
-
 HW_mem::HW_mem(char * fname,uint32_t start,uint32_t end,char * name):HW_access(start,end,name)
 {
     mem = new char[end - start + 1 ];

@@ -1,3 +1,14 @@
+/* 
+*   cpu_cmd_line_fct.h
+*
+*   AV3XX emulator
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*/
 
 int do_cmd_help_s(int argc,char ** argv)
 { 
@@ -69,12 +80,12 @@ int Cpu::do_cmd_add_bkpt(int argc,char ** argv)
         }
         i = my_atoi(argv[0]);
         if(do_del)
-            bkpt->del(i);
+            bkpt->del(i,BKPT_CPU);
         else
-            bkpt->add(i);
+            bkpt->add(i,BKPT_CPU);
     }
     else
-        bkpt->print_bkpt_list();
+        bkpt->print_bkpt_list(BKPT_CPU);
     return 0;
 }
 
@@ -159,7 +170,7 @@ int Cpu::do_cmd_print_state(int argc,char ** argv)
 }
 
 
-void init_static_fct(Cpu * cpu)
+void init_cpu_static_fct(Cpu * cpu)
 {
     cur_cpu = cpu;
     add_cmd_fct("help",do_cmd_help_s,"Print this help");

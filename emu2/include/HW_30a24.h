@@ -1,5 +1,5 @@
 /* 
-*   mem_space.h
+*   HW_30a24.h
 *
 *   AV3XX emulator
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,28 +10,23 @@
 * KIND, either express of implied.
 */
 
-#ifndef __MEM_SPACE_H
-#define __MEM_SPACE_H
+#ifndef __HW_30A24_H
+#define __HW_30A24_H
 
 #include "emu.h"
 #include "HW_access.h"
-#include <bkpt_list.h>
 
-class mem_space:public HW_access {
+
+class HW_30a24 : public HW_access {
     public:
-        mem_space(char * flash,char * sdram);
-        ~mem_space();        
-        
-        int do_cmd_dump(int argc,char ** argv);
-        int do_cmd_add_bk_mem(int argc,char ** argv);
-        
+        HW_30a24();
+                
         uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);
         
-    private:
-        bkpt_list * bkpt;
-    
-       
+        int HDD_power;
+        int power_connected;
+        int usb_connected;
 };
 
-#endif
+#endif // __HW_30A24_H

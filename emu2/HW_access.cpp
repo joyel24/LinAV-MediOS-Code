@@ -35,9 +35,12 @@ uint32_t HW_access::read(uint32_t addr,int size)
         if(addr>=ptr->start && addr<=(ptr->end-size+1))
             return ptr->read(addr,size);
                 
-    DEBUG_HW(MEM_HW_DEBUG,"%s::read(0x%08x,%d) ERROR addr does not belong to a known zone\n",name,addr,size);
     if(exit_on_not_match)
+    {
+        printf("%s::read(0x%08x,%d) ERROR addr does not belong to a known zone\n",name,addr,size);
         exit(0);
+    }
+    DEBUG_HW(MEM_HW_DEBUG,"%s::read(0x%08x,%d) ERROR addr does not belong to a known zone\n",name,addr,size);
     return 0;
 }
 
@@ -50,9 +53,12 @@ void HW_access::write(uint32_t addr,uint32_t val,int size)
             return;
         }
 
-    DEBUG_HW(MEM_HW_DEBUG,"%s::write(0x%08x,%x,%d) ERROR addr does not belong to a known zone\n",name,addr,val,size);
     if(exit_on_not_match)
-        exit(0);             
+    {
+        printf("%s::write(0x%08x,%x,%d) ERROR addr does not belong to a known zone\n",name,addr,val,size);          
+        exit(0);   
+    }
+    DEBUG_HW(MEM_HW_DEBUG,"%s::write(0x%08x,%x,%d) ERROR addr does not belong to a known zone\n",name,addr,val,size);          
 }
 
 void HW_access::add_item(HW_access * HW)

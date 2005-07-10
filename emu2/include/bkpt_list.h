@@ -15,22 +15,33 @@
 
 #include "emu.h"
 
+#define BKPT_CPU   0
+#define BKPT_MEM   1
+
 typedef struct bkpt_s {
     uint32_t address;
+    uint32_t size;
     struct bkpt_s * nxt;
+    char * cause;
 } BKPT;
+
+
 
 class bkpt_list {
     public:
         bkpt_list();
         
-        void del(uint32_t address);
-        void add(uint32_t address);
-        bool has_bkpt(uint32_t address);
-        void print_bkpt_list(void);
+        void del(uint32_t address,int type);
+        void add(uint32_t address,int type);
+        void add(uint32_t address,int type,char * cause);
+        void add(uint32_t address,uint32_t size,int type);
+        void add(uint32_t address,uint32_t size,int type,char * cause);
+        bool has_bkpt(uint32_t address,int type);
+        void print_bkpt_list(int type);
         
     private:
-        BKPT * head;        
+        BKPT * head[2];
+        char * bkpt_str[2];      
 };
 
 #endif

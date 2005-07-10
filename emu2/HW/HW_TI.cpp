@@ -15,26 +15,44 @@
 #include <HW_TI.h>
 #include <HW_null.h>
 
+#include <HW_mem.h>
+
 #include <HW_uart.h>
 #include <HW_clock.h>
 #include <HW_gpio.h>
 #include <HW_timer.h>
 #include <i2c_gpio.h>
 
-HW_TI::HW_TI():HW_access(0x30000,0x3FFFF,"DSC25")
+
+#include <HW_30a24.h>
+#include <HW_cpld.h>
+#include <HW_TI_ver.h>
+#include <HW_ECR.h>
+#include <HW_OSD.h>
+
+HW_TI::HW_TI(HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30000,0x3FFFF,"DSC25")
 {
     exit_on_not_match = false;
-    add_item(new HW_null(0x30680,0x30700,"OSD"));
+    
+    add_item(new HW_OSD(mem));
+    
     add_item(new HW_uart(0x30300,0x30310,"UART0"));
     add_item(new HW_uart(0x30380,0x30390,"UART1"));
     add_item(new HW_clock());
     HW_gpio * gpio = new HW_gpio();
     add_item(gpio);
-    add_item(new HW_null(0x30a24,0x30a25,"UKN-30A24"));
+    hw_30a24 = new HW_30a24();
+    hw_dma = new HW_dma(mem,hw_cpld);
+    add_item(hw_30a24);    
+    add_item(hw_dma);
+    
     add_item(new HW_timer(0x0));
     add_item(new HW_timer(0x1));
     add_item(new HW_timer(0x2));
     add_item(new HW_timer(0x3));
+    
+    add_item(new HW_TI_ver());
+    add_item(new HW_ECR());
     
     new i2c_master(gpio);
     

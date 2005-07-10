@@ -15,11 +15,15 @@
 
 #include "emu.h"
 #include "HW_access.h"
+#include "HW_30a24.h"
+#include "HW_dma.h"
 
 class HW_TI:public HW_access {
     public:
-        HW_TI();
+        HW_TI(HW_mem * mem,HW_cpld * hw_cpld);
         ~HW_TI();  
+        HW_30a24 * hw_30a24;
+        HW_dma * hw_dma;
         
         /*uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);      */
