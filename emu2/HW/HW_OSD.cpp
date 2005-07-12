@@ -109,32 +109,32 @@ uint32_t HW_OSD::read(uint32_t addr,int size)
             break;
             
         case 0x30694:
-            ret_val=(((OSD_offset_regs[0]>>16)&0x0F)<<8) | ((OSD_offset_regs[1]>>16)&0x0F);  // removing the SDRAM base addr. 0x03000000
+            ret_val=(((OSD_offset_regs[1]>>21)&0x07)<<8) | ((OSD_offset_regs[0]>>21)&0x07);  // removing the SDRAM base addr. 0x03000000
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) (Vid0=%x Vid1=%x)\n",name,"Vid0 & Vid1 buffer HI offset",
                 ret_val,size,OSD_offset_regs[0],OSD_offset_regs[1]);            
             break;        
         case 0x30696:
-            ret_val=OSD_offset_regs[0]&0xFFFF;
+            ret_val=(OSD_offset_regs[0]>>5)&0xFFFF;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) (Vid0=%x)\n",name,"Vid0 buffer LO offset",
                 ret_val,size,OSD_offset_regs[0]);            
             break;        
         case 0x30698:
-            ret_val=OSD_offset_regs[1]&0xFFFF;
+            ret_val=(OSD_offset_regs[1]>>5)&0xFFFF;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) (Vid1=%x)\n",name,"Vid1 buffer LO offset",
                 ret_val,size,OSD_offset_regs[1]);   
             break;
         case 0x3069A:
-            ret_val=(((OSD_offset_regs[2]>>16)&0x0F)<<8) | ((OSD_offset_regs[3]>>16)&0x0F);  // removing the SDRAM base addr. 0x03000000
+            ret_val=(((OSD_offset_regs[3]>>21)&0x07)<<8) | ((OSD_offset_regs[2]>>21)&0x07);  // removing the SDRAM base addr. 0x03000000
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) (Bmap0=%x Bmap1=%x)\n",name,"Bmap0 & Bmap1 buffer HI offset",
                    ret_val,size,OSD_offset_regs[2],OSD_offset_regs[3]);            
             break;        
         case 0x3069C:
-            ret_val=OSD_offset_regs[2]&0xFFFF;
+            ret_val=(OSD_offset_regs[2]>>5)&0xFFFF;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) Bmap0=%x)\n",name,"Bmap0 buffer LO offset",
                 ret_val,size,OSD_offset_regs[2]);            
             break;        
         case 0x3069E:
-            ret_val=OSD_offset_regs[3]&0xFFFF;
+            ret_val=(OSD_offset_regs[3]>>5)&0xFFFF;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) Bmap1=%x)\n",name,"Bmap1 buffer LO offset",
                 ret_val,size,OSD_offset_regs[3]);            
             break;
@@ -344,34 +344,34 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
             break;
             
         case 0x30694:
-            OSD_offset_regs[0] = 0x03000000 | (OSD_offset_regs[0] & 0xFFFF) | (((val>>8)&0x0F)<<16);
-            OSD_offset_regs[1] = 0x03000000 | (OSD_offset_regs[1] & 0xFFFF) | ((val&0x0F)<<16);
+            OSD_offset_regs[0] = 0x03000000 | ((val&0x07)<<21) | (OSD_offset_regs[0] & 0x1FFFFF);
+            OSD_offset_regs[1] = 0x03000000 | (((val>>8)&0x07)<<21) | (OSD_offset_regs[1] & 0x1FFFFF);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (Vid0=%x Vid1=%x)\n",name,"Vid0 & Vid1 buffer HI offset",
                 val,size,OSD_offset_regs[0],OSD_offset_regs[1]);            
             break;        
         case 0x30696:
-            OSD_offset_regs[0] = 0x03000000 | (OSD_offset_regs[0]&0x0F0000) | val&0xFFFF;
+            OSD_offset_regs[0] = 0x03000000 | (OSD_offset_regs[0]&0x0E00000) | ((val<<5)&0x1FFFFF);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (Vid0=%x)\n",name,"Vid0 buffer LO offset",
                 val,size,OSD_offset_regs[0]);            
             break;        
         case 0x30698:
-            OSD_offset_regs[1] = 0x03000000 | (OSD_offset_regs[1]&0x0F0000) | val&0xFFFF;
+            OSD_offset_regs[1] = 0x03000000 | (OSD_offset_regs[1]&0x0E00000) | ((val<<5)&0x1FFFFF);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (Vid1=%x)\n",name,"Vid1 buffer LO offset",
                 val,size,OSD_offset_regs[1]);            
             break;
         case 0x3069A:
-            OSD_offset_regs[2] = 0x03000000 | (OSD_offset_regs[2] & 0xFFFF) | (((val>>8)&0x0F)<<16);
-            OSD_offset_regs[3] = 0x03000000 | (OSD_offset_regs[3] & 0xFFFF) | ((val&0x0F)<<16);
+            OSD_offset_regs[2] = 0x03000000 | ((val&0x07)<<21) | (OSD_offset_regs[2] & 0x1FFFFF);
+            OSD_offset_regs[3] = 0x03000000 | (((val>>8)&0x07)<<21) | (OSD_offset_regs[3] & 0x1FFFFF);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (Bmap0=%x Bmap1=%x)\n",name,"Bmap0 & Bmap1 buffer HI offset",
                 val,size,OSD_offset_regs[2],OSD_offset_regs[3]);            
             break;        
         case 0x3069C:
-            OSD_offset_regs[2] = 0x03000000 | (OSD_offset_regs[2]&0x0F0000) | val&0xFFFF;
+            OSD_offset_regs[2] = 0x03000000 | (OSD_offset_regs[2]&0x0E00000) | ((val<<5)&0x1FFFFF);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) Bmap0=%x)\n",name,"Bmap0 buffer LO offset",
                 val,size,OSD_offset_regs[2]);            
             break;        
         case 0x3069E:
-            OSD_offset_regs[3] = 0x03000000 | (OSD_offset_regs[3]&0x0F0000) | val&0xFFFF;
+            OSD_offset_regs[3] = 0x03000000 | (OSD_offset_regs[3]&0x0E00000) | ((val<<5)&0x1FFFFF);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) Bmap1=%x)\n",name,"Bmap1 buffer LO offset",
                 val,size,OSD_offset_regs[3]);            
             break;
@@ -531,4 +531,11 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
             break;
     }
     
+}
+
+void HW_OSD::chk_access(uint32_t addr,uint32_t val)
+{
+    if(OSD_offset_regs[2] >= 0x03000000 && addr>=OSD_offset_regs[2] 
+        && addr <= (OSD_offset_regs[2]+lcd->SCREEN_WIDTH*lcd->SCREEN_HEIGHT*2))
+        lcd->drawPix(addr-OSD_offset_regs[2],val);        
 }

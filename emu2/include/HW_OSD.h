@@ -35,6 +35,8 @@ class HW_OSD : public HW_access {
         
         int do_cmd_updt_lcd(int argc,char ** argv);
         
+        void chk_access(uint32_t addr,uint32_t val);
+        
     private:
         int OSD_config_regs[6];
         int OSD_width_regs[4];

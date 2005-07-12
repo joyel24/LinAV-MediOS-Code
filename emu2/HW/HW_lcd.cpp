@@ -114,6 +114,17 @@ int HW_lcd::nxtEvent(void)
    }  
 }
 
+void HW_lcd::drawPix(uint32_t addr,uint32_t val)
+{
+    int i,j;
+    
+    addr >>= 1;
+    i=addr%SCREEN_WIDTH;
+    j=addr/SCREEN_WIDTH;
+    XSetForeground(display, gc, colorTab[val&0xFF]);
+    XDrawPoint(display, window, gc, i, j);
+}
+
 void HW_lcd::updte_lcd(uint32_t base_addr)
 {
     int a=0;
@@ -122,34 +133,9 @@ void HW_lcd::updte_lcd(uint32_t base_addr)
     uint32_t color;
     
     for(int j = 0 ; j < SCREEN_HEIGHT+1 ; j++)
-    {
-        for(int i = 0 ; i < SCREEN_WIDTH+1 ; i++)        
+        for(int i = 0 ; i < SCREEN_WIDTH+1 ; i++)
         {
-            /*for(int k=0;k<4;k++)
-                data[3-k]=mem->read(base_addr+(j*SCREEN_WIDTH+i+k)*2,1);
-            for(int k=0;k<4;k++)
-            {*/
-                /*if(mem->read(base_addr+(j*SCREEN_WIDTH+i),1) == 1)
-                {
-                    XSetForeground(display, gc, BlackPixel(display,screen));
-                    a++;
-                }
-                else
-                {
-                    XSetForeground(display, gc, WhitePixel(display,screen));
-                    b++;
-                }*/
-                
-                    XSetForeground(display, gc, colorTab[mem->read(base_addr+(j*(SCREEN_WIDTH*2)+i*2),2)&0xFF]);
-                printf("drawing at (%d,%d)index = %x (addr=%x)\n",i,j,
-                   mem->read(base_addr+j*SCREEN_WIDTH*2+i*2,2),
-                    base_addr+j*SCREEN_WIDTH*2+i*2);
-                    XDrawPoint(display, window, gc, i, j);
-                    
-               
-                    
-            //}
-        }
-    }
-    printf("pix0:%d pix1:%d\n",a,b);
+            XSetForeground(display, gc, colorTab[mem->read(base_addr+(j*(SCREEN_WIDTH*2)+i*2),2)&0xFF]);
+            XDrawPoint(display, window, gc, i, j);
+         }
 }

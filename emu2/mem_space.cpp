@@ -45,7 +45,7 @@ mem_space::mem_space(char * flash,char * sdram):HW_access(0x0,0xFFFFFFFF,"AVMEM"
     add_item(sd);
     
     HW_cpld * hw_cpld = new HW_cpld();    
-    HW_TI * hw_TI = new HW_TI(sd,hw_cpld);
+    HW_TI * hw_TI = new HW_TI(this,sd,hw_cpld);
     
     
     add_item(hw_cpld);
@@ -87,6 +87,7 @@ extern uint32_t old_PC;
 uint32_t mem_space::read(uint32_t addr,int size)
 {
     uint32_t val = HW_access::read(addr,size);
+           
     if(bkpt->has_bkpt(addr,BKPT_MEM))
     {
         printf("@%08x: read mem (s=%d), get : %x\n",old_PC,size,val);
@@ -101,7 +102,13 @@ void mem_space::write(uint32_t addr,uint32_t val,int size)
         printf("@%08x: write mem (s=%d): %x\n",old_PC,size,val);
     }
     HW_access::write(addr,val,size);
+    
+    hw_OSD->chk_access(addr,val);
 }
 
+void mem_space::set_OSD(HW_OSD * hw_osd)
+{
+    this->hw_OSD=hw_osd;
+}
 
 #include "mem_cmd_line_fct.h"

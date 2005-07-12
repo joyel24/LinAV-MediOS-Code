@@ -29,12 +29,19 @@
 #include <HW_TI_ver.h>
 #include <HW_ECR.h>
 #include <HW_OSD.h>
+#include <HW_access.h>
 
-HW_TI::HW_TI(HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30000,0x3FFFF,"DSC25")
+HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30000,0x3FFFF,"DSC25")
 {
     exit_on_not_match = false;
     
-    add_item(new HW_OSD(mem));
+    this->memSpace=memSpace;
+    
+    HW_OSD * osd = new HW_OSD(mem);
+    
+    memSpace->set_OSD(osd);
+    
+    add_item(osd);
     
     add_item(new HW_uart(0x30300,0x30310,"UART0"));
     add_item(new HW_uart(0x30380,0x30390,"UART1"));

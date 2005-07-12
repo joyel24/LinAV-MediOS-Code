@@ -16,6 +16,7 @@
 #include "emu.h"
 #include "HW_access.h"
 #include <bkpt_list.h>
+#include <HW_OSD.h>
 
 class mem_space:public HW_access {
     public:
@@ -28,8 +29,11 @@ class mem_space:public HW_access {
         uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);
         
+        void set_OSD(HW_OSD * hw_osd);
+        
     private:
         bkpt_list * bkpt;
+        HW_OSD * hw_OSD;
     
        
 };

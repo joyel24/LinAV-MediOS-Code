@@ -17,13 +17,15 @@
 #include "HW_access.h"
 #include "HW_30a24.h"
 #include "HW_dma.h"
+#include "mem_space.h"
 
 class HW_TI:public HW_access {
     public:
-        HW_TI(HW_mem * mem,HW_cpld * hw_cpld);
+        HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld);
         ~HW_TI();  
         HW_30a24 * hw_30a24;
         HW_dma * hw_dma;
+        mem_space * memSpace;
         
         /*uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);      */

@@ -22,6 +22,11 @@ class HW_lcd {
     public:
         HW_lcd(HW_mem * mem);
         void updte_lcd(uint32_t base_addr);
+        void drawPix(uint32_t addr,uint32_t val);     
+        
+        int SCREEN_WIDTH;
+        int SCREEN_HEIGHT;
+          
     private:
         HW_mem * mem;
         
@@ -34,8 +39,7 @@ class HW_lcd {
         
         int colorTab[256];
         
-        int SCREEN_WIDTH;
-        int SCREEN_HEIGHT;
+        
         
         void setPalette(int palette[256][3],int size);
         int nxtEvent(void);
