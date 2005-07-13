@@ -186,7 +186,7 @@ i2c_RTC::i2c_RTC(void):i2c_device(0xD0,"RTC")
 
     ch = ch & 0xff;
 
-    DEBUG_HW(RTC_HW_DEBUG,"[RTC Checksum calculated] =0x%x",ch);
+    printf("[RTC Checksum calculated] =0x%x\n",ch);
 
     rtc_reg[0x2f] = ch;
 

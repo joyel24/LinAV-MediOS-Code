@@ -66,8 +66,7 @@ HW_lcd::HW_lcd(HW_mem * mem)
     
     XMapWindow(display, window);
     
-    printf("LCD init done\n");
-    nxtEvent(); // call needed to force exposure event
+    printf("LCD init done\n");    
 }
 
 void HW_lcd::setPalette(int palette[256][3],int size)
@@ -88,7 +87,7 @@ void HW_lcd::setPalette(int palette[256][3],int size)
     }
 }
 
-int HW_lcd::nxtEvent(void)
+int HW_lcd::nxtEvent(uint32_t addr)
 {   
  
     int pending;
@@ -105,6 +104,8 @@ int HW_lcd::nxtEvent(void)
     switch (event.type) 
     {
       case Expose :
+          if(addr!=0)
+              updte_lcd(addr);
           break;
       case KeyPress :
           break;

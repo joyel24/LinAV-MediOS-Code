@@ -97,8 +97,6 @@ class HW_cpld:public HW_access {
         char * buffer;
         
         FILE * hd;
-        
-        
 };
 
 #endif

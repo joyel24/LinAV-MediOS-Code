@@ -22,6 +22,9 @@
 #define CPLD_V_LOW
 #define CPLD_V_HIGH
 
+#include <hd_data/id_disk.h>
+#include <hd_data/part_table.h>
+
 HW_cpld::HW_cpld(void):HW_access(0x02000000,0x02ffffff,"CPLD")
 {
     exit_on_not_match = false;
@@ -145,11 +148,13 @@ void HW_cpld::init_ata(void)
     nsector = 1;  
     ata_cmd = 0;     
     
-    ident_data = new char[512];
-    part_data = new char[1024];
+    ident_data = id_disk_src;
+    part_data = part_table_src;
+    /*ident_data = new char[512];
+    part_data = new char[1024];*/
     buffer = NULL;
     
-    FILE * fd = fopen("id_disk", "rb");
+    /*FILE * fd = fopen("id_disk", "rb");
     if (!fd)
         printf("Error: opening: %s for identify data\n","id_disk");
     else
@@ -157,7 +162,7 @@ void HW_cpld::init_ata(void)
         fread (ident_data,1,512,fd);
         fclose(fd);
         printf("Read file %s for identify data\n","id_disk");        
-    }    
+    }  */  
     
     
     /*fd = fopen("part_table", "rb");
@@ -169,7 +174,7 @@ void HW_cpld::init_ata(void)
         fclose(fd);
         printf("Read file %s for identify data\n","table");        
     } */
-    memset(part_data,0,1024);   
+    /*memset(part_data,0,1024);   */
     
     hd = fopen("HD.bin", "r+b");
     if (!hd)
