@@ -29,6 +29,7 @@
 #include <HW_TI_ver.h>
 #include <HW_ECR.h>
 #include <HW_OSD.h>
+#include <HW_IRQ.h>
 #include <HW_access.h>
 
 HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30000,0x3FFFF,"DSC25")
@@ -60,6 +61,10 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30
     
     add_item(new HW_TI_ver());
     add_item(new HW_ECR());
+    
+    HW_irq = new HW_IRQ();
+    
+    add_item(HW_irq);
     
     new i2c_master(gpio);
     

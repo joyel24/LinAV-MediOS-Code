@@ -50,8 +50,8 @@ void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0x2: ///////////////////////////////////////////// SUB
-            DEBUG("SUB%s %s, %s, %s => %d\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter,GET_REG(Rd));
             REG(Rd)=GET_REG(Rn) - shifter_operand;
+            printf("SUB%s %s, %s, %s => %x\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter,GET_REG(Rd));            
             if(fl_s && Rd==15)
             {
                 CHG_MODE

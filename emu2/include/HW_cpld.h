@@ -66,6 +66,8 @@ class HW_cpld:public HW_access {
         
         void write_buffer(char * data,int data_size);
         
+        int do_cmd_btn(int btn);
+        
     private:
         HW_30a24 * hw_30a24;  
         
@@ -97,6 +99,8 @@ class HW_cpld:public HW_access {
         char * buffer;
         
         FILE * hd;
+        
+        int btn_var[8];
 };
 
 #endif

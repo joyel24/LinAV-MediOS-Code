@@ -1,5 +1,5 @@
 /* 
-*   mem_space.cpp
+*   HW_cpld.cpp
 *
 *   AV3XX emulator
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -25,9 +25,33 @@
 #include <hd_data/id_disk.h>
 #include <hd_data/part_table.h>
 
+#define BTN_UP    0x0
+#define BTN_LEFT  0x1
+#define BTN_RIGHT 0x2
+#define BTN_DOWN  0x3
+#define BTN_F3    0x4
+#define BTN_F1    0x5
+#define BTN_F2    0x6
+#define BTN_JOY   0x7
+
+#define BTN_INIT_VAL  0x1
+
+#define BTN_FCT(BTN,MASK)      \
+    if(BTN)                    \
+        BTN--;                 \
+    else                       \
+        ret_val |= MASK;        
+
+HW_cpld * cpld_obj;
+
+#include <cmd_line.h>        
+#include "cpld_cmd_line_fct.h"        
+        
 HW_cpld::HW_cpld(void):HW_access(0x02000000,0x02ffffff,"CPLD")
 {
     exit_on_not_match = false;
+    
+    init_cpld_static_fct(this);
     
     cpld_ata_mode = 0x0 ; /* only HD/CF is concidered => we use HD */
     cpld_module_type = 0xF; /* no modules */
@@ -38,6 +62,10 @@ HW_cpld::HW_cpld(void):HW_access(0x02000000,0x02ffffff,"CPLD")
     ide_reset = 0;
     
     init_ata();
+    
+    /* btn init */
+    for(int k=0;k<8;k++)
+        btn_var[k]=0   ; 
 }
 
 HW_cpld::~HW_cpld()
@@ -57,7 +85,7 @@ void HW_cpld::setDMA(HW_dma * hw_dma)
 
 uint32_t HW_cpld::read(uint32_t addr,int size)
 {
-    uint32_t ret_val;
+    uint32_t ret_val=0;
     if(addr >= 0x02400000 && addr < 0x02400400 )
     {        
         ret_val=ata_read(addr,size);        
@@ -83,10 +111,21 @@ uint32_t HW_cpld::read(uint32_t addr,int size)
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD3 - read, size %x: %x\n",size,ret_val);
                 break;
             case 0x02600680:
+                BTN_FCT(btn_var[0],0x1)
+                BTN_FCT(btn_var[1],0x2)
+                DEBUG_HW(CPLD_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
+                break;
             case 0x02600700:
+                BTN_FCT(btn_var[2],0x1)
+                BTN_FCT(btn_var[3],0x2)
+                BTN_FCT(btn_var[4],0x4)
+                DEBUG_HW(CPLD_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
+                break;
             case 0x02600780:
-                DEBUG_HW(CPLD_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x\n",addr,size);
-                ret_val=0;
+                BTN_FCT(btn_var[5],0x1)
+                BTN_FCT(btn_var[6],0x2)
+                BTN_FCT(btn_var[7],0x4)
+                DEBUG_HW(CPLD_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
                 break;
             default:
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD - read ERROR ukn addr: @0x%08x, size %x\n",addr,size);
@@ -129,7 +168,7 @@ void HW_cpld::write(uint32_t addr,uint32_t val,int size)
             case 0x02600680:
             case 0x02600700:
             case 0x02600780:
-                DEBUG_HW(CPLD_HW_DEBUG,"CPLD - write buttons (@0x%08x), size %x\n",addr,size);
+                DEBUG_HW(CPLD_HW_DEBUG,"CPLD - !!!! write buttons (@0x%08x), size %x\n",addr,size);
                 break;
             default:
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD - write ERROR ukn addr: @0x%08x, size %x\n",addr,size);

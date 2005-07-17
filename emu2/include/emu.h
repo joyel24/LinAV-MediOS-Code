@@ -41,13 +41,14 @@ extern uint32_t old_PC;
 #define DMA_HW_DEBUG    (0x1<< 15)
 #define ECR_HW_DEBUG    (0x1<< 16)
 #define OSD_HW_DEBUG    (0x1<< 17)
+#define IRQ_HW_DEBUG    (0x1<< 18)
 
 #define DEBUG_MODE
 #define DEBUG_MODE_HW
 
 #ifdef DEBUG_MODE
 #define DEBUG(fmt, arg...) if(disp_mode==1 || run_mode==STEP) printf(fmt,## arg) ;
-#define MKDEBUG sprintf
+#define MKDEBUG(dest,fmt, arg...) if(disp_mode==1 || run_mode==STEP) sprintf(dest,fmt,## arg);
 #else
 #define DEBUG(...)
 #define MKDEBUG(...)

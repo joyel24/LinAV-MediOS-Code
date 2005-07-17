@@ -1,5 +1,5 @@
 /* 
-*   emu_types.h
+*   cpld_cmd_line_fct.h
 *
 *   AV3XX emulator
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,11 +10,20 @@
 * KIND, either express of implied.
 */
 
-#ifndef EMU_TYPES_H
-#define EMU_TYPES_H
 
-typedef unsigned long uint32_t;
-typedef unsigned long long uint64_t;
-typedef signed long long sint64_t;
+int do_cmd_btn_up_s(int argc,char ** argv) 
+{ 
+    return cpld_obj->do_cmd_btn(BTN_UP);
+}
 
-#endif
+int HW_cpld::do_cmd_btn(int btn)
+{
+    btn_var[btn]=BTN_INIT_VAL;
+    return 0;
+}
+
+void init_cpld_static_fct(HW_cpld * cpld)
+{
+    cpld_obj = cpld;
+    add_cmd_fct("btn_up",do_cmd_btn_up_s,"Emulate btn UP press");    
+}

@@ -18,6 +18,10 @@
 #include "HW_30a24.h"
 #include "HW_dma.h"
 #include "mem_space.h"
+#include "HW_IRQ.h"
+#include "HW_mem.h"
+#include "HW_cpld.h"
+
 
 class HW_TI:public HW_access {
     public:
@@ -26,7 +30,7 @@ class HW_TI:public HW_access {
         HW_30a24 * hw_30a24;
         HW_dma * hw_dma;
         mem_space * memSpace;
-        
+        HW_IRQ * HW_irq;
         /*uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);      */
 };

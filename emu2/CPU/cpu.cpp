@@ -21,6 +21,8 @@
 #include <cmd_line.h>
 #include <bkpt_list.h>
 
+#include <HW_TI.h>
+
 char * mode_str[] = {"User","System","Supervisor","Abort","Undefined","IRQ","FIQ"};
 
 enum REGS {R_R0 = 0x00, R_R1 = 0x01, R_R2 = 0x02, R_R3 = 0x03,
@@ -198,6 +200,32 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
     
     while(1)
     {       
+        if(!FIQ_FLAG && mem->hw_TI->HW_irq->have_int_FIQ)
+        {
+            mem->hw_TI->HW_irq->have_int_FIQ = false;
+            printf("FIQ \n");
+            *mode_regs[M_FIQ][R_LR]=PC_REAL+4;
+            *mode_regs[M_FIQ][R_SPSR]=REG(R_CPSR);
+            SET_MODE(M_FIQ);
+            CLR_FLAG(T_MASK);
+            SET_FLAG(FIQ_MASK);
+            SET_FLAG(IRQ_MASK);
+            REG(R_PC)=0x1C;
+        }
+        
+        if(!IRQ_FLAG && mem->hw_TI->HW_irq->have_int_IRQ)
+        {
+            mem->hw_TI->HW_irq->have_int_IRQ = false;
+            printf("IRQ \n");
+            *mode_regs[M_IRQ][R_LR]=PC_REAL+4;
+            *mode_regs[M_IRQ][R_SPSR]=REG(R_CPSR);
+            SET_MODE(M_IRQ);
+            CLR_FLAG(T_MASK);
+            SET_FLAG(IRQ_MASK);
+            REG(R_PC)=0x18;
+        }
+        
+        
         address = T_FLAG ? PC_REAL&0xfffffffe : (PC_REAL+2)&0xfffffffc;
         
         if(bkpt->has_bkpt(address,BKPT_CPU))

@@ -165,10 +165,24 @@ int do_cmd_print_state_s(int argc,char ** argv)
 
 int Cpu::do_cmd_print_state(int argc,char ** argv)
 {
-    printState();    
+    int reg_num;
+    uint32_t val;
+    if(argc>0)
+    {
+        reg_num = my_atoi(argv[0]);
+        if(argc>1)
+        {
+            val = my_atoi(argv[1]);
+            REG(reg_num) = val;
+            printf("%s set to %x\n",RR(reg_num),GET_REG(reg_num));
+        }
+        else
+            printf("%s=%x\n",RR(reg_num),GET_REG(reg_num));
+    }
+    else    
+        printState();    
     return 0;
 }
-
 
 void init_cpu_static_fct(Cpu * cpu)
 {

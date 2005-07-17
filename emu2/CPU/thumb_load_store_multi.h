@@ -4,27 +4,49 @@ void Cpu::thumb_load_store_multi(int format,int opcode,uint32_t instruction)
     int Rn;
     bool bit_R ;
     uint32_t address;
+    int nb_set=0;
+    bool is_present = false;
     
     switch(format)
     {
-        case 0x0:            
-            DEBUG("%sMIA ",opcode?"LD":"ST");
+        case 0x0:
             Rn = (instruction >> 8) & 0x7;
             address = GET_REG(Rn);
-            for(int k =0; k < 8; k++)
+            if(opcode)
             {
-                if((register_list & 0x1) == 0x1)
+                DEBUG("LDMIA %s!, ",RR(Rn));
+                for(int k =0; k < 8; k++)
                 {
-                        if(opcode)
-                            REG(k) = mem->read(address,4);
-                        else
-                            mem->write(address,GET_REG(k),4);
+                    if((register_list & 0x1) == 0x1)
+                    {
+                        REG(k) = mem->read(address,4);
                         address +=4;
-                        DEBUG("% ",RR(k));
+                        DEBUG("%s ",RR(k));
+                        nb_set++;
+                        if(k==Rn)
+                            is_present = true;
+                    }
+                    register_list = register_list >> 1;
                 }
-                register_list = register_list >> 1;
+                if(!is_present)
+                    REG(Rn)=GET_REG(Rn)+4*nb_set;
             }
-            REG(Rn)=address;
+            else
+            {
+                DEBUG("STMIA %s!, ",RR(Rn));
+                for(int k =0; k < 8; k++)
+                {
+                    if((register_list & 0x1) == 0x1)
+                    {
+                        mem->write(address,GET_REG(k),4);
+                        address +=4;
+                        DEBUG("%s ",RR(k));
+                        nb_set++;
+                    }
+                    register_list = register_list >> 1;
+                }
+                REG(Rn)=GET_REG(Rn)+4*nb_set;
+            }
             DEBUG("\n");
             break;
         case 0x1:
