@@ -30,13 +30,13 @@ class HW_IRQ : public HW_access {
         bool have_int_FIQ;
         
         int do_IRQ_cmd(int type,int num);
+        void do_IRQ_FIQ(int type,int num);
         
     private:
         int status[4];
         int entry[4];
         int enable[4];
         
-        void do_IRQ_FIQ(int type,int num);
 };
 
 #endif // __HW_IRQ_H

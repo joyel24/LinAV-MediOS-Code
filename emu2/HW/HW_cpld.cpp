@@ -34,7 +34,7 @@
 #define BTN_F2    0x6
 #define BTN_JOY   0x7
 
-#define BTN_INIT_VAL  0x1
+#define BTN_INIT_VAL  0x1F
 
 #define BTN_FCT(BTN,MASK)      \
     if(BTN)                    \
@@ -113,6 +113,7 @@ uint32_t HW_cpld::read(uint32_t addr,int size)
             case 0x02600680:
                 BTN_FCT(btn_var[0],0x1)
                 BTN_FCT(btn_var[1],0x2)
+                ret_val |= 0x4;
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
                 break;
             case 0x02600700:

@@ -22,8 +22,20 @@ int HW_cpld::do_cmd_btn(int btn)
     return 0;
 }
 
+int do_cmd_btn_s(int argc,char ** argv) 
+{ 
+    return cpld_obj->do_cmd_btn2();
+}
+
+int HW_cpld::do_cmd_btn2(void)
+{
+    printf("UP: %x\n",btn_var[BTN_UP]);
+    return 0;
+}
+
 void init_cpld_static_fct(HW_cpld * cpld)
 {
     cpld_obj = cpld;
-    add_cmd_fct("btn_up",do_cmd_btn_up_s,"Emulate btn UP press");    
+    add_cmd_fct("btn_up",do_cmd_btn_up_s,"Emulate btn UP press");
+    add_cmd_fct("btn",do_cmd_btn_s,"tmp");  
 }

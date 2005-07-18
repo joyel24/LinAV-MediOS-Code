@@ -67,6 +67,7 @@ class HW_cpld:public HW_access {
         void write_buffer(char * data,int data_size);
         
         int do_cmd_btn(int btn);
+        int do_cmd_btn2(void);
         
     private:
         HW_30a24 * hw_30a24;  

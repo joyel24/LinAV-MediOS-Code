@@ -14,6 +14,7 @@
 
 #include <HW_timer.h>
 
+#define MULT_FACTOR 1
 
 uint32_t timer_start[] = {
     0x30000,
@@ -23,16 +24,13 @@ uint32_t timer_start[] = {
 };
 
 
-HW_timer::HW_timer(int timer_num):HW_access(0,0,"TMR")
+HW_timer::HW_timer(int timer_num,HW_IRQ * HW_irq):HW_access(0,0,"TMR")
 {
     this->start     = timer_start[timer_num];
     this->end       = timer_start[timer_num]+0xC;
     this->timer_num = timer_num;
     
-    zone_list = NULL;
-    nxt = NULL;
-    
-    timer_num=0;
+    this->HW_irq=HW_irq;
     
     tm_mode=0;
     tm_clk=0;
@@ -83,7 +81,9 @@ void HW_timer::write(uint32_t addr,uint32_t val,int size)
                 (val&0x3)==0x0?"Stop":
                 (val&0x3)==0x1?"One-Shot":
                 (val&0x3)==0x2?"Free-run":"RESERVED");
-            tm_mode= val&0xFF;
+            tm_mode= val&0x3;
+            tm_cnt=0;
+            tm_ps=0;
             break;
         case 0x2:
             DEBUG_HW(TMR_HW_DEBUG,"%s%d write ClockSelect(%x)=%s\n",name,timer_num,val&0x1,(val&0x1)==0x1?"Ext or SYSCLK clock":"Current ARM clock");
@@ -91,7 +91,7 @@ void HW_timer::write(uint32_t addr,uint32_t val,int size)
             break;
         case 0x4:
             DEBUG_HW(TMR_HW_DEBUG,"%s%d write Prescaler divide value=%x\n",name,timer_num,val&0x3FF);
-            tm_p_scaler=val&0x3FF;
+            tm_p_scaler=(val&0x3FF)*MULT_FACTOR;
             break;
         case 0x6:
             DEBUG_HW(TMR_HW_DEBUG,"%s%d write Max counter val=%x\n",name,timer_num,val&0xFFFF);
@@ -100,12 +100,53 @@ void HW_timer::write(uint32_t addr,uint32_t val,int size)
         case 0x8:
             DEBUG_HW(TMR_HW_DEBUG,"%s%d write Timer Triger => %s\n",name,timer_num,(val&0x1)==0x1?"GO":"NO GO");
             tm_trigger=val&0x1;
+            tm_cnt=0;
+            tm_ps=0;
             break;
         case 0xA:
-            DEBUG_HW(TMR_HW_DEBUG,"%s%d write Timer count => SHOULD NOT READ\n",name,timer_num);
+            DEBUG_HW(TMR_HW_DEBUG,"%s%d write Timer count => SHOULD NOT WRITE\n",name,timer_num);
             break;
         default:
             DEBUG_HW(TMR_HW_DEBUG,"%s%d UKN write @0x%08x, size %x\n",name,timer_num,addr,size);
+            break;
+    }
+}
+
+void HW_timer::nxt_cycle(void)
+{
+    switch(tm_mode&0x3)
+    {
+        case 0x0:
+            break;
+        case 0x1:
+            if(tm_trigger&0x1)
+            {
+                tm_ps++;
+                if(tm_ps == tm_p_scaler)
+                {
+                    tm_ps = 0;
+                    tm_cnt++;
+                    if(tm_cnt == tm_max)
+                    {
+                        tm_trigger = 0;
+                        HW_irq->do_IRQ_FIQ(IRQ,timer_num);     
+                        tm_cnt=0;                  
+                    }
+                }
+            }
+            break;
+        case 0x2:
+            tm_ps++;
+            if(tm_ps == tm_p_scaler)
+            {
+                tm_ps = 0;
+                tm_cnt++;
+                if(tm_cnt == tm_max)
+                {
+                    HW_irq->do_IRQ_FIQ(IRQ,timer_num);     
+                    tm_cnt=0;                  
+                }
+            }
             break;
     }
 }

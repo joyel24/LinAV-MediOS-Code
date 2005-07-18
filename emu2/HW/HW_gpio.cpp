@@ -38,6 +38,10 @@ HW_gpio::HW_gpio(void):HW_access(0x30580,0x30593,"GPIO")
        
     for(int i=0;i<32;i++)
         port_list[i]=new gpio_port(i);
+        
+        
+    port_list[0x0]->state = 1;
+    port_list[0x1c]->state = 1;
     
 }
 
@@ -68,6 +72,8 @@ gpio_port::gpio_port(int gpio_num,char * name)
 bool gpio_port::is_set(void)
 {
     //DEBUG_HW(GPIO_HW_DEBUG,"GPIO%x reading state: %s\n",gpio_num,state?"SET":"CLR");
+    if(gpio_num == 0 || gpio_num == 0x1c)
+        return 1;
     return state;
 }
 

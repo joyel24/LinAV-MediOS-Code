@@ -85,13 +85,14 @@ void Cpu::arm_LoadStoreMulti(uint32_t instruction)
     {
         DEBUG("LDM%s ", debugShifter2);
 
+        bool has_PC = (register_list>>15)&0x1==0x1;
 
         uint32_t address = start_address;
         for(int k=0;k<15;k++)
         {
             if(register_list & 0x1)
             {
-                if(bit_S)
+                if(bit_S && !has_PC)
                     *mode_regs[M_USER][k]=mem->read(address,4);
                 else
                     REG(k)=mem->read(address,4);
@@ -104,6 +105,7 @@ void Cpu::arm_LoadStoreMulti(uint32_t instruction)
         if(register_list & 0x1) // test for PC (R15)
         {
             DEBUG("PC\n");
+            uint32_t val;
             if(bit_S)
             {
                 int old_mode=MODE;
@@ -114,6 +116,7 @@ void Cpu::arm_LoadStoreMulti(uint32_t instruction)
                 }
                 else                
                     REG(R_CPSR)=REG(R_SPSR);
+                    
                 if(old_mode != MODE)
                 {
                     DEBUG("Mode has changed from %s to %s\n",mode_str[old_mode],mode_str[MODE]);
@@ -121,7 +124,19 @@ void Cpu::arm_LoadStoreMulti(uint32_t instruction)
                 }
                     
             }
-            REG(R_PC)=mem->read(address,4) & 0xFFFFFFFC;
+            
+            val=mem->read(address,4);
+            
+            REG(R_PC)=val & 0xFFFFFFFE;
+            
+            /*if(val & 0x1)
+            {
+                SET_FLAG(T_MASK);
+            }
+            else
+            {
+                CLR_FLAG(T_MASK);
+            }*/
             address+=4;
         }
         else

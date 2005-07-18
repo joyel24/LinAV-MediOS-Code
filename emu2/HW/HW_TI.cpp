@@ -54,17 +54,20 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30
     add_item(hw_30a24);    
     add_item(hw_dma);
     
-    add_item(new HW_timer(0x0));
-    add_item(new HW_timer(0x1));
-    add_item(new HW_timer(0x2));
-    add_item(new HW_timer(0x3));
+    HW_irq = new HW_IRQ();
+    
+    add_item(HW_irq);
+    
+    for(int i=0;i<4;i++)
+    {
+        timer_list[i]=new HW_timer(i,HW_irq);
+        add_item(timer_list[i]);
+    }
     
     add_item(new HW_TI_ver());
     add_item(new HW_ECR());
     
-    HW_irq = new HW_IRQ();
     
-    add_item(HW_irq);
     
     new i2c_master(gpio);
     

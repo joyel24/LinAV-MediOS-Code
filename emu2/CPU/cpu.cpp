@@ -48,7 +48,11 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
                     
 
 #define MODE          (cpsr_tab[*mode_regs[M_USER][R_CPSR] & 0xF])
-#define SET_MODE(val) {*mode_regs[M_USER][R_CPSR]=(*mode_regs[M_USER][R_CPSR] & 0xFFFFFFF0)|mode_tab[val];}
+#define SET_MODE(val) \
+  { \
+    *mode_regs[M_USER][R_CPSR]=(*mode_regs[M_USER][R_CPSR] & 0xFFFFFFE0) | 0x10 | mode_tab[val]; \
+    current_reg = mode_regs[MODE]; \
+  }
 
 #define GET_FLAG(mask) (*mode_regs[M_USER][R_CPSR] & (mask))
 #define SET_FLAG(mask) {*mode_regs[M_USER][R_CPSR] = (*mode_regs[M_USER][R_CPSR] & ~(mask)) | (mask); current_reg = mode_regs[MODE];}
@@ -106,7 +110,7 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
                          REG(R_CPSR)=REG(R_SPSR);  \
                          if(__old_mode != MODE)    \
                          { \
-                            DEBUG("Mode has changed from %s to %s\n",mode_str[__old_mode],mode_str[MODE]); \
+                            printf("Mode has changed from %s to %s at %x\n",mode_str[__old_mode],mode_str[MODE],PC_REAL); \
                             current_reg = mode_regs[MODE]; \
                          } \
                      }
@@ -167,8 +171,7 @@ Cpu::Cpu(mem_space * mem)
     SET_FLAG(IRQ_MASK);
     SET_FLAG(FIQ_MASK);
     
-    SET_MODE(M_SVC);
-    current_reg = mode_regs[M_SVC];
+    SET_MODE(M_SYS); //M_SVC
     
     /* init the cmd line */
     
@@ -199,11 +202,16 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
     uint32_t address;
     
     while(1)
-    {       
+    {  
+        for(int i=0;i<4;i++)
+            mem->hw_TI->timer_list[i]->nxt_cycle();    
+        
+        
+             
         if(!FIQ_FLAG && mem->hw_TI->HW_irq->have_int_FIQ)
         {
             mem->hw_TI->HW_irq->have_int_FIQ = false;
-            printf("FIQ \n");
+            //printf("FIQ - return at %x\n",PC_REAL+4);
             *mode_regs[M_FIQ][R_LR]=PC_REAL+4;
             *mode_regs[M_FIQ][R_SPSR]=REG(R_CPSR);
             SET_MODE(M_FIQ);
@@ -215,8 +223,9 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
         
         if(!IRQ_FLAG && mem->hw_TI->HW_irq->have_int_IRQ)
         {
+            //printState();
             mem->hw_TI->HW_irq->have_int_IRQ = false;
-            printf("IRQ \n");
+            //printf("IRQ - return at %x\n",PC_REAL+4);
             *mode_regs[M_IRQ][R_LR]=PC_REAL+4;
             *mode_regs[M_IRQ][R_SPSR]=REG(R_CPSR);
             SET_MODE(M_IRQ);
@@ -224,7 +233,6 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
             SET_FLAG(IRQ_MASK);
             REG(R_PC)=0x18;
         }
-        
         
         address = T_FLAG ? PC_REAL&0xfffffffe : (PC_REAL+2)&0xfffffffc;
         

@@ -21,6 +21,7 @@
 #include "HW_IRQ.h"
 #include "HW_mem.h"
 #include "HW_cpld.h"
+#include "HW_timer.h"
 
 
 class HW_TI:public HW_access {
@@ -31,6 +32,9 @@ class HW_TI:public HW_access {
         HW_dma * hw_dma;
         mem_space * memSpace;
         HW_IRQ * HW_irq;
+        
+        HW_timer * timer_list[4];
+        
         /*uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);      */
 };

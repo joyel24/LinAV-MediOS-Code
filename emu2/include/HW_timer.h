@@ -15,14 +15,16 @@
 
 #include "emu.h"
 #include "HW_access.h"
-
+#include "HW_IRQ.h"
 
 class HW_timer : public HW_access {
     public:
-        HW_timer(int timer_num);
+        HW_timer(int timer_num,HW_IRQ * HW_irq);
                 
         uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);
+        
+        void nxt_cycle(void);
         
     private:
         int timer_num;
@@ -32,6 +34,9 @@ class HW_timer : public HW_access {
         int tm_max;
         int tm_trigger;
         int tm_cnt;
+        int tm_ps;
+        
+        HW_IRQ * HW_irq;
 };
 
 #endif // __HW_TIMER_H

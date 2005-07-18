@@ -11,7 +11,7 @@ void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
     int opcode = (instruction >> 21 ) & 0xF;
     uint32_t alu_out;
 
-    bool fl_s = (instruction >> 20 ) & 0x1;
+    bool fl_s = (instruction >> 20 ) & 0x1==0x1;
 
     
                 
@@ -50,8 +50,11 @@ void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0x2: ///////////////////////////////////////////// SUB
+            if(fl_s && Rd==15)
+                printf("SUBS %s, %s, %s old_val %x\n",RR(Rd),RR(Rn),debugShifter,GET_REG(Rd));
+            
             REG(Rd)=GET_REG(Rn) - shifter_operand;
-            printf("SUB%s %s, %s, %s => %x\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter,GET_REG(Rd));            
+            DEBUG("SUB%s %s, %s, %s => %x\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter,GET_REG(Rd));            
             if(fl_s && Rd==15)
             {
                 CHG_MODE
@@ -64,7 +67,7 @@ void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0x3: ///////////////////////////////////////////// RSB => reverse subtract
-            DEBUG("RSB %s, %s, %s\n",RR(Rd),RR(Rn),debugShifter);
+            DEBUG("RSB%s %s, %s, %s\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter);
             REG(Rd)=shifter_operand-GET_REG(Rn);
             if(fl_s && Rd==15)
             {
@@ -78,7 +81,7 @@ void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0x4: ///////////////////////////////////////////// ADD
-            DEBUG("ADD %s, %s, %s\n",RR(Rd),RR(Rn),debugShifter);
+            DEBUG("ADD%s %s, %s, %s\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter);
             REG(Rd)=GET_REG(Rn) + shifter_operand;
             if(fl_s && Rd==15)
             {
@@ -92,7 +95,7 @@ void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0x5: ///////////////////////////////////////////// ADC => add with carry
-            DEBUG("ADC %s, %s, %s\n",RR(Rd),RR(Rn),debugShifter);
+            DEBUG("ADC%s %s, %s, %s\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter);
             int addOn;
             if(C_FLAG)
                 addOn=1;
@@ -117,7 +120,7 @@ void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0x6: ///////////////////////////////////////////// SBC => sub with carry
-            DEBUG("SBC %s, %s, %s\n",RR(Rd),RR(Rn),debugShifter);
+            DEBUG("SBC%s %s, %s, %s\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter);
             if(C_FLAG)
                 addOn=1;
             else
@@ -137,7 +140,7 @@ void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0x7: ///////////////////////////////////////////// RSC => reverse subtract with carry
-            DEBUG("RSC %s, %s, %s\n",RR(Rd),RR(Rn),debugShifter);
+            DEBUG("RSC%s %s, %s, %s\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter);
             if(C_FLAG)
                 addOn=1;
             else
@@ -224,7 +227,7 @@ void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0xD: ///////////////////////////////////////////// MOV
-            DEBUG("MOV %s, %s\n",RR(Rd),debugShifter);
+            DEBUG("MOV%s %s, %s\n",fl_s?"S":"",RR(Rd),debugShifter);
             REG(Rd)=shifter_operand;
 
             if(fl_s && Rd==15)
@@ -252,7 +255,7 @@ void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0xF: ///////////////////////////////////////////// MVN => MOV not
-            DEBUG("MVN %s, %s\n",RR(Rd),debugShifter);
+            DEBUG("MVN%s %s, %s\n",fl_s?"S":"",RR(Rd),debugShifter);
             REG(Rd)=~shifter_operand;
 
             if(fl_s && Rd==15)
