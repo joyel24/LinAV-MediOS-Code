@@ -22,16 +22,9 @@
 class HW_ON_OFF:public gpio_port {
     public:
         HW_ON_OFF(int num);
-        //void set_gpio(void);
-        //void clear_gpio(void);
-        //void gpio_dir_chg(int dir);
         
-        //const char * name;
-        
-        //int state;
-        
-    /*protected:
-        int gpio_num;*/
+        void set_gpio(void);
+        void clear_gpio(void);
 };
 
 

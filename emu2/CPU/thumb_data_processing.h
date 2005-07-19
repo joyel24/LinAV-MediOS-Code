@@ -9,7 +9,7 @@ int formatTable[9][16] = {
     {0x1,0x6,0xA},
     {0x5,0x7,0x6,0x3,0x0,0x2,0x1,0x4}};
 
-void Cpu::thumb_data_process(int format,int opcode,uint32_t instruction)
+void thumb_data_process(int format,int opcode,uint32_t instruction)
 {
         int Rd=0;
         int Rn=0;

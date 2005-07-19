@@ -123,15 +123,21 @@ uint32_t old_PC;
                    
 char * cond_str[] = {"EQ","NE","CS","CC","MI","PL","VS","VC","HI","LS","GE","LT","GT","LE","  ","ERR"};
 
-Cpu * cur_cpu;
+uint32_t ** current_reg;
+uint32_t * mode_regs[7][18];        
+uint32_t regs_data[37];
 
-void init_cpu_static_fct(Cpu * cpu);
+uint32_t my_data;
+
+extern mem_space * mem;
+
+bkpt_list * bkpt;
+
+void init_cpu_static_fct(void);
                      
-Cpu::Cpu(mem_space * mem)
+void init_cpu(void)
 {
     int i,j;
-    
-    this->mem=mem;
     
     /*init regs data*/
     for(i=0;i<38;i++)
@@ -175,7 +181,7 @@ Cpu::Cpu(mem_space * mem)
     
     /* init the cmd line */
     
-    init_cpu_static_fct(this);
+    init_cpu_static_fct();
     
     /* init bkpt_list */
     
@@ -185,14 +191,14 @@ Cpu::Cpu(mem_space * mem)
     
 }
 
-void Cpu::sigint(void)
+void sigint(void)
 {
     run_mode = STEP;
 }
 
 #include "cpu_cmd_line_fct.h"
 
-void Cpu::go(uint32_t start_address,uint32_t stack_address)
+void go(uint32_t start_address,uint32_t stack_address)
 {
     uint32_t instruction;
     REG(R_PC)=start_address;
@@ -266,9 +272,7 @@ void Cpu::go(uint32_t start_address,uint32_t stack_address)
     }
 }
 
-
-
-bool Cpu::checkCondition(int condCode)
+bool checkCondition(int condCode)
 {
     switch(condCode & 0xF)
     {
@@ -309,7 +313,7 @@ bool Cpu::checkCondition(int condCode)
     return false;
 }
 
-void Cpu::doARM(uint32_t instruction)
+void doARM(uint32_t instruction)
 {
     int condCode = (instruction >> 28) & 0xf;
     int instr_num = (instruction >> 25) & 0x7;
@@ -503,7 +507,7 @@ void Cpu::doARM(uint32_t instruction)
         printState();
 }
 
-void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
+void arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
 {
     if (checkCondition(condCode))
     {   
@@ -638,7 +642,7 @@ void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
 #include "cpu_multiply.h"
 
        
-void Cpu::arm_CoProcessor(int condCode,uint32_t instruction)
+void arm_CoProcessor(int condCode,uint32_t instruction)
 {
     INT_DEBUG_HEAD
     printf("coprocessor instruction: %08x\n",instruction);
@@ -646,14 +650,14 @@ void Cpu::arm_CoProcessor(int condCode,uint32_t instruction)
 }
 
 
-void Cpu::arm_DSP(int condCode,uint32_t instruction)
+void arm_DSP(int condCode,uint32_t instruction)
 {
     INT_DEBUG_HEAD
     printf("DSP instruction: %08x\n",instruction);
     exit(0);
 }
 
-void Cpu::arm_Swap(uint32_t instruction)
+void arm_Swap(uint32_t instruction)
 {
     int Rm=instruction & 0xF;
     int Rn=(instruction>>16) &0xF;
@@ -700,7 +704,7 @@ void Cpu::arm_Swap(uint32_t instruction)
     }
 }
 
-void Cpu::doThumb(uint32_t instruction)
+void doThumb(uint32_t instruction)
 {
     int instr_num = (instruction >> 13) & 0x7;
     
@@ -885,14 +889,14 @@ void Cpu::doThumb(uint32_t instruction)
 #include "thumb_load_store_multi.h"
 
 ////////////////////////////// signExtend
-uint32_t Cpu::signExtend1(uint32_t data)
+uint32_t signExtend1(uint32_t data)
 {
     if(data > 0x7F) // neg
         data -=  0x100;
     return data;
 }
 
-uint32_t Cpu::signExtend11(uint32_t data)
+uint32_t signExtend11(uint32_t data)
 {
     if(data > 0x3FF) // neg
     {
@@ -901,14 +905,14 @@ uint32_t Cpu::signExtend11(uint32_t data)
     return data;
 }
 
-uint32_t Cpu::signExtend2(uint32_t data)
+uint32_t signExtend2(uint32_t data)
 {
     if(data> 0x7FFF) // neg
         data -=  0x10000;
     return data;
 }
 
-void Cpu::printState(void)
+void printState(void)
 {
     int i=0;
     printf("Mode : %s (%d) - PC:%08x, LR:%08x, SP:%08x\n",mode_str[MODE],MODE,
@@ -931,40 +935,4 @@ void Cpu::printState(void)
     if(MODE != M_USER && MODE != M_SYS)
         printf("SPSR: %08x\n",GET_REG(R_SPSR));
     
-}
-
-void Cpu::test_ini(void)
-{
-    int i;
-    for(i=0;i<17;i++)
-        regs_data[i]=i;
-        
-    regs_data[17]=0x0213;
-    regs_data[18]=0x0214;
-    regs_data[19]=0x0217;
-    
-    /* ABT mode */
-    regs_data[20]=0x0313;
-    regs_data[21]=0x0314;
-    regs_data[22]=0x0317;
-    
-    /* UND mode */
-    regs_data[23]=0x0413;
-    regs_data[24]=0x0414;
-    regs_data[25]=0x0417;
-    
-    /* IRQ mode */
-    regs_data[26]=0x0513;
-    regs_data[27]=0x0514;
-    regs_data[28]=0x0517;
-    
-    /* FIQ mode */
-    for(i=0;i<7;i++)
-        regs_data[29+i]=0x6*0x100+R_R8+i;
-   regs_data[36]=0x0617;
-   
-   printf("All regs init to test value\nNow printing them:\n");
-   for(i=0;i<7;i++)
-       printState();
-   
 }

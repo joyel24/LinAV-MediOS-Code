@@ -1,4 +1,4 @@
-void Cpu::thumb_load_store_multi(int format,int opcode,uint32_t instruction)
+void thumb_load_store_multi(int format,int opcode,uint32_t instruction)
 {
     int register_list = instruction & 0xFF;
     int Rn;

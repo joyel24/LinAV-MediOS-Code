@@ -1,4 +1,4 @@
-void Cpu::arm_LoadStoreMulti(uint32_t instruction)
+void arm_LoadStoreMulti(uint32_t instruction)
 {
     bool bit_P = ((instruction >> 24) & 0x1);
     bool bit_U = ((instruction >> 23) & 0x1);
@@ -111,15 +111,15 @@ void Cpu::arm_LoadStoreMulti(uint32_t instruction)
                 int old_mode=MODE;
                 if(old_mode == M_USER || old_mode == M_SYS)  
                 {              
-                    DEBUG("Unpredictable, wrong mode\n");
-                    exit(0);
+                    printf("Unpredictable, wrong mode\n");
+                    //exit(0);
                 }
                 else                
                     REG(R_CPSR)=REG(R_SPSR);
                     
                 if(old_mode != MODE)
                 {
-                    DEBUG("Mode has changed from %s to %s\n",mode_str[old_mode],mode_str[MODE]);
+                    printf("Mode has changed from %s to %s\n",mode_str[old_mode],mode_str[MODE]);
                     current_reg = mode_regs[MODE];
                 }
                     

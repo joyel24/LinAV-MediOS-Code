@@ -1,4 +1,4 @@
-void Cpu::thumb_load_store(int format,int opcode,uint32_t instruction)
+void thumb_load_store(int format,int opcode,uint32_t instruction)
 {   
     int Rd;
     int Rn;

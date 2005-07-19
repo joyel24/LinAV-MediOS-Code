@@ -21,7 +21,6 @@
 #include <cmd_line.h>
 
 mem_space * mem;
-Cpu    * cpu;
 
 enum cmd_type {NO_CMD=0x0,F_SDRM='s',F_FLASH='f',C_HELP='h'};
 
@@ -36,7 +35,7 @@ void cmd_line(void);
 void signal_handler( int num ) {
    if(num == SIGINT)
    {
-       cpu->sigint();
+       sigint();
    }   
 }
 
@@ -91,17 +90,17 @@ int main(int argc, char* argv[])
     init_cmd_line();
     
     //sdram_file = "linux.bin";
+    //sdram_file = "gravity.bin";
     sdram_file = "CJBM_v2.depack";
     //sdram_file = "firm_1.depack_NEW";
     
     mem = new mem_space(flash_file,sdram_file);
     
-    cpu = new Cpu(mem);
+    init_cpu();
     
     signal(SIGINT,&signal_handler);
     
-    cpu->go(0x03000000,0x000080000-0x4);
+    go(0x03000000,0x000080000-0x4);
     
     delete(mem);
-    delete(cpu);
 }

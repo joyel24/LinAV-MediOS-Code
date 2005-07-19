@@ -66,16 +66,10 @@ int HW_cpld::do_cmd_btn(int btn)
     switch(btn)
     {
         case BTN_ON:
-            if(ON_btn->state)
-                ON_btn->clear_gpio();
-            else
-                ON_btn->set_gpio();
+            ON_btn->state=ON_btn->state==1?0:1;
             break;
         case BTN_OFF:
-            if(OFF_btn->state)
-                OFF_btn->clear_gpio();
-            else
-                OFF_btn->set_gpio();
+            OFF_btn->state=OFF_btn->state==1?0:1;
             break;
         default:
             btn_var[btn]=BTN_INIT_VAL;

@@ -1,4 +1,4 @@
-void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
+void arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
 {
     int offset_12=0,shift=0,shift_imm=0,immedH=0,immedL=0;
     int Rm=0,Rn=0,Rd=0;

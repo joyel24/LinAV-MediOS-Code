@@ -1,6 +1,6 @@
 #define isNeg(VAL)   (((VAL)>>31)&0x1)
 
-void Cpu::ARM_NegZero(uint32_t result)
+void ARM_NegZero(uint32_t result)
 {
     if(result == 0)
     {
@@ -22,7 +22,7 @@ void Cpu::ARM_NegZero(uint32_t result)
 }
 
 
-void Cpu::ARM_AddCarry(uint32_t a, uint32_t b, uint32_t result)
+void ARM_AddCarry(uint32_t a, uint32_t b, uint32_t result)
 {
     bool tmpflag = false;
     if ((isNeg(a) && isNeg(b)) ||
@@ -34,7 +34,7 @@ void Cpu::ARM_AddCarry(uint32_t a, uint32_t b, uint32_t result)
 }
 
 
-void Cpu::ARM_AddOverflow(uint32_t a, uint32_t b, uint32_t result)
+void ARM_AddOverflow(uint32_t a, uint32_t b, uint32_t result)
 {
     bool tmpflag = false;
     if (isNeg(a) && isNeg(b) && !isNeg(result) ||
@@ -45,7 +45,7 @@ void Cpu::ARM_AddOverflow(uint32_t a, uint32_t b, uint32_t result)
 }
 
 
-void Cpu::ARM_SubCarry(uint32_t a, uint32_t b, uint32_t result)
+void ARM_SubCarry(uint32_t a, uint32_t b, uint32_t result)
 {
     bool tmpflag = false;
     if ((isNeg(a) && !isNeg(b)) ||
@@ -57,7 +57,7 @@ void Cpu::ARM_SubCarry(uint32_t a, uint32_t b, uint32_t result)
 }
 
 
-void Cpu::ARM_SubOverflow(uint32_t a, uint32_t b, uint32_t result)
+void ARM_SubOverflow(uint32_t a, uint32_t b, uint32_t result)
 {
     bool tmpflag = false;
     if (isNeg(a) && !isNeg(b) && !isNeg(result) ||
@@ -69,7 +69,7 @@ void Cpu::ARM_SubOverflow(uint32_t a, uint32_t b, uint32_t result)
 
 /////////////// with carry version
 
-void Cpu::ARM_AddCCarry(uint32_t a, uint32_t b, uint32_t c)
+void ARM_AddCCarry(uint32_t a, uint32_t b, uint32_t c)
 {
     ARM_AddCarry(a,b,a+b);
     if(!C_FLAG  && c !=0)
@@ -77,15 +77,15 @@ void Cpu::ARM_AddCCarry(uint32_t a, uint32_t b, uint32_t c)
 #warning add carry test
 }
 
-void Cpu::ARM_AddCOverflow(uint32_t a, uint32_t b, uint32_t c)
+void ARM_AddCOverflow(uint32_t a, uint32_t b, uint32_t c)
 {
     ARM_AddOverflow(a,b,a+b);
     if(!V_FLAG  && c !=0)
-            Cpu::ARM_AddOverflow(a+b,c,a+b+c);
+            ARM_AddOverflow(a+b,c,a+b+c);
 #warning add overflow test
 }
 
-void Cpu::ARM_SubCCarry(uint32_t a, uint32_t b,uint32_t c)
+void ARM_SubCCarry(uint32_t a, uint32_t b,uint32_t c)
 {
     ARM_SubCarry(a,b,a-b);
     if(!V_FLAG  && c !=0)
@@ -93,7 +93,7 @@ void Cpu::ARM_SubCCarry(uint32_t a, uint32_t b,uint32_t c)
 #warning sub carry test
 }
 
-void Cpu::ARM_SubCOverflow(uint32_t a, uint32_t b,uint32_t c)
+void ARM_SubCOverflow(uint32_t a, uint32_t b,uint32_t c)
 {
     ARM_SubOverflow(a,b,a-b);
     if(!V_FLAG  && c !=0)

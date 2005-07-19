@@ -18,8 +18,6 @@
 
 #include "emu.h"
 
-class Cpu;
-
 typedef struct cmd_line_elem {
   char *name;
   int (*func)(int argc,char ** argv);

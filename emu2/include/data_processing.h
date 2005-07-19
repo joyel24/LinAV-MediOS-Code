@@ -1,4 +1,4 @@
-void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
+void arm_DataProcessing(int condCode,uint32_t instruction)
 {    
     int Rd = (instruction >> 12) & 0xF;
     int Rn = (instruction >> 16) & 0xF;
@@ -271,7 +271,7 @@ void Cpu::arm_DataProcessing(int condCode,uint32_t instruction)
         }
 }
 
-uint32_t Cpu::getShifterData(uint32_t instruction,char *debugShifter,int *shifter_carry_out)
+uint32_t getShifterData(uint32_t instruction,char *debugShifter,int *shifter_carry_out)
 {
 
     uint32_t shifter_operand=0;

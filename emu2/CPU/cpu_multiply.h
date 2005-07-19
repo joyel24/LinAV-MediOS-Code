@@ -1,4 +1,4 @@
-void Cpu::arm_Mul(int condCode,uint32_t instruction)
+void arm_Mul(int condCode,uint32_t instruction)
 {
     if(!checkCondition(condCode))
     {
