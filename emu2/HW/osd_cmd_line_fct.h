@@ -26,6 +26,11 @@ int HW_OSD::do_cmd_updt_lcd(int argc,char ** argv)
         start_addr = my_atoi(argv[0]);
         lcd->updte_lcd(start_addr);
     }
+    else
+    {
+        if(OSD_offset_regs[2]>=0x03000000 && OSD_offset_regs[2] < 0x04000000)
+            lcd->updte_lcd(OSD_offset_regs[2]);
+    }
     return 0;
 }
 

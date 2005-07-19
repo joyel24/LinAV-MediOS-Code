@@ -536,8 +536,8 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
 void HW_OSD::chk_access(uint32_t addr,uint32_t val)
 {
     if(OSD_offset_regs[2] >= 0x03000000 && addr>=OSD_offset_regs[2] 
-        && addr <= (OSD_offset_regs[2]+lcd->SCREEN_WIDTH*lcd->SCREEN_HEIGHT*2))
-        lcd->drawPix(addr-OSD_offset_regs[2],val);
-    lcd->nxtEvent(OSD_offset_regs[2]);
+            && addr <= (OSD_offset_regs[2]+lcd->SCREEN_WIDTH*lcd->SCREEN_HEIGHT*2))
+            lcd->drawPix(addr-OSD_offset_regs[2],val);
+        lcd->nxtEvent(OSD_offset_regs[2]);
 }
 
