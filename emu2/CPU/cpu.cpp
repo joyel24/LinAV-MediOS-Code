@@ -171,7 +171,7 @@ Cpu::Cpu(mem_space * mem)
     SET_FLAG(IRQ_MASK);
     SET_FLAG(FIQ_MASK);
     
-    SET_MODE(M_SYS); //M_SVC
+    SET_MODE(M_SVC); //M_SYS
     
     /* init the cmd line */
     

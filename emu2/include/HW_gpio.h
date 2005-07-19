@@ -28,8 +28,6 @@ class gpio_port {
         const char * name;
         
         int state;
-        
-    protected:
         int gpio_num;
 };
 

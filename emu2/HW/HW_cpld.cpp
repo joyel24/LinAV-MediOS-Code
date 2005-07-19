@@ -16,6 +16,7 @@
 #include <HW_cpld.h>
 #include <HW_30a24.h>
 #include <HW_dma.h>
+#include <HW_ON_OFF.h>
 
 #include <my_print.h>
 
@@ -33,8 +34,10 @@
 #define BTN_F1    0x5
 #define BTN_F2    0x6
 #define BTN_JOY   0x7
+#define BTN_ON    0x8
+#define BTN_OFF   0x9
 
-#define BTN_INIT_VAL  0x1F
+#define BTN_INIT_VAL  0x2
 
 #define BTN_FCT(BTN,MASK)      \
     if(BTN)                    \
@@ -65,7 +68,10 @@ HW_cpld::HW_cpld(void):HW_access(0x02000000,0x02ffffff,"CPLD")
     
     /* btn init */
     for(int k=0;k<8;k++)
-        btn_var[k]=0   ; 
+        btn_var[k]=0   ;
+        
+    ON_btn = new HW_ON_OFF(ON_GPIO); 
+    OFF_btn = new HW_ON_OFF(OFF_GPIO);
 }
 
 HW_cpld::~HW_cpld()
@@ -81,6 +87,12 @@ void HW_cpld::set30A24(HW_30a24 * hw_30a24)
 void HW_cpld::setDMA(HW_dma * hw_dma)
 {
     this->hw_dma = hw_dma;
+}
+
+void HW_cpld::setONOFF(HW_gpio * gpio)
+{
+    gpio->register_port(ON_btn->gpio_num,ON_btn);
+    gpio->register_port(OFF_btn->gpio_num,OFF_btn);
 }
 
 uint32_t HW_cpld::read(uint32_t addr,int size)

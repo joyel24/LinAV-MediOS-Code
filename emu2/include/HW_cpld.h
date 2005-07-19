@@ -20,6 +20,8 @@
 #include "HW_access.h"
 #include "HW_30a24.h"
 #include "HW_dma.h"
+#include <HW_ON_OFF.h>
+#include <HW_gpio.h>
 
 #define IDE_BASE                          (0x02400000)
 
@@ -61,13 +63,15 @@ class HW_cpld:public HW_access {
         
         void set30A24(HW_30a24 * hw_30a24);
         void setDMA(HW_dma * hw_dma);
+        void setONOFF(HW_gpio * gpio);
         
         void setStatus(int status);
         
         void write_buffer(char * data,int data_size);
         
         int do_cmd_btn(int btn);
-        int do_cmd_btn2(void);
+        
+        
         
     private:
         HW_30a24 * hw_30a24;  
@@ -102,6 +106,9 @@ class HW_cpld:public HW_access {
         FILE * hd;
         
         int btn_var[8];
+        
+        HW_ON_OFF * ON_btn;
+        HW_ON_OFF * OFF_btn;
 };
 
 #endif

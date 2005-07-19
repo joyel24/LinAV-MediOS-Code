@@ -32,6 +32,7 @@ class HW_TI:public HW_access {
         HW_dma * hw_dma;
         mem_space * memSpace;
         HW_IRQ * HW_irq;
+        HW_gpio * gpio;
         
         HW_timer * timer_list[4];
         

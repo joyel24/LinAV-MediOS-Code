@@ -47,7 +47,7 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30
     add_item(new HW_uart(0x30300,0x30310,"UART0"));
     add_item(new HW_uart(0x30380,0x30390,"UART1"));
     add_item(new HW_clock());
-    HW_gpio * gpio = new HW_gpio();
+    gpio = new HW_gpio();
     add_item(gpio);
     hw_30a24 = new HW_30a24();
     hw_dma = new HW_dma(mem,hw_cpld);
@@ -70,6 +70,7 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30
     
     
     new i2c_master(gpio);
+    
     
 }
 
