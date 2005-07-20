@@ -9,20 +9,27 @@
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
 */
+#include "X11/keysym.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <HW_lcd.h>
+#include <HW_cpld.h>
+#include <mem_space.h>
 
 #include <pallette.h>
 
+extern mem_space * mem;
+
 //#define LCD_UPDATE(x,y,w,h)       {lcd_update(UPDATE_ONLY,x,y,w,h);}
 
-HW_lcd::HW_lcd(HW_mem * mem)
+HW_lcd::HW_lcd(HW_mem * mem2)
 {
     int x,y;
     
-    this->mem = mem;
+    this->mem2 = mem2;
+    //this->memSpace = memSpace;
 
     SCREEN_WIDTH = 320;
     SCREEN_HEIGHT = 240;
@@ -64,6 +71,8 @@ HW_lcd::HW_lcd(HW_mem * mem)
             XDrawPoint(display, window, gc, x, y);
         }            
     
+    XSelectInput(display, window, ExposureMask | KeyPressMask | KeyReleaseMask);
+        
     XMapWindow(display, window);
     
     printf("LCD init done\n");    
@@ -93,24 +102,91 @@ int HW_lcd::nxtEvent(uint32_t addr)
     int pending;
     pending = XPending(display);
     KeySym keysym;
-    unsigned char c = 0;
-    XSelectInput(display, window, ExposureMask | KeyPressMask | KeyReleaseMask);
+    char c = 0;
+    
+    
+    
     
   if(pending != 0)
   {
+    
     /* next event */
     XNextEvent(display, &event);    
-    
+    int val=BTN_INIT_VAL;
     switch (event.type) 
     {
-      case Expose :
-          if(addr!=0)
-              updte_lcd(addr);
-          break;
-      case KeyPress :
-          break;
-      case KeyRelease :
-      break;
+        case Expose :
+            if(addr>=0x03000000 && addr < 0x04000000)
+                updte_lcd(addr);
+            break;
+        //case KeyRelease :
+            //val=0;
+        case KeyPress : 
+            printf("keypress ");         
+            XLookupString (&event.xkey, &c, 1, &keysym, 0);
+            switch(keysym)
+            {
+                case XK_KP_Left:
+                case XK_Left:
+                case XK_KP_4:
+                    printf("left\n"); 
+                    mem->hw_cpld->btn_var[BTN_LEFT]=val;
+                    break;
+            
+                case XK_KP_Right:
+                case XK_Right:
+                case XK_KP_6:
+                    printf("right\n");
+                    mem->hw_cpld->btn_var[BTN_RIGHT]=val;
+                    break;
+            
+                case XK_KP_Up:
+                case XK_Up:
+                case XK_KP_8:
+                    printf("up\n");
+                    mem->hw_cpld->btn_var[BTN_UP]=val;
+                    break;
+            
+                case XK_KP_Down:
+                case XK_Down:
+                case XK_KP_2:
+                    printf("down\n");
+                    mem->hw_cpld->btn_var[BTN_DOWN]=val;
+                    break;
+                
+                case XK_KP_Add:
+                case XK_Q:
+                case XK_q:
+                    printf("ON %d\n",mem->hw_cpld->ON_btn->state);
+                    mem->hw_cpld->ON_btn->state=mem->hw_cpld->ON_btn->state==1?0:1;
+                    break;
+                    
+                case XK_KP_Enter:
+                case XK_A:
+                case XK_a:
+                    printf("OFF %d\n",mem->hw_cpld->OFF_btn->state);
+                    mem->hw_cpld->OFF_btn->state=mem->hw_cpld->OFF_btn->state==1?0:1;
+                    break;
+                    
+                case XK_KP_Divide:
+                case XK_1:
+                    printf("F1\n");
+                    mem->hw_cpld->btn_var[BTN_F1]=val;
+                    break;
+                    
+                case XK_KP_Multiply:
+                case XK_2:
+                    printf("F2\n");
+                    mem->hw_cpld->btn_var[BTN_F2]=val;
+                    break;
+                    
+                case XK_KP_Subtract:
+                case XK_3:
+                    printf("F3\n");
+                    mem->hw_cpld->btn_var[BTN_F3]=val;
+                    break;
+            }        
+            break;
     }
    }  
 }
@@ -136,7 +212,7 @@ void HW_lcd::updte_lcd(uint32_t base_addr)
     for(int j = 0 ; j < SCREEN_HEIGHT+1 ; j++)
         for(int i = 0 ; i < SCREEN_WIDTH+1 ; i++)
         {
-            XSetForeground(display, gc, colorTab[mem->read(base_addr+(j*(SCREEN_WIDTH*2)+i*2),2)&0xFF]);
+            XSetForeground(display, gc, colorTab[mem2->read(base_addr+(j*(SCREEN_WIDTH*2)+i*2),2)&0xFF]);
             XDrawPoint(display, window, gc, i, j);
          }
 }

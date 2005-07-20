@@ -20,7 +20,7 @@ HW_OSD * hw_OSD;
 
 void init_mem_static_fct(HW_OSD * osd);
 
-HW_OSD::HW_OSD(HW_mem * mem):HW_access(0x30680,0x30700,"OSD")
+HW_OSD::HW_OSD(HW_mem * mem2):HW_access(0x30680,0x30700,"OSD")
 {
     init_mem_static_fct(this);
     
@@ -56,7 +56,7 @@ HW_OSD::HW_OSD(HW_mem * mem):HW_access(0x30680,0x30700,"OSD")
     OSD_pallette_index=0;
     OSD_alt_vid_offset=0;
     
-    lcd = new HW_lcd(mem);
+    lcd = new HW_lcd(mem2);
 }
 
 #include <osd_cmd_line_fct.h>
@@ -533,11 +533,16 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
     
 }
 
+int HW_OSD::nxtEvent(void)
+{
+    return lcd->nxtEvent(OSD_offset_regs[2]);
+}
+
 void HW_OSD::chk_access(uint32_t addr,uint32_t val)
 {
     if(OSD_offset_regs[2] >= 0x03000000 && addr>=OSD_offset_regs[2] 
             && addr <= (OSD_offset_regs[2]+lcd->SCREEN_WIDTH*lcd->SCREEN_HEIGHT*2))
             lcd->drawPix(addr-OSD_offset_regs[2],val);
-        lcd->nxtEvent(OSD_offset_regs[2]);
+        //lcd->nxtEvent(OSD_offset_regs[2]);
 }
 

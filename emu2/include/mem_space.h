@@ -17,6 +17,7 @@
 #include "HW_access.h"
 #include <bkpt_list.h>
 #include <HW_OSD.h>
+#include <HW_cpld.h>
 //#include <HW_TI.h>
 
 class HW_TI;
@@ -35,6 +36,7 @@ class mem_space:public HW_access {
         void set_OSD(HW_OSD * hw_osd);
         
         HW_TI * hw_TI;
+        HW_cpld * hw_cpld;
         
     private:
         bkpt_list * bkpt;

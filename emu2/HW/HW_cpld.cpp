@@ -26,25 +26,17 @@
 #include <hd_data/id_disk.h>
 #include <hd_data/part_table.h>
 
-#define BTN_UP    0x0
-#define BTN_LEFT  0x1
-#define BTN_RIGHT 0x2
-#define BTN_DOWN  0x3
-#define BTN_F3    0x4
-#define BTN_F1    0x5
-#define BTN_F2    0x6
-#define BTN_JOY   0x7
-#define BTN_ON    0x8
-#define BTN_OFF   0x9
-
-#define BTN_INIT_VAL  0x2
-
+#if 1
 #define BTN_FCT(BTN,MASK)      \
     if(BTN)                    \
         BTN--;                 \
     else                       \
         ret_val |= MASK;        
-
+#else
+#define BTN_FCT(BTN,MASK)      \
+    if(!BTN)                    \
+        ret_val |= MASK;        
+#endif
 HW_cpld * cpld_obj;
 
 #include <cmd_line.h>        

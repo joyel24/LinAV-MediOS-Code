@@ -18,7 +18,7 @@ $(TARGET) : $(OBJS)
 
 clean:  clean-subdirs
 	@echo '-----   cleaning MAIN'
-	@rm -f *.o *~ $(TARGET) include/*~ 
+	@rm -f *.o *~ $(TARGET) include/*~ build/*
         
 builddir:
 	@mkdir -p build

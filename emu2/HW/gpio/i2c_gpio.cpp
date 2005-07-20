@@ -135,6 +135,7 @@ void i2c_master::print_i2c_list(void)
 
 void i2c_master::register_i2c(i2c_device * device)
 {
+    printf("registering new device I2C: %x\n",device->address);
     device->nxt=i2c_head;
     i2c_head = device;
 }
@@ -142,7 +143,8 @@ void i2c_master::register_i2c(i2c_device * device)
 i2c_device * i2c_master::find_device(int address)
 {
     i2c_device * ptr=i2c_head;
-    while(ptr!=NULL && ptr->address != (address&0xFE)) ptr = ptr->nxt;
+    while(ptr!=NULL && ptr->address != (address&0xFE))
+        ptr = ptr->nxt;
     return ptr;
 }
 

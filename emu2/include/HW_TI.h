@@ -22,7 +22,7 @@
 #include "HW_mem.h"
 #include "HW_cpld.h"
 #include "HW_timer.h"
-
+#include "HW_OSD.h"
 
 class HW_TI:public HW_access {
     public:
@@ -33,6 +33,7 @@ class HW_TI:public HW_access {
         mem_space * memSpace;
         HW_IRQ * HW_irq;
         HW_gpio * gpio;
+        HW_OSD * osd;
         
         HW_timer * timer_list[4];
         

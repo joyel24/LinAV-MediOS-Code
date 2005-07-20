@@ -14,13 +14,16 @@
 #define __HW_LCD_H
 
 #include <HW_mem.h>
+//#include <mem_space.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+class mem_space;
+
 class HW_lcd {
     public:
-        HW_lcd(HW_mem * mem);
+        HW_lcd(HW_mem * mem2);
         void updte_lcd(uint32_t base_addr);
         void drawPix(uint32_t addr,uint32_t val);     
         
@@ -30,7 +33,7 @@ class HW_lcd {
         int nxtEvent(uint32_t addr);
           
     private:
-        HW_mem * mem;
+        HW_mem * mem2;
         
         Display* display;
         Window window;

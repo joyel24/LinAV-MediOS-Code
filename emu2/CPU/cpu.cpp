@@ -209,6 +209,8 @@ void go(uint32_t start_address,uint32_t stack_address)
     
     while(1)
     {  
+        mem->hw_TI->osd->nxtEvent();
+        
         for(int i=0;i<4;i++)
             mem->hw_TI->timer_list[i]->nxt_cycle();    
         

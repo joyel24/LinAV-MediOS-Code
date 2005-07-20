@@ -39,8 +39,8 @@ i2c_MAS::i2c_MAS(void):i2c_device(0x3c,"MAS")
         codec_reg[i]=0;
     
     
-    D0_ram = new HW_mem(NULL,0x0,0x800,"MAS_D0");
-    D1_ram = new HW_mem(NULL,0x0,0x800,"MAS_D1");
+    D0_ram = new HW_mem(NULL,0x0,0x1000,"MAS_D0");
+    D1_ram = new HW_mem(NULL,0x0,0x1000,"MAS_D1");
     
     D0_ram->write(0x7F0,0xa0264,4);
     D0_ram->write(0x7F1,0x125,4);

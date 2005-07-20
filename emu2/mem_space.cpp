@@ -44,7 +44,7 @@ mem_space::mem_space(char * flash,char * sdram):HW_access(0x0,0xFFFFFFFF,"AVMEM"
     HW_mem * sd = new HW_mem(sdram,0x3000000,0x4000000,"SDRAM");
     add_item(sd);
     
-    HW_cpld * hw_cpld = new HW_cpld();    
+    hw_cpld = new HW_cpld();    
     hw_TI = new HW_TI(this,sd,hw_cpld);
     
     

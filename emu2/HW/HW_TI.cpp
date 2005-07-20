@@ -38,7 +38,7 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30
     
     this->memSpace=memSpace;
     
-    HW_OSD * osd = new HW_OSD(mem);
+    osd = new HW_OSD(mem);
     
     memSpace->set_OSD(osd);
     
@@ -67,7 +67,8 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30
     add_item(new HW_TI_ver());
     add_item(new HW_ECR());
     
-    
+    add_item(new HW_null(0x30700,0x30800,"UKN-0x30700"));
+    add_item(new HW_null(0x30800,0x30880,"VIDEO"));
     
     new i2c_master(gpio);
     
