@@ -18,7 +18,7 @@
 
 class i2c_RTC:i2c_device {
     public:
-        i2c_RTC(void);
+        i2c_RTC(HW_gpio * gpio);
         
         int read(void);
         void write(int val);

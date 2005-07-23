@@ -109,7 +109,7 @@ void HW_dma::write(uint32_t addr,uint32_t val,int size)
                             data[i+data_ptr] = mem->read(0x03000000 + dma_src + i,1);
                         data_ptr+=dma_size;
                         dma_src+=dma_size;                        
-                        if(data_ptr==data_size)
+                        if(data_ptr>=data_size)
                         {
                             DEBUG_HW(DMA_HW_DEBUG," (finale) \n");
                             hw_cpld->write_buffer(data,data_size);
@@ -118,13 +118,13 @@ void HW_dma::write(uint32_t addr,uint32_t val,int size)
                         DEBUG_HW(DMA_HW_DEBUG,"done");
                         break;
                     case 0x15:
-                        DEBUG_HW(DMA_HW_DEBUG,"real dest = %x , src val (%x) %02x%02x%02x%02x  ",0x03000000 + dma_dst,data_ptr,
-                                data[data_ptr]&0xFF,data[data_ptr+1]&0xFF,data[data_ptr+2]&0xFF,data[data_ptr+3]&0xFF);
+                        DEBUG_HW(DMA_HW_DEBUG,"real dest = %x , src val (%x/%x) %02x%02x%02x%02x  ",0x03000000 + dma_dst,data_ptr,
+                            data_size,data[data_ptr]&0xFF,data[data_ptr+1]&0xFF,data[data_ptr+2]&0xFF,data[data_ptr+3]&0xFF);
                         for (int i = 0; i < dma_size; i++)
                              mem->write(0x03000000 + dma_dst + i,data[i+data_ptr] & 0xff,1);
                         data_ptr+=dma_size;
                         dma_dst+=dma_size;
-                        if(data_ptr==data_size)
+                        if(data_ptr>=data_size)
                         {
                             DEBUG_HW(DMA_HW_DEBUG," (finale) ");
                             hw_cpld->setStatus(IDE_STATUS_RDY);

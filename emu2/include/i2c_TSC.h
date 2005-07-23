@@ -16,9 +16,10 @@
 #include <emu.h>
 #include <i2c_device.h>
 
+
 class i2c_TSC:i2c_device {
     public:
-        i2c_TSC(void);
+        i2c_TSC(HW_gpio * gpio);
         
         int read(void);
         void write(int val);

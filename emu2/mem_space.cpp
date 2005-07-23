@@ -58,6 +58,7 @@ mem_space::mem_space(char * flash,char * sdram):HW_access(0x0,0xFFFFFFFF,"AVMEM"
     exit_on_not_match = true;
 #else
     exit_on_not_match = false;
+    data_abt_on_not_match = true;
 #endif    
     /* special init for uart */
     char * str="DeBuGuNlOcKeD_42";

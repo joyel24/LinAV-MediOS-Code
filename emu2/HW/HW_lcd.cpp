@@ -98,13 +98,11 @@ void HW_lcd::setPalette(int palette[256][3],int size)
 
 int HW_lcd::nxtEvent(uint32_t addr)
 {   
- 
+ #if 1
     int pending;
     pending = XPending(display);
     KeySym keysym;
     char c = 0;
-    
-    
     
     
   if(pending != 0)
@@ -189,6 +187,7 @@ int HW_lcd::nxtEvent(uint32_t addr)
             break;
     }
    }  
+   #endif
 }
 
 void HW_lcd::drawPix(uint32_t addr,uint32_t val)

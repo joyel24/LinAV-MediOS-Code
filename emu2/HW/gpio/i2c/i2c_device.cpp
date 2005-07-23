@@ -16,8 +16,9 @@
 #include <emu.h>
 #include <i2c_gpio.h>
 #include <i2c_device.h>
+#include <i2c_gpio.h>
 
-i2c_device::i2c_device(int address,char * name)
+i2c_device::i2c_device(int address,char * name,HW_gpio * gpio)
 {
     //printf("i2c_device constructor %x\n",this);
     this->nxt=NULL;

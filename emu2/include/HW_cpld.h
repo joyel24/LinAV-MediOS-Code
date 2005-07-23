@@ -42,6 +42,8 @@
 #define IDE_CMD_SLEEP                     0xe0
 #define IDE_CMD_MULT_READ_SECTORS         0xC4
 #define IDE_CMD_MULT_WRITE_SECTORS        0xC5
+#define IDE_CMD_SET_MULT                  0xc6
+
 
 #define IDE_STATUS_BSY                    0x80
 #define IDE_STATUS_RDY                    0x40

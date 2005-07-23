@@ -14,7 +14,7 @@
 
 #include <HW_timer.h>
 
-#define MULT_FACTOR 1
+#define DIV_FACTOR 1
 
 uint32_t timer_start[] = {
     0x30000,
@@ -91,7 +91,7 @@ void HW_timer::write(uint32_t addr,uint32_t val,int size)
             break;
         case 0x4:
             DEBUG_HW(TMR_HW_DEBUG,"%s%d write Prescaler divide value=%x\n",name,timer_num,val&0x3FF);
-            tm_p_scaler=(val&0x3FF)*MULT_FACTOR;
+            tm_p_scaler=(val&0x3FF)>>DIV_FACTOR;
             break;
         case 0x6:
             DEBUG_HW(TMR_HW_DEBUG,"%s%d write Max counter val=%x\n",name,timer_num,val&0xFFFF);

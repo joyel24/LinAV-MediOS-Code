@@ -118,9 +118,9 @@ i2c_master::i2c_master(HW_gpio * gpio)
     active = false;
     
     i2c_head=NULL;
-    register_i2c((i2c_device *)new i2c_MAS());
-    register_i2c((i2c_device *)new i2c_RTC());
-    register_i2c((i2c_device *)new i2c_TSC());
+    register_i2c((i2c_device *)new i2c_MAS(gpio));
+    register_i2c((i2c_device *)new i2c_RTC(gpio));
+    register_i2c((i2c_device *)new i2c_TSC(gpio));
     
     print_i2c_list();
     

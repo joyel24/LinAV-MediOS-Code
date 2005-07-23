@@ -15,12 +15,13 @@
 
 #include <emu.h>
 #include <i2c_TSC.h>
+#include <HW_gpio.h>
 
 char * tsc_str[] = { "TEMP0","Vbat1","IN1","UKN","TEMP1","Vbat2","IN2","UKN",
                     "ActivateX-","ActivateY-","ActivateY+,X-","UKN",
                     "X pos","Y pos","Z1 pos","Z2 pos"};
 
-i2c_TSC::i2c_TSC(void):i2c_device(0x90,"TSC-BAT")
+i2c_TSC::i2c_TSC(HW_gpio * gpio):i2c_device(0x90,"TSC-BAT",gpio)
 {
     //printf("i2c_TSC constructor for %x:%s %x\n",this,name,address);
     wait_cmd=true;

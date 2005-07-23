@@ -111,8 +111,8 @@ void arm_LoadStoreMulti(uint32_t instruction)
                 int old_mode=MODE;
                 if(old_mode == M_USER || old_mode == M_SYS)  
                 {              
-                    printf("Unpredictable, wrong mode\n");
-                    //exit(0);
+                    //printf("Unpredictable, wrong mode\n");
+                    exit(0);
                 }
                 else                
                     REG(R_CPSR)=REG(R_SPSR);

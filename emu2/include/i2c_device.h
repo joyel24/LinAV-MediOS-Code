@@ -21,7 +21,7 @@ class i2c_device;
 
 class i2c_device {
     public:
-        i2c_device(int address,char * name);
+        i2c_device(int address,char * name,HW_gpio * gpio);
         
         virtual int read(void);
         virtual void write(int val);
@@ -33,6 +33,8 @@ class i2c_device {
         
         int address;
         char * name;
+        
+        HW_gpio * gpio;
 };
 
 #endif /* __I2C_DEVICE_H */

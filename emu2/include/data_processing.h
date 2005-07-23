@@ -209,8 +209,7 @@ void arm_DataProcessing(int condCode,uint32_t instruction)
                 ARM_SubOverflow(GET_REG(Rn),-shifter_operand, alu_out);
             }
             else
-                printf(" fl_s not set!!!");
-            printf("\n");
+                printf(" fl_s not set!!!\n");
             break;
         case 0xC: ///////////////////////////////////////////// ORR
             DEBUG("ORR %s, %s, %s\n",RR(Rd),RR(Rn),debugShifter);

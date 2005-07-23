@@ -23,6 +23,8 @@
 
 #include <HW_TI.h>
 
+#include <gio_MAS_EOD.h>
+
 char * mode_str[] = {"User","System","Supervisor","Abort","Undefined","IRQ","FIQ"};
 
 enum REGS {R_R0 = 0x00, R_R1 = 0x01, R_R2 = 0x02, R_R3 = 0x03,
@@ -133,6 +135,8 @@ extern mem_space * mem;
 
 bkpt_list * bkpt;
 
+bool data_abort=false;
+
 void init_cpu_static_fct(void);
                      
 void init_cpu(void)
@@ -211,10 +215,23 @@ void go(uint32_t start_address,uint32_t stack_address)
     {  
         mem->hw_TI->osd->nxtEvent();
         
+        ((gio_MAS_EOD*)mem->hw_TI->gpio->port_list[0x4])->chkEOD();
+        
         for(int i=0;i<4;i++)
             mem->hw_TI->timer_list[i]->nxt_cycle();    
         
-        
+        if(data_abort)
+        {
+            data_abort = false;
+            *mode_regs[M_ABT][R_LR]=PC_REAL+8;
+            *mode_regs[M_ABT][R_SPSR]=REG(R_CPSR);
+            SET_MODE(M_ABT);
+            CLR_FLAG(T_MASK);
+            SET_FLAG(IRQ_MASK);
+            REG(R_PC)=0x10;
+            //printf("WARNING DATA ABT\n");
+            run_mode = STEP;
+        }
              
         if(!FIQ_FLAG && mem->hw_TI->HW_irq->have_int_FIQ)
         {

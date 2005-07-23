@@ -18,6 +18,7 @@
 #include <emu.h>
 
 #include <i2c_RTC.h>
+#include <HW_gpio.h>
 
 char * time_str[8] = {
     "MS",
@@ -120,7 +121,7 @@ int i2c_RTC::bcd2int(int v)
         return ((v & 0xf0) >> 4) * 10 + (v & 0xf);
 }
 
-i2c_RTC::i2c_RTC(void):i2c_device(0xD0,"RTC")
+i2c_RTC::i2c_RTC(HW_gpio * gpio):i2c_device(0xD0,"RTC",gpio)
 {
     //printf("i2c_RTC constructor for %x:%s %x\n",this,name,address);
     has_address=false;

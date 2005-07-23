@@ -22,6 +22,7 @@ protected:
     void rm_item(HW_access * ptr);
     
     bool exit_on_not_match;
+    bool data_abt_on_not_match;
 
 public:
     HW_access * zone_list;

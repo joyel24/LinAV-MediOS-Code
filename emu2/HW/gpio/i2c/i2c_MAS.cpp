@@ -28,7 +28,7 @@
                             
 #include "mas_codec_reg_name.h"
 
-i2c_MAS::i2c_MAS(void):i2c_device(0x3c,"MAS")
+i2c_MAS::i2c_MAS(HW_gpio * gpio):i2c_device(0x3c,"MAS",gpio)
 {
     //printf("i2c_MAS constructor for %x:%s %x\n",this,name,address);
     control_reg=0x3000;
@@ -38,18 +38,36 @@ i2c_MAS::i2c_MAS(void):i2c_device(0x3c,"MAS")
     for(int i=0;i<0x30;i++)
         codec_reg[i]=0;
     
+    codec_reg[0x0c] = 0x500;
+    codec_reg[0x0d] = 0x500;
     
     D0_ram = new HW_mem(NULL,0x0,0x1000,"MAS_D0");
     D1_ram = new HW_mem(NULL,0x0,0x1000,"MAS_D1");
     
     D0_ram->write(0x7F0,0xa0264,4);
-    D0_ram->write(0x7F1,0x125,4);
+    D0_ram->write(0x7F1,0x124,4);
     D0_ram->write(0x7F2,0x5,4);
     D0_ram->write(0x7F3,0x18432,4);
     D0_ram->write(0x7F4,0x80000,4);
     D0_ram->write(0x7F8,0x8200,4);
     D0_ram->write(0x7FC,0x80000,4);
     D0_ram->write(0x7FF,0x80000,4);
+    
+    cur_p_data = 0;
+    for(int i=0;i<8;i++)
+    {
+        gio_p_data[i] = new gio_MAS_data(i,this);
+        gpio->register_port(i+0x8,gio_p_data[i]);
+        
+    }
+    gio_pr = new gio_MAS_PR(this);
+    gpio->register_port(0x1F,gio_pr);
+    gio_rtr = new gpio_port(0x1E,"MAS_RPR");
+    gpio->register_port(0x1E,gio_rtr);
+    gio_eod = new gio_MAS_EOD();
+    gpio->register_port(0x04,gio_eod);
+    gio_pw = new gio_MAS_PW();
+    gpio->register_port(0x10,gio_pw);
 }
 
 #define MAS_READ_REG(REG)              \
@@ -79,7 +97,40 @@ i2c_MAS::i2c_MAS(void):i2c_device(0x3c,"MAS")
             DEBUG_HW(MAS_HW_DEBUG,"MAS %s write %x\n",MAS_CMD_STR(cmd),mas_data);   \
         }                              \
     }
+
+void i2c_MAS::set_p_data(int num,int val)
+{
+    int mask = (~(0x1<<num))&0xFF;
+    cur_p_data = cur_p_data&mask;
+    if(val)
+        cur_p_data |= (0x1<<num);
+    cur_p_data &= 0xFF;
+}
+
+void i2c_MAS::set_PR(void)
+{
+    //printf("Raising PR\n");
+    gio_rtr->set_gpio();
+}
+
+void i2c_MAS::clr_PR(void)
+{
+    //printf("clear latch (PR)\n");
+#if 1
+    gio_eod->cnt--;
     
+    if(gio_eod->cnt<=0)
+    {
+        gio_eod->state=0;  /*emulate MAS buffer full */ 
+        //printf("EOD 0\n");
+        gio_eod->cnt_loop=0x600;
+        gio_eod->cnt = 0;
+    }
+#endif    
+    gio_rtr->clear_gpio();
+}
+
+        
 /* MAS version in revers : 3587 01 02 */
 #define MAS_VER     0x02018735
     
@@ -120,7 +171,7 @@ int i2c_MAS::read(void)
                         ret_val = (mas_data >> ((1-(index%2))*8) )&0xff;
                         if(index%2 == 1)
                         {
-                            DEBUG_HW(MAS_HW_DEBUG,"MAS reading: %x at %x (left %x)\n",ret_val,xfer_addr,xfer_size-1);
+                            DEBUG_HW(MAS_HW_DEBUG,"MAS reading: %x at %x (left %x)\n",mas_data&0xFFFF,xfer_addr,xfer_size-1);
                             xfer_size--;
                             xfer_addr++;
                             if(xfer_size)
@@ -132,7 +183,7 @@ int i2c_MAS::read(void)
                         ret_val = (mas_data >> ((3-(index%4))*8) )&0xff;
                         if(index%4 == 3)
                         {
-                            DEBUG_HW(MAS_HW_DEBUG,"MAS reading: %x at %x (left %x)\n",ret_val,xfer_addr,xfer_size);
+                            DEBUG_HW(MAS_HW_DEBUG,"MAS reading: %x at %x (left %x)\n",mas_data,xfer_addr,xfer_size-1);
                             xfer_size--;
                             xfer_addr++;
                             if(xfer_size)
@@ -302,16 +353,13 @@ void i2c_MAS::write(int val)
                                             mas_data &= 0xFFFFE;
                                         
                                         if(dest)
-                                            D1_ram->write(xfer_addr,mas_data&0xFFFF,4);
+                                            D1_ram->write(xfer_addr,mas_data&0xFFFFF,4);
                                         else
-                                            D0_ram->write(xfer_addr,mas_data&0xFFFF,4);
+                                            D0_ram->write(xfer_addr,mas_data&0xFFFFF,4);
                                             
-                                        if(xfer_addr == 0x7F6)
-                                        {
-                                            if(dest)
-                                                D1_ram->write(0x7F7,mas_data&0xFFFF,4);
-                                            else
-                                                D0_ram->write(0x7F7,mas_data&0xFFFF,4);
+                                        if(xfer_addr == 0x7F6 & !dest)
+                                        {                                            
+                                            D0_ram->write(0x7F7,mas_data&0x4C,4);
                                         }
                                         xfer_size--;
                                         xfer_addr++;
@@ -323,7 +371,7 @@ void i2c_MAS::write(int val)
                                     mas_data = (mas_data << 8) | (val & 0xFF);
                                     if((index-7)%4 == 3)
                                     {
-                                        DEBUG_HW(MAS_HW_DEBUG,"MAS writting: %x at %x (left %x)\n",mas_data,xfer_addr,xfer_size);
+                                        DEBUG_HW(MAS_HW_DEBUG,"MAS writting: %x at %x (left %x)\n",mas_data,xfer_addr,xfer_size-1);
                                         
                                         if(xfer_addr==0x7F1)
                                             mas_data &= 0xFFFFE;
@@ -333,12 +381,9 @@ void i2c_MAS::write(int val)
                                         else
                                             D0_ram->write(xfer_addr,mas_data&0xFFFFF,4);
                                             
-                                        if(xfer_addr == 0x7F6)
+                                        if(xfer_addr == 0x7F6 & !dest)
                                         {
-                                            if(dest)
-                                                D1_ram->write(0x7F7,mas_data&0xFFFFF,4);
-                                            else
-                                                D0_ram->write(0x7F7,mas_data&0xFFFFF,4);
+                                            D0_ram->write(0x7F7,mas_data&0xFFFFF,4);
                                         }
                                         xfer_size--;
                                         xfer_addr++;

@@ -296,13 +296,13 @@ void HW_cpld::ata_write(uint32_t addr,uint32_t val,int size)
                 case IDE_CMD_READ_SECTORS:
                 case IDE_CMD_MULT_READ_SECTORS:
                     lba = sector | (l_cyl << 8) | (h_cyl << 16);                    
-                    DEBUG_HW(ATA_HW_DEBUG,"read sectors LBA:%x\n",lba);
+                    DEBUG_HW(ATA_HW_DEBUG,"read sectors LBA:%x count=%x\n",lba,nsector==0?256:nsector);
                     if(lba == 0 || lba == 1)
                     {
                         data_ptr = 0;
                         data_size = 512;
                         data = part_data+lba*512;
-                        print_data(ATA_HW_DEBUG,data,data_size);
+                        //print_data(ATA_HW_DEBUG,data,data_size);
                         hw_dma->init_ata_xfer(data,data_ptr,data_size);
                         break;
                     }
@@ -311,7 +311,7 @@ void HW_cpld::ata_write(uint32_t addr,uint32_t val,int size)
                     if(lba>=0)
                     {
                         data_ptr = 0;
-                        data_size = 512*nsector;
+                        data_size = 512*(nsector==0?256:nsector);
                         buffer = new char[data_size];
                         data=buffer;
                         if (!hd)
@@ -321,17 +321,17 @@ void HW_cpld::ata_write(uint32_t addr,uint32_t val,int size)
                         }
                         fseek(hd,lba*512,SEEK_SET);
                         fread(buffer,1,data_size,hd);
-                        print_data(ATA_HW_DEBUG,data,data_size);
+                        //print_data(ATA_HW_DEBUG,data,data_size);
                         hw_dma->init_ata_xfer(data,data_ptr,data_size);
                     }     
                     else
                     {
                         data_ptr = 0;
-                        data_size = 512*nsector;
+                        data_size = 512*(nsector==0?256:nsector);
                         buffer = new char[data_size];
                         memset(buffer,0,data_size);
                         data = buffer;
-                        print_data(ATA_HW_DEBUG,data,data_size);
+                        //print_data(ATA_HW_DEBUG,data,data_size);
                         hw_dma->init_ata_xfer(data,data_ptr,data_size);
                     }               
                     break;
@@ -360,6 +360,12 @@ void HW_cpld::ata_write(uint32_t addr,uint32_t val,int size)
                     break;
                 case IDE_CMD_SLEEP:
                     DEBUG_HW(ATA_HW_DEBUG,"sleep\n");
+                    break;
+                case IDE_CMD_SET_MULT:
+                    DEBUG_HW(ATA_HW_DEBUG,"Set mult XFER\n");
+                    break;
+                default:
+                    printf("UKN cmde %x\n",ata_cmd);
                     break;
             }
             break;
