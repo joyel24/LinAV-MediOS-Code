@@ -354,7 +354,7 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
                             //DEBUG_HW(GPIO_HW_DEBUG,"(delayed)");
                         }
                         else
-                            CLR_GPIO(k+0x10);
+                            CLR_GPIO(k);
                         //DEBUG_HW(GPIO_HW_DEBUG,"|");
                     }
                     val = val >> 1;                

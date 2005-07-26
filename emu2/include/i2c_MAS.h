@@ -22,6 +22,11 @@
 #include <gio_MAS_EOD.h>
 #include <gio_MAS_PW.h>
 
+#define PIO_BUFFER_SIZE 256
+
+#include <stdlib.h>
+#include <stdio.h>
+
 class i2c_MAS:i2c_device {
     public:
         i2c_MAS(HW_gpio * gpio);
@@ -42,6 +47,11 @@ class i2c_MAS:i2c_device {
         int address;
         char * name;
         
+        int do_cmd_dump_D0D1(int argc,char ** argv);
+        int do_cmd_dump_pio_buffer(int argc,char ** argv);
+        int do_cmd_clear_pio_buffer(int argc,char ** argv);
+        int do_cmd_dump_pio_to_file(int argc,char ** argv);
+        
     private:
         int index;
         int cmd;
@@ -57,15 +67,23 @@ class i2c_MAS:i2c_device {
         
         int cur_p_data;
               
-        HW_mem * D0_ram;
-        HW_mem * D1_ram;
+        int * D0_ram;
+        int * D1_ram;
         
+        int main_regs[256];
+        
+        char pio_buffer[PIO_BUFFER_SIZE];
+        int pio_index;
+        bool pio_full;
+        bool dump_to_file;
         
         gio_MAS_data * gio_p_data[8];
         gio_MAS_PR * gio_pr;
         gpio_port * gio_rtr;
         gio_MAS_EOD * gio_eod;
         gio_MAS_PW * gio_pw;
+        
+        FILE * fd;
         
         
 };

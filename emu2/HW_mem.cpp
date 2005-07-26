@@ -37,7 +37,7 @@ HW_mem::HW_mem(char * fname,uint32_t start,uint32_t end,char * name):HW_access(s
             rewind (fd);
             fread(mem, 1, fsize,fd);
             fclose(fd);
-            printf("Loading file %s in %s done (%d bytes read)\n",name,fname,fsize);
+            printf("Loading file %s in %s done (%d bytes read)\n",fname,name,fsize);
         }
     }
     else

@@ -20,5 +20,6 @@
 
 void my_print_data(char * data,int length);
 void my_print_mem(mem_space * mem,char * data,int length);
+void my_print_memBuffer(HW_mem * memBuff,int start,int length);
 
 #endif /* __MY_PRINT_H */
