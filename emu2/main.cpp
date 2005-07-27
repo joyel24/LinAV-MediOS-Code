@@ -89,9 +89,9 @@ int main(int argc, char* argv[])
     
     init_cmd_line();
     
-    //sdram_file = "linux.bin";
+    sdram_file = "linux.bin";
     //sdram_file = "gravity.bin";
-    sdram_file = "CJBM_v2.depack";
+    //sdram_file = "CJBM_v2.depack";
     //sdram_file = "firm_1.depack_NEW";
     
     mem = new mem_space(flash_file,sdram_file);
