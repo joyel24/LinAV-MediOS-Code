@@ -44,13 +44,18 @@ void bkpt_list::add(uint32_t address,uint32_t size,int type,char * cause)
 {
     BKPT * ptr;
     BKPT * ptr_new = new BKPT();
+    if(!ptr_new)
+    {
+        printf("Can't create new %s bkpt (new returned a NULL pointer)\n",bkpt_str[type]);
+        return;
+    }
     ptr_new->address = address;
     ptr_new->size = size;
     ptr_new->cause = cause;
     
     if(head[type] == NULL || head[type]->address > address) /* list empty or address < => insert at the beg*/
     {
-        ptr_new->nxt = NULL;
+        ptr_new->nxt = head[type];
         head[type] = ptr_new;
     }
     else                                        /* let's find where to insert */
@@ -69,6 +74,12 @@ void bkpt_list::add(uint32_t address,uint32_t size,int type,char * cause)
 void bkpt_list::del(uint32_t address,int type)
 {
     BKPT * ptr=head[type];
+    
+    if(!head[type])
+    {
+        printf("%s bkpt list is empty\n",bkpt_str[type]);
+        return;
+    }
     
     if(head[type]->address == address)
     {
