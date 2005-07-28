@@ -107,7 +107,7 @@ int execute_line (char *line)
 
   if (!command)
     {
-      fprintf (stderr, "%s: No such command for Emu.\n", word);
+      fprintf (stderr, "%s: No such command\n", word);
       return 0;
     }
 
@@ -298,7 +298,7 @@ void cmd_line(void)
   done=0;
   while(!done)
   {
-      line = readline ("EMU> ");
+      line = readline (ARCH_NAME " EMU> ");
 
       if (!line)
         break;

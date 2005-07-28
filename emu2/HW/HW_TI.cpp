@@ -32,7 +32,7 @@
 #include <HW_IRQ.h>
 #include <HW_access.h>
 
-HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30000,0x3FFFF,"DSC25")
+HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(TI_REG_START,TI_REG_END,"DSC25")
 {
     exit_on_not_match = false;
     
@@ -44,14 +44,17 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30
     
     add_item(osd);
     
-    add_item(new HW_uart(0x30300,0x30310,"UART0"));
-    add_item(new HW_uart(0x30380,0x30390,"UART1"));
+    add_item(new HW_uart(UART0_START,UART0_END,"UART0"));
+    add_item(new HW_uart(UART1_START,UART1_END,"UART1"));
     add_item(new HW_clock());
     gpio = new HW_gpio();
     add_item(gpio);
+#ifdef HAS_HW_30A24
     hw_30a24 = new HW_30a24();
-    hw_dma = new HW_dma(mem,hw_cpld);
-    add_item(hw_30a24);    
+    add_item(hw_30a24);  
+#endif
+
+    hw_dma = new HW_dma(mem,hw_cpld);      
     add_item(hw_dma);
     
     HW_irq = new HW_IRQ();
@@ -67,8 +70,9 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30
     add_item(new HW_TI_ver());
     add_item(new HW_ECR());
     
-    add_item(new HW_null(0x30700,0x30800,"UKN-0x30700"));
-    add_item(new HW_null(0x30800,0x30880,"VIDEO"));
+    //add_item(new HW_null(0x30700,0x30800,"UKN-0x30700"));
+    
+    add_item(new HW_null(VID_START,VID_END,"VIDEO"));
     
     new i2c_master(gpio);
     

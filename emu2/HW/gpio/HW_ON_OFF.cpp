@@ -18,7 +18,7 @@
 
 HW_ON_OFF::HW_ON_OFF(int num):gpio_port(0)
 {
-    this->gpio_num=(num==ON_GPIO?0x0:0x1C);
+    this->gpio_num=(num==ON_GPIO?GPIO_ON_NUM:GPIO_OFF_NUM);
     this->name = (num==ON_GPIO?"ON":"OFF");
     state = 1;  /* default => btn not pressed */
 }

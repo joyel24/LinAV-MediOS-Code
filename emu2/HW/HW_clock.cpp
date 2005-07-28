@@ -14,7 +14,7 @@
 
 #include <HW_clock.h>
 
-HW_clock::HW_clock(void):HW_access(0x30880,0x30890,"CLOCK")
+HW_clock::HW_clock(void):HW_access(CLOCK_START,CLOCK_END,"CLOCK")
 {
     
 }
@@ -24,11 +24,11 @@ uint32_t HW_clock::read(uint32_t addr,int size)
     DEBUG_HW(CLOCK_HW_DEBUG,"%s read @0x%08x, size %x\n",name,addr,size);
     switch(addr)
     {
-        case 0x30880:
+        case CLOCK_START+0x0:
             return 0x8000;
-        case 0x30882:
+        case CLOCK_START+0x2:
             return 0x8000;
-        case 0x30884:
+        case CLOCK_START+0x4:
             return 0x8000;
         default:
             break;

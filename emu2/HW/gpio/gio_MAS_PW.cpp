@@ -16,7 +16,7 @@
 #include <i2c_MAS.h>
 
 
-gio_MAS_PW::gio_MAS_PW(void):gpio_port(0x10,"MAS_PW")
+gio_MAS_PW::gio_MAS_PW(void):gpio_port(GPIO_MAS_PW,"MAS_PW")
 {    
 }
 

@@ -1,5 +1,5 @@
 /* 
-*   HW_null.cpp
+*   HW_30A24.cpp
 *
 *   AV3XX emulator
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -9,12 +9,17 @@
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
 */
+
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <HW_30a24.h>
 
 #include <cmd_line.h> 
+
+#include <emu.h>
+
+#ifdef HAS_HW_30A24
 
 HW_30a24 * hw_30a24_obj;
 
@@ -72,3 +77,5 @@ void HW_30a24::write(uint32_t addr,uint32_t val,int size)
     DEBUG_HW(HW_30A24_DEBUG,"write 30A24\n");
     DEBUG_HW(HW_30A24_DEBUG,"%s write, size %x, val= %x\n",name,size,val);
 }
+
+#endif

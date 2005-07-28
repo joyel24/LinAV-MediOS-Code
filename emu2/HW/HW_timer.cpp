@@ -17,10 +17,10 @@
 #define DIV_FACTOR 1
 
 uint32_t timer_start[] = {
-    0x30000,
-    0x30080,
-    0x30100,
-    0x30180
+    TMR0_START,
+    TMR1_START,
+    TMR2_START,
+    TMR3_START
 };
 
 

@@ -20,7 +20,7 @@ HW_OSD * hw_OSD;
 
 void init_mem_static_fct(HW_OSD * osd);
 
-HW_OSD::HW_OSD(HW_mem * mem2):HW_access(0x30680,0x30700,"OSD")
+HW_OSD::HW_OSD(HW_mem * mem2):HW_access(OSD_START,OSD_END,"OSD")
 {
     init_mem_static_fct(this);
     
@@ -66,228 +66,228 @@ uint32_t HW_OSD::read(uint32_t addr,int size)
     uint32_t ret_val=0;
     switch(addr)
     {
-        case 0x30680:
+        case OSD_START+0x0:
             ret_val=OSD_config_regs[0];
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Main config",ret_val,size);            
             break;
-        case 0x30682:
+        case OSD_START+0x2:
             ret_val=OSD_config_regs[1];
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Vid0 & Vid1 config",ret_val,size);            
             break;
-        case 0x30684:
+        case OSD_START+0x4:
             ret_val=OSD_config_regs[2];
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Bmap0 config",ret_val,size);            
             break;
-        case 0x30686:
+        case OSD_START+0x6:
             ret_val=OSD_config_regs[3];
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Bmap1 config",ret_val,size);            
             break;
-        case 0x30688:
+        case OSD_START+0x8:
             ret_val=OSD_config_regs[4];
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Cursor0 config",ret_val,size);            
             break;
-        case 0x3068A:
+        case OSD_START+0xA:
             ret_val=OSD_config_regs[5];
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Cursor1 config",ret_val,size);            
             break;
             
-        case 0x3068C:
+        case OSD_START+0xC:
             ret_val=OSD_width_regs[0];
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Vid0 buffer width",ret_val,size);            
             break;
-        case 0x3068E:
+        case OSD_START+0xE:
             ret_val=OSD_width_regs[1];
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Vid1 buffer width",ret_val,size);            
             break;
-        case 0x30690:
+        case OSD_START+0x10:
             ret_val=OSD_width_regs[2];
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Bmap0 buffer width",ret_val,size);            
             break;
-        case 0x30692:
+        case OSD_START+0x12:
             ret_val=OSD_width_regs[3];
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Bmap1 buffer width",ret_val,size);            
             break;
             
-        case 0x30694:
+        case OSD_START+0x14:
             ret_val=(((OSD_offset_regs[1]>>21)&0x07)<<8) | ((OSD_offset_regs[0]>>21)&0x07);  // removing the SDRAM base addr. 0x03000000
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) (Vid0=%x Vid1=%x)\n",name,"Vid0 & Vid1 buffer HI offset",
                 ret_val,size,OSD_offset_regs[0],OSD_offset_regs[1]);            
             break;        
-        case 0x30696:
+        case OSD_START+0x16:
             ret_val=(OSD_offset_regs[0]>>5)&0xFFFF;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) (Vid0=%x)\n",name,"Vid0 buffer LO offset",
                 ret_val,size,OSD_offset_regs[0]);            
             break;        
-        case 0x30698:
+        case OSD_START+0x18:
             ret_val=(OSD_offset_regs[1]>>5)&0xFFFF;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) (Vid1=%x)\n",name,"Vid1 buffer LO offset",
                 ret_val,size,OSD_offset_regs[1]);   
             break;
-        case 0x3069A:
+        case OSD_START+0x1A:
             ret_val=(((OSD_offset_regs[3]>>21)&0x07)<<8) | ((OSD_offset_regs[2]>>21)&0x07);  // removing the SDRAM base addr. 0x03000000
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) (Bmap0=%x Bmap1=%x)\n",name,"Bmap0 & Bmap1 buffer HI offset",
                    ret_val,size,OSD_offset_regs[2],OSD_offset_regs[3]);            
             break;        
-        case 0x3069C:
+        case OSD_START+0x1C:
             ret_val=(OSD_offset_regs[2]>>5)&0xFFFF;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) Bmap0=%x)\n",name,"Bmap0 buffer LO offset",
                 ret_val,size,OSD_offset_regs[2]);            
             break;        
-        case 0x3069E:
+        case OSD_START+0x1E:
             ret_val=(OSD_offset_regs[3]>>5)&0xFFFF;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) Bmap1=%x)\n",name,"Bmap1 buffer LO offset",
                 ret_val,size,OSD_offset_regs[3]);            
             break;
             
-        case 0x306A0:
+        case OSD_START+0x20:
             ret_val=OSD_main_shift_horiz;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"main shift HORIZ",ret_val,size);            
             break;
-        case 0x306A2:
+        case OSD_START+0x22:
             ret_val=OSD_main_shift_vert;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"main shift VERT",ret_val,size);            
             break;
             
-        case 0x306A4:
+        case OSD_START+0x24:
             ret_val=OSD_info_regs[0].x;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Vid0 X",ret_val,size);            
             break;
-        case 0x306A6:
+        case OSD_START+0x26:
             ret_val=OSD_info_regs[0].y;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Vid0 Y",ret_val,size);            
             break;
-        case 0x306A8:
+        case OSD_START+0x28:
             ret_val=OSD_info_regs[0].width;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Vid0 width",ret_val,size);            
             break;
-        case 0x306AA:
+        case OSD_START+0x2A:
             ret_val=OSD_info_regs[0].height;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Vid0 height",ret_val,size);            
             break;
-        case 0x306AC:
+        case OSD_START+0x2C:
             ret_val=OSD_info_regs[1].x;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Vid1 X",ret_val,size);            
             break;
-        case 0x306AE:
+        case OSD_START+0x2E:
             ret_val=OSD_info_regs[1].y;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Vid1 Y",ret_val,size);            
             break;
-        case 0x306B0:
+        case OSD_START+0x30:
             ret_val=OSD_info_regs[1].width;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Vid1 width",ret_val,size);            
             break;
-        case 0x306B2:
+        case OSD_START+0x32:
             ret_val=OSD_info_regs[1].height;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Vid1 height",ret_val,size);            
             break;
-        case 0x306B4:
+        case OSD_START+0x34:
             ret_val=OSD_info_regs[2].x;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Bmap0 X",ret_val,size);            
             break;
-        case 0x306B6:
+        case OSD_START+0x36:
             ret_val=OSD_info_regs[2].y;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Bmap0 Y",ret_val,size);            
             break;
-        case 0x306B8:
+        case OSD_START+0x38:
             ret_val=OSD_info_regs[2].width;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Bmap0 width",ret_val,size);            
             break;
-        case 0x306BA:
+        case OSD_START+0x3A:
             ret_val=OSD_info_regs[2].height;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Bmap0 height",ret_val,size);            
             break;
-        case 0x306BC:
+        case OSD_START+0x3C:
             ret_val=OSD_info_regs[3].x;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Bmap1 X",ret_val,size);            
             break;
-        case 0x306BE:
+        case OSD_START+0x3E:
             ret_val=OSD_info_regs[3].y;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Bmap1 Y",ret_val,size);            
             break;
-        case 0x306C0:
+        case OSD_START+0x40:
             ret_val=OSD_info_regs[3].width;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Bmap1 width",ret_val,size);            
             break;
-        case 0x306C2:
+        case OSD_START+0x42:
             ret_val=OSD_info_regs[3].height;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Bmap1 height",ret_val,size);            
             break;
-        case 0x306C4:
+        case OSD_START+0x44:
             ret_val=OSD_info_regs[4].x;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Cursor0 X",ret_val,size);            
             break;
-        case 0x306C6:
+        case OSD_START+0x46:
             ret_val=OSD_info_regs[4].y;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Cursor0 Y",ret_val,size);            
             break;
-        case 0x306C8:
+        case OSD_START+0x48:
             ret_val=OSD_info_regs[4].width;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Cursor0 width",ret_val,size);            
             break;
-        case 0x306CA:
+        case OSD_START+0x4A:
             ret_val=OSD_info_regs[4].height;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Cursor0 height",ret_val,size);            
             break;
-        case 0x306CC:
+        case OSD_START+0x4C:
             ret_val=OSD_info_regs[5].x;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Cursor1 X",ret_val,size);            
             break;
-        case 0x306CE:
+        case OSD_START+0x4E:
             ret_val=OSD_info_regs[5].y;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Cursor1 Y",ret_val,size);            
             break;
             
-        case 0x306D0:
-        case 0x306D2:
-        case 0x306D4:
-        case 0x306D6:
-        case 0x306D8:
-        case 0x306DA:
-        case 0x306DC:
-        case 0x306DE:
+        case OSD_START+0x50:
+        case OSD_START+0x52:
+        case OSD_START+0x54:
+        case OSD_START+0x56:
+        case OSD_START+0x58:
+        case OSD_START+0x5A:
+        case OSD_START+0x5C:
+        case OSD_START+0x5E:
         {
-            int index=(addr-0x306D0)/2;
+            int index=(addr-OSD_START+0x50)/2;
             ret_val=OSD_pallette_bank1[index];
             DEBUG_HW(OSD_HW_DEBUG,"%s %s %d read => %x (size %x)\n",name,"Palette Bank1",index,ret_val,size);            
             break;
         }
-        case 0x306E0:
-        case 0x306E2:
-        case 0x306E4:
-        case 0x306E6:
-        case 0x306E8:
-        case 0x306EA:
-        case 0x306EC:
-        case 0x306EE:
+        case OSD_START+0x60:
+        case OSD_START+0x62:
+        case OSD_START+0x64:
+        case OSD_START+0x66:
+        case OSD_START+0x68:
+        case OSD_START+0x6A:
+        case OSD_START+0x6C:
+        case OSD_START+0x6E:
         {
-            int index=(addr-0x306D0)/2;
+            int index=(addr-OSD_START+0x60)/2;
             ret_val=OSD_pallette_bank2[index];
             DEBUG_HW(OSD_HW_DEBUG,"%s %s %d read => %x (size %x)\n",name,"Palette Bank2",index,ret_val,size);            
             break;
         }
         
-        case 0x306F2:
+        case OSD_START+0x72:
             ret_val=OSD_cursor_data;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Cursor data",ret_val,size);            
             break;
-        case 0x306F4:
+        case OSD_START+0x74:
             ret_val=OSD_pallette_status;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Pallette status & cursor data",ret_val,size);            
             break;
-        case 0x306F6:
+        case OSD_START+0x76:
             ret_val=OSD_pallette_data_wr;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Pallette data write",ret_val,size);            
             break;
-        case 0x306F8:
+        case OSD_START+0x78:
             ret_val=OSD_pallette_index;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x)\n",name,"Pallette data & index",ret_val,size);            
             break;
-        case 0x306FC:
+        case OSD_START+0x7C:
             ret_val=(OSD_alt_vid_offset>>16)&0x3F;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) (OSD ALT=%x)\n",name,"OSD ALT buffer HI",
                 ret_val,size,OSD_alt_vid_offset);            
             break;
-        case 0x306FE:
+        case OSD_START+0x7E:
             ret_val=OSD_alt_vid_offset&0xFFFF;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s read => %x (size %x) (OSD ALT=%x)\n",name,"Pallette data & index",
                 ret_val,size,OSD_alt_vid_offset);            
@@ -301,230 +301,230 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
 {
     switch(addr)
     {
-        case 0x30680:
+        case OSD_START+0x0:
             OSD_config_regs[0]=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Main config",val,size);            
             break;
-        case 0x30682:
+        case OSD_START+0x2:
             OSD_config_regs[1]=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Vid0 & Vid1 config",val,size);            
             break;
-        case 0x30684:
+        case OSD_START+0x4:
             OSD_config_regs[2]=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap0 config",val,size);            
             break;
-        case 0x30686:
+        case OSD_START+0x6:
             OSD_config_regs[3]=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap1 config",val,size);            
             break;
-        case 0x30688:
+        case OSD_START+0x8:
             OSD_config_regs[4]=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Cursor0 config",val,size);            
             break;
-        case 0x3068A:
+        case OSD_START+0xA:
             OSD_config_regs[5]=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Cursor1 config",val,size);            
             break;
             
-        case 0x3068C:
+        case OSD_START+0xC:
             OSD_width_regs[0]=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Vid0 buffer width",val,size);            
             break;
-        case 0x3068E:
+        case OSD_START+0xE:
             OSD_width_regs[1]=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Vid1 buffer width",val,size);            
             break;
-        case 0x30690:
+        case OSD_START+0x10:
             OSD_width_regs[2]=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap0 buffer width",val,size);            
             break;
-        case 0x30692:
+        case OSD_START+0x12:
             OSD_width_regs[3]=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap1 buffer width",val,size);            
             break;
             
-        case 0x30694:
-            OSD_offset_regs[0] = 0x03000000 | ((val&0x07)<<21) | (OSD_offset_regs[0] & 0x1FFFFF);
-            OSD_offset_regs[1] = 0x03000000 | (((val>>8)&0x07)<<21) | (OSD_offset_regs[1] & 0x1FFFFF);
+        case OSD_START+0x14:
+            OSD_offset_regs[0] = SDRAM_START | ((val&0x07)<<21) | (OSD_offset_regs[0] & 0x1FFFFF);
+            OSD_offset_regs[1] = SDRAM_START | (((val>>8)&0x07)<<21) | (OSD_offset_regs[1] & 0x1FFFFF);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (Vid0=%x Vid1=%x)\n",name,"Vid0 & Vid1 buffer HI offset",
                 val,size,OSD_offset_regs[0],OSD_offset_regs[1]);            
             break;        
-        case 0x30696:
-            OSD_offset_regs[0] = 0x03000000 | (OSD_offset_regs[0]&0x0E00000) | ((val<<5)&0x1FFFFF);
+        case OSD_START+0x16:
+            OSD_offset_regs[0] = SDRAM_START | (OSD_offset_regs[0]&0x0E00000) | ((val<<5)&0x1FFFFF);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (Vid0=%x)\n",name,"Vid0 buffer LO offset",
                 val,size,OSD_offset_regs[0]);            
             break;        
-        case 0x30698:
-            OSD_offset_regs[1] = 0x03000000 | (OSD_offset_regs[1]&0x0E00000) | ((val<<5)&0x1FFFFF);
+        case OSD_START+0x18:
+            OSD_offset_regs[1] = SDRAM_START | (OSD_offset_regs[1]&0x0E00000) | ((val<<5)&0x1FFFFF);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (Vid1=%x)\n",name,"Vid1 buffer LO offset",
                 val,size,OSD_offset_regs[1]);            
             break;
-        case 0x3069A:
-            OSD_offset_regs[2] = 0x03000000 | ((val&0x07)<<21) | (OSD_offset_regs[2] & 0x1FFFFF);
-            OSD_offset_regs[3] = 0x03000000 | (((val>>8)&0x07)<<21) | (OSD_offset_regs[3] & 0x1FFFFF);
+        case OSD_START+0x1A:
+            OSD_offset_regs[2] = SDRAM_START | ((val&0x07)<<21) | (OSD_offset_regs[2] & 0x1FFFFF);
+            OSD_offset_regs[3] = SDRAM_START | (((val>>8)&0x07)<<21) | (OSD_offset_regs[3] & 0x1FFFFF);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (Bmap0=%x Bmap1=%x)\n",name,"Bmap0 & Bmap1 buffer HI offset",
                 val,size,OSD_offset_regs[2],OSD_offset_regs[3]);            
             break;        
-        case 0x3069C:
-            OSD_offset_regs[2] = 0x03000000 | (OSD_offset_regs[2]&0x0E00000) | ((val<<5)&0x1FFFFF);
+        case OSD_START+0x1C:
+            OSD_offset_regs[2] = SDRAM_START | (OSD_offset_regs[2]&0x0E00000) | ((val<<5)&0x1FFFFF);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) Bmap0=%x)\n",name,"Bmap0 buffer LO offset",
                 val,size,OSD_offset_regs[2]);            
             break;        
-        case 0x3069E:
-            OSD_offset_regs[3] = 0x03000000 | (OSD_offset_regs[3]&0x0E00000) | ((val<<5)&0x1FFFFF);
+        case OSD_START+0x1E:
+            OSD_offset_regs[3] = SDRAM_START | (OSD_offset_regs[3]&0x0E00000) | ((val<<5)&0x1FFFFF);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) Bmap1=%x)\n",name,"Bmap1 buffer LO offset",
                 val,size,OSD_offset_regs[3]);            
             break;
             
-        case 0x306A0:
+        case OSD_START+0x20:
             OSD_main_shift_horiz=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"main shift HORIZ",val,size);            
             break;
-        case 0x306A2:
+        case OSD_START+0x22:
             OSD_main_shift_vert=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"main shift VERT",val,size);            
             break;
             
-        case 0x306A4:
+        case OSD_START+0x24:
             OSD_info_regs[0].x=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Vid0 X",val,size);            
             break;
-        case 0x306A6:
+        case OSD_START+0x26:
             OSD_info_regs[0].y=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Vid0 Y",val,size);            
             break;
-        case 0x306A8:
+        case OSD_START+0x28:
             OSD_info_regs[0].width=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Vid0 width",val,size);            
             break;
-        case 0x306AA:
+        case OSD_START+0x2A:
             OSD_info_regs[0].height=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Vid0 height",val,size);            
             break;
-        case 0x306AC:
+        case OSD_START+0x2C:
             OSD_info_regs[1].x=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Vid1 X",val,size);            
             break;
-        case 0x306AE:
+        case OSD_START+0x2E:
             OSD_info_regs[1].y=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Vid1 Y",val,size);            
             break;
-        case 0x306B0:
+        case OSD_START+0x30:
             OSD_info_regs[1].width=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Vid1 width",val,size);            
             break;
-        case 0x306B2:
+        case OSD_START+0x32:
             OSD_info_regs[1].height=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Vid1 height",val,size);            
             break;
-        case 0x306B4:
+        case OSD_START+0x34:
             OSD_info_regs[2].x=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap0 X",val,size);            
             break;
-        case 0x306B6:
+        case OSD_START+0x36:
             OSD_info_regs[2].y=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap0 Y",val,size);            
             break;
-        case 0x306B8:
+        case OSD_START+0x38:
             OSD_info_regs[2].width=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap0 width",val,size);            
             break;
-        case 0x306BA:
+        case OSD_START+0x3A:
             OSD_info_regs[2].height=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap0 height",val,size);            
             break;
-        case 0x306BC:
+        case OSD_START+0x3C:
             OSD_info_regs[3].x=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap1 X",val,size);            
             break;
-        case 0x306BE:
+        case OSD_START+0x3E:
             OSD_info_regs[3].y=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap1 Y",val,size);            
             break;
-        case 0x306C0:
+        case OSD_START+0x40:
             OSD_info_regs[3].width=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap1 width",val,size);            
             break;
-        case 0x306C2:
+        case OSD_START+0x42:
             OSD_info_regs[3].height=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap1 height",val,size);            
             break;
-        case 0x306C4:
+        case OSD_START+0x44:
             OSD_info_regs[4].x=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Cursor0 X",val,size);            
             break;
-        case 0x306C6:
+        case OSD_START+0x46:
             OSD_info_regs[4].y=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Cursor0 Y",val,size);            
             break;
-        case 0x306C8:
+        case OSD_START+0x48:
             OSD_info_regs[4].width=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Cursor0 width",val,size);            
             break;
-        case 0x306CA:
+        case OSD_START+0x4A:
             OSD_info_regs[4].height=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Cursor0 height",val,size);            
             break;
-        case 0x306CC:
+        case OSD_START+0x4C:
             OSD_info_regs[5].width=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Cursor1 width",val,size);            
             break;
-        case 0x306CE:
+        case OSD_START+0x4E:
             OSD_info_regs[5].height=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Cursor1 height",val,size);            
             break;
         
-        case 0x306D0:
-        case 0x306D2:
-        case 0x306D4:
-        case 0x306D6:
-        case 0x306D8:
-        case 0x306DA:
-        case 0x306DC:
-        case 0x306DE:
+        case OSD_START+0x50:
+        case OSD_START+0x52:
+        case OSD_START+0x54:
+        case OSD_START+0x56:
+        case OSD_START+0x58:
+        case OSD_START+0x5A:
+        case OSD_START+0x5C:
+        case OSD_START+0x5E:
         {
-            int index=(addr-0x306D0)/2;
+            int index=(addr-OSD_START+0x50)/2;
             OSD_pallette_bank1[index]=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s %d write %x (size %x)\n",name,"Palette Bank1",index,val,size);            
             break;
         }
-        case 0x306E0:
-        case 0x306E2:
-        case 0x306E4:
-        case 0x306E6:
-        case 0x306E8:
-        case 0x306EA:
-        case 0x306EC:
-        case 0x306EE:
+        case OSD_START+0x60:
+        case OSD_START+0x62:
+        case OSD_START+0x64:
+        case OSD_START+0x66:
+        case OSD_START+0x68:
+        case OSD_START+0x6A:
+        case OSD_START+0x6C:
+        case OSD_START+0x6E:
         {
-            int index=(addr-0x306D0)/2;
+            int index=(addr-OSD_START+0x60)/2;
             OSD_pallette_bank2[index]=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s %d write %x (size %x)\n",name,"Palette Bank2",index,val,size);            
             break;
         }
             
-        case 0x306F2:
+        case OSD_START+0x72:
             OSD_cursor_data=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Cursor data",val,size);            
             break;
-        case 0x306F4:
+        case OSD_START+0x74:
             OSD_pallette_status=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Pallette status & cursor data",val,size);            
             break;
-        case 0x306F6:
+        case OSD_START+0x76:
             OSD_pallette_data_wr=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Pallette data write",val,size);            
             break;
-        case 0x306F8:
+        case OSD_START+0x78:
             OSD_pallette_index=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Pallette data & index",val,size);            
             break;
-        case 0x306FC:
+        case OSD_START+0x7C:
             OSD_alt_vid_offset = (OSD_alt_vid_offset & 0xFFFF) | ((val & 0x3F)<<16);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (OSD ALT=%x)\n",name,"OSD ALT buffer HI",
                 val,size,OSD_alt_vid_offset);            
             break;
-        case 0x306FE:
+        case OSD_START+0x7E:
             OSD_alt_vid_offset = (OSD_alt_vid_offset & 0x3F0000) | (val & 0xFFFF);
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (OSD ALT=%x)\n",name,"Pallette data & index",
                 val,size,OSD_alt_vid_offset);            
@@ -540,8 +540,8 @@ int HW_OSD::nxtEvent(void)
 
 void HW_OSD::chk_access(uint32_t addr,uint32_t val)
 {
-    if(OSD_offset_regs[2] >= 0x03000000 && addr>=OSD_offset_regs[2] 
-            && addr <= (OSD_offset_regs[2]+lcd->SCREEN_WIDTH*lcd->SCREEN_HEIGHT*2))
+    if(OSD_offset_regs[2] >= SDRAM_START && addr>=OSD_offset_regs[2] 
+            && addr <= (OSD_offset_regs[2]+SCREEN_WIDTH*SCREEN_HEIGHT*2))
             lcd->drawPix(addr-OSD_offset_regs[2],val);
         //lcd->nxtEvent(OSD_offset_regs[2]);
 }

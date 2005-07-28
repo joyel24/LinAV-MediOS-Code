@@ -16,7 +16,7 @@
 #include <i2c_MAS.h>
 
 
-gio_MAS_PR::gio_MAS_PR(i2c_MAS * mas):gpio_port(0x1F,"MAS_PR")
+gio_MAS_PR::gio_MAS_PR(i2c_MAS * mas):gpio_port(GPIO_MAS_PR,"MAS_PR")
 {    
     this->mas=mas;
 }

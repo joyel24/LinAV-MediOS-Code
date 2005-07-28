@@ -19,10 +19,10 @@ HW_uart::HW_uart(uint32_t start,uint32_t end,char * name):HW_access(start,end,na
     char fname[]="uartN";
     switch(start)
     {
-        case 0x30300:
+        case UART0_START:
             uartNum=0;
             break;
-        case 0x30380:
+        case UART1_START:
             uartNum=1;
             break;
         default:

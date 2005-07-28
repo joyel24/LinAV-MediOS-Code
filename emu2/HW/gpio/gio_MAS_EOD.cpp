@@ -31,7 +31,7 @@ int gio_MAS_EOD::do_cmd_eod(void)
     return 0;
 }
 
-gio_MAS_EOD::gio_MAS_EOD(void):gpio_port(0x04,"MAS_EOD")
+gio_MAS_EOD::gio_MAS_EOD(void):gpio_port(GPIO_MAS_EOD,"MAS_EOD")
 { 
     state = 1; 
     gio_MAS_EOD_obj = this;

@@ -14,7 +14,11 @@
 #include <string.h>
 
 #include <HW_cpld.h>
+
+#ifdef HAS_HW_30A24
 #include <HW_30a24.h>
+#endif
+
 #include <HW_dma.h>
 #include <HW_ON_OFF.h>
 
@@ -42,7 +46,7 @@ HW_cpld * cpld_obj;
 #include <cmd_line.h>        
 #include "cpld_cmd_line_fct.h"        
         
-HW_cpld::HW_cpld(void):HW_access(0x02000000,0x02ffffff,"CPLD")
+HW_cpld::HW_cpld(void):HW_access(CPLD_START,CPLD_END,"CPLD")
 {
     exit_on_not_match = false;
     
@@ -71,10 +75,12 @@ HW_cpld::~HW_cpld()
     
 }
 
+#ifdef HAS_HW_30A24
 void HW_cpld::set30A24(HW_30a24 * hw_30a24)
 {
     this->hw_30a24 = hw_30a24;
 }
+#endif
 
 void HW_cpld::setDMA(HW_dma * hw_dma)
 {
@@ -90,7 +96,7 @@ void HW_cpld::setONOFF(HW_gpio * gpio)
 uint32_t HW_cpld::read(uint32_t addr,int size)
 {
     uint32_t ret_val=0;
-    if(addr >= 0x02400000 && addr < 0x02400400 )
+    if(addr >= IDE_BASE && addr < IDE_END)
     {        
         ret_val=ata_read(addr,size);        
     }
@@ -98,35 +104,35 @@ uint32_t HW_cpld::read(uint32_t addr,int size)
     {
         switch(addr)
         {
-            case 0x02600000:
+            case CPLD_START+CPLD_PORT_OFFSET+0x0:
                 ret_val=cpld_module_type; 
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD0 - read, size %x: module connected : %x\n",size,ret_val);
                 break;
-            case 0x02600100:
+            case CPLD_START+CPLD_PORT_OFFSET+0x100:
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD1 - read, size %x: %x (USB %s)\n",size,cpld2_val,cpld2_val&0x1?"enable":"disable");
                 ret_val = cpld2_val;
                 break;
-            case 0x02600200:
+            case CPLD_START+CPLD_PORT_OFFSET+0x200:
                 ret_val = 0x10;
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD2 - read, size %x: %x\n",size,ret_val);
                 break;
-            case 0x02600300:
+            case CPLD_START+CPLD_PORT_OFFSET+0x300:
                 ret_val = (fw_connected&0x1)<<3;
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD3 - read, size %x: %x\n",size,ret_val);
                 break;
-            case 0x02600680:
+            case CPLD_START+CPLD_PORT_OFFSET+0x680:
                 BTN_FCT(btn_var[0],0x1)
                 BTN_FCT(btn_var[1],0x2)
                 ret_val |= 0x4;
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
                 break;
-            case 0x02600700:
+            case CPLD_START+CPLD_PORT_OFFSET+0x700:
                 BTN_FCT(btn_var[2],0x1)
                 BTN_FCT(btn_var[3],0x2)
                 BTN_FCT(btn_var[4],0x4)
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
                 break;
-            case 0x02600780:
+            case CPLD_START+CPLD_PORT_OFFSET+0x780:
                 BTN_FCT(btn_var[5],0x1)
                 BTN_FCT(btn_var[6],0x2)
                 BTN_FCT(btn_var[7],0x4)
@@ -143,7 +149,7 @@ uint32_t HW_cpld::read(uint32_t addr,int size)
 
 void HW_cpld::write(uint32_t addr,uint32_t val,int size)
 {
-    if(addr >= 0x02400000 && addr < 0x02400400 )
+    if(addr >= IDE_BASE && addr < IDE_END)
     {
         ata_write(addr,val,size);
     }
@@ -151,28 +157,28 @@ void HW_cpld::write(uint32_t addr,uint32_t val,int size)
     {
         switch(addr)
         {
-            case 0x02600000:
+            case CPLD_START+CPLD_PORT_OFFSET+0x0:
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD0 - write ata mode, size %x: %x\n",size,val);
                 cpld_ata_mode = val;
                 break;
-            case 0x02600100:
+            case CPLD_START+CPLD_PORT_OFFSET+0x100:
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD1 - write, size %x: %x (USB %s)\n",size,val,val&0x1?"enable":"disable");
                 cpld2_val = val;
                 break;
-            case 0x02600200:
+            case CPLD_START+CPLD_PORT_OFFSET+0x200:
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD2 - write, size %x: %x (bck light %s) (ide reset %s)\n",size,val,
                     (val&0x4)?"ON":"OFF",(val&0x1)?"ON":"OFF");
                 bck_light = val&0x4;
                 ide_reset = val&0x1;
                 break;
-            case 0x02600300:
+            case CPLD_START+CPLD_PORT_OFFSET+0x300:
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD3 - write, size %x: %x (HD is %s)\n",size,val,(val&0x8)?"ON":"OFF");
                 hdd_on = val&0x8;
                 hw_30a24->HDD_power = hdd_on?1:0;
                 break;
-            case 0x02600680:
-            case 0x02600700:
-            case 0x02600780:
+            case CPLD_START+CPLD_PORT_OFFSET+0x680:
+            case CPLD_START+CPLD_PORT_OFFSET+0x700:
+            case CPLD_START+CPLD_PORT_OFFSET+0x780:
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD - !!!! write buttons (@0x%08x), size %x\n",addr,size);
                 break;
             default:
@@ -194,32 +200,8 @@ void HW_cpld::init_ata(void)
     
     ident_data = id_disk_src;
     part_data = part_table_src;
-    /*ident_data = new char[512];
-    part_data = new char[1024];*/
     buffer = NULL;
-    
-    /*FILE * fd = fopen("id_disk", "rb");
-    if (!fd)
-        printf("Error: opening: %s for identify data\n","id_disk");
-    else
-    {
-        fread (ident_data,1,512,fd);
-        fclose(fd);
-        printf("Read file %s for identify data\n","id_disk");        
-    }  */  
-    
-    
-    /*fd = fopen("part_table", "rb");
-    if (!fd)
-        printf("Error: opening: %s for identify data\n","table");
-    else
-    {
-        fread (part_data,1,1024,fd);
-        fclose(fd);
-        printf("Read file %s for identify data\n","table");        
-    } */
-    /*memset(part_data,0,1024);   */
-    
+       
     hd = fopen("HD.bin", "r+b");
     if (!hd)
         printf("Error: opening: %s for HD emu\n","HD.bin");

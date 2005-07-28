@@ -14,9 +14,9 @@
 
 #include <HW_TI_ver.h>
 
-#define TI_VER 0x32
 
-HW_TI_ver::HW_TI_ver():HW_access(0x30906,0x30907,"TI version")
+
+HW_TI_ver::HW_TI_ver():HW_access(TI_VER_START,TI_VER_END,"TI version")
 {
     
 }

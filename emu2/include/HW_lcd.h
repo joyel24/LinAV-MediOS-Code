@@ -27,9 +27,6 @@ class HW_lcd {
         void updte_lcd(uint32_t base_addr);
         void drawPix(uint32_t addr,uint32_t val);     
         
-        int SCREEN_WIDTH;
-        int SCREEN_HEIGHT;
-        
         int nxtEvent(uint32_t addr);
           
     private:

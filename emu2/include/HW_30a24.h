@@ -14,6 +14,9 @@
 #define __HW_30A24_H
 
 #include "emu.h"
+
+#ifdef HAS_HW_30A24
+
 #include "HW_access.h"
 
 
@@ -28,5 +31,6 @@ class HW_30a24 : public HW_access {
         int power_connected;
         int usb_connected;
 };
+#endif // HAS_HW_30A24
 
 #endif // __HW_30A24_H

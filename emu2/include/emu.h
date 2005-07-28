@@ -13,6 +13,12 @@
 #ifndef EMU_H
 #define EMU_H
 
+#ifdef AV3XX
+#include <arch/arch_av3xx.h>
+#else
+#error "undef arch"
+#endif
+
 #include "emu_types.h"
 
 #define STEP 0

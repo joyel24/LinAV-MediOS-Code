@@ -34,14 +34,14 @@ mem_space::mem_space(char * flash,char * sdram):HW_access(0x0,0xFFFFFFFF,"AVMEM"
     
     bkpt= new bkpt_list();  
 
-    HW_mem * reset_vector=new HW_mem(NULL,0x0,0x4,"Reset");
+    HW_mem * reset_vector=new HW_mem(NULL,RESET_VECTOR,RESET_VECTOR+0x4,"Reset"); /* one instruction reset vector*/
     add_item(reset_vector);
-    reset_vector->write(0x0,0xEA03FFFE,4);
+    reset_vector->write(RESET_VECTOR,RESET_INIT_VAL,4);
     
-    add_item(new HW_mem(NULL,0x4,0x8000,"IRAM"));
+    add_item(new HW_mem(NULL,IRAM_START,IRAM_END,"IRAM"));
     add_item(new HW_mem(NULL,0x40000,0x50000,"DSP MEM"));    
-    add_item(new HW_mem(flash,0x100000,0x180000,"FLASH"));
-    HW_mem * sd = new HW_mem(sdram,0x3000000,0x4000000,"SDRAM");
+    add_item(new HW_mem(flash,FLASH_START,FLASH_END,"FLASH"));
+    HW_mem * sd = new HW_mem(sdram,SDRAM_START,SDRAM_END,"SDRAM");
     add_item(sd);
     
     hw_cpld = new HW_cpld();    
@@ -60,12 +60,8 @@ mem_space::mem_space(char * flash,char * sdram):HW_access(0x0,0xFFFFFFFF,"AVMEM"
     exit_on_not_match = false;
     data_abt_on_not_match = true;
 #endif    
-    /* special init for uart */
-    char * str="DeBuGuNlOcKeD_42";
-    for(int i=0;*(str+i);i++)
-    {
-        write((0x107FF0+i),(char)*(str+i),1);
-    }
+    /* special init for each ARCH */
+    ARCH_INIT
     
     
     init_mem_static_fct(this);

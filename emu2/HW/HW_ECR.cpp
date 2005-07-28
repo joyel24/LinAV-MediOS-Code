@@ -15,7 +15,7 @@
 #include <HW_ECR.h>
 
 
-HW_ECR::HW_ECR():HW_access(0x30900,0x30905,"ECR")
+HW_ECR::HW_ECR():HW_access(ECR_START,ECR_END,"ECR")
 {
     bytes_swapped=0;
     bits_swapped=0;
@@ -27,15 +27,15 @@ uint32_t HW_ECR::read(uint32_t addr,int size)
     uint32_t ret_val=0;
     switch(addr)
     {
-        case 0x30900:
+        case ECR_START+0x0:
             DEBUG_HW(ECR_HW_DEBUG,"%s INPUT read => %x (size %x)\n",name,in_val,size);
             ret_val=in_val;
             break;
-        case 0x30902:
+        case ECR_START+0x2:
             DEBUG_HW(ECR_HW_DEBUG,"%s BYTES_SWAPPED read => %x (size %x)\n",name,bytes_swapped,size);
             ret_val=bytes_swapped;
             break;
-        case 0x30904:
+        case ECR_START+0x4:
             DEBUG_HW(ECR_HW_DEBUG,"%s BITS_SWAPPED read => %x (size %x)\n",name,bits_swapped,size);
             ret_val=bits_swapped;
             break;
@@ -45,7 +45,7 @@ uint32_t HW_ECR::read(uint32_t addr,int size)
 
 void HW_ECR::write(uint32_t addr,uint32_t val,int size)
 {
-    if(addr == 0x30900)
+    if(addr == ECR_START+0x0)
     {
         uint32_t tmp_val;
         tmp_val = in_val = val;

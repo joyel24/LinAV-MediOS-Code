@@ -19,9 +19,9 @@
 #define IRQ_0    0x4
 #define IRQ_1    0x6
 
-#define BASE_STATUS   0x30500
-#define BASE_ENTRY    0x30508
-#define BASE_ENABLE   0x30520
+#define BASE_STATUS   IRQ_START+0x0
+#define BASE_ENTRY    IRQ_START+0x8
+#define BASE_ENABLE   IRQ_START+0x20
 
 char * str_irq_fiq[] = {
     "FIQ0",
@@ -37,7 +37,7 @@ HW_IRQ * irq_obj;
 
 #include "irq_cmd_line_fct.h"
 
-HW_IRQ::HW_IRQ(void):HW_access(0x30500,0x3055E,"IRQ/FIQ")
+HW_IRQ::HW_IRQ(void):HW_access(IRQ_START,IRQ_END,"IRQ/FIQ")
 {
     init_irq_static_fct(this);
     for(int i=0;i<4;i++)

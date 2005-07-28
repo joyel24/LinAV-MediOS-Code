@@ -22,17 +22,12 @@
 
 extern mem_space * mem;
 
-//#define LCD_UPDATE(x,y,w,h)       {lcd_update(UPDATE_ONLY,x,y,w,h);}
-
 HW_lcd::HW_lcd(HW_mem * mem2)
 {
     int x,y;
     
     this->mem2 = mem2;
-    //this->memSpace = memSpace;
 
-    SCREEN_WIDTH = 320;
-    SCREEN_HEIGHT = 240;
 
     display = XOpenDisplay(0);  
     if(!display) 
@@ -114,7 +109,7 @@ int HW_lcd::nxtEvent(uint32_t addr)
     switch (event.type) 
     {
         case Expose :
-            if(addr>=0x03000000 && addr < 0x04000000)
+            if(addr>=SDRAM_START && addr < SDRAM_END)
                 updte_lcd(addr);
             break;
         //case KeyRelease :

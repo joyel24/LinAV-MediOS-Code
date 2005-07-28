@@ -16,7 +16,7 @@
 #include "HW_cpld.h"
 
 
-HW_dma::HW_dma(HW_mem * mem,HW_cpld * hw_cpld):HW_access(0x30a38,0x30a48,"DMA")
+HW_dma::HW_dma(HW_mem * mem,HW_cpld * hw_cpld):HW_access(DMA_START,DMA_END,"DMA")
 {
     dma_src=dma_dst=dma_size=0;
     device_sel=dma_endian=0;
@@ -30,31 +30,31 @@ uint32_t HW_dma::read(uint32_t addr,int size)
 #ifdef HAS_ATA
     switch(addr)
     {
-        case 0x30a38:            
+        case DMA_START+0x0:            
             ret_val = (dma_src >> 16)&0xFFFF;
             DEBUG_HW(DMA_HW_DEBUG,"DMA - read - SRC HI = %x\n",ret_val);
             break;
-        case 0x30a3a:            
+        case DMA_START+0x2:            
             ret_val = dma_src&0xFFFF;
             DEBUG_HW(DMA_HW_DEBUG,"DMA - read - SRC LO = %x\n",ret_val);
             break;
-        case 0x30a3c:            
+        case DMA_START+0x4:            
             ret_val = (dma_dst >> 16)&0xFFFF;
             DEBUG_HW(DMA_HW_DEBUG,"DMA - read - DST HI = %x\n",ret_val);
             break;
-        case 0x30a3e:            
+        case DMA_START+0x6:            
             ret_val = dma_src&0xFFFF;
             DEBUG_HW(DMA_HW_DEBUG,"DMA - read - DST LO = %x\n",ret_val);
             break;
-        case 0x30a40:            
+        case DMA_START+0x8:            
             ret_val = dma_size;
             DEBUG_HW(DMA_HW_DEBUG,"DMA - read - SIZE = %x\n",ret_val);
             break;
-        case 0x30a42:            
+        case DMA_START+0xa:            
             ret_val = device_sel;
             DEBUG_HW(DMA_HW_DEBUG,"DMA - read - DEVICE SELECT = %x\n",ret_val);
             break;
-        case 0x30a44:            
+        case DMA_START+0xc:            
             ret_val = 0;
             DEBUG_HW(DMA_HW_DEBUG,"DMA - read - DMA state = %x\n",ret_val);
             break;
@@ -71,31 +71,31 @@ void HW_dma::write(uint32_t addr,uint32_t val,int size)
 #ifdef HAS_ATA
     switch(addr)
     {
-        case 0x30a38:            
+        case DMA_START+0x0:            
             dma_src = (dma_src&0xFFFF) | ((val << 16)&0xFFFF0000);
             DEBUG_HW(DMA_HW_DEBUG,"DMA - write - SRC HI = %x (src=%x)\n",val,dma_src);
             break;
-        case 0x30a3a:            
+        case DMA_START+0x2:            
             dma_src = (dma_src&0xFFFF0000) | (val & 0xFFFF);
             DEBUG_HW(DMA_HW_DEBUG,"DMA - write - SRC LO = %x (src=%x)\n",val,dma_src);
             break;
-        case 0x30a3c:            
+        case DMA_START+0x4:            
             dma_dst = (dma_dst&0xFFFF) | ((val << 16)&0xFFFF0000);
             DEBUG_HW(DMA_HW_DEBUG,"DMA - write - DST HI = %x (dst=%x)\n",val,dma_dst);
             break;
-        case 0x30a3e:            
+        case DMA_START+0x6:            
             dma_dst = (dma_dst&0xFFFF0000) | (val & 0xFFFF);
             DEBUG_HW(DMA_HW_DEBUG,"DMA - write - DST LO = %x (dst=%x)\n",val,dma_dst);
             break;
-        case 0x30a40:            
+        case DMA_START+0x8:            
             dma_size = val;
             DEBUG_HW(DMA_HW_DEBUG,"DMA - write - SIZE = %x\n",val);
             break;
-        case 0x30a42:            
+        case DMA_START+0xA:            
             device_sel = val&0xFF;
             DEBUG_HW(DMA_HW_DEBUG,"DMA - write - DEVICE SELECT = %x\n",val);
             break;
-        case 0x30a44:
+        case DMA_START+0xC:
             dma_endian = (val>>8)&0x1;
             DEBUG_HW(DMA_HW_DEBUG,"DMA - write - START - (endian=%x)",dma_endian);
             if(val & 0x1)
@@ -106,7 +106,7 @@ void HW_dma::write(uint32_t addr,uint32_t val,int size)
                 {     
                     case 0x51:                          
                         for (int i = 0; i < dma_size; i++)
-                            data[i+data_ptr] = mem->read(0x03000000 + dma_src + i,1);
+                            data[i+data_ptr] = mem->read(SDRAM_START + dma_src + i,1);
                         data_ptr+=dma_size;
                         dma_src+=dma_size;                        
                         if(data_ptr>=data_size)
@@ -118,10 +118,10 @@ void HW_dma::write(uint32_t addr,uint32_t val,int size)
                         DEBUG_HW(DMA_HW_DEBUG,"done");
                         break;
                     case 0x15:
-                        DEBUG_HW(DMA_HW_DEBUG,"real dest = %x , src val (%x/%x) %02x%02x%02x%02x  ",0x03000000 + dma_dst,data_ptr,
+                        DEBUG_HW(DMA_HW_DEBUG,"real dest = %x , src val (%x/%x) %02x%02x%02x%02x  ",SDRAM_START + dma_dst,data_ptr,
                             data_size,data[data_ptr]&0xFF,data[data_ptr+1]&0xFF,data[data_ptr+2]&0xFF,data[data_ptr+3]&0xFF);
                         for (int i = 0; i < dma_size; i++)
-                             mem->write(0x03000000 + dma_dst + i,data[i+data_ptr] & 0xff,1);
+                             mem->write(SDRAM_START + dma_dst + i,data[i+data_ptr] & 0xff,1);
                         data_ptr+=dma_size;
                         dma_dst+=dma_size;
                         if(data_ptr>=data_size)

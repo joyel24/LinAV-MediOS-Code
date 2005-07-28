@@ -181,7 +181,7 @@ void init_cpu(void)
     SET_FLAG(IRQ_MASK);
     SET_FLAG(FIQ_MASK);
     
-    SET_MODE(M_SVC); //M_SYS
+    SET_MODE(INIT_MODE); //M_SYS
     
     /* init the cmd line */
     

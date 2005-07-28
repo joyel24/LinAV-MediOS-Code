@@ -46,11 +46,8 @@ class HW_gpio : public HW_access {
         gpio_port * port_list[32];   
         
     private:
-        //int DIR_0,DIR_1,INV_0,INV_1;
         int FSEL,BITRATE;
         int IRQPORT;
-                
-        //int BITSET_0,BITSET_1,BITCLR_0,BITCLR_1;
               
 };
 

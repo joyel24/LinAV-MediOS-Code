@@ -28,7 +28,7 @@ int HW_OSD::do_cmd_updt_lcd(int argc,char ** argv)
     }
     else
     {
-        if(OSD_offset_regs[2]>=0x03000000 && OSD_offset_regs[2] < 0x04000000)
+        if(OSD_offset_regs[2]>=SDRAM_START && OSD_offset_regs[2] < SDRAM_END)
             lcd->updte_lcd(OSD_offset_regs[2]);
     }
     return 0;

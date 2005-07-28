@@ -23,8 +23,6 @@
 #include <HW_ON_OFF.h>
 #include <HW_gpio.h>
 
-#define IDE_BASE                          (0x02400000)
-
 #define IDE_DATA                          (IDE_BASE+0x000)
 #define IDE_ERROR                         (IDE_BASE+0x080)
 #define IDE_NSECTOR                       (IDE_BASE+0x100)
@@ -75,8 +73,9 @@ class HW_cpld:public HW_access {
         
         uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size); 
-        
+#ifdef HAS_HW_30A24
         void set30A24(HW_30a24 * hw_30a24);
+#endif
         void setDMA(HW_dma * hw_dma);
         void setONOFF(HW_gpio * gpio);
         
@@ -92,7 +91,9 @@ class HW_cpld:public HW_access {
         HW_ON_OFF * OFF_btn;
         
     private:
+#ifdef HAS_HW_30A24
         HW_30a24 * hw_30a24;  
+#endif
         
         HW_dma * hw_dma; 
         
