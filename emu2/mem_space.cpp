@@ -50,8 +50,9 @@ mem_space::mem_space(char * flash,char * sdram):HW_access(0x0,0xFFFFFFFF,"AVMEM"
     
     add_item(hw_cpld);
     add_item(hw_TI);
-    
+#ifdef HAS_HW_30A24    
     hw_cpld->set30A24(hw_TI->hw_30a24);
+#endif
     hw_cpld->setDMA(hw_TI->hw_dma);
     hw_cpld->setONOFF(hw_TI->gpio);
 #ifdef EXIT_ON_ADDR_ERROR    

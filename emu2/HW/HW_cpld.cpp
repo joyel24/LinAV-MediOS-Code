@@ -96,6 +96,7 @@ void HW_cpld::setONOFF(HW_gpio * gpio)
 uint32_t HW_cpld::read(uint32_t addr,int size)
 {
     uint32_t ret_val=0;
+    
     if(addr >= IDE_BASE && addr < IDE_END)
     {        
         ret_val=ata_read(addr,size);        

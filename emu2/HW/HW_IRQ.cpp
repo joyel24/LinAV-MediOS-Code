@@ -19,9 +19,9 @@
 #define IRQ_0    0x4
 #define IRQ_1    0x6
 
-#define BASE_STATUS   IRQ_START+0x0
-#define BASE_ENTRY    IRQ_START+0x8
-#define BASE_ENABLE   IRQ_START+0x20
+#define BASE_STATUS   (IRQ_START+0x0)
+#define BASE_ENTRY    (IRQ_START+0x8)
+#define BASE_ENABLE   (IRQ_START+0x20)
 
 char * str_irq_fiq[] = {
     "FIQ0",
