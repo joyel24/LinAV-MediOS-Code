@@ -26,6 +26,7 @@
 #define FONT_HEIGHT 12
 #define TERM_WIDTH 80
 #define TERM_HEIGHT 50
+#define MARGIN 3
 
 class HW_uart : public HW_access {
     public:
@@ -51,7 +52,7 @@ class HW_uart : public HW_access {
 
         int skip;
 
-        char term[TERM_HEIGHT][TERM_WIDTH];
+        char term[TERM_HEIGHT][TERM_WIDTH+1];
         int tx;
         int ty;
 

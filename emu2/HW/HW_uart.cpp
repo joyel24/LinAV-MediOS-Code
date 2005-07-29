@@ -65,7 +65,7 @@ HW_uart::HW_uart(uint32_t start,uint32_t end,char * name):HW_access(start,end,na
     window = XCreateSimpleWindow(
             display,                               /* Display */
             DefaultRootWindow(display),            /* Main Window */
-            0, 0, TERM_WIDTH*FONT_WIDTH, TERM_HEIGHT*FONT_HEIGHT,     /* Geometry */
+            0, 0, TERM_WIDTH*FONT_WIDTH+MARGIN*2, TERM_HEIGHT*FONT_HEIGHT+MARGIN*2,     /* Geometry */
             0,                                    /* Width border */
             BlackPixel(display, screen),
             WhitePixel(display, screen)
@@ -184,6 +184,7 @@ void HW_uart::add_char(char c){
     }
 
     if (tx>=TERM_WIDTH){
+        term[ty][tx]=0;
     	  tx=0;
         ++ty;
     }
@@ -194,7 +195,7 @@ void HW_uart::add_char(char c){
         }
 
         ty=TERM_HEIGHT-1;
-        
+
         full_update=1;
     }
 
@@ -203,8 +204,8 @@ void HW_uart::add_char(char c){
     if (full_update){
         update_window();
     }else{
-	      XClearArea(display,window,0,ty*FONT_HEIGHT+2,TERM_WIDTH*FONT_WIDTH,FONT_HEIGHT,false);
-        XDrawString(display,window,gc,0,ty*FONT_HEIGHT+FONT_HEIGHT,term[ty],strlen(term[ty]));
+	      XClearArea(display,window,MARGIN,ty*FONT_HEIGHT+2+MARGIN,TERM_WIDTH*FONT_WIDTH+MARGIN,FONT_HEIGHT,false);
+        XDrawString(display,window,gc,MARGIN,ty*FONT_HEIGHT+FONT_HEIGHT+MARGIN,term[ty],strlen(term[ty]));
         XFlush(display);
     }
 }
@@ -212,8 +213,8 @@ void HW_uart::add_char(char c){
 void HW_uart::update_window(){
 
 	  for (int i=0;i<TERM_HEIGHT;++i){
-	      XClearArea(display,window,0,i*FONT_HEIGHT+2,TERM_WIDTH*FONT_WIDTH,FONT_HEIGHT,false);
-        XDrawString(display,window,gc,0,i*FONT_HEIGHT+FONT_HEIGHT,term[i],strlen(term[i]));
+	      XClearArea(display,window,MARGIN,i*FONT_HEIGHT+2+MARGIN,TERM_WIDTH*FONT_WIDTH+MARGIN,FONT_HEIGHT,false);
+        XDrawString(display,window,gc,MARGIN,i*FONT_HEIGHT+FONT_HEIGHT+MARGIN,term[i],strlen(term[i]));
     }
 
     XFlush(display);
