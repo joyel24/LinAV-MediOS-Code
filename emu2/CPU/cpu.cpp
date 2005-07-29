@@ -1,4 +1,4 @@
-/* 
+/*
 *   cpu.cpp
 *
 *   AV3XX emulator
@@ -213,6 +213,8 @@ void go(uint32_t start_address,uint32_t stack_address)
     
     while(1)
     {  
+        mem->hw_TI->uart_list[0]->nxtEvent();
+        mem->hw_TI->uart_list[1]->nxtEvent();
         mem->hw_TI->osd->nxtEvent();
         
         ((gio_MAS_EOD*)mem->hw_TI->gpio->port_list[0x4])->chkEOD();

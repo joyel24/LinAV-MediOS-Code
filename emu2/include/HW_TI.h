@@ -1,4 +1,4 @@
-/* 
+/*
 *   HW_TI.h
 *
 *   AV3XX emulator
@@ -23,6 +23,7 @@
 #include "HW_cpld.h"
 #include "HW_timer.h"
 #include "HW_OSD.h"
+#include "HW_uart.h"
 
 class HW_TI:public HW_access {
     public:
@@ -38,7 +39,8 @@ class HW_TI:public HW_access {
         HW_OSD * osd;
         
         HW_timer * timer_list[4];
-        
+        HW_uart * uart_list[2];
+
         /*uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);      */
 };

@@ -1,4 +1,4 @@
-/* 
+/*
 *   HW_TI.cpp
 *
 *   AV3XX emulator
@@ -44,8 +44,12 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(TI_R
     
     add_item(osd);
     
-    add_item(new HW_uart(UART0_START,UART0_END,"UART0"));
-    add_item(new HW_uart(UART1_START,UART1_END,"UART1"));
+    uart_list[0]=new HW_uart(0x30300,0x30310,"UART0");
+    add_item(uart_list[0]);
+
+    uart_list[1]=new HW_uart(0x30380,0x30390,"UART1");
+    add_item(uart_list[1]);
+
     add_item(new HW_clock());
     gpio = new HW_gpio();
     add_item(gpio);
@@ -69,7 +73,7 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_access(TI_R
     
     add_item(new HW_TI_ver());
     add_item(new HW_ECR());
-    
+
     //add_item(new HW_null(0x30700,0x30800,"UKN-0x30700"));
     
     add_item(new HW_null(VID_START,VID_END,"VIDEO"));

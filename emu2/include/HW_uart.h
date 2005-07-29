@@ -1,4 +1,4 @@
-/* 
+/*
 *   HW_uart.h
 *
 *   AV3XX emulator
@@ -19,6 +19,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
+#define FONT_WIDTH 6
+#define FONT_HEIGHT 12
+#define TERM_WIDTH 80
+#define TERM_HEIGHT 50
+
 class HW_uart : public HW_access {
     public:
         HW_uart(uint32_t start,uint32_t end,char * name);
@@ -26,9 +34,30 @@ class HW_uart : public HW_access {
                 
         uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);
+
+        int nxtEvent();
+
+        void add_char(char c);
+        void update_window();
     private:
         int uartNum;
         FILE * fd;
+
+        Display* display;
+        Window window;
+        GC gc;
+        int screen;
+        XEvent event;
+
+        int skip;
+
+        char term[TERM_HEIGHT][TERM_WIDTH];
+        int tx;
+        int ty;
+
+        char in_fifo[256];
+        int if_r;
+        int if_w;
 };
 
 #endif // __HW_UART_H

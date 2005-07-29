@@ -1,4 +1,4 @@
-/* 
+/*
 *   cmd_line_parser.cpp
 *
 *   AV3XX emulator
@@ -15,6 +15,7 @@
 
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <sys/cdefs.h>
 
 #include <cmd_line.h>
 

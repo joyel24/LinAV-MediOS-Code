@@ -1,4 +1,4 @@
-/* 
+/*
 *   HW_lcd.h
 *
 *   AV3XX emulator
@@ -40,7 +40,9 @@ class HW_lcd {
         XEvent event;
         
         int colorTab[256];
-        
+
+        int skip;
+
         void setPalette(int palette[256][3],int size);
 
 };

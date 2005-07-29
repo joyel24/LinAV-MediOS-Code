@@ -1,4 +1,4 @@
-/* 
+/*
 *   HW_lcd.cpp
 *
 *   AV3XX emulator
@@ -25,9 +25,10 @@ extern mem_space * mem;
 HW_lcd::HW_lcd(HW_mem * mem2)
 {
     int x,y;
-    
-    this->mem2 = mem2;
 
+    skip=0;
+
+    this->mem2 = mem2;
 
     display = XOpenDisplay(0);  
     if(!display) 
@@ -43,7 +44,7 @@ HW_lcd::HW_lcd(HW_mem * mem2)
             display,                               /* Display */
             DefaultRootWindow(display),            /* Main Window */
             0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,     /* Geometry */
-            10,                                    /* Width border */
+            0,                                    /* Width border */
             BlackPixel(display, screen),	
             WhitePixel(display, screen)
             );            
@@ -70,7 +71,7 @@ HW_lcd::HW_lcd(HW_mem * mem2)
         
     XMapWindow(display, window);
     
-    printf("LCD init done\n");    
+    printf("LCD init done\n");
 }
 
 void HW_lcd::setPalette(int palette[256][3],int size)
@@ -94,6 +95,10 @@ void HW_lcd::setPalette(int palette[256][3],int size)
 int HW_lcd::nxtEvent(uint32_t addr)
 {   
  #if 1
+    ++skip;
+    if(skip<10000) return 0;
+    skip=0;
+
     int pending;
     pending = XPending(display);
     KeySym keysym;
