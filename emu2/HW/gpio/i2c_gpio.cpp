@@ -116,6 +116,7 @@ i2c_master::i2c_master(HW_gpio * gpio)
     /* ini variables */
     
     active = false;
+    cur_device = NULL;
     
     i2c_head=NULL;
     register_i2c((i2c_device *)new i2c_MAS(gpio));

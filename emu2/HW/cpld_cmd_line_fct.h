@@ -93,5 +93,5 @@ void init_cpld_static_fct(HW_cpld * cpld)
     add_cmd_fct("f3",do_cmd_btn_f3_s,"Emulate btn F3 press");
     add_cmd_fct("joy",do_cmd_btn_joy_s,"Emulate btn JOY press");
     add_cmd_fct("on",do_cmd_btn_on_s,"Emulate btn ON press");
-    add_cmd_fct("off",do_cmd_btn_off_s,"Emulate btn OFF press");    
+    add_cmd_fct("off",do_cmd_btn_off_s,"Emulate btn OFF press");   
 }
