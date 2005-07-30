@@ -306,6 +306,7 @@ void arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
                     data=mem->read(address,4);
                     int tst = address & 0x3;
                     uint32_t value=0;
+        #if 0
                     switch(tst)
                     {
                         case 0x0:
@@ -313,14 +314,20 @@ void arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
                             break;
                         case 0x1:
                             value=(data << 24) | (data >> 8);
+                            printf("ROT\n");
                             break;
                         case 0x2:
                             value=(data << 16) | (data >> 16);
+                            printf("ROT\n");
                             break;
                         case 0x3:
                             value=(data << 8) | (data >> 24);
+                            printf("ROT\n");
                             break;
                     }
+        #else
+                    value=data;
+        #endif
                     if(Rd==15)
                     {
                         //printf("@%08x:%08x| LDR loaded: 0x%08x org: 0x%08x\n",old_PC,instruction, value,address);

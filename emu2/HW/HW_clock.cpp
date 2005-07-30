@@ -21,20 +21,24 @@ HW_clock::HW_clock(void):HW_access(CLOCK_START,CLOCK_END,"CLOCK")
 
 uint32_t HW_clock::read(uint32_t addr,int size)
 {
-    DEBUG_HW(CLOCK_HW_DEBUG,"%s read @0x%08x, size %x\n",name,addr,size);
+    int ret_val = 0;
     switch(addr)
     {
         case CLOCK_START+0x0:
-            return 0x8000;
+            ret_val = 0x8000;
+            break;
         case CLOCK_START+0x2:
-            return 0x8000;
+            ret_val = 0x8000;
+            break;
         case CLOCK_START+0x4:
-            return 0x8000;
+            ret_val = 0x8000;
+            break;
         default:
             break;
     }    
+    DEBUG_HW(CLOCK_HW_DEBUG,"%s read @0x%08x, (size %x) => send %x\n",name,addr,size,ret_val);
     
-    return 0;
+    return ret_val;
 }
 
 void HW_clock::write(uint32_t addr,uint32_t val,int size)

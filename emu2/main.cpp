@@ -91,8 +91,9 @@ int main(int argc, char* argv[])
     
     //sdram_file = "linux.bin";
     //sdram_file = "gravity.bin";
-    sdram_file = "CJBM_v2.depack";
+    //sdram_file = "CJBM_v2.depack";
     //sdram_file = "firm_1.depack_NEW";
+    flash_file="flash_rom";
     
     mem = new mem_space(flash_file,sdram_file);
     
@@ -100,7 +101,7 @@ int main(int argc, char* argv[])
     
     signal(SIGINT,&signal_handler);
     
-    go(SDRAM_START,STACK_INIT);
+    go(START_ADDR,STACK_INIT);
     
     delete(mem);
 }

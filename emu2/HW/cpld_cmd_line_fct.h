@@ -76,8 +76,7 @@ int HW_cpld::do_cmd_btn(int btn)
             break;
     }
     
-    run_mode = RUN;
-    return 1;
+    return 0;
 }
 
 

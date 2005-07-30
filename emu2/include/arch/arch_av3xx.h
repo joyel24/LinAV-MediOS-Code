@@ -34,6 +34,7 @@
 
 /************************************************************ initial state */
 
+#define START_ADDR        FLASH_START
 #define STACK_INIT        (IRAM_END - 0x4) 
 #define RESET_INIT_VAL    0xEA03FFFE     
 #define INIT_MODE         M_SVC
