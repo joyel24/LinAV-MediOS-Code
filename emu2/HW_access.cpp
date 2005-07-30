@@ -28,6 +28,7 @@ HW_access::HW_access(uint32_t start,uint32_t end, char * name)
     
     exit_on_not_match = true;
     data_abt_on_not_match = false;
+    full_size = false;
 }
 
 extern bool data_abort;
@@ -36,7 +37,20 @@ uint32_t HW_access::read(uint32_t addr,int size)
 {
     for(HW_access * ptr=zone_list;ptr!=NULL;ptr=ptr->nxt)
         if(addr>=ptr->start && addr<(ptr->end-size+1))
-            return ptr->read(addr,size);
+        {
+            switch(size)
+            {
+                case 1:
+                    return (ptr->read(addr,size)&0xFF);
+                case 2:
+                    return ptr->read(addr,size);
+                case 4:
+                    if(ptr->full_size)
+                        return ptr->read(addr,size);
+                    else
+                        return ((ptr->read(addr,2)&0xFFFF) | ((ptr->read(addr+2,2)&0xFFFF)<<16));
+            }
+        }
                 
     if(exit_on_not_match)
     {
@@ -58,7 +72,24 @@ void HW_access::write(uint32_t addr,uint32_t val,int size)
     for(HW_access * ptr=zone_list;ptr!=NULL;ptr=ptr->nxt)
         if(addr>=ptr->start && addr<(ptr->end-size+1))
         {
-            ptr->write(addr,val,size);
+            switch(size)
+            {
+                case 1:
+                    ptr->write(addr,val&0xFF,size);
+                    break;
+                case 2:
+                    ptr->write(addr,val&0xFFFF,size);
+                    break;
+                case 4:
+                    if(ptr->full_size)
+                        ptr->write(addr,val,size);
+                    else
+                    {
+                        ptr->write(addr,val&0xFFFF,size);
+                        ptr->write(addr+2,(val>>16)&0xFFFF,size);
+                    }
+                    break;
+            }
             return;
         }
 

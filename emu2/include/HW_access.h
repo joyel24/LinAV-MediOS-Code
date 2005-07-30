@@ -23,6 +23,7 @@ protected:
     
     bool exit_on_not_match;
     bool data_abt_on_not_match;
+    bool full_size;
 
 public:
     HW_access * zone_list;

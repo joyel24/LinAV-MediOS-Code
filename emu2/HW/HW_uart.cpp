@@ -110,7 +110,7 @@ int HW_uart::nxtEvent()
             break;
         case KeyPress :
             XLookupString (&event.xkey, &c, 1, &keysym, 0);
-
+            
             in_fifo[if_w & 0xff]=c;
             ++if_w;
             break;

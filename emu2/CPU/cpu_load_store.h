@@ -303,10 +303,10 @@ void arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
                 {
                     DEBUG("LDR %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                         
-                    data=mem->read(address,4);
+                    data=mem->read(address&0xFFFFFFFC,4);
                     int tst = address & 0x3;
                     uint32_t value=0;
-        #if 0
+        #if 1
                     switch(tst)
                     {
                         case 0x0:
@@ -314,15 +314,12 @@ void arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
                             break;
                         case 0x1:
                             value=(data << 24) | (data >> 8);
-                            printf("ROT\n");
                             break;
                         case 0x2:
                             value=(data << 16) | (data >> 16);
-                            printf("ROT\n");
                             break;
                         case 0x3:
                             value=(data << 8) | (data >> 24);
-                            printf("ROT\n");
                             break;
                     }
         #else

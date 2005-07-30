@@ -25,6 +25,8 @@ HW_mem::HW_mem(char * fname,uint32_t start,uint32_t end,char * name):HW_access(s
     FILE * fd;
     int fsize;
   
+    full_size = true;
+    
     if(fname)
     {
         fd = fopen(fname, "rb");
