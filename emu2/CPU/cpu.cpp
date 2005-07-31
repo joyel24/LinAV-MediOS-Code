@@ -378,6 +378,7 @@ void doARM(uint32_t instruction)
                             case 0:
                                 if((instruction>>22)&0x1)
                                 {                           /* BIT 22 == 1 */ /* CLZ */
+                                    INT_DEBUG_HEAD
                                     printf("CLZ : Undef instruction\n");
                                     exit(0);
                                 }
@@ -409,6 +410,7 @@ void doARM(uint32_t instruction)
                                 }
                                 break;
                             case 1:
+                                INT_DEBUG_HEAD
                                 printf("BLX: Undef instruction\n");
                                 exit(0);
                                 break;
@@ -416,6 +418,7 @@ void doARM(uint32_t instruction)
                                 arm_DSP(condCode,instruction);
                                 break;
                             case 3:
+                                INT_DEBUG_HEAD
                                 printf("BKPT: Undef instruction\n");
                                 exit(0);
                                 break;
@@ -444,7 +447,8 @@ void doARM(uint32_t instruction)
                     arm_MSR_MRS(condCode,instr_num,instruction);                    
                 else
                 {
-                    printf("Undef instruction\n");                   
+                    INT_DEBUG_HEAD
+                    printf("Undef instruction (1) %x\n",instruction);                   
                     exit(0);
                 }
             else   /* data processing immediate */
@@ -453,7 +457,8 @@ void doARM(uint32_t instruction)
         case 0x3:
             if(condCode == 0xf)
             {
-                printf("Undef instruction\n");
+                INT_DEBUG_HEAD
+                printf("Undef instruction (2) %x\n",instruction);
                 exit(0);
             }
         case 0x2:
@@ -769,7 +774,8 @@ void doThumb(uint32_t instruction)
                         {
                             if(TST_BIT(instruction,7) == 1)
                             {
-                                DEBUG("BLX undefined in armV4\n");
+                                INT_DEBUG_HEAD_THUMB
+                                printf("BLX undefined in armV4\n");
                                 exit(0);
                             }
                             else                    /* BX */
@@ -818,9 +824,11 @@ void doThumb(uint32_t instruction)
                         thumb_load_store_multi(0x1,(instruction>>11)&0x1,instruction);
                         break;
                     case 0x3:
-                        DEBUG("BKT undef for ARMv4\n");
+                        INT_DEBUG_HEAD_THUMB
+                        printf("BKT undef for ARMv4\n");
                         exit(0);
                     default:
+                        INT_DEBUG_HEAD_THUMB
                         printf("Error: MISC instruction with undef op: %x\n",(instruction>>9)&0x3);
                         exit(0);
                 }                
@@ -846,7 +854,8 @@ void doThumb(uint32_t instruction)
                         REG(R_PC)=0x8;
                         break;
                     case 0xE:
-                        DEBUG("undefined instruction\n");
+                        INT_DEBUG_HEAD_THUMB
+                        printf("undefined instruction (3) %x\n",instruction);
                         exit(0);
                         break;
                     default:                             /* B <cond> */
@@ -876,7 +885,8 @@ void doThumb(uint32_t instruction)
                         DEBUG("B => 0x%08x\n",PC_REAL);                        
                         break;
                     case 0x1:                /* BLX step 2 => not defined */
-                        DEBUG("BLX undefined instruction\n");
+                        INT_DEBUG_HEAD_THUMB
+                        printf("BLX undefined instruction\n");
                         exit(0);
                         break;
                     case 0x2:                /* BL(X) step 1 */
