@@ -40,7 +40,7 @@ HW_lcd::HW_lcd(HW_mem * mem2)
     screen = DefaultScreen(display);
     gc = DefaultGC(display, screen);
     
-    window = XCreateSimpleWindow(
+    window1 = XCreateSimpleWindow(
             display,                               /* Display */
             DefaultRootWindow(display),            /* Main Window */
             0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,     /* Geometry */
@@ -48,12 +48,12 @@ HW_lcd::HW_lcd(HW_mem * mem2)
             BlackPixel(display, screen),	
             WhitePixel(display, screen)
             );            
-    if(!window) 
+    if(!window1) 
     {
             printf("Can't create the window");
             exit(1);
     }
-    XStoreName(display, window, "AV Emu LCD");
+    XStoreName(display, window1, "AV Emu LCD");
     
     pal = DefaultColormap(display,screen);
     
@@ -64,12 +64,12 @@ HW_lcd::HW_lcd(HW_mem * mem2)
     for(y=0; y<SCREEN_HEIGHT; y++)
         for(x=0; x<SCREEN_WIDTH; x++)
         {
-            XDrawPoint(display, window, gc, x, y);
+            XDrawPoint(display, window1, gc, x, y);
         }            
     
-    XSelectInput(display, window, ExposureMask | KeyPressMask | KeyReleaseMask);
+    XSelectInput(display, window1, ExposureMask | KeyPressMask | KeyReleaseMask);
         
-    XMapWindow(display, window);
+    XMapWindow(display, window1);
     
     printf("LCD init done\n");
 }
@@ -198,7 +198,7 @@ void HW_lcd::drawPix(uint32_t addr,uint32_t val)
     i=addr%SCREEN_WIDTH;
     j=addr/SCREEN_WIDTH;
     XSetForeground(display, gc, colorTab[val&0xFF]);
-    XDrawPoint(display, window, gc, i, j);
+    XDrawPoint(display, window1, gc, i, j);
 }
 
 void HW_lcd::updte_lcd(uint32_t base_addr)
@@ -212,6 +212,6 @@ void HW_lcd::updte_lcd(uint32_t base_addr)
         for(int i = 0 ; i < SCREEN_WIDTH+1 ; i++)
         {
             XSetForeground(display, gc, colorTab[mem2->read(base_addr+(j*(SCREEN_WIDTH*2)+i*2),2)&0xFF]);
-            XDrawPoint(display, window, gc, i, j);
+            XDrawPoint(display, window1, gc, i, j);
          }
 }

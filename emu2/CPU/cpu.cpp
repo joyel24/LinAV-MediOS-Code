@@ -219,9 +219,10 @@ void go(uint32_t start_address,uint32_t stack_address)
         
         ((gio_MAS_EOD*)mem->hw_TI->gpio->port_list[0x4])->chkEOD();
         
-        for(int i=0;i<4;i++)
+        for(int i=0;i<4;i++)            
             mem->hw_TI->timer_list[i]->nxt_cycle();    
         
+        #if 0
         if(data_abort)
         {
             data_abort = false;
@@ -234,6 +235,7 @@ void go(uint32_t start_address,uint32_t stack_address)
             //printf("WARNING DATA ABT\n");
             run_mode = STEP;
         }
+        #endif
              
         if(!FIQ_FLAG && mem->hw_TI->HW_irq->have_int_FIQ)
         {
@@ -266,7 +268,6 @@ void go(uint32_t start_address,uint32_t stack_address)
         if(bkpt->has_bkpt(address,BKPT_CPU))
         {
             run_mode = STEP;
-            //printState();
             cmd_line();
         }
         else if(run_mode == STEP)

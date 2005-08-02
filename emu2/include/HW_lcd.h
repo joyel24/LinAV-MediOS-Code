@@ -33,7 +33,9 @@ class HW_lcd {
         HW_mem * mem2;
         
         Display* display;
-        Window window;
+        Window window1;
+        Window window2;
+        
         GC gc;
         Colormap pal;
         int screen;
