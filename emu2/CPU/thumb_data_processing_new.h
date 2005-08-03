@@ -178,7 +178,7 @@ void thumb_cmn(uint32_t instruction) /* format 4 */
 void thumb_cmp_Reg_imm(uint32_t instruction) /* format 2 */
 {
     uint32_t op1 = GET_REG(((instruction>>8)&0x7));
-    uint32_t op2 = GET_REG(instruction&0xFF);
+    uint32_t op2 = instruction&0xFF;
     DEBUG("CMP %s 0x%x\n",RR(((instruction>>8)&0x7)),op2);
     DO_THUMB_CMP(op1,op2)
 }
@@ -298,7 +298,7 @@ void thumb_lsr_2Reg_imm(uint32_t instruction) /* format 3 */
 
 void thumb_mov_Reg_imm(uint32_t instruction) /* format 2 */
 {
-    uint32_t op2 = GET_REG(instruction&0xFF);
+    uint32_t op2 = instruction&0xFF;
     DEBUG("MOV %s 0x%x\n",RR(((instruction>>8)&0x7)),op2);
     REG(((instruction>>8)&0x7)) = op2;
     ARM_NegZero(GET_REG(GET_R1));
@@ -319,9 +319,9 @@ void thumb_mov_long_R(uint32_t instruction) /* format 7 */
     uint32_t op2 = GET_REG(GET_LR2);
     DEBUG("MOV %s %s\n",RR(GET_LR1),RR(GET_LR2));
     if(GET_LR2 == R_PC)
-         REG(GET_R1) = GET_REG(GET_LR2) +1;
+         REG(GET_LR1) = GET_REG(GET_LR2) +1;
     else
-         REG(GET_R1) = GET_REG(GET_LR2);
+         REG(GET_LR1) = GET_REG(GET_LR2);
 }
 
 void thumb_mul(uint32_t instruction) /* format 4 */

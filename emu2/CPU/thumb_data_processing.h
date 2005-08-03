@@ -80,6 +80,7 @@ void thumb_data_process(int format,int opcode,uint32_t instruction)
                 shifter_operand = GET_REG(op2Reg);
                 MKDEBUG(debugShifter,"%s, %s",RR(Rd),RR(op2Reg));
                 break;
+            
         }
 
         RnVal = GET_REG(Rn);

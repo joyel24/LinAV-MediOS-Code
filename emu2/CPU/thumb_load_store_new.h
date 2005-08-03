@@ -25,14 +25,22 @@ void thumb_ldr_3Reg(uint32_t instruction)
 
 void thumb_ldr_Reg_PC_imm(uint32_t instruction)
 {
-    DEBUG("LDR %s, [PC, 0x%x] \n",RR(GET_R1),instruction&0xFF);
-    REG(((instruction>>8)&0x7)) = mem->read((GET_REG(R_PC) & 0xFFFFFFFC)+(instruction&0xFF),4);
+    DEBUG("LDR %s, [PC, 0x%x] \n",RR(((instruction>>8)&0x7)),((instruction&0xFF)<<2));
+    REG(((instruction>>8)&0x7)) = mem->read(((GET_REG(R_PC) & 0xFFFFFFFC)+((instruction&0xFF)<<2)),4);
 }
 
 void thumb_ldr_Reg_SP_imm(uint32_t instruction)
 {
-    DEBUG("LDR %s, [SP, 0x%x] \n",RR(GET_R1),instruction&0xFF);
-    DO_LDR((GET_REG(R_SP)),(instruction&0xFF))
+    DEBUG("LDR %s, [SP, 0x%x] \n",RR(((instruction>>8)&0x7)),(instruction&0xFF)<<2);
+    uint32_t address = GET_REG(R_SP) + (instruction&0xFF)<<2;
+    if((address & 0x3) == 0)
+        REG(((instruction>>8)&0x7)) = mem->read(address,4);
+    else
+    {
+        INT_DEBUG_HEAD_THUMB
+        printf("Unpredictable LDR\n");
+        exit(0);
+    }
 }
 
 void thumb_ldrb_2Reg_imm(uint32_t instruction)

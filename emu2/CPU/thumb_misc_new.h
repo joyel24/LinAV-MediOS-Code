@@ -47,7 +47,7 @@ void thumb_B_cond(uint32_t instruction)
             DEBUG("B<%s> ",cond_str[cond]);    
             if(checkCondition(cond))
             {
-                REG(R_PC) = GET_REG(R_PC) + signExtend1(cond)<<1;
+                REG(R_PC) = GET_REG(R_PC) + (signExtend1((instruction&0xFF))<<1);
                 DEBUG("=> 0x%08x\n",PC_REAL);                            
             }
             else

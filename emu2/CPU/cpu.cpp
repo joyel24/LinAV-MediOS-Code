@@ -138,6 +138,61 @@ bkpt_list * bkpt;
 bool data_abort=false;
 
 void init_cpu_static_fct(void);
+
+#define new_thumb
+
+#ifdef new_thumb
+
+#include "thumb_data_processing_new.h"
+#include "thumb_load_store_new.h"
+#include "thumb_load_store_multi_new.h"
+#include "thumb_misc_new.h"
+
+struct fct_data {
+    int blank_size;
+    int mask;    
+    void (*fct)(uint32_t instruction);
+};
+
+void (*thumb_fct[1024])(uint32_t ) ;
+
+#include "thumb_fct_ini_tab.h"
+
+void ini_thumb_fct(void)
+{
+    int i,j,k;
+    /* clearing the whole fct array */
+    for(i=0;i<1024;i++)
+        thumb_fct[i] = NULL;
+        
+    /* init array using fct_ini_tab */    
+    for(i=0;fct_ini_tab[i].fct!=NULL;i++)
+    {
+        j=0x1<<fct_ini_tab[i].blank_size;
+        for(k=0;k<j;k++)
+        {
+            printf("%04d |Processing MASK:%x POS:%x/%x val:%x\n",
+                i,fct_ini_tab[i].mask,k,fct_ini_tab[i].blank_size,fct_ini_tab[i].mask|k);
+            if(thumb_fct[fct_ini_tab[i].mask|k])
+                printf("error thumb_fct[%x] already defined (cur %x)\n",fct_ini_tab[i].mask|k,i);
+            else
+                thumb_fct[fct_ini_tab[i].mask|k] = fct_ini_tab[i].fct;
+        }
+    }
+    
+    /*Let's see if we forget something*/
+    k=0;
+    for(j=0;j<1024;j++)
+        if(!thumb_fct[j])
+        {
+            k++;
+            printf("%04d|error thumb_fct[%x] not defined\n",k,j);            
+        }
+    printf("[ini_thumb fct] Processed %04d fct, we've missed : %04d cells in thumb_fct\n",i,k);
+}
+
+#endif
+
                      
 void init_cpu(void)
 {
@@ -189,8 +244,11 @@ void init_cpu(void)
     
     /* init bkpt_list */
     
-    bkpt= new bkpt_list();    
+    bkpt= new bkpt_list(); 
     
+#ifdef new_thumb
+    ini_thumb_fct();
+#endif
     printf("Init of Cpu object      DONE\n");
     
 }
@@ -277,10 +335,17 @@ void go(uint32_t start_address,uint32_t stack_address)
                 
         old_PC=PC_REAL;
         if(T_FLAG)  /* THUMB */
-        {            
+        {        
             instruction=mem->read(address,2);
             PC_REAL+=2;
+#ifdef new_thumb
+            DEBUG_HEAD_THUMB;
+            thumb_fct[(instruction>>6)&0x3FF](instruction);
+            if(disp_mode==1 || run_mode==STEP)
+                printState();
+#else
             doThumb(instruction);
+#endif
         }
         else       /* ARM */
         {
