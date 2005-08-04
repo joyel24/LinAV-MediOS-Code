@@ -21,7 +21,7 @@ struct fct_data fct_ini_tab[] = {
 { 0x0, 0x103,  /* 01 0000 0011,*/ thumb_lsr_2Reg },
 { 0x5, 0x020,  /* 00 001X XXXX,*/ thumb_lsr_2Reg_imm },
 { 0x5, 0x080,  /* 00 100X XXXX,*/ thumb_mov_Reg_imm },
-//NOT used: equiv to ADD Rd, Rn, #0 { 0x0, 0x070,  /* 00 0111 0000,*/ thumb_mov_2Reg },
+{ 0x0, 0x070,  /* 00 0111 0000,*/ thumb_mov_2Reg }, //equiv to ADD Rd, Rn, #0
 { 0x2, 0x118,  /* 01 0001 10XX,*/ thumb_mov_long_R },
 { 0x0, 0x10D,  /* 01 0000 1101,*/ thumb_mul },
 { 0x0, 0x10F,  /* 01 0000 1111,*/ thumb_mvn },
@@ -58,7 +58,7 @@ struct fct_data fct_ini_tab[] = {
 { 0x3, 0x2F0,  /* 10 1111 0XXX,*/ thumb_pop },
 { 0x3, 0x2D0,  /* 10 1101 0XXX,*/ thumb_push },
 
-// already def in B<cond> { 0x2, 0x37C,  /* 11 0111 11XX,*/ thumb_swi },
+{ 0x2, 0x37C,  /* 11 0111 11XX,*/ thumb_swi },  // !same as B<cond>
 { 0x2, 0x2F8,  /* 10 1111 10XX,*/ thumb_bkpt },
 { 0x6, 0x340,  /* 11 01XX XXXX,*/ thumb_B_cond },
 { 0x5, 0x380,  /* 11 100X XXXX,*/ thumb_B },
@@ -66,7 +66,7 @@ struct fct_data fct_ini_tab[] = {
 { 0x5, 0x3E0,  /* 11 111X XXXX,*/ thumb_BL_S2 },
 { 0x1, 0x11C,  /* 01 0001 110X,*/ thumb_BX },
 
-// already def in B<cond> { 0x2, 0x378,  /* 11 0111 10XX,*/ thumb_undef },
+{ 0x2, 0x378,  /* 11 0111 10XX,*/ thumb_undef }, // !same as B<cond>
 { 0x5, 0x3A0,  /* 11 101X XXXX,*/ thumb_undef },
 { 0x2, 0x2C4,  /* 10 1100 01XX,*/ thumb_undef },
 { 0x3, 0x2C8,  /* 10 1100 1XXX,*/ thumb_undef },

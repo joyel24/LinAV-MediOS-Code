@@ -177,9 +177,9 @@ void ini_thumb_fct(void)
             printf("%04d |Processing MASK:%x POS:%x/%x val:%x\n",
                 i,fct_ini_tab[i].mask,k,fct_ini_tab[i].blank_size,fct_ini_tab[i].mask|k);
 #endif                
-            if(thumb_fct[fct_ini_tab[i].mask|k])
+            /*if(thumb_fct[fct_ini_tab[i].mask|k])
                 printf("error thumb_fct[%x] already defined (cur %x)\n",fct_ini_tab[i].mask|k,i);
-            else
+            else*/
                 thumb_fct[fct_ini_tab[i].mask|k] = fct_ini_tab[i].fct;
         }
     }
@@ -187,7 +187,7 @@ void ini_thumb_fct(void)
     /*Let's see if we forget something*/
 
     
-#ifdef chk_thumb_tab
+//#ifdef chk_thumb_tab
     k=0;
     for(j=0;j<1024;j++)
         if(!thumb_fct[j])
@@ -195,9 +195,9 @@ void ini_thumb_fct(void)
             k++;
             printf("%04d|error thumb_fct[%x] not defined\n",k,j);            
         }
-#else
-    k=-1;
-#endif
+//#else
+//    k=-1;
+//#endif
     printf("[ini_thumb fct] Processed %04d fct, we've missed : %04d cells in thumb_fct\n",i,k);
 }
 

@@ -26,7 +26,7 @@ void thumb_undef(uint32_t instruction)
 void thumb_B_cond(uint32_t instruction)
 {
     int cond = (instruction>>8)&0xF;
-    
+#if 0    
     switch(cond)
     {
         case 0xF: /*SWI*/
@@ -44,6 +44,7 @@ void thumb_B_cond(uint32_t instruction)
             exit(0);
             break;
         default:
+#endif
             DEBUG("B<%s> ",cond_str[cond]);    
             if(checkCondition(cond))
             {
@@ -52,7 +53,7 @@ void thumb_B_cond(uint32_t instruction)
             }
             else
                 DEBUG("CC not met\n");
-    }
+ //   }
 }
 
 void thumb_B(uint32_t instruction)
