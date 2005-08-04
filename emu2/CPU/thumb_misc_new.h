@@ -57,13 +57,13 @@ void thumb_B_cond(uint32_t instruction)
 
 void thumb_B(uint32_t instruction)
 {
-    REG(R_PC)=GET_REG(R_PC) + signExtend11(instruction & 0x7FF)<<1;
+    REG(R_PC)=GET_REG(R_PC) + (signExtend11(instruction & 0x7FF)<<1);
     DEBUG("B => 0x%08x\n",PC_REAL);   
 }
 
 void thumb_BL_S1(uint32_t instruction)
 {
-    REG(R_LR)=GET_REG(R_PC)+signExtend11(instruction & 0x7FF)<<12;
+    REG(R_LR)=GET_REG(R_PC)+(signExtend11(instruction & 0x7FF)<<12);
     DEBUG("BL stp1\n");   
 }
 

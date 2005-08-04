@@ -73,6 +73,11 @@ void thumb_add_2LongR(uint32_t instruction) /* format 7 */
 {
     DEBUG("ADD %s, %s\n",RR(GET_LR1),RR(GET_LR2));
     REG(GET_LR1) = GET_REG(GET_LR1) + GET_REG(GET_LR2);
+    if(GET_REG(GET_LR1) == R_PC || GET_REG(GET_LR2) == R_PC)
+    {
+        printf("ADD long using PC\n");
+        exit(0);
+    }
 }
 
 
@@ -90,30 +95,32 @@ void thumb_asr_2Reg(uint32_t instruction) /* format 4 */
     
     DEBUG("ASR %s, %s\n",RR(GET_R1),RR(GET_R2));
     
-    if(op2 > 0 )
+    if(op2 == 0)
     {
-        if(op2 <32)
+        /*nothing*/
+    }    
+    if(op2 < 32)
+    {
+        SET_C((op1 >> (op2 - 1)) & 0x1);
+        if(op1 > 0x7FFFFFFF) // neg number => keep neg sign
         {
-            SET_C((op1 >> (op2 - 1)) & 0x1);
-            if(op1 > 0x7FFFFFFF) // neg number => keep neg sign
-            {
-                for (int j = 0; j < op2; j++) {
-                        op1 = (op1 >> 1) | 0x80000000;
-                }
-                REG(GET_R1) = op1;
+            for (int j = 0; j < op2; j++) {
+                    op1 = (op1 >> 1) | 0x80000000;
             }
-            else
-                REG(GET_R1) = op1 >> op2;
+            REG(GET_R1) = op1;
         }
-        else 
-        {
-            SET_C((op1 >> 31) & 0x1);
-            if(!C_FLAG)
-                REG(GET_R1) = 0;
-            else
-                REG(GET_R1) = 0xFFFFFFFF;
-        }
+        else
+            REG(GET_R1) = op1 >> op2;
     }
+    else if(op2 >= 32)
+    {
+        SET_C((op1 >> 31) & 0x1);
+        if(!C_FLAG)
+            REG(GET_R1) = 0;
+        else
+            REG(GET_R1) = 0xFFFFFFFF;
+    }
+    
     ARM_NegZero(GET_REG(GET_R1));
 }
 
@@ -160,9 +167,8 @@ void thumb_cmn(uint32_t instruction) /* format 4 */
 {
     uint32_t op1 = GET_REG(GET_R1);
     uint32_t op2 = GET_REG(GET_R2);
-    uint32_t alu_out = op1 + op2;
+    uint32_t alu_out = op1 + op2; // RnVal - (-shifter_operand)
     DEBUG("CMN %s, %s\n",RR(GET_R1),RR(GET_R2));
-    alu_out=op1 + op2; // RnVal - (-shifter_operand)
     ARM_NegZero(alu_out);
     ARM_SubCarry(op1,-op2, alu_out);
     ARM_SubOverflow(op1,-op2, alu_out);

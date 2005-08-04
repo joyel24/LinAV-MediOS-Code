@@ -143,6 +143,8 @@ void init_cpu_static_fct(void);
 
 #ifdef new_thumb
 
+//#define chk_thumb_tab
+
 #include "thumb_data_processing_new.h"
 #include "thumb_load_store_new.h"
 #include "thumb_load_store_multi_new.h"
@@ -171,8 +173,10 @@ void ini_thumb_fct(void)
         j=0x1<<fct_ini_tab[i].blank_size;
         for(k=0;k<j;k++)
         {
+#ifdef chk_thumb_tab
             printf("%04d |Processing MASK:%x POS:%x/%x val:%x\n",
                 i,fct_ini_tab[i].mask,k,fct_ini_tab[i].blank_size,fct_ini_tab[i].mask|k);
+#endif                
             if(thumb_fct[fct_ini_tab[i].mask|k])
                 printf("error thumb_fct[%x] already defined (cur %x)\n",fct_ini_tab[i].mask|k,i);
             else
@@ -181,6 +185,9 @@ void ini_thumb_fct(void)
     }
     
     /*Let's see if we forget something*/
+
+    
+#ifdef chk_thumb_tab
     k=0;
     for(j=0;j<1024;j++)
         if(!thumb_fct[j])
@@ -188,6 +195,9 @@ void ini_thumb_fct(void)
             k++;
             printf("%04d|error thumb_fct[%x] not defined\n",k,j);            
         }
+#else
+    k=-1;
+#endif
     printf("[ini_thumb fct] Processed %04d fct, we've missed : %04d cells in thumb_fct\n",i,k);
 }
 
@@ -245,7 +255,7 @@ void init_cpu(void)
     /* init bkpt_list */
     
     bkpt= new bkpt_list(); 
-    
+    //bkpt->add(0x0302786c,BKPT_CPU);
 #ifdef new_thumb
     ini_thumb_fct();
 #endif
@@ -267,6 +277,7 @@ void go(uint32_t start_address,uint32_t stack_address)
     REG(R_SP)=stack_address;
     
     run_mode = STEP;
+    //run_mode = RUN;
     uint32_t address;
     
     while(1)
@@ -326,6 +337,7 @@ void go(uint32_t start_address,uint32_t stack_address)
         if(bkpt->has_bkpt(address,BKPT_CPU))
         {
             run_mode = STEP;
+            //exit(0);
             cmd_line();
         }
         else if(run_mode == STEP)

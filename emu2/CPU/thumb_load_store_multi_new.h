@@ -63,7 +63,7 @@ void thumb_pop(uint32_t instruction)
         REG(R_PC) = value & 0xFFFFFFFE;
         address +=4;
         DEBUG("PC ");
-        SET_T(value & 0x1);
+        SET_T((value & 0x1));
     }
     REG(R_SP)=address;
     DEBUG("\n");

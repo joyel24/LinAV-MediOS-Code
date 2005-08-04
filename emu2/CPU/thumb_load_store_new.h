@@ -32,7 +32,7 @@ void thumb_ldr_Reg_PC_imm(uint32_t instruction)
 void thumb_ldr_Reg_SP_imm(uint32_t instruction)
 {
     DEBUG("LDR %s, [SP, 0x%x] \n",RR(((instruction>>8)&0x7)),(instruction&0xFF)<<2);
-    uint32_t address = GET_REG(R_SP) + (instruction&0xFF)<<2;
+    uint32_t address = GET_REG(R_SP) + ((instruction&0xFF)<<2);
     if((address & 0x3) == 0)
         REG(((instruction>>8)&0x7)) = mem->read(address,4);
     else
@@ -69,8 +69,8 @@ void thumb_ldrb_3Reg(uint32_t instruction)
 
 void thumb_ldrh_2Reg_imm(uint32_t instruction)
 {
-    DEBUG("LDRH %s, [%s, 0x%x] \n",RR(GET_R1),RR(GET_R2),(instruction>>5)&0x1E);
-    DO_LDRH((GET_REG(GET_R2)),((instruction>>5)&0x1E))
+    DEBUG("LDRH %s, [%s, 0x%x] \n",RR(GET_R1),RR(GET_R2),(instruction>>5)&0x3E);
+    DO_LDRH((GET_REG(GET_R2)),((instruction>>5)&0x3E))
 }
 
 void thumb_ldrh_3Reg(uint32_t instruction)
@@ -125,26 +125,34 @@ void thumb_str_3Reg(uint32_t instruction)
 
 void thumb_str_Reg_SP_imm(uint32_t instruction)
 {
-    DEBUG("STR %s, [SP, 0x%x] \n",RR(GET_R1),instruction&0xFF);
-    DO_STR((GET_REG(R_SP)),(instruction&0xFF))
+    DEBUG("STR %s, [SP, 0x%x] \n",((instruction>>8)&0x7),((instruction&0xFF)<<2));
+    uint32_t address = GET_REG(R_SP) + ((instruction&0xFF)<<2);
+    if((address & 0x3) == 0)
+        mem->write(address,GET_REG(((instruction>>8)&0x7)),4);
+    else
+    {
+        INT_DEBUG_HEAD_THUMB
+        printf("Unpredictable STR\n");
+        exit(0);
+    }
 }
 
 void thumb_strb_2Reg_imm(uint32_t instruction)
 {
     DEBUG("STRB %s, [%s, 0x%x] \n",RR(GET_R1),RR(GET_R2),(instruction>>6)&0x1F);
-    mem->write(GET_REG(GET_R2)+((instruction>>6)&0x1F),GET_REG(GET_R1),1);
+    mem->write(GET_REG(GET_R2)+((instruction>>6)&0x1F),(GET_REG(GET_R1)&0xFF),1);
 }
 
 void thumb_strb_3Reg(uint32_t instruction)
 {
     DEBUG("STRB %s, [%s, %s] \n",RR(GET_R1),RR(GET_R2),RR(GET_R3));
-    mem->write(GET_REG(GET_R2)+GET_REG(GET_R3),GET_REG(GET_R1),1);
+    mem->write(GET_REG(GET_R2)+GET_REG(GET_R3),(GET_REG(GET_R1)&0xFF),1);
 }
 
 #define DO_STRH(OP1,OP2) {                     \
     uint32_t address = OP1 + OP2;              \
     if((address & 0x1) == 0)                   \
-        mem->write(address,GET_REG(GET_R1),2); \
+        mem->write(address,(GET_REG(GET_R1)&0xFFFF),2); \
     else                                       \
     {                                          \
         INT_DEBUG_HEAD_THUMB                   \
@@ -155,8 +163,8 @@ void thumb_strb_3Reg(uint32_t instruction)
 
 void thumb_strh_2Reg_imm(uint32_t instruction)
 {
-    DEBUG("STRH %s, [%s, 0x%x] \n",RR(GET_R1),RR(GET_R2),(instruction>>5)&0x1E);
-    DO_STRH((GET_REG(GET_R2)),((instruction>>5)&0x1E))
+    DEBUG("STRH %s, [%s, 0x%x] \n",RR(GET_R1),RR(GET_R2),(instruction>>5)&0x3E);
+    DO_STRH((GET_REG(GET_R2)),((instruction>>5)&0x3E))
 }
 
 void thumb_strh_3Reg(uint32_t instruction)
