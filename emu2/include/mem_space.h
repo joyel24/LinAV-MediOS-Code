@@ -1,4 +1,4 @@
-/* 
+/*
 *   mem_space.h
 *
 *   AV3XX emulator
@@ -14,7 +14,7 @@
 #define __MEM_SPACE_H
 
 #include "emu.h"
-#include "HW_access.h"
+#include "HW_node.h"
 #include <bkpt_list.h>
 #include <HW_OSD.h>
 #include <HW_cpld.h>
@@ -22,7 +22,7 @@
 
 class HW_TI;
 
-class mem_space:public HW_access {
+class mem_space:public HW_node {
     public:
         mem_space(char * flash,char * sdram);
         ~mem_space();        

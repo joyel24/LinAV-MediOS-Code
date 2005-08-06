@@ -1,4 +1,4 @@
-/* 
+/*
 *   HW_mem.h
 *
 *   AV3XX emulator
@@ -19,15 +19,17 @@
 
 class HW_mem : public HW_access {
     public:
+        HW_mem(char * fname,uint32_t start,uint32_t end,char * name, uint32_t load_offset);
         HW_mem(char * fname,uint32_t start,uint32_t end,char * name);
         ~HW_mem();
-        
+
         uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);
-        
+
     private:
         char *  mem;
-        
+
+        void init(char * fname,uint32_t start,uint32_t end,uint32_t load_offset);
 };
 
 #endif // __HW_MEM_H

@@ -14,7 +14,7 @@
 #define __HW_TI_H
 
 #include "emu.h"
-#include "HW_access.h"
+#include "HW_node.h"
 #include "HW_30a24.h"
 #include "HW_dma.h"
 #include "mem_space.h"
@@ -25,7 +25,7 @@
 #include "HW_OSD.h"
 #include "HW_uart.h"
 
-class HW_TI:public HW_access {
+class HW_TI:public HW_node {
     public:
         HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld);
         ~HW_TI();  

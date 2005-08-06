@@ -14,7 +14,7 @@ all: builddir subdirs $(TARGET)
 $(TARGET) : $(OBJS)
 	@echo '-----   building $(TARGET)'
 	@$(MV) *.o build/
-	@$(GPP) -o $(TARGET) -ggdb3  $(LDFLAGS) build/*.o -lreadline -lncurses -L/usr/X11R6/lib -lX11
+	@$(GPP) $(GPPFLAGS) -o $(TARGET) $(LDFLAGS) build/*.o -lreadline -lncurses -L/usr/X11R6/lib -lX11
 
 clean:  clean-subdirs
 	@echo '-----   cleaning MAIN'

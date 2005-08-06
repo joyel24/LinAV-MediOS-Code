@@ -1,4 +1,4 @@
-/* 
+/*
 *   arch-av3xx.h
 *
 *   AV3XX emulator
@@ -16,7 +16,7 @@
 
 #define RESET_VECTOR      0x00000000
 
-#define IRAM_START        0x00000004
+#define IRAM_START        0x00000000
 #define IRAM_END          0x00008000
 #define TI_REG_START      0x00030000
 #define TI_REG_END        0x00040000
@@ -116,7 +116,6 @@
 
 /* this HW is used on the av for the usb/DC/HD status */
 #define HAS_HW_30A24
-
 
 /********************** DMA      ****************************************/
 #define DMA_START   TI_REG_START+0xa38

@@ -1,4 +1,4 @@
-/* 
+/*
 *   HW_timer.cpp
 *
 *   AV3XX emulator
@@ -122,28 +122,28 @@ void HW_timer::nxt_cycle(void)
             if(tm_trigger&0x1)
             {
                 tm_ps++;
-                if(tm_ps == tm_p_scaler)
+                if(tm_ps >= tm_p_scaler)
                 {
                     tm_ps = 0;
                     tm_cnt++;
-                    if(tm_cnt == tm_max)
+                    if(tm_cnt >= tm_max)
                     {
                         tm_trigger = 0;
-                        HW_irq->do_IRQ_FIQ(IRQ,timer_num);     
-                        tm_cnt=0;                  
+                        HW_irq->do_IRQ_FIQ(IRQ,timer_num);
+                        tm_cnt=0;
                     }
                 }
             }
             break;
         case 0x2:
             tm_ps++;
-            if(tm_ps == tm_p_scaler)
+            if(tm_ps >= tm_p_scaler)
             {
                 tm_ps = 0;
                 tm_cnt++;
-                if(tm_cnt == tm_max)
+                if(tm_cnt >= tm_max)
                 {
-                    HW_irq->do_IRQ_FIQ(IRQ,timer_num);     
+                    HW_irq->do_IRQ_FIQ(IRQ,timer_num);
                     tm_cnt=0;                  
                 }
             }

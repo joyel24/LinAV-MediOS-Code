@@ -1,4 +1,4 @@
-/* 
+/*
 *   hw_access.h
 *
 *   AV3XX emulator
@@ -18,27 +18,20 @@
 class HW_access {
     
 protected:
-    void add_item(HW_access * ptr);
-    void rm_item(HW_access * ptr);
-    
     bool exit_on_not_match;
     bool data_abt_on_not_match;
-    bool full_size;
 
 public:
-    HW_access * zone_list;
-    HW_access * nxt;
-    
-
     HW_access(uint32_t start,uint32_t end, char * name);
-    
+
     uint32_t        start;
     uint32_t        end;
     char *          name;
-    
-    virtual uint32_t read(uint32_t addr,int size);
-    virtual void write(uint32_t addr,uint32_t val,int size); 
-    
+    bool full_size;
+
+    virtual uint32_t read(uint32_t addr,int size){return 0;};
+    virtual void write(uint32_t addr,uint32_t val,int size){};
+
 };
 
 #endif

@@ -173,10 +173,10 @@ void HW_uart::write(uint32_t addr,uint32_t val,int size)
 void HW_uart::add_char(char c){
     int full_update=0;
 
-    if (c==13){
+    if (c==10){
         tx=0;
         ++ty;
-    }else if (c==10){
+    }else if (c==13){
 
     }else{
         term[ty][tx]=c;
