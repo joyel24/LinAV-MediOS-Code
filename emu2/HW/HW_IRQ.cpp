@@ -135,7 +135,15 @@ void HW_IRQ::do_IRQ_FIQ(int type,int num)
     status[(type==FIQ?0:2)+REG_NUM(num)] &= ((~(0x1<<REAL_NUM(num))) & 0xFFFF);
     DEBUG_HW(IRQ_HW_DEBUG,"%s Doing %s num = %x\n",name,type==FIQ?"FIQ":"IRQ",num);
     if(type==FIQ)
+    {
         have_int_FIQ = true;
+        if(chkFiqFlag())
+            cur_irq_fct = cpu_do_fiq;
+    }
     else
-        have_int_IRQ = true; 
+    {
+        have_int_IRQ = true;
+        if(chkIrqFlag())
+            cur_irq_fct = cpu_do_irq;
+    }
 }

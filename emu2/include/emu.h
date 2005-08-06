@@ -28,6 +28,25 @@ extern int run_mode;
 extern int HW_mode;
 extern int disp_mode;
 extern uint32_t old_PC;
+void void_cmdline(void);
+extern void (*cmd_line_fct)(void);
+
+#define CHG_RUN_MODE(MODE) {         \
+    run_mode = MODE;                 \
+    if(run_mode==RUN)                \
+        cmd_line_fct=void_cmdline;   \
+    else                             \
+        cmd_line_fct=cmd_line;       \
+}
+
+bool chkIrqFlag();
+bool chkFiqFlag();
+
+void void_irq_fiq(void);
+void cpu_do_irq(void);
+void cpu_do_fiq(void);
+
+extern void (*cur_irq_fct)(void);
 
 #define CPU_DEBUG       (0x1)
 #define NULL_HW_DEBUG   (0x1<< 1)

@@ -125,7 +125,7 @@ void thumb_str_3Reg(uint32_t instruction)
 
 void thumb_str_Reg_SP_imm(uint32_t instruction)
 {
-    DEBUG("STR %s, [SP, 0x%x] \n",((instruction>>8)&0x7),((instruction&0xFF)<<2));
+    DEBUG("STR %s, [SP, 0x%x] \n",RR(((instruction>>8)&0x7)),((instruction&0xFF)<<2));
     uint32_t address = GET_REG(R_SP) + ((instruction&0xFF)<<2);
     if((address & 0x3) == 0)
         mem->write(address,GET_REG(((instruction>>8)&0x7)),4);

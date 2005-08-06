@@ -220,7 +220,6 @@ void i2c_MAS::set_p_data(int num,int val)
 void i2c_MAS::set_PR(void)
 {
     //printf("Raising PR\n");
-    //run_mode = STEP;
     gio_rtr->set_gpio();
     
 }

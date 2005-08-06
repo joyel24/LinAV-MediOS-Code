@@ -25,6 +25,9 @@
 
 #include <gio_MAS_EOD.h>
 
+
+extern mem_space * mem;
+
 char * mode_str[] = {"User","System","Supervisor","Abort","Undefined","IRQ","FIQ"};
 
 enum REGS {R_R0 = 0x00, R_R1 = 0x01, R_R2 = 0x02, R_R3 = 0x03,
@@ -67,8 +70,6 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 #define FIQ_FLAG      GET_FLAG(FIQ_MASK)
 #define IRQ_FLAG      GET_FLAG(IRQ_MASK)
 
-#define SET_T(COND)   {if(COND) SET_FLAG(T_MASK) else CLR_FLAG(T_MASK)}
-
 #define Q_MASK        (0x08000000)
 #define V_MASK        (0x10000000)
 #define C_MASK        (0x20000000)
@@ -110,6 +111,9 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
            
 #define CHG_MODE     {   int __old_mode=MODE;      \
                          REG(R_CPSR)=REG(R_SPSR);  \
+                         CHK_T_FLAG_FCT            \
+                         CHK_IRQ_FCT               \
+                         CHK_FIQ_FCT               \
                          if(__old_mode != MODE)    \
                          { \
                             printf("Mode has changed from %s to %s at %x\n",mode_str[__old_mode],mode_str[MODE],PC_REAL); \
@@ -130,14 +134,109 @@ uint32_t * mode_regs[7][18];
 uint32_t regs_data[37];
 
 uint32_t my_data;
+                     
 
-extern mem_space * mem;
+void thumb_mode_fct(uint32_t address);
+void arm_mode_fct(uint32_t address);
 
-bkpt_list * bkpt;
+void (*t_flag_mode_fct)(uint32_t address)=arm_mode_fct;
+
+#define CHK_T_FLAG_FCT {                                 \
+    if(*mode_regs[M_USER][R_CPSR] & (0x00000020))        \
+        t_flag_mode_fct = thumb_mode_fct;                \
+    else                                                 \
+        t_flag_mode_fct = arm_mode_fct;                  \
+}
+                     
+#define SET_T(COND) {                      \
+    if(COND)                               \
+    {                                      \
+        t_flag_mode_fct = thumb_mode_fct;  \
+        SET_FLAG(T_MASK)                   \
+    }                                      \
+    else                                   \
+    {                                      \
+        t_flag_mode_fct = arm_mode_fct;    \
+        CLR_FLAG(T_MASK)                   \
+    }                                      \
+}
+
+
+void void_irq_fiq(void) {};
+
+void (*cur_irq_fct)(void) = void_irq_fiq;
+void (*cur_fiq_fct)(void) = void_irq_fiq;
+
+bool chkIrqFlag()
+{
+    return !IRQ_FLAG;
+}
+
+bool chkFiqFlag()
+{
+    return !FIQ_FLAG;
+}
+
+void cpu_do_irq(void);
+void cpu_do_fiq(void);
+
+#define CHK_IRQ_FCT                                      \
+{                                                        \
+    if(chkIrqFlag() && mem->hw_TI->HW_irq->have_int_IRQ)    \
+        cur_irq_fct = cpu_do_irq;                        \
+    else                                                 \
+        cur_irq_fct = void_irq_fiq;                      \
+}
+
+#define CHK_FIQ_FCT                                      \
+{                                                        \
+    if(chkFiqFlag() && mem->hw_TI->HW_irq->have_int_FIQ)    \
+        cur_irq_fct = cpu_do_fiq;                        \
+    else                                                 \
+        cur_irq_fct = void_irq_fiq;                      \
+}
+
+void cpu_do_irq(void)
+{
+    //printState();
+    mem->hw_TI->HW_irq->have_int_IRQ = false;
+    //printf("IRQ - return at %x\n",PC_REAL+4);
+    *mode_regs[M_IRQ][R_LR]=PC_REAL+4;
+    *mode_regs[M_IRQ][R_SPSR]=REG(R_CPSR);
+    SET_MODE(M_IRQ);
+    CLR_FLAG(T_MASK);
+    CHK_T_FLAG_FCT
+    SET_FLAG(IRQ_MASK);
+    CHK_IRQ_FCT
+    CHK_FIQ_FCT
+    REG(R_PC)=0x18;
+}
+
+void cpu_do_fiq(void)
+{
+    mem->hw_TI->HW_irq->have_int_FIQ = false;
+    //printf("FIQ - return at %x\n",PC_REAL+4);
+    *mode_regs[M_FIQ][R_LR]=PC_REAL+4;
+    *mode_regs[M_FIQ][R_SPSR]=REG(R_CPSR);
+    SET_MODE(M_FIQ);
+    CLR_FLAG(T_MASK);
+    CHK_T_FLAG_FCT
+    SET_FLAG(FIQ_MASK);
+    SET_FLAG(IRQ_MASK);
+    CHK_IRQ_FCT
+    CHK_FIQ_FCT
+    REG(R_PC)=0x1C;
+}
+
+BKPT_LIST * bkpt;
 
 bool data_abort=false;
 
 void init_cpu_static_fct(void);
+
+void void_cmdline(void) {}
+
+void (*cmd_line_fct)(void)=void_cmdline;
 
 #define new_thumb
 
@@ -203,6 +302,26 @@ void ini_thumb_fct(void)
 
 #endif
 
+
+void thumb_mode_fct(uint32_t address)
+{
+    uint32_t instruction = mem->read(address,2);
+    PC_REAL+=2;
+#ifdef new_thumb
+    DEBUG_HEAD_THUMB;
+    thumb_fct[(instruction>>6)&0x3FF](instruction);
+    if(disp_mode==1 || run_mode==STEP)
+        printState();
+#else
+    doThumb(instruction);
+#endif
+}
+
+void arm_mode_fct(uint32_t address)
+{
+    PC_REAL+= 4;
+    doARM(mem->read(address,4));
+}
                      
 void init_cpu(void)
 {
@@ -245,7 +364,8 @@ void init_cpu(void)
        
     SET_FLAG(IRQ_MASK);
     SET_FLAG(FIQ_MASK);
-    
+    CHK_IRQ_FCT
+    CHK_FIQ_FCT
     SET_MODE(INIT_MODE); //M_SYS
     
     /* init the cmd line */
@@ -254,30 +374,32 @@ void init_cpu(void)
     
     /* init bkpt_list */
     
-    bkpt= new bkpt_list(); 
-    //bkpt->add(0x0302786c,BKPT_CPU);
+    bkpt= new_bkpt_list(BKPT_CPU); 
+    //add(bkpt,0x0302786c);
 #ifdef new_thumb
     ini_thumb_fct();
 #endif
+    
+    CHK_T_FLAG_FCT
+    
     printf("Init of Cpu object      DONE\n");
     
 }
 
 void sigint(void)
 {
-    run_mode = STEP;
+    CHG_RUN_MODE(STEP)
 }
 
 #include "cpu_cmd_line_fct.h"
 
 void go(uint32_t start_address,uint32_t stack_address)
 {
-    uint32_t instruction;
     REG(R_PC)=start_address;
     REG(R_SP)=stack_address;
     
-    run_mode = STEP;
-    //run_mode = RUN;
+    CHG_RUN_MODE(STEP)
+    //CHG_RUN_MODE(RUN)
     uint32_t address;
     
     while(1)
@@ -299,75 +421,31 @@ void go(uint32_t start_address,uint32_t stack_address)
             *mode_regs[M_ABT][R_SPSR]=REG(R_CPSR);
             SET_MODE(M_ABT);
             CLR_FLAG(T_MASK);
+            CHK_T_FLAG_FCT
             SET_FLAG(IRQ_MASK);
+            CHK_IRQ_FCT
+            CHK_FIQ_FCT
             REG(R_PC)=0x10;
             //printf("WARNING DATA ABT\n");
-            run_mode = STEP;
+            CHG_RUN_MODE(STEP)
         }
         #endif
              
-        if(!FIQ_FLAG && mem->hw_TI->HW_irq->have_int_FIQ)
-        {
-            mem->hw_TI->HW_irq->have_int_FIQ = false;
-            //printf("FIQ - return at %x\n",PC_REAL+4);
-            *mode_regs[M_FIQ][R_LR]=PC_REAL+4;
-            *mode_regs[M_FIQ][R_SPSR]=REG(R_CPSR);
-            SET_MODE(M_FIQ);
-            CLR_FLAG(T_MASK);
-            SET_FLAG(FIQ_MASK);
-            SET_FLAG(IRQ_MASK);
-            REG(R_PC)=0x1C;
-        }
         
-        if(!IRQ_FLAG && mem->hw_TI->HW_irq->have_int_IRQ)
-        {
-            //printState();
-            mem->hw_TI->HW_irq->have_int_IRQ = false;
-            //printf("IRQ - return at %x\n",PC_REAL+4);
-            *mode_regs[M_IRQ][R_LR]=PC_REAL+4;
-            *mode_regs[M_IRQ][R_SPSR]=REG(R_CPSR);
-            SET_MODE(M_IRQ);
-            CLR_FLAG(T_MASK);
-            SET_FLAG(IRQ_MASK);
-            REG(R_PC)=0x18;
-        }
+        
+        cur_fiq_fct();
+        cur_irq_fct();
+        
+        
+        
         
         address = T_FLAG ? PC_REAL&0xfffffffe : (PC_REAL+2)&0xfffffffc;
         
-        if(bkpt->has_bkpt(address,BKPT_CPU))
-        {
-            run_mode = STEP;
-            //exit(0);
-            cmd_line();
-        }
-        else if(run_mode == STEP)
-        {
-            cmd_line();
-        }
+        bkpt->fct(bkpt,address,0);
+        cmd_line_fct();
                 
         old_PC=PC_REAL;
-        if(T_FLAG)  /* THUMB */
-        {        
-            instruction=mem->read(address,2);
-            PC_REAL+=2;
-#ifdef new_thumb
-            DEBUG_HEAD_THUMB;
-            thumb_fct[(instruction>>6)&0x3FF](instruction);
-            if(disp_mode==1 || run_mode==STEP)
-                printState();
-#else
-            doThumb(instruction);
-#endif
-        }
-        else       /* ARM */
-        {
-            instruction=mem->read(address,4);
-            PC_REAL+= 4;
-            doARM(instruction);
-        }
-        
-        
-        
+        t_flag_mode_fct(address);
     }
 }
 
@@ -471,11 +549,13 @@ void doARM(uint32_t instruction)
                                         if(GET_REG(Rm) & 0x1)
                                         {
                                             SET_FLAG(T_MASK);
+                                            CHK_T_FLAG_FCT
                                             DEBUG("Thumb - ");
                                         }
                                         else
                                         {
                                             CLR_FLAG(T_MASK);
+                                            CHK_T_FLAG_FCT
                                             DEBUG("ARM - ");
                                         }
                                         REG(R_PC) = GET_REG(Rm) & 0xFFFFFFE;
@@ -596,8 +676,11 @@ void doARM(uint32_t instruction)
                     *mode_regs[M_SVC][R_SPSR]=REG(R_CPSR);
                     SET_MODE(M_SVC);
                     CLR_FLAG(T_MASK);
+                    CHK_T_FLAG_FCT
                     SET_FLAG(IRQ_MASK);
                     REG(R_PC)=0x8;
+                    CHK_IRQ_FCT
+                    CHK_FIQ_FCT
                 }
                 else
                     DEBUG("SWI CC not met\n");
@@ -679,9 +762,10 @@ void arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
                         REG(R_CPSR) = (GET_REG(R_CPSR) & ~0xFF000000) | (opVal & 0xFF000000);
                     DEBUG(" => %08x\n",GET_REG(R_CPSR));
                 }
-                
-                
             }
+            CHK_T_FLAG_FCT
+            CHK_IRQ_FCT
+            CHK_FIQ_FCT
         }
         else                                   /* MRS */
         {
@@ -928,8 +1012,11 @@ void doThumb(uint32_t instruction)
                         *mode_regs[M_SVC][R_SPSR]=REG(R_CPSR);
                         SET_MODE(M_SVC);
                         CLR_FLAG(T_MASK);
+                        CHK_T_FLAG_FCT
                         SET_FLAG(IRQ_MASK);
                         REG(R_PC)=0x8;
+                        CHK_IRQ_FCT
+                        CHK_FIQ_FCT
                         break;
                     case 0xE:
                         INT_DEBUG_HEAD_THUMB

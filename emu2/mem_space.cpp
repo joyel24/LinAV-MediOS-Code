@@ -32,7 +32,7 @@ mem_space::mem_space(char * flash,char * sdram):HW_node(0x0,0xFFFFFFFF,16,"AVMEM
 {
     /* init bkpt_list */
 
-    bkpt= new bkpt_list();
+    bkpt = new_bkpt_list(BKPT_MEM);
 
     HW_mem * iram=new HW_mem(NULL,IRAM_START,IRAM_END,"IRAM");
     add_item(iram);
@@ -87,20 +87,19 @@ extern uint32_t old_PC;
 uint32_t mem_space::read(uint32_t addr,int size)
 {
     uint32_t val = HW_node::read(addr,size);
-           
-    if(bkpt->has_bkpt(addr,BKPT_MEM))
-    {
-        printf("@%08x: read mem (s=%d), get : %x\n",old_PC,size,val);
-    }
+          
+    bkpt->fct(bkpt,addr,BKPT_MEM_READ);
+     
+    
     return val;
 }
 
 void mem_space::write(uint32_t addr,uint32_t val,int size)
 {
-    if(bkpt->has_bkpt(addr,BKPT_MEM))
-    {
-        printf("@%08x: write mem (s=%d): %x\n",old_PC,size,val);
-    }
+    
+    
+    bkpt->fct(bkpt,addr,BKPT_MEM_WRITE);
+     
     HW_node::write(addr,val,size);
     
     hw_OSD->chk_access(addr,val);

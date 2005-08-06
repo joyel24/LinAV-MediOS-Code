@@ -331,10 +331,12 @@ void arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
                         if(value & 0x1)
                         {
                             SET_FLAG(T_MASK);
+                            CHK_T_FLAG_FCT
                         }
                         else
                         {
                             CLR_FLAG(T_MASK);
+                            CHK_T_FLAG_FCT
                         }
                         REG(Rd) = value & 0xFFFFFFFE;
                     }

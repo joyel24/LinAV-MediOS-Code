@@ -2,10 +2,13 @@ void thumb_swi(uint32_t instruction)
 {
     DEBUG("SWI :%08x\n",instruction & 0x000000FF);
     *mode_regs[M_SVC][R_LR]=PC_REAL;
-    *mode_regs[M_SVC][R_SPSR]=REG(R_CPSR);
+    *mode_regs[M_SVC][R_SPSR]=REG(R_CPSR);    
     SET_MODE(M_SVC);
     CLR_FLAG(T_MASK);
+    CHK_T_FLAG_FCT
     SET_FLAG(IRQ_MASK);
+    CHK_IRQ_FCT
+    CHK_FIQ_FCT
     REG(R_PC)=0x8;
 }
 
@@ -26,34 +29,14 @@ void thumb_undef(uint32_t instruction)
 void thumb_B_cond(uint32_t instruction)
 {
     int cond = (instruction>>8)&0xF;
-#if 0    
-    switch(cond)
+    DEBUG("B<%s> ",cond_str[cond]);    
+    if(checkCondition(cond))
     {
-        case 0xF: /*SWI*/
-            DEBUG("SWI :%08x\n",instruction & 0x000000FF);
-            *mode_regs[M_SVC][R_LR]=PC_REAL;
-            *mode_regs[M_SVC][R_SPSR]=REG(R_CPSR);
-            SET_MODE(M_SVC);
-            CLR_FLAG(T_MASK);
-            SET_FLAG(IRQ_MASK);
-            REG(R_PC)=0x8;
-            break;
-        case 0xE: /* UNDEF */
-            INT_DEBUG_HEAD_THUMB
-            printf("undefined instruction (3) %x\n",instruction);
-            exit(0);
-            break;
-        default:
-#endif
-            DEBUG("B<%s> ",cond_str[cond]);    
-            if(checkCondition(cond))
-            {
-                REG(R_PC) = GET_REG(R_PC) + (signExtend1((instruction&0xFF))<<1);
-                DEBUG("=> 0x%08x\n",PC_REAL);                            
-            }
-            else
-                DEBUG("CC not met\n");
- //   }
+        REG(R_PC) = GET_REG(R_PC) + (signExtend1((instruction&0xFF))<<1);
+        DEBUG("=> 0x%08x\n",PC_REAL);                            
+    }
+    else
+        DEBUG("CC not met\n");
 }
 
 void thumb_B(uint32_t instruction)

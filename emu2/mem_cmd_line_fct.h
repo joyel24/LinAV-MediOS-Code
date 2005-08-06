@@ -1,4 +1,4 @@
-/* 
+/*
 *   mem_cmd_line_fct.h
 *
 *   AV3XX emulator
@@ -12,8 +12,8 @@
 
 
 
-int do_cmd_dump_s(int argc,char ** argv) 
-{ 
+int do_cmd_dump_s(int argc,char ** argv)
+{
     return mem_obj->do_cmd_dump(argc,argv);
 }
 
@@ -27,15 +27,15 @@ int mem_space::do_cmd_dump(int argc,char ** argv)
         start_addr = my_atoi(argv[0]);
         if(argc>1)
         {
-            size = my_atoi(argv[1]);                   
+            size = my_atoi(argv[1]);
         }
         my_print_mem(this,(char*)start_addr,size);
-    } 
+    }
     return 0;
 }
 
-int do_cmd_add_bk_mem_s(int argc,char ** argv) 
-{ 
+int do_cmd_add_bk_mem_s(int argc,char ** argv)
+{
     return mem_obj->do_cmd_add_bk_mem(argc,argv);
 }
 
@@ -54,16 +54,16 @@ int mem_space::do_cmd_add_bk_mem(int argc,char ** argv)
         }
         i = my_atoi(argv[0]);
         if(do_del)
-            bkpt->del(i,BKPT_MEM);
+            del(bkpt,i);
         else
         {
             if(argc>1)
                 size=my_atoi(argv[1]);
-            bkpt->add(i,size,BKPT_MEM);
+            add(bkpt,i,size);
         }
     }
     else
-        bkpt->print_bkpt_list(BKPT_MEM);
+        print_bkpt_list(bkpt);
     return 0;
 }
 
@@ -71,5 +71,5 @@ void init_mem_static_fct(mem_space * mem)
 {
     mem_obj = mem;
     add_cmd_fct("dump",do_cmd_dump_s,"Dump mem to screen");
-    add_cmd_fct("bkm",do_cmd_add_bk_mem_s,"Manage mem bkpt"); 
+    add_cmd_fct("bkm",do_cmd_add_bk_mem_s,"Manage mem bkpt");
 }

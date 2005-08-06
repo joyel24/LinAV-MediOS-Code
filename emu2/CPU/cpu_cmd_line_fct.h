@@ -33,7 +33,7 @@ int do_cmd_step(int argc,char ** argv)
 
 int do_cmd_run(int argc,char ** argv)
 {
-    run_mode=RUN;
+    CHG_RUN_MODE(RUN);
     return 1;
 }
 
@@ -51,12 +51,12 @@ int do_cmd_add_bkpt(int argc,char ** argv)
         }
         i = my_atoi(argv[0]);
         if(do_del)
-            bkpt->del(i,BKPT_CPU);
+            del(bkpt,i);
         else
-            bkpt->add(i,BKPT_CPU);
+            add(bkpt,i);
     }
     else
-        bkpt->print_bkpt_list(BKPT_CPU);
+        print_bkpt_list(bkpt);
     return 0;
 }
 

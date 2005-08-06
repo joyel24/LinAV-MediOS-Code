@@ -1,4 +1,4 @@
-/* 
+/*
 *   bkpt_list.h
 *
 *   AV3XX emulator
@@ -18,6 +18,9 @@
 #define BKPT_CPU   0
 #define BKPT_MEM   1
 
+#define BKPT_MEM_READ   0
+#define BKPT_MEM_WRITE  1
+
 typedef struct bkpt_s {
     uint32_t address;
     uint32_t size;
@@ -25,24 +28,23 @@ typedef struct bkpt_s {
     char * cause;
 } BKPT;
 
+typedef struct bkpt_list {
+    BKPT * head;
+    int type;
+    int bk_count;
+    void (*fct)(struct bkpt_list * ptr_list,uint32_t address,int mode);
+} BKPT_LIST;
 
-
-class bkpt_list {
-    public:
-        bkpt_list();
-        
-        void del(uint32_t address,int type);
-        void add(uint32_t address,int type);
-        void add(uint32_t address,int type,char * cause);
-        void add(uint32_t address,uint32_t size,int type);
-        void add(uint32_t address,uint32_t size,int type,char * cause);
-        bool has_bkpt(uint32_t address,int type);
-        void print_bkpt_list(int type);
-        
-    private:
-        BKPT * head[2];
-        char * bkpt_str[2];      
-};
+BKPT_LIST * new_bkpt_list(int type);
+void add(BKPT_LIST * ptr,uint32_t address,char * cause);
+void add(BKPT_LIST * ptr,uint32_t address);
+void add(BKPT_LIST * ptr,uint32_t address,uint32_t size);
+void add(BKPT_LIST * ptr_list,uint32_t address,uint32_t size,char * cause);
+void del(BKPT_LIST * ptr_list,uint32_t address);
+void updateFctPointer(BKPT_LIST * ptr_list);
+void fct_void(BKPT_LIST * ptr_list,uint32_t address,int mode);
+void has_bkpt(BKPT_LIST * ptr_list,uint32_t address,int mode);
+void print_bkpt_list(bkpt_list * ptr_list);
 
 #endif
 

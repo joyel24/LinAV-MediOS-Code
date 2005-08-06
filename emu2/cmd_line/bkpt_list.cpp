@@ -1,4 +1,4 @@
-/* 
+/*
 *   bkpt_list.cpp
 *
 *   AV3XX emulator
@@ -14,120 +14,163 @@
 #include <stdlib.h>
 
 #include <emu.h>
+#include <cmd_line.h>
 #include <bkpt_list.h>
 
-bkpt_list::bkpt_list(void)
+
+char * bkpt_str[2] = { "CPU", "MEM" };
+
+
+BKPT_LIST * new_bkpt_list(int type)
 {
-    head[0]=NULL;
-    head[1]=NULL;
-    
-    bkpt_str[0] = "CPU";
-    bkpt_str[1] = "MEM";
+    BKPT_LIST * ptr = new bkpt_list();
+    if(!ptr)
+    {
+        printf("Can't create bkpt list in memory\n");
+        return NULL;
+    }
+    ptr->head = NULL;
+    ptr->type = type;
+    ptr->bk_count = 0;
+    ptr->fct = fct_void;
+    return ptr;
 }
 
-void bkpt_list::add(uint32_t address,int type,char * cause)
+void add(BKPT_LIST * ptr,uint32_t address,char * cause)
 {
-    add(address,0,type,cause);
+    add(ptr,address,0,cause);
 }
 
-void bkpt_list::add(uint32_t address,int type)
+void add(BKPT_LIST * ptr,uint32_t address)
 {
-    add(address,0,type,NULL);
+    add(ptr,address,0,NULL);
 }
 
-void bkpt_list::add(uint32_t address,uint32_t size,int type)
+void add(BKPT_LIST * ptr,uint32_t address,uint32_t size)
 {
-    add(address,size,type,NULL);
+    add(ptr,address,size,NULL);
 }
 
-void bkpt_list::add(uint32_t address,uint32_t size,int type,char * cause)
+void add(BKPT_LIST * ptr_list,uint32_t address,uint32_t size,char * cause)
 {
     BKPT * ptr;
     BKPT * ptr_new = new BKPT();
     if(!ptr_new)
     {
-        printf("Can't create new %s bkpt (new returned a NULL pointer)\n",bkpt_str[type]);
+        printf("Can't create new %s bkpt (new returned a NULL pointer)\n",bkpt_str[ptr_list->type]);
         return;
     }
     ptr_new->address = address;
     ptr_new->size = size;
     ptr_new->cause = cause;
-    
-    if(head[type] == NULL || head[type]->address > address) /* list empty or address < => insert at the beg*/
+
+    if(ptr_list->head == NULL || ptr_list->head->address > address) /* list empty or address < => insert at the beg*/
     {
-        ptr_new->nxt = head[type];
-        head[type] = ptr_new;
+        ptr_new->nxt = ptr_list->head;
+        ptr_list->head = ptr_new;
     }
     else                                        /* let's find where to insert */
     {
-        ptr=head[type];
+        ptr=ptr_list->head;
         while(ptr->nxt!=NULL && ptr->nxt->address<address)
             ptr=ptr->nxt;
-                
+
         ptr_new->nxt = ptr->nxt;
-        ptr->nxt = ptr_new;        
+        ptr->nxt = ptr_new;
     }
-    
-    printf("adding %s bkpt for 0x%08x %s%s%s\n",bkpt_str[type],address,cause!=NULL?"(":"",cause!=NULL?cause:"",cause!=NULL?")":"");
+    ptr_list->bk_count++;
+    updateFctPointer(ptr_list);
+    printf("adding %s bkpt %d for 0x%08x %s%s%s\n",bkpt_str[ptr_list->type],ptr_list->bk_count,address,
+        cause!=NULL?"(":"",cause!=NULL?cause:"",cause!=NULL?")":"");
 }
 
-void bkpt_list::del(uint32_t address,int type)
+void del(BKPT_LIST * ptr_list,uint32_t address)
 {
-    BKPT * ptr=head[type];
-    
-    if(!head[type])
+    BKPT * ptr=ptr_list->head;
+
+    if(!ptr_list->head)
     {
-        printf("%s bkpt list is empty\n",bkpt_str[type]);
+        printf("%s bkpt list is empty\n",bkpt_str[ptr_list->type]);
         return;
     }
-    
-    if(head[type]->address == address)
+
+    if(ptr_list->head->address == address)
     {
-        head[type]=head[type]->nxt;
+        ptr_list->head=ptr_list->head->nxt;
         printf("Removed %s bkpt for 0x%08x %s%s%s\n",
-            bkpt_str[type],address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",ptr->cause!=NULL?")":"");
+            bkpt_str[ptr_list->type],address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",ptr->cause!=NULL?")":"");
         delete ptr;
+        ptr_list->bk_count--;
+        updateFctPointer(ptr_list);
         return;
     }
-    
+
     while(ptr->nxt && ptr->nxt->address != address)
         ptr=ptr->nxt;
     if(!ptr->nxt)
-        printf("Didn't find %s bkpt for 0x%08x\n",bkpt_str[type],address);
+        printf("Didn't find %s bkpt for 0x%08x\n",bkpt_str[ptr_list->type],address);
     else
     {
         BKPT * ptr2=ptr->nxt;
         printf("Removed %s bkpt for 0x%08x %s%s%s\n",
-            bkpt_str[type],address,ptr->nxt->cause!=NULL?"(":"",ptr->nxt->cause!=NULL?ptr->nxt->cause:"",ptr->nxt->cause!=NULL?")":"");
-        ptr->nxt = ptr->nxt->nxt;        
+            bkpt_str[ptr_list->type],address,ptr->nxt->cause!=NULL?"(":"",ptr->nxt->cause!=NULL?ptr->nxt->cause:"",
+            ptr->nxt->cause!=NULL?")":"");
+        ptr->nxt = ptr->nxt->nxt;
         delete ptr2;
+        ptr_list->bk_count--;
+        updateFctPointer(ptr_list);
     }
 }
 
-bool bkpt_list::has_bkpt(uint32_t address,int type)
+void updateFctPointer(BKPT_LIST * ptr_list)
 {
-    BKPT * ptr=head[type];
+    if(ptr_list->bk_count == 0)
+        ptr_list->fct = fct_void;
+    else
+        ptr_list->fct = has_bkpt;
+}
+
+void fct_void(BKPT_LIST * ptr_list,uint32_t address,int mode)
+{
+    
+}
+
+void has_bkpt(BKPT_LIST * ptr_list,uint32_t address,int mode)
+{
+    BKPT * ptr=ptr_list->head;
 
     while(ptr && ptr->address <= address)
     {
         if(address >= ptr->address && address <= (ptr->address+ptr->size))
         {
-            printf("%s BREAKPOINT at 0x%08x %s%s%s\n",
-                bkpt_str[type],address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",ptr->cause!=NULL?")":"");
-            return true;
+            switch(ptr_list->type)
+            {
+                case BKPT_MEM:
+                    printf("%s %s BREAKPOINT at 0x%08x %s%s%s\n",bkpt_str[ptr_list->type],mode==BKPT_MEM_READ?"read":"write",
+                        address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",
+                        ptr->cause!=NULL?")":"");
+                    break;
+                case BKPT_CPU:
+                    printf("%s BREAKPOINT at 0x%08x %s%s%s\n",bkpt_str[ptr_list->type],
+                        address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",
+                        ptr->cause!=NULL?")":"");
+                    //exit(0);
+                    break;
+            }    
+            CHG_RUN_MODE(STEP);
+            return ;
         }
         ptr=ptr->nxt;
     }
-    return false;
 }
 
-void bkpt_list::print_bkpt_list(int type)
+void print_bkpt_list(bkpt_list * ptr_list)
 {
-    printf("%s Breakpoint list",bkpt_str[type]);
-    if(head)
+    printf("%s Breakpoint list",bkpt_str[ptr_list->type]);
+    if(ptr_list->head)
     {
         printf(":\n");
-        for(BKPT * ptr=head[type];ptr!=NULL;ptr=ptr->nxt)
+        for(BKPT * ptr=ptr_list->head;ptr!=NULL;ptr=ptr->nxt)
         {
             printf("0x%08x %s%s%s\n",ptr->address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",ptr->cause!=NULL?")":"");
         }

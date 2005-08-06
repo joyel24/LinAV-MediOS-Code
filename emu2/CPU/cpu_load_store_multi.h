@@ -114,8 +114,13 @@ void arm_LoadStoreMulti(uint32_t instruction)
                     //printf("Unpredictable, wrong mode\n");
                     //exit(0);
                 }
-                else                
+                else
+                {
                     REG(R_CPSR)=REG(R_SPSR);
+                    CHK_T_FLAG_FCT
+                    CHK_IRQ_FCT
+                    CHK_FIQ_FCT
+                }
                     
                 if(old_mode != MODE)
                 {
@@ -132,10 +137,12 @@ void arm_LoadStoreMulti(uint32_t instruction)
             /*if(val & 0x1)
             {
                 SET_FLAG(T_MASK);
+                CHK_T_FLAG_FCT
             }
             else
             {
                 CLR_FLAG(T_MASK);
+                CHK_T_FLAG_FCT
             }*/
             address+=4;
         }
