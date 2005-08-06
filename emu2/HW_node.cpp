@@ -61,7 +61,7 @@ void HW_node::write(uint32_t addr,uint32_t val,int size)
 
 void HW_node::add_item(HW_access * HW)
 {
-    printf("%s %s %08x %08x\n",name,HW->name,HW->start,HW->end);
+//    printf("%s %s %08x %08x\n",name,HW->name,HW->start,HW->end);
 
     int i=(HW->start-start) >> granularity_shift;
     int end=(HW->end-start) >> granularity_shift;
