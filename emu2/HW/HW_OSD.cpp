@@ -38,7 +38,7 @@ HW_OSD::HW_OSD(HW_mem * mem2):HW_access(OSD_START,OSD_END,"OSD")
     {  
         OSD_width_regs[i]=0;
         
-        OSD_offset_regs[i]=0;
+        OSD_offset_regs[i]=0x03000000;
     }
     
     for(int i=0;i<8;i++)
@@ -535,14 +535,17 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
 
 int HW_OSD::nxtEvent(void)
 {
-    return lcd->nxtEvent(OSD_offset_regs[2]);
+    return lcd->nxtEvent(OSD_config_regs,OSD_offset_regs);
 }
 
 void HW_OSD::chk_access(uint32_t addr,uint32_t val)
 {
-    if(OSD_offset_regs[2] >= SDRAM_START && addr>=OSD_offset_regs[2] 
+    if((OSD_config_regs[2]&0x1) && addr>=OSD_offset_regs[2] 
             && addr <= (OSD_offset_regs[2]+SCREEN_WIDTH*SCREEN_HEIGHT*2))
             lcd->drawPix(addr-OSD_offset_regs[2],val);
-        //lcd->nxtEvent(OSD_offset_regs[2]);
+    else if ((OSD_config_regs[1]&0x1) && addr>=OSD_offset_regs[0] 
+            && addr <= (OSD_offset_regs[0]+SCREEN_WIDTH*SCREEN_HEIGHT*4))
+            lcd->drawVidPix(addr-OSD_offset_regs[0],val);
+        
 }
 

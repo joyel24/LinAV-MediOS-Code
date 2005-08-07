@@ -34,6 +34,7 @@ class HW_OSD : public HW_access {
         void write(uint32_t addr,uint32_t val,int size);
         
         int do_cmd_updt_lcd(int argc,char ** argv);
+        int do_cmd_cfg_out(int argc,char ** argv);
         
         void chk_access(uint32_t addr,uint32_t val);
         int nxtEvent(void);

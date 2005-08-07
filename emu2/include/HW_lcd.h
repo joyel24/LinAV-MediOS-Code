@@ -14,20 +14,25 @@
 #define __HW_LCD_H
 
 #include <HW_mem.h>
-//#include <mem_space.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+
+#define USE_CACHE
+#define PX_CACHE_SIZE  1000
+
+#define LCD_BMAP 0
+#define LCD_VID  1
 
 class mem_space;
 
 class HW_lcd {
     public:
         HW_lcd(HW_mem * mem2);
-        void updte_lcd(uint32_t base_addr);
+        void updte_lcd(uint32_t base_addr,int type);
         void drawPix(uint32_t addr,uint32_t val);     
-        
-        int nxtEvent(uint32_t addr);
+        void drawVidPix(uint32_t addr,uint32_t val);     
+        int nxtEvent(int * config,uint32_t * addr);
           
     private:
         HW_mem * mem2;
@@ -46,7 +51,12 @@ class HW_lcd {
         int skip;
 
         void setPalette(int palette[256][3],int size);
-
+        uint32_t getColor(uint32_t color);
+#ifdef USE_CACHE        
+        uint32_t pixel_cache[PX_CACHE_SIZE][2];
+        int in_cache;
+        int cache_size;    
+#endif 
 };
 
 #endif // __HW_LCD_H

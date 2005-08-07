@@ -27,6 +27,10 @@ HW_lcd::HW_lcd(HW_mem * mem2)
     int x,y;
 
     skip=0;
+#ifdef USE_CACHE
+    in_cache = 0;
+    cache_size = 0;
+#endif
 
     this->mem2 = mem2;
 
@@ -47,13 +51,23 @@ HW_lcd::HW_lcd(HW_mem * mem2)
             0,                                    /* Width border */
             BlackPixel(display, screen),	
             WhitePixel(display, screen)
+            );
+    window2 = XCreateSimpleWindow(
+            display,                               /* Display */
+            DefaultRootWindow(display),            /* Main Window */
+            0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,     /* Geometry */
+            0,                                    /* Width border */
+            BlackPixel(display, screen),	
+            WhitePixel(display, screen)
             );            
-    if(!window1) 
+    if(!window1 || !window2) 
     {
-            printf("Can't create the window");
+            printf("Can't create the windows");
             exit(1);
     }
-    XStoreName(display, window1, "AV Emu LCD");
+    
+    XStoreName(display, window1, "AV Emu LCD - BMAP1");
+    XStoreName(display, window2, "AV Emu LCD - VID1");
     
     pal = DefaultColormap(display,screen);
     
@@ -68,8 +82,10 @@ HW_lcd::HW_lcd(HW_mem * mem2)
         }            
     
     XSelectInput(display, window1, ExposureMask | KeyPressMask | KeyReleaseMask);
+    XSelectInput(display, window2, ExposureMask);
         
     XMapWindow(display, window1);
+    XMapWindow(display, window2);
     
     printf("LCD init done\n");
 }
@@ -92,7 +108,7 @@ void HW_lcd::setPalette(int palette[256][3],int size)
     }
 }
 
-int HW_lcd::nxtEvent(uint32_t addr)
+int HW_lcd::nxtEvent(int * config,uint32_t * addr)
 {   
  #if 1
     ++skip;
@@ -114,8 +130,10 @@ int HW_lcd::nxtEvent(uint32_t addr)
     switch (event.type) 
     {
         case Expose :
-            if(addr>=SDRAM_START && addr < SDRAM_END)
-                updte_lcd(addr);
+            if(config[2]&0x1 && addr[2]>SDRAM_START)
+                updte_lcd(addr[2],LCD_BMAP);
+            /*if(config[1]&0x1 && addr[0]>SDRAM_START)
+                updte_lcd(addr[0],LCD_VID);*/
             break;
         //case KeyRelease :
             //val=0;
@@ -201,17 +219,90 @@ void HW_lcd::drawPix(uint32_t addr,uint32_t val)
     XDrawPoint(display, window1, gc, i, j);
 }
 
-void HW_lcd::updte_lcd(uint32_t base_addr)
+void HW_lcd::drawVidPix(uint32_t addr,uint32_t val)
+{
+    int i,j;
+    
+    addr >>= 2;
+    i=addr%SCREEN_WIDTH;
+    j=addr/SCREEN_WIDTH;
+    XSetForeground(display, gc, getColor(val));
+    XDrawPoint(display, window2, gc, i, j);
+}
+
+void HW_lcd::updte_lcd(uint32_t base_addr,int type)
 {
     int a=0;
     int b=0;
     char data[4];
     uint32_t color;
     
-    for(int j = 0 ; j < SCREEN_HEIGHT+1 ; j++)
-        for(int i = 0 ; i < SCREEN_WIDTH+1 ; i++)
+    if(type == LCD_BMAP)
+    {
+        for(int j = 0 ; j < SCREEN_HEIGHT+1 ; j++)
+            for(int i = 0 ; i < SCREEN_WIDTH+1 ; i++)        
+            {
+                color = colorTab[mem2->read(base_addr+(j*(SCREEN_WIDTH*2)+i*2),2)&0xFF];
+                XSetForeground(display, gc, color);
+                XDrawPoint(display, window1, gc, i, j);
+            }
+    }
+    else if(type == LCD_VID)
+    {
+        for(int j = 0 ; j < SCREEN_HEIGHT+1 ; j++)
+            for(int i = 0 ; i < SCREEN_WIDTH+1 ; i++)        
+            {
+                color = getColor(mem2->read(base_addr+(j*(SCREEN_WIDTH*4)+i*4),4));
+                XSetForeground(display, gc, color);
+                XDrawPoint(display, window2, gc, i, j);
+            }
+            
+    }
+}
+
+uint32_t HW_lcd::getColor(uint32_t color)
+{
+    XColor c;
+    int r,g,b,Y,Cr,Cb;
+    int i,j;
+    
+    
+    
+#ifdef USE_CACHE
+    //printf("getColor: asked: %x (cache size=%x cache pos=%x) ",color,cache_size,in_cache);
+    /*if(cache_size>PX_CACHE_SIZE)
+    {
+        printf("error in cache_size\n");
+        exit(0);
+    }*/
+    // trying to find already computed value
+    for(i=0;i<cache_size;i++)
+        if(pixel_cache[i][0]==color)
         {
-            XSetForeground(display, gc, colorTab[mem2->read(base_addr+(j*(SCREEN_WIDTH*2)+i*2),2)&0xFF]);
-            XDrawPoint(display, window1, gc, i, j);
-         }
+            //printf("-- find %x (cache size=%x cache pos=%x)\n",pixel_cache[i][1],cache_size,in_cache);
+            return pixel_cache[i][1];            
+        }
+#endif    
+    Cb=color&0xFF;
+    Y=(color>>8)&0xFF;
+    Cr=(color>>16)&0xFF;
+    r=(int)(Y+1.402*(Cr-128));
+    g=(int)(Y-0.34414*(Cb-128)-0.71414*(Cr-128));
+    b=(int)(Y+1.772*(Cb-128));
+    c.red = r*0x100+r;
+    c.green = g*0x100+g;
+    c.blue = b*0x100+b;
+    XAllocColor(display, pal, &c);
+
+#ifdef USE_CACHE   
+    pixel_cache[in_cache][0]=color;
+    pixel_cache[in_cache][1]=c.pixel;
+    in_cache++;
+    if(cache_size<PX_CACHE_SIZE)
+        cache_size++;
+    if(in_cache>=PX_CACHE_SIZE)
+        in_cache=0;
+    //printf("-- find %x (cache size=%x cache pos=%x)\n",c.pixel,cache_size,in_cache);
+#endif    
+    return c.pixel;
 }

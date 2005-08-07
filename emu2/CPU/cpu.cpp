@@ -141,11 +141,17 @@ void arm_mode_fct(uint32_t address);
 
 void (*t_flag_mode_fct)(uint32_t address)=arm_mode_fct;
 
+
+
 #define CHK_T_FLAG_FCT {                                 \
     if(*mode_regs[M_USER][R_CPSR] & (0x00000020))        \
+    {                                                    \
         t_flag_mode_fct = thumb_mode_fct;                \
+    }                                                    \
     else                                                 \
+    {                                                    \
         t_flag_mode_fct = arm_mode_fct;                  \
+    }                                                    \
 }
                      
 #define SET_T(COND) {                      \
@@ -430,14 +436,9 @@ void go(uint32_t start_address,uint32_t stack_address)
             CHG_RUN_MODE(STEP)
         }
         #endif
-             
-        
         
         cur_fiq_fct();
         cur_irq_fct();
-        
-        
-        
         
         address = T_FLAG ? PC_REAL&0xfffffffe : (PC_REAL+2)&0xfffffffc;
         
