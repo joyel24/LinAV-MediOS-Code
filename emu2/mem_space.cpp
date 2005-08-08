@@ -38,14 +38,15 @@ mem_space::mem_space(char * flash,char * sdram):HW_node(0x0,0xFFFFFFFF,16,"AVMEM
     add_item(iram);
     iram->write(RESET_VECTOR,RESET_INIT_VAL,4);
 
-    add_item(new HW_mem(NULL,0x40000,0x50000,"DSP MEM"));
-    add_item(new HW_mem(flash,FLASH_START,FLASH_END,"FLASH"));
+    HW_mem * dsp_mem = new HW_mem(NULL,0x40000,0x50000,"DSP MEM");
+    add_item(dsp_mem);
+    HW_mem * flash_mem = new HW_mem(flash,FLASH_START,FLASH_END,"FLASH");
+    add_item(flash_mem);
+    
     HW_mem * sd = new HW_mem(sdram,SDRAM_START,SDRAM_END,"SDRAM");
     add_item(sd);
-
     hw_cpld = new HW_cpld();
     hw_TI = new HW_TI(this,sd,hw_cpld);
-    
     
     add_item(hw_cpld);
     add_item(hw_TI);

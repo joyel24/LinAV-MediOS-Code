@@ -22,6 +22,8 @@
 
 extern mem_space * mem;
 
+int lcd_update_cnt[2] = {0,0};
+
 HW_lcd::HW_lcd(HW_mem * mem2)
 {
     int x,y;
@@ -52,6 +54,14 @@ HW_lcd::HW_lcd(HW_mem * mem2)
             BlackPixel(display, screen),	
             WhitePixel(display, screen)
             );
+    if(!window1 ) 
+    {
+            printf("Can't create BMAP0 windows");
+            exit(1);
+    }
+    XStoreName(display, window1, "AV Emu LCD - BMAP1");
+    
+#ifdef HAS_VID0            
     window2 = XCreateSimpleWindow(
             display,                               /* Display */
             DefaultRootWindow(display),            /* Main Window */
@@ -60,15 +70,16 @@ HW_lcd::HW_lcd(HW_mem * mem2)
             BlackPixel(display, screen),	
             WhitePixel(display, screen)
             );            
-    if(!window1 || !window2) 
+    if(!window2) 
     {
-            printf("Can't create the windows");
+            printf("Can't create VID0 windows");
             exit(1);
     }
+   
     
-    XStoreName(display, window1, "AV Emu LCD - BMAP1");
     XStoreName(display, window2, "AV Emu LCD - VID1");
-    
+#endif    
+
     pal = DefaultColormap(display,screen);
     
     setPalette(ini_pal,256);   
@@ -82,11 +93,12 @@ HW_lcd::HW_lcd(HW_mem * mem2)
         }            
     
     XSelectInput(display, window1, ExposureMask | KeyPressMask | KeyReleaseMask);
-    XSelectInput(display, window2, ExposureMask);
-        
     XMapWindow(display, window1);
-    XMapWindow(display, window2);
     
+#ifdef HAS_VID0     
+    XSelectInput(display, window2, ExposureMask);
+    XMapWindow(display, window2);
+#endif     
     printf("LCD init done\n");
 }
 
@@ -132,8 +144,10 @@ int HW_lcd::nxtEvent(int * config,uint32_t * addr)
         case Expose :
             if(config[2]&0x1 && addr[2]>SDRAM_START)
                 updte_lcd(addr[2],LCD_BMAP);
-            /*if(config[1]&0x1 && addr[0]>SDRAM_START)
-                updte_lcd(addr[0],LCD_VID);*/
+#ifdef HAS_VID0
+            if(config[1]&0x1 && addr[0]>SDRAM_START)
+                updte_lcd(addr[0],LCD_VID);
+#endif
             break;
         //case KeyRelease :
             //val=0;
@@ -221,6 +235,7 @@ void HW_lcd::drawPix(uint32_t addr,uint32_t val)
 
 void HW_lcd::drawVidPix(uint32_t addr,uint32_t val)
 {
+#ifdef HAS_VID0
     int i,j;
     
     addr >>= 2;
@@ -228,7 +243,10 @@ void HW_lcd::drawVidPix(uint32_t addr,uint32_t val)
     j=addr/SCREEN_WIDTH;
     XSetForeground(display, gc, getColor(val));
     XDrawPoint(display, window2, gc, i, j);
+#endif
 }
+
+
 
 void HW_lcd::updte_lcd(uint32_t base_addr,int type)
 {
@@ -236,7 +254,7 @@ void HW_lcd::updte_lcd(uint32_t base_addr,int type)
     int b=0;
     char data[4];
     uint32_t color;
-    
+    lcd_update_cnt[type]++;
     if(type == LCD_BMAP)
     {
         for(int j = 0 ; j < SCREEN_HEIGHT+1 ; j++)
@@ -247,6 +265,7 @@ void HW_lcd::updte_lcd(uint32_t base_addr,int type)
                 XDrawPoint(display, window1, gc, i, j);
             }
     }
+#ifdef HAS_VID0    
     else if(type == LCD_VID)
     {
         for(int j = 0 ; j < SCREEN_HEIGHT+1 ; j++)
@@ -258,6 +277,7 @@ void HW_lcd::updte_lcd(uint32_t base_addr,int type)
             }
             
     }
+#endif
 }
 
 uint32_t HW_lcd::getColor(uint32_t color)

@@ -49,7 +49,7 @@ uint32_t HW_node::read(uint32_t addr,int size)
 }
 
 void HW_node::write(uint32_t addr,uint32_t val,int size)
-{
+{    
     HW_access * acc = access_array[(addr-start)>>granularity_shift];
     if (size<4 || acc->full_size){
       acc->write(addr,val,size);

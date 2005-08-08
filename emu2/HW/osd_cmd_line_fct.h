@@ -17,6 +17,8 @@ int do_cmd_cfg_out_s(int argc,char ** argv)
 
 char * str_zoom[] = {"normal", "x2", "x4"};
 
+extern int lcd_update_cnt[2];
+
 int HW_OSD::do_cmd_cfg_out(int argc,char ** argv)
 {
     int val;
@@ -28,6 +30,9 @@ int HW_OSD::do_cmd_cfg_out(int argc,char ** argv)
     val = (OSD_config_regs[1]>>8)&0xFF;
     printf("VID0 config (%02x): %s, %s, Zoom y %s, Zoom x %s\n",val,(val&0x1)?"enable":"disable",
         (val&0x2)?"half height":"normal height",str_zoom[(val>>2)&0x3],str_zoom[(val>>4)&0x3]);
+        
+        
+    printf("LCD update stats: BMAP0 : %d, VID0 : %d\n",lcd_update_cnt[0],lcd_update_cnt[1]);
     return 0;
 }
 

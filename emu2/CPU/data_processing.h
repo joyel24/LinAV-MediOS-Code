@@ -199,7 +199,7 @@ void arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0xB: ///////////////////////////////////////////// CMN => Rn + shifter_operand
-            DEBUG("CMN %s, %s",RR(Rn),debugShifter);
+            DEBUG("CMN %s, %s\n",RR(Rn),debugShifter);
             alu_out=GET_REG(Rn) + shifter_operand;
 
             if(fl_s)

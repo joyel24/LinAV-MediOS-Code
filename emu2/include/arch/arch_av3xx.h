@@ -39,6 +39,8 @@
 #define RESET_INIT_VAL    0xEA03FFFE     
 #define INIT_MODE         M_SVC
 
+//#define HAS_VID0
+
 /* Special init for this arch: enable debug on UART */
 #define ARCH_INIT   \
 {                   \

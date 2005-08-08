@@ -64,11 +64,21 @@ void HW_mem::init(char * fname,uint32_t start,uint32_t end,uint32_t load_offset)
 
 uint32_t HW_mem::read(uint32_t addr,int size)
 {
+    if(addr>=end)
+    {        
+         DEBUG_HW(MEM_HW_DEBUG,"%s::read(0x%08x,%d) ERROR addr does not belong to a known zone\n",name,addr,size);
+         return 0;
+    }
     return  (*((unsigned long *) (mem+addr-start))) & (0xffffffff>>((4-size)<<3));
 }
 
 void HW_mem::write(uint32_t addr,uint32_t val,int size)
 {
+    if(addr>=end)
+    {
+        DEBUG_HW(MEM_HW_DEBUG,"%s::write(0x%08x,%x,%d) ERROR addr does not belong to a known zone\n",name,addr,val,size);
+        return ;
+    }
     unsigned long tmp = *((unsigned long *) (mem+addr-start));
     tmp = (size>=4) ? val : (tmp & (0xffffffff<<(size<<3))) | (val & (0xffffffff>>((4-size)<<3)));
     *((unsigned long *) (mem+addr-start))=tmp;
