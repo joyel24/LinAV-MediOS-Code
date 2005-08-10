@@ -16,11 +16,11 @@
 #ifdef AV3XX
 #include <arch/arch_av3xx.h>
 #else
-		#ifdef Gmini400
-		#include <arch/arch_gmini400.h>
-		#else
-				#error "undef arch"
-		#endif
+#ifdef Gmini400
+#include <arch/arch_gmini400.h>
+#else
+    #error "undef arch"
+#endif
 #endif
 #include "emu_types.h"
 

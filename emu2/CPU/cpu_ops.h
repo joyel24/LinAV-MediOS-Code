@@ -100,3 +100,27 @@ void ARM_SubCOverflow(uint32_t a, uint32_t b,uint32_t c)
             ARM_SubOverflow(a-b,c,a-b-c);
 #warning sub overflow test
 }
+
+////////////////////////////// signExtend
+uint32_t signExtend1(uint32_t data)
+{
+    if(data > 0x7F) // neg
+        data -=  0x100;
+    return data;
+}
+
+uint32_t signExtend11(uint32_t data)
+{
+    if(data > 0x3FF) // neg
+    {
+        data -=  0x800;
+    }
+    return data;
+}
+
+uint32_t signExtend2(uint32_t data)
+{
+    if(data> 0x7FFF) // neg
+        data -=  0x10000;
+    return data;
+}

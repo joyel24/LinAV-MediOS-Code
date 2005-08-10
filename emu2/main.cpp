@@ -93,6 +93,7 @@ int main(int argc, char* argv[])
     //sdram_file = "linux.bin";
     //sdram_file = "gravity.bin";
     sdram_file = "CJBM_v2.depack";
+    //sdram_file = "fw1304.bin";
     //sdram_file = "firm_1.depack_NEW";
     //flash_file="flash_rom";
     

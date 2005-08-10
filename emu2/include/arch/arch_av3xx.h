@@ -27,11 +27,11 @@
 
 #define FLASH_START       0x100000
 #define FLASH_END         0x180000
-#define FLASH_LOAD_OFFSET	0x000000
+#define FLASH_LOAD_OFFSET 0x000000
 
 #define SDRAM_START       0x03000000
 #define SDRAM_END         0x04000000
-#define SDRAM_LOAD_OFFSET	0x00000000
+#define SDRAM_LOAD_OFFSET 0x00000000
 
 
 /************************************************************ initial state */
