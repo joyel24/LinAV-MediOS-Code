@@ -41,7 +41,7 @@ int do_cmd_chg_disp(int argc,char ** argv);
 int do_cmd_chg_hw_disp(int argc,char ** argv);
 
        
-bool checkCondition(int condCode);
+//bool checkCondition(int condCode);
 void doThumb(uint32_t instruction);
 void doARM(uint32_t instruction);
 

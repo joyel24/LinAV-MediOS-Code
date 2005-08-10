@@ -244,6 +244,75 @@ void void_cmdline(void) {}
 
 void (*cmd_line_fct)(void)=void_cmdline;
 
+#if 0
+bool checkCondition(int condCode)
+{
+    
+    switch(condCode & 0xF)
+    {
+            case 0xE:                                       // AL
+                    return true;
+            case 0x0:                                       // EQ
+                    return Z_FLAG;
+            case 0x1:                                       // NE
+                    return !Z_FLAG;
+            case 0x2:                                       // CS/HS
+                    return C_FLAG;
+            case 0x3:                                       // CC/LO
+                    return !C_FLAG;
+            case 0x4:                                       // MI
+                    return N_FLAG;
+            case 0x5:                                       // PL
+                    return !N_FLAG;
+            case 0x6:                                       // VS
+                    return V_FLAG;
+            case 0x7:                                       // VC
+                    return !V_FLAG;
+            case 0x8:                                       // HI
+                    return (C_FLAG && !Z_FLAG);
+            case 0x9:                                       // LS
+                    return (!C_FLAG || Z_FLAG);
+            case 0xA:                                       // GE
+                    return (N_FLAG == V_FLAG);
+            case 0xB:                                       // LT
+                    return (N_FLAG != V_FLAG);
+            case 0xC:                                       // GT
+                    return (!Z_FLAG && ((N_FLAG && V_FLAG) || (!N_FLAG && !V_FLAG)));
+            case 0xD:                                       // LE
+                    return (Z_FLAG || ((N_FLAG && !V_FLAG) || (!N_FLAG && V_FLAG)));
+            case 0xF:                                       // Error
+                    printf("Error cond code = 0xF (b1111)");
+                    return false;
+    }
+    return false;
+}
+#else
+/*   0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+  0000 0001 0010 0011 0100 0101 0110 0111 1000 1001 1010 1011 1100 1101 1110 1111
+  NZCV  */
+int cond_tab[0x10][0x10] = {
+/*cond / result| 0 1 2 3 4 5 6 7 8 9 A B C D E F */
+/*0 - EQ*/     { 0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1},  /* Z set   */
+/*1 - NE*/     { 1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0},  /* Z clear */
+/*2 - CS/HS*/  { 0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1},  /* C set   */
+/*3 - CC/LO*/  { 1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0},  /* C clear */
+/*4 - MI*/     { 0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1},  /* N set   */
+/*5 - PL*/     { 1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0},  /* N clear */
+/*6 - VS*/     { 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1},  /* V set   */
+/*7 - VC*/     { 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0},  /* V clear */
+/*8 - HI*/     { 0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0},  /* (C_FLAG && !Z_FLAG) */
+/*9 - LS*/     { 1,1,0,0,1,1,1,1,1,1,0,0,1,1,1,1},  /* (!C_FLAG || Z_FLAG) */
+/*A - GE*/     { 1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1},  /* (N_FLAG == V_FLAG)  */
+/*B - LT*/     { 0,1,0,1,0,1,0,1,1,0,1,0,1,0,1,0},  /* (N_FLAG != V_FLAG)  */
+/*C - GT*/     { 1,0,1,0,0,0,0,0,0,1,0,1,0,0,0,0},  /* (!Z_FLAG && ((N_FLAG && V_FLAG) || (!N_FLAG && !V_FLAG))) */
+/*D - LE*/     { 0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1},  /* (Z_FLAG || ((N_FLAG && !V_FLAG) || (!N_FLAG && V_FLAG)))  */
+/*E - AL*/     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+/*F - UNK*/    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+};
+#define checkCondition(VAL) (cond_tab[VAL&0xF][((*mode_regs[M_USER][R_CPSR])>>28)&0xF])
+#endif
+
+
 #define new_thumb
 
 #ifdef new_thumb
@@ -450,46 +519,8 @@ void go(uint32_t start_address,uint32_t stack_address)
     }
 }
 
-bool checkCondition(int condCode)
-{
-    switch(condCode & 0xF)
-    {
-            case 0xE:                                       // AL
-                    return true;
-            case 0x0:                                       // EQ
-                    return Z_FLAG;
-            case 0x1:                                       // NE
-                    return !Z_FLAG;
-            case 0x2:                                       // CS/HS
-                    return C_FLAG;
-            case 0x3:                                       // CC/LO
-                    return !C_FLAG;
-            case 0x4:                                       // MI
-                    return N_FLAG;
-            case 0x5:                                       // PL
-                    return !N_FLAG;
-            case 0x6:                                       // VS
-                    return V_FLAG;
-            case 0x7:                                       // VC
-                    return !V_FLAG;
-            case 0x8:                                       // HI
-                    return (C_FLAG && !Z_FLAG);
-            case 0x9:                                       // LS
-                    return (!C_FLAG || Z_FLAG);
-            case 0xA:                                       // GE
-                    return (N_FLAG == V_FLAG);
-            case 0xB:                                       // LT
-                    return (N_FLAG != V_FLAG);
-            case 0xC:                                       // GT
-                    return (!Z_FLAG && ((N_FLAG && V_FLAG) || (!N_FLAG && !V_FLAG)));
-            case 0xD:                                       // LE
-                    return (Z_FLAG || ((N_FLAG && !V_FLAG) || (!N_FLAG && V_FLAG)));
-            case 0xF:                                       // Error
-                    printf("Error cond code = 0xF (b1111)");
-                    return false;
-    }
-    return false;
-}
+
+    
 
 void doARM(uint32_t instruction)
 {

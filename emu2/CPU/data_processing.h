@@ -24,7 +24,7 @@ void arm_DataProcessing(int condCode,uint32_t instruction)
     switch(opcode)
     {
         case 0x0: ///////////////////////////////////////////// AND
-            DEBUG("AND %s, %s, %s\n",RR(Rd),RR(Rn),debugShifter);
+            DEBUG("AND%s %s, %s, %s\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter);
             REG(Rd)=GET_REG(Rn) & shifter_operand;
             if(fl_s && Rd==15)
             {
@@ -37,7 +37,7 @@ void arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0x1: ///////////////////////////////////////////// EOR
-            DEBUG("EOR %s, %s, %s\n",RR(Rd),RR(Rn),debugShifter);
+            DEBUG("EOR%S %s, %s, %s\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter);
             REG(Rd)=GET_REG(Rn) ^ shifter_operand;
             if(fl_s && Rd==15)
             {
@@ -50,9 +50,7 @@ void arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0x2: ///////////////////////////////////////////// SUB
-            if(fl_s && Rd==15)
-                printf("SUBS %s, %s, %s old_val %x\n",RR(Rd),RR(Rn),debugShifter,GET_REG(Rd));
-            
+                        
             REG(Rd)=GET_REG(Rn) - shifter_operand;
             DEBUG("SUB%s %s, %s, %s => %x\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter,GET_REG(Rd));            
             if(fl_s && Rd==15)
@@ -162,57 +160,31 @@ void arm_DataProcessing(int condCode,uint32_t instruction)
         case 0x8: ///////////////////////////////////////////// TST => Rn & shifter_operand
             DEBUG("TST %s, %s\n",RR(Rn),debugShifter);
             alu_out=GET_REG(Rn) & shifter_operand;
-
-            if(fl_s && Rd==15)
-            {
-                CHG_MODE
-            }
-            else if(fl_s)
-            {
-                ARM_NegZero(alu_out);
-                SET_C(shifter_carry_out == 1);
-            }
+            ARM_NegZero(alu_out);
+            SET_C(shifter_carry_out == 1);
             break;
         case 0x9: ///////////////////////////////////////////// TEQ => Rn ^ shifter_operand
             DEBUG("TEQ %s, %s\n",RR(Rn),debugShifter);
             alu_out=GET_REG(Rn) ^ shifter_operand;
-
-            if(fl_s && Rd==15)
-            {
-                CHG_MODE
-            }
-            else if(fl_s)
-            {
-                ARM_NegZero(alu_out);
-                SET_C(shifter_carry_out == 1);
-            }
+            ARM_NegZero(alu_out);
+            SET_C(shifter_carry_out == 1);
             break;
         case 0xA: ///////////////////////////////////////////// CMP => Rn - shifter_operand
             DEBUG("CMP %s, %s\n",RR(Rn),debugShifter);
             alu_out=GET_REG(Rn) - shifter_operand;
-
-            if(fl_s)
-            {
-                ARM_NegZero(alu_out);
-                ARM_SubCarry(GET_REG(Rn),shifter_operand, alu_out);
-                ARM_SubOverflow(GET_REG(Rn),shifter_operand, alu_out);
-            }
+            ARM_NegZero(alu_out);
+            ARM_SubCarry(GET_REG(Rn),shifter_operand, alu_out);
+            ARM_SubOverflow(GET_REG(Rn),shifter_operand, alu_out);
             break;
         case 0xB: ///////////////////////////////////////////// CMN => Rn + shifter_operand
             DEBUG("CMN %s, %s\n",RR(Rn),debugShifter);
             alu_out=GET_REG(Rn) + shifter_operand;
-
-            if(fl_s)
-            {
-                ARM_NegZero(alu_out);
-                ARM_SubCarry(GET_REG(Rn),-shifter_operand, alu_out);
-                ARM_SubOverflow(GET_REG(Rn),-shifter_operand, alu_out);
-            }
-            else
-                printf(" fl_s not set!!!\n");
+            ARM_NegZero(alu_out);
+            ARM_SubCarry(GET_REG(Rn),-shifter_operand, alu_out);
+            ARM_SubOverflow(GET_REG(Rn),-shifter_operand, alu_out);
             break;
         case 0xC: ///////////////////////////////////////////// ORR
-            DEBUG("ORR %s, %s, %s\n",RR(Rd),RR(Rn),debugShifter);
+            DEBUG("ORR%s %s, %s, %s\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter);
             REG(Rd)=GET_REG(Rn) | shifter_operand;
 
             if(fl_s && Rd==15)
@@ -240,7 +212,7 @@ void arm_DataProcessing(int condCode,uint32_t instruction)
             }
             break;
         case 0xE: ///////////////////////////////////////////// BIC => Bit clear
-            DEBUG("BIC %s, %s, %s\n",RR(Rd),RR(Rn),debugShifter);
+            DEBUG("BIC%s %s, %s, %s\n",fl_s?"S":"",RR(Rd),RR(Rn),debugShifter);
             REG(Rd)=GET_REG(Rn) & (~shifter_operand);
             //printf("R dest(%d) = %08x %x %x\n",Rd,GET_REG(Rd),shifter_operand,~shifter_operand);
             if(fl_s && Rd==15)
