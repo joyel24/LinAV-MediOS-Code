@@ -10,13 +10,13 @@
 * KIND, either express of implied.
 */
 
-#define ARCH_NAME         "AV3XX"
+#define ARCH_NAME         "Gmini400"
 
 /************************************************************ Memory Zone */
 
 #define RESET_VECTOR      0x00000000
 
-#define IRAM_START        0x00000000
+#define IRAM_START        0x00000004
 #define IRAM_END          0x00008000
 #define TI_REG_START      0x00030000
 #define TI_REG_END        0x00040000
@@ -25,30 +25,27 @@
 
 
 
-#define FLASH_START       0x100000
-#define FLASH_END         0x180000
-#define FLASH_LOAD_OFFSET	0x000000
+#define FLASH_START       0x0100000
+#define FLASH_END         0x0180000
+#define FLASH_LOAD_OFFSET	0x0010000
 
-#define SDRAM_START       0x03000000
-#define SDRAM_END         0x04000000
-#define SDRAM_LOAD_OFFSET	0x00000000
+#define SDRAM_START       0x0900000
+#define SDRAM_END         0x1900000
+#define SDRAM_LOAD_OFFSET	0x0000000
 
 
 /************************************************************ initial state */
 
 #define START_ADDR        SDRAM_START
-#define STACK_INIT        (IRAM_END - 0x4) 
-#define RESET_INIT_VAL    0xEA03FFFE     
+//#define START_ADDR        0x110000
+#define STACK_INIT        (IRAM_END - 0x4)
+#define RESET_INIT_VAL    0xEA03FFFE
 #define INIT_MODE         M_SVC
 
-//#define HAS_VID0
-
-/* Special init for this arch: enable debug on UART */
+/* Special init for this arch: enable monitor command line mode */
 #define ARCH_INIT   \
 {                   \
-    char * str="DeBuGuNlOcKeD_42";  \
-    for(int i=0;*(str+i);i++)       \
-        write((0x107FF0+i),(char)*(str+i),1); \
+    write(0x10600f,0x55,1);\
 }
 
 /************************************************************ HW config */
@@ -69,7 +66,7 @@
 
 /********************** IRQ      ****************************************/
 #define IRQ_START   TI_REG_START+0x500
-#define IRQ_END     TI_REG_START+0x560
+#define IRQ_END     TI_REG_START+0x57f
 
 /********************** GPIO     ****************************************/
 #define GPIO_START   TI_REG_START+0x580
@@ -121,6 +118,7 @@
 /* this HW is used on the av for the usb/DC/HD status */
 #define HAS_HW_30A24
 
+
 /********************** DMA      ****************************************/
 #define DMA_START   TI_REG_START+0xa38
 #define DMA_END     TI_REG_START+0xa48
@@ -132,8 +130,8 @@
 /********************** CPLD     ****************************************/
 #define CPLD_START       0x02000000
 #define CPLD_END         0x03000000
-#define CPLD_PORT_OFFSET 0x00600000
+#define CPLD_PORT_OFFSET 0x00500000
 
 /********************** LCD      ****************************************/
-#define SCREEN_WIDTH  320
-#define SCREEN_HEIGHT 240
+#define SCREEN_WIDTH  220
+#define SCREEN_HEIGHT 176

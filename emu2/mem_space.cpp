@@ -40,10 +40,10 @@ mem_space::mem_space(char * flash,char * sdram):HW_node(0x0,0xFFFFFFFF,16,"AVMEM
 
     HW_mem * dsp_mem = new HW_mem(NULL,0x40000,0x50000,"DSP MEM");
     add_item(dsp_mem);
-    HW_mem * flash_mem = new HW_mem(flash,FLASH_START,FLASH_END,"FLASH");
+    HW_mem * flash_mem = new HW_mem(flash,FLASH_START,FLASH_END,"FLASH",FLASH_LOAD_OFFSET);
     add_item(flash_mem);
     
-    HW_mem * sd = new HW_mem(sdram,SDRAM_START,SDRAM_END,"SDRAM");
+    HW_mem * sd = new HW_mem(sdram,SDRAM_START,SDRAM_END,"SDRAM",SDRAM_LOAD_OFFSET);
     add_item(sd);
     hw_cpld = new HW_cpld();
     hw_TI = new HW_TI(this,sd,hw_cpld);
