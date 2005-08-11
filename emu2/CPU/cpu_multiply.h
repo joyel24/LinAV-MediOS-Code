@@ -19,10 +19,18 @@ void arm_Mul(int condCode,uint32_t instruction)
     if(!longM)                                 // multiply normal
     {
         Rd= (instruction>>16) & 0xF;
-        REG(Rd) = (uint32_t)(((uint64_t)GET_REG(Rm) * (uint64_t)GET_REG(Rs)) & 0x00000000FFFFFFFF);
-
-        DEBUG("MUL %s, %s, %s\n",RR(Rd),RR(Rm),RR(Rs));
-
+        Rn= (instruction>>12) & 0xF;
+        if(bit_A)
+        {
+            REG(Rd) = (uint32_t)((((uint64_t)GET_REG(Rm) * (uint64_t)GET_REG(Rs))+(uint64_t)GET_REG(Rn)) & 0x00000000FFFFFFFF);
+            DEBUG("MLA %s, %s, %s, %s\n",RR(Rd),RR(Rn),RR(Rm),RR(Rs));
+        }
+        else
+        {
+            REG(Rd) = (uint32_t)(((uint64_t)GET_REG(Rm) * (uint64_t)GET_REG(Rs)) & 0x00000000FFFFFFFF);
+            DEBUG("MUL %s, %s, %s\n",RR(Rd),RR(Rm),RR(Rs));
+        }
+        
         if(bit_S)
         {
             ARM_NegZero(GET_REG(Rd));
@@ -36,7 +44,7 @@ void arm_Mul(int condCode,uint32_t instruction)
 
         uint64_t value;
 
-        DEBUG("%sM%sL%s ",bit_U?"S":"U",bit_A?"AL":"UL",bit_S?"S":"");
+        DEBUG("%sM%sL%s ",bit_U?"S":"U",bit_A?"LA":"UL",bit_S?"S":"");
 
         if (bit_U)
         {
