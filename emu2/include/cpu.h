@@ -27,6 +27,8 @@ void go(uint32_t start_address,uint32_t stack_address);
 void printState(void);
 void test_ini(void);
 
+uint32_t read_reg(int num);
+
 void sigint(void);
 
 /* cmd_line functions */

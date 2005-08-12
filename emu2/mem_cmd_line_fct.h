@@ -10,7 +10,7 @@
 * KIND, either express of implied.
 */
 
-
+#include "cpu.h"
 
 int do_cmd_dump_s(int argc,char ** argv)
 {
@@ -21,10 +21,26 @@ int do_cmd_dump_s(int argc,char ** argv)
 int mem_space::do_cmd_dump(int argc,char ** argv)
 {
     uint32_t start_addr=0;
+    int reg_num;
     int size = 0x200;
     if(argc>0)
     {
-        start_addr = my_atoi(argv[0]);
+        if(argv[0][0] == 'R' || argv[0][0] == 'r')
+        {
+            argv[0]++;
+            reg_num=my_atoi(argv[0]);
+            if(reg_num>=0 && reg_num<=15)
+            {
+                start_addr=read_reg(reg_num);
+            }
+            else
+            {
+                printf("Wrong reg number: %d\n",reg_num);
+                return 0;
+            }
+        }
+        else
+            start_addr = my_atoi(argv[0]);
         if(argc>1)
         {
             size = my_atoi(argv[1]);

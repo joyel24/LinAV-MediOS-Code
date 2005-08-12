@@ -15,8 +15,9 @@
 
 #include "emu.h"
 
-#define BKPT_CPU   0
-#define BKPT_MEM   1
+#define BKPT_CPU        0
+#define BKPT_MEM        1
+#define BKPT_STEPOVER   2
 
 #define BKPT_MEM_READ   0
 #define BKPT_MEM_WRITE  1
@@ -41,6 +42,7 @@ void add(BKPT_LIST * ptr,uint32_t address);
 void add(BKPT_LIST * ptr,uint32_t address,uint32_t size);
 void add(BKPT_LIST * ptr_list,uint32_t address,uint32_t size,char * cause);
 void del(BKPT_LIST * ptr_list,uint32_t address);
+void delN(BKPT_LIST * ptr_list,int num);
 void updateFctPointer(BKPT_LIST * ptr_list);
 void fct_void(BKPT_LIST * ptr_list,uint32_t address,int mode);
 void has_bkpt(BKPT_LIST * ptr_list,uint32_t address,int mode);

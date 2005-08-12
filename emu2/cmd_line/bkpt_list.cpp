@@ -18,7 +18,7 @@
 #include <bkpt_list.h>
 
 
-char * bkpt_str[2] = { "CPU", "MEM" };
+char * bkpt_str[] = { "CPU", "MEM", "STEPOVER" };
 
 
 BKPT_LIST * new_bkpt_list(int type)
@@ -80,8 +80,9 @@ void add(BKPT_LIST * ptr_list,uint32_t address,uint32_t size,char * cause)
     }
     ptr_list->bk_count++;
     updateFctPointer(ptr_list);
-    printf("adding %s bkpt %d for 0x%08x %s%s%s\n",bkpt_str[ptr_list->type],ptr_list->bk_count,address,
-        cause!=NULL?"(":"",cause!=NULL?cause:"",cause!=NULL?")":"");
+    if(ptr_list->type!=BKPT_STEPOVER)
+        printf("adding %s bkpt %d for 0x%08x %s%s%s\n",bkpt_str[ptr_list->type],ptr_list->bk_count-1,address,
+            cause!=NULL?"(":"",cause!=NULL?cause:"",cause!=NULL?")":"");
 }
 
 void del(BKPT_LIST * ptr_list,uint32_t address)
@@ -97,8 +98,9 @@ void del(BKPT_LIST * ptr_list,uint32_t address)
     if(ptr_list->head->address == address)
     {
         ptr_list->head=ptr_list->head->nxt;
-        printf("Removed %s bkpt for 0x%08x %s%s%s\n",
-            bkpt_str[ptr_list->type],address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",ptr->cause!=NULL?")":"");
+        if(ptr_list->type!=BKPT_STEPOVER)
+            printf("Removed %s bkpt for 0x%08x %s%s%s\n",
+                bkpt_str[ptr_list->type],address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",ptr->cause!=NULL?")":"");
         delete ptr;
         ptr_list->bk_count--;
         updateFctPointer(ptr_list);
@@ -112,14 +114,56 @@ void del(BKPT_LIST * ptr_list,uint32_t address)
     else
     {
         BKPT * ptr2=ptr->nxt;
-        printf("Removed %s bkpt for 0x%08x %s%s%s\n",
-            bkpt_str[ptr_list->type],address,ptr->nxt->cause!=NULL?"(":"",ptr->nxt->cause!=NULL?ptr->nxt->cause:"",
-            ptr->nxt->cause!=NULL?")":"");
+        if(ptr_list->type!=BKPT_STEPOVER)
+            printf("Removed %s bkpt for 0x%08x %s%s%s\n",
+                bkpt_str[ptr_list->type],address,ptr->nxt->cause!=NULL?"(":"",ptr->nxt->cause!=NULL?ptr->nxt->cause:"",
+                ptr->nxt->cause!=NULL?")":"");
         ptr->nxt = ptr->nxt->nxt;
         delete ptr2;
         ptr_list->bk_count--;
         updateFctPointer(ptr_list);
     }
+}
+
+void delN(BKPT_LIST * ptr_list,int num)
+{
+    BKPT * ptr=ptr_list->head;
+    int i;
+
+    if(!ptr_list->head)
+    {
+        printf("%s bkpt list is empty\n",bkpt_str[ptr_list->type]);
+        return;
+    }
+
+    if(num>=ptr_list->bk_count)
+    {
+        printf("%s bkpt index out of list (index=%d, count=%d)\n",bkpt_str[ptr_list->type],num,ptr_list->bk_count);
+        return;
+    }
+
+    if(num==0)
+    {
+        ptr_list->head=ptr_list->head->nxt;
+        printf("Removed %s bkpt for 0x%08x %s%s%s\n",
+            bkpt_str[ptr_list->type],ptr->address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",ptr->cause!=NULL?")":"");
+        delete ptr;
+        ptr_list->bk_count--;
+        updateFctPointer(ptr_list);
+        return;
+    }
+
+    for(int i=0;i<(num-1);i++)
+        ptr=ptr->nxt;
+
+    BKPT * ptr2=ptr->nxt;
+    printf("Removed %s bkpt for 0x%08x %s%s%s\n",
+        bkpt_str[ptr_list->type],ptr2->address,ptr->nxt->cause!=NULL?"(":"",ptr->nxt->cause!=NULL?ptr->nxt->cause:"",
+        ptr->nxt->cause!=NULL?")":"");
+    ptr->nxt = ptr->nxt->nxt;
+    delete ptr2;
+    ptr_list->bk_count--;
+    updateFctPointer(ptr_list);
 }
 
 void updateFctPointer(BKPT_LIST * ptr_list)
@@ -132,7 +176,7 @@ void updateFctPointer(BKPT_LIST * ptr_list)
 
 void fct_void(BKPT_LIST * ptr_list,uint32_t address,int mode)
 {
-    
+
 }
 
 void has_bkpt(BKPT_LIST * ptr_list,uint32_t address,int mode)
@@ -154,9 +198,13 @@ void has_bkpt(BKPT_LIST * ptr_list,uint32_t address,int mode)
                     printf("%s BREAKPOINT at 0x%08x %s%s%s\n",bkpt_str[ptr_list->type],
                         address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",
                         ptr->cause!=NULL?")":"");
-                    //exit(0);
+                        //exit(0);
                     break;
-            }    
+                case BKPT_STEPOVER:
+                    printf("Return from function at 0x%08x\n",address);
+                    del(ptr_list,address);
+                    break;
+            }
             CHG_RUN_MODE(STEP);
             return ;
         }
@@ -170,9 +218,10 @@ void print_bkpt_list(bkpt_list * ptr_list)
     if(ptr_list->head)
     {
         printf(":\n");
+        int i=0;
         for(BKPT * ptr=ptr_list->head;ptr!=NULL;ptr=ptr->nxt)
         {
-            printf("0x%08x %s%s%s\n",ptr->address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",ptr->cause!=NULL?")":"");
+            printf("%d: 0x%08x %s%s%s\n",i++,ptr->address,ptr->cause!=NULL?"(":"",ptr->cause!=NULL?ptr->cause:"",ptr->cause!=NULL?")":"");
         }
     }
     else

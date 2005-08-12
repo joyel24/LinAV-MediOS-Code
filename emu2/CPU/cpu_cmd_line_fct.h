@@ -1,4 +1,4 @@
-/* 
+/*
 *   cpu_cmd_line_fct.h
 *
 *   AV3XX emulator
@@ -9,6 +9,9 @@
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
 */
+
+BKPT_LIST * bkpt_step;
+
 
 int do_cmd_help(int argc,char ** argv)
 {
@@ -31,6 +34,13 @@ int do_cmd_step(int argc,char ** argv)
     return 1;
 }
 
+int do_cmd_stepover(int argc,char ** argv)
+{
+    add(bkpt_step,T_FLAG ? (old_PC&0xfffffffe)+2 : ((old_PC+2)&0xfffffffc)+4);
+    CHG_RUN_MODE(RUN);
+    return 1;
+}
+
 int do_cmd_run(int argc,char ** argv)
 {
     CHG_RUN_MODE(RUN);
@@ -49,7 +59,30 @@ int do_cmd_add_bkpt(int argc,char ** argv)
             do_del=true;
             argv[0]++;
         }
-        i = my_atoi(argv[0]);
+
+        if(do_del && (argv[0][0] == 'n' || argv[0][0] == 'N'))
+        {
+            argv[0]++;
+            i = my_atoi(argv[0]);
+            delN(bkpt,i);
+            return 0;
+        }
+
+        if(argv[0][0] == 'r' || argv[0][0] == 'R')
+        {
+            i = my_atoi(argv[0]);
+            if(i>=R_R0 && i<=R_PC)
+            {
+                i=GET_REG(i);
+            }
+            else
+            {
+                printf("Wrong reg number: %d\n",i);
+                return 0;
+            }
+        }
+        else
+            i = my_atoi(argv[0]);
         if(do_del)
             del(bkpt,i);
         else
@@ -65,11 +98,11 @@ int do_cmd_print_stack(int argc,char ** argv)
     uint32_t SP_val = GET_REG(R_SP);
     printf("Stack content:\n");
     for(int i=0;i<0x10;i++)
-    {        
+    {
         printf("%x:@%08x = %x\n",i,SP_val,mem->read(SP_val,4));
         SP_val+=0x4;
     }
-    
+
     return 0;
 }
 
@@ -86,7 +119,7 @@ int do_cmd_chg_disp(int argc,char ** argv)
     }
     else
     {
-        if(disp_mode)            
+        if(disp_mode)
             printf("displaying instruction\n");
         else
             printf("Not displaying instruction\n");
@@ -104,7 +137,7 @@ int do_cmd_chg_hw_disp(int argc,char ** argv)
     }
     else
     {
-        if(HW_mode)            
+        if(HW_mode)
             printf("displaying HW output level: %x\n",HW_mode);
         else
             printf("Not displaying HW output\n");
@@ -128,19 +161,21 @@ int do_cmd_print_state(int argc,char ** argv)
         else
             printf("%s=%x\n",RR(reg_num),GET_REG(reg_num));
     }
-    else    
-        printState();    
+    else
+        printState();
     return 0;
 }
 
 void init_cpu_static_fct(void)
 {
+    bkpt_step= new_bkpt_list(BKPT_STEPOVER);
     add_cmd_fct("help",do_cmd_help,"Print this help");
     add_cmd_fct("?",do_cmd_help,"Print this help");
     add_cmd_fct("q",do_cmd_quit,"Exit");
     add_cmd_fct("quit",do_cmd_quit,"Exit");
     add_cmd_fct("exit",do_cmd_quit,"Exit");
     add_cmd_fct("step",do_cmd_step,"Execute next instruction");
+    add_cmd_fct("stepover",do_cmd_stepover,"step over next function call");
     add_cmd_fct("run",do_cmd_run,"Execute code");
     add_cmd_fct("bkpt",do_cmd_add_bkpt,"Add/display a breakpoint");
     add_cmd_fct("stack",do_cmd_print_stack,"Show stack");

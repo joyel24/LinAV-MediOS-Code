@@ -439,6 +439,11 @@ void init_cpu(void)
     
 }
 
+uint32_t read_reg(int num)
+{
+    return GET_REG(num);
+}
+
 void sigint(void)
 {
     CHG_RUN_MODE(STEP)
@@ -488,9 +493,10 @@ void go(uint32_t start_address,uint32_t stack_address)
         cur_irq_fct();
         
         address = T_FLAG ? PC_REAL&0xfffffffe : (PC_REAL+2)&0xfffffffc;
-        
+                
         bkpt->fct(bkpt,address,0);
         cmd_line_fct();
+        bkpt_step->fct(bkpt_step,address,0);
                 
         old_PC=PC_REAL;
         t_flag_mode_fct(address);
