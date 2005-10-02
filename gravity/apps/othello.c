@@ -34,10 +34,10 @@ struct position cursor_pos={3,2};
 
 #define NB_PIECE_POS 90
 
-#define BG_COLOR     COLOR_BLACK
-#define LINE_COLOR   COLOR_WHITE
-#define SEL_COLOR    COLOR_RED
-#define TXT_COLOR    COLOR_WHITE
+#define BG_COLOR     COLOR32_WHITE
+#define LINE_COLOR   COLOR32_BLACK
+#define SEL_COLOR    COLOR32_RED
+#define TXT_COLOR    COLOR32_WHITE
 
 #define EMPTY      -1
 #define HUMAN      0
@@ -61,34 +61,37 @@ int nbPieces[2]={2,2};
 int endOfGame=0;
 int cursorMoveMode=0; /* 0 = move anywhere, 1 = move to possible locations */
 
-unsigned char human_bmap[12][12]= {
-{00,00,00,00,24,24,24,24,00,00,00,00},
-{00,00,24,24,24,24,24,24,24,24,00,00},
-{00,24,24,24,24,24,24,24,24,24,24,00},
-{00,24,24,24,00,00,00,00,24,24,24,00},
-{24,24,24,00,00,00,00,00,00,24,24,24},
-{24,24,24,00,00,00,00,00,00,24,24,24},
-{24,24,24,00,00,00,00,00,00,24,24,24},
-{24,24,24,00,00,00,00,00,00,24,24,24},
-{00,24,24,24,00,00,00,00,24,24,24,00},
-{00,24,24,24,24,24,24,24,24,24,24,00},
-{00,00,24,24,24,24,24,24,24,24,00,00},
-{00,00,00,00,24,24,24,24,00,00,00,00},
+#define BG_COLOR COLOR32_WHITE
+#define HU_COLOR COLOR32_BLUE
+#define AR_COLOR COLOR32_RED
+unsigned int human_bmap[12][12]= {
+{BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR},
+{BG_COLOR,BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR,BG_COLOR},
+{BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR},
+{BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR},
+{HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR},
+{HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR},
+{HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR},
+{HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR},
+{BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR},
+{BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR},
+{BG_COLOR,BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR,BG_COLOR},
+{BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,HU_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR},
 };
 
-unsigned char av3xx_bmap[12][12]= {
-{00,00,00,00,25,25,25,25,00,00,00,00},
-{00,00,25,25,25,25,25,25,25,25,00,00},
-{00,25,25,25,25,25,25,25,25,25,25,00},
-{00,25,25,25,25,25,25,25,25,25,25,00},
-{25,25,25,25,25,25,25,25,25,25,25,25},
-{25,25,25,25,25,25,25,25,25,25,25,25},
-{25,25,25,25,25,25,25,25,25,25,25,25},
-{25,25,25,25,25,25,25,25,25,25,25,25},
-{00,25,25,25,25,25,25,25,25,25,25,00},
-{00,25,25,25,25,25,25,25,25,25,25,00},
-{00,00,25,25,25,25,25,25,25,25,00,00},
-{00,00,00,00,25,25,25,25,00,00,00,00},
+unsigned int av3xx_bmap[12][12]= {
+{BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR},
+{BG_COLOR,BG_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,BG_COLOR,BG_COLOR},
+{BG_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,BG_COLOR},
+{BG_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,BG_COLOR},
+{AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR},
+{AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR},
+{AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR},
+{AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR},
+{BG_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,BG_COLOR},
+{BG_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,BG_COLOR},
+{BG_COLOR,BG_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,BG_COLOR,BG_COLOR},
+{BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,AR_COLOR,BG_COLOR,BG_COLOR,BG_COLOR,BG_COLOR},
 };
 
 BITMAP hBitmap = {(unsigned int) human_bmap, 12, 12, 0, 0};
@@ -120,35 +123,63 @@ struct helperMenu othelloMenu = {
 
 void drawPiece(int x, int y, int player)
 {
+    GFX_POINT pt;
+    pt.x=X_INI+PIECE_OFFSET+x*(CELL_SIZE+1);
+    pt.y=Y_INI+PIECE_OFFSET+y*(CELL_SIZE+1);
     switch(player)
     {
-        case HUMAN:
-            drawBITMAP(&hBitmap,X_INI+PIECE_OFFSET+x*(CELL_SIZE+1),Y_INI+PIECE_OFFSET+y*(CELL_SIZE+1));
+        case HUMAN:            
+            API_GFX_BITMAP(&hBitmap,&pt);
             break;
         case AV3XX:
-            drawBITMAP(&aBitmap,X_INI+PIECE_OFFSET+x*(CELL_SIZE+1),Y_INI+PIECE_OFFSET+y*(CELL_SIZE+1));
+            API_GFX_BITMAP(&aBitmap,&pt);
             break;
     }
 }
 
 void erasePiece(int x, int y)
 {
-    fillRect(BG_COLOR,X_INI+1+x*(CELL_SIZE+1),Y_INI+1+y*(CELL_SIZE+1),CELL_SIZE,CELL_SIZE);
+    GFX_RECT rc;
+    rc.x = X_INI+1+x*(CELL_SIZE+1);
+    rc.y = Y_INI+1+y*(CELL_SIZE+1);
+    rc.w = CELL_SIZE;
+    rc.h = CELL_SIZE;
+
+    API_GFX_FILLRECT (&rc, BG_COLOR);
 }
 
 void drawBoard(void)
 {
     int i,j;
 
-    clearScreen(BG_COLOR);
+    GFX_RECT rc;
+    rc.x = 0;
+    rc.y = 0;
+    rc.w = 320;
+    rc.h = 240;
+
+    API_GFX_FILLRECT (&rc, BG_COLOR);
 
 
+    GFX_POINT pt1, pt2, pt3, pt4;
+
+    pt1.x = X_INI;
+    pt2.x = X_INI+NB_CELL*(CELL_SIZE+1);
+    pt3.y=Y_INI;
+    pt4.y=Y_INI+NB_CELL*(CELL_SIZE+1);
     for(i=0;i<NB_CELL+1;i++)
     {
+        
+        pt1.y = Y_INI+i*(CELL_SIZE+1);        
+        pt2.y = Y_INI+i*(CELL_SIZE+1);
+        pt3.x=X_INI+i*(CELL_SIZE+1);
+        pt4.x=X_INI+i*(CELL_SIZE+1);
+        
         /* horizontal line */
-        drawLine(LINE_COLOR,X_INI,Y_INI+i*(CELL_SIZE+1),X_INI+NB_CELL*(CELL_SIZE+1),Y_INI+i*(CELL_SIZE+1));
+        API_GFX_DRAWLINE(&pt1,&pt2,LINE_COLOR);
         /* vertical line */
-        drawLine(LINE_COLOR,X_INI+i*(CELL_SIZE+1),Y_INI,X_INI+i*(CELL_SIZE+1),Y_INI+NB_CELL*(CELL_SIZE+1));
+        API_GFX_DRAWLINE(&pt3,&pt4,LINE_COLOR);
+        
     }
 
     for(j=0;j<NB_CELL;j++)
@@ -159,17 +190,27 @@ void drawBoard(void)
 
 void selectCell(int x, int y)
 {
-    drawRect(SEL_COLOR,X_INI+x*(CELL_SIZE+1),Y_INI+y*(CELL_SIZE+1),CELL_SIZE+2,CELL_SIZE+2);
+    GFX_RECT rc;
+    rc.x = X_INI+x*(CELL_SIZE+1);
+    rc.y = Y_INI+y*(CELL_SIZE+1);
+    rc.w = CELL_SIZE+2;
+    rc.h = CELL_SIZE+2;
+    API_GFX_DRAWRECT(&rc,SEL_COLOR);
 }
 
 void unSelectCell(int x, int y)
 {
-    drawRect(LINE_COLOR,X_INI+x*(CELL_SIZE+1),Y_INI+y*(CELL_SIZE+1),CELL_SIZE+2,CELL_SIZE+2);
+    GFX_RECT rc;
+    rc.x = X_INI+x*(CELL_SIZE+1);
+    rc.y = Y_INI+y*(CELL_SIZE+1);
+    rc.w = CELL_SIZE+2;
+    rc.h = CELL_SIZE+2;
+    API_GFX_DRAWRECT(&rc,LINE_COLOR);
 }
 
 void drawNbPiece()
 {
-    char tmp[10];
+   /* char tmp[10];
 
     sprintf(tmp,"You: %02d",nbPieces[HUMAN]);
     putS(TXT_COLOR, BG_COLOR, 20, 220, tmp);
@@ -178,10 +219,12 @@ void drawNbPiece()
     sprintf(tmp,"Archos: %02d",nbPieces[AV3XX]);
     putS(TXT_COLOR, BG_COLOR, 120, 220, tmp);
     drawBITMAP(&aBitmap, 104, 220);
+    */
 }
 
 void drawMenu()
 {
+/*
     int w=0,h=0;
 
     getStringS("Nav Mode:", &w, &h);
@@ -197,6 +240,7 @@ void drawMenu()
         getStringS("Standard   ", &w, &h);
         putS(TXT_COLOR, BG_COLOR, 320-w-5,225, "Standard   ");
     }
+    */
 }
 
 void iniBoard(void)
@@ -225,6 +269,7 @@ void moveCursor(int dx, int dy)
     cursor_pos.x+=dx;
     cursor_pos.y+=dy;
     selectCell(cursor_pos.x,cursor_pos.y);
+    API_GFX_UPDATE_RECT (0);
 }
 
 int tstMove(int player,int x, int y,int dx, int dy,int dispMove)
@@ -233,7 +278,6 @@ int tstMove(int player,int x, int y,int dx, int dy,int dispMove)
     int out_of_board=0;
     int tot=0,i;
     x+=dx;y+=dy;
-   // printf("[tstMove] dx=%d dy=%d\n",dx,dy);
     while(board[x][y]==other)
     {
         x+=dx;y+=dy;
@@ -256,7 +300,6 @@ int tstMove(int player,int x, int y,int dx, int dy,int dispMove)
                 drawPiece(x,y,player);
                 board[x][y]=player;
             }
-            printf("\n");
 
         }
         return tot;
@@ -364,18 +407,24 @@ void doMove(int x,int y)
 
 void endGame(void)
 {
+  
     int w,h;
 
-    getStringS("Game Over... ",&w,&h);
+    //getStringS("Game Over... ",&w,&h);
 
-    putS(COLOR_WHITE,COLOR_BLACK,10,2,"Game Over...");
+    //putS(COLOR_WHITE,COLOR_BLACK,10,2,"Game Over...");
+    printf("Game over... ");
 
     if(nbPieces[HUMAN]>nbPieces[AV3XX])
-        putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You won! :D");
+        //putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You won! :D");
+        printf("You won! :D\n");
     else if(nbPieces[HUMAN]<nbPieces[AV3XX])
-        putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You lost. :(");
+        //putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You lost. :(");
+        printf("You lost. :(\n");
     else
-        putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You tied. :|");
+        //putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You tied. :|");
+        printf("You tied. :|\n");
+       
 }
 
 void nxtCursosPos(int direction,int dispMove)
@@ -461,11 +510,14 @@ void nxtCursosPos(int direction,int dispMove)
 
 void iniCursorPos()
 {
+    printf("init pos from (%d,%d) -> ",cursor_pos.x,cursor_pos.y);
     unSelectCell(cursor_pos.x,cursor_pos.y);
     cursor_pos.x=0;
     cursor_pos.y=0;
     nxtCursosPos(NXT_POS,NO_MOVE);
     selectCell(cursor_pos.x,cursor_pos.y);
+    printf("(%d,%d)\n",cursor_pos.x,cursor_pos.y);
+    API_GFX_UPDATE_RECT (0);
 }
 
 void simpleMove(int dx,int dy)
@@ -473,6 +525,7 @@ void simpleMove(int dx,int dy)
     int cx = cursor_pos.x;
     int cy = cursor_pos.y;
 
+    
     if(cx+dx>=0 && cy+dy>=0 && cx+dx<=NB_CELL-1 && cy+dy<=NB_CELL-1)
         moveCursor(dx,dy);
 }
@@ -483,22 +536,16 @@ void redraw(void)
     drawMenu();
     iniCursorPos();
     drawNbPiece();
+    API_GFX_UPDATE_RECT (0);
+
 }
 
 void eventHandler(int evt)
 {  
-    //cops->helperEvt(evt,BTN_JOY);
-    
-    if(evt !=0)
-        printf("get evt : %d\n",evt);
-    
-    if(evt == BTN_OFF || evt == EVT_QUIT)
-            stop_othello=1;
-    
-    /*
     
     switch(evt)
     {
+    
         case BTN_UP:
             if(cursorMoveMode==0)
                 simpleMove(0,-1);
@@ -530,17 +577,25 @@ void eventHandler(int evt)
             doMove(cursor_pos.x,cursor_pos.y);
             computerMove();
             drawNbPiece();
+            API_GFX_UPDATE_RECT (0);
             while(!computeAllowed(allowedHuman,HUMAN))
             {
                 if(!computerMove())
                 {
                     endOfGame=1;
-                    endGame();
+                    endGame();                    
                     break;
                 }
+                API_GFX_UPDATE_RECT (0);
             }
+            
             if(!endOfGame)
+            {
                 iniCursorPos();
+            }
+            
+            
+            
             break;
 
         case BTN_F3:
@@ -555,6 +610,8 @@ void eventHandler(int evt)
 
         case BTN_ON:
             iniBoard();
+            
+            redraw();
             computeAllowed(allowedHuman,HUMAN);
             break;
 
@@ -562,53 +619,56 @@ void eventHandler(int evt)
             redraw();
             break;
     }
-    */
+    
+    
+    
 }
 
 void _start(void)
 {
-    //REGISTER(eventHandler,0);
     int evt;
     unsigned int evt_buffer;
-    
+    int w=320;
+    int h=240;
     printf("\nIn othello\n");
     
-    //open_graphics();
-#if 0    
-    clearScreen(COLOR_WHITE);
+    API_GFX_CREATE_CONTEXT (w, h, 0);
+    GFX_RECT rc;
+    rc.x = 0;
+    rc.y = 0;
+    rc.w = w;
+    rc.h = h;
     
-    setFont(STD8X13);
+    API_GFX_FILLRECT (&rc, COLOR32_WHITE);
+    rc.x = 5;
+    rc.y = 5;
+    rc.w = w-10;
+    rc.h = h-10;
+    API_GFX_SET_DRAWING_RECT (&rc);
+    API_GFX_UPDATE_RECT (0);
 
     iniBoard();
     
-    /*iniHelperMenu(&othelloMenu);*/
-#endif    
+    
     evt_buffer=register_evt();
     if(!evt_buffer)
     {
         printf("[ini_status_bar] can't register to evt\n");
-        //return;
+        return;
     }
-    //API_TASK_CREATE (eventHandler, evt_buffer, NULL);
    
-    //computeAllowed(allowedHuman,HUMAN);
-    //redraw();
+    computeAllowed(allowedHuman,HUMAN);
+    
+    redraw();
  
     stop_othello=0;
-    printf("\nbefore loop\n");
     while(!stop_othello)
     {
         evt=waitEvt(evt_buffer);
         eventHandler(evt);
     }
-    printf("\nafter loop\n");
     unregister_evt(evt_buffer);
 
-
-//for(evt =0;evt<10000;evt++) /*nothing*/;
-
-
-    printf("\nout othello\n");
     
 }
 

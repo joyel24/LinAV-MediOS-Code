@@ -145,6 +145,7 @@ ERROR_CODE API_GFX_DRAWRECT         (GFX_RECT* pRect, COLOR Color)              
 ERROR_CODE API_GFX_FILLRECT         (GFX_RECT* pRect, COLOR Color)                                     { swi_call(nAPI_GFX_FILLRECT); }
 ERROR_CODE API_GFX_SCROLL_HORIZ     ()                                                                 { swi_call(nAPI_GFX_SCROLL_HORIZ); }
 ERROR_CODE API_GFX_SCROLL_VERT      ()                                                                 { swi_call(nAPI_GFX_SCROLL_VERT); }
+ERROR_CODE API_GFX_BITMAP           (BITMAP * bitmap,GFX_POINT* pt)                                    { swi_call(nAPI_GFX_BITMAP); }
 
 ERROR_CODE API_PRINTF               (const char * fmt, va_list args)                                   { swi_call(nAPI_PRINTF); }
 ERROR_CODE API_SET_FONT             (HFONT hFont)                                                      { swi_call(nAPI_SET_FONT); }

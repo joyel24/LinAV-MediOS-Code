@@ -14,6 +14,8 @@
 
 // API data type
 
+#include <kernel/graphics_struct.h>
+
 typedef struct _GFX_CONTEXT
 {
 	long x;

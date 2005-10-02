@@ -453,35 +453,19 @@ void graphics32_DrawSprite(unsigned int * palette,SPRITE * sprite, unsigned int 
         
 }
 
-void graphics32_DrawBITMAP(BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
+void graphics32_DrawBITMAP(BITMAP * bitmap, GFX_POINT* pt, GFX_CONTEXT* pCtx)
 {
     int i,j,c;
-    unsigned int * dest=getOffset(x,y,buff,unsigned int );
+    COLOR* dest = getCtxOffset (pt->x, pt->y, pCtx);
     unsigned int * src=(unsigned int *)bitmap->data;
+    
+    for(j=0;j<bitmap->height;j++)
+    {
+        memcpy(dest,src,bitmap->width*4);
+        dest+=pCtx->delta >> 2;
+        src+=bitmap->width;
+    }
 
-    if(trsp != -1)
-    {
-        for(j=0;j<bitmap->height;j++)
-        {
-            for(i=0;i<bitmap->width;i++)
-            {
-                c=inl(src+i);
-                if(c!=trsp)
-                    outl(c,dest+i);
-            }
-            dest+=buff->width;
-            src+=bitmap->width;
-        }
-    }
-    else
-    {
-        for(j=0;j<bitmap->height;j++)
-        {
-            memcpy(dest,src,bitmap->width*4);
-            dest+=buff->width;
-            src+=bitmap->width;
-        }
-    }
 }
 
 void graphics32_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP, struct graphicsBuffer * buff)

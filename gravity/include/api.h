@@ -141,6 +141,8 @@ ERROR_CODE API_GFX_FILLRECT         (GFX_RECT* pRect, COLOR Color);
 ERROR_CODE API_GFX_SCROLL_HORIZ     ();
 ERROR_CODE API_GFX_SCROLL_VERT      ();
 
+ERROR_CODE API_GFX_BITMAP           (BITMAP * bitmap,GFX_POINT* pt);
+
 ERROR_CODE API_PRINTF               (const char* fmt, va_list args);
 ERROR_CODE API_SET_FONT             (HFONT hFont);
 ERROR_CODE API_GET_FONT             (HFONT* phFont);

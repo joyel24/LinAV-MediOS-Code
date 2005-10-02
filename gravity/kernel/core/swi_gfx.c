@@ -499,6 +499,16 @@ __IRAM_CODE int swi_gfx_handler (
 		}
 	}
 	break;
+        
+        case  nAPI_GFX_BITMAP:          //(BITMAP * bitmap,GFX_POINT* pt)
+        {
+            GFX_CONTEXT* pCtx = lock_task ()->pDrawingContext;
+            if (pCtx)
+            {
+                graphics32_DrawBITMAP((BITMAP*)nParam1,(GFX_POINT*)nParam2,pCtx);
+            }
+        }
+        break;
 
 	case nAPI_GFX_DRAWRECT:         //(GFX_RECT* pRect, COLOR Color);
 	{

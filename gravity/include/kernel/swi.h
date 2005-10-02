@@ -155,6 +155,7 @@
 #define nAPI_GFX_FILLRECT         (nAPI_GFX_section + 44)
 #define nAPI_GFX_SCROLL_HORIZ     (nAPI_GFX_section + 45)
 #define nAPI_GFX_SCROLL_VERT      (nAPI_GFX_section + 46)
+#define nAPI_GFX_BITMAP           (nAPI_GFX_section + 47)
 
 #define nAPI_PRINTF               (nAPI_GFX_section + 50)
 #define nAPI_SET_FONT             (nAPI_GFX_section + 51)
