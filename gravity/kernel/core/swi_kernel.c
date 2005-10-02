@@ -46,6 +46,22 @@ int swi_kernel_handler (
 		__sti ();
 	}
 	break;
+        
+        case nAPI_TASK_NAME:      //(HTASK* phTask,char * name)                     { SAVE; asm("swi 1"); LOAD; }
+	{
+            int i=0;
+            TASK_INFO* pTCB = *((TASK_INFO**)nParam1);
+            char * name = (char *)(nParam2);
+            pTCB->cName[0]='U';
+            pTCB->cName[1]='_';
+            while(i<8 && name!='\0')
+            {
+                pTCB->cName[i+2]=*name;
+                name++;
+                i++;
+            }
+            pTCB->cName[9]='\0';
+        }
 
 	case nAPI_TASK_SUSPEND:     //(HTASK hTask)                                                              { SAVE; asm("swi 2"); LOAD; }
 	{
@@ -320,7 +336,7 @@ int swi_kernel_handler (
                 case 0x003: /* send evt */
                     send_evt(*(int*)nParam2);
                     break;
-                case 0x004: /* send evt */
+                case 0x004: /* flush evt */
                     __cli ();
                     ((struct evt_pipes_s *)nParam2)->evt_pipe.nReceiver = 0;
                     ((struct evt_pipes_s *)nParam2)->evt_pipe.nSender = 0;

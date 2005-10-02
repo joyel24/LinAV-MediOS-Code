@@ -43,9 +43,11 @@
 #define nAPI_TASK_CONTINUE        (nAPI_KERNEL_section+3)
 #define nAPI_TASK_SETPRIORITY     (nAPI_KERNEL_section+4)
 #define nAPI_TASK_GETHANDLE       (nAPI_KERNEL_section+5)
+#define nAPI_EVT                  (nAPI_KERNEL_section+6)
 
 #define nAPI_TASK_CREATE          (nAPI_KERNEL_section+10)
 #define nAPI_TASK_TERMINATE       (nAPI_KERNEL_section+11)
+#define nAPI_TASK_NAME            (nAPI_KERNEL_section+12)
 
 #define nAPI_OS_VERSION           (nAPI_KERNEL_section+20)
 
@@ -67,6 +69,8 @@
 
 #define nAPI_VAR_GET              (nAPI_KERNEL_section+60)
 #define nAPI_VAR_SET              (nAPI_KERNEL_section+61)
+
+
 ////////////////////// KERNEL API /////////////////////
 ///////////////////////////////////////////////////////
 
@@ -97,7 +101,7 @@
 ///////////////////// DEVICE API //////////////////////
 #define nAPI_TIME                 (nAPI_DEVICE_section + 0)
 #define nAPI_POWER                (nAPI_DEVICE_section + 1)
-#define nAPI_EVT                  (nAPI_DEVICE_section + 2)
+
 #define nAPI_SET_LCD_BRIGHTNESS   (nAPI_DEVICE_section + 3)
 #define nAPI_GET_LCD_BRIGHTNESS   (nAPI_DEVICE_section + 4)
 ///////////////////// DEVICE API //////////////////////

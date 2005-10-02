@@ -34,6 +34,7 @@ ERROR_CODE API_TASK_SETPRIORITY     (HTASK hTask, int nPriority);
 ERROR_CODE API_TASK_GETHANDLE       (HTASK* phTask);
 
 ERROR_CODE API_TASK_CREATE          (void* pvCode, void* pParam, HTASK* phTask);
+ERROR_CODE API_TASK_NAME            (HTASK* phTask, char * name);
 ERROR_CODE API_TASK_TERMINATE       ();
 
 int        API_OS_VERSION           ();

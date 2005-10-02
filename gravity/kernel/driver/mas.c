@@ -41,24 +41,20 @@ int in_32_val(void)
 #define OUT_WRITE_DEVICE           i2c_outb(I2C_WRITE_DEVICE(MAS_DEVICE));
 #define OUT_READ_DEVICE            i2c_outb(I2C_READ_DEVICE(MAS_DEVICE));
 #define OUT_SUBADDRESS(addr)       i2c_outb(addr);
-#define OUT_16_VAL(val)            i2c_outb(val>>8); \
-                                       i2c_outb(val);
-#define OUT_32_VAL(val)            OUT_16_VAL(val >> 16) OUT_16_VAL(val); 
+#define OUT_16_VAL(val)            i2c_outb(((val)>>8)&0xFF); \
+                                       i2c_outb(val&0xFF);
+#define OUT_32_VAL(val)            OUT_16_VAL((val) >> 16) OUT_16_VAL(val); 
 #define IN_16_VAL                  in_16_val()
 #define IN_32_VAL                  in_32_val()
 
 /********************* init mas                    ***************************/
 int mas_reset(void)
 {
-    //int i;
-    gio_clear(GIO_MAS_PWR);      // stop the MAS
-    //for(i=0;i<0x40000;i++) /* NOTHING */ ;
+    gio_clear(GIO_MAS_PWR);  // stop the MAS
     mdelay(100);
     gio_set(GIO_MAS_PWR);       // start the MAS
-    //for(i=0;i<0x40000;i++) /* NOTHING */ ;
     mdelay(10);
     mas_write_direct_config(MAS_CONTROL,0x8c00);
-    //mdelay(100);
     return 0;
 }
 
@@ -106,7 +102,8 @@ int mas_get_frame_count(void)
 
 int mas_read_direct_config(int reg)
 {
-	int ret=0;	
+	int ret=0;
+        //i2c_ini_xfer();	
 	i2c_start();
 	OUT_WRITE_DEVICE
 	OUT_SUBADDRESS(reg)
@@ -120,6 +117,7 @@ int mas_read_direct_config(int reg)
 
 int mas_write_direct_config(int reg,int val)
 {
+    //i2c_ini_xfer();
 	i2c_start();
 	OUT_WRITE_DEVICE
 	OUT_SUBADDRESS(reg)
@@ -133,7 +131,9 @@ int mas_write_direct_config(int reg,int val)
 
 int mas_read_register(int reg)
 {
-	int ret=0;	
+	int ret=0;
+        int ret2=0;
+        //i2c_ini_xfer();
 	i2c_start();
 	OUT_WRITE_DEVICE
 	OUT_SUBADDRESS(MAS_DATA_WRITE)
@@ -144,7 +144,11 @@ int mas_read_register(int reg)
 	OUT_SUBADDRESS(MAS_DATA_READ)
 	i2c_start();	
 	OUT_READ_DEVICE	
-	ret= IN_32_VAL & 0x000FFFFF;
+        ret = IN_16_VAL;
+        ret = (ret&0xF)<<16;
+        i2c_ack();
+        ret2 = IN_16_VAL;
+        ret |= (ret2 & 0xFFFF);
 	i2c_notAck();	
 	i2c_stop();	
 	return ret;
@@ -152,16 +156,19 @@ int mas_read_register(int reg)
 
 int mas_write_register(int reg,int val)
 {
-	i2c_start();
-	OUT_WRITE_DEVICE
-	OUT_SUBADDRESS(MAS_DATA_WRITE)
-	OUT_32_VAL(0xb0000000 | ((reg << 20) & 0x0FF00000) | (val & 0x000FFFFF))
-	i2c_stop();	
-	return 0;
+    //i2c_ini_xfer();
+    i2c_start();
+    OUT_WRITE_DEVICE
+    OUT_SUBADDRESS(MAS_DATA_WRITE)
+    OUT_16_VAL(0xB000 | ((reg&0xFF)<<4) | ((val>>16)&0xf))
+    OUT_16_VAL(val&0xFFFF)
+    i2c_stop();
+    return 0;
 }
 
 int mas_freeze(void)
 {
+    //i2c_ini_xfer();
     i2c_start();
     OUT_WRITE_DEVICE
     OUT_SUBADDRESS(MAS_DATA_WRITE)
@@ -172,6 +179,7 @@ int mas_freeze(void)
 
 int mas_run(void)
 {
+    //i2c_ini_xfer();
     i2c_start();
     OUT_WRITE_DEVICE
     OUT_SUBADDRESS(MAS_DATA_WRITE)
@@ -200,6 +208,7 @@ int mas_read_Di_register(int i,int addr,void * buf,int size) // !!! 20 bit value
 	int ret=0;
 	int j;
 	char * buffer = (char*) buf;
+        //i2c_ini_xfer();
 	i2c_start();
 	OUT_WRITE_DEVICE
 	OUT_SUBADDRESS(MAS_DATA_WRITE)
@@ -215,10 +224,14 @@ int mas_read_Di_register(int i,int addr,void * buf,int size) // !!! 20 bit value
 	for(j=0;j<size*4;j+=4)
 	{
 		ret=IN_32_VAL;
-		buffer[j+3]=(ret>>24)&0xFF;
+		/*buffer[j+3]=(ret>>24)&0xFF;
 		buffer[j+2]=(ret>>16)&0xFF;
 		buffer[j+1]=(ret>>8)&0xFF;
-		buffer[j]=ret&0xFF;
+		buffer[j]=ret&0xFF;*/
+                buffer[j+3]=(ret>>24)&0xFF;
+                buffer[j+2]=(ret>>16)&0xFF;
+		buffer[j+1]=(ret>>8)&0x0F;
+		buffer[j]=0;
 		if(j+4!=size)
 			i2c_ack();
 	}		
@@ -232,6 +245,7 @@ int mas_shortRead_Di_register(int i,int addr,void * buf,int size) // no problem 
 	int ret=0;
 	int j;
 	char * buffer = (char*) buf;
+        //i2c_ini_xfer();
 	i2c_start();
 	OUT_WRITE_DEVICE
 	OUT_SUBADDRESS(MAS_DATA_WRITE)
@@ -263,6 +277,7 @@ int mas_write_Di_register(int i,int addr,void * buf,int size) // !!! 20 bit valu
 	char * buffer = (char*) buf;
 	int j;
 	unsigned long outval;
+        //i2c_ini_xfer();
 	i2c_start();
 	OUT_WRITE_DEVICE
 	OUT_SUBADDRESS(MAS_DATA_WRITE)
@@ -285,6 +300,7 @@ int mas_shortWrite_Di_register(int i,int addr,void * buf,int size) // no problem
 {
 	char * buffer = (char*) buf;
 	int j;
+        //i2c_ini_xfer();
 	i2c_start();
 	OUT_WRITE_DEVICE
 	OUT_SUBADDRESS(MAS_DATA_WRITE)
@@ -299,6 +315,7 @@ int mas_shortWrite_Di_register(int i,int addr,void * buf,int size) // no problem
 
 int mas_clear_sync(void)
 {
+    //i2c_ini_xfer();
 	i2c_start();
 	OUT_WRITE_DEVICE
 	OUT_SUBADDRESS(MAS_DATA_WRITE)
@@ -310,6 +327,7 @@ int mas_clear_sync(void)
 int mas_read_version(struct mas_version * ptr)
 {
 	int ret;
+        //i2c_ini_xfer();
 	i2c_start();
 	OUT_WRITE_DEVICE
 	OUT_SUBADDRESS(MAS_DATA_WRITE)
@@ -537,112 +555,43 @@ int mas_write_codec(int reg,int val)
 
 /*********************  PCM  code       ***************************/
 #if 0
-int tst_write(int dest,int addr,int size,char * buffer)
-{
-        int j;
-        i2c_start();
-	OUT_WRITE_DEVICE
-	OUT_SUBADDRESS(MAS_DATA_WRITE)
-	OUT_16_VAL(MAS_WRITE_Di(dest))
-	OUT_16_VAL(size)
-	OUT_16_VAL(addr)
 
-	for(j=0;j<size*4;j++)
-	{
-            i2c_outb(buffer[j]&0xff);
- 	}
-	i2c_stop();
-        return 0;
-}
+#include "mas_code/mas_pcm_struct.h"
+#include "mas_code/d0_640_1e.h"
+#include "mas_code/d0_674_51.h"
+#include "mas_code/d0_661_13.h"
+#include "mas_code/d0_6e4_10.h"
+#include "mas_code/d0_700_12.h"
+#include "mas_code/d1_600_3f.h"
+#include "mas_code/d1_640_c.h"
+#include "mas_code/d1_660_1c.h"
+#include "mas_code/d0_800_684.h"
+#include "mas_code/d1_800_435.h"
 
-int tst_read(int dest,int addr,int size,char * buffer)     	
-{
-    int j,ret;
-    i2c_start();
-    OUT_WRITE_DEVICE
-    OUT_SUBADDRESS(MAS_DATA_WRITE)
-    OUT_16_VAL(MAS_READ_Di(dest))
-    OUT_16_VAL(size)
-    OUT_16_VAL(addr)	
-    i2c_stop();	
-    i2c_start();
-    OUT_WRITE_DEVICE
-    OUT_SUBADDRESS(MAS_DATA_READ)
-    i2c_start();	
-    OUT_READ_DEVICE
-    for(j=0;j<size*4;j+=4)
-    {
-            ret=IN_32_VAL;
-            buffer[j]=(ret>>24)&0xFF;
-            buffer[j+1]=(ret>>16)&0xFF;
-            buffer[j+2]=(ret>>8)&0xFF;
-            buffer[j+3]=ret&0xFF;
-            if(j+4!=size)
-                    i2c_ack();
-    }		
-    i2c_notAck();	
-    i2c_stop();	
-}
+#define NB_CHUNK 10
 
-int do_write(char *buffer,int size)
-{
-    int i,j;
-    i2c_start();
-    i2c_outb(0x3c);
-    i2c_outb(0x68);
-    for(j=0;j<size;j++)
-    {
-        if(j<8)
-            printk("%02x",buffer[j]);
-        if(i2c_outb(buffer[j])==1)
-            printk("Err ");
-    }
-    i2c_stop();
-    printk("\nsend: %x s=%x\n",j,size);
-}
+struct mas_pcm_struct * chunk_list[NB_CHUNK] = {
+    &D0_640_1e,
+    &D0_674_51,
+    &D0_661_13,
+    &D0_6e4_10,
+    &D0_700_12,
+    &D1_600_3f,
+    &D1_640_c,
+    &D1_660_1c,
+    &D0_800_684,
+    &D1_800_435
+};
 
 int mas_load_PCM_code(void)
 {
-    int i,j,dest,addr,size,err;
-    char * buffer;
-    char tmp[2000];
-    for(i=0;i<nb_wav_chunk;i++)
+    int i,val;
+    for(i=0;i<NB_CHUNK;i++)
     {
-        buffer=wav_chunks[i];        
-#if 0
-        if(buffer[0]==0xE0)
-            dest=0;
-        else
-            dest=1;
-        addr=(buffer[4]&0xFF)<<8 | (buffer[5]&0xFF);
-        size=(buffer[2]&0xFF)<<8 | (buffer[3]&0xFF);
-        if(i==0)
-        {
-            size=0x600;
-            i2c_start();
-            OUT_WRITE_DEVICE
-            OUT_SUBADDRESS(MAS_DATA_WRITE)            
-            OUT_16_VAL(MAS_WRITE_Di(0))
-           i2c_outb(0xE0);
-            //OUT_16_VAL(size)
-            //OUT_16_VAL(0)
-            i2c_stop();
-            printk("Special Chunk 0\n");
-            
-        }
-        else
-        {
-            printk("Chunk %d: dest:D%d addr:%04x size:%04x \n",i,dest,addr,size);
-            buffer=buffer+6;
-            tst_write(dest,addr,size,buffer);
-            //mas_write_Di_register(dest,addr,buffer,size);
-        }
-#else
-        size=wav_chunk_size[i];
-        do_write(buffer,size);
-#endif
-        
-       
+        printk("loading %s(%x@%x,%x)\n",chunk_list[i]->name,chunk_list[i]->reg,chunk_list[i]->addr,chunk_list[i]->length);
+        mas_write_Di_register(chunk_list[i]->reg,chunk_list[i]->addr,(void *)chunk_list[i]->buffer,chunk_list[i]->length);
+        mas_read_Di_register(chunk_list[i]->reg,chunk_list[i]->addr,&val,1);
+        printk("read back : @%x:%x get: %x\n",chunk_list[i]->reg,chunk_list[i]->addr,val);
     }
     return 0;
 }
@@ -658,146 +607,87 @@ int mas_stop_data[8][2] = {
     { 0x06,0x00000 }
 };
 
-char stop_data1[] = {0x00,0x00 };
-char stop_data2[] = {0xB3,0xB0,0x03,0x18 };
-char stop_data3[] = {0xB4,0x30,0x03,0x00 };
-char stop_data4[] = {0xB4,0xB0,0x00,0x00 };
-char stop_data5[] = {0xB5,0x30,0x03,0x18 };
-char stop_data6[] = {0xB6,0xB0,0x00,0x00 };
-char stop_data7[] = {0xBB,0xB0,0x03,0x18 };
-char stop_data8[] = {0xBC,0x30,0x03,0x00 };
-char stop_data9[] = {0xB0,0x60,0x00,0x00 };
-
 void mas_stop_app(void)
 {
-    /*int i;
+    int i,val;
     mas_freeze();
     for(i=0;i<8;i++)
     {
-        mas_write_register(mas_stop_data[i][0],mas_stop_data[i][1]);        
-    }*/
-    do_write(stop_data1,2);
-    do_write(stop_data2,4);
-    do_write(stop_data3,4);
-    do_write(stop_data4,4);
-    do_write(stop_data5,4);
-    do_write(stop_data6,4);
-    do_write(stop_data7,4);
-    do_write(stop_data8,4);
-    do_write(stop_data9,4);
-    
-}
-
-void iniData(char * data,int val)
-{
-    int i;
-    for(i=3;i>=0;i--)
-    {
-        data[i]= val & 0xFF;
-        val=val >> 8;
-        
+        mas_write_register(mas_stop_data[i][0],mas_stop_data[i][1]);
+        val = mas_read_register(mas_stop_data[i][0]);
+        printk("READ back reg : %x=%x should be %x\n",mas_stop_data[i][0],val,mas_stop_data[i][1]);
     }
-    /*for(i=0;i<4;i++)
-        printk("%02x",data[i]);*/
-    printk("\n");
 }
 
-int getData(char * data)
-{
-    return ((data[3]<<24) & 0xFF000000) | ((data[2]<<16) & 0x00FF0000) | ((data[1]<<8) & 0x0000FF00) | (data[0]& 0x000000FF);
-}
 
-char run_data1[]={0xB6,0xBC,0x00,0x00};
-char run_data2[]={0x10,0x00};
 
 void mas_run_app(void)
 {
-    char data[4];
-    printk("stp 1 ");
-    //mas_write_register(0x6B,0xC0000);
-    do_write(run_data1,4);
-    printk("2 ");
-    do_write(run_data2,2);
-    //mas_run();
-    printk("3 ");
-    iniData(data,0x125);
-    //tst_write(0,0x661,0x1,data);
-    mas_write_Di_register(0,0x661,data,0x1);
-    printk("4 ");
-    iniData(data,0x0);
-    //tst_write(0,0x347,0x1,data);
-    mas_write_Di_register(0,0x347,data,0x1);
-    printk("5 ");
-    iniData(data,0x4E5E);
-    //tst_write(0,0x348,0x1,data);
-    mas_write_Di_register(0,0x348,data,0x1);
-    printk("6 ");
-    iniData(data,0x01A5);
-    //tst_write(0,0x344,0x1,data);
-    mas_write_Di_register(0,0x344,data,0x1);
+    int val=0;
+    
+    
+    mas_write_register(0x6B,0xC0000);
+    mas_run();
+    
+    
+    val = 0x125;
+    mas_write_Di_register(MAS_REGISTER_D0,0x661,&val,1);
+    printk("bf loop1\n");
+    while(1)
+    {
+        val=0;
+        mas_read_Di_register(MAS_REGISTER_D0,0x666,&val,1);
+        if(val==0)
+            break;
+        printk("APP get: %x\n",val);
+    }
+    printk("af loop1\n");
+    val = 0x8300;
+    mas_write_Di_register(MAS_REGISTER_D0,0x7f8,&val,1);
+    val = 0x125;
+    mas_write_Di_register(MAS_REGISTER_D0,0x661,&val,1);
+    printk("bf loop2\n");
+    while(1)
+    {
+        val=0;
+        mas_read_Di_register(MAS_REGISTER_D0,0x666,&val,1);
+        if(val==0)
+            break;
+        printk("APP get: %x\n",val);
+        
+    }
+    printk("af loop2\n");
+    val = 0x0069;
+    mas_write_Di_register(MAS_REGISTER_D0,0x66b,&val,1);
+    val = 0x1125;
+    mas_write_Di_register(MAS_REGISTER_D0,0x661,&val,1);
+    printk("bf loop2\n");
+    while(1)
+    {
+        val=0;
+        mas_read_Di_register(MAS_REGISTER_D0,0x666,&val,1);
+        if(val==0)
+            break;
+        printk("APP get: %x\n",val);
+    }
+    printk("af loop2\n");
+    printk("all ok\n");
+    
 }
 
-void mas_run_PCM(void)
-{
-    int res;
-    char data[4];
-    
-    int i;
-    //while(1)
-//     {
-        iniData(data,0x0125);
-        //tst_write(0,0x661,0x1,data);
-        mas_write_Di_register(0,0x661,data,0x1);
-        for(i=0;i<5;i++)
-        {
-            iniData(data,0x0);
-            //tst_read(0,0x666,0x1,data);
-            mas_read_Di_register(0,0x666,data,0x1);
-            printk("res=%x\n",getData(data));
-           if(getData(data)==0)
-                break;
-        }
-//         if(getData(data)==0)
-//                 break;
-//         printk("[MAS RUN] Retry stopping\n");
-//      }
-     
-     printk("[MAS RUN] mas stopped\n");
-     
-     iniData(data,0x61);
-     //tst_write(0,0x66B,0x1,data);
-     mas_write_Di_register(0,0x66B,data,0x1);
-     
-     iniData(data,0x1125);
-     //tst_write(0,0x661,0x1,data);
-     mas_write_Di_register(0,0x661,data,0x1);
-     
-     iniData(data,0x0);
-     //tst_read(0,0x661,0x1,data);
-     mas_read_Di_register(0,0x661,data,0x1);
-     printk("IOC %x\n",getData(data));
-     for(i=0;i<0xff;i++)
-     {
-     iniData(data,0x0);
-     //tst_read(0,0x666,0x1,data);
-     mas_read_Di_register(0,0x666,data,0x1);
-     printk("APP run %x ",getData(data));
-     }
-     printk("\n");
-}
+
 
 int mas_test_PCM(void)
 {
-    int i;
-    
-    
     printk("\t\tStopping\n");    
     mas_stop_app();
     printk("\t\tDownloading\n");
     mas_load_PCM_code();
     printk("\t\tRuning\n");
     mas_run_app();
-    printk("\t\tLaunching\n");
-    mas_run_PCM();
+    
+    
+    
+    return 0;
 }
 #endif

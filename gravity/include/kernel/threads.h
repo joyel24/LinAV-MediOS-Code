@@ -35,7 +35,7 @@ typedef struct _TASK_INFO
 	PIPE*              pMessagePipe;
 	GFX_CONTEXT*       pMemoryContext;
 	GFX_CONTEXT*       pDrawingContext;
-	char               cName [8];
+	char               cName [10];
 	unsigned long      nPriority;
 	unsigned long      nCurrentScore;
 	FONT_HEADER*       pFont;

@@ -93,6 +93,7 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
             outb(ata_cmd->lba>>16,IDE_HCYL);
             outb((ata_cmd->lba>>24) | IDE_SEL_LBA,IDE_SELECT);
             outb(ata_cmd->count,IDE_NSECTOR);
+            outb(av_cmd_array[ata_cmd->xfer_dir],IDE_COMMAND);
             break;
     }
 

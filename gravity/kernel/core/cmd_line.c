@@ -265,6 +265,7 @@ extern PIPE * UART_0_Pipe;
 void init_cmd_line(void)
 {
     cur_pos=0;
+    HTASK hTask;
     
     arg_list = (unsigned char**)kmalloc(sizeof(unsigned char*)*MAX_ARGS);
     cur_cmd = (unsigned char*)kmalloc(sizeof(unsigned char)*MAX_CMD_LEN);
@@ -277,7 +278,10 @@ void init_cmd_line(void)
         return;
     }
         
-    API_TASK_CREATE (cmd_line_task, UART_0_Pipe, NULL);
+    
+    
+    API_TASK_CREATE (cmd_line_task, UART_0_Pipe,&hTask);
+    API_TASK_NAME(&hTask,"CMD_LINE");
         
     printk("[init] cmd line\n");
 }
@@ -309,9 +313,14 @@ void do_tasks (unsigned char ** params)
     __cli ();
     TASK_INFO* pStart = g_pTaskRing;
     TASK_INFO* pWork = pStart;
+    
     do
-            pWork = pWork->pNextTask, nTasks ++;
-                    while (pStart != pWork);
+    {
+        printk("%d: %s\n",nTasks,pWork->cName);
+        pWork = pWork->pNextTask;
+        nTasks ++;
+    }
+    while (pStart != pWork);
     __sti ();
 
     printk("Tasks running: %i\n", nTasks);

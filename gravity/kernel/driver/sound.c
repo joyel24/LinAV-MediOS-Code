@@ -229,7 +229,7 @@ __IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
 //            current_buffer=(sound_buffer_s *)arg;
 //            playing_sound=1;
 //            in_pause=0;
-			enable_irq(IRQ_MAS_DATA);
+	enable_irq(IRQ_MAS_DATA);
             break;
 
 		case DSP_SETCURR_MP3_BUFFER:
@@ -259,6 +259,8 @@ __IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
                 enable_irq(IRQ_MAS_DATA);
                 dsp_interrupt(IRQ_MAS_DATA);                
             }
+
+            }
 */
 
 			g_nPaused = 0;
@@ -275,12 +277,12 @@ __IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
 			dsp_interrupt (IRQ_MAS_DATA);
 			__sti ();
 
+
 			break;
 
         case DSP_STOP_MP3:
             g_nPaused = 1;
             disable_irq (IRQ_MAS_DATA);
-//			mas_stop_mp3_app();
             break;
 
         case DSP_PAUSE_MP3:
@@ -507,15 +509,17 @@ void mixer_ctl(unsigned int cmd, int dir, void * arg)
 
 /********************* OSS init               ***************************/
 
+#include <kernel/kfile.h>
+
 void init_sound (void)
 {
     struct mas_version version;
 
     printk("[init] Loading av3xx sound driver: ");
 
-	HCRITSEC hSec = 0;
-	API_CRITSEC_CREATE (&hSec);
-	g_pCS_SOUND = (CRITSEC_INFO*)hSec;
+    HCRITSEC hSec = 0;
+    API_CRITSEC_CREATE (&hSec);
+    g_pCS_SOUND = (CRITSEC_INFO*)hSec;
 
     mas_gio_init();
     printk("M");
@@ -527,15 +531,16 @@ void init_sound (void)
 //    playing_sound=0;
 //    in_pause=0;
 
-	g_nPaused = 0;
-	g_CurrentBuffer = NULL;
+    g_nPaused = 0;
+    g_CurrentBuffer = NULL;
 
     disable_irq (IRQ_MAS_DATA);
-
+    printk(" done\n");
 
     /*************************************************************/
-    #if 0
-    /* wave testing */
+    
+    //ini_mas_for_mp3();
+#if 0    
     mas_write_codec(MAS_REG_AUDIO_CONF,MAS_INPUT_AD | MAS_L_AD_CONVERTER | MAS_R_AD_CONVERTER | MAS_DA_CONVERTER
                                 | 0xf  << 4 // mic gain
                                 | 0xf << 8  // adc gain right
@@ -549,23 +554,66 @@ void init_sound (void)
     mas_control_config(MAS_SET,MAS_VOLUME,70);
     
     
-    mas_set_D0(MAS_INTERFACE_CONTROL,0x04);
+    /*mas_set_D0(MAS_INTERFACE_CONTROL,0x04);
     mas_set_clk_speed(0x4800);
-    mas_set_D0(MAS_MAIN_IO_CONTROL,0x125);
+    mas_set_D0(MAS_MAIN_IO_CONTROL,0x125);*/
     
     mas_test_PCM();
     
-    int cnt,mp3ptr=0;
     
-    while(1)
+    int mp3ptr=0;
+    int fd = kfopen("/data.bin",O_RDONLY);
+    if(fd<0)
+        printk("Error loading file\n");
+    else
     {
+        char * mp3Buff = kmalloc(1024*1024*7);
+        int cnt=1;
+        int size=kfilesize(fd);
+        /*
+        while(cnt>0)
+        {
+            cnt = kfread(fd,mp3Buff+size,1024);
+            size += cnt;            
+        }*/
+        size = kfread(fd,mp3Buff,size);
+        printk("Read from file: %x\n",size);
+        kfclose(fd);
+        //int size=0x46500;
+        char * data_buff = mp3Buff;
+        int data;
+        if(size>0)
+        {
+            while(1)
+            {
+                if(inw(GIO_BITSET0) & (0x1<<GIO_MAS_EOD))
+                    continue;
+                
+                data = (data_buff[0] & 0xFF) | ((data_buff[1] & 0xFF)<<8);
+                
+                data++;
+                
+                outw(0xFF00,GIO_BITCLEAR0);
+                outw(((data & 0xFF)<<8),GIO_BITSET0);
+                /* try to latch data (raise PR) */
+                outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);
+                outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);
+                outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);
+                
+                outw(0xFF00,GIO_BITCLEAR0);
+                outw((data & 0xFF00),GIO_BITSET0);
+                outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);
+                
+                data_buff+=2;
+                if ((data_buff-mp3Buff)>=size) {data_buff=mp3Buff; printk("loop\n");}
+                
+                outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);
+            }
+        }
         cnt = mas_pio_write(mp3Buff + mp3ptr, 2000);
         printk("%d ",cnt); 
         //mp3ptr+=cnt;
         //if (mp3ptr>=65000){mp3ptr=0; printk("loop ");}
-    }
-    #endif
-    /*************************************************************/
-    printk(" done\n");
+#endif
 
 }

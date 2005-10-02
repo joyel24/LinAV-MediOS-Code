@@ -38,6 +38,7 @@ ERROR_CODE API_TASK_CONTINUE        (HTASK hTask)                               
 ERROR_CODE API_TASK_SETPRIORITY     (HTASK hTask, int nPriority)                                       { swi_call(nAPI_TASK_SETPRIORITY); }
 ERROR_CODE API_TASK_GETHANDLE       (HTASK* phTask)                                                    { swi_call(nAPI_TASK_GETHANDLE); }
 
+ERROR_CODE API_TASK_NAME            (HTASK* phTask, char * name)                                       { swi_call(nAPI_TASK_NAME); }
 ERROR_CODE API_TASK_CREATE          (void* pvCode, void* pParam, HTASK* phTask)                        { swi_call(nAPI_TASK_CREATE); }
 ERROR_CODE API_TASK_TERMINATE       ()                                                                 { swi_call(nAPI_TASK_TERMINATE); }
 

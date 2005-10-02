@@ -31,13 +31,22 @@ __IRAM_CODE int swi_file_handler (
 	case nAPI_RUN_GRV:          //(const char* pGRVPath, HTASK* phTask)
 	{
 		void* pvTCB = 0;
+                int i=0;
 		API_MALLOC (&pvTCB, sizeof(TASK_INFO));
 		TASK_INFO* pTCB = (TASK_INFO*)pvTCB;
 		if (!pTCB)
 			return ERR_NOMEMORY;
 
-		kInitialiseTCBVariables (pTCB, 16384 , "USER");
+		kInitialiseTCBVariables (pTCB, 16384 , "U_");
 
+                while(i<7 && ((const char *)nParam1)[i+1] != '\0')
+                {
+                    pTCB->cName[i+2] = ((const char *)nParam1)[i+1];
+                    i++;
+                }
+                pTCB->cName[9]='\0';
+                
+                
 		ERROR_CODE code = load_bflat ((const char *)nParam1, pTCB);
 
 		void* pStack = 0;

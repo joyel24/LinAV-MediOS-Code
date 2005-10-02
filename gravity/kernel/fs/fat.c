@@ -424,7 +424,6 @@ int fat_mount(int volume, int drive, int startsector)
     printk("FAT sectors: 0x%x\n",fat_bpb->fatsize);
 
     fat_bpb->mounted = true;
-
     return 0;
 }
 

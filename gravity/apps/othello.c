@@ -488,6 +488,15 @@ void redraw(void)
 void eventHandler(int evt)
 {  
     //cops->helperEvt(evt,BTN_JOY);
+    
+    if(evt !=0)
+        printf("get evt : %d\n",evt);
+    
+    if(evt == BTN_OFF || evt == EVT_QUIT)
+            stop_othello=1;
+    
+    /*
+    
     switch(evt)
     {
         case BTN_UP:
@@ -553,6 +562,7 @@ void eventHandler(int evt)
             redraw();
             break;
     }
+    */
 }
 
 void _start(void)
@@ -561,10 +571,10 @@ void _start(void)
     int evt;
     unsigned int evt_buffer;
     
-    printf("In othello");
+    printf("\nIn othello\n");
     
     //open_graphics();
-    
+#if 0    
     clearScreen(COLOR_WHITE);
     
     setFont(STD8X13);
@@ -572,27 +582,33 @@ void _start(void)
     iniBoard();
     
     /*iniHelperMenu(&othelloMenu);*/
-    
+#endif    
     evt_buffer=register_evt();
     if(!evt_buffer)
     {
         printf("[ini_status_bar] can't register to evt\n");
-        return;
+        //return;
     }
     //API_TASK_CREATE (eventHandler, evt_buffer, NULL);
-    
-    computeAllowed(allowedHuman,HUMAN);
-    redraw();
-    
+   
+    //computeAllowed(allowedHuman,HUMAN);
+    //redraw();
+ 
     stop_othello=0;
-    
+    printf("\nbefore loop\n");
     while(!stop_othello)
     {
         evt=waitEvt(evt_buffer);
         eventHandler(evt);
     }
-    
+    printf("\nafter loop\n");
     unregister_evt(evt_buffer);
 
+
+//for(evt =0;evt<10000;evt++) /*nothing*/;
+
+
+    printf("\nout othello\n");
+    
 }
 

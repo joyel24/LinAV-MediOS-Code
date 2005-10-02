@@ -48,12 +48,25 @@
 #define DA_0               DIS_INT SDA_LO SDA_OUT ENA_INT
 #define CL_0               DIS_INT SCL_LO SCL_OUT ENA_INT
 
-#define i2c_ini_xfer()     { int _val; DELAY_1 CL_1 DELAY_1 DA_1 DELAY_1 \
-                                _val=inw(GIO_BITSET1);\
-                                if(!(_val & SCL_MASK) || !(_val & SDA_MASK)) return -1; \
-                           }
+__IRAM_CODE void i2c_ini_xfer(void)
+{
+    int _val; 
+    DELAY_1 
+    CL_1 
+    DELAY_1 
+    DA_1 
+    DELAY_1
+    _val=inw(GIO_BITSET1);
+    if(!(_val & SCL_MASK) || !(_val & SDA_MASK))
+        return -1; 
+}
 
 #define WAIT_I2C           while(!SCL) /*nothing*/;
+
+__IRAM_CODE void wait_i2c(void)
+{
+    while(!SCL) /*nothing*/;
+}
 
 __IRAM_CODE void i2c_start(void)
 {
@@ -125,6 +138,10 @@ __IRAM_CODE int i2c_getAck(void)
     DELAY_1
     CL_0
     DELAY_1
+    /*if(!ret)
+        printk("not ack\n");
+    else
+        printk("ack\n");*/
     return ret;
 }
 
@@ -169,8 +186,34 @@ __IRAM_CODE int i2c_outb(char data)
     }
     CL_0
     DELAY_1
+    //while(!i2c_getAck()) /*nothing*/;
+    
     return i2c_getAck();
 }
+
+__IRAM_CODE void mas_i2c_outb(char data)
+{
+    char i;    
+    for(i=0x80;i;i=i>>1)
+    {
+        CL_0
+        DELAY_1
+        if(i&data)
+        {
+            DA_1
+        }
+        else
+        {
+            DA_0
+        }
+        DELAY_1
+        CL_1
+        DELAY_1        
+    }
+    CL_0
+    DELAY_1    
+}
+
 
 __IRAM_CODE int i2c_read(int device, int address, void * buffer, int count)
 {

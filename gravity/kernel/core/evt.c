@@ -75,7 +75,8 @@ void send_evt(int evt)
     struct evt_pipes_s * ptr;
     unsigned char c=(unsigned char)evt;
     
-    //printk("get evt : %x |",evt);
+    /*if(evt!=0)
+        printk("get evt : %x |",evt);*/
     
     for(ptr=head;ptr!=NULL;ptr=ptr->nxt)
     {        

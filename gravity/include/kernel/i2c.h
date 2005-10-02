@@ -20,6 +20,12 @@
 #define I2C_WRITE_DEVICE(val)                   (val & ~0x01)
 #define I2C_READ_DEVICE(val)                    (val | 0x01)
 
+void i2c_ini_xfer(void);
+
+void wait_i2c(void);
+void mas_i2c_outb(char data);
+int i2c_getAck(void);
+
 void i2c_stop(void);
 void i2c_start(void);
 
@@ -30,7 +36,6 @@ int i2c_getAck(void);
 char i2c_inb(void);
 int  i2c_outb(char data);
 
-int i2c_iniRead(void);
 int i2c_read(int device, int address, void * buffer, int count);
 int i2c_write(int device, int address, void * buffer, int count);
 int i2c_writeRaw(int device, void * buffer, int count);

@@ -222,6 +222,7 @@ void error_scr_switch()
 }
 
 /****************************************************************************/
+#include "pallette.h"
 
 void ini_graphics(void)
 {
@@ -242,14 +243,24 @@ void ini_graphics(void)
     osdSetComponentConfig(OSD_CURSOR1, 0);
     osdSetComponentConfig(OSD_CURSOR2, 0);
     
+    //setPalette(ini_pal,256);
     setPalette(gui_pal,256);
-
     error_scr_state=1;
     
     iniComponent(BMAP1,&ERROR_SCR,(unsigned int)&screen_ERROR);
     osdSetComponentConfig(OSD_BITMAP1,ERROR_SCR.state|OSD_COMPONENT_ENABLE);    
     ERROR_SCR.enable=1;
+    /*int x,y,i;
+    i=0;
+    for (y=0;y<240;y+=15) {
+    for (x=0;x<320;x+=20) {
+      g8ops.fillRect(i,x,y,20,15,&ERROR_SCR);
+      i++;
+    }
+  }
+
     
+    while(1) ;*/
     ini_font();
 }
 
