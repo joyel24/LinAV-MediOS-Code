@@ -235,13 +235,13 @@ unsigned int register_evt(void)
 
 void unregister_evt(unsigned int arg)
 {
-    API_EVT(0x001,arg,NULL);
+    API_EVT(0x001,(void *)arg,NULL);
 }
 
 int waitEvt(unsigned int arg)
 {
     int val=0;
-    API_EVT(0x002,arg,&val);
+    API_EVT(0x002,(void *)arg,&val);
     return val;
 }
 
@@ -252,5 +252,5 @@ void sendEvt(int evt)
 
 void flushEvt(unsigned int arg)
 {
-    API_EVT(0x004,arg,NULL);
+    API_EVT(0x004,(void *)arg,NULL);
 }

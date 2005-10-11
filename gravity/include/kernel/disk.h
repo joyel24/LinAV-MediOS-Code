@@ -59,4 +59,6 @@ void select_drive(int drive);
 void dd_swapChar(char * txt,int size);
 void dd_findEnd(char * txt,int size);
 
+int exec_disk_cmd_from_irq (int command);
+
 #endif

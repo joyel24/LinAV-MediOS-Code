@@ -16,6 +16,7 @@
 #include <kernel/kernel.h>
 #include <kernel/timer.h>
 #include <kernel/hardware.h>
+#include <kernel/bat_power.h>
 #include <kernel/cpld.h>
 //#include <kernel/gio.h>
 #include <kernel/ata.h>

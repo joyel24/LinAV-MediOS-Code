@@ -73,7 +73,7 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
     unsigned long start_code;
     unsigned long * reloc_table;
     
-    int (*run_flat)(int argc,char**argv);
+    //int (*run_flat)(int argc,char**argv);
     
     
     fd_bflat = kfopen(fname,O_RDONLY);
@@ -125,7 +125,7 @@ ERROR_CODE load_bflat (const char * fname, TASK_INFO* pTCB)
 //    text_pos=(unsigned long)API_MALLOC(text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
 
     text_pos = 0;
-    API_MALLOC (&text_pos, text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
+    API_MALLOC ((void**)&text_pos, text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
 
     if(!text_pos)
     {

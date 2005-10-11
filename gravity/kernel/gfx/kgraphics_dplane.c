@@ -364,7 +364,7 @@ void KdrawLine(unsigned int color, int x1, int y1, int x2, int y2,struct graphic
      
 }
 
-__IRAM_CODE int swi_gfx_handler(unsigned long nCmd,
+int swi_gfx_handler(unsigned long nCmd,
     unsigned long nParam1,
     unsigned long nParam2,
     unsigned long nParam3)

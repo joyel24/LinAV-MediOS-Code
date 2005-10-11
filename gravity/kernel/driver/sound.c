@@ -25,6 +25,8 @@
 
 #include <kernel/threads.h>
 
+#include <api.h>
+
 #define MAS_DELAY        {int ___i; for(___i=0;___i<20;___i++);}
 #define MIN(a, b)        (((a)<(b))?(a):(b))
 #define MAX(a, b)        (((a)<(b))?(b):(a))

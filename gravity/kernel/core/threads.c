@@ -13,6 +13,7 @@
 #include <kernel/malloc.h>
 
 #include <kernel/kernel.h>
+#include <kernel/memmgr.h>
 #include <kernel/threads.h>
 #include <kernel/pipes.h>
 #include <kernel/errors.h>

@@ -49,7 +49,7 @@ int atoi (const char *str)
         str++;
     }
     
-    if('0' == *str & ('x'==*(str+1) || 'X'==*(str+1))) /* hex specific code */
+    if(('0' == *str) && ('x'==*(str+1) || 'X'==*(str+1))) /* hex specific code */
     {
         str+=2;
         while ('0' == *str)

@@ -54,7 +54,7 @@ void dsp_run ()
 ERROR_CODE load_dsp_program_hdd (const char* pszFilename)
 {
 	printk ("Loading dsp program from hdd into sdram...\n");
-	unsigned char* pDSPCode = 0;
+	unsigned char * pDSPCode = 0;
 	int fDSPCode = kfopen (pszFilename, O_RDONLY);
 	int nSize;
 	if (fDSPCode < 0)
@@ -65,7 +65,7 @@ ERROR_CODE load_dsp_program_hdd (const char* pszFilename)
 	else
 	{
 		nSize = kfilesize (fDSPCode);
-		API_MALLOC ((void**)&pDSPCode, nSize);
+		API_MALLOC ((void**)(&pDSPCode), (unsigned long)nSize);
 		int nReaded = kfread (fDSPCode, pDSPCode, nSize);
 		printk ("Program loaded into sdram (%d bytes)\n", nReaded);
 		kfclose (fDSPCode);

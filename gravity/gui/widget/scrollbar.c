@@ -104,3 +104,4 @@ void draw_scrollBar(struct scroll_bar * scrollBar, int items, int min_shown,int 
         }
     }
 }
+

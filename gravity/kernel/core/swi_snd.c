@@ -18,7 +18,7 @@ __IRAM_CODE int swi_snd_handler (
 	unsigned long nParam2,
 	unsigned long nParam3)
 {
-    sound_api_param * api_param = (sound_api_param*)nParam2;
+   // sound_api_param * api_param = (sound_api_param*)nParam2;
     switch (nCmd)
     {
         case nAPI_SOUND_BUFFER_WRITE:            

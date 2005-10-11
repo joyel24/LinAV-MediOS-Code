@@ -22,6 +22,7 @@
 #include <kernel/hw_chk.h>
 #include <kernel/ata.h>
 #include <kernel/evt.h>
+#include <kernel/disk.h>
 
 #include <kernel/bat_power.h>
 

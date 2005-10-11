@@ -128,7 +128,7 @@ void draw_bottom_status(struct browser_data *bdata)
     char tmp[100];
     char tmpS[15];
 
-    int len=0;   
+    //int len=0;   
     
     createSizeString(tmpS,bdata->totSize);
         

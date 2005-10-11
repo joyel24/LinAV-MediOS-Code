@@ -38,12 +38,12 @@ int in_32_val(void)
 	return ret|i2c_inb();
 }
 
-#define OUT_WRITE_DEVICE           i2c_outb(I2C_WRITE_DEVICE(MAS_DEVICE));
-#define OUT_READ_DEVICE            i2c_outb(I2C_READ_DEVICE(MAS_DEVICE));
-#define OUT_SUBADDRESS(addr)       i2c_outb(addr);
+#define OUT_WRITE_DEVICE           i2c_outb((I2C_WRITE_DEVICE(MAS_DEVICE)));
+#define OUT_READ_DEVICE            i2c_outb((I2C_READ_DEVICE(MAS_DEVICE)));
+#define OUT_SUBADDRESS(addr)       i2c_outb((addr));
 #define OUT_16_VAL(val)            i2c_outb(((val)>>8)&0xFF); \
-                                       i2c_outb(val&0xFF);
-#define OUT_32_VAL(val)            OUT_16_VAL((val) >> 16) OUT_16_VAL(val); 
+                                       i2c_outb((val)&0xFF);
+#define OUT_32_VAL(val)            OUT_16_VAL((val) >> 16) OUT_16_VAL((val)); 
 #define IN_16_VAL                  in_16_val()
 #define IN_32_VAL                  in_32_val()
 

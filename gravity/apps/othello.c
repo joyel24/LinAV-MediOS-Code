@@ -408,7 +408,7 @@ void doMove(int x,int y)
 void endGame(void)
 {
   
-    int w,h;
+    //int w,h;
 
     //getStringS("Game Over... ",&w,&h);
 

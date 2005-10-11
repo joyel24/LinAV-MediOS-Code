@@ -40,7 +40,7 @@ void avwm(void)
     evt_buffer=register_evt();
     
     ini_status_bar();
-    ini_file_browser();
+    //ini_file_browser();
     
     sendEvt(EVT_REDRAW);
 

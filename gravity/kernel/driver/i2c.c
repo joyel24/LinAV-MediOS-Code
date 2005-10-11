@@ -57,8 +57,8 @@ __IRAM_CODE void i2c_ini_xfer(void)
     DA_1 
     DELAY_1
     _val=inw(GIO_BITSET1);
-    if(!(_val & SCL_MASK) || !(_val & SDA_MASK))
-        return -1; 
+    /*if(!(_val & SCL_MASK) || !(_val & SDA_MASK))
+        return -1; */
 }
 
 #define WAIT_I2C           while(!SCL) /*nothing*/;
