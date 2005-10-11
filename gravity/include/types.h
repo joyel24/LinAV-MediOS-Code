@@ -57,6 +57,18 @@ typedef struct _GFX_BLENDPARAMS
 	long transparency;
 } GFX_BLENDPARAMS;
 
+typedef struct _GFX_DATA
+{
+    long x;
+    long y;
+    long w;
+    long h;
+    int direction;
+    long delta; 
+    unsigned int color;
+    unsigned int bg_color;
+} GFX_DATA;
+
 typedef struct _PLANE_DATA
 {
     int vplane;

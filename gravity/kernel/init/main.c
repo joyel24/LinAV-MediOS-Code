@@ -150,7 +150,7 @@ void kernel_startup_thread (void)
 
     printk("[init] END\n");
 
-    printk ("Loading background image...\n");
+    /*printk ("Loading background image...\n");
     int fBack = fopen ("/back.img",O_RDONLY);
     if (fBack < 0)
             printk ("Background not loaded.\n");
@@ -161,10 +161,10 @@ void kernel_startup_thread (void)
             printk ("Background loaded (%d bytes, %x @%08x)\n", nReaded, screen_VID2[0], screen_VID2);
             kfclose (fBack);
     }
-
-    GFX_init ();
+*/
+    //GFX_init ();
     
-    API_RUN_GRV("/othello.grv",0);
+    //API_RUN_GRV("/othello.grv",0);
 
     while(1) API_TASK_SLEEP (3000);
 

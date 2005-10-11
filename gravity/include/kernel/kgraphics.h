@@ -66,6 +66,10 @@ void          (*drawHLine)        (unsigned int color, int x, int y, int width, 
 void          (*drawVLine)        (unsigned int color, int x, int y, int height, struct graphicsBuffer * buff);
 };
 
+#ifdef DPLANE
+//int gfx_swi_handler(int cmd,GFX_DATA * gfxD, void * pvData);
+#else
+
 /* 32-bit planes graphic ops, to use directly... */
 void graphics32_DrawPixel (COLOR color, int x, int y, GFX_CONTEXT* pCtx);
 COLOR graphics32_ReadPixel (int x, int y, GFX_CONTEXT* pCtx);
@@ -75,7 +79,7 @@ void graphics32_DrawLine (COLOR color, int x1, int y1, int x2, int y2, GFX_CONTE
 void graphics32_DrawBITMAP(BITMAP * bitmap, GFX_POINT* pt, GFX_CONTEXT* pCtx);
 
 int gfx_swi_handler (TASK_INFO* pOwner, int cmd, GFX_CONTEXT* gfxD, void* pvData);
-
+#endif
 /* general functions */
 void  ini_graphics        (void);
 void  iniComponent        (int vplane,struct graphicsBuffer * buff,unsigned int offset);
