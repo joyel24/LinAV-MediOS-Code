@@ -9,7 +9,10 @@
 *
 *  ASM optimised string functions
 */
-		.section .core
+
+
+.text
+
 /*
  * Prototype: void memcpy(void *to,const void *from,unsigned long n);
  * ARM3: cant use memcopy here!!!
@@ -29,6 +32,7 @@
  * The pointer is now aligned and the length is adjusted.  Try doing the
  * memzero again.
  */
+
 .global memset
 memset:
 	ands	r3, r0, #3		@ 1 unaligned?

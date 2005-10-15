@@ -203,6 +203,8 @@ void flushEvt(unsigned int arg);
 #define  powerConnected()       do_api_power(0x002)
 #define  getBatLevel()          do_api_power(0x001)
 
+
+
 //ERROR_CODE getTime              (struct av_tm * time_data);
 //ERROR_CODE setTime              (struct av_tm * time_data);
 

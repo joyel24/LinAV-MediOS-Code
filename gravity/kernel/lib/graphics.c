@@ -244,6 +244,24 @@ void scrollWindowHoriz(unsigned int bgColor, int x, int y, int width, int height
     g_data.delta=scroll;
     API_GFX(0x20C,&g_data,NULL);
 }
+void setPalletteRGB(int r, int g, int b, int index)
+{
+    GFX_CONTEXT g_data;
+    g_data.x=r;
+    g_data.y=g;
+    g_data.w=b;
+    g_data.h=index;
+    API_GFX(0x20D,&g_data,NULL);
+}
+
+unsigned int getBufferOffset(int buffer_num)
+{
+    GFX_CONTEXT g_data;
+    g_data.x=buffer_num;
+    API_GFX(0x20E,&g_data,NULL);
+    return g_data.color;
+}
+
 
 /************************************************** font functions ********/
 

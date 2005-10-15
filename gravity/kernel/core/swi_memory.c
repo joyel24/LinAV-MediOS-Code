@@ -49,6 +49,7 @@ __IRAM_CODE int swi_memory_handler (
 		int i;
 		unsigned char* pDst = (unsigned char*)nParam1;
 		unsigned char fill = nParam2;
+                //memset(pDst,fill,nParam3);
 		for (i=0;i<nParam3;i++)
 			pDst[i] = fill;
 	}

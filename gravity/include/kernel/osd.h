@@ -217,6 +217,12 @@ void osdSetComponentSourceWidth (int component, int width);
 void osdSetComponentConfig (int component, int config);
 void osdInit();
 
+#define RGB2Y(r,g,b)  ((306*r + 601*g + 117*b) >> 10)
+#define RGB2Cb(r,g,b)  (((-173*r -339*g + 512*b) >> 10) + 128)
+#define RGB2Cr(r,g,b)  (((512*r - 429*g - 83*b) >> 10) + 128)
+
+#define osdSetPaletteRGB(r,g,b,index)  {osdSetPallette(RGB2Y(r,g,b), RGB2Cr(r,g,b),RGB2Cb(r,g,b),index);}
+
 void osdRestorePlane(int component, unsigned int address, int x, int y, int w, int h, int bpp, int state,int enable);
 
 #endif

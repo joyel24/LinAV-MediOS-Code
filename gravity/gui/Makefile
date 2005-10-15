@@ -9,7 +9,7 @@ SRC2 = $(wildcard *.S)
 OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 
 
-SUBDIRS = gfx int_plugins widget
+SUBDIRS = gfx int_plugins widget 
 
 TARGET = gui.a
 

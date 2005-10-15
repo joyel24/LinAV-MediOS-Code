@@ -165,7 +165,10 @@ void kernel_startup_thread (void)
     //GFX_init ();
     
     //API_RUN_GRV("/othello.grv",0);
-
+    API_RUN_GRV("/av_sms.grv",0);
+    //avwm();
+    //av_sms();
+    
     while(1) API_TASK_SLEEP (3000);
 
 

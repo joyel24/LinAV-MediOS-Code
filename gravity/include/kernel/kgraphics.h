@@ -36,20 +36,6 @@ struct graphicsFont {
 
 typedef struct graphicsFont *     FONT_ID;
 
-struct graphicsBuffer {
-    unsigned int  offset;                 // ->The data
-    int           enable;
-    int           component;
-    int           width;
-    int           real_width;
-    int           height;
-    int           x;
-    int           y;
-    int           bitsPerPixel;           // eg 32 = YCbCr color
-    int           state;
-    
-    struct graphics_operations * gops;
-};
 
 struct graphics_operations {
 void          (*drawPixel)        (unsigned int color, int x, int y, struct graphicsBuffer * buff);

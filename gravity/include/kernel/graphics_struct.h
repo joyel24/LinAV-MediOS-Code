@@ -21,6 +21,21 @@
 #define CUR1    4
 #define CUR2    5
 
+struct graphicsBuffer {
+    unsigned int  offset;                 // ->The data
+    int           enable;
+    int           component;
+    int           width;
+    int           real_width;
+    int           height;
+    int           x;
+    int           y;
+    int           bitsPerPixel;           // eg 32 = YCbCr color
+    int           state;
+    
+    struct graphics_operations * gops;
+};
+
 struct spriteBuffer {
     unsigned int  data;
     int           width;

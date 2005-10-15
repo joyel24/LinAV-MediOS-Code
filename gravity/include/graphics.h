@@ -53,4 +53,9 @@ void  getPos          (int vplane,int * x,int * y);
 void setFont          (int font_nb);
 int  getFont          (void);
 
+/* osd function on color*/
+
+void setPalletteRGB(int r, int g, int b, int index);
+unsigned int getBufferOffset(int buffer_num);
+
 #endif

@@ -46,11 +46,7 @@ void setPalette(int palette[256][3],int size)
 
 int osdRGB2Packed(int r, int g, int b)
 {
-	int y = (306*r + 601*g + 117*b) >> 10 ; 
-	int cb = ((-173*r -339*g + 512*b) >> 10) + 128;
-	int cr = ((512*r - 429*g - 83*b) >> 10) + 128;
-
-	return  (cr << 16) | (y << 8) | cb;
+	return  ((RGB2Cr(r,g,b) << 16) | (RGB2Y(r,g,b) << 8) | RGB2Cb(r,g,b));
 }
 
 void osdSetCursor2Bitmap (int index, int data)
@@ -83,6 +79,9 @@ void osdSetPallette (int Y, int Cr, int Cb, int index)
 	Y&=0xFF;
         Cr&=0xFF;
         Cb&=0xFF;
+        
+        //printk("OSD set palette (%x,%x,%x) at %d\n",Y,Cr,Cb,index);
+        
 	while((inw(OSD_PAL_ACCESS_STATUS)&0x1) != 0)
 		/* nothing */ ;
         outw((Y << 8) | Cb,OSD_PAL_DATA_WRITE);

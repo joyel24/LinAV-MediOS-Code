@@ -9,7 +9,8 @@
 *
 *  ASM optimised string functions
 */
-		.section .core
+.text
+
 /*
  * Prototype: void memcpy(void *to,const void *from,unsigned long n);
  * ARM3: cant use memcopy here!!!
