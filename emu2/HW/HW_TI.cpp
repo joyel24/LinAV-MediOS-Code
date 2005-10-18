@@ -1,4 +1,4 @@
-/*
+/* 
 *   HW_TI.cpp
 *
 *   AV3XX emulator
@@ -15,72 +15,14 @@
 #include <HW_TI.h>
 #include <HW_null.h>
 
-#include <HW_mem.h>
-
 #include <HW_uart.h>
-#include <HW_clock.h>
-#include <HW_gpio.h>
-#include <HW_timer.h>
-#include <i2c_gpio.h>
 
-
-#include <HW_30a24.h>
-#include <HW_cpld.h>
-#include <HW_TI_ver.h>
-#include <HW_ECR.h>
-#include <HW_OSD.h>
-#include <HW_IRQ.h>
-#include <HW_access.h>
-
-HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_node(TI_REG_START,TI_REG_END,4,"DSC25")
+HW_TI::HW_TI():HW_access(0x30000,0x3FFFF,"DSC25")
 {
     exit_on_not_match = false;
-    
-    this->memSpace=memSpace;
-    
-    osd = new HW_OSD(mem);
-    
-    memSpace->set_OSD(osd);
-    
-    add_item(osd);
-    
-    uart_list[0]=new HW_uart(0x30300,0x30310,"UART0");
-    add_item(uart_list[0]);
-
-    uart_list[1]=new HW_uart(0x30380,0x30390,"UART1");
-    add_item(uart_list[1]);
-
-    add_item(new HW_clock());
-    gpio = new HW_gpio();
-    add_item(gpio);
-#ifdef HAS_HW_30A24
-    hw_30a24 = new HW_30a24();
-    add_item(hw_30a24);  
-#endif
-
-    hw_dma = new HW_dma(mem,hw_cpld);      
-    add_item(hw_dma);
-    
-    HW_irq = new HW_IRQ();
-
-    add_item(HW_irq);
-    
-    for(int i=0;i<4;i++)
-    {
-        timer_list[i]=new HW_timer(i,HW_irq);
-        add_item(timer_list[i]);
-    }
-    
-    add_item(new HW_TI_ver());
-    add_item(new HW_ECR());
-
-    //add_item(new HW_null(0x30700,0x30800,"UKN-0x30700"));
-    
-    add_item(new HW_null(VID_START,VID_END,"VIDEO"));
-    
-    new i2c_master(gpio);
-    
-    
+    add_item(new HW_null(0x30680,0x30700,"OSD"));
+    add_item(new HW_uart(0x30300,0x30310,"UART0"));
+    add_item(new HW_uart(0x30380,0x30390,"UART1"));
 }
 
 HW_TI::~HW_TI()
@@ -88,3 +30,14 @@ HW_TI::~HW_TI()
     
 }
 
+/*uint32_t HW_TI::read(uint32_t addr,int size)
+{
+    printf("DSC25 HW read @0x%08x, size %x\n",addr,size);
+    return 0;
+}
+
+void HW_TI::write(uint32_t addr,uint32_t val,int size)
+{
+    printf("DSC25 HW write %x @0x%08x, size %x\n",val,addr,size);
+}
+*/

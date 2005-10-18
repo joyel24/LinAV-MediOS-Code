@@ -24,12 +24,12 @@
 #define DMA_SDRAM          0x5
 #define DMA_ATA            0x1
 
-#define dma_set_src(addr)      outw(((addr)>>16)&0xFFFF,DMA_SRC_HI);outw((addr)&0xFFFF,DMA_SRC_LO);
-#define dma_set_dest(addr)     outw(((addr)>>16)&0xFFFF,DMA_DEST_HI);outw((addr)&0xFFFF,DMA_DEST_LO);
-#define dma_set_size(size)     outw((size)&0xFFFF,DMA_SIZE);
-#define dma_set_dev(src,dest)  outw((((src)<<4)&0x00F0) | ((dest)&0x000F),DMA_DEV_SEL);
+#define dma_set_src(addr)      outw((addr>>16)&0xFFFF,DMA_SRC_HI);outw(addr&0xFFFF,DMA_SRC_LO);
+#define dma_set_dest(addr)     outw((addr>>16)&0xFFFF,DMA_DEST_HI);outw(addr&0xFFFF,DMA_DEST_LO);
+#define dma_set_size(size)     outw(size&0xFFFF,DMA_SIZE);
+#define dma_set_dev(src,dest)  outw(((src<<4)&0x00F0) | (dest&0x000F),DMA_DEV_SEL);
 #define dma_start              outw(inw(DMA_START) | 0x1,DMA_START);
 #define dma_running            ((inw(DMA_STATE)&0x1)==0x1)
-#define dma_endian_conv(type)  outw((inw(DMA_START)&0xFCFF) | ((type)<<16),DMA_START);
+#define dma_endian_conv(type)  outw((inw(DMA_START)&0xFCFF) | (type<<16),DMA_START);
 
 #endif

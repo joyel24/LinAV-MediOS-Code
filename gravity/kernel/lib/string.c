@@ -13,7 +13,7 @@
 #include <sys_def/ctype.h>
 #include <sys_def/string.h>
 
-#include <api.h>
+//#include <sys_def/malloc.h>
 
 #if 0
 #include <dma.h>
@@ -30,14 +30,6 @@ void * memcpy(void * dest,const void *src,size_t count)
 }
 #endif
 
-void strlwr(char *s)
-{
-    while (*s)
-    {
-        *s = toLower(*s);
-        s++;
-    }
-}
 
 int atoi (const char *str)
 {
@@ -49,54 +41,31 @@ int atoi (const char *str)
         str++;
     }
     
-    if(('0' == *str) && ('x'==*(str+1) || 'X'==*(str+1))) /* hex specific code */
+    if ('-' == *str)
     {
-        str+=2;
-        while ('0' == *str)
-        {
-            str++;
-        }
-        
-        while (isxdigit(*str))
-        {
-            value = (value << 4);
-            if(isdigit(*str))
-                value += (*str - '0');
-            else
-                value += (__tolower(*str) - 'a' + 10);
-            str++;
-        }
-        
-        return value;
+        sign = -1;
+        str++;
     }
-    else
-    {    
-        if ('-' == *str)
-        {
-            sign = -1;
-            str++;
-        }
-        else if ('+' == *str)
-        {
-            str++;
-        }
-        
-        while ('0' == *str)
-        {
-            str++;
-        }
-        
-        while (isdigit(*str))
-        {
-            value = (value * 10) + (*str - '0');
-            str++;
-        }
+    else if ('+' == *str)
+    {
+        str++;
+    }
     
-        return value * sign;
+    while ('0' == *str)
+    {
+        str++;
     }
+
+    while (isdigit(*str))
+    {
+        value = (value * 10) + (*str - '0');
+        str++;
+    }
+    
+    return value * sign;
 }
 
-
+#if 0
 char * strdup(const char * s)
 {
     int len=strlen(s)+1;
@@ -105,7 +74,7 @@ char * strdup(const char * s)
         strncpy(s2,s,len);
     return s2;
 }
-
+#endif
 
 int strcasecmp(const char *s1, const char *s2)
 {

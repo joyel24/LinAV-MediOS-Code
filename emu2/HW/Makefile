@@ -5,12 +5,11 @@ GPPFLAGS += -I../include -I./
 SRC = $(wildcard *.cpp)
 OBJS = $(SRC:%.cpp=%.o)
 
-SUBDIRS = gpio
 
-all: subdirs $(OBJS)
+all: $(OBJS)
 	$(MV) *.o ../build/
 
-clean: clean-subdirs
+clean:
 	@rm -f *.o *~ 
                         
 include ../default.rule

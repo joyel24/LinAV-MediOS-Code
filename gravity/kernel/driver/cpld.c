@@ -15,9 +15,9 @@
 #include <kernel/hardware.h>
 #include <kernel/cpld.h>
 
-#warning we should lock the access to cpld see lock comment below
+//spinlock_t av3xx_cpld_lock,av3xx_cpldState_lock;
 
-__IRAM_DATA int cpld_port_state[4]=
+static int cpld_port_state[4]=
 {
     0x0,
     0x0,
@@ -25,16 +25,78 @@ __IRAM_DATA int cpld_port_state[4]=
     0x8,
 };
 
-__IRAM_DATA int cpld_port_array[4] = {
+int cpld_port_array[4] = {
     CPLD_PORT0,
     CPLD_PORT1,
     CPLD_PORT2,
     CPLD_PORT3
 };
 
+void cpld_chg_state(int cpld_port,int bit_num,int direction)
+{
+    //printk("chg cpld %d: bit:%d dir:%d\n",cpld_port,bit_num,direction);
+    int tmp=cpld_port_state[cpld_port];
+    if(direction)
+        tmp |= (0x1 << bit_num);
+    else
+        tmp &= ~(0x1 << bit_num);
+        
+    if(tmp!=cpld_port_state[cpld_port])
+    {
+        /*printk("chg cpld %d: bit:%d dir:%d old=0x%x new=0x%x\n",cpld_port,bit_num,direction,cpld_port_state[cpld_port],tmp);*/
+        cpld_port_state[cpld_port]=tmp;
+        outw(cpld_port_state[cpld_port],cpld_port_array[cpld_port]);
+    }
+}
+
+int cpld_read(int cpld_port)
+{
+    int val;
+    //spin_lock(&av3xx_cpld_lock);
+    val=inw(cpld_port_array[cpld_port]);
+    //spin_unlock(&av3xx_cpld_lock);
+    return val;
+}
+
+void cpld_select(int bit_num,int direction)
+{
+    int val;
+    //spin_lock(&av3xx_cpldState_lock);
+    if(direction)
+        val = cpld_port_state[CPLD0] | (0x1 << bit_num);
+    else
+        val = cpld_port_state[CPLD0] & ~(0x1 << bit_num);
+    if(val != cpld_port_state[CPLD0])
+    {
+        cpld_port_state[CPLD0]=val;
+        cpld_do_select();
+    }
+    //spin_unlock(&av3xx_cpldState_lock);
+}
+
+void cpld_do_select(void)
+{  
+    int res,res2;
+    //spin_lock(&av3xx_cpld_lock);
+    printk("changing cpld select : %d\n",cpld_port_state[CPLD0]);
+    outw(cpld_port_state[CPLD0],CPLD_PORT0);
+    outw(cpld_port_state[CPLD0],CPLD_PORT0);
+    outw(cpld_port_state[CPLD0],CPLD_PORT0);
+    outw(cpld_port_state[CPLD0],CPLD_PORT0);
+    outw(cpld_port_state[CPLD0],CPLD_PORT0);
+    
+    res=inw(cpld_port_array[CPLD0]);
+    while((res2=inw(cpld_port_array[CPLD0]))!=res) /* wait for the value to become stable */
+        res=res2;
+    //spin_unlock(&av3xx_cpld_lock);
+}
+
 void init_cpld(void)
 {
     int version;
+    
+    //spin_lock_init(&av3xx_cpld_lock);
+    //spin_lock_init(&av3xx_cpldState_lock);
     
     cpld_do_select(); 
     outw(cpld_port_state[CPLD1],CPLD_PORT1);
@@ -46,68 +108,3 @@ void init_cpld(void)
     /* everything is ok */
     printk("[init] CPLD Ver:0x%x\n",version);
 }
-
-__IRAM_CODE void cpld_chg_state(int cpld_port,int bit_num,int direction)
-{
-    int tmp;
-    
-    /* LOCK */    
-    tmp=cpld_port_state[cpld_port];
-    if(direction)
-        tmp |= (0x1 << bit_num);
-    else
-        tmp &= ~(0x1 << bit_num);
-        
-    if(tmp!=cpld_port_state[cpld_port])
-    {
-        cpld_port_state[cpld_port]=tmp;
-        outw(cpld_port_state[cpld_port],cpld_port_array[cpld_port]);
-    }
-    /* UNLOCK */
-}
-
-__IRAM_CODE int cpld_read(int cpld_port)
-{
-    int val;
-    /* LOCK */
-    val=inw(cpld_port_array[cpld_port]);
-    /* UNLOCK */
-    return val;
-}
-
-__IRAM_CODE void cpld_select(int bit_num,int direction)
-{
-    int val;
-    /* LOCK */
-    if(direction)
-        val = cpld_port_state[CPLD0] | (0x1 << bit_num);
-    else
-        val = cpld_port_state[CPLD0] & ~(0x1 << bit_num);
-    if(val != cpld_port_state[CPLD0])
-    {
-        cpld_port_state[CPLD0]=val;
-        cpld_do_select();
-    }
-    /* UNLOCK */
-}
-
-__IRAM_CODE void cpld_do_select(void)
-{  
-    int res,res2;
-    /* LOCK */
-    printk("changing cpld select : %d\n",cpld_port_state[CPLD0]);
-    outw(cpld_port_state[CPLD0],CPLD_PORT0);
-    outw(cpld_port_state[CPLD0],CPLD_PORT0);
-    outw(cpld_port_state[CPLD0],CPLD_PORT0);
-    outw(cpld_port_state[CPLD0],CPLD_PORT0);
-    outw(cpld_port_state[CPLD0],CPLD_PORT0);
-    
-    res=inw(cpld_port_array[CPLD0]);
-    while((res2=inw(cpld_port_array[CPLD0]))!=res) /* wait for the value to become stable */
-        res=res2;
-    /* UNLOCK */
-}
-
-
-
-

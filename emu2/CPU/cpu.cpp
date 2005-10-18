@@ -1,4 +1,4 @@
-/*
+/* 
 *   cpu.cpp
 *
 *   AV3XX emulator
@@ -17,16 +17,6 @@
 #include <mem_space.h>
 
 #include <cpu.h>
-
-#include <cmd_line.h>
-#include <bkpt_list.h>
-
-#include <HW_TI.h>
-
-#include <gio_MAS_EOD.h>
-
-
-extern mem_space * mem;
 
 char * mode_str[] = {"User","System","Supervisor","Abort","Undefined","IRQ","FIQ"};
 
@@ -53,11 +43,7 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
                     
 
 #define MODE          (cpsr_tab[*mode_regs[M_USER][R_CPSR] & 0xF])
-#define SET_MODE(val) \
-  { \
-    *mode_regs[M_USER][R_CPSR]=(*mode_regs[M_USER][R_CPSR] & 0xFFFFFFE0) | 0x10 | mode_tab[val]; \
-    current_reg = mode_regs[MODE]; \
-  }
+#define SET_MODE(val) {*mode_regs[M_USER][R_CPSR]=(*mode_regs[M_USER][R_CPSR] & 0xFFFFFFF0)|mode_tab[val];}
 
 #define GET_FLAG(mask) (*mode_regs[M_USER][R_CPSR] & (mask))
 #define SET_FLAG(mask) {*mode_regs[M_USER][R_CPSR] = (*mode_regs[M_USER][R_CPSR] & ~(mask)) | (mask); current_reg = mode_regs[MODE];}
@@ -69,6 +55,8 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 #define T_FLAG        GET_FLAG(T_MASK)
 #define FIQ_FLAG      GET_FLAG(FIQ_MASK)
 #define IRQ_FLAG      GET_FLAG(IRQ_MASK)
+
+#define SET_T(COND)   {if(COND) SET_FLAG(T_MASK) else CLR_FLAG(T_MASK)}
 
 #define Q_MASK        (0x08000000)
 #define V_MASK        (0x10000000)
@@ -93,15 +81,12 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 
 #define RR(N)         (reg_str[N])
 
-#define INT_DEBUG_HEAD   {printf("@%08x:%08x|%s%s%s%s%s|%s| ",old_PC,instruction, \
+#ifdef DEBUG_MODE
+#define DEBUG_HEAD   {printf("@%08x:%08x|%s%s%s%s%s|%s| ",old_PC,instruction, \
             N_FLAG?"N":" ",Z_FLAG?"Z":" ",C_FLAG?"C":" ",V_FLAG?"V":" ",Q_FLAG?"Q":" ", \
             cond_str[condCode&0xF]);}
-#define INT_DEBUG_HEAD_THUMB   {printf("@%08x:%04x|%s%s%s%s%s| ",old_PC,instruction, \
+#define DEBUG_HEAD_THUMB   {printf("@%08x:%04x|%s%s%s%s%s| ",old_PC,instruction, \
             N_FLAG?"N":" ",Z_FLAG?"Z":" ",C_FLAG?"C":" ",V_FLAG?"V":" ",Q_FLAG?"Q":" ");}
-            
-#ifdef DEBUG_MODE
-#define DEBUG_HEAD         if(run_mode==STEP || disp_mode==1) INT_DEBUG_HEAD
-#define DEBUG_HEAD_THUMB   if(run_mode==STEP || disp_mode==1) INT_DEBUG_HEAD_THUMB
 #else
 #define DEBUG_HEAD
 #define DEBUG_HEAD_THUMB
@@ -111,143 +96,98 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
            
 #define CHG_MODE     {   int __old_mode=MODE;      \
                          REG(R_CPSR)=REG(R_SPSR);  \
-                         CHK_T_FLAG_FCT            \
-                         CHK_IRQ_FCT               \
-                         CHK_FIQ_FCT               \
                          if(__old_mode != MODE)    \
                          { \
-                            printf("Mode has changed from %s to %s at %x\n",mode_str[__old_mode],mode_str[MODE],PC_REAL); \
+                            DEBUG("Mode has changed from %s to %s\n",mode_str[__old_mode],mode_str[MODE]); \
                             current_reg = mode_regs[MODE]; \
                          } \
                      }
 
-int run_mode;
-int HW_mode=0;
-int disp_mode=0;
-                     
-uint32_t old_PC;
-                   
 char * cond_str[] = {"EQ","NE","CS","CC","MI","PL","VS","VC","HI","LS","GE","LT","GT","LE","  ","ERR"};
-
-uint32_t ** current_reg;
-uint32_t * mode_regs[7][18];        
-uint32_t regs_data[37];
-
-uint32_t my_data;
                      
-
-void thumb_mode_fct(uint32_t address);
-void arm_mode_fct(uint32_t address);
-
-void (*t_flag_mode_fct)(uint32_t address)=arm_mode_fct;
-
-
-
-#define CHK_T_FLAG_FCT {                                 \
-    if(*mode_regs[M_USER][R_CPSR] & (0x00000020))        \
-    {                                                    \
-        t_flag_mode_fct = thumb_mode_fct;                \
-    }                                                    \
-    else                                                 \
-    {                                                    \
-        t_flag_mode_fct = arm_mode_fct;                  \
-    }                                                    \
-}
-                     
-#define SET_T(COND) {                      \
-    if(COND)                               \
-    {                                      \
-        t_flag_mode_fct = thumb_mode_fct;  \
-        SET_FLAG(T_MASK)                   \
-    }                                      \
-    else                                   \
-    {                                      \
-        t_flag_mode_fct = arm_mode_fct;    \
-        CLR_FLAG(T_MASK)                   \
-    }                                      \
-}
-
-
-void void_irq_fiq(void) {};
-
-void (*cur_irq_fct)(void) = void_irq_fiq;
-void (*cur_fiq_fct)(void) = void_irq_fiq;
-
-bool chkIrqFlag()
+Cpu::Cpu(mem_space * mem)
 {
-    return !IRQ_FLAG;
-}
-
-bool chkFiqFlag()
-{
-    return !FIQ_FLAG;
-}
-
-void cpu_do_irq(void);
-void cpu_do_fiq(void);
-
-#define CHK_IRQ_FCT                                      \
-{                                                        \
-    if(chkIrqFlag() && mem->hw_TI->HW_irq->have_int_IRQ)    \
-        cur_irq_fct = cpu_do_irq;                        \
-    else                                                 \
-        cur_irq_fct = void_irq_fiq;                      \
-}
-
-#define CHK_FIQ_FCT                                      \
-{                                                        \
-    if(chkFiqFlag() && mem->hw_TI->HW_irq->have_int_FIQ)    \
-        cur_irq_fct = cpu_do_fiq;                        \
-    else                                                 \
-        cur_irq_fct = void_irq_fiq;                      \
-}
-
-void cpu_do_irq(void)
-{
-    //printState();
-    mem->hw_TI->HW_irq->have_int_IRQ = false;
-    //printf("IRQ - return at %x\n",PC_REAL+4);
-    *mode_regs[M_IRQ][R_LR]=PC_REAL+4;
-    *mode_regs[M_IRQ][R_SPSR]=REG(R_CPSR);
-    SET_MODE(M_IRQ);
-    CLR_FLAG(T_MASK);
-    CHK_T_FLAG_FCT
-    SET_FLAG(IRQ_MASK);
-    CHK_IRQ_FCT
-    CHK_FIQ_FCT
-    REG(R_PC)=0x18;
-}
-
-void cpu_do_fiq(void)
-{
-    mem->hw_TI->HW_irq->have_int_FIQ = false;
-    //printf("FIQ - return at %x\n",PC_REAL+4);
-    *mode_regs[M_FIQ][R_LR]=PC_REAL+4;
-    *mode_regs[M_FIQ][R_SPSR]=REG(R_CPSR);
-    SET_MODE(M_FIQ);
-    CLR_FLAG(T_MASK);
-    CHK_T_FLAG_FCT
-    SET_FLAG(FIQ_MASK);
-    SET_FLAG(IRQ_MASK);
-    CHK_IRQ_FCT
-    CHK_FIQ_FCT
-    REG(R_PC)=0x1C;
-}
-
-BKPT_LIST * bkpt;
-
-bool data_abort=false;
-
-void init_cpu_static_fct(void);
-
-void void_cmdline(void) {}
-
-void (*cmd_line_fct)(void)=void_cmdline;
-
-#if 0
-bool checkCondition(int condCode)
-{
+    int i,j;
     
+    this->mem=mem;
+      
+    /*init regs data*/
+    for(i=0;i<38;i++)
+        regs_data[i]=0;
+
+           
+    /*ini the same regs for all modes */
+    for(i=0;i<17;i++)
+        for(j=0;j<7;j++)
+            mode_regs[j][i] = &regs_data[i];
+    
+    /* SVC mode */
+    mode_regs[M_SVC][R_SP] =  &regs_data[17];
+    mode_regs[M_SVC][R_LR] =  &regs_data[18];
+    mode_regs[M_SVC][R_SPSR] = &regs_data[19];
+    
+    /* ABT mode */
+    mode_regs[M_ABT][R_SP] =  &regs_data[20];
+    mode_regs[M_ABT][R_LR] =  &regs_data[21];
+    mode_regs[M_ABT][R_SPSR] = &regs_data[22];
+    
+    /* UND mode */
+    mode_regs[M_UND][R_SP] =  &regs_data[23];
+    mode_regs[M_UND][R_LR] =  &regs_data[24];
+    mode_regs[M_UND][R_SPSR] = &regs_data[25];
+    
+    /* IRQ mode */
+    mode_regs[M_IRQ][R_SP] =  &regs_data[26];
+    mode_regs[M_IRQ][R_LR] =  &regs_data[27];
+    mode_regs[M_IRQ][R_SPSR] = &regs_data[28];
+    
+    /* FIQ mode */
+    for(i=0;i<7;i++)
+        mode_regs[M_FIQ][R_R8+i] = &regs_data[29+i];
+    mode_regs[M_FIQ][R_SPSR] = &regs_data[36];
+       
+    SET_FLAG(IRQ_MASK);
+    SET_FLAG(FIQ_MASK);
+    
+    SET_MODE(M_SVC);
+    current_reg = mode_regs[M_SVC];
+    
+    printf("Init of Cpu object      DONE\n");
+    
+}
+
+
+void Cpu::go(uint32_t start_address,uint32_t stack_address)
+{
+    uint32_t instruction;
+    REG(R_PC)=start_address;
+    REG(R_SP)=stack_address;
+    //for(int i=0;i<0x20;i++)
+    while(1)
+    {        
+        old_PC=PC_REAL;
+        if(T_FLAG)  /* THUMB */
+        {            
+            instruction=mem->read(PC_REAL&0xfffffffe,2);
+            PC_REAL+=2;
+            doThumb(instruction);
+        }
+        else       /* ARM */
+        {
+            instruction=mem->read((PC_REAL+2)&0xfffffffc,4);
+            PC_REAL+= 4;
+            doARM(instruction);
+        }
+        
+        
+        
+    }
+}
+
+
+
+bool Cpu::checkCondition(int condCode)
+{
     switch(condCode & 0xF)
     {
             case 0xE:                                       // AL
@@ -286,227 +226,8 @@ bool checkCondition(int condCode)
     }
     return false;
 }
-#else
-/*   0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
-  0000 0001 0010 0011 0100 0101 0110 0111 1000 1001 1010 1011 1100 1101 1110 1111
-  NZCV  */
-int cond_tab[0x10][0x10] = {
-/*cond / result| 0 1 2 3 4 5 6 7 8 9 A B C D E F */
-/*0 - EQ*/     { 0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1},  /* Z set   */
-/*1 - NE*/     { 1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0},  /* Z clear */
-/*2 - CS/HS*/  { 0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1},  /* C set   */
-/*3 - CC/LO*/  { 1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0},  /* C clear */
-/*4 - MI*/     { 0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1},  /* N set   */
-/*5 - PL*/     { 1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0},  /* N clear */
-/*6 - VS*/     { 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1},  /* V set   */
-/*7 - VC*/     { 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0},  /* V clear */
-/*8 - HI*/     { 0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0},  /* (C_FLAG && !Z_FLAG) */
-/*9 - LS*/     { 1,1,0,0,1,1,1,1,1,1,0,0,1,1,1,1},  /* (!C_FLAG || Z_FLAG) */
-/*A - GE*/     { 1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1},  /* (N_FLAG == V_FLAG)  */
-/*B - LT*/     { 0,1,0,1,0,1,0,1,1,0,1,0,1,0,1,0},  /* (N_FLAG != V_FLAG)  */
-/*C - GT*/     { 1,0,1,0,0,0,0,0,0,1,0,1,0,0,0,0},  /* (!Z_FLAG && ((N_FLAG && V_FLAG) || (!N_FLAG && !V_FLAG))) */
-/*D - LE*/     { 0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1},  /* (Z_FLAG || ((N_FLAG && !V_FLAG) || (!N_FLAG && V_FLAG)))  */
-/*E - AL*/     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-/*F - UNK*/    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-};
-#define checkCondition(VAL) (cond_tab[VAL&0xF][((*mode_regs[M_USER][R_CPSR])>>28)&0xF])
-#endif
 
-
-#include "thumb_data_processing.h"
-#include "thumb_load_store.h"
-#include "thumb_load_store_multi.h"
-#include "thumb_misc.h"
-
-struct fct_data {
-    int blank_size;
-    int mask;    
-    void (*fct)(uint32_t instruction);
-};
-
-void (*thumb_fct[1024])(uint32_t ) ;
-
-#include "thumb_fct_ini_tab.h"
-
-void ini_thumb_fct(void)
-{
-    int i,j,k;
-    /* clearing the whole fct array */
-    for(i=0;i<1024;i++)
-        thumb_fct[i] = NULL;
-        
-    /* init array using fct_ini_tab */    
-    for(i=0;fct_ini_tab[i].fct!=NULL;i++)
-    {
-        j=0x1<<fct_ini_tab[i].blank_size;
-        for(k=0;k<j;k++)
-        { 
-            /*if(thumb_fct[fct_ini_tab[i].mask|k])
-                printf("error thumb_fct[%x] already defined (cur %x)\n",fct_ini_tab[i].mask|k,i);
-            else*/
-                thumb_fct[fct_ini_tab[i].mask|k] = fct_ini_tab[i].fct;
-        }
-    }
-    
-    /*Let's see if we've forgot something*/
-    k=0;
-    for(j=0;j<1024;j++)
-        if(!thumb_fct[j])
-        {
-            k++;
-            printf("%04d|error thumb_fct[%x] not defined\n",k,j);            
-        }
-    printf("[ini_thumb fct] Processed %04d fct, we've missed : %04d cells in thumb_fct\n",i,k);
-}
-
-
-
-void thumb_mode_fct(uint32_t address)
-{
-    uint32_t instruction = mem->read(address,2);
-    PC_REAL+=2;
-    DEBUG_HEAD_THUMB;
-    thumb_fct[(instruction>>6)&0x3FF](instruction);
-    if(disp_mode==1 || run_mode==STEP)
-        printState();
-}
-
-void arm_mode_fct(uint32_t address)
-{
-    PC_REAL+= 4;
-    doARM(mem->read(address,4));
-}
-                     
-void init_cpu(void)
-{
-    int i,j;
-    
-    /*init regs data*/
-    for(i=0;i<38;i++)
-        regs_data[i]=0;
-
-           
-    /*ini the same regs for all modes */
-    for(i=0;i<17;i++)
-        for(j=0;j<7;j++)
-            mode_regs[j][i] = &regs_data[i];
-    
-    /* SVC mode */
-    mode_regs[M_SVC][R_SP] =  &regs_data[17];
-    mode_regs[M_SVC][R_LR] =  &regs_data[18];
-    mode_regs[M_SVC][R_SPSR] = &regs_data[19];
-    
-    /* ABT mode */
-    mode_regs[M_ABT][R_SP] =  &regs_data[20];
-    mode_regs[M_ABT][R_LR] =  &regs_data[21];
-    mode_regs[M_ABT][R_SPSR] = &regs_data[22];
-    
-    /* UND mode */
-    mode_regs[M_UND][R_SP] =  &regs_data[23];
-    mode_regs[M_UND][R_LR] =  &regs_data[24];
-    mode_regs[M_UND][R_SPSR] = &regs_data[25];
-    
-    /* IRQ mode */
-    mode_regs[M_IRQ][R_SP] =  &regs_data[26];
-    mode_regs[M_IRQ][R_LR] =  &regs_data[27];
-    mode_regs[M_IRQ][R_SPSR] = &regs_data[28];
-    
-    /* FIQ mode */
-    for(i=0;i<7;i++)
-        mode_regs[M_FIQ][R_R8+i] = &regs_data[29+i];
-    mode_regs[M_FIQ][R_SPSR] = &regs_data[36];
-       
-    SET_FLAG(IRQ_MASK);
-    SET_FLAG(FIQ_MASK);
-    CHK_IRQ_FCT
-    CHK_FIQ_FCT
-    SET_MODE(INIT_MODE); //M_SYS
-    
-    /* init the cmd line */
-    
-    init_cpu_static_fct();
-    
-    /* init bkpt_list */
-    
-    bkpt= new_bkpt_list(BKPT_CPU); 
-    //add(bkpt,0x0302786c);
-
-    ini_thumb_fct();
-    
-    CHK_T_FLAG_FCT
-    
-    printf("Init of Cpu object      DONE\n");
-    
-}
-
-uint32_t read_reg(int num)
-{
-    return GET_REG(num);
-}
-
-void sigint(void)
-{
-    CHG_RUN_MODE(STEP)
-}
-
-#include "cpu_cmd_line_fct.h"
-
-void go(uint32_t start_address,uint32_t stack_address)
-{
-    REG(R_PC)=start_address;
-    REG(R_SP)=stack_address;
-    
-    CHG_RUN_MODE(STEP)
-    //CHG_RUN_MODE(RUN)
-    uint32_t address;
-    
-    while(1)
-    {  
-        mem->hw_TI->uart_list[0]->nxtEvent();
-        mem->hw_TI->uart_list[1]->nxtEvent();
-        mem->hw_TI->osd->nxtEvent();
-        
-        ((gio_MAS_EOD*)mem->hw_TI->gpio->port_list[0x4])->chkEOD();
-        
-        for(int i=0;i<4;i++)            
-            mem->hw_TI->timer_list[i]->nxt_cycle();    
-        
-        #if 0
-        if(data_abort)
-        {
-            data_abort = false;
-            *mode_regs[M_ABT][R_LR]=PC_REAL+8;
-            *mode_regs[M_ABT][R_SPSR]=REG(R_CPSR);
-            SET_MODE(M_ABT);
-            CLR_FLAG(T_MASK);
-            CHK_T_FLAG_FCT
-            SET_FLAG(IRQ_MASK);
-            CHK_IRQ_FCT
-            CHK_FIQ_FCT
-            REG(R_PC)=0x10;
-            //printf("WARNING DATA ABT\n");
-            CHG_RUN_MODE(STEP)
-        }
-        #endif
-        
-        cur_fiq_fct();
-        cur_irq_fct();
-        
-        address = T_FLAG ? PC_REAL&0xfffffffe : (PC_REAL+2)&0xfffffffc;
-                
-        bkpt->fct(bkpt,address,0);
-        cmd_line_fct();
-        bkpt_step->fct(bkpt_step,address,0);
-                
-        old_PC=PC_REAL;
-        t_flag_mode_fct(address);
-    }
-}
-
-
-    
-
-void doARM(uint32_t instruction)
+void Cpu::doARM(uint32_t instruction)
 {
     int condCode = (instruction >> 28) & 0xf;
     int instr_num = (instruction >> 25) & 0x7;
@@ -550,7 +271,6 @@ void doARM(uint32_t instruction)
                             case 0:
                                 if((instruction>>22)&0x1)
                                 {                           /* BIT 22 == 1 */ /* CLZ */
-                                    INT_DEBUG_HEAD
                                     printf("CLZ : Undef instruction\n");
                                     exit(0);
                                 }
@@ -565,13 +285,11 @@ void doARM(uint32_t instruction)
                                         if(GET_REG(Rm) & 0x1)
                                         {
                                             SET_FLAG(T_MASK);
-                                            CHK_T_FLAG_FCT
                                             DEBUG("Thumb - ");
                                         }
                                         else
                                         {
                                             CLR_FLAG(T_MASK);
-                                            CHK_T_FLAG_FCT
                                             DEBUG("ARM - ");
                                         }
                                         REG(R_PC) = GET_REG(Rm) & 0xFFFFFFE;
@@ -584,7 +302,6 @@ void doARM(uint32_t instruction)
                                 }
                                 break;
                             case 1:
-                                INT_DEBUG_HEAD
                                 printf("BLX: Undef instruction\n");
                                 exit(0);
                                 break;
@@ -592,7 +309,6 @@ void doARM(uint32_t instruction)
                                 arm_DSP(condCode,instruction);
                                 break;
                             case 3:
-                                INT_DEBUG_HEAD
                                 printf("BKPT: Undef instruction\n");
                                 exit(0);
                                 break;
@@ -621,8 +337,7 @@ void doARM(uint32_t instruction)
                     arm_MSR_MRS(condCode,instr_num,instruction);                    
                 else
                 {
-                    INT_DEBUG_HEAD
-                    printf("Undef instruction (1) %x\n",instruction);                   
+                    printf("Undef instruction\n");                   
                     exit(0);
                 }
             else   /* data processing immediate */
@@ -631,8 +346,7 @@ void doARM(uint32_t instruction)
         case 0x3:
             if(condCode == 0xf)
             {
-                INT_DEBUG_HEAD
-                printf("Undef instruction (2) %x\n",instruction);
+                printf("Undef instruction\n");
                 exit(0);
             }
         case 0x2:
@@ -671,7 +385,7 @@ void doARM(uint32_t instruction)
             break;
         case 0x6:
             if(checkCondition(condCode))
-                arm_CoProcessor(condCode,instruction);
+                arm_CoProcessor(instruction);
             else
                 DEBUG("CoProcessor CC not met\n");
             break;
@@ -679,7 +393,7 @@ void doARM(uint32_t instruction)
             if(((instruction>>24)&0x1)==0)
             {
                 if(checkCondition(condCode))
-                    arm_CoProcessor(condCode,instruction);
+                    arm_CoProcessor(instruction);
                 else
                     DEBUG("CoProcessor CC not met\n");
             }
@@ -692,11 +406,8 @@ void doARM(uint32_t instruction)
                     *mode_regs[M_SVC][R_SPSR]=REG(R_CPSR);
                     SET_MODE(M_SVC);
                     CLR_FLAG(T_MASK);
-                    CHK_T_FLAG_FCT
                     SET_FLAG(IRQ_MASK);
                     REG(R_PC)=0x8;
-                    CHK_IRQ_FCT
-                    CHK_FIQ_FCT
                 }
                 else
                     DEBUG("SWI CC not met\n");
@@ -706,8 +417,109 @@ void doARM(uint32_t instruction)
              printf("You should not be here\n");
              exit(0);
     }
-    if(disp_mode==1 || run_mode==STEP)
-        printState();
+#ifdef PRINTSTATE    
+    printState();
+#endif
+}
+
+void Cpu::arm_MSR_MRS(int condCode,int instr_num,uint32_t instruction)
+{
+    if (checkCondition(condCode))
+    {   
+        int old_mode = MODE;
+        
+        if((instruction >> 21) & 0x1)           /* MSR */
+        {
+            int opVal;
+            int Rm=instruction&0xF;
+            DEBUG("MSR ");            
+            
+            if((instruction>>25) & 0x1)
+            {
+                opVal=((instruction&0xFF) << (32-(((instruction>>8) & 0xF)*2))) | ((instruction&0xFF) >> (((instruction>>8) & 0xF)*2));
+                DEBUG("[%08x] -> ",opVal);
+            }
+            else
+            {
+                opVal = GET_REG(Rm);
+                DEBUG("R%d (%08x) -> ",Rm,GET_REG(Rm));
+            }
+            int mask = (instruction >> 16) & 0xF;
+            if((instruction >> 22) & 0x1)
+            {
+                
+                DEBUG("SPSR (mask =%08x)",mask);
+                if(old_mode == M_USER || old_mode == M_SYS)
+                {
+                    DEBUG(" !! ERROR, no SPSR in %s mode\n",mode_str[old_mode]);
+                }
+                else
+                {
+                    if( (mask & 0x1) == 0x1)
+                        REG(R_SPSR) = (GET_REG(R_SPSR) & ~0x000000FF) | (opVal & 0x000000FF);
+                    if( (mask & 0x2) == 0x2)
+                        REG(R_SPSR) = (GET_REG(R_SPSR) & ~0x0000FF00) | (opVal & 0x0000FF00);
+                    if( (mask & 0x4) == 0x4)
+                        REG(R_SPSR) = (GET_REG(R_SPSR) & ~0x00FF0000) | (opVal & 0x00FF0000);
+                    if( (mask & 0x8) == 0x8)
+                        REG(R_SPSR) = (GET_REG(R_SPSR) & ~0xFF000000) | (opVal & 0xFF000000);
+                    DEBUG(" => %08x\n",GET_REG(R_SPSR));
+                }
+            }
+            else
+            {
+                DEBUG("CPSR (%08x)",mask);
+                if( (mask & 0x1) == 0x1)
+                    REG(R_CPSR) = (GET_REG(R_CPSR) & ~0x000000FF) | (opVal & 0x000000FF);
+                if( (mask & 0x2) == 0x2)
+                    REG(R_CPSR) = (GET_REG(R_CPSR) & ~0x0000FF00) | (opVal & 0x0000FF00);
+                if( (mask & 0x4) == 0x4)
+                    REG(R_CPSR) = (GET_REG(R_CPSR) & ~0x00FF0000) | (opVal & 0x00FF0000);
+                if( (mask & 0x8) == 0x8)
+                    REG(R_CPSR) = (GET_REG(R_CPSR) & ~0xFF000000) | (opVal & 0xFF000000);
+                DEBUG(" => %08x\n",GET_REG(R_CPSR));
+            }
+        }
+        else                                   /* MRS */
+        {
+            DEBUG("MRS ");
+            
+            int Rd = (instruction >> 12) & 0xF;
+            if((instruction >> 22) & 0x1)             /* SPSR */
+            {
+                 if(old_mode == M_USER || old_mode == M_SYS)
+                {
+                    DEBUG("ERROR, no SPSR in %s mode\n",mode_str[old_mode]);
+                    
+                }
+                else
+                {
+                    DEBUG("R%d <- SPSR (%08x)\n",Rd,GET_REG(R_SPSR));
+                    REG(Rd) = GET_REG(R_SPSR);
+                }
+                
+            }
+            else                                      /* CPSR */
+            {
+                DEBUG("R%d <- CPSR (%08x)\n",Rd,GET_REG(R_CPSR));
+                REG(Rd) = GET_REG(R_CPSR);
+            }
+        }
+        
+        /* checking mode change */
+        if(old_mode != MODE)
+        {
+            DEBUG("Mode has changed from %s to %s\n",mode_str[old_mode],mode_str[MODE]);
+            current_reg = mode_regs[MODE];
+        }
+    }
+    else
+    {
+        DEBUG("MSR/MRS CC not met\n");
+    }
+    
+    
+            
 }
 
 /* special ops */
@@ -730,12 +542,277 @@ void doARM(uint32_t instruction)
 
 #include "cpu_multiply.h"
 
-/* misc ARM functions */
+       
+void Cpu::arm_CoProcessor(uint32_t instruction)
+{
+    DEBUG("coprocessor instruction: %08x\n",instruction);
+    exit(0);
+}
 
-#include "arm_misc.h"
 
+void Cpu::arm_DSP(int condCode,uint32_t instruction)
+{
+    DEBUG("DSP instruction: %08x\n",instruction);
+    exit(0);
+}
 
-void printState(void)
+void Cpu::arm_Swap(uint32_t instruction)
+{
+    int Rm=instruction & 0xF;
+    int Rn=(instruction>>16) &0xF;
+    int Rd=(instruction>>12) &0xF;
+    
+    uint32_t data;  
+    
+    DEBUG("SWP"); 
+
+    if((instruction>>22) & 0x1)           // SWPB
+    {
+        DEBUG("B [R%d] = R%d R%d = [R%d]\n",Rn,Rm,Rd);
+        data = mem->read(GET_REG(Rn),1);
+        mem->write(GET_REG(Rn),GET_REG(Rm) & 0xFF,1);
+        REG(Rd) = data;
+    }
+    else                                  // SWP
+    {
+        DEBUG(" [R%d] = R%d R%d = [R%d] (rot right:",Rn,Rm,Rd);
+        switch(GET_REG(Rn) & 0x3)
+        {
+            case 0x0:
+                data = mem->read(GET_REG(Rn),4);
+                DEBUG("0)\n");
+                break;
+            case 0x1:
+                data = mem->read(GET_REG(Rn),4);
+                data = ((data << 24) & 0xFF000000) | ((data >> 8) & 0x00FFFFFF);
+                DEBUG("8)\n");
+                break;
+            case 0x2:
+                data = mem->read(GET_REG(Rn),4);
+                data = ((data << 16) & 0xFFFF0000)  | ((data >> 16) & 0x0000FFFF);
+                DEBUG("16)\n");
+                break;
+            case 0x3:
+                data = mem->read(GET_REG(Rn),4);
+                data = ((data << 8) & 0xFFFFFF00)  | ((data >> 24) & 0xFF000000);
+                DEBUG("24)\n");
+                break;
+        }
+        mem->write(GET_REG(Rn),GET_REG(Rm),4);
+        REG(Rd)=data;
+    }
+}
+
+void Cpu::doThumb(uint32_t instruction)
+{
+    int instr_num = (instruction >> 13) & 0x7;
+    
+    DEBUG_HEAD_THUMB;
+    
+    switch(instr_num)
+    {
+        case 0x0:
+            switch((instruction>>10)&0x7)
+            {
+                case 0x6:
+                    thumb_data_process(0x0,(instruction>>9)&0x1,instruction);
+                    break;
+                case 0x7:
+                    thumb_data_process(0x1,(instruction>>9)&0x1,instruction);
+                    break;
+                default:
+                    thumb_data_process(0x3,(instruction>>11)&0x3,instruction);
+                    break;
+            }
+            break;
+        case 0x1:
+            thumb_data_process(0x2,(instruction>>11)&0x3,instruction);
+            break;
+        case 0x2:
+            if(TST_BIT(instruction,12) == 0)
+            {
+                if(TST_BIT(instruction,11) == 0)
+                {
+                    if(TST_BIT(instruction,10) == 0)
+                    {
+                        thumb_data_process(0x4,(instruction>>6)&0xF,instruction);
+                    }
+                    else
+                    {
+                        if(((instruction>>8)&0x3)!=0x3)
+                        {
+                            thumb_data_process(0x7,(instruction>>8)&0x3,instruction);
+                        }
+                        else
+                        {
+                            if(TST_BIT(instruction,7) == 1)
+                            {
+                                DEBUG("BLX undefined in armV4\n");
+                                exit(0);
+                            }
+                            else                    /* BX */
+                            {
+                                int Rm = (instruction>>3)&0xF;
+                                uint32_t dest = GET_REG(Rm) & 0xFFFFFFFE;
+                                SET_T(GET_REG(Rm) & 0x1);
+                                REG(R_PC) = dest;
+                                DEBUG("BX %s => 0x%08x\n",GET_REG(Rm) & 0x1?"THUMB":"ARM",dest);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    thumb_load_store(0x2,0x0,instruction);
+                }
+            }
+            else
+            {
+                thumb_load_store(0x1,(instruction>>9)&0x7,instruction);
+            }
+            break;
+        case 0x3:
+            thumb_load_store(0x0,(instruction>>11)&0x1F,instruction);
+            break;
+        case 0x4:
+            if(TST_BIT(instruction,12) == 0)
+                thumb_load_store(0x0,(instruction>>11)&0x1F,instruction);
+            else
+                thumb_load_store(0x3,(instruction>>11)&0x1,instruction);
+            break;
+        case 0x5:
+            if(TST_BIT(instruction,12) == 0)
+            {
+                thumb_data_process(0x5,0,instruction);
+            }
+            else
+            {
+                switch((instruction>>9)&0x3)
+                {
+                    case 0x0:
+                        thumb_data_process(0x6,(instruction>>7)&0x1,instruction);
+                        break;
+                    case 0x2:
+                        thumb_load_store_multi(0x1,(instruction>>11)&0x1,instruction);
+                        break;
+                    case 0x3:
+                        DEBUG("BKT undef for ARMv4\n");
+                        exit(0);
+                    default:
+                        printf("Error: MISC instruction with undef op: %x\n",(instruction>>9)&0x3);
+                        exit(0);
+                }                
+            }
+            break;
+        case 0x6:
+            if(TST_BIT(instruction,12) == 0)
+            {
+                thumb_load_store_multi(0x0,(instruction>>11)&0x1,instruction);
+            }
+            else
+            {
+                int cond=(instruction>>8)&0xF;
+                switch(cond)
+                {
+                    case 0xF:                            /* SWI */
+                        DEBUG("SWI :%08x\n",instruction & 0x000000FF);
+                        *mode_regs[M_SVC][R_LR]=PC_REAL;
+                        *mode_regs[M_SVC][R_SPSR]=REG(R_CPSR);
+                        SET_MODE(M_SVC);
+                        CLR_FLAG(T_MASK);
+                        SET_FLAG(IRQ_MASK);
+                        REG(R_PC)=0x8;
+                        break;
+                    case 0xE:
+                        DEBUG("undefined instruction\n");
+                        exit(0);
+                        break;
+                    default:                             /* B <cond> */
+                        DEBUG("B<%s> ",cond_str[cond&0xF]);
+                        if(checkCondition(cond))
+                        {
+                            uint32_t offset=(instruction&0xFF);
+                            offset=signExtend1(offset)<<1;
+                            REG(R_PC) = GET_REG(R_PC) + offset;
+                            DEBUG("=> 0x%08x\n",PC_REAL);                            
+                        }
+                        else
+                            DEBUG("CC not met\n");
+                        break;
+                        
+                }
+            }
+            break;
+        case 0x7:
+                uint32_t offset = instruction & 0x7FF;
+                switch((instruction>>11)&0x3)
+                {
+                    
+                    case 0x0:                /* B */
+                        offset=signExtend11(offset)<<1;
+                        REG(R_PC)=GET_REG(R_PC) + offset;
+                        DEBUG("B => 0x%08x\n",PC_REAL);                        
+                        break;
+                    case 0x1:                /* BLX step 2 => not defined */
+                        DEBUG("BLX undefined instruction\n");
+                        exit(0);
+                        break;
+                    case 0x2:                /* BL(X) step 1 */
+                        offset=signExtend11(offset)<<12;
+                        REG(R_LR)=GET_REG(R_PC)+offset;
+                        DEBUG("BL stp1 off 0x%08x\n",offset);
+                        break;
+                    case 0x3:                /* BL step 2 */
+                        offset=GET_REG(R_LR)+(offset<<1);
+                        REG(R_LR) = PC_REAL | 1 ;
+                        REG(R_PC) = offset;
+                        DEBUG("BL => 0x%08x\n",offset);
+                        break;
+                }
+            break;
+    }
+#ifdef PRINTSTATE    
+    printState();
+#endif
+}
+
+/* thumb data processing */
+
+#include "thumb_data_processing.h"
+
+/* thumb load/store */
+
+#include "thumb_load_store.h"
+
+/* thumb load/store multi*/
+
+#include "thumb_load_store_multi.h"
+
+////////////////////////////// signExtend
+uint32_t Cpu::signExtend1(uint32_t data)
+{
+    if(data > 0x7F) // neg
+        data -=  0x100;
+    return data;
+}
+
+uint32_t Cpu::signExtend11(uint32_t data)
+{
+    if(data > 0x3FF) // neg
+    {
+        data -=  0x800;
+    }
+    return data;
+}
+
+uint32_t Cpu::signExtend2(uint32_t data)
+{
+    if(data> 0x7FFF) // neg
+        data -=  0x10000;
+    return data;
+}
+
+void Cpu::printState(void)
 {
     int i=0;
     printf("Mode : %s (%d) - PC:%08x, LR:%08x, SP:%08x\n",mode_str[MODE],MODE,
@@ -758,4 +835,40 @@ void printState(void)
     if(MODE != M_USER && MODE != M_SYS)
         printf("SPSR: %08x\n",GET_REG(R_SPSR));
     
+}
+
+void Cpu::test_ini(void)
+{
+    int i;
+    for(i=0;i<17;i++)
+        regs_data[i]=i;
+        
+    regs_data[17]=0x0213;
+    regs_data[18]=0x0214;
+    regs_data[19]=0x0217;
+    
+    /* ABT mode */
+    regs_data[20]=0x0313;
+    regs_data[21]=0x0314;
+    regs_data[22]=0x0317;
+    
+    /* UND mode */
+    regs_data[23]=0x0413;
+    regs_data[24]=0x0414;
+    regs_data[25]=0x0417;
+    
+    /* IRQ mode */
+    regs_data[26]=0x0513;
+    regs_data[27]=0x0514;
+    regs_data[28]=0x0517;
+    
+    /* FIQ mode */
+    for(i=0;i<7;i++)
+        regs_data[29+i]=0x6*0x100+R_R8+i;
+   regs_data[36]=0x0617;
+   
+   printf("All regs init to test value\nNow printing them:\n");
+   for(i=0;i<7;i++)
+       printState();
+   
 }

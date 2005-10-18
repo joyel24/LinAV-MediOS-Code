@@ -14,7 +14,6 @@
 #define __ATA_H
 
 #include <kernel/hardware.h>
-#include <kernel/threads.h>
 //#include <kernel/disk.h>
 
 #define IDE_DATA                          (IDE_BASE+0x000)
@@ -41,10 +40,8 @@
 
 #define IDE_SEL_LBA                       0x40
 
-#define ATA_DO_READ                       0
-#define ATA_DO_WRITE                      1
-#define ATA_DO_IDENT                      2
-#define ATA_SLEEP                         3
+#define ATA_DO_READ                              0
+#define ATA_DO_WRITE                             1
 
 #define ATA_WITH_DMA                             1
 #define ATA_NO_DMA                               0
@@ -54,22 +51,10 @@
 
 #define SECTOR_SIZE      512
 
-typedef struct __ATA_CMD {
-    int drive;
-    int use_dma;
-    int xfer_dir;
-    void * data;
-    int count;
-    unsigned int lba;
-    struct __ATA_CMD * nxt;
-    TASK_INFO* pSenderThread;
-} ata_cmd_s;
-
-//int  ata_RW_Sector     (unsigned int lba,int count,void * buffer,int direction);
-int  ata_process_cmd   (ata_cmd_s * ata_cmd);
+int  ata_RW_Sector     (unsigned int lba,int count,void * buffer,int direction);
 void ata_RW_Data       (void * buffer,int count,int direction,int use_dma);
 
-int  ata_identify      (int drive,char * buffer);
+int  ata_identify      (char * buffer);
 
 int  ata_sleep         (void);
 
@@ -84,7 +69,5 @@ void ata_select_CF     (void);
 
 void ata_stop_HD       (void);
 
-void init_ata          (void);
-void ide_intr_action   (int irq);
 
 #endif

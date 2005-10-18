@@ -1,4 +1,4 @@
-include ../../Makefile.conf
+include ../Makefile.conf
 
 ASFLAGS  += -I../../include
 GCCFLAGS += -I../../include
@@ -15,4 +15,4 @@ force: clean all
 clean:  
 	@rm -f *.o *.bak *~ $(TARGET)
 
-include ../../default.rule
+include ../default.rule

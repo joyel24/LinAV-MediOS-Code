@@ -13,14 +13,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <signal.h>
-
 #include <emu.h>
 #include <mem_space.h>
 #include <cpu.h>
-#include <cmd_line.h>
 
 mem_space * mem;
+Cpu    * cpu;
 
 enum cmd_type {NO_CMD=0x0,F_SDRM='s',F_FLASH='f',C_HELP='h'};
 
@@ -28,15 +26,6 @@ void usage(char * name)
 {
     printf("Usage: %s -f name|-s name|-h\n-f : file to be loaded in flash\n-s : file to be loaded in sdram\n-h: help\n",name);
     exit(0);
-}
-
-void cmd_line(void);
-
-void signal_handler( int num ) {
-   if(num == SIGINT)
-   {
-       sigint();
-   }   
 }
 
 int main(int argc, char* argv[])
@@ -82,28 +71,18 @@ int main(int argc, char* argv[])
         }
     }
     
-    /*if(sdram_file == NULL)
+    if(sdram_file == NULL)
     {
         usage(argv[0]);
-    }*/
+    }
     
-    init_cmd_line();
-    
-    //sdram_file = "winav.bin";
-    //sdram_file = "linux.bin";
-    //sdram_file = "gravity.bin";
-    sdram_file = "CJBM_v2.depack";
-    //sdram_file = "fw1304.bin";
-    //sdram_file = "firm_1.depack_NEW";
-    //flash_file="flash_rom";
-    
+
     mem = new mem_space(flash_file,sdram_file);
     
-    init_cpu();
+    cpu = new Cpu(mem);
     
-    signal(SIGINT,&signal_handler);
-    
-    go(START_ADDR,STACK_INIT);
+    cpu->go(0x03000000,0x000080000-0x4);
     
     delete(mem);
+    delete(cpu);
 }

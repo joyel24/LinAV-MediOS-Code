@@ -19,12 +19,8 @@
 
 #define IRQ_OSD              7 // interrupt really fast, related to OSD
 
-#define IRQ_DSP              11
-
 #define IRQ_UART0            12 
 #define IRQ_UART1            13
-
-#define IRQ_IDE              15  // ide
 
 #define IRQ_BTN_ON           18  // GIO0
 

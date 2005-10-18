@@ -1,5 +1,5 @@
 /* 
-*   emu_types.h
+*   hw.h
 *
 *   AV3XX emulator
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,11 +10,14 @@
 * KIND, either express of implied.
 */
 
-#ifndef EMU_TYPES_H
-#define EMU_TYPES_H
+#ifndef __HW_H
+#define __HW_H
 
-typedef unsigned int uint32_t;
-typedef unsigned long uint64_t;
-typedef signed long long sint64_t;
 
-#endif
+class HW {
+    public:
+        HW();
+        ~HW();
+};
+
+#endif // __HW_H

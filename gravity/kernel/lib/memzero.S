@@ -9,7 +9,8 @@
 *
 *  ASM optimised string functions
 */
-.text
+
+	.text
 	.align	5
 	.word	0
 /*

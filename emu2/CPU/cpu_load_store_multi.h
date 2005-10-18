@@ -1,4 +1,4 @@
-void arm_LoadStoreMulti(uint32_t instruction)
+void Cpu::arm_LoadStoreMulti(uint32_t instruction)
 {
     bool bit_P = ((instruction >> 24) & 0x1);
     bool bit_U = ((instruction >> 23) & 0x1);
@@ -85,14 +85,13 @@ void arm_LoadStoreMulti(uint32_t instruction)
     {
         DEBUG("LDM%s ", debugShifter2);
 
-        bool has_PC = (register_list>>15)&0x1==0x1;
 
         uint32_t address = start_address;
         for(int k=0;k<15;k++)
         {
             if(register_list & 0x1)
             {
-                if(bit_S && !has_PC)
+                if(bit_S)
                     *mode_regs[M_USER][k]=mem->read(address,4);
                 else
                     REG(k)=mem->read(address,4);
@@ -105,45 +104,24 @@ void arm_LoadStoreMulti(uint32_t instruction)
         if(register_list & 0x1) // test for PC (R15)
         {
             DEBUG("PC\n");
-            uint32_t val;
             if(bit_S)
             {
                 int old_mode=MODE;
                 if(old_mode == M_USER || old_mode == M_SYS)  
                 {              
-                    //printf("Unpredictable, wrong mode\n");
-                    //exit(0);
+                    DEBUG("Unpredictable, wrong mode\n");
+                    exit(0);
                 }
-                else
-                {
+                else                
                     REG(R_CPSR)=REG(R_SPSR);
-                    CHK_T_FLAG_FCT
-                    CHK_IRQ_FCT
-                    CHK_FIQ_FCT
-                }
-                    
                 if(old_mode != MODE)
                 {
-                    printf("Mode has changed from %s to %s\n",mode_str[old_mode],mode_str[MODE]);
+                    DEBUG("Mode has changed from %s to %s\n",mode_str[old_mode],mode_str[MODE]);
                     current_reg = mode_regs[MODE];
                 }
                     
             }
-            
-            val=mem->read(address,4);
-            
-            REG(R_PC)=val & 0xFFFFFFFE;
-            
-            /*if(val & 0x1)
-            {
-                SET_FLAG(T_MASK);
-                CHK_T_FLAG_FCT
-            }
-            else
-            {
-                CLR_FLAG(T_MASK);
-                CHK_T_FLAG_FCT
-            }*/
+            REG(R_PC)=mem->read(address,4) & 0xFFFFFFFC;
             address+=4;
         }
         else

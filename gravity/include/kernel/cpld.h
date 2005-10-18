@@ -46,9 +46,9 @@
 #define CPLD_PORT2             (CPLD_BASE+0x200)
 #define CPLD_PORT3             (CPLD_BASE+0x300)
 
-extern void cpld_chg_state   (int cpld_port,int bit_num,int direction);
-extern void cpld_select      (int bit_num,int direction);
-extern int  cpld_read        (int cpld_port);
+void cpld_chg_state   (int cpld_port,int bit_num,int direction);
+void cpld_select      (int bit_num,int direction);
+int  cpld_read        (int cpld_port);
 
 #define cpld_set_port_0(bit_num)     cpld_select(bit_num,1)
 #define cpld_clear_port_0(bit_num)   cpld_select(bit_num,0)
@@ -59,8 +59,6 @@ extern int  cpld_read        (int cpld_port);
 #define cpld_set_port_3(bit_num)     cpld_chg_state(CPLD3,bit_num,1)
 #define cpld_clear_port_3(bit_num)   cpld_chg_state(CPLD3,bit_num,0)
 
-extern void cpld_do_select(void);
-
-extern void init_cpld(void);
-
+void cpld_do_select(void);
+void init_cpld(void);
 #endif

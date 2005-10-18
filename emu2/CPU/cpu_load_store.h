@@ -1,4 +1,4 @@
-void arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
+void Cpu::arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
 {
     int offset_12=0,shift=0,shift_imm=0,immedH=0,immedL=0;
     int Rm=0,Rn=0,Rd=0;
@@ -147,7 +147,7 @@ void arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
         {
             if (!checkCondition(condCode)) {
                 //hh = hh + "(cc not met)";
-                DEBUG("CC not met\n");
+                printf("CC not met\n");
                 return;
             }
             REG(Rn)=address;
@@ -157,7 +157,7 @@ void arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
     {
         address = RnVal;
         if (!checkCondition(condCode)) {
-            DEBUG("CC not met\n");
+            printf("CC not met\n");
             return;
         }
         if(bit_U)
@@ -178,7 +178,7 @@ void arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
     {
         if(!checkCondition(condCode)) {
             //hh = hh + "(cc not met)";
-            DEBUG("CC not met\n");
+            printf("CC not met\n");
             return;
         }
 
@@ -303,10 +303,9 @@ void arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
                 {
                     DEBUG("LDR %s, %s %s (0x%08x)\n" ,RR(Rd),RR(Rn),debugShifter,address);
                         
-                    data=mem->read(address&0xFFFFFFFC,4);
+                    data=mem->read(address,4);
                     int tst = address & 0x3;
                     uint32_t value=0;
-        #if 1
                     switch(tst)
                     {
                         case 0x0:
@@ -322,21 +321,16 @@ void arm_LoadStore(int condCode,int instr_num,uint32_t instruction)
                             value=(data << 8) | (data >> 24);
                             break;
                     }
-        #else
-                    value=data;
-        #endif
                     if(Rd==15)
                     {
                         //printf("@%08x:%08x| LDR loaded: 0x%08x org: 0x%08x\n",old_PC,instruction, value,address);
                         if(value & 0x1)
                         {
                             SET_FLAG(T_MASK);
-                            CHK_T_FLAG_FCT
                         }
                         else
                         {
                             CLR_FLAG(T_MASK);
-                            CHK_T_FLAG_FCT
                         }
                         REG(Rd) = value & 0xFFFFFFFE;
                     }

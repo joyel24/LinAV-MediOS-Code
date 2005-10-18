@@ -1,4 +1,4 @@
-include ../Makefile.conf
+include Makefile.conf
 
 ASFLAGS  += -I../include
 #-mfpu=softfpa
@@ -9,29 +9,27 @@ SRC2 = $(wildcard *.S)
 OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 
 
-SUBDIRS = init core lib driver gfx fs add_ons
+LDFLAGS = -L/home/thomas/Av320/arm-tools/inst_uclibc/toolchain/gcc-3.3.x/toolchain_arm_nofpu/arm-linux/lib/ -lgcc -Map amos.map
 
-TARGET = kernel.a
+TARGET = amos
 
-all: builddir subdirs $(TARGET) lib_gravity
+SUBDIRS = init core lib driver
+
+all: builddir subdirs $(TARGET) 
 
 force: clean all        
 
-$(TARGET) :
+$(TARGET) : $(OBJS)
 	@echo '-----   building kernel'
-#	@$(AR) -rc $(TARGET) build/*.o
-#	@$(RANLIB) $(TARGET)
+#	@cp -f $(OBJS) build/
+	$(LD) -N -Tamos.lds -o $(TARGET).elf build/*.o $(LDFLAGS)
+	@$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).bin
+#@$(RM) -f $(TARGET).elf
 clean:  clean-subdirs
-	@echo '-----   cleaining kernel'
-	@rm -f *.o *.bak *~ build/*.o $(TARGET) ../libgravity.a
+	@echo '-----   cleaining MAIN'
+	@rm -f *.o *.bak *~ $(TARGET).bin $(TARGET).elf ../include/*~ ../include/kernel/*~ ../include/sys_def/*~ build/*.o *.map
 
 builddir:
 	@mkdir -p build
         
-lib_gravity:
-	@make -C lib --no-print-directory -s all
-	@$(AR) -rc libgravity.a lib/*.o
-	@$(RANLIB) libgravity.a
-	@mv libgravity.a ../
-        
-include ../default.rule
+include default.rule

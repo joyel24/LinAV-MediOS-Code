@@ -7,18 +7,18 @@ OBJS = $(SRC:%.cpp=%.o)
 
 TARGET = emu
 
-SUBDIRS = CPU HW cmd_line
+SUBDIRS = CPU HW
 
 all: builddir subdirs $(TARGET)
 
 $(TARGET) : $(OBJS)
 	@echo '-----   building $(TARGET)'
 	@$(MV) *.o build/
-	@$(GPP) $(GPPFLAGS) -o $(TARGET) $(LDFLAGS) build/*.o -lreadline -lncurses -L/usr/X11R6/lib -lX11
+	@$(GPP) -o $(TARGET)  $(LDFLAGS) build/*.o
 
 clean:  clean-subdirs
 	@echo '-----   cleaning MAIN'
-	@rm -f *.o *~ $(TARGET) include/*~ build/*
+	@rm -f *.o *~ $(TARGET) include/*~ 
         
 builddir:
 	@mkdir -p build
