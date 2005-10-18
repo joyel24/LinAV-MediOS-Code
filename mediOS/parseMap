@@ -1,0 +1,17 @@
+if [ -z $1 ]; then
+	name="medios.map";
+else
+	name=$1;
+fi
+echo "Memory zone";
+for mem in DRAM IRAM; do
+	l1=`grep ^${mem} ${name} | awk '{print $2}'`
+	l2=`grep ^${mem} ${name} | awk '{print $3}'`
+	echo $mem : START:$l1 SIZE:$l2;
+done
+echo "Section list";
+for section in text iram rodata data bss common; do
+	l1=`grep ^\\\.${section} ${name} | awk '{print $2}'`;
+	l2=`grep ^\\\.${section} ${name} | awk '{print $3}'`;
+	echo "$section : START:$l1 SIZE:$l2";
+done
