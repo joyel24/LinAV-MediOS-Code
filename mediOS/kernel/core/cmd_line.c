@@ -259,7 +259,6 @@ extern PIPE * UART_0_Pipe;
 void init_cmd_line(void)
 {
     cur_pos=0;
-//    HTASK hTask;
     
     arg_list = (unsigned char**)malloc(sizeof(unsigned char*)*MAX_ARGS);
     cur_cmd = (unsigned char*)malloc(sizeof(unsigned char)*MAX_CMD_LEN);

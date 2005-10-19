@@ -72,7 +72,7 @@ ERROR_CODE load_bflat (const char * fname)
     unsigned long start_code;
     unsigned long * reloc_table;
     
-    //int (*run_flat)(int argc,char**argv);
+    int (*run_flat)(int argc,char**argv);
     
     
     fd_bflat = kfopen(fname,O_RDONLY);
@@ -220,16 +220,13 @@ ERROR_CODE load_bflat (const char * fname)
         
         FLAT_PRINT(" (%08x)\n",*(unsigned long*)reloc_point);
     }
-       
-    
-//    run_flat=header.entry+text_pos;
-//    FLAT_PRINT("[load_bflat] about to launch: %08x\n",run_flat);
-//    run_flat(0,NULL);
 
     
+    run_flat=header.entry+text_pos;
+    FLAT_PRINT("[load_bflat] about to launch: %08x\n",run_flat);
+    ret = run_flat(0,NULL);
 
-//header.stack_size
-
-    kfclose(fd_bflat);         
+    free(text_pos);
+    
     return ERR_OK;
 }

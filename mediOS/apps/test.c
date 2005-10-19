@@ -1,7 +1,7 @@
 #include <api.h>
 
-void _start(void)
+int _start(int argc,char**argv)
 {
     printf("In test\n");
-    while(1) /*nothing*/;
+    return 0;
 }

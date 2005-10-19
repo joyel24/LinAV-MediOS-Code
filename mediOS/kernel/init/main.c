@@ -131,6 +131,8 @@ void kernel_start (void)
     printk("[init] END\n");
 
     load_bflat("/test.grv");
+    
+    printk("Back from blat\n");
         
     while(1) /*nothing*/;
 

@@ -24,6 +24,14 @@
 /* used by swi_sound */
 #include <kernel/sound.h>
 
+/* used for user_printf */
+#include <stdarg.h>
+void user_printf(const char * fmt, va_list args);
+
+/* used by swi_file */
+#include <kernel/bflat.h>
+int fs_swi(int cmd,void * data1, void * data2);
+
 __IRAM_CODE int kcswi_handler (
 	unsigned long nCmd,
 	unsigned long nParam2,
@@ -36,12 +44,16 @@ __IRAM_CODE int kcswi_handler (
         
         #include "swi_dsp.c.h"
         
-        //#include "swi_file.c.h"
+        #include "swi_file.c.h"
         
         //#include "swi_kernel.c.h"
         
         #include "swi_memory.c.h"
 
+        case nAPI_PRINTF:
+            user_printf((const char *)nParam1, (va_list) nParam2);
+            break;
+        
         default:
             printk("Unknown SWI cmd call %d, module %d\n", nCmd, nCmd>>8);
     }

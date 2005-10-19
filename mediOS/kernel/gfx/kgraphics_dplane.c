@@ -393,9 +393,7 @@ int swi_gfx_handler(unsigned long nCmd,
     
     switch(nCmd)
     {
-        case nAPI_PRINTF:
-            user_printf((const char *)nParam1, (va_list) nParam2);
-            break;
+        
             
         case nAPI_GFX:
     
