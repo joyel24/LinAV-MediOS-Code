@@ -8,6 +8,10 @@
     .section ".text.init"
 .global entry_code
 entry_code:
+/* disable irq and fiq*/
+    /*mrs r0,cpsr
+    //orr r0,r0,#0x80
+    msr cpsr_cf,r0*/
 /* initialize the stacks and disable irq+fiq */
     MSR CPSR_c, #0xD1 @0x80 | 0x40 | 0x11 = 0xD1 [FIQ mode]
     mov r0, #0x00008000
@@ -20,7 +24,7 @@ entry_code:
     mov sp, r0
     MSR CPSR_c, #0xDF @0x80 | 0x40 | 0x1F = 0xDF [SYS mode]
     mov r0, #0x00007D00
-    mov sp, r0    
+    mov sp, r0
 /* move iram code */
     ldr r0, __real_iram_start_ptr    
     ldr r1, __iram_start_ptr
@@ -31,6 +35,10 @@ mv_iram_loop:
     str     r3, [r1],#4
     subs    r2, r2, #4
     bne     mv_iram_loop
+/* enable fiq for wdt */
+    mrs      r0, cpsr
+    bic      r0, r0, #0x40
+    msr      cpsr_c, r0
 /* clear bss */
     ldr     r1, __bss_start_ptr
     ldr     r2, __bss_end_ptr
@@ -40,10 +48,6 @@ clr_bss_loop:
     str     r3,[r1],#4
     subs    r2, r2, #4
     bne     clr_bss_loop
-/* enable fiq for wdt */
-    mrs      r0, cpsr
-    bic      r0, r0, #0x40
-    msr      cpsr_c, r0
 /* launch start_function */
     ldr    lr, __kernel_start_ptr
     bx     lr

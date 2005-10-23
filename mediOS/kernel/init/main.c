@@ -69,8 +69,6 @@ void kload_context();
 
 void kernel_start (void)
 {
-    printk("MediOS %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);
-    
     ini_graphics();
     
 #ifdef USE_DEBUG_ON_SCREEN    
