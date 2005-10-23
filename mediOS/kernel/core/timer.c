@@ -35,10 +35,16 @@ __IRAM_CODE void main_timer_action(int irq)
     
     /* HW check */
     BTN_CHK;
+#ifdef HAVE_BAT_POWER 
     BAT_POWER_CHK;
+#endif
+#ifdef HAVE_USB_FW
     USB_FW_CHK;
+#endif
+#ifdef HAVE_EXT_MODULE
     EXT_MODULE_CHK;    
-    
+#endif
+   
     while(ptr!=NULL)
     {
         if(ptr->trigger && ptr->expires<=tick)

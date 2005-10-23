@@ -69,6 +69,8 @@ void kload_context();
 
 void kernel_start (void)
 {
+    printk("MediOS %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);
+    
     ini_graphics();
     
 #ifdef USE_DEBUG_ON_SCREEN    
@@ -97,24 +99,33 @@ void kernel_start (void)
     init_uart();
 
     init_cpld();
-
+#ifdef HAVE_CMD_LINE
     init_cmd_line();
+#endif
 
+#ifdef HAVE_EVT
     init_evt();
+#endif
 
-    init_buttons();
+    init_buttons();   
+#ifdef HAVE_BAT_POWER    
     init_power();
+#endif
+
     init_rtc();
+#ifdef HAVE_USB_FW
     init_usb_fw();
-
-    //init_fm_remote();
-
+#endif
+#ifdef HAVE_FM_REMOTE
+    init_fm_remote();
+#endif
+#ifdef HAVE_EXT_MODULE
     init_ext_module();
-
+#endif
     init_disk();
-    
+#ifdef HAVE_SOUND
     init_sound();
-
+#endif
     /* enable the IRQ */
     printk("[init] INT enabled\n");
     __sti();

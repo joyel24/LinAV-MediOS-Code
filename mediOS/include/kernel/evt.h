@@ -26,7 +26,16 @@ struct evt_pipes_s {
 
 struct evt_pipes_s * get_evt_handling(void);
 void rm_evt_handling(struct evt_pipes_s * evt_pipes);
-void send_evt(int evt);
+
+#ifdef HAVE_EVT
+#define send_evt(EVT) do_send_evt(EVT)
+#else
+#define send_evt(EVT)
+#endif
+
+void do_send_evt(int evt);
+
 void init_evt(void);
+
 
 #endif

@@ -19,7 +19,7 @@
 #include <kernel/buttons.h>
 #include <kernel/bat_power.h>
 
-#include <kernel/pipes.h>
+//#include <kernel/pipes.h>
 //#include <evt.h>
 
 #include <kernel/fm_remote.h>
@@ -83,7 +83,7 @@ int key_evt_array[NB_KEY][2] = {
     { BUTTON_ON,       0x02 }  /* PRESS */
 };
 
-void FM_remote_thread(PIPE * fm_remote_pipe)
+/*void FM_remote_thread(PIPE * fm_remote_pipe)
 {
     char c;
     while(1)
@@ -127,7 +127,7 @@ void FM_remote_thread(PIPE * fm_remote_pipe)
         }
 #endif
     }
-}
+}*/
 
 void processKey(int key)
 {
@@ -539,8 +539,6 @@ void FM_send_data(char cmd,char * data,int size)
     for(i=0;i<size;i++)
         uartOut(data[i]&0xFF,UART_1);
 }
-
-extern PIPE * UART_1_Pipe;
 
 void init_fm_remote(void)
 {

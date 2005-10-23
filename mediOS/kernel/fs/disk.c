@@ -27,7 +27,7 @@
 #include <kernel/kfile.h>
 #include <kernel/kdir.h>
 #include <kernel/kernel.h>
-#include <kernel/pipes.h>
+//#include <kernel/pipes.h>
 #include <kernel/bat_power.h>
 
 
@@ -202,28 +202,36 @@ int disk_RW_sector (int drive,unsigned int lba,int count,void * buffer,int direc
     cmd.xfer_dir = direction;
     cmd.use_dma = ATA_WITH_DMA;
     cmd.drive = drive;
-    
-    
-
     res=ata_process_cmd(&cmd);
     return res;
 }
 
 int exec_disk_cmd_from_irq (int command)
 {
-	/*ata_cmd_s * cmd = (ata_cmd_s *)(g_pAtaCtrlPipe->buffer+g_pAtaCtrlPipe->nSender);
+    /*ata_cmd_s * cmd = (ata_cmd_s *)(g_pAtaCtrlPipe->buffer+g_pAtaCtrlPipe->nSender);
 
-	cmd->lba   = 0;
-	cmd->count = 0;
-	cmd->data  = 0;
-	cmd->xfer_dir = command;
-	cmd->use_dma  = 0;
-	cmd->drive    = 0;
-	cmd->pSenderThread = 0;
+    cmd->lba   = 0;
+    cmd->count = 0;
+    cmd->data  = 0;
+    cmd->xfer_dir = command;
+    cmd->use_dma  = 0;
+    cmd->drive    = 0;
+    cmd->pSenderThread = 0;
 
-	g_pAtaCtrlPipe->nSender = (g_pAtaCtrlPipe->nSender + sizeof(ata_cmd_s)) & PIPE_SIZE_MASK;*/
+    g_pAtaCtrlPipe->nSender = (g_pAtaCtrlPipe->nSender + sizeof(ata_cmd_s)) & PIPE_SIZE_MASK;*/
+        
+    int res;
+    ata_cmd_s cmd;
 
-	return 1;
+    cmd.lba = 0;
+    cmd.count = 0;
+    cmd.data = 0;
+    cmd.xfer_dir = command;
+    cmd.use_dma = 0;
+    cmd.drive = 0;
+    res=ata_process_cmd(&cmd);
+
+    return res;
 }
 
 void printPartition_info(struct partition_info * partition_list)

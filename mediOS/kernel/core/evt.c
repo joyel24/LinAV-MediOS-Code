@@ -70,7 +70,7 @@ void rm_evt_handling(struct evt_pipes_s * evt_pipes)
     printk(" done\n");
 }
 
-void send_evt(int evt)
+void do_send_evt(int evt)
 {
     struct evt_pipes_s * ptr;
     unsigned char c=(unsigned char)evt;

@@ -128,19 +128,26 @@ void hd_launchTimer(void)
     }
 }
 
+#ifdef HAVE_USB_FW
 extern int kusb_fw_status;
+#endif
 
 void hd_timer_fct(void)
 {
     int num=getCurrentTimer();
+#ifdef HAVE_USB_FW
     if(hd_timer_used[num] && !kusb_fw_status)
+#else
+    if(hd_timer_used[num])
+#endif
     {
-//        ata_stop_HD();
-		printk("exec_disk_cmd_from_irq\n");
-		exec_disk_cmd_from_irq (ATA_SLEEP);
+        printk("exec_disk_cmd_from_irq\n");
+        exec_disk_cmd_from_irq (ATA_SLEEP);
     }
+#ifdef HAVE_USB_FW    
     if(kusb_fw_status)
         hd_launchTimer(); // we have enable the usb => keep the timer running
+#endif
 }
 
 void hd_timer_on(int num)

@@ -37,7 +37,9 @@ __IRAM_DATA int nb_pressed[NB_BUTTONS];
 __IRAM_DATA int nb_off_press;
 __IRAM_DATA int nb_debug_switch;
 
+#ifdef HAVE_FM_REMOTE
 extern int inHold;
+#endif
 
 __IRAM_DATA int old_state;
 
@@ -103,8 +105,10 @@ __IRAM_CODE void process_button_press(int val)
             {                 
                 if(nb_pressed[btn]==0)
                 {
+#ifdef HAVE_FM_REMOTE
                     if(!inHold)
                     {
+#endif
                         nb_pressed[btn]=mx_press;
                         if(lcd_get_state()==0)
                         {
@@ -119,12 +123,14 @@ __IRAM_CODE void process_button_press(int val)
   
                         send_evt(btn+1);
                         printk("BTN %d pressed\n",btn);
+#ifdef HAVE_FM_REMOTE                        
                     }
                     else
                     {
                         //FM_putTmpText("** HOLD **",30);
                         printk("** HOLD **\n");
-                    }                                
+                    }
+#endif                                
                 }
                 else
                     nb_pressed[btn]--;                   
