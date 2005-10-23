@@ -18,7 +18,6 @@
 #include <kernel/pipes.h>
 #include <kernel/irq.h>
 #include <kernel/timer.h>
-#include <kernel/hw_chk.h>
 
 #include <kernel/bflat.h>
 #include <kernel/malloc.h>
@@ -270,12 +269,7 @@ void init_cmd_line(void)
         printk("[init] cmd line, can't allocate memory for args\n");
         return;
     }
-        
-    
-    
- //   API_TASK_CREATE (cmd_line_task, UART_0_Pipe,&hTask);
- //   API_TASK_NAME(&hTask,"CMD_LINE");
-        
+          
     printk("[init] cmd line\n");
 }
 
@@ -310,7 +304,6 @@ void print_handler_info (unsigned char ** params)
 {
     print_irq();
     print_timer();
-    print_HW_chk();
 }
 
 void do_memory_dump (unsigned char ** params)

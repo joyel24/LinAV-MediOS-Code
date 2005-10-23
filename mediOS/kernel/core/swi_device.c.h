@@ -30,10 +30,10 @@ extern int lcd_bright;
                 *((int*)nParam2)=kFWIsConnected();
                 break;
             case 0x002:
-                *((int*)nParam2)=kpowerConnected();
+                *((int*)nParam2)=POWER_CONNECTED;
                 break;
             case 0x003:
-                *((int*)nParam2)=kgetBatLevel();
+                *((int*)nParam2)=GET_BAT_LEVEL;
                 break;
             default:
                 printk("power swi %d not implemented\n",(int)nParam1);

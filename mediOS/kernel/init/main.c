@@ -21,7 +21,6 @@
 #include <kernel/kernel.h>
 #include <kernel/irq.h>
 #include <kernel/timer.h>
-#include <kernel/hw_chk.h>
 
 #include <kernel/uart.h>
 #include <kernel/cpld.h>
@@ -60,7 +59,6 @@ void print_boot_info(void)
     printk("SP: %08x\n",get_sp());
     print_irq();
     print_timer();
-    print_HW_chk();
 }
 
 extern void ini_debugOnScreen(void);
@@ -88,24 +86,17 @@ void kernel_start (void)
         (unsigned int)MALLOC_START,
         (unsigned int)MALLOC_SIZE);
 
-    /* initialize thread lists and setup first two threads */
-
-
     /* init the irq */
     init_irq();
     
     /* init the tick timer */
     init_timer();
-
-    /* enable the IRQ */
-    __sti();
-
+    
     /* driver init */
 
     init_uart();
 
     init_cpld();
-    init_HW_chk();
 
     init_cmd_line();
 
@@ -116,7 +107,7 @@ void kernel_start (void)
     init_rtc();
     init_usb_fw();
 
-    init_fm_remote();
+    //init_fm_remote();
 
     init_ext_module();
 
@@ -124,15 +115,19 @@ void kernel_start (void)
     
     init_sound();
 
+    /* enable the IRQ */
+    printk("[init] INT enabled\n");
+    __sti();
+    
     printk("[init] ------------ all drivers\n");
    
     print_boot_info();
 
     printk("[init] END\n");
 
-    load_bflat("/test.grv");
+    //load_bflat("/av_sms.grv");
     
-    printk("Back from blat\n");
+    //printk("Back from blat\n");
         
     while(1) /*nothing*/;
 

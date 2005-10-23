@@ -29,10 +29,15 @@
 #define HD_FREQ_DEFAULT_0    10 /* 10s timer */
 #define HD_FREQ_DEFAULT_1    10 /* 10s timer */
 
+#define GET_BAT_LEVEL (tsc2003getVal(CMD_BAT0|INTERNAL_ON))
 
-int kpowerConnected(void);
-int kgetBatLevel(void);
+extern int kpwrState;
+void process_DC_change(void);
 
+#define BAT_POWER_CHK {              \
+    if(POWER_CONNECTED!=kpwrState) \
+        process_DC_change();         \
+}
 
 #define lcd_off()           lcd_set_state(0)
 #define lcd_on()            lcd_set_state(1)

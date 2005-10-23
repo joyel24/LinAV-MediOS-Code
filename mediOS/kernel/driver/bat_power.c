@@ -19,24 +19,11 @@
 #include <kernel/gio.h>
 #include <kernel/kernel.h>
 #include <kernel/timer.h>
-#include <kernel/hw_chk.h>
 #include <kernel/ata.h>
 #include <kernel/evt.h>
 #include <kernel/disk.h>
 
 #include <kernel/bat_power.h>
-
-
-int kpowerConnected(void)
-{
-    int val=inw(POWER_STATE);
-    return (val >> 0x5)&0x1;
-}
-
-int kgetBatLevel(void)
-{
-    return tsc2003getVal(CMD_BAT0|INTERNAL_ON);
-}
 
 int lcd_state=1;
 int lcd_bright=10;
@@ -52,8 +39,6 @@ int hd_freq_rep[2]={HD_FREQ_DEFAULT_0,HD_FREQ_DEFAULT_1};
 int hd_timer_used[2]={1,1};
 int hd_sleep_state=0;
 struct timer_s hd_timer;
-
-struct hw_chk_s dc_chker;
 
 void lcd_set_state(int state)
 {
@@ -195,7 +180,7 @@ void chgTimer(void)
 
 int getCurrentTimer(void)
 {
-    if(kpowerConnected())
+    if(POWER_CONNECTED)
         return AV_TIMER_ON_DC;
     else
         return AV_TIMER_ON_BAT;
@@ -203,18 +188,13 @@ int getCurrentTimer(void)
 
 int kpwrState;
 
-void chk_DC_connector(void)
+void process_DC_change(void)
 {
-    if(kpowerConnected()!=kpwrState)
-    {
-        kpwrState=kpowerConnected();
-        /* change the timers */
-        chgTimer();
-           
-        send_evt(EVT_PWR);
-        printk("DC connector %s\n",kpwrState==1?"plugged":"unplugged");
-
-    }
+    kpwrState=POWER_CONNECTED;
+    /* change the timers */
+    chgTimer();        
+    send_evt(EVT_PWR);
+    printk("DC connector %s\n",kpwrState==1?"plugged":"unplugged");
 }
 
 void init_power(void)
@@ -248,12 +228,6 @@ void init_power(void)
     lcd_launchTimer();
     hd_launchTimer();
     
-    kpwrState=kpowerConnected();
-    ini_hw_chker(&dc_chker);
-    dc_chker.name="DC in";
-    dc_chker.action=chk_DC_connector;
-    add_hw_chker(&dc_chker);
-      
-    
-    printk("[init] power : Bat level: %x, DC %s connected\n",kgetBatLevel(),kpwrState==0?"not":"is");
+    kpwrState=POWER_CONNECTED;    
+    printk("[init] power : Bat level: %x, DC %s connected\n",GET_BAT_LEVEL,kpwrState==0?"not":"is");
 }

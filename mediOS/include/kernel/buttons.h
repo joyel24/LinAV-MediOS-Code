@@ -15,13 +15,10 @@
 
 #include <kernel/hardware.h>
 #include <kernel/kernel.h>
+#include <kernel/gio.h>
 
 #define MAX_PRESSED                 4
 #define MAX_OFF                     15
-
-#define BUTTON_PORT0          (BUTTON_BASE)
-#define BUTTON_PORT1          (BUTTON_BASE+0x80)
-#define BUTTON_PORT2          (BUTTON_BASE+0x100)
 
 #define BUTTON_UP            0x0000
 #define BUTTON_LEFT          0x0001
@@ -36,6 +33,17 @@
 
 #define NB_BUTTONS            10
 
-extern void init_buttons(void);
+extern int old_state;
+void process_button_press(int val);
+void init_buttons(void);
+//READ_BUTTONS ;
+#define BTN_CHK    {                     \
+    int __val ;                          \
+    READ_BUTTONS(__val)                  \
+    if(old_state==0);                    \
+        old_state=__val;                 \
+    if(__val!=old_state || __val!=0x3FF) \
+        process_button_press(__val);     \
+}
 
 #endif

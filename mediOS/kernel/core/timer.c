@@ -18,6 +18,11 @@
 #include <kernel/timer.h>
 #include <kernel/kernel.h>
 
+#include <kernel/buttons.h>
+#include <kernel/bat_power.h>
+#include <kernel/usb_fw.h>
+#include <kernel/ext_module.h>
+
 unsigned long tick __IRAM_DATA;
 
 struct timer_s * timer_head __IRAM_DATA;
@@ -27,7 +32,13 @@ __IRAM_CODE void main_timer_action(int irq)
     struct timer_s * ptr=timer_head;
     
     tick++;
-
+    
+    /* HW check */
+    BTN_CHK;
+    BAT_POWER_CHK;
+    USB_FW_CHK;
+    EXT_MODULE_CHK;    
+    
     while(ptr!=NULL)
     {
         if(ptr->trigger && ptr->expires<=tick)

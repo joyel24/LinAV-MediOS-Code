@@ -115,10 +115,15 @@
 /** USB state **/
 
 #define USB_STATE                         0x30a24
+#define kusbIsConnected()                 ((inw(USB_STATE) & 0x40)!=0)
+#define kFWIsConnected()                  ((cpld_read(CPLD3) & 0x8)==0)
+#define FW_enable()                       cpld_select(CPLD_FW_EXT,0x1)
+#define FW_disable()                      cpld_select(CPLD_FW_EXT,0x0)
 
 /** power state **/
 
 #define POWER_STATE                       0x30a24
+#define POWER_CONNECTED                   ((inw(POWER_STATE) >> 0x5)&0x1)
 
 /** I2C **/
 
@@ -127,5 +132,18 @@
 /** BUTTONS **/
 
 #define BUTTON_BASE                       0x02600680
+
+#define BUTTON_PORT0          (BUTTON_BASE)
+#define BUTTON_PORT1          (BUTTON_BASE+0x80)
+#define BUTTON_PORT2          (BUTTON_BASE+0x100)
+
+#define READ_BUTTONS(VAL)                {       \
+    VAL =  inw(BUTTON_PORT0)&0x3;            \
+    VAL|=((inw(BUTTON_PORT1)&0x7)<<2);           \
+    VAL|=((inw(BUTTON_PORT2)&0x7)<<5);           \
+    /* ON, OFF keys */                           \
+    if(gio_is_set(GIO_ON_BTN))  VAL |= (0x1<<8); \
+    if(gio_is_set(GIO_OFF_BTN)) VAL |= (0x1<<9); \
+}
 
 #endif  /* __HARDWARE_H */

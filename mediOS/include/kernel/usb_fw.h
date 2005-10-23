@@ -13,16 +13,27 @@
 #include <kernel/io.h>
 #include <kernel/hardware.h>
 #include <kernel/cpld.h>
+#include <kernel/evt.h>
+#include <kernel/kernel.h>
 
-#define kusbIsConnected()   ((inw(USB_STATE) & 0x40)!=0)
-#define kFWIsConnected()    ((cpld_read(CPLD3) & 0x8)==0)
-#define FW_enable()         cpld_select(CPLD_FW_EXT,0x1)
-#define FW_disable()        cpld_select(CPLD_FW_EXT,0x0)
+extern int kusb_state;
+extern int kfw_state;
 
-/*int kusbIsConnected(void);
-int kFWIsConnected(void);
-void FW_enable(void);
-void FW_disable(void);*/
+#define USB_FW_CHK  {                    \
+    if(kusbIsConnected()!=kusb_state)    \
+    {                                    \
+        kusb_state=kusbIsConnected();    \
+        printk("[USB FW] usb %s\n",kusb_state==1?"connected":"disconnected");  \
+        send_evt(EVT_USB);               \
+    }                                    \
+    if(kFWIsConnected()!=kfw_state)      \
+    {                                    \
+        kfw_state=kFWIsConnected();      \
+        printk("[USB FW] FW %s\n",kfw_state==1?"connected":"disconnected"); \
+        send_evt(EVT_FW_EXT);            \
+    }                                    \
+}
+
 void init_usb_fw(void);
 
 #endif

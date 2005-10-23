@@ -9,36 +9,14 @@
 #include <kernel/io.h>
 #include <kernel/hardware.h>
 #include <kernel/cpld.h>
-#include <kernel/hw_chk.h>
 #include <kernel/usb_fw.h>
 #include <kernel/kernel.h>
 #include <kernel/evt.h>
 
 int kusb_state,kfw_state;
-struct hw_chk_s usb_fw_chker;
 
 int kusb_fw_status=0;
 int k_usb_fw=0; /* variable to know what is used for connection 1: usb, 2:fw*/
-
-void chk_usb_fw(void)
-{
-    int new_state;
-    new_state=kusbIsConnected();
-    if(new_state!=kusb_state)
-    {
-        kusb_state=new_state;
-        printk("[USB FW] usb %s\n",kusb_state==1?"connected":"disconnected");
-        send_evt(EVT_USB);
-    }
-    
-    new_state=kFWIsConnected();
-    if(new_state!=kfw_state)
-    {
-        kfw_state=new_state;
-        printk("[USB FW] FW %s\n",kfw_state==1?"connected":"disconnected");
-        send_evt(EVT_FW_EXT);
-    }
-}
 
 int usbFwEnabled(void)
 {
@@ -105,10 +83,6 @@ void init_usb_fw(void)
     kusb_state=kusbIsConnected();
     kfw_state=kFWIsConnected();
     kusb_fw_status=0;
-    ini_hw_chker(&usb_fw_chker);
-    usb_fw_chker.name="usb/fw";
-    usb_fw_chker.action=chk_usb_fw;
-    add_hw_chker(&usb_fw_chker);
-    
+        
     printk("[init] usb FW (usb %s - FW %s)\n",kusb_state==1?"connected":"disconnected",kfw_state==1?"connected":"disconnected");
 }

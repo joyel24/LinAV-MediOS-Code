@@ -19,7 +19,7 @@
 #include <kernel/gio.h>
 #include <kernel/evt.h>
 
-#include <kernel/hw_chk.h>
+//#include <kernel/hw_chk.h>
 #include <kernel/bat_power.h>
 
 #include <kernel/buttons.h>
@@ -39,42 +39,15 @@ __IRAM_DATA int nb_debug_switch;
 
 extern int inHold;
 
-int old_state;
+__IRAM_DATA int old_state;
 
-__IRAM_DATA struct hw_chk_s btn_chker;
+//__IRAM_DATA struct hw_chk_s btn_chker;
 
-__IRAM_CODE void chk_button(void)
+__IRAM_CODE void process_button_press(int val)
 {
-    int btn,val,fastDir=0;
-    
-    val =  inw(BUTTON_PORT0)&0x3;
-    val|=((inw(BUTTON_PORT1)&0x7)<<2);
-    val|=((inw(BUTTON_PORT2)&0x7)<<5);
-    /* ON, OFF keys */
-    if(gio_is_set(GIO_ON_BTN))  val |= (0x1<<8);
-    if(gio_is_set(GIO_OFF_BTN)) val |= (0x1<<9);
-    
-    if(old_state==0);
-        old_state=val;
-    
-    if(val==old_state && val==0x3FF)
-        return;
+    int btn,fastDir=0;
     
     old_state=val;
-    
-/*    val = (~val)&0x3FF;
-    
-    if(val == 0x3FF)
-    {
-        for(btn=0;btn<NB_BUTTONS;btn++)
-            if(nb_pressed[btn]!=0)
-                nb_pressed[btn]=0;
-        nb_off_press=0;
-#ifdef USE_DEBUG_ON_SCREEN 
-        nb_debug_switch=0;
-#endif
-        return;
-    }*/
     
 #ifdef USE_DEBUG_ON_SCREEN  
     if(BTN_PRESSED(val,BUTTON_ON) && BTN_PRESSED(val,BUTTON_MENU1))
@@ -145,7 +118,7 @@ __IRAM_CODE void chk_button(void)
                         halt_launchTimer(); /* postpone the poweroff timer */
   
                         send_evt(btn+1);
-                        //printk("BTN %d pressed\n",btn);
+                        printk("BTN %d pressed\n",btn);
                     }
                     else
                     {
@@ -179,13 +152,7 @@ void init_buttons(void)
         nb_pressed[btn]=0;
     /* set GIO for ON/OFF to input */
     gio_dir(GIO_ON_BTN,GIO_IN);
-    gio_dir(GIO_OFF_BTN,GIO_IN);
-    
-    ini_hw_chker(&btn_chker);
-    
-    btn_chker.name="Btn";        
-    btn_chker.action=chk_button;
-    add_hw_chker(&btn_chker);
+    gio_dir(GIO_OFF_BTN,GIO_IN);    
             
     printk("[init] buttons\n");
 }

@@ -142,9 +142,6 @@ void init_irq(void)
     outw(0xffff, INTC_IRQ0_STATUS);
     outw(0xffff, INTC_IRQ1_STATUS);
     
-    /* init the irq struct */
-    
-    
     printk("[init] irq\n");    
 }
 

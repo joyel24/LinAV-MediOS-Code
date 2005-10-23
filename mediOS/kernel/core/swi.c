@@ -7,12 +7,14 @@
 */
 
 #include <kernel/kernel.h>
+#include <kernel/hardware.h>
 #include <kernel/swi.h>
 
 /* used by swi_device */
 #include <kernel/usb_fw.h>
 #include <kernel/rtc.h>
 #include <kernel/bat_power.h>
+
 
 /* used by swi_dsp */
 #include <kernel/irq.h>
@@ -53,7 +55,9 @@ __IRAM_CODE int kcswi_handler (
         case nAPI_PRINTF:
             user_printf((const char *)nParam1, (va_list) nParam2);
             break;
-        
+        case nAPI_GFX:
+            swi_gfx_handler(nParam1, nParam2,nParam3);
+            break;            
         default:
             printk("Unknown SWI cmd call %d, module %d\n", nCmd, nCmd>>8);
     }

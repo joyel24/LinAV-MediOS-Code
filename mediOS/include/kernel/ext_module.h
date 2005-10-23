@@ -45,6 +45,16 @@ void do_mod_connect(int module_num);
 void do_mod_disconnect(int module_num);
 int  get_module(void);
 void init_ext_module(void);
+void process_ext_mod_chg(int res);
+
+extern int known_module[];
+extern int connected_module;
+
+#define EXT_MODULE_CHK    {   \
+    int __res=get_module();   \
+    if(known_module[__res] && __res!=connected_module) \
+        process_ext_mod_chg(__res);  \
+}
 
 /************************************** end private functions */
 

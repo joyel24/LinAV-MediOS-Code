@@ -15,7 +15,6 @@
 #include <kernel/io.h>
 #include <kernel/hardware.h>
 #include <kernel/cpld.h>
-#include <kernel/hw_chk.h>
 
 #include <kernel/kernel.h>
 #include <kernel/usb_fw.h>
@@ -63,24 +62,18 @@ int known_module[]= {
 
 int connected_module=0;
 
-struct hw_chk_s ext_module_chker;
-
 struct module_actions *actions_array[NB_EXT_MODULES];
 
-void chk_ext_module(void)
+void process_ext_mod_chg(int res)
 {
-    int res;
     /*if(!FM_is_connected() && !FWIsConnected())
     {*/
-        res=get_module();
-        if(known_module[res] && res!=connected_module)
-        {
             if(res==AV_MODULE_NONE)
                 do_mod_disconnect(connected_module);
             else
                 do_mod_connect(res);
             connected_module=res;
-        }        
+     
     /*}
     else
     {
@@ -162,12 +155,6 @@ void init_ext_module(void)
         connected_module=AV_MODULE_NONE;
     */
         
-    /* setting up a chker to watch module state */
-    ini_hw_chker(&ext_module_chker);
-    ext_module_chker.name="ext module";
-    ext_module_chker.action=chk_ext_module;
-    add_hw_chker(&ext_module_chker);
-    
     printk("[init] external module (connected: %s)\n",module_name[connected_module]); 
 }
 
