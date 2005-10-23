@@ -66,6 +66,11 @@ __IRAM_CODE void uartOutString(unsigned char * data,int uartNum)
     }
 }
 
+void restore_uart_handler(int uartNum)
+{
+    chg_irq_handler(uartNum == 0?IRQ_UART0:IRQ_UART1,uart_intr_action);    
+}
+
 void init_uart(void)
 {
         

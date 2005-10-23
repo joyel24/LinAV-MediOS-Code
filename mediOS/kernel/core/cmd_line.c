@@ -15,7 +15,6 @@
 #include <kernel/kernel.h>
 #include <kernel/uart.h>
 
-#include <kernel/pipes.h>
 #include <kernel/irq.h>
 #include <kernel/timer.h>
 
@@ -89,171 +88,153 @@ __IRAM_DATA int cur_pos;
 
 __IRAM_DATA unsigned char ** arg_list;
 
-__IRAM_CODE void cmd_line_task(PIPE * uart_pipe)
+__IRAM_CODE void cmd_line_INT(int irq_num)
 {
-    unsigned char c='\0';
-    int nb_args=0;
-    struct cmd_line_s * cmd_line;
-    unsigned  char * ptr;
-
-    while(1)
+    unsigned char c;
+    int uart = irq_num - IRQ_UART0;
+    
+    while(uartIn(&c,uart))
     {
-loop:
-        c='\0';
-        while(1)
+        if(c=='\n' || c=='\r')               /* end of line => add \0 to end the line */
         {
-//            API_PIPE_RECV((HPIPE)uart_pipe,&c,1);
-
-            if(c=='\n' || c=='\r')               /* end of line => add \0 to end the line */
-            {
-                cur_cmd[cur_pos++]='\0';
-                break;
-            }
-
-            if(c>=0x20 && c<0xFF && c!=0x7F)
-                cur_cmd[cur_pos++]=c;               /* we have a char => add it in the cmd string */
-            else
-            {                                       /* special chars */
-                switch(c)
-                {
-                    case 0x1B:                      /* ESC */
-                        if(uartIn(&c,UART_0))
-                        {
-                            if(c=='[')
-                            {
-                                if(uartIn(&c,UART_0))
-                                {
-                                    switch(c)
-                                    {
-                                        case 0x41:
-                                            printk("\nUP\n");
-                                            break;
-                                        case 0x42:
-                                            printk("\nDOWN\n");
-                                            break;
-                                        case 0x43:
-                                            printk("\nRIGHT\n");
-                                            break;
-                                        case 0x44:
-                                            printk("\nLEFT\n");
-                                            break;                                    
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case 0x08:                      /* bckspc */
-                    case 0x7F:                      /* del */
-                        if(cur_pos>0)
-                        {
-                            cur_pos--;
-                            cur_cmd[cur_pos]='\0';
-                            printk("\ngrv> %s",cur_cmd);
-                        }
-                        break;
-                    default:
-                        break;                    
-                }
-                c='\0';
-                break;
-                
-            }
-            
-            if(cur_pos>MAX_CMD_LEN)            /* can't add more chars => reset everything */
-            {
-                cur_cmd[0]='\0';
-                cur_pos=0;
-                c='\0';
-                break;
-            }
-            
-            c='\0';                            /* prepare char c for a new loop */
+            cur_cmd[cur_pos++]='\0';
+            process_cmd();
+            continue;
         }
         
-        if(c!='\0')                            /* a cmd was send */
+        if(c>=0x20 && c<0xFF && c!=0x7F)
         {
-            if(cur_pos==1)
+                cur_cmd[cur_pos++]=c;               /* we have a char => add it in the cmd string */
+        }
+        else
+        {                                       /* special chars */
+            switch(c)
             {
-                printk("\ngrv> ");
-            }
-            else
-            {
-                /* processing the cmd */
-                nb_args=0;
-                RM_HEAD_SPC(cur_cmd);
-                
-                /* let's find the cmd name */                
-                ptr=FIND_NXT_TOKEN(cur_cmd);
-                
-                if(!*ptr)   /* cmd with no args */
-                {
-                    cmd_line=FIND_CMD_LINE(cur_cmd,cmd_tab);
-                    if(!cmd_line)
+                case 0x1B:                      /* ESC */
+                    if(uartIn(&c,uart))
                     {
-                        printk("Unknown command: %s\nType help to have the list of command\n",cur_cmd);
-                        cur_cmd[0]='\0';
-                        cur_pos=0;
-                        printk("grv> ");
-                        goto loop;
-                    }                    
-                }
-                else
-                {
-                    *ptr='\0';
-                    cmd_line=FIND_CMD_LINE(cur_cmd,cmd_tab);
-                    if(!cmd_line)
-                    {
-                        printk("Unknown command: %s\nType help to have the list of command\n",cur_cmd);
-                        cur_cmd[0]='\0';
-                        cur_pos=0;
-                        printk("grv> ");
-                        goto loop;
-                    }
-                    
-                    cur_cmd = ptr+1;
-                    //printk("[cmd_line] 2 - find cmd |%s|, args: |%s|\n",cmd_line->cmd,cur_cmd);
-                    /* parse args */
-                    while(*cur_cmd)
-                    {
-                        RM_HEAD_SPC(cur_cmd);
-                        if(*cur_cmd)
+                        if(c=='[')
                         {
-                            arg_list[nb_args]=cur_cmd;
-                            nb_args++;
-                            cur_cmd=FIND_NXT_TOKEN(cur_cmd);
-                            if(*cur_cmd)
+                            if(uartIn(&c,uart))
                             {
-                            *cur_cmd='\0';
-                            cur_cmd++;
-                            }                         
+                                /*switch(c)
+                                {
+                                    case 0x41:
+                                        printk("\nUP\n");
+                                        break;
+                                    case 0x42:
+                                        printk("\nDOWN\n");
+                                        break;
+                                    case 0x43:
+                                        printk("\nRIGHT\n");
+                                        break;
+                                    case 0x44:
+                                        printk("\nLEFT\n");
+                                        break;                                    
+                                }*/
+                            }
                         }
                     }
-                    /*printk("[cmd_line] 3 - args :|");
-                    for(i=0;i<nb_args;i++)
-                        printk("%s|",arg_list[i]);
-                    printk("\n");*/
-                    
-                }
-                
-                /* launch the cmd if we have enough params */
-                if(nb_args>=cmd_line->nb_args)
-                    cmd_line->cmd_action(arg_list);
-                else
-                    printk("%s need more args:\n%s\n",cmd_line->cmd,cmd_line->help_str);
-                
-                /* put back the prompt */
-                printk("grv> ");
+                    break;
+                case 0x08:                      /* bckspc */
+                case 0x7F:                      /* del */
+                    if(cur_pos>0)
+                    {
+                        cur_pos--;
+                        cur_cmd[cur_pos]='\0';
+                        printk("\ngrv> %s",cur_cmd);
+                    }
+                    break;
+                default:
+                    break;                    
             }
-            
-            /* Ready to get a new cmd */
+        }
+        
+        if(cur_pos>MAX_CMD_LEN)            /* can't add more chars => reset everything */
+        {
             cur_cmd[0]='\0';
             cur_pos=0;
-        }
+        }        
     }
-    printk("OUT OF CMDLINE LOOP\n");
 }
 
-extern PIPE * UART_0_Pipe;
+__IRAM_CODE void process_cmd(void)
+{        
+    int nb_args=0;    
+    struct cmd_line_s * cmd_line;
+    unsigned  char * ptr;
+    
+    if(cur_pos==1)
+    {
+        printk("\ngrv> ");
+    }
+    else
+    {
+        /* processing the cmd */
+        RM_HEAD_SPC(cur_cmd);
+        
+        /* let's find the cmd name */                
+        ptr=FIND_NXT_TOKEN(cur_cmd);
+        
+        if(!*ptr)   /* cmd with no args */
+        {
+            cmd_line=FIND_CMD_LINE(cur_cmd,cmd_tab);
+            if(!cmd_line)
+            {
+                printk("Unknown command: %s\nType help to have the list of command\n",cur_cmd);
+                cur_cmd[0]='\0';
+                cur_pos=0;
+                printk("grv> ");
+                return;
+            }                    
+        }
+        else
+        {
+            *ptr='\0';
+            cmd_line=FIND_CMD_LINE(cur_cmd,cmd_tab);
+            if(!cmd_line)
+            {
+                printk("Unknown command: %s\nType help to have the list of command\n",cur_cmd);
+                cur_cmd[0]='\0';
+                cur_pos=0;
+                printk("grv> ");
+                return;
+            }
+            
+            cur_cmd = ptr+1;
+            /* parse args */
+            while(*cur_cmd)
+            {
+                RM_HEAD_SPC(cur_cmd);
+                if(*cur_cmd)
+                {
+                    arg_list[nb_args]=cur_cmd;
+                    nb_args++;
+                    cur_cmd=FIND_NXT_TOKEN(cur_cmd);
+                    if(*cur_cmd)
+                    {
+                        *cur_cmd='\0';
+                        cur_cmd++;
+                    }                         
+                }
+            }            
+        }
+        
+        /* launch the cmd if we have enough params */
+        if(nb_args>=cmd_line->nb_args)
+            cmd_line->cmd_action(arg_list);
+        else
+            printk("%s need more args:\n%s\n",cmd_line->cmd,cmd_line->help_str);
+        
+        /* put back the prompt */
+        printk("grv> ");
+    }
+            
+    /* Ready to get a new cmd */
+    cur_cmd[0]='\0';
+    cur_pos=0;
+
+}
 
 void init_cmd_line(void)
 {
@@ -263,6 +244,8 @@ void init_cmd_line(void)
     cur_cmd = (unsigned char*)malloc(sizeof(unsigned char)*MAX_CMD_LEN);
     
     cur_cmd[0]='\0';
+    
+    chg_irq_handler(IRQ_UART0,cmd_line_INT);
     
     if(!arg_list)
     {

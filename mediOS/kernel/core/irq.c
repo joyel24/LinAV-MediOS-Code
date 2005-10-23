@@ -169,6 +169,29 @@ __IRAM_CODE int irq_state(int irq)
     return 0;
 }
 
+__IRAM_CODE void chg_irq_handler(int irq_num,void(*fct)(int irq))
+{
+    int i=0;
+    int is_enable=0;
+    while(irq_table[i].irq != irq_num && irq_table[i].irq != -1)
+        i++;
+    if(irq_table[i].irq == irq_num)
+    {
+        if(irq_state(irq_num))
+        {
+            disable_irq(irq_num);
+            is_enable =1;
+        }
+        printk("IRQ handler for %s (%d) changed\n",irq_table[i].name,irq_num);
+        irq_table[i].action = fct;
+        if(is_enable)
+            enable_irq(irq_num);        
+    }
+    else
+    {
+        printk("Can't change IRQ handler for %d\n",irq_num);
+    }
+}
 
 void print_irq(void)
 {

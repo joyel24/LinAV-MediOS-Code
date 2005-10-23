@@ -190,7 +190,7 @@ extern void del_irq_handler(int irq);
 extern void disable_irq(int irq);
 extern void enable_irq(int irq);
 extern int  irq_state(int irq);
-
+extern void chg_irq_handler(int irq_num,void(*fct)(int irq));
 extern void print_irq(void);
 
 #endif

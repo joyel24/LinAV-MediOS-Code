@@ -32,4 +32,6 @@ void print_handler_info (unsigned char ** params);
 void do_memory_dump (unsigned char ** params);
 void init_cmd_line(void);
 
+void process_cmd(void);
+
 #endif
