@@ -30,7 +30,7 @@
 #define MAX_NON_GET   5
 #define NB_KEY        8
 
-#define INI_TXT       "-- mediOS by oxygen --"
+#define INI_TXT       "--mediOS--"
 
 int FM_connected=0;
 int nbPingSend=0;
@@ -86,31 +86,86 @@ int key_evt_array[NB_KEY][2] = {
 void fm_remote_INT(int irq_num)
 {
     char c;
+    int count;
     while(uartIn(&c,UART_1))
     {
         if(FM_connected)
         {
-            printk("%c",c);
-        }
-        else
-        {
             switch(c)
             {
                 case 0xf8:
-                    while(uartIn(&c,UART_1)) /*nothing*/;
-                    
-                    uartOut('v',UART_1);
-                
-                    printk("loop ");
-                    
+                    FM_connected=0;
                     break;
                 case 'V':
+                    cmd=3;
+                    break;
+                case 'K':
+                    cmd=1;
+                    radio_index=0;
+                    break;
+                case 'R':
+                    cmd=2;
+                default:
+                    switch(cmd)
+                    {
+                        case 0:
+                            printk("[FM Remote] get unknown cmd: %x\n",c);
+                            break;
+                        case 1:
+                            if(c!=0)
+                            {
+                                printk("[FM Remote] get key cmd: %x\n",c);
+                                processKey(c);
+                            }
+                            cmd=0;
+                            break;
+                        case 2:
+                            radio_param[radio_index++]=c;
+                            if(radio_index==5)
+                            {
+                                printk("[FM Remote] get radio cmd: %x%x%x%x%x\n",radio_param[0],radio_param[1]
+                                    ,radio_param[2],radio_param[3],radio_param[4]);
+                                cmd=0;
+                            }
+                            break;
+                        case 3:
+                            //printk("[FM Remote] get pong cmd: %x\n",c);
+                            cmd=0;                                    
+                        default:
+                            cmd=0;
+                            break;
+                    }
+                    break;
+            }
+            
+        }
+        else
+        {
+            disable_irq(IRQ_UART1);
+            switch(c)
+            {
+                case 0xf8:
+                    while(1)
+                    {
+                        count=0;
+                        while(!uartIn(&c,UART_1) && count<4200) count++;
+                        if(count >=4200)
+                        {
+                            uartOut('v',UART_1);
+                            printk("is this a pause?\n");
+                            break;
+                        }
+                    }
+                    break;
+                 case 'V':
                     FM_connected=1;
+                    FM_do_ini_call();
                     printk("[FM Remote] connected\n");
                     break;
-                default:
+                 default:
                     printk("don't know what to do with %c %02x\n",c,c);
             }
+            enable_irq(IRQ_UART1);
         }
     }
         
@@ -160,6 +215,7 @@ void processKey(int key)
     if(key & 0x80 && key_evt_array[1][0]==-1)
     {
         inHold=~inHold;
+        
         printk("[FM key] hold %s\n",inHold?"enable":"disable");
     }
     

@@ -243,25 +243,6 @@ void printPartition_info(struct partition_info * partition_list)
                 partition_list[i].strType,partition_list[i].type);
 }
 
-
-/*
-void select_drive(int drive)
-{
-    if(drive==HD_DRIVE)
-    {
-        ata_select_HD();
-        ata_powerUp_HD();
-        hd_sleep_state=0;
-        hd_launchTimer();
-    }
-    else
-    {
-        ata_select_CF();
-    }
-}
-*/
-
-
 void dd_swapChar(char * txt,int size)
 {
     int i;
