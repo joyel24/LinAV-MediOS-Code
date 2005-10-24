@@ -13,18 +13,18 @@
 #include <sys_def/string.h>
 
 #include <kernel/io.h>
+#include <kernel/irqs.h>
+#include <kernel/irq.h>
 #include <kernel/hardware.h>
 #include <kernel/cpld.h>
 #include <kernel/gio.h>
 #include <kernel/buttons.h>
 #include <kernel/bat_power.h>
-
-//#include <kernel/pipes.h>
+#include <kernel/uart.h>
+#include <api.h>
 //#include <evt.h>
 
 #include <kernel/fm_remote.h>
-
-#include <kernel/videoio.h>
 
 #define MAX_PING      3
 #define MAX_NON_GET   5
@@ -83,20 +83,44 @@ int key_evt_array[NB_KEY][2] = {
     { BUTTON_ON,       0x02 }  /* PRESS */
 };
 
+void fm_remote_INT(int irq_num)
+{
+    char c;
+    while(uartIn(&c,UART_1))
+    {
+        if(FM_connected)
+        {
+            printk("%c",c);
+        }
+        else
+        {
+            switch(c)
+            {
+                case 0xf8:
+                    while(uartIn(&c,UART_1)) /*nothing*/;
+                    
+                    uartOut('v',UART_1);
+                
+                    printk("loop ");
+                    
+                    break;
+                case 'V':
+                    FM_connected=1;
+                    printk("[FM Remote] connected\n");
+                    break;
+                default:
+                    printk("don't know what to do with %c %02x\n",c,c);
+            }
+        }
+    }
+        
+}
+
 /*void FM_remote_thread(PIPE * fm_remote_pipe)
 {
     char c;
     while(1)
     {
-//		uartOutString ("*** DEBUG STRING ***", 1);
-
-//		API_TASK_SLEEP (250);
-
-//        printk("[UART1 waiting]\n", c);
-       // API_PIPE_RECV((HPIPE)fm_remote_pipe,&c,1);
-        printk("[%c]\n", c);
-
-#if 0
         //printk("FM loop ");
         if(FM_connected)
         {        
@@ -125,7 +149,6 @@ int key_evt_array[NB_KEY][2] = {
                     printk("don't know what to do\n");
             }
         }
-#endif
     }
 }*/
 
@@ -542,86 +565,31 @@ void FM_send_data(char cmd,char * data,int size)
 
 void init_fm_remote(void)
 {
-	/* setting VIDEO-OUT */
-	printk ("[init] videoout start...\n");
-	gio_dir (GIO_VID_OUT,GIO_OUT);
-	gio_clear (GIO_VID_OUT);
-	printk ("[init] videoout end...\n");
-
-	// Configure picture size
-	outw (511,VIDEO_IO_BASE+VIDEOIO_PPLN_REG);
-	outw (255,VIDEO_IO_BASE+VIDEOIO_LPFR_REG);
-
-	outw (512,VIDEO_IO_BASE+VIDEOIO_HSIZE_REG);
-
-	outw (0x3F3F,VIDEO_IO_BASE+VIDEOIO_HDVDW_REG);
-
-	// Configure picture address
-	unsigned long nAddress = 0x03000000;
-	nAddress /= 32;
-	outw ((nAddress >> 16) & 0xFFFF,VIDEO_IO_BASE+VIDEOIO_SDA_HI_REG);
-	outw (nAddress & 0xFFFF,VIDEO_IO_BASE+VIDEOIO_SDA_LO_REG);
-
-	// Configure working mode
-	outw (0x4001,VIDEO_IO_BASE+VIDEOIO_MODESET_REG);
-
-	// Enable output VD/HD
-	outw (0x0001,VIDEO_IO_BASE+VIDEOIO_SYNCEN_REG);
-
-/*
-#define VIDEO_IO_BASE                     0x30780
-
-#define VIDEOIO_SYNCEN_REG   0x00
-#define VIDEOIO_MODESET_REG  0x02
-#define VIDEOIO_CLAMP_REG    0x04
-#define VIDEOIO_HDWDW_REG    0x06
-#define VIDEOIO_PPLN_REG     0x08
-#define VIDEOIO_LPFR_REG     0x0A
-#define VIDEOIO_SPH_REG      0x0C
-#define VIDEOIO_LNH_REG      0x0E
-#define VIDEOIO_SLV_REG      0x10
-#define VIDEOIO_LNV_REG      0x12
-#define VIDEOIO_DECIM_REG    0x14
-#define VIDEOIO_HSIZE_REG    0x16
-#define VIDEOIO_SDA_HI_REG   0x18
-#define VIDEOIO_SDA_LO_REG   0x1A
-#define VIDEOIO_VDINT0_REG   0x1C
-#define VIDEOIO_VDINT1_REG   0x1E
-#define VIDEOIO_OSDHPOS_REG  0x20
-#define VIDEOIO_OSDVPOS_REG  0x22
-#define VIDEOIO_FIDMODE_REG  0x24
-*/
-
-#if 0
     /* setting the gio and cpld */
     gio_dir(GIO_SPDIF,GIO_OUT);
-    gio_set(GIO_SPDIF);
-
     gio_dir(GIO_VID_OUT,GIO_OUT);
+    gio_set(GIO_SPDIF);
     gio_set(GIO_VID_OUT);
-
     cpld_set_port_3(CPLD_FM);
-
+    
     /*setting up the UART1 port */
-//    outw(0x015F,UART1_BASE+UART_BRSR); /* 9600 BAUD */
-    outw(0x02BE,UART1_BASE+UART_BRSR); /* 4800 BAUD */
-
+    outw(0x015F,UART1_BASE+UART_BRSR); /* 9600 BAUD */
     //outw(0x8000,UART1_BASE+UART_MSR);
     //outw(0x0000,UART1_BASE+UART_RFCR);
     //outw(0x0300,UART1_BASE+UART_TFCR);
-
+    
     /* initiale state */
-
+    
     inHold=0;
     FM_connected=0;
-
+    
     light_state=0x1;
-    FM_put_iniTxt();
+    FM_put_iniTxt();    
     contrast=0x00;
-
-    API_TASK_CREATE (FM_remote_thread, UART_1_Pipe, NULL);
-
+    
+    //API_TASK_CREATE (FM_remote_thread, UART_1_Pipe, NULL);
+    chg_irq_handler(IRQ_UART1,fm_remote_INT);  
     /* everything is ok */
     printk("[init] fm remote\n");
-#endif
 }
+

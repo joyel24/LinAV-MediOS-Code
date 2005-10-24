@@ -8,10 +8,6 @@
     .section ".text.init"
 .global entry_code
 entry_code:
-/* disable irq and fiq*/
-    /*mrs r0,cpsr
-    //orr r0,r0,#0x80
-    msr cpsr_cf,r0*/
 /* initialize the stacks and disable irq+fiq */
     MSR CPSR_c, #0xD1 @0x80 | 0x40 | 0x11 = 0xD1 [FIQ mode]
     mov r0, #0x00008000

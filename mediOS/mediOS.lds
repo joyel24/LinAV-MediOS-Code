@@ -41,7 +41,7 @@ SECTIONS
     {
         _bss_start = .;
         *(.bss)
-        _bss_end = .;
+        _bss_end = ALIGN(0x04);
     } > DRAM
     
     .common :
