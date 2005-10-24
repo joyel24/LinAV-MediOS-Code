@@ -18,11 +18,15 @@
 
 #define CONFIG_ARM_CLK 54000000
 
+
 /* uarts */
 
 #define UART0_BASE                        0x00030300
 #define UART1_BASE                        0x00030380
 
+/* DEBUG */
+#define DEBUG_UART              UART_0
+//#define USE_DEBUG_ON_SCREEN     1
 
 /* timers */
 

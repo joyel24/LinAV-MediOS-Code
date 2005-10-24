@@ -13,7 +13,6 @@
 #include <kernel/io.h>
 #include <kernel/hardware.h>
 #include <kernel/kernel.h>
-#include <kernel/config.h>
 #include <kernel/exit.h>
 
 #include <kernel/gio.h>

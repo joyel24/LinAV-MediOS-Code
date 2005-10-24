@@ -14,8 +14,8 @@
 #include <sys_def/string.h>
 #include <sys_def/ctype.h>
 
-#include <kernel/config.h>
 #include <kernel/uart.h>
+#include <kernel/hardware.h>
 
 #ifdef USE_DEBUG_ON_SCREEN
 #include <kernel/kgraphics.h>

@@ -42,8 +42,6 @@
 #include <kernel/pipes.h>
 #include <kernel/kgraphics.h>
 
-#include <kernel/config.h>
-
 #include <kernel/kfile.h>
 #include <kernel/kdir.h>
 #include <sys_def/colordef.h>
