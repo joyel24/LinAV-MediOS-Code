@@ -7,14 +7,7 @@
 */
 
 #include <kernel/kernel.h>
-#include <kernel/hardware.h>
 #include <kernel/swi.h>
-
-/* used by swi_device */
-#include <kernel/usb_fw.h>
-#include <kernel/rtc.h>
-#include <kernel/bat_power.h>
-
 
 /* used by swi_dsp */
 #include <kernel/irq.h>
@@ -26,13 +19,8 @@
 /* used by swi_sound */
 #include <kernel/sound.h>
 
-/* used for user_printf */
-#include <stdarg.h>
-void user_printf(const char * fmt, va_list args);
-
 /* used by swi_file */
-#include <kernel/bflat.h>
-int fs_swi(int cmd,void * data1, void * data2);
+
 
 __IRAM_CODE int kcswi_handler (
 	unsigned long nCmd,
@@ -40,27 +28,31 @@ __IRAM_CODE int kcswi_handler (
 	unsigned long nParam3,
 	unsigned long nParam1)
 {
-    switch (nCmd)
+    switch (nCmd >> 8)
     {
-        #include "swi_device.c.h"
-        
-        #include "swi_dsp.c.h"
-        
-        #include "swi_file.c.h"
-        
-        //#include "swi_kernel.c.h"
-        
-        #include "swi_memory.c.h"
-
-        case nAPI_PRINTF:
-            user_printf((const char *)nParam1, (va_list) nParam2);
-            break;
-        case nAPI_GFX:
-            swi_gfx_handler(nParam1, nParam2,nParam3);
-            break;            
+        case nAPI_KERNEL_section_code:
+                return swi_kernel_handler (nCmd, nParam1, nParam2, nParam3);
+    
+        case nAPI_GFX_section_code:
+                return swi_gfx_handler (nCmd, nParam1, nParam2, nParam3);
+    
+        case nAPI_SND_section_code:
+                return swi_snd_handler (nCmd, nParam1, nParam2, nParam3);
+    
+        case nAPI_FILE_section_code:
+                return swi_file_handler (nCmd, nParam1, nParam2, nParam3);
+    
+        case nAPI_DEVICE_section_code:
+                return swi_device_handler (nCmd, nParam1, nParam2, nParam3);
+    
+        case nAPI_MEMORY_section_code:
+                return swi_memory_handler (nCmd, nParam1, nParam2, nParam3);
+    
+        case nAPI_DSP_section_code:
+                return swi_dsp_handler (nCmd, nParam1, nParam2, nParam3);
+    
         default:
-            printk("Unknown SWI cmd call %d, module %d\n", nCmd, nCmd>>8);
+                printk("Unknown SWI module call %d\n", nCmd);
     }
-
 	return 0;
 }

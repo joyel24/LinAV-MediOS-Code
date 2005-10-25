@@ -8,7 +8,6 @@
 
 #include <kernel/kernel.h>
 #include <kernel/swi.h>
-#include <kernel/threads.h>
 #include <kernel/evt.h>
 #include <api.h>
 #include <kernel/irq.h>

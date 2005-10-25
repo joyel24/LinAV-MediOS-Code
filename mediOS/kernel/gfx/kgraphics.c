@@ -378,7 +378,9 @@ void KdrawLine(unsigned int color, int x1, int y1, int x2, int y2,struct graphic
      
 }
 
-int swi_gfx_handler(unsigned long cmd,
+void user_printf(const char * fmt, va_list args);
+
+int swi_gfx_handler(unsigned long nCmd,unsigned long cmd,
     unsigned long nParam2,
     unsigned long nParam3)
 {
@@ -389,7 +391,12 @@ int swi_gfx_handler(unsigned long cmd,
     unsigned char * str=(unsigned char*)nParam3;
     PLANE_DATA * p_data=(PLANE_DATA*) nParam3;
     
-    
+    if(nCmd == nAPI_PRINTF)
+    {
+        user_printf((const char *)cmd, (va_list) nParam2);
+    }
+    else
+    {    
             switch(cmd) {
                 case 0x000:                      /* void open_graphics(void) */
                     error_scr_state=0;    
@@ -556,6 +563,6 @@ int swi_gfx_handler(unsigned long cmd,
                     *int_data=current_font;
                     break;
             }
-           
+           }
     return 0;
 }
