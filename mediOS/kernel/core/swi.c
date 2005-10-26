@@ -9,18 +9,6 @@
 #include <kernel/kernel.h>
 #include <kernel/swi.h>
 
-/* used by swi_dsp */
-#include <kernel/irq.h>
-#include <kernel/dsp.h>
-
-/* used by swi_memory */
-#include <kernel/malloc.h>
-
-/* used by swi_sound */
-#include <kernel/sound.h>
-
-/* used by swi_file */
-
 
 __IRAM_CODE int kcswi_handler (
 	unsigned long nCmd,
@@ -30,9 +18,6 @@ __IRAM_CODE int kcswi_handler (
 {
     switch (nCmd >> 8)
     {
-        case nAPI_KERNEL_section_code:
-                return swi_kernel_handler (nCmd, nParam1, nParam2, nParam3);
-    
         case nAPI_GFX_section_code:
                 return swi_gfx_handler (nCmd, nParam1, nParam2, nParam3);
     

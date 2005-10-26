@@ -29,7 +29,7 @@ builddir:
 	@mkdir -p build
         
 lib_medios:
-	@make -C lib --no-print-directory -s all
+	@make -C lib --no-print-directory -s lib
 	@$(AR) -rc libmedios.a lib/*.o
 	@$(RANLIB) libmedios.a
 	@mv libmedios.a ../

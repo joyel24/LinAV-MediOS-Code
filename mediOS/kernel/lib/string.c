@@ -13,6 +13,12 @@
 #include <sys_def/ctype.h>
 #include <sys_def/string.h>
 
+#ifdef BUILD_LIB
+#include <kernel/malloc.h>
+#else
+#include <api.h>
+#endif
+
 #if 0
 #include <dma.h>
 

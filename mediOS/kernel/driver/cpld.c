@@ -15,8 +15,6 @@
 #include <kernel/hardware.h>
 #include <kernel/cpld.h>
 
-#warning we should lock the access to cpld see lock comment below
-
 __IRAM_DATA int cpld_port_state[4]=
 {
     0x0,
@@ -51,7 +49,6 @@ __IRAM_CODE void cpld_chg_state(int cpld_port,int bit_num,int direction)
 {
     int tmp;
     
-    /* LOCK */    
     tmp=cpld_port_state[cpld_port];
     if(direction)
         tmp |= (0x1 << bit_num);
@@ -63,22 +60,16 @@ __IRAM_CODE void cpld_chg_state(int cpld_port,int bit_num,int direction)
         cpld_port_state[cpld_port]=tmp;
         outw(cpld_port_state[cpld_port],cpld_port_array[cpld_port]);
     }
-    /* UNLOCK */
 }
 
 __IRAM_CODE int cpld_read(int cpld_port)
 {
-    int val;
-    /* LOCK */
-    val=inw(cpld_port_array[cpld_port]);
-    /* UNLOCK */
-    return val;
+    return inw(cpld_port_array[cpld_port]);
 }
 
 __IRAM_CODE void cpld_select(int bit_num,int direction)
 {
     int val;
-    /* LOCK */
     if(direction)
         val = cpld_port_state[CPLD0] | (0x1 << bit_num);
     else
@@ -88,13 +79,11 @@ __IRAM_CODE void cpld_select(int bit_num,int direction)
         cpld_port_state[CPLD0]=val;
         cpld_do_select();
     }
-    /* UNLOCK */
 }
 
 __IRAM_CODE void cpld_do_select(void)
 {  
     int res,res2;
-    /* LOCK */
     printk("changing cpld select : %d\n",cpld_port_state[CPLD0]);
     outw(cpld_port_state[CPLD0],CPLD_PORT0);
     outw(cpld_port_state[CPLD0],CPLD_PORT0);
@@ -105,7 +94,6 @@ __IRAM_CODE void cpld_do_select(void)
     res=inw(cpld_port_array[CPLD0]);
     while((res2=inw(cpld_port_array[CPLD0]))!=res) /* wait for the value to become stable */
         res=res2;
-    /* UNLOCK */
 }
 
 

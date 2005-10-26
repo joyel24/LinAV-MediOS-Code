@@ -222,11 +222,11 @@ ERROR_CODE load_bflat (const char * fname)
     }
 
     
-    run_flat=header.entry+text_pos;
+    run_flat=(int (*)(int ,char**))header.entry+text_pos;
     FLAT_PRINT("[load_bflat] about to launch: %08x\n",run_flat);
     ret = run_flat(0,NULL);
 
-    free(text_pos);
+    free((void*)text_pos);
     
     return ERR_OK;
 }

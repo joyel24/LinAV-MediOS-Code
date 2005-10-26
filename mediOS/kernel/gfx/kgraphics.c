@@ -395,7 +395,7 @@ int swi_gfx_handler(unsigned long nCmd,unsigned long cmd,
     {
         user_printf((const char *)cmd, (va_list) nParam2);
     }
-    else
+    else if(nCmd == nAPI_GFX)
     {    
             switch(cmd) {
                 case 0x000:                      /* void open_graphics(void) */

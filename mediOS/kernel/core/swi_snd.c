@@ -24,10 +24,14 @@ __IRAM_CODE int swi_snd_handler (
             return 0;
         
         case nAPI_MIXER:
+#ifdef HAVE_SOUND
             mixer_ctl((int)nParam1,(int)nParam2,(void *)nParam3);
+#endif
             return 0;
         case nAPI_DSP:
+#ifdef HAVE_SOUND
             dsp_ctl((int)nParam1,(void *)nParam2);
+#endif
             return 0;
         default:
                 printk("File undefined swi (%d)\n",nCmd);
