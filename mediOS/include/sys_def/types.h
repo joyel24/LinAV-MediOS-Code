@@ -25,6 +25,8 @@
 #define LONG_MIN	(-LONG_MAX - 1)
 #define ULONG_MAX	(~0UL)
 
+typedef unsigned short       uint16_t;
+
 typedef unsigned int         size_t;
 typedef signed   int         ssize_t;
 
