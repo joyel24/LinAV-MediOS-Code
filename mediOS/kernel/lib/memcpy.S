@@ -22,7 +22,9 @@
 .global memmove
 memcpy:
 memmove:
-#if 1
+#if 1   
+        cmp r2, #0
+        beq kmemcpyexit
 	stmdb sp!, {r4, r5}
 	mov r5, #0
 	and r4, r0, #3
@@ -43,6 +45,7 @@ kmemcpyslow:
 	subs r2, r2, #1
 	bne kmemcpyslow
 	ldmia sp!, {r4, r5}
+kmemcpyexit:
 	mov pc, lr
 
 @ 4 byte/cycle
