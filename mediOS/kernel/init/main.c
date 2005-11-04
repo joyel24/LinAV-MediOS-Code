@@ -67,6 +67,8 @@ void kload_context();
 
 void kernel_start (void)
 {
+    DEBUG_UART_INIT
+    
     ini_graphics();
     
 #ifdef USE_DEBUG_ON_SCREEN    
@@ -132,7 +134,9 @@ void kernel_start (void)
 
     printk("[init] END\n");
 
-    //load_bflat("/av_sms.grv");
+    //load_bflat("/test.grv");
+    
+    load_med("/test.grv");
     
     //printk("Back from blat\n");
         
