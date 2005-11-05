@@ -593,8 +593,9 @@ void doARM(uint32_t instruction)
                                 break;
                             case 3:
                                 INT_DEBUG_HEAD
-                                printf("BKPT: Undef instruction\n");
-                                exit(0);
+                                printf("BKPT: instruction\n");
+                                CHG_RUN_MODE(STEP)
+                                //exit(0);
                                 break;
                         }
                     }

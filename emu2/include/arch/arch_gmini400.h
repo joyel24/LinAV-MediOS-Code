@@ -31,13 +31,27 @@
 
 #define SDRAM_START       0x0900000
 #define SDRAM_END         0x1900000
-#define SDRAM_LOAD_OFFSET	0x0000000
+#ifdef Gmini400
+#define SDRAM_LOAD_OFFSET	0x0000000 // original;
+#else
+#ifdef Gmini400hb
+#define SDRAM_LOAD_OFFSET	0x310000 //gmini400 homebrew;
+#endif
+#endif
+
+
 
 
 /************************************************************ initial state */
 
-#define START_ADDR        SDRAM_START
-//#define START_ADDR        0x110000
+#ifdef Gmini400
+#define START_ADDR        SDRAM_START //original
+#else
+#ifdef Gmini400hb
+#define START_ADDR        0xC10000  //gmini400 homebrew;
+#endif
+#endif
+
 #define STACK_INIT        (IRAM_END - 0x4)
 #define RESET_INIT_VAL    0xEA03FFFE
 #define INIT_MODE         M_SVC

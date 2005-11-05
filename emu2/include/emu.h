@@ -19,7 +19,11 @@
 #ifdef Gmini400
 #include <arch/arch_gmini400.h>
 #else
+#ifdef Gmini400hb
+#include <arch/arch_gmini400.h>
+#else
     #error "undef arch"
+#endif
 #endif
 #endif
 #include "emu_types.h"
