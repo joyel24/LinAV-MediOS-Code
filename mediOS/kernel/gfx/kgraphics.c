@@ -397,6 +397,7 @@ int swi_gfx_handler(unsigned long nCmd,unsigned long cmd,
     }
     else if(nCmd == nAPI_GFX)
     {    
+        printk("processing GFX fct: %x\n",cmd);
             switch(cmd) {
                 case 0x000:                      /* void open_graphics(void) */
                     error_scr_state=0;    

@@ -15,6 +15,7 @@
 #include <kernel/malloc.h>
 
 #include <kernel/bflat.h>
+#include <kernel/med.h>
 
 #include <kernel/io.h>
 #include <kernel/hardware.h>
@@ -60,10 +61,6 @@ void print_boot_info(void)
 }
 
 extern void ini_debugOnScreen(void);
-
-extern int kata_manager (void* pvParameters);
-extern void API_BKT(void);
-void kload_context();
 
 void kernel_start (void)
 {
@@ -136,9 +133,9 @@ void kernel_start (void)
 
     //load_bflat("/test.grv");
     
-    load_med("/test.grv");
+    load_med("/othello.grv");
     
-    //printk("Back from blat\n");
+    printk("Back from med\n");
         
     while(1) /*nothing*/;
 

@@ -11,6 +11,7 @@
 #include <kernel/usb_fw.h>
 #include <kernel/rtc.h>
 #include <kernel/bat_power.h>
+#include <types.h>
 
 extern int lcd_bright;
 
@@ -62,7 +63,26 @@ __IRAM_CODE int swi_device_handler (
             case nAPI_GET_LCD_BRIGHTNESS:
                 *((int*)nParam1) = lcd_bright;
                 return 0;
-                
+            
+            case nAPI_GET_EVT_PIPE:
+#ifdef HAVE_EVT
+                *((EVT_PIPE*) nParam1) = (EVT_PIPE) get_evt_handling();
+#endif
+                return 0;
+            
+            case nAPI_RM_EVT_PIPE:
+#ifdef HAVE_EVT
+                rm_evt_handling((struct evt_pipes_s *)nParam1);
+                return 0;
+#endif                
+            case nAPI_GET_EVT:
+#ifdef HAVE_EVT
+                kpipe_read(&(((struct evt_pipes_s *)nParam1)->evt_pipe),(char*)nParam2,1);
+#endif
+                return 0;
+            case nAPI_BKPT:
+                do_bkpt();
+                return 0;
             default:
                 printk("Device undefined swi (%d)\n",nCmd);
         }

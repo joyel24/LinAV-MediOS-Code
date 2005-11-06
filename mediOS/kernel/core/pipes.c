@@ -15,10 +15,10 @@
 #include <kernel/kernel.h>
 #include <kernel/pipes.h>
 
-PIPE* g_pKernelCtrlPipe __IRAM_DATA = 0;
+/*PIPE* g_pKernelCtrlPipe __IRAM_DATA = 0;
 PIPE* g_pSystemCtrlPipe __IRAM_DATA = 0;
 PIPE* g_pGFXManagerPipe __IRAM_DATA = 0;
-PIPE* g_pAtaCtrlPipe    __IRAM_DATA = 0;
+PIPE* g_pAtaCtrlPipe    __IRAM_DATA = 0;*/
 
 __IRAM_CODE void kpipe_write  (PIPE* pPipe, void* _pData, unsigned long nBytes)
 {
@@ -37,7 +37,7 @@ __IRAM_CODE void kpipe_write  (PIPE* pPipe, void* _pData, unsigned long nBytes)
 __IRAM_CODE void kpipe_read  (PIPE* pPipe, void* _pData, unsigned long nBytes)
 {
 	unsigned char* pOut = (unsigned char*)_pData;
-	while (nBytes --)
+        while (nBytes -- && pPipe->nReceiver != pPipe->nSender)
 	{
 		*pOut++ = pPipe->buffer[pPipe->nReceiver ++];
 		pPipe->nReceiver &= PIPE_SIZE_MASK;

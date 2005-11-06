@@ -1,7 +1,7 @@
 /* 
-*   include/uart.h
+*   include/kernel/kernel.h
 *
-*   AMOS project
+*   mediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -13,6 +13,9 @@
 
 #ifndef __KERNEL_H
 #define __KERNEL_H
+
+
+#include <sys_def/section_types.h>
 
 void printk(char *fmt, ...);
 void print_data(char * data,int length);
@@ -33,13 +36,5 @@ struct pt_regs {
 
 #define SWAB16(x) (x)
 #define SWAB32(x) (x)
-
-/* section definition */
-
-#define __IRAM_CODE    __attribute__ ((section(".core")))
-#define __IRAM_DATA    __attribute__ ((section(".cored")))
-
-#define __SDRAM_CODE   __attribute__ ((section(".text")))
-#define __SDRAM_DATA   __attribute__ ((section(".data")))
 
 #endif

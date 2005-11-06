@@ -49,6 +49,11 @@ ERROR_CODE API_POWER                (int cmd,int * val)                         
 
 ERROR_CODE API_SET_LCD_BRIGHTNESS   (int nBrightness)                                                  { swi_call(nAPI_SET_LCD_BRIGHTNESS); }
 ERROR_CODE API_GET_LCD_BRIGHTNESS   (int* pnBrightness)                                                { swi_call(nAPI_GET_LCD_BRIGHTNESS); }
+
+ERROR_CODE API_GET_EVT_PIPE         (EVT_PIPE * pipe)                                                  { swi_call(nAPI_GET_EVT_PIPE); }
+ERROR_CODE API_RM_EVT_PIPE          (EVT_PIPE pipe)                                                    { swi_call(nAPI_RM_EVT_PIPE); }
+ERROR_CODE API_GET_EVT              (EVT_PIPE pipe,char * data)                                        { swi_call(nAPI_GET_EVT); }
+ERROR_CODE API_BKPT                 (void)                                                             { swi_call(nAPI_BKPT); }
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 
@@ -127,3 +132,16 @@ int do_api_power (int cmd)
     return res;
 }
 
+EVT_PIPE get_evt_pipe(void)
+{
+    EVT_PIPE val;
+    API_GET_EVT_PIPE(&val);
+    return val;
+}
+
+char get_evt(EVT_PIPE var)
+{
+    char c=0;
+    API_GET_EVT(var,&c);
+    return c;
+}

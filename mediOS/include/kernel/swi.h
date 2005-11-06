@@ -53,6 +53,12 @@
 
 #define nAPI_SET_LCD_BRIGHTNESS   (nAPI_DEVICE_section + 3)
 #define nAPI_GET_LCD_BRIGHTNESS   (nAPI_DEVICE_section + 4)
+
+#define nAPI_GET_EVT_PIPE         (nAPI_DEVICE_section + 5)
+#define nAPI_RM_EVT_PIPE          (nAPI_DEVICE_section + 6)
+#define nAPI_GET_EVT              (nAPI_DEVICE_section + 7)
+
+#define nAPI_BKPT                 (nAPI_DEVICE_section + 8)
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 

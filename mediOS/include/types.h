@@ -87,6 +87,7 @@ typedef unsigned long HPIPE;
 typedef unsigned long HCRITSEC;
 typedef unsigned long HEAP;
 typedef unsigned long HFONT;
+typedef unsigned long EVT_PIPE;
 
 typedef unsigned long COLOR;
 

@@ -171,42 +171,6 @@ void fm_remote_INT(int irq_num)
         
 }
 
-/*void FM_remote_thread(PIPE * fm_remote_pipe)
-{
-    char c;
-    while(1)
-    {
-        //printk("FM loop ");
-        if(FM_connected)
-        {        
-            API_PIPE_RECV((HPIPE)fm_remote_pipe,&c,1);
-        }
-        else
-        {
-            API_PIPE_RECV((HPIPE)fm_remote_pipe,&c,1);
-            printk("Read: %02x\n",c);
-            switch(c)
-            {
-                case 0xf8:
-                    while(API_PIPE_TEST((HPIPE)fm_remote_pipe))
-                    {
-                        API_PIPE_RECV((HPIPE)fm_remote_pipe,&c,1);
-                        if(c!=0xf8)
-                            break;
-                    }
-                    uartOut('v',UART_1);
-                    break;
-                case 'V':
-                    FM_connected=1;
-                    printk("[FM Remote] connected\n");
-                    break;
-                default:
-                    printk("don't know what to do\n");
-            }
-        }
-    }
-}*/
-
 void processKey(int key)
 {
     int i;

@@ -56,4 +56,28 @@ typedef struct {
     uint32_t	r_info;
 } rel_entry;
 
+#define MED_DISCARD         0
+#define MED_BIT             1
+#define MED_BSS             2
+#define MED_REL             3
+
+#define MED_DEST_IRAM       0
+#define MED_DEST_SDRAM      1
+
+
+typedef struct __section_t {
+    char*           name;
+    uint32_t        vaddr;
+    char*           addr;
+    uint32_t        offset;
+    uint32_t        size;
+    int             type;
+    int             dest;
+    int             opt;
+    int             nb_ent;
+    struct __section_t *   rel;
+} section_t;
+
+void load_med(char * file_name);
+
 #endif

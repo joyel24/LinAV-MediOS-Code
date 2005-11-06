@@ -16,6 +16,7 @@
 #include <kernel/errors.h>
 
 #include <sys_def/time.h>
+#include <sys_def/section_types.h>
 
 #include <types.h>
 
@@ -47,6 +48,15 @@ ERROR_CODE API_POWER                (int cmd,int * val);
 
 ERROR_CODE API_SET_LCD_BRIGHTNESS   (int nBrightness);
 ERROR_CODE API_GET_LCD_BRIGHTNESS   (int* pnBrightness);
+
+ERROR_CODE API_GET_EVT_PIPE         (EVT_PIPE * pipe);
+ERROR_CODE API_RM_EVT_PIPE          (EVT_PIPE pipe);
+ERROR_CODE API_GET_EVT              (EVT_PIPE pipe,char * data);
+#define rm_evt_pipe                 API_RM_EVT_PIPE
+EVT_PIPE get_evt_pipe(void);
+char get_evt(EVT_PIPE var);
+
+ERROR_CODE API_BKPT                 (void);
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 

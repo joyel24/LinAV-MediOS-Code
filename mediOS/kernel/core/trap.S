@@ -104,11 +104,11 @@ trap_irq:
     @
     @ now branch to the relevent MODE handling routine
     @
-    mrs    r13, spsr            @ switch to SVC_32 mode
+    mrs    r13, spsr            @ switch to correct mode
     bic    r13, r13, #0x1f      @ preserve F and T bits
-    orr    r13, r13, #0x13
+    orr    r13, r13, #0x13      @ 0x1F for SYS_32,   0x13 for SVC_32
     orr    r13, r13, #0x80
-    msr    spsr_c, r13            @ switch to SVC_32 mode
+    msr    spsr_c, r13          @ switch to correct mode
     
     @and    lr, lr, #15
     ldr    lr, [pc]

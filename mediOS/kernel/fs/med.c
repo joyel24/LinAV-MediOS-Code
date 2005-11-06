@@ -22,33 +22,83 @@
 
 #include <kernel/med.h>
 
+#define CORE_START   ((char*)&_iram_end+0x10)
+
+#ifdef DO_MED_DEBUG
+#define DEBUG_MED (s...)   printk(s)
+#else
+#define DEBUG_MED(s...)
+#endif
+
+char * SDRAM_SECTIONS[] = {
+    ".texte",
+    ".data",
+    ".bss",
+    ".rodata",
+    NULL
+};
+
+char * IRAM_SECTIONS[] = {
+    ".iram",
+    ".core",
+    ".cored",
+    NULL
+};
+
+char * BSS_SECTIONS[] = {
+    ".bss",
+    NULL
+};
+
+
+
+int cmp_string(char * str1,char * str2)
+{
+    while(*str1 && *str2)
+    {
+        if(*str1 != *str2)
+            return 0;
+        str1++;
+        str2++;
+    }
+    return 1;
+}
+
+int test_section(char * name,char ** name_list)
+{
+    int i;
+    int res = 0;
+    for(i=0;name_list[i];i++)
+    {
+        if(cmp_string(name,name_list[i]))
+            res = 1;
+    }
+    return res;
+}
+
 void load_med(char * file_name)
 {
-    int fd,ret,i,res;
+    int fd,ret,i,j,k,res,res2;
     
-    int (*run_flat)(int argc,char**argv);
+    int (*run_med)(int argc,char**argv);
     
     elf_hdr header;
     
-    section_hdr * sections;
+    section_hdr section;
     char * sections_name;
     
-    int text_section=0;
-    int data_section=0;
-    int rodata_section=0;
-    int core_section=0;
+    section_t * section_list;
     
-    int rel_text_section=0;
-    int rel_core_section=0;
+    uint32_t entry=-1;
     
-    char * text_start;
-    char * ro_data_start;
-    char * data_start;
-    char * core_start=(char*)&_iram_end+0x10;
-    
-    int nb_ent;
-    uint32_t entry;
-    
+    uint32_t sdram_size=0;
+    char * sdram_start=NULL;
+    char * sdram_ptr=NULL;
+    uint32_t iram_size=0;
+    char * iram_ptr=NULL;
+    int first_sdram=-1;
+    int first_iram=-1;
+        
     fd = kfopen(file_name,O_RDONLY);
     if(fd<0)
     {
@@ -56,276 +106,264 @@ void load_med(char * file_name)
         return ;
     }
     
+    /* reading elf header */
     if((ret=kfread(fd,(void*)&header,sizeof(elf_hdr)))<sizeof(elf_hdr))
     {
         printk("[load_med] Can't read completly the header (read %d)\n",ret);
         goto exit_point;
     }
     
+    /* checking ELF Magic*/
     if(header.e_ident[0] != 0x7F || header.e_ident[1] != 0x45 || header.e_ident[2] != 0x4c || header.e_ident[3] != 0x46)
     {
         header.e_ident[4]=0;
         printk("[load_med] Wrong magic (%s)\n",header.e_ident);
         goto exit_point;
     }
-    
-    sections = (section_hdr *)malloc(sizeof(section_hdr)*header.e_shnum);
-    if(!sections)
+    /* reading all section headers from file*/
+    section_list = (section_t *)malloc(sizeof(section_t)*header.e_shnum);
+    if(!section_list)
     {
         printk("Error can't malloc an array of section header of %d elements\n",header.e_shnum);
         goto exit_point;
     }
-            
+           
+    /* creating our own list of section infos */ 
     for(i=0;i<header.e_shnum;i++)
     {
         klseek (fd,header.e_shoff+i*header.e_shentsize,SEEK_SET);
-        res=kfread(fd,(void*)&(sections[i]),sizeof(section_hdr));
+        kfread(fd,(void*)&section,sizeof(section_hdr));
+        /* init from section header*/
+        section_list[i].name = (char*)section.sh_name;
+        section_list[i].vaddr = section.sh_addr;
+        section_list[i].offset = section.sh_offset;
+        section_list[i].size = section.sh_size;
+        
+        /* default value */
+        section_list[i].addr = 0;
+        section_list[i].type = MED_DISCARD;
+        section_list[i].rel = NULL;
+        section_list[i].opt = 0;
+        section_list[i].nb_ent = 0;
+               
+        /* special processing for rel section */
+        if(section.sh_type == 9)
+        {
+            section_list[i].opt = section.sh_info;
+            section_list[i].type = MED_REL;
+            section_list[i].nb_ent =section.sh_size/section.sh_entsize;
+        }
     }
     
-    klseek (fd,sections[header.e_shstrndx].sh_offset,SEEK_SET);
-    
-    sections_name = (char*)malloc(sizeof(char)*sections[header.e_shstrndx].sh_size);
+    /* reading section's name section */
+    klseek (fd,section_list[header.e_shstrndx].offset,SEEK_SET);    
+    sections_name = (char*)malloc(sizeof(char)*section_list[header.e_shstrndx].size);
     if(!sections_name)
     {
-        printk("Error can't malloc an array of char of %d elements for sections' names\n",sections[header.e_shstrndx].sh_size);
+        printk("Error can't malloc an array of char of %d elements for sections' names\n",section_list[header.e_shstrndx].size);
         goto exit_point1;
-    }
+    }    
+    res=kfread(fd,(void*)sections_name,sizeof(char)*section_list[header.e_shstrndx].size);
     
-    res=kfread(fd,(void*)sections_name,sizeof(char)*sections[header.e_shstrndx].sh_size);
+    /* parsing section list according to name */
     
     for(i=0;i<header.e_shnum;i++)
     {
-        /* trying to find sections*/
-        if(!strcmp(&sections_name[sections[i].sh_name],".text"))
+        /* getting the real name */
+        section_list[i].name=&sections_name[(uint32_t)section_list[i].name];
+            
+        /* discard all 0 sized section */
+        if(section_list[i].size == 0x0)
         {
-            text_section=i;
-            printk("text section from %x to %x\n",sections[i].sh_addr,sections[i].sh_addr+sections[i].sh_size);
+            section_list[i].type = MED_DISCARD;
+            DEBUG_MED("Section %s will not be loaded, size=0\n",section_list[i].name);
+            continue;
         }
-        else if(!strcmp(&sections_name[sections[i].sh_name],".core"))
+            
+        /* linking rel section to its section */
+        if(section_list[i].type == MED_REL) /* rel section */
         {
-            core_section=i;
-            printk("core section from %x to %x\n",sections[i].sh_addr,sections[i].sh_addr+sections[i].sh_size);
+            section_list[section_list[i].opt].rel = &section_list[i];
+            DEBUG_MED("Section %s will not be loaded, rel section\n",section_list[i].name);
+            continue;
         }
-        else if(!strcmp(&sections_name[sections[i].sh_name],".rodata"))
+        
+        /* is this a bss section ?*/
+        if(test_section(section_list[i].name,BSS_SECTIONS))
+            section_list[i].type = MED_BSS;
+        
+        /* standard processing */
+        
+        /* is this a SDRAM section */
+        if(test_section(section_list[i].name,SDRAM_SECTIONS))
         {
-            rodata_section=i;
-            printk("rodata section from %x to %x\n",sections[i].sh_addr,sections[i].sh_addr+sections[i].sh_size);
+            if(section_list[i].type!=MED_BSS)
+                section_list[i].type = MED_BIT;
+            section_list[i].dest = MED_DEST_SDRAM;
+            sdram_size += section_list[i].size;
+            if(first_sdram!=-1)
+                first_sdram=i;
         }
-        else if(!strcmp(&sections_name[sections[i].sh_name],".data"))
+        else if(test_section(section_list[i].name,IRAM_SECTIONS))
         {
-            data_section=i;
-            printk("data section from %x to %x\n",sections[i].sh_addr,sections[i].sh_addr+sections[i].sh_size);
+            if(section_list[i].type!=MED_BSS)
+                section_list[i].type = MED_BIT;
+            section_list[i].dest = MED_DEST_IRAM;
+            iram_size += section_list[i].size;
+            if(first_iram!=-1)
+                first_iram=i;
         }
         else
-            printk("unknown section %d: %s\n",i,&sections_name[sections[i].sh_name]);
+        {
+            DEBUG_MED("Section %s will not be loaded\n",section_list[i].name);
+        }        
+        
     }
+        
+    /* get mem space in IRAM and SDRAM */
+        
+    if((0x7000-(unsigned int)CORE_START)<iram_size)
+    {        
+        printk("Can't get a buffer for IRAM: avail %x need %x\n",(0x7000-(unsigned int)CORE_START),iram_size);
+        goto exit_point2;
+    }
+    
+    iram_ptr=CORE_START;
+    DEBUG_MED("Iram strat: %x\n",iram_ptr);
+    
+    sdram_ptr = sdram_start = (char*)malloc(sdram_size);
+    
+    if(!sdram_start)
+    {
+        printk("Can't get a buffer in SDRAM size: %x\n",sdram_size);
+        goto exit_point2;
+    }
+    else
+        printk("buffer in SDRAM created; size: %x\n",sdram_size);
+    
+    /* loading sections in mem */
     
     for(i=0;i<header.e_shnum;i++)
     {
-        if(sections[i].sh_type == 9)
+        if(section_list[i].type == MED_DISCARD || section_list[i].type == MED_REL)
         {
-            printk("found rel ");
-            if(sections[i].sh_info == text_section)
-            {
-                rel_text_section = i;
-                printk("for text\n");
-            }
-            else if(sections[i].sh_info == core_section)
-            {
-                rel_core_section = i;
-                printk("for core\n");
-            }
-            else
-                printk("-Error %d is a rel for %d (%s)\n",i,sections[i].sh_info,&sections_name[sections[sections[i].sh_info].sh_name]);
-        }        
-    }     
+            printk("[%d] %s not loaded (size=0x%x)\n",i,section_list[i].name,section_list[i].size);
+            continue;
+        }
         
-    /* creating text and data section */
-    
-    
-    if((0x7000-(unsigned int)core_start)<sections[core_section].sh_size)
-    {
-        printk("Can't get a buffer for CORE: avail=%x need %x\n",0x7000-(unsigned int)core_start,sections[core_section].sh_size);
-        goto exit_point2;
-    }
-    
-    
-    text_start = (char*)malloc(sections[text_section].sh_size+sections[data_section].sh_size+sections[rodata_section].sh_size);
-    
-    if(!text_start)
-    {
-        printk("Can't get a buffer in SDRAM size: %x\n",sections[text_section].sh_size+sections[data_section].sh_size+sections[rodata_section].sh_size);
-        goto exit_point2;
-    }
-    else
-        printk("buffer in SDRAM created; size: %x\n",sections[text_section].sh_size+sections[data_section].sh_size+sections[rodata_section].sh_size);
+        if(section_list[i].dest == MED_DEST_SDRAM)
+        {
+            section_list[i].addr = sdram_ptr;
+            sdram_ptr+=section_list[i].size;
+        }
+        else if(section_list[i].dest == MED_DEST_IRAM)
+        {
+            section_list[i].addr = iram_ptr;
+            iram_ptr+=section_list[i].size;
+        }
         
-    data_start = text_start + sections[text_section].sh_size;
-    ro_data_start = data_start + sections[data_section].sh_size;
-    
-    if(sections[text_section].sh_size)
-    {
-        klseek (fd,sections[text_section].sh_offset,SEEK_SET);
-        res = kfread(fd,(void*)text_start,(size_t)sections[text_section].sh_size);
-        printk("TEXT load at 0x%x, read %x/%x\n",text_start,res,(size_t)sections[text_section].sh_size);
-    }
-    else
-        printk("no TEXT loaded (size==0)\n");
+        if(section_list[i].type == MED_BSS)
+        {
+            /* clearing bss */
+            memset(section_list[i].addr,0,section_list[i].size);
+            printk("[%d] %s created at 0x%x and cleared (size=0x%x)\n",i,section_list[i].name,section_list[i].addr,section_list[i].size);
+        }
+        else
+        {
+            /* loading section from disk */
+            klseek (fd,section_list[i].offset,SEEK_SET);
+            res = kfread(fd,(void*)section_list[i].addr,section_list[i].size);
+            printk("[%d] %s load at 0x%x, read %x/%x\n",i,section_list[i].name,section_list[i].addr,res,section_list[i].size);
+        }           
         
-    if(sections[data_section].sh_size)
-    {
-        klseek (fd,sections[data_section].sh_offset,SEEK_SET);
-        res = kfread(fd,(void*)data_start,sections[data_section].sh_size);
-        printk("DATA load at 0x%x, read %x/%x\n",data_start,res,sections[data_section].sh_size);
     }
-    else
-        printk("no DATA loaded (size==0)\n");
-        
-    if(sections[rodata_section].sh_size)
-    {
-        printk("RODATA load ");
-        klseek (fd,sections[rodata_section].sh_offset,SEEK_SET);
-        res = kfread(fd,(void*)ro_data_start,sections[rodata_section].sh_size);
-        printk("at 0x%x, read %x/%x\n",ro_data_start,res,sections[rodata_section].sh_size);
-    }
-    else
-        printk("no RODATA loaded (size==0)\n");
-    
-    if(sections[core_section].sh_size)
-    {
-        printk("CORE load ");
-        klseek (fd,sections[core_section].sh_offset,SEEK_SET);
-        res = kfread(fd,(void*)core_start,sections[core_section].sh_size);
-        printk("at 0x%x, read %x/%x\n",core_start,res,sections[core_section].sh_size);
-    }
-    else
-        printk("no CORE loaded (size==0)\n");
      
     /* now processing relocs */
-      
-    if(rel_text_section)
+
+    for(i=0;i<header.e_shnum;i++)
     {
-        rel_entry rel_data;
-        uint32_t addr;
-        uint32_t content;
-        nb_ent = sections[rel_text_section].sh_size/sections[rel_text_section].sh_entsize;
-        
-        printk("we'll have to process %d relocs\n",nb_ent);
-        for(i=0;i<nb_ent;i++)
+        if(section_list[i].type != MED_DISCARD && section_list[i].type != MED_REL && section_list[i].rel)
         {
-            klseek(fd,sections[rel_text_section].sh_offset+i*sizeof(rel_entry),SEEK_SET);
-            kfread(fd,(void*)&rel_data,sizeof(rel_entry));
-            /* only considering type 2 rel */
-            if(ELF32_R_TYPE(rel_data.r_info) == 0x2)
+            rel_entry rel_data;
+            uint32_t addr;
+            uint32_t content;
+            res=0;res2=0;
+            printk("we'll have to process %d relocs for %s - \n",section_list[i].rel->nb_ent,section_list[i].rel->name);
+            for(j=0;j<section_list[i].rel->nb_ent;j++)
             {
-                addr = rel_data.r_offset-sections[text_section].sh_addr+(uint32_t)text_start;                
-                content = inl(addr);
-                
-                if(sections[text_section].sh_addr <= content && (sections[text_section].sh_addr+sections[text_section].sh_size)>content)
+                klseek(fd,section_list[i].rel->offset+j*sizeof(rel_entry),SEEK_SET);
+                kfread(fd,(void*)&rel_data,sizeof(rel_entry));
+                /* only considering type 2 rel */
+                if(ELF32_R_TYPE(rel_data.r_info) == 0x2)
                 {
-                    printk("rel from text to text\n");
-                    outl(content-sections[text_section].sh_addr+(uint32_t)text_start,addr);                    
+                    res++;
+                    addr = rel_data.r_offset-section_list[i].vaddr+(uint32_t)section_list[i].addr;                
+                    content = inl(addr);
+                    /* searching where is this addr */
+                    for(k=0;k<header.e_shnum;k++)
+                        if(section_list[k].vaddr<=content && (section_list[k].vaddr+section_list[k].size)>content)
+                        {
+                            outl(content-section_list[k].vaddr+(uint32_t)section_list[k].addr,addr);
+                            res2++;
+                            DEBUG_MED("REL: from %x(%x), data %x changed to %x (in section %d start: %x(%x))\n",rel_data.r_offset,addr,content,
+                                content-section_list[k].vaddr+(uint32_t)section_list[k].addr,k,
+                                section_list[k].vaddr,
+                                (uint32_t)section_list[k].addr);
+                        }                    
                 }
-                else if(sections[data_section].sh_addr <= content && (sections[data_section].sh_addr+sections[data_section].sh_size)>content)
-                {
-                    printk("rel from text to data\n");
-                    outl(content-sections[data_section].sh_addr+(uint32_t)data_start,addr);                    
-                }
-                else if(sections[rodata_section].sh_addr <= content && (sections[rodata_section].sh_addr+sections[rodata_section].sh_size)>content)
-                {
-                    printk("rel from text to rodata\n");
-                    outl(content-sections[rodata_section].sh_addr+(uint32_t)ro_data_start,addr);                    
-                }
-                else if(sections[core_section].sh_addr <= content && (sections[core_section].sh_addr+sections[core_section].sh_size)>content)
-                {
-                    printk("rel from text to core\n");
-                    outl(content-sections[core_section].sh_addr+(uint32_t)core_start,addr);                    
-                }
-                else
-                    printk("didn't find correct section: 0x%x from 0x%x\n",content,addr);
             }
-            //printk("REL %x: off:0x%x SYM: 0x%x Type: 0x%x\n",i,rel_data.r_offset,ELF32_R_SYM(rel_data.r_info),ELF32_R_TYPE(rel_data.r_info));       
+            printk("%d were of type 2, %d were found\n",res,res2);
         }
     }
-    else
-        printk("no rel in text\n");
     
-    if(rel_core_section)
+    /* now finding where to start */
+    for(k=0;k<header.e_shnum;k++)
+    if(section_list[k].vaddr<=header.e_entry && (section_list[k].vaddr+section_list[k].size)>header.e_entry)
     {
-        rel_entry rel_data;
-        uint32_t addr;
-        uint32_t content;
-        nb_ent = sections[rel_core_section].sh_size/sections[rel_core_section].sh_entsize;
-        
-        printk("we'll have to process %d relocs\n",nb_ent);
-        for(i=0;i<nb_ent;i++)
-        {
-            klseek(fd,sections[rel_core_section].sh_offset+i*sizeof(rel_entry),SEEK_SET);
-            kfread(fd,(void*)&rel_data,sizeof(rel_entry));
-            /* only considering type 2 rel */
-            if(ELF32_R_TYPE(rel_data.r_info) == 0x2)
-            {
-                addr = rel_data.r_offset-sections[core_section].sh_addr+(uint32_t)core_start;                
-                content = inl(addr);
-                
-                if(sections[text_section].sh_addr <= content && (sections[text_section].sh_addr+sections[text_section].sh_size)>content)
-                {
-                    printk("rel from core to text\n");
-                    outl(content-sections[text_section].sh_addr+(uint32_t)text_start,addr);                    
-                }
-                else if(sections[data_section].sh_addr <= content && (sections[data_section].sh_addr+sections[data_section].sh_size)>content)
-                {
-                    printk("rel from core to data\n");
-                    outl(content-sections[data_section].sh_addr+(uint32_t)data_start,addr);                    
-                }
-                else if(sections[rodata_section].sh_addr <= content && (sections[rodata_section].sh_addr+sections[rodata_section].sh_size)>content)
-                {
-                    printk("rel from core to rodata\n");
-                    outl(content-sections[rodata_section].sh_addr+(uint32_t)ro_data_start,addr);                    
-                }
-                else if(sections[core_section].sh_addr <= content && (sections[core_section].sh_addr+sections[core_section].sh_size)>content)
-                {
-                    printk("rel from core to data\n");
-                    outl(content-sections[core_section].sh_offset+(uint32_t)core_start,addr);                    
-                }
-                else
-                    printk("didn't find correct section: 0x%x from 0x%x\n",content,addr);
-            }
-            //printk("REL %x: off:0x%x SYM: 0x%x Type: 0x%x\n",i,rel_data.r_offset,ELF32_R_SYM(rel_data.r_info),ELF32_R_TYPE(rel_data.r_info));       
-        }
+        entry=header.e_entry-section_list[k].vaddr+(uint32_t)section_list[k].addr;
+        break;
     }
-    else
-        printk("no rel in core\n");
-           
-    if(sections[text_section].sh_addr <= header.e_entry && (sections[text_section].sh_addr+sections[text_section].sh_size)>header.e_entry)
+    
+    if(entry==-1)
     {
-        entry = header.e_entry - sections[text_section].sh_addr + (uint32_t)text_start;
-        printk("entry point in text: 0x%x\n",entry);
-    }
-    else if(sections[core_section].sh_addr <= header.e_entry && (sections[core_section].sh_addr+sections[core_section].sh_size)>header.e_entry)
-    {
-        entry = header.e_entry - sections[core_section].sh_addr + (uint32_t)core_start;
-        printk("entry point in core: 0x%x\n",entry);
-    }
-    else
-    {
-        printk("Entry not in text or core\n");
+        printk("can't find setion of entry point: 0x%x\n",header.e_entry);
         goto exit_point3;
     }
+    else
+        printk("entry point in section: %d\n",k);
+           
+    kfclose(fd);
          
-    run_flat = (int (*)(int ,char**))entry;
+    printk("sdram  %x (@%x)\n",sdram_start,&sdram_start); 
+    printk("sections_name  %x(@%x)\n",sections_name,&sections_name);
+    printk("section_list  %x(@%x)\n",section_list,&section_list);
     
-    printk("calling app\n");      
+    run_med = (int (*)(int ,char**))entry;
     
-    run_flat(0,NULL);
+    DEBUG_MED("calling app\n");      
     
-    printk("back from app\n");           
+    
+    run_med(0,NULL);
+    
+    printk("back from app\n"); 
+              
+    free(sdram_start);
+    printk("sdram freed %x\n",sdram_start); 
+    free(sections_name);
+    printk("sections_name freed %x\n",sections_name);
+    free(section_list);
+    printk("section_list freed %x\n",section_list);
+    return;
+    
 exit_point3:    
-    free(text_start);
+    free(sdram_start);
+    printk("sdram freed\n"); 
 exit_point2:    
     free(sections_name);
+    printk("sections_name freed\n"); 
 exit_point1:
-    free(sections);
+    free(section_list);
+    printk("sections_name freed\n");
 exit_point:
     kfclose(fd);
     
