@@ -13,7 +13,11 @@
 #ifdef AV3XX
 #include <kernel/target/av3xx_def.h>
 #else
+#ifdef GMINI4XX
+#include <kernel/target/gmini4xx_def.h>
+#else
 #error bad target device
-#endif
+#endif /* GMINI4XX */
+#endif /* AV3XX */
 
 #endif  /* __HARDWARE_H */

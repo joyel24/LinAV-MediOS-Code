@@ -133,7 +133,7 @@ void kernel_start (void)
 
     //load_bflat("/test.grv");
     
-    load_med("/othello.grv");
+    //load_med("/othello.grv");
     
     printk("Back from med\n");
         
