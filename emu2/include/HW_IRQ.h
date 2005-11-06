@@ -10,6 +10,8 @@
 * KIND, either express of implied.
 */
 
+
+
 #ifndef __HW_IRQ_H
 #define __HW_IRQ_H
 
@@ -18,6 +20,7 @@
 
 #define FIQ  0x0
 #define IRQ  0x1
+
 
 class HW_IRQ : public HW_access {
     public:
@@ -33,9 +36,9 @@ class HW_IRQ : public HW_access {
         void do_IRQ_FIQ(int type,int num);
         
     private:
-        int status[4];
-        int entry[4];
-        int enable[4];
+        int status[NUM_OF_IRQ];
+        int entry[NUM_OF_IRQ];
+        int enable[NUM_OF_IRQ];
         
 };
 

@@ -1,3 +1,4 @@
+
 /* 
 *   HW_IRQ.cpp
 *
@@ -14,24 +15,20 @@
 
 #include <HW_IRQ.h>
 
-#define FIQ_0    0x0
-#define FIQ_1    0x2
-#define IRQ_0    0x4
-#define IRQ_1    0x6
-
-#define BASE_STATUS   (IRQ_START+0x0)
-#define BASE_ENTRY    (IRQ_START+0x8)
-#define BASE_ENABLE   (IRQ_START+0x20)
-
 char * str_irq_fiq[] = {
     "FIQ0",
     "FIQ1",
+#ifdef Gmini400
+    "FIQ2",
+    "null",
+#endif
     "IRQ0",
-    "IRQ1"
+    "IRQ1",
+#ifdef Gmini400
+    "IRQ2"
+#endif
 };
 
-#define REG_NUM(irq) (irq<16?0:1)
-#define REAL_NUM(irq) (irq<16?irq:irq-16)
 
 HW_IRQ * irq_obj;
 
@@ -40,7 +37,7 @@ HW_IRQ * irq_obj;
 HW_IRQ::HW_IRQ(void):HW_access(IRQ_START,IRQ_END,"IRQ/FIQ")
 {
     init_irq_static_fct(this);
-    for(int i=0;i<4;i++)
+    for(int i=0;i<NUM_OF_IRQ;i++)
     {
         status[i]=0x0;
         entry[i]=0;
@@ -58,27 +55,38 @@ uint32_t HW_IRQ::read(uint32_t addr,int size)
     switch(addr)
     {
         case BASE_STATUS + FIQ_0:
-        case BASE_STATUS + IRQ_0:
-            mod_val=0xFFF7;
+        case BASE_STATUS + IRQ_0:         //mod_val=0xFFF7; 
         case BASE_STATUS + FIQ_1:
         case BASE_STATUS + IRQ_1:
-            num = (addr - BASE_STATUS)/2;
+#ifdef Gmini400
+        case BASE_STATUS + FIQ_2:
+        case BASE_STATUS + IRQ_2:	
+#endif
+            num = (addr - BASE_STATUS)/2; //addr - BASE_ENTRY == FIQ_0 or FIQ_1 or ...
             ret_val=status[num];
-            status[num] &= mod_val;
+            status[num] &= 0xFFFF;
             DEBUG_HW(IRQ_HW_DEBUG,"%s read %s STATUS @0x%08x, size %x send %x\n",name,str_irq_fiq[num],addr,size,ret_val);            
             break;
         case BASE_ENTRY + FIQ_0:
         case BASE_ENTRY + FIQ_1:
         case BASE_ENTRY + IRQ_0:
         case BASE_ENTRY + IRQ_1:
+#ifdef Gmini400        
+        case BASE_ENTRY + FIQ_2:
+        case BASE_ENTRY + IRQ_2:
+#endif
             num = (addr - BASE_ENTRY)/2;
             ret_val=entry[num];
             DEBUG_HW(IRQ_HW_DEBUG,"%s read %s ENTRY @0x%08x, size %x send %x\n",name,str_irq_fiq[num],addr,size,ret_val);            
             break;
         case BASE_ENABLE + FIQ_0:
-        case BASE_ENABLE + FIQ_1:
+        case BASE_ENABLE + FIQ_1:        
         case BASE_ENABLE + IRQ_0:
         case BASE_ENABLE + IRQ_1:
+#ifdef Gmini400         
+        case BASE_ENABLE + IRQ_2:
+        case BASE_ENABLE + FIQ_2:
+#endif
             num = (addr - BASE_ENABLE)/2;
             ret_val=enable[num];
             DEBUG_HW(IRQ_HW_DEBUG,"%s read %s ENABLE @0x%08x, size %x send %x\n",name,str_irq_fiq[num],addr,size,ret_val);            
@@ -100,6 +108,10 @@ void HW_IRQ::write(uint32_t addr,uint32_t val,int size)
         case BASE_STATUS+FIQ_1:
         case BASE_STATUS+IRQ_0:
         case BASE_STATUS+IRQ_1:
+#ifdef Gmini400
+        case BASE_STATUS + FIQ_2:
+        case BASE_STATUS + IRQ_2:	
+#endif
             num = (addr - BASE_STATUS)/2;
             status[num]=(status[num]|val)&0xFFFF;
             DEBUG_HW(IRQ_HW_DEBUG,"%s write %x to %s STATUS @0x%08x, size %x\n",
@@ -109,6 +121,10 @@ void HW_IRQ::write(uint32_t addr,uint32_t val,int size)
         case BASE_ENTRY+FIQ_1:
         case BASE_ENTRY+IRQ_0:
         case BASE_ENTRY+IRQ_1:
+#ifdef Gmini400
+        case BASE_ENTRY + FIQ_2:
+        case BASE_ENTRY + IRQ_2:	
+#endif
             num = (addr - BASE_ENTRY)/2;
             entry[num]=val&0xFFFF;
             DEBUG_HW(IRQ_HW_DEBUG,"%s write %x to %s ENTRY @0x%08x, size %x\n",
@@ -118,6 +134,10 @@ void HW_IRQ::write(uint32_t addr,uint32_t val,int size)
         case BASE_ENABLE+FIQ_1:
         case BASE_ENABLE+IRQ_0:
         case BASE_ENABLE+IRQ_1:
+#ifdef Gmini400
+        case BASE_ENABLE + FIQ_2:
+        case BASE_ENABLE + IRQ_2:	
+#endif
             num = (addr - BASE_ENABLE)/2;
             enable[num]=val&0xFFFF;
             DEBUG_HW(IRQ_HW_DEBUG,"%s write %x to %s ENABLE @0x%08x, size %x\n",
@@ -132,7 +152,7 @@ void HW_IRQ::write(uint32_t addr,uint32_t val,int size)
 
 void HW_IRQ::do_IRQ_FIQ(int type,int num)
 {
-    status[(type==FIQ?0:2)+REG_NUM(num)] &= ((~(0x1<<REAL_NUM(num))) & 0xFFFF);
+    status[(type==FIQ?0:NUM_OF_IRQ/2)+REG_NUM(num)] &= ((~(0x1<<REAL_NUM(num))) & 0xFFFF);
     DEBUG_HW(IRQ_HW_DEBUG,"%s Doing %s num = %x\n",name,type==FIQ?"FIQ":"IRQ",num);
     if(type==FIQ)
     {

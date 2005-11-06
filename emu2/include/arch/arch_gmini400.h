@@ -12,6 +12,8 @@
 
 #define ARCH_NAME         "Gmini400"
 
+#define homebrew //or let it be ;-)
+
 /************************************************************ Memory Zone */
 
 #define RESET_VECTOR      0x00000000
@@ -31,12 +33,11 @@
 
 #define SDRAM_START       0x0900000
 #define SDRAM_END         0x1900000
-#ifdef Gmini400
+
+#ifndef homebrew
 #define SDRAM_LOAD_OFFSET	0x0000000 // original;
 #else
-#ifdef Gmini400hb
 #define SDRAM_LOAD_OFFSET	0x310000 //gmini400 homebrew;
-#endif
 #endif
 
 
@@ -44,12 +45,10 @@
 
 /************************************************************ initial state */
 
-#ifdef Gmini400
+#ifndef homebrew
 #define START_ADDR        SDRAM_START //original
 #else
-#ifdef Gmini400hb
 #define START_ADDR        0xC10000  //gmini400 homebrew;
-#endif
 #endif
 
 #define STACK_INIT        (IRAM_END - 0x4)
@@ -82,6 +81,21 @@
 #define IRQ_START   TI_REG_START+0x500
 #define IRQ_END     TI_REG_START+0x57f
 
+#define FIQ_0    0x0
+#define FIQ_1    0x2
+#define FIQ_2    0x4
+#define IRQ_0    0x8
+#define IRQ_1    0xA
+#define IRQ_2    0xC
+
+#define BASE_STATUS   (IRQ_START+0x0)
+#define BASE_ENTRY    (IRQ_START+0xE)
+#define BASE_ENABLE   (IRQ_START+0x26)
+
+#define NUM_OF_IRQ 7 //1 more (bogus) because of the missing 0x6 
+#define REG_NUM(irq) (irq<16?0:irq<32?1:2)
+#define REAL_NUM(irq) (irq<16?irq:irq<32?irq-16:irq-32) //get the irq line number in the reg
+
 /********************** GPIO     ****************************************/
 #define GPIO_START   TI_REG_START+0x580
 #define GPIO_END     TI_REG_START+0x596
@@ -107,7 +121,8 @@
 /********************** OSD     ****************************************/
 #define OSD_START   TI_REG_START+0x680
 #define OSD_END     TI_REG_START+0x700
-
+//#define OSD_START   0x18d0300
+//#define OSD_END     0x18d0320
 /********************** VIDEO    ****************************************/
 #define VID_START   TI_REG_START+0x800
 #define VID_END     TI_REG_START+0x880

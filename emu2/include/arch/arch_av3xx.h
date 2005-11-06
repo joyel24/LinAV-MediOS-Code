@@ -71,6 +71,19 @@
 #define IRQ_START   TI_REG_START+0x500
 #define IRQ_END     TI_REG_START+0x560
 
+#define FIQ_0    0x0
+#define FIQ_1    0x2
+#define IRQ_0    0x4
+#define IRQ_1    0x6
+
+#define BASE_STATUS   (IRQ_START+0x0)
+#define BASE_ENTRY    (IRQ_START+0x8)
+#define BASE_ENABLE   (IRQ_START+0x20)
+
+#define NUM_OF_IRQ 4
+#define REG_NUM(irq) (irq<16?0:1)
+#define REAL_NUM(irq) (irq<16?irq:irq-16) //get the irq line number in the reg
+
 /********************** GPIO     ****************************************/
 #define GPIO_START   TI_REG_START+0x580
 #define GPIO_END     TI_REG_START+0x596
