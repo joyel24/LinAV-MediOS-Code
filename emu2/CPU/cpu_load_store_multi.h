@@ -124,7 +124,7 @@ void arm_LoadStoreMulti(uint32_t instruction)
                     
                 if(old_mode != MODE)
                 {
-                    printf("Mode has changed from %s to %s\n",mode_str[old_mode],mode_str[MODE]);
+                    //printf("Mode has changed from %s to %s\n",mode_str[old_mode],mode_str[MODE]);
                     current_reg = mode_regs[MODE];
                 }
                     

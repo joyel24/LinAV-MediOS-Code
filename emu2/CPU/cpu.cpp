@@ -116,7 +116,6 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
                          CHK_FIQ_FCT               \
                          if(__old_mode != MODE)    \
                          { \
-                            printf("Mode has changed from %s to %s at %x\n",mode_str[__old_mode],mode_str[MODE],PC_REAL); \
                             current_reg = mode_regs[MODE]; \
                          } \
                      }
