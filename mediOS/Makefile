@@ -25,7 +25,7 @@ force: clean all
 
 $(TARGET) : subdirs
 	@echo '-----   building kernel'
-	$(LD) -N -TmediOS.lds -o $(TARGET).elf $(LIBS) $(LDFLAGS) -Map medios.map
+	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).bin
 #@$(RM) -f $(TARGET).elf
 clean:  clean-subdirs

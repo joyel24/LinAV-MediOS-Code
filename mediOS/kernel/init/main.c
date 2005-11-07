@@ -51,8 +51,6 @@
 
 #include <kernel/osd.h>
 
-extern char screen_VID2 [320 * 240 *4 + 40];
-
 void print_boot_info(void)
 {
     printk("SP: %08x\n",get_sp());
@@ -65,6 +63,7 @@ extern void ini_debugOnScreen(void);
 void kernel_start (void)
 {
     DEBUG_UART_INIT
+    LCD_INIT 
     
     ini_graphics();
     
@@ -82,7 +81,7 @@ void kernel_start (void)
         (unsigned int)&_iram_end - (unsigned int)&_iram_start,
         (unsigned int)MALLOC_START,
         (unsigned int)MALLOC_SIZE);
-
+while(1);
     /* init the irq */
     init_irq();
     

@@ -127,7 +127,7 @@ irq_reg1 = 0x30506
 .include "g4xx_trap_fiq.S"
 irq_reg0 = 0x30508
 irq_reg1 = 0x3050A
-irq_reqg2 = 0x3050C
+irq_reg2 = 0x3050C
 .else
 .print "Error undef ARCH"
 .endif

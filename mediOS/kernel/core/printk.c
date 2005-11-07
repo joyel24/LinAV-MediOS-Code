@@ -22,8 +22,7 @@
 #include <kernel/kfont.h>
 #include <sys_def/colordef.h>
 
-#define MAX_COL      78
-#define MAX_LINE     38
+
 
 #define BASE_X       2
 #define BASE_Y       2

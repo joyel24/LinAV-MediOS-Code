@@ -1,5 +1,5 @@
 /*
- * include/kernel/target/av3xx_def.h
+ * include/kernel/target/gmini4xx_def.h
  *
  * mediOS project
  * Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -7,11 +7,12 @@
  * This file contains the hardware definitions of the AV3XX series machines
  */
 
-#ifndef __AV3XX_DEF_H
-#define __AV3XX_DEF_H
+#ifndef __GMINI4XX_DEF_H
+#define __GMINI4XX_DEF_H
 
-#define SDRAM_START   0x03000000
-#define SDRAM_END     0x04000000
+
+#define SDRAM_START       0x0900000
+#define SDRAM_END         0x1900000
 
 #define MALLOC_START  ((((unsigned int)&_end_kernel) & 0xFFFFF000)+0x1000)
 #define MALLOC_SIZE   (SDRAM_END-MALLOC_START)
@@ -28,7 +29,7 @@
 #define DEBUG_UART              UART_0
 #define DEBUG_UART_INIT
 
-#define USE_DEBUG_ON_SCREEN     1
+//#define USE_DEBUG_ON_SCREEN     1
 
 /* timers */
 
@@ -108,20 +109,18 @@
 
 #define VIDEO_BASE                        0x30800
 #define LCD_BACK_LIGHT                    0x02600200
+#define VIDEO_LCD_VSYNC                   (VIDEO_BASE+0x2C)
+#define SCREEN_WIDTH      240
+#define SCREEN_REAL_WIDTH 220
+#define SCREEN_HEIGHT     176
 
-#define SCREEN_WIDTH                      320
-#define SCREEN_REAL_WIDTH                 320
-#define SCREEN_HEIGHT                     240
-
-#define MAX_COL      78
-#define MAX_LINE     38
+#define MAX_COL      53
+#define MAX_LINE     27
 
 #define LCD_INIT 
 
 /* osd */
 #define OSD_BASE                          0x30680
-
-
 
 /* video in/out */
 #define VIDEO_IO_BASE                     0x30780

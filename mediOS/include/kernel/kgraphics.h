@@ -17,8 +17,7 @@
 
 #define getOffset(x,y,buffer,type) ((type*)(x*((buffer->bitsPerPixel)>>3)+y*buffer->width*((buffer->bitsPerPixel)>>3)+buffer->offset))
 
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
+
 
 struct graphicsFont {
     char **  table;
