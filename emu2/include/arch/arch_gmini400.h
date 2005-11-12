@@ -162,5 +162,5 @@
 #define CPLD_PORT_OFFSET 0x00500000
 
 /********************** LCD      ****************************************/
-#define SCREEN_WIDTH  220
+#define SCREEN_WIDTH  240
 #define SCREEN_HEIGHT 176
