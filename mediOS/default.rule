@@ -5,6 +5,13 @@ subdirs:
 		echo '-----   end      ' $$p; \
 	done
 
+subdirs_lib:        
+	@@for p in $(SUBDIRS); do \
+		echo '-----   building ' $$p; \
+		make -C $$p --no-print-directory -s kernel_lib; \
+		echo '-----   end      ' $$p; \
+	done        
+        
 clean-subdirs:
 	@@for p in $(SUBDIRS); do \
 		echo '-----   cleaning ' $$p; \
