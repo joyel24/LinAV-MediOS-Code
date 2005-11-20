@@ -17,4 +17,6 @@
 
 #define NULL ((void*)0)
 
+#define abs(x) ((x)>0?(x):-(x))
+
 #endif

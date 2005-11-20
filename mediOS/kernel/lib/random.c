@@ -1,3 +1,12 @@
+/* 
+*   kernel/lib/random.c
+*
+*   mediOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+*  Original code from Rockbox
+*/
+
 /*
  * This is the ``Mersenne Twister'' random number generator MT19937, which
  * generates pseudorandom integers uniformly distributed in 0..(2^32 - 1)
