@@ -59,6 +59,9 @@
 #define nAPI_GET_EVT              (nAPI_DEVICE_section + 7)
 
 #define nAPI_BKPT                 (nAPI_DEVICE_section + 8)
+
+#define nAPI_GET_TICK             (nAPI_DEVICE_section + 9)
+
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 

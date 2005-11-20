@@ -49,6 +49,8 @@ void moveVirtualScreen();
 
 void showGGBorder(bool show);
 
+void initDisplay();
+
 
 int _start(int argc, char ** argv){
   
@@ -85,7 +87,8 @@ int _start(int argc, char ** argv){
 }
 
 
-void initDisplay(){
+void initDisplay()
+{
   open_graphics();
   clearScreen(COLOR_WHITE);
 }
@@ -176,29 +179,39 @@ void osdSetPallette_S (int Y, int Cr, int Cb, int index)
 
 void doEmulLoop(){
   int i,evt;
+ 
 unsigned int ycbcr,y,cb,cr;
 
-unsigned int evt_buffer;
+//unsigned int evt_buffer;
 int frameSkip = 1;
+int prevTick,frameTickDelta,frameTick;
 
   input.pad[1]=0;
   vdp.limit=0;
     sms.cyclesperline=512;
 
-  evt_buffer=get_evt_pipe();
+  /*evt_buffer=get_evt_pipe();
     if(!evt_buffer)
     {
         printf("[ini_status_bar] can't register to evt\n");
-    }
+    }*/
     
+  prevTick=get_tick();  
+  
   do{
         
     input.system=0;
 
     
     
-    evt=get_evt(evt_buffer);
+    //evt=get_evt(evt_buffer);
     
+    evt=read_btn() & 0xF7F;
+    input.pad[0] = evt;
+    
+    input.system = evt;
+    
+    /*
     switch(evt)
     {
         case BTN_UP:
@@ -229,7 +242,8 @@ int frameSkip = 1;
         case BTN_F3:
             input.pad[0] |= INPUT_BUTTON1;
             break;
-    }
+    }*/
+    
     
     for(i=0;i<frameSkip;++i){
       sms_frame(1);
@@ -257,6 +271,16 @@ int frameSkip = 1;
 
     sms_frame(0);
 
+    //printf("tick = %x\n",get_tick());
+    frameTick=get_tick()-prevTick;
+    frameTickDelta=((frameSkip+1)*TICKS_PER_FRAME)-frameTick;
+    //if (frameTickDelta>0) delay(frameTickDelta);
+    
+      if (frameTickDelta>0) --frameSkip;
+      if (frameTickDelta<-10) ++frameSkip;
+
+      //printf("%x %x\n",frameSkip,frameTickDelta);
+    prevTick=get_tick();
         
   }while(1);
 }

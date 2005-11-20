@@ -14,6 +14,7 @@
 #include <types.h>
 
 extern int lcd_bright;
+extern unsigned long tick;
 
 __IRAM_CODE int swi_device_handler (
 	unsigned long nCmd,
@@ -23,6 +24,9 @@ __IRAM_CODE int swi_device_handler (
 {
 	switch (nCmd)
 	{
+            case nAPI_GET_TICK:
+                *((unsigned long*)nParam1)=tick;
+                return 0;
             case nAPI_TIME:
                 switch((int)nParam1)
                 {

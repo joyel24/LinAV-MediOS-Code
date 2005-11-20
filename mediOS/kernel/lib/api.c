@@ -44,6 +44,7 @@ ERROR_CODE API_RUN_GRV              (const char* pGRVPath, HTASK* phTask)       
 
 ///////////////////////////////////////////////////////
 ///////////////////// DEVICE API //////////////////////
+ERROR_CODE API_GET_TICK             (unsigned long * val)                                              { swi_call(nAPI_GET_TICK); }
 ERROR_CODE API_TIME                 (int cmd,struct av_tm * time_data)                                 { swi_call(nAPI_TIME); }
 ERROR_CODE API_POWER                (int cmd,int * val)                                                { swi_call(nAPI_POWER); }
 
@@ -145,3 +146,11 @@ char get_evt(EVT_PIPE var)
     API_GET_EVT(var,&c);
     return c;
 }
+
+unsigned long get_tick(void)
+{
+    unsigned long ret = 0;
+    API_GET_TICK(&ret);
+    return ret;
+}
+

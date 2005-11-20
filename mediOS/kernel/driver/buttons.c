@@ -27,8 +27,8 @@
 #include <kernel/kgraphics.h>
 #endif
 
-#define BTN_NOT_PRESSED(val,btn)    (val&(0x1<<btn))
-#define BTN_PRESSED(val,btn)        !(val&(0x1<<btn))
+#define BTN_NOT_PRESSED(val,btn)    !(val&(0x1<<btn))
+#define BTN_PRESSED(val,btn)        (val&(0x1<<btn))
 
 __IRAM_DATA int mx_press;
 
@@ -43,6 +43,13 @@ extern int inHold;
 __IRAM_DATA int old_state;
 
 //__IRAM_DATA struct hw_chk_s btn_chker;
+
+__IRAM_CODE int read_btn(void)
+{
+    int val=0;
+    READ_BUTTONS(val)
+    return val;
+}
 
 __IRAM_CODE void process_button_press(int val)
 {
@@ -121,7 +128,7 @@ __IRAM_CODE void process_button_press(int val)
                         halt_launchTimer(); /* postpone the poweroff timer */
   
                         send_evt(btn+1);
-                        printk("BTN %d pressed\n",btn);
+                        //printk("BTN %d pressed\n",btn);
 #ifdef HAVE_FM_REMOTE                        
                     }
                     else

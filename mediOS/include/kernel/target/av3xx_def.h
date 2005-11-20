@@ -158,6 +158,7 @@
     /* ON, OFF keys */                           \
     if(gio_is_set(GIO_ON_BTN))  VAL |= (0x1<<8); \
     if(gio_is_set(GIO_OFF_BTN)) VAL |= (0x1<<9); \
+    VAL = (~VAL)&0x3FF;                          \
 }
 
 #endif  /* __HARDWARE_H */

@@ -22,7 +22,7 @@
 
 #include <kernel/sound.h>
 #include <kernel/ata.h>
-
+#include <kernel/hardware.h>
 // API definition
 
 
@@ -43,6 +43,7 @@ ERROR_CODE API_RUN_GRV              (const char* pGRVPath, HTASK* phTask);
 
 ///////////////////////////////////////////////////////
 ///////////////////// DEVICE API //////////////////////
+ERROR_CODE API_GET_TICK             (unsigned long * val);
 ERROR_CODE API_TIME                 (int cmd,struct av_tm * time_data);
 ERROR_CODE API_POWER                (int cmd,int * val);
 
@@ -98,6 +99,8 @@ void       printf               (char *fmt, ...);
 
 void *  malloc(long size);
 void    free(void *buff);
+
+unsigned long get_tick(void);
 
 #define  getTime(time_data)     API_TIME(0x000,time_data)
 #define  setTime(time_data)     API_TIME(0x001,time_data)
