@@ -31,7 +31,8 @@ int HW_OSD::do_cmd_cfg_out(int argc,char ** argv)
     printf("VID0 config (%02x): %s, %s, Zoom y %s, Zoom x %s\n",val,(val&0x1)?"enable":"disable",
         (val&0x2)?"half height":"normal height",str_zoom[(val>>2)&0x3],str_zoom[(val>>4)&0x3]);
         
-        
+    printf("VID0 @:0x%x\nVID1 @:0x%x\nBMAP0 @:0x%x\nBMAP1 @:0x%x\n",
+        OSD_offset_regs[0],OSD_offset_regs[1],OSD_offset_regs[2],OSD_offset_regs[3]);
     printf("LCD update stats: BMAP0 : %d, VID0 : %d\n",lcd_update_cnt[0],lcd_update_cnt[1]);
     return 0;
 }

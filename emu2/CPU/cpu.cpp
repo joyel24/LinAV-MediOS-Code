@@ -93,10 +93,19 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 
 #define RR(N)         (reg_str[N])
 
-#define INT_DEBUG_HEAD   {printf("@%08x:%08x|%s%s%s%s%s|%s| ",old_PC,instruction, \
+//#define MOD_PC  0x3F22B88
+
+#ifdef MOD_PC
+#define CALC_PC(X) (X-MOD_PC)
+#else
+#define CALC_PC(X) X
+#endif
+
+
+#define INT_DEBUG_HEAD   {printf("@%08x:%08x|%s%s%s%s%s|%s| ",CALC_PC(old_PC),instruction, \
             N_FLAG?"N":" ",Z_FLAG?"Z":" ",C_FLAG?"C":" ",V_FLAG?"V":" ",Q_FLAG?"Q":" ", \
             cond_str[condCode&0xF]);}
-#define INT_DEBUG_HEAD_THUMB   {printf("@%08x:%04x|%s%s%s%s%s| ",old_PC,instruction, \
+#define INT_DEBUG_HEAD_THUMB   {printf("@%08x:%04x|%s%s%s%s%s| ",CALC_PC(old_PC),instruction, \
             N_FLAG?"N":" ",Z_FLAG?"Z":" ",C_FLAG?"C":" ",V_FLAG?"V":" ",Q_FLAG?"Q":" ");}
             
 #ifdef DEBUG_MODE

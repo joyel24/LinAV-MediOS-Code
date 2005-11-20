@@ -360,13 +360,13 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
             break;        
         case OSD_START+0x16:
             //OSD_offset_regs[0] = SDRAM_START | (OSD_offset_regs[0]&0x0E00000) | ((val<<5)&0x1FFFFF);
-            OSD_offset_regs[0] = (((OSD_offset_regs[0]-SDRAM_START)&0x03E0000) | ((val<<5)&0x1FFFFF))+SDRAM_START;
+            OSD_offset_regs[0] = (((OSD_offset_regs[0]-SDRAM_START)&0x03E00000) | ((val<<5)&0x1FFFFF))+SDRAM_START;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (Vid0=%x)\n",name,"Vid0 buffer LO offset",
                 val,size,OSD_offset_regs[0]);            
             break;        
         case OSD_START+0x18:
             //OSD_offset_regs[1] = SDRAM_START | (OSD_offset_regs[1]&0x0E00000) | ((val<<5)&0x1FFFFF);
-            OSD_offset_regs[1] = (((OSD_offset_regs[1]-SDRAM_START)&0x03E0000) | ((val<<5)&0x1FFFFF))+SDRAM_START;
+            OSD_offset_regs[1] = (((OSD_offset_regs[1]-SDRAM_START)&0x03E00000) | ((val<<5)&0x1FFFFF))+SDRAM_START;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (Vid1=%x)\n",name,"Vid1 buffer LO offset",
                 val,size,OSD_offset_regs[1]);            
             break;
@@ -380,13 +380,13 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
             break;        
         case OSD_START+0x1C:
             //OSD_offset_regs[2] = SDRAM_START | (OSD_offset_regs[2]&0x0E00000) | ((val<<5)&0x1FFFFF);
-            OSD_offset_regs[2] = (((OSD_offset_regs[2]-SDRAM_START)&0x03E0000) | ((val<<5)&0x1FFFFF))+SDRAM_START;
+            OSD_offset_regs[2] = (((OSD_offset_regs[2]-SDRAM_START)&0x03E00000) | ((val<<5)&0x1FFFFF))+SDRAM_START;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) Bmap0=%x)\n",name,"Bmap0 buffer LO offset",
                 val,size,OSD_offset_regs[2]);            
             break;        
         case OSD_START+0x1E:
             //OSD_offset_regs[3] = SDRAM_START | (OSD_offset_regs[3]&0x0E00000) | ((val<<5)&0x1FFFFF);
-            OSD_offset_regs[3] = (((OSD_offset_regs[3]-SDRAM_START)&0x03E0000) | ((val<<5)&0x1FFFFF))+SDRAM_START;
+            OSD_offset_regs[3] = (((OSD_offset_regs[3]-SDRAM_START)&0x03E00000) | ((val<<5)&0x1FFFFF))+SDRAM_START;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) Bmap1=%x)\n",name,"Bmap1 buffer LO offset",
                 val,size,OSD_offset_regs[3]);            
             break;
@@ -523,16 +523,29 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Cursor data",val,size);            
             break;
         case OSD_START+0x74:
-            OSD_pallette_status=val;
-            DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Pallette status & cursor data",val,size);            
+            OSD_pallette_status=val&0xFFFE; // keeping bit 0 at 0
+            DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,
+                "Pallette status & cursor data",val,size);            
             break;
         case OSD_START+0x76:
             OSD_pallette_data_wr=val;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Pallette data write",val,size);            
             break;
         case OSD_START+0x78:
-            OSD_pallette_index=val;
-            DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Pallette data & index",val,size);            
+            {
+                int Y = (OSD_pallette_data_wr >> 8) & 0xFF;
+                int Cb = OSD_pallette_data_wr & 0xFF;
+                int Cr = (val >> 8) & 0xFF;
+                int index = val & 0xFF;
+                int ret = lcd->setPalette(YCrCb2R(Y,Cr,Cb),YCrCb2G(Y,Cr,Cb),YCrCb2B(Y,Cr,Cb),index);
+                /*lcd->updte_lcd(OSD_offset_regs[2],LCD_BMAP);*/
+                /*lcd->updte_lcd(OSD_offset_regs[0],LCD_VID);*/
+                OSD_pallette_index=0;
+                OSD_pallette_data_wr=0;         
+                DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Pallette data & index",val,size);
+                DEBUG_HW(OSD_HW_DEBUG,"Palette update: Y=%x,Cr=%x,Cb=%x => r=%x,g=%x,b=%x index=%x => Xindex=%x\n",
+                    Y,Cb,Cr,YCrCb2R(Y,Cr,Cb),YCrCb2G(Y,Cr,Cb),YCrCb2B(Y,Cr,Cb),index,ret);
+            }
             break;
         case OSD_START+0x7C:
             //OSD_alt_vid_offset = (OSD_alt_vid_offset & 0xFFFF) | ((val & 0x3F)<<21);

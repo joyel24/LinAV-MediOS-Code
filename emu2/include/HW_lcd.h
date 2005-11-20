@@ -24,12 +24,17 @@
 #define LCD_BMAP 0
 #define LCD_VID  1
 
+#define YCrCb2R(Y,Cr,Cb) ((int)(Y+1.402*(Cr-128)))
+#define YCrCb2G(Y,Cr,Cb) ((int)(Y-0.34414*(Cb-128)-0.71414*(Cr-128)))
+#define YCrCb2B(Y,Cr,Cb) ((int)(Y+1.772*(Cb-128)))
+
 class mem_space;
 
 class HW_lcd {
     public:
         HW_lcd(HW_mem * mem2);
         void updte_lcd(uint32_t base_addr,int type);
+        int setPalette(int r,int g, int b, int index);
         void drawPix(uint32_t addr,uint32_t val);     
         void drawVidPix(uint32_t addr,uint32_t val);     
         int nxtEvent(int * config,uint32_t * addr);

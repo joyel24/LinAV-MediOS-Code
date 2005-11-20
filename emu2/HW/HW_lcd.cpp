@@ -112,12 +112,20 @@ void HW_lcd::setPalette(int palette[256][3],int size)
         r = palette[i][0];
         g = palette[i][1];
         b = palette[i][2];
-        c.red = r*0x100+r;
-        c.green = g*0x100+g;
-        c.blue = b*0x100+b;
-        XAllocColor(display, pal, &c);
-        colorTab[i] = c.pixel;
+        setPalette(r,g,b,i);
     }
+}
+
+int HW_lcd::setPalette(int r,int g, int b, int index)
+{
+    XColor c;
+        
+    c.red = r*0x100+r;
+    c.green = g*0x100+g;
+    c.blue = b*0x100+b;
+    XAllocColor(display, pal, &c);
+    colorTab[index] = c.pixel;    
+    return c.pixel;
 }
 
 int HW_lcd::nxtEvent(int * config,uint32_t * addr)
@@ -226,8 +234,8 @@ void HW_lcd::drawPix(uint32_t addr,uint32_t val)
 {
     int i,j;
     
-    addr >>= 1;
-    i=addr%SCREEN_WIDTH;
+    //addr >>= 1;
+    i=(addr%SCREEN_WIDTH);
     j=addr/SCREEN_WIDTH;
     XSetForeground(display, gc, colorTab[val&0xFF]);
     XDrawPoint(display, window1, gc, i, j);
@@ -260,7 +268,7 @@ void HW_lcd::updte_lcd(uint32_t base_addr,int type)
         for(int j = 0 ; j < SCREEN_HEIGHT+1 ; j++)
             for(int i = 0 ; i < SCREEN_WIDTH+1 ; i++)        
             {
-                color = colorTab[mem2->read(base_addr+(j*(SCREEN_WIDTH*2)+i*2),2)&0xFF];
+                color = colorTab[mem2->read(base_addr+(j*(SCREEN_WIDTH)+i),1)&0xFF];
                 XSetForeground(display, gc, color);
                 XDrawPoint(display, window1, gc, i, j);
             }
