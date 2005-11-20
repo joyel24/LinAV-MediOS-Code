@@ -25,12 +25,15 @@ all: $(TARGET)
 force: clean all        
 
 lib :
-	make -C apps/sms stdalone
+#	make -C apps/sms stdalone
+	make -C apps/avboy stdalone
+        
 #	make -C apps/ othello_iram.o
 #	make -C apps/ othello_sdram.o
 #	make -C apps/ othello.o
 	make -C kernel/ kernel_lib
-	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) -Lapps/sms -lsms $(LDFLAGS) -Map medios.map
+#	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) -Lapps/sms -lsms $(LDFLAGS) -Map medios.map
+	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) -Lapps/avboy -lavboy $(LDFLAGS) -Map medios.map
 #	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) apps/othello.o  $(LDFLAGS) -Map medios.map
 #	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) apps/othello_iram.o apps/othello_sdram.o $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).bin
