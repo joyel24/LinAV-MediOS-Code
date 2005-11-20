@@ -10,6 +10,10 @@ OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 all: $(OBJS)
 	@cp -f $(OBJS) ../build
 
+kernel_lib: GCCFLAGS += -DBUILD_LIB
+kernel_lib: $(OBJS)
+	@cp -f $(OBJS) ../build
+        
 force: clean all        
 
 clean:  

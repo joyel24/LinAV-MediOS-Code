@@ -12,6 +12,8 @@ all: $(OBJS)
 
 force: clean all        
 
+kernel_lib: all
+
 clean:  
 	@rm -f *.o *.bak *~ $(TARGET)
 

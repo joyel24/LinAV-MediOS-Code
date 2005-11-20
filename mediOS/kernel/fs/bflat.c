@@ -52,6 +52,8 @@
 #define FLAT_FLAG_RAM       1
 #define FLAT_FLAG_PIC       2
 
+#define DEBUG_FLAT
+
 #ifdef DEBUG_FLAT
 #define FLAT_PRINT(s...)   printk(s)
 #else
@@ -97,6 +99,8 @@ ERROR_CODE load_bflat (const char * fname)
         
     /* Processing header data */
     
+    print_data(&header,0x50);
+    
     header.rev          = swap_val(header.rev);
     header.entry        = swap_val(header.entry);
     header.data_start   = swap_val(header.data_start);
@@ -113,11 +117,11 @@ ERROR_CODE load_bflat (const char * fname)
     
     extra_len = max(bss_len+header.stack_size,header.reloc_count*sizeof(unsigned long));
     
-    printk("[load_bflat] loading %s: bFLAT:v%d text(%08x) data(%08x) bss(%08x) stack(%08x) relocs:%d\n",fname,header.rev,
+    printk("[load_bflat] loading %s: bFLAT:v%d text(%08x) data(%08x) bss(%08x) stack(%08x) relocs:%x\n",fname,header.rev,
                    text_len, data_len,bss_len,header.stack_size,header.reloc_count);
                    
     printk("[load_bflat] flags: %08x\n",header.flags);
-
+    print_data(&header,0x50);
 //    text_pos=(unsigned long)API_MALLOC(text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
 
     text_pos = (unsigned long)malloc((long)(text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long)));
@@ -133,7 +137,7 @@ ERROR_CODE load_bflat (const char * fname)
     reloc_table=(unsigned long *)(text_pos+header.reloc_start+NB_LIB*sizeof(unsigned long));
     start_code=text_pos+sizeof(struct bflat_header);
     
-    FLAT_PRINT("[load_bflat] text_pos=%08x start_code=%08x data_pos=%08x\n",text_pos,start_code,data_pos);
+    printk("[load_bflat] text_pos=%08x start_code=%08x data_pos=%08x\n",text_pos,start_code,data_pos);
     
     klseek(fd_bflat, 0, SEEK_SET);
     
@@ -221,6 +225,7 @@ ERROR_CODE load_bflat (const char * fname)
     
     run_flat=(int (*)(int ,char**))header.entry+text_pos;
     FLAT_PRINT("[load_bflat] about to launch: %08x\n",run_flat);
+    do_bkpt();
     ret = run_flat(0,NULL);
 
     free((void*)text_pos);

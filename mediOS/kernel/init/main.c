@@ -81,7 +81,7 @@ void kernel_start (void)
         (unsigned int)&_iram_end - (unsigned int)&_iram_start,
         (unsigned int)MALLOC_START,
         (unsigned int)MALLOC_SIZE);
-while(1);
+       
     /* init the irq */
     init_irq();
     
@@ -130,11 +130,19 @@ while(1);
 
     printk("[init] END\n");
 
-    //load_bflat("/test.grv");
+#ifdef BUILD_LIB
+    do_bkpt();
+    _start();
+    while(1) /*nothing*/;
+#endif
+    
+    do_bkpt();
+    
+    load_bflat("/av_sms.grv");
     
     //load_med("/othello.grv");
     
-    printk("Back from med\n");
+    printk("Back from grv\n");
         
     while(1) /*nothing*/;
 

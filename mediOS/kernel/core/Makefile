@@ -18,6 +18,8 @@ endif
 all: $(OBJS)
 	@cp -f $(OBJS) ../build
 
+kernel_lib: all
+        
 force: clean all        
 
 clean:  

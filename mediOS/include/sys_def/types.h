@@ -33,6 +33,8 @@ typedef signed   int         ssize_t;
 typedef unsigned int         mode_t;
 typedef signed long          off_t;
 
+typedef int                  int32_t;
+
 typedef unsigned int         uint32_t;
 typedef unsigned long long   uint64_t;
 

@@ -37,7 +37,7 @@ __IRAM_CODE int kcswi_handler (
                 return swi_dsp_handler (nCmd, nParam1, nParam2, nParam3);
     
         default:
-                printk("Unknown SWI module call %d\n", nCmd);
+                printk("Unknown SWI module call %x\n", nCmd);
     }
 	return 0;
 }

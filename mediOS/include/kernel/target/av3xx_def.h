@@ -28,7 +28,7 @@
 #define DEBUG_UART              UART_0
 #define DEBUG_UART_INIT
 
-#define USE_DEBUG_ON_SCREEN     1
+//#define USE_DEBUG_ON_SCREEN     1
 
 /* timers */
 

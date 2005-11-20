@@ -12,6 +12,8 @@ all: clean $(OBJS)
 
 lib: GCCFLAGS += -DBUILD_LIB
 lib:  clean $(OBJS)
+
+kernel_lib: all
                 
 force: clean all        
 

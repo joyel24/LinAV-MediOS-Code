@@ -28,10 +28,12 @@ clean:  clean-subdirs
 builddir:
 	@mkdir -p build
         
+kernel_lib: builddir subdirs_lib 
+
 lib_medios:
 	@make -C lib --no-print-directory -s lib
-	@$(AR) -rc libmedios.a lib/*.o
-	@$(RANLIB) libmedios.a
-	@mv libmedios.a ../
+	@$(AR) -rc libLmedios.a lib/*.o
+	@$(RANLIB) libLmedios.a
+	@mv libLmedios.a ../
         
 include ../default.rule

@@ -412,6 +412,7 @@ int swi_gfx_handler(unsigned long nCmd,unsigned long cmd,
                     current_font=0;
                     buffers[BMAP1]->enable=1;
                     osdSetComponentConfig(OSD_BITMAP1,buffers[BMAP1]->state|OSD_COMPONENT_ENABLE);
+                    printk("BMAP1 @%x\n",buffers[BMAP1]->offset);
                     break;
                 case 0x001:                      /* void close_graphics(void) */
                     break;
@@ -555,6 +556,7 @@ int swi_gfx_handler(unsigned long nCmd,unsigned long cmd,
                     osdSetPaletteRGB(g_data->x,g_data->y,g_data->w,g_data->h);
                     break;
                 case 0x20E:
+                    printk("Buffer @ of plane : %x => @0x%x\n",g_data->x,buffers[g_data->x]->offset);
                     g_data->color = buffers[g_data->x]->offset;
                     break;
                 case 0x300:                      /* void setFont(int font_nb) */

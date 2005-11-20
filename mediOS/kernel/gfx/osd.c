@@ -82,19 +82,11 @@ void osdSetPallette (int Y, int Cr, int Cb, int index)
         
         //printk("OSD set palette (%x,%x,%x) at %d\n",Y,Cr,Cb,index);
         
-	while((inw(OSD_PAL_ACCESS_STATUS)&0x1) != 0)
-		/* nothing */ ;
+	while((inw(OSD_PAL_ACCESS_STATUS)&0x1) != 0) /* nothing */ ;
         outw((Y << 8) | Cb,OSD_PAL_DATA_WRITE);
-	//outw((Cr << 8) | index,OSD_PAL_INDEX_WRITE);
-
-	while((inw(OSD_PAL_ACCESS_STATUS)&0x1) != 0)
-		/* nothing */ ;
-
-	//outw((Y << 8) | Cb,OSD_PAL_DATA_WRITE);
+	while((inw(OSD_PAL_ACCESS_STATUS)&0x1) != 0) /* nothing */ ;
         outw((Cr << 8) | index,OSD_PAL_INDEX_WRITE);
-        
-        while((inw(OSD_PAL_ACCESS_STATUS)&0x1) != 0)
-        /* nothing */ ;
+        while((inw(OSD_PAL_ACCESS_STATUS)&0x1) != 0) /* nothing */ ;
 }
 
 void osdSet16CPallette (int bankN, int index, int value)
@@ -108,7 +100,7 @@ void osdSet16CPallette (int bankN, int index, int value)
 
 void osdSetAltOffset (int address)
 {
-	int offset = address - 0x03000000;
+	int offset = address - SDRAM_START;
 	offset = offset >> 5;
 
 	outw(offset,OSD_ALT_VID_OFF_HI);
@@ -118,7 +110,7 @@ void osdSetAltOffset (int address)
 void osdSetComponentOffset (int component, int address)
 {
 	int val;
-	int offset = address - 0x03000000;
+	int offset = address - SDRAM_START;
 
 	offset = offset >> 5;
 	outw(offset,osdLookupOffsetLO[component]);
@@ -168,10 +160,10 @@ void osdRestorePlane(int component, unsigned int address, int x, int y, int w, i
 {
     unsigned int val;
     
-    outw(((address&0x00FFFFFF)>>5),osdLookupOffsetLO[component]);
+    outw(((address-SDRAM_START)>>5)&0xFFFF,osdLookupOffsetLO[component]);
     val=inw(osdLookupOffsetHI[component]);
     val &= 0xFF00 >> OSD_OFF_HI_SHIFT[component];
-    val |= ((address&0x00FFFFFF)>>21) << OSD_OFF_HI_SHIFT[component];
+    val |= (((address-SDRAM_START)>>21)&0xFF) << OSD_OFF_HI_SHIFT[component];
     
     outw(2*w,OSD_COMP_W(component));
     outw(h,OSD_COMP_H(component));

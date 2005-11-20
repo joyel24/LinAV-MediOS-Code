@@ -12,6 +12,8 @@ SUBDIRS = fonts
 all: subdirs $(OBJS)
 	@cp -f *.o ../build
 
+kernel_lib: all
+
 force: clean all        
 
 clean: clean-subdirs 
