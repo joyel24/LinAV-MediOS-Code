@@ -9,7 +9,7 @@ SRC2 = $(wildcard *.S)
 OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 
 
-LDFLAGS = -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lgcc
+LDFLAGS = -s -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lgcc
 #LDFLAGS = -L/home/christophe/gcc-3.3.x/toolchain_arm_nofpu/arm-linux/lib/ -lgcc
 
 TARGET = medios

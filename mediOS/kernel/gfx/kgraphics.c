@@ -34,7 +34,7 @@
 #define tstXY(x,y)  {if(x>SCREEN_WIDTH) return 0; if(x<0) return 0; if(y>SCREEN_HEIGHT) return 0; if(y<0) return 0;}
 #define tstWH(x,y,w,h)  {if(x+w>SCREEN_WIDTH)return 0; if(x+w<0) return 0; if(y+h>SCREEN_HEIGHT) return 0; if(y+h<0) return 0;}
 
-#define abs(val)    (val<0?-val:val)
+//#define abs(val)    (val<0?-val:val)
 
 #ifdef USE_DEBUG_ON_SCREEN 
 char screen_ERROR[SCREEN_WIDTH*SCREEN_HEIGHT+40];

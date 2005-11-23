@@ -133,12 +133,17 @@ void kernel_start (void)
 #ifdef BUILD_LIB
     do_bkpt();
     _start();
+    printk("[loop] back from code\n");
     while(1) /*nothing*/;
 #endif
     
+    
+
     do_bkpt();
     
-    load_bflat("/av_sms.grv");
+    
+    
+    load_bflat("/othello.grv");
     
     //load_med("/othello.grv");
     

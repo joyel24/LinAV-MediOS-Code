@@ -22,10 +22,12 @@ void sti(void);
 void cli(void);
 void stf(void);
 void clf(void);
+
 void __sti(void);
 void __cli(void);
 void __stf(void);
 void __clf(void);
+
 
 /*
  * Enable IRQs
@@ -163,18 +165,15 @@ void __clf(void);
         : "memory");                           \
     })
 
-#if 1        
+     
 #define     irq_ack(IRQ)       ({ outw((1<<INTC_IRQ_SHIFT(IRQ)), INTC_IRQ_STATUS(IRQ)); })
 #define     fiq_ack(FIQ)       ({ outw((1<<INTC_FIQ_SHIFT(FIQ)), INTC_FIQ_STATUS(FIQ)); })
 #define     mask_irq(IRQ)      ({ unsigned int __addr=INTC_IRQ_ENABLE(IRQ); outw(inw(__addr)&(~(1<<INTC_IRQ_SHIFT(IRQ))),__addr); })
 #define     unmask_irq(IRQ)    ({ unsigned int __addr=INTC_IRQ_ENABLE(IRQ); outw(inw(__addr)|(1<<INTC_IRQ_SHIFT(IRQ)),__addr); })
 #define     mask_ack_irq(IRQ)  ({ mask_irq(IRQ); irq_ack(IRQ); })
 #define     irq_enabled(IRQ)   ({ int __val; __val=(inw(INTC_IRQ_ENABLE(IRQ)) & (1<<INTC_IRQ_SHIFT(IRQ)))!=0; __val;})
-#else
-extern void mask_irq(unsigned int irq);
-extern void unmask_irq(unsigned int irq);
-extern void mask_ack_irq(unsigned int irq);
-#endif
+
+#define     irq_state(IRQ)     ((IRQ>=0 && IRQ<NR_IRQS)?irq_enabled(IRQ)!=0:0)
 
 struct irq_data_s {
     int irq;
@@ -189,7 +188,7 @@ extern void add_irq_handler(int irq,void(*action)(int irqnr),char * name);
 extern void del_irq_handler(int irq);
 extern void disable_irq(int irq);
 extern void enable_irq(int irq);
-extern int  irq_state(int irq);
+//extern int  irq_state(int irq);
 extern void chg_irq_handler(int irq_num,void(*fct)(int irq));
 extern void print_irq(void);
 

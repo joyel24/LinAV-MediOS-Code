@@ -17,6 +17,13 @@
 #include <kernel/irq.h>
 #include <kernel/kernel.h>
 
+/*******************************************************/
+#undef __IRAM_CODE
+#define __IRAM_CODE
+#undef __IRAM_DATA
+#define __IRAM_DATA
+/*******************************************************/
+
 #define DELAY_1              { int _x; for(_x=0;_x<10;_x++); };
 #define DELAY_2              { int _x; for(_x=0;_x<10;_x++); };
 
@@ -47,6 +54,9 @@
 #define CL_1               DIS_INT SCL_IN ENA_INT 
 #define DA_0               DIS_INT SDA_LO SDA_OUT ENA_INT
 #define CL_0               DIS_INT SCL_LO SCL_OUT ENA_INT
+
+
+
 
 __IRAM_CODE void i2c_ini_xfer(void)
 {

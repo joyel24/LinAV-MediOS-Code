@@ -120,7 +120,7 @@ __IRAM_CODE void do_IRQ(void)
         mask = 0x1 << INTC_IRQ_SHIFT(irq);
 
         if(((~inw(INTC_IRQ_STATUS(irq))) & mask) && (inw(INTC_IRQ_ENABLE(irq)) & mask))
-        {
+        {            
             irq_table[i].nb_irq++;
             irq_ack(irq);
             irq_table[i].action(irq);
@@ -163,7 +163,8 @@ __IRAM_CODE void enable_irq(int irq)
     }
 }
 
-__IRAM_CODE int irq_state(int irq)
+/*
+int irq_state(int irq)
 {
     if(irq>=0 && irq<NR_IRQS)
     {
@@ -171,6 +172,7 @@ __IRAM_CODE int irq_state(int irq)
     }
     return 0;
 }
+*/
 
 __IRAM_CODE void chg_irq_handler(int irq_num,void(*fct)(int irq))
 {
