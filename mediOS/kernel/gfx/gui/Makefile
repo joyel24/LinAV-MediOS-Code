@@ -1,16 +1,16 @@
-include ../../Makefile.conf
+include ../../../Makefile.conf
 
-ASFLAGS  += -I../../include
-GCCFLAGS += -I../../include
+ASFLAGS  += -I../../../include
+GCCFLAGS += -I../../../include
 
 SRC = $(wildcard *.c)
 SRC2 = $(wildcard *.S)
 OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 
-SUBDIRS = gui fonts
+SUBDIRS = file_browser scrollbar
 
 all: subdirs $(OBJS)
-	@cp -f *.o ../build
+	@cp -f *.o ../../build
 
 kernel_lib: all
 
@@ -19,4 +19,4 @@ force: clean all
 clean: clean-subdirs 
 	@rm -f *.o *.bak *~ $(TARGET)
 
-include ../../default.rule
+include ../../../default.rule

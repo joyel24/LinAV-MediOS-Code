@@ -120,11 +120,11 @@ __IRAM_CODE void do_IRQ(void)
         mask = 0x1 << INTC_IRQ_SHIFT(irq);
 
         if(((~inw(INTC_IRQ_STATUS(irq))) & mask) && (inw(INTC_IRQ_ENABLE(irq)) & mask))
-        {            
+        {              
             irq_table[i].nb_irq++;
             irq_ack(irq);
             irq_table[i].action(irq);
-			break;
+            break;
         }
     }
 }

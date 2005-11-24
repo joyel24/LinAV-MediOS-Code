@@ -23,6 +23,15 @@
 
 #include <kernel/cmd_line.h>
 
+/*******************************************************/
+#if 1
+#undef __IRAM_CODE
+#define __IRAM_CODE
+#undef __IRAM_DATA
+#define __IRAM_DATA
+#endif
+/*******************************************************/
+
 #define MAX_CMD_LEN     100
 #define MAX_ARGS        10
 

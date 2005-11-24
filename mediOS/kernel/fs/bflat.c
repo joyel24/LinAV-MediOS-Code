@@ -52,7 +52,7 @@
 #define FLAT_FLAG_RAM       1
 #define FLAT_FLAG_PIC       2
 
-#define DEBUG_FLAT
+//#define DEBUG_FLAT
 
 #ifdef DEBUG_FLAT
 #define FLAT_PRINT(s...)   printk(s)
@@ -225,7 +225,7 @@ ERROR_CODE load_bflat (const char * fname)
     
     run_flat=(int (*)(int ,char**))header.entry+text_pos;
     FLAT_PRINT("[load_bflat] about to launch: %08x\n",run_flat);
-    do_bkpt();
+    
     ret = run_flat(0,NULL);
 
     free((void*)text_pos);

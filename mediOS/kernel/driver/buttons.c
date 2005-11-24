@@ -127,7 +127,7 @@ __IRAM_CODE void process_button_press(int val)
                             
                         halt_launchTimer(); /* postpone the poweroff timer */
   
-                        //send_evt(btn+1);
+                        send_evt(btn+1);
                         //printk("BTN %d pressed\n",btn);
 #ifdef HAVE_FM_REMOTE                        
                     }

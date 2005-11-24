@@ -134,7 +134,7 @@ setPalletteRGB(r,g,b,i);
 
 int oldbt=0;
 
-bool doevents(void){
+__IRAM_CODE bool doevents(void){
   int bt,pressed,released;
   event_t ev;
 
@@ -143,7 +143,7 @@ bool doevents(void){
   released=~bt & oldbt;
   oldbt=bt;
 
-  printf("%0.8x %0.8x\n",pressed,released);
+  //printf("%0.8x %0.8x\n",pressed,released);
 
   if (pressed){
     if(pressed & 0x01)     pad_press(PAD_UP);

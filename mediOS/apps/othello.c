@@ -567,6 +567,7 @@ void _start(void)
 {
     int evt;
     unsigned int evt_buffer;
+    
     printf("\nIn othello\n");
     
     open_graphics();

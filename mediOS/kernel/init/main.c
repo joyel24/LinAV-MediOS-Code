@@ -51,6 +51,8 @@
 
 #include <kernel/osd.h>
 
+#include <sys_def/font.h>
+
 void print_boot_info(void)
 {
     printk("SP: %08x\n",get_sp());
@@ -59,6 +61,8 @@ void print_boot_info(void)
 }
 
 extern void ini_debugOnScreen(void);
+
+char * test_string;
 
 void kernel_start (void)
 {
@@ -136,11 +140,23 @@ void kernel_start (void)
     printk("[loop] back from code\n");
     while(1) /*nothing*/;
 #endif
-    
-    
-
     do_bkpt();
     
+    iniIcon();
+    open_graphics();
+    clearScreen(COLOR_WHITE);
+    setFont(STD6X9);
+    ini_file_browser();
+    while(1)
+    {
+    test_string=browse("/",1);
+    if(test_string)
+        printk("get %s\n",test_string);
+    }
+    printk("[loop] back from browser\n");
+    
+    
+    while(1);
     
     
     load_bflat("/othello.grv");

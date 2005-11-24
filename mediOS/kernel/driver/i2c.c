@@ -18,10 +18,12 @@
 #include <kernel/kernel.h>
 
 /*******************************************************/
+#if 1
 #undef __IRAM_CODE
 #define __IRAM_CODE
 #undef __IRAM_DATA
 #define __IRAM_DATA
+#endif
 /*******************************************************/
 
 #define DELAY_1              { int _x; for(_x=0;_x<10;_x++); };

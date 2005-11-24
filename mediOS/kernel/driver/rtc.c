@@ -37,6 +37,9 @@ int getDayOfWeek(int day,int month,int year)
 {
     int result;
     int y;
+    
+    if(month>12) month=12;
+    
     y=year%100;
     result=(5*y)/4;
     result+=month_code[month-1];
