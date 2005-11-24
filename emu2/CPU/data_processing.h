@@ -358,8 +358,8 @@ uint32_t getShifterData(uint32_t instruction,char *debugShifter,int *shifter_car
         else // register shifts
         {
             int Rs = (instruction >> 8) & 0xF;
-
-            if(Rs == 0 && shift == 0) // no shift
+            uint32_t RsVal=GET_REG(Rs)& 0xff;
+            if(RsVal == 0 && shift == 0) // no shift
             {
                 shifter_operand = GET_REG(Rm);
                 if(C_FLAG)
@@ -370,7 +370,6 @@ uint32_t getShifterData(uint32_t instruction,char *debugShifter,int *shifter_car
             }
             else
             {
-                uint32_t RsVal=GET_REG(Rs) & 0xff;
                 RmVal=GET_REG(Rm);
                 switch(shift)
                 {

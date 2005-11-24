@@ -138,7 +138,10 @@ uint32_t HW_uart::read(uint32_t addr,int size)
             else
             	  return 0;
         case 0xc:
-            return 0xffff;
+            if (if_r<if_w)
+            	  return 0x0407;
+            else
+            	  return 0x0403;
         default:        
             DEBUG_HW(UART_HW_DEBUG,"%s read @0x%08x, size %x\n",name,addr,size);
             break;
