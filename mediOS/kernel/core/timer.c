@@ -1,7 +1,7 @@
 /* 
-*   kernel/timer.c
+*   kernel/core/timer.c
 *
-*   AMOS project
+*   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -105,26 +105,8 @@ void init_timer(void)
     outw(TMR_MODE_STOP, TIMER1_BASE+TIMER_MODE);
     outw(TMR_MODE_STOP, TIMER2_BASE+TIMER_MODE);
     outw(TMR_MODE_STOP, TIMER3_BASE+TIMER_MODE);
-
-    /*
-    * System clock formula:
-    *         freq = clock / (div * scale)
-    *  freq need to be 100Hz
-    */
-
-    outw(TMR_SEL_ARM, TIMER0_BASE+TIMER_SEL);
-
-    /* prescale  */
-    outw(9, TIMER0_BASE+TIMER_SCAL);
-
-    /* div  */
-    outw((CONFIG_ARM_CLK/1000)-1, TIMER0_BASE+TIMER_DIV);
-
-    /* freerun */
-    outw(TMR_MODE_FREERUN, TIMER0_BASE+TIMER_MODE);
-       
-    /* enable timer irq */
-    enable_irq(IRQ_TMR_0);
+    
+    arch_init_timer();
     
     printk("[init] timer\n");
 }

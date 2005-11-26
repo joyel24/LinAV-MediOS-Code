@@ -103,6 +103,19 @@
 /* GIO         */
 
 #define GIO_BASE                          0x30580
+#define GIO_DIRECTION0                    (GIO_BASE+0x00)  // GIO 0-15
+#define GIO_DIRECTION1                    (GIO_BASE+0x02)  // GIO 16-31
+#define GIO_DIRECTION2                    0
+#define GIO_INVERT0                       (GIO_BASE+0x04)  // GIO 0-15
+#define GIO_INVERT1                       (GIO_BASE+0x06)  // GIO 16-31
+#define GIO_INVERT2                       0
+#define GIO_BITSET0                       (GIO_BASE+0x08)  // GIO 0-15
+#define GIO_BITSET1                       (GIO_BASE+0x0a)  // GIO 16-31
+#define GIO_BITSET2                       0
+#define GIO_BITCLEAR0                     (GIO_BASE+0x0c)  // GIO 0-15
+#define GIO_BITCLEAR1                     (GIO_BASE+0x0e)  // GIO 16-31
+#define GIO_BITCLEAR2                     0
+#define GIO_ENABLE_IRQ                    (GIO_BASE+0x10)  // GIO 0-7
 
 /* video */
 

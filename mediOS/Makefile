@@ -17,14 +17,17 @@ TARGET = medios
 SUBDIRS = kernel
 #apps
 #gui
-LIBS = kernel/build/*.o
+LIBS = kernel/build/*.o kernel/target/arch_$(TARGET_DEVICE)/*.o
 #gui/gui.a
 
 all: $(TARGET)
 
 force: clean all        
 
-lib :
+incdir:
+	make -C include/kernel/target incdir
+        
+lib : incdir
 #	make -C apps/sms stdalone
 	make -C apps/avboy stdalone
         
@@ -44,7 +47,7 @@ lib :
     
     
 
-$(TARGET) : subdirs
+$(TARGET) : incdir subdirs
 	@echo '-----   building kernel'
 	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).bin

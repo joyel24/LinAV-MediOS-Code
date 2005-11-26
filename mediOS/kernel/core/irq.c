@@ -27,46 +27,7 @@
 __IRAM_DATA int cli_var=0;
 __IRAM_DATA int clf_var=0;
 
-__IRAM_DATA struct irq_data_s irq_table[] = {
-    {
-        irq     : IRQ_UART0,
-        action  : uart_intr_action,
-        name    : "UART0 intr",
-        nb_irq  : 0
-    },
-    {
-        irq     : IRQ_UART1,
-        action  : uart_intr_action,
-        name    : "UART1 intr",
-        nb_irq  : 0
-    },
-#ifdef HAVE_SOUND
-    {
-        irq     : IRQ_MAS_DATA,
-        action  : dsp_interrupt,
-        name    : "MAS",
-        nb_irq  : 0
-    },
-#endif
-    {
-        irq     : IRQ_TMR_0,
-        action  : main_timer_action,
-        name    : "Tick_timer",
-        nb_irq  : 0
-    },
-    {
-        irq     : IRQ_IDE,
-        action  : ide_intr_action,
-        name    : "IDE intr",
-        nb_irq  : 0
-    },
-    {
-        irq     : -1,
-        action  : NULL,
-        name    : NULL,
-        nb_irq  : 0
-    }
-};
+extern struct irq_data_s irq_table[];
 
 __IRAM_CODE void sti(void)
 {
@@ -131,19 +92,8 @@ __IRAM_CODE void do_IRQ(void)
 
 void init_irq(void)
 {
-    /* disable all irqs */
-    outw(0x0000, INTC_IRQ0_ENABLE);
-    outw(0x0800, INTC_IRQ1_ENABLE);
-
-    /* Set all to IRQ mode, not FIQ except WDT */
-    outw(0x0000, INTC_FISEL0);
-    outw(0x0800, INTC_FISEL1);
-
-    /* clear all status */
-    outw(0xffff, INTC_FIQ0_STATUS);
-    outw(0xffff, INTC_FIQ1_STATUS);
-    outw(0xffff, INTC_IRQ0_STATUS);
-    outw(0xffff, INTC_IRQ1_STATUS);
+    
+    arch_init_irq();
     
     printk("[init] irq\n");    
 }

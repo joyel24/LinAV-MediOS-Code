@@ -1,3 +1,5 @@
+.section ".core"  
+
 @.align	5
 .global trap_fiq
 

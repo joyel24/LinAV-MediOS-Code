@@ -29,4 +29,6 @@ extern void stop_timer(struct timer_s * timer_data);
 void init_timer(void);
 void print_timer(void);
 
+void arch_init_timer(void);
+
 #endif
