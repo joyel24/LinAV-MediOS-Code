@@ -64,6 +64,8 @@ __IRAM_DATA struct irq_data_s irq_table[] = {
     }
 };
 
+
+
 void arch_init_irq(void)
 {
     /* disable all irqs */

@@ -10,29 +10,17 @@
  Date:     18/10/2005
  Author:   GliGli
 
+ Modified by CjNr11 27/11/2005
+
 */
 
 #include <sys_def/string.h>
-//#include "string.h"
-//#include <ata.h>
-//#include <fat.h>
-//#include <file.h>
-//#include <system.h>
 #include <graphics.h>
-//#include <osdDSC25.h>
-//#include <buttons.h>
-//#include <fonts.h>
-//#include <debug.h>
-//#include <usb.h>
-//#include <timers.h>
-//#include <avmalloc.h>
 #include <evt.h>
-
-//#include "tickcount.h"
-//#include <filebrowser.h>
 #include <kernel/delay.h>
-
+#include <fs_io.h>
 #include <api.h>
+#include "avboy.h"
 
 #define LCD_WIDTH 320
 #define LCD_HEIGHT 240
@@ -43,6 +31,12 @@
 #define USER_MENU_QUIT -2
 
 #define OSD_BITMAP1_CONFIG  OSD_COMPONENT_ENABLE | OSD_BITMAP_8BIT | OSD_BITMAP_MERGEBACK | OSD_BITMAP_A7 | OSD_BITMAP_ZX1 | OSD_BITMAP_RAMCLUT
+
+#define getstringsize(a,b,c) getStringS(a,b,c)
+#define drawline(a,b,c,d,e) drawLine(e,a,b,c,d)
+#define drawrect(a,b,c,d,e) drawRect(e,a,b,c,d)
+#define fillrect(a,b,c,d,e) fillRect(e,a,b,c,d)
+#define putsxy(a,b,c) putS(0xFF,0x00,a,b,c)
 
 int OSD_BITMAP1_ADDRESS;
 
@@ -63,25 +57,36 @@ int OSD_BITMAP1_ADDRESS;
 extern unsigned long tick;
 struct fb fb;
 struct pcm pcm;
+
+
 int _start(int argc,char* argv) {
-  char* rom="/KIRBY.GB";
-//  char* rom="/sml1.gb";
-//  char* rom="/kirby2.gb";
-//  char* rom="/dkl.gb";
-//  char* rom="/vr.gbc";
-
- // bpool(0x3f00000,0xfffff);
-
-open_graphics();
-OSD_BITMAP1_ADDRESS = getBufferOffset(BMAP1);
- setSize(BMAP1,160,144,8);
+   int fd;
+   open_graphics();
+   OSD_BITMAP1_ADDRESS = getBufferOffset(BMAP1);
+   setSize(BMAP1,160,144,8);
 
  
    fillRect(0x00,0,0,160,144);
 
-setFont(10);
-  vid_init();
+   setFont(10);
+
+
+ // char* rom="/KIRBY.GB";
+//  char* rom="/sml1.gb";
+// char* rom="/AVBOY/ROMS/KIRBY2.gb
+//  char* rom="/dkl.gb";
+//  char* rom="/vr.gbc";
+ // bpool(0x3f00000,0xfffff);
+
+   char * rom;
+
+   vid_init();
 	pcm_init();
+
+rom = (char *)bget(MAX_PATH);
+
+browser(rom);
+printf("Rom name : %s\n",rom);
 
 	loader_init(rom);
 
@@ -134,16 +139,16 @@ setPalletteRGB(r,g,b,i);
 
 int oldbt=0;
 
-__IRAM_CODE bool doevents(void){
+bool doevents(void){
   int bt,pressed,released;
-  event_t ev;
+ // event_t ev;
 
   bt=read_btn() & 0xF7F;
   pressed=bt & ~oldbt;
   released=~bt & oldbt;
   oldbt=bt;
 
-  //printf("%0.8x %0.8x\n",pressed,released);
+ // printf("%0.8x %0.8x\n",pressed,released);
 
   if (pressed){
     if(pressed & 0x01)     pad_press(PAD_UP);

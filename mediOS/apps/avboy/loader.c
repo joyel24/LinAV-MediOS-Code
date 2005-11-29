@@ -10,12 +10,6 @@
 #include <sys_def/random.h>
 
 
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <avmalloc.h>
-//#include <string.h>
-//#include <file.h>
-//#include <debug.h>
 #include <fs_io.h>
 #include <kernel/malloc.h>
 
@@ -87,7 +81,7 @@ static char *rtcfile;
 static char *saveprefix;
 
 static char *savename;
-static char *savedir;
+static char *savedir = "/avboy/states";
 
 static int saveslot;
 
@@ -127,13 +121,6 @@ static byte *loadfile(int f, int *len)
 	}
 	*len = l;
 	return d;
-      /*byte *d;
-      int taille;
-      taille=filesize(f);
-      printf("Rom size : %d\n", taille);
-      d=malloc(taille);
-	fread(f, d, taille);
-      return d;*/
 }
 
 static byte *inf_buf;
@@ -172,13 +159,13 @@ int rom_load()
 
 
 	f = fopen(romfile, O_RDONLY);
-      printf("File ok!\n");
 	if (f<0) {
        //  debug("Retry!");
        //  f = fopen(romfile, O_RDONLY);
        //  if (f<0) die("cannot open rom file: %s\n", romfile);
          die("cannot open rom file: %s\n", romfile);
       }
+      else printf("File ok!\n");
 
 	data = loadfile(f, &len);
 
@@ -252,7 +239,7 @@ int sram_save()
 	if (!mbc.batt || !sramfile || !ram.loaded || !mbc.ramsize)
 		return -1;
 
-	f = fopen(sramfile, O_WRONLY);
+	f = fopen(sramfile, O_WRONLY|O_CREAT|O_TRUNC);
 	if (!f) return -1;
 	fwrite(f, ram.sbank, 8192);
 	fclose(f);
@@ -263,7 +250,7 @@ int sram_save()
 
 void state_save(int n)
 {
-/*	FILE *f;
+	int f;
 	char *name;
 
 	if (n < 0) n = saveslot;
@@ -271,18 +258,18 @@ void state_save(int n)
 	name = bget(strlen(saveprefix) + 5);
 	sprintf(name, "%s.%03d", saveprefix, n);
 
-	if ((f = fopen(name, O_WRONLY)))
+	if ((f = fopen(name, O_WRONLY|O_CREAT|O_TRUNC)))
 	{
 		savestate(f);
 		fclose(f);
 	}
-	brel(name);*/
+	brel(name);
 }
 
 
 void state_load(int n)
 {
-	/*FILE *f;
+	int f;
 	char *name;
 
 	if (n < 0) n = saveslot;
@@ -290,7 +277,7 @@ void state_load(int n)
 	name = bget(strlen(saveprefix) + 5);
 	sprintf(name, "%s.%03d", saveprefix, n);
 
-	if ((f = fopen(name, O_WRONLY)))
+	if ((f = fopen(name, O_RDONLY)))
 	{
 		loadstate(f);
 		fclose(f);
@@ -299,25 +286,25 @@ void state_load(int n)
 		sound_dirty();
 		mem_updatemap();
 	}
-	brel(name);*/
+	brel(name);
 }
 
 void rtc_save()
 {
-/*	FILE *f;
+	int f;
 	if (!rtc.batt) return;
-	if (!(f = fopen(rtcfile, O_WRONLY))) return;
+	if (!(f = fopen(rtcfile, O_WRONLY|O_CREAT|O_TRUNC))) return;
 	rtc_save_internal(f);
-	fclose(f);*/
+	fclose(f);
 }
 
 void rtc_load()
 {
-	/*FILE *f;
+	int f;
 	if (!rtc.batt) return;
 	if (!(f = fopen(rtcfile, O_RDONLY))) return;
 	rtc_load_internal(f);
-	fclose(f);*/
+	fclose(f);
 }
 
 
@@ -363,16 +350,21 @@ static void cleanup()
 void loader_init(char *s)
 {
 	char *name, *p;
+	DIR* dir;
 
-	sys_checkdir(savedir, 1); /* needs to be writable */
-
+//	sys_checkdir(savedir, 1); /* needs to be writable */
+	dir=opendir(savedir);
+	if(!dir)
+	  mkdir(savedir,0);
+	else
+	  closedir(dir);
 	romfile = s;
       printf("Loading rom...\n");
 	rom_load();
       printf("Rom loaded!\n");
 
 	vid_settitle(rom.name);
-/*
+
 	if (savename && *savename)
 	{
 		if (savename[0] == '-' && savename[1] == 0)
@@ -386,7 +378,8 @@ void loader_init(char *s)
 		if (p) *p = 0;
 	}
 	else name = ldup(rom.name);
-*/
+     // name=rom.name;
+
 	saveprefix = bget(strlen(savedir) + strlen(name) + 2);
 	sprintf(saveprefix, "%s/%s", savedir, name);
 

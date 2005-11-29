@@ -12,7 +12,7 @@
 #include "asm.h"
 #endif
 
-__IRAM_DATA struct lcd lcd;
+struct lcd lcd;
 
 struct scan scan;
 

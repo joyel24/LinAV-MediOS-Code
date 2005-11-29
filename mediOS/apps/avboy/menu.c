@@ -2,6 +2,8 @@
 /* menu.c - user menu for rockboy                                    */
 /*                                                                   */
 /* Note: this file only exposes one function: do_user_menu().        */
+/*                                                                   */
+/* Modified by CjNr11 27/11/2005                                     */
 /*********************************************************************/
 
 //#include <stdlib.h>"
@@ -13,6 +15,7 @@
 #include <sys_def/ctype.h>
 #include "mem.h"
 #include <fs_io.h>
+#include <graphics.h>
 //#include <buttons.h>
 //#include "graph.h"
 //#include "types.h"
@@ -40,7 +43,7 @@ static void do_opt_menu(void);
 static void munge_name(char *buf, size_t bufsiz);
 
 /* directory ROM save slots belong in */
-#define STATE_DIR "/avboy"
+#define STATE_DIR "/avboy/states"
 
 #define MENU_CANCEL (-1)
 static int do_menu(char *title, char **items, size_t num_items, int sel_item);
@@ -71,22 +74,23 @@ typedef enum {
   SM_ITEM_SLOT3,
   SM_ITEM_SLOT4,
   SM_ITEM_SLOT5,
-  SM_ITEM_FILE,
+//  SM_ITEM_FILE,
   SM_ITEM_BACK,
   SM_ITEM_LAST
 } SlotMenuItem;
+
 
 /* this semi-evil, but we snprintf() into these strings later
  * Note: if you want more save slots, just add more lines 
  * to this array */
 static const char *slot_menu[] = {
-  "1.                  ",
-  "2.                  ",
-  "3.                  ",
-  "4.                  ",
-  "5.                  ",
-  "Save to File...     ",
-  "Previous Menu...    "
+  "1.                 ",
+  "2.                 ",
+  "3.                 ",
+  "4.                 ",
+  "5.                 ",
+//  "Save to File...    ",
+  "Previous Menu...   "
 };
 
 #define OPT_MENU_TITLE "Options"
@@ -179,7 +183,7 @@ static void build_slot_path(char *buf, size_t bufsiz, size_t slot_id) {
   munge_name(name_buf, strlen(name_buf));
 
   /* glom the whole mess together */
-  snprintf(buf, bufsiz, "%s/%s-%d.rbs", STATE_DIR, name_buf, slot_id + 1);
+  snprintf(buf, bufsiz, "%s/%s-%d.avb", STATE_DIR, name_buf, slot_id + 1);
 }
 
 /*
@@ -196,10 +200,11 @@ static bool do_file(char *path, char *desc, bool is_load) {
   int fd, file_mode;
     
   /* set file mode */
-  //file_mode = is_load ? O_RDONLY : ();
+  file_mode = is_load ? O_RDONLY : O_WRONLY | O_CREAT;
   
   /* attempt to open file descriptor here */
-  if ((fd = fopen(path, is_load ? O_RDONLY : O_WRONLY | O_CREAT)) <= 0)
+  printf("Path : %s, fm : %d\n", path,file_mode);
+  if ((fd = fopen(path, file_mode )) <= 0)
     return false;
 
   /* load/save state */
@@ -211,7 +216,8 @@ static bool do_file(char *path, char *desc, bool is_load) {
     loadstate(fd);
 
     /* print out a status message so the user knows the state loaded */
-    snprintf(buf, sizeof(buf), "Loaded state from \"%s\"", path);
+ //   printf(buf, sizeof(buf), "Loaded state from \"%s\"", path);
+    printf("Loaded state from \"%s\"\n", path);
   //splash(buf);
   } else {
     /* build description buffer */
@@ -220,8 +226,8 @@ static bool do_file(char *path, char *desc, bool is_load) {
       strncpy(desc_buf, desc, sizeof(desc_buf));
 
     /* save state */
-   /* fwrite(fd, desc_buf, 20);
-    savestate(fd);*/
+   fwrite(fd, desc_buf, 20);
+    savestate(fd);
   }
 
   /* close file descriptor */
@@ -242,15 +248,17 @@ static bool do_slot(size_t slot_id, bool is_load) {
   
   /* build slot filename, clear desc buf */
   build_slot_path(path_buf, sizeof(path_buf), slot_id);
+ printf("Path : %s\n",path_buf);
   memset(desc_buf, 0, sizeof(desc_buf));
 
   /* if we're saving to a slot, then get a brief description */
   if (!is_load) {
-  //  if (rb->kbd_input(desc_buf, sizeof(desc_buf)) || !strlen(desc_buf)) {
-    if (!strlen(desc_buf)) {
+  //  if (rb->kbd_input(desc_buf, sizeof(desc_buf)) || !strlen(desc_buf)) {   //Maybe a description here?
+ //   if (!strlen(desc_buf)) {
       memset(desc_buf, 0, sizeof(desc_buf));
+   //   sprintf(desc_buf,"Save %d"...
       strncpy(desc_buf, "Untitled", sizeof(desc_buf));
-    }
+ //   }
   }
 
   /* load/save file */
@@ -298,11 +306,12 @@ static void do_slot_menu(bool is_load) {
   
   /* create menu items (the last two are file and previous menu,
    * so don't populate those) */
-  for (i = 0; i < num_items - 2; i++)
-    slot_info((char*) slot_menu[i], 20, i);
+//  for (i = 0; i < num_items - 2; i++)
+ // for (i = 0; i < num_items - 1; i++)
+ //   slot_info((char*) slot_menu[i], 20, i);
   
   /* set text of file item */
-  snprintf((char*) slot_menu[SM_ITEM_FILE], 20, "%s File...", is_load ? "Load from" : "Save to");
+//  snprintf((char*) slot_menu[SM_ITEM_FILE], 20, "%s File...", is_load ? "Load from" : "Save to");
   
   /* set menu title */
   title = is_load ? "Load State" : "Save State";
@@ -315,28 +324,28 @@ static void do_slot_menu(bool is_load) {
     /* handle selected menu item */
     done = true;
     if (mi != MENU_CANCEL && mi != SM_ITEM_BACK) {
-      if (mi == SM_ITEM_FILE) {
-        char rom_name_buf[40];
+   //   if (mi == SM_ITEM_FILE) {
+    //    char rom_name_buf[40];
 
         /* munge rom name to valid filename */
-        strncpy(rom_name_buf, rom.name, 16);
-        munge_name(rom_name_buf, sizeof(rom_name_buf));
+    //    strncpy(rom_name_buf, rom.name, 16);
+     //   munge_name(rom_name_buf, sizeof(rom_name_buf));
 
         /* create default filename */
-        snprintf(buf, sizeof(buf), "/%s.rbs", rom_name_buf);
+     //   snprintf(buf, sizeof(buf), "/%s.avb", rom_name_buf);
 
         /* prompt for output filename, save to file */
-  //      if (!rb->kbd_input(buf, sizeof(buf)))
-        if (0)
-          done = do_file(buf, NULL, is_load);
-      } else {
+  // //     if (!rb->kbd_input(buf, sizeof(buf)))
+       // if (0)
+     //     done = do_file(buf, NULL, is_load);
+    //  } else {
         done = do_slot(mi, is_load);
-      }
+    //  }
 
       /* if we couldn't save the state file, then print out an
        * error message */
-     // if (!is_load && !done)
-     // splash("Couldn't save state file.");
+      if (!is_load && !done)
+      printf("Couldn't save state file.");
     }
   }
 }
@@ -372,7 +381,7 @@ static void do_opt_menu(void) {
 /*
  * select_item - select menu item (after deselecting current item)
  */
-static void select_item(char *title, int curr_item, size_t item_i) {
+void select_item(char *title, int curr_item, size_t item_i) {
   int x, y, w, h;
 
   /* get size of title, use that as height ofr all lines */
@@ -390,7 +399,7 @@ static void select_item(char *title, int curr_item, size_t item_i) {
     y = MENU_Y + h + MENU_ITEM_PAD * 2; /* account for title */
     y += h * curr_item;
  //   rb->lcd_fillrect(x, y, w, h);
-    drawrect(x, y, w, h,0x00); //faute de complement!!
+    drawrect(x, y, w, h,0x00);
   }
 
   /* select new item */
@@ -469,11 +478,6 @@ static int do_menu(char *title, char **items, size_t num_items, int sel) {
   bool done = false;
   ret = MENU_CANCEL;
 
- /*   for (y=0;y<144;y+=9) {
-        for (x=0;x<160;x+=10) {
-    fillRect(c, x, y, 10, 9);
-c++;
-}} while(1);*/ //palette!
 
   /* draw menu on screen and select the first item */
   draw_menu(title, items, num_items);
@@ -538,3 +542,118 @@ c++;}}
   /* return selected item */
   return ret;
 }
+
+void browser(char * rom) {
+  int x, y, w, h, by;
+  size_t i;
+
+  int btn, sel_item=0, curr_item, num_items=6, nb=0,pos=0; //len=0;
+  char title[]="Start..."; //ext[4]; rom[MAX_PATH],
+  char (*items)[MAX_PATH];
+  char (*list)[MAX_PATH];
+  bool done = false;
+  struct dirent *romdir;
+  DIR * romd=NULL;
+
+items = bget(MAX_PATH*6);
+list = bget(MAX_PATH);
+
+romd=opendir("/avboy/roms");
+if(romd) printf("Dir /avboy/roms/ opened!\n");
+else printf("Dir error!\n");
+
+
+  while((romdir=readdir(romd))!=NULL) {
+     if(!(romdir->attribute & ATTR_DIRECTORY)) {
+   /*     len = strlen(romdir->d_name);
+        ext[0] = romdir->d_name[len-3];
+        ext[1] = romdir->d_name[len-2];
+        ext[2] = romdir->d_name[len-1];
+        ext[3] = '\0';
+        if(strcmp(*/
+     list[nb][0]='\0';
+     strcat(list[nb],romdir->d_name);
+     nb++;
+     list = bgetr(list,MAX_PATH*(nb+1));
+     }
+  }
+
+  fillRect(0xaf,11,9,140,128);
+  fillRect(0x00,10,8,140,128);
+  drawRect(0xff,10,8,140,128);
+
+  x = 10 + 2;
+  y = 8 + 2 * 2;
+  getstringsize(title, &w, &h);
+  h += 2 * 2;
+
+  for (i = 8; i < (size_t) y + h; i += 2)
+    drawline(10, i, 10 + 139, i,0xff);
+
+  fillrect((160 - w) / 2 - 2, y - 2, w + 4, h,0x00);
+  putsxy((160 - w)/2, y, title);
+  
+  by = y + h + 2;
+  
+
+
+while(!done) {
+  if(pos > (nb-6)) num_items=nb-pos;
+  else num_items=6;
+  for(i=0;i<num_items;i++) {items[i][0]='\0'; strcat(items[i],list[i+pos]);}
+
+  fillRect(0x00,11,29,138,106);
+  for (i = 0; i < num_items; i++)
+    putsxy(x+2, by + h * i, items[i]);
+
+  curr_item = -1;
+  select_item(title, curr_item, sel_item);
+  curr_item = sel_item;
+
+  while (1) {
+    while (read_btn());
+    btn = read_btn();
+
+    if(btn & 0x08) {
+        sel_item = curr_item + 1;
+        if (sel_item >= (int) num_items) {
+           if(pos < (nb-6)) {sel_item=0;pos+=6;break;}
+           else {sel_item = curr_item;}
+        }
+        else {
+           select_item(title, curr_item, sel_item);
+           curr_item = sel_item;
+        }
+      }
+      else if(btn & 0x01) {
+        sel_item = curr_item - 1;
+        if (sel_item < 0) {
+           if(pos > 0) {sel_item=5;pos-=6;break;}
+           else {sel_item = curr_item;}
+        }
+        else {
+           select_item(title, curr_item, sel_item);
+           curr_item = sel_item;
+        }
+      }
+      else if(btn & 0x04) {
+        done = true;
+        break;
+      }
+      else if(btn & 0x02) {
+      }
+
+  }
+  }
+
+  rom[0]='\0';
+  strcat(rom,"/AVBOY/ROMS/");
+  strcat(rom,items[curr_item]);
+  strcat(rom,"\0");
+  brel(items);
+  brel(list);
+ // return rom;
+return;
+}
+
+
