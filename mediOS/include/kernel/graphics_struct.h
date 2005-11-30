@@ -56,4 +56,6 @@ typedef struct spriteBuffer       BITMAP;
 #define S24bit     5
 #define S32bit     6
 
+#define PALETTE unsigned int 
+
 #endif

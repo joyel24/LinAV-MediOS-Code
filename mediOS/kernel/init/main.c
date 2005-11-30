@@ -154,8 +154,8 @@ void kernel_start (void)
         printk("get %s\n",test_string);
     }
     */
-    iniMsgBox();
-    msgBox("A caption", "a msg", 3, 2);
+    while(1)
+        virtKbd(get_evt_pipe());
     
     printk("[loop] back from test code\n");
     

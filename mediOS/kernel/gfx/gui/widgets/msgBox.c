@@ -38,6 +38,8 @@ int stopBoxLoop = 0; /* global variable used to stop the private evt loop*/
 int cntButtons  = 0; /* Buttons in MSgBox */
 int g_type = MSGBOX_TYPE_OK;
 
+int fontVal;
+
 /* msg_box event handler */
 void msgBoxEvtHandler(EVT_PIPE evt_buffer)
 {
@@ -276,24 +278,23 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
     setPlane(BMAP1);
 }
 
-int ini_font;
+
 
 /* restore the previous state */
 void eraseMsgBox(void)
 {
     hidePlane(BMAP2);
     setPlane(BMAP1);
-    setFont(ini_font);
+    setFont(fontVal);
 }
 
 /* main function */
-int msgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
+int msgBox(unsigned char* caption, unsigned char* msg, int type, int icon, EVT_PIPE evt_buffer)
 {
     g_type = type;
-    ini_font=getFont();
+    fontVal=getFont();
     drawMsgBox(caption,msg,type,icon);
-    msgBoxEvtHandler(get_evt_pipe());
-    //msgEvtLoop();
+    msgBoxEvtHandler(evt_buffer);
     eraseMsgBox();
     return res;
 }
