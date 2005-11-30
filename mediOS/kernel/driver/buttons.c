@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/driver/buttons.c
 *
 *   AMOS project
@@ -15,6 +15,7 @@
 #include <kernel/kernel.h>
 #include <kernel/exit.h>
 
+#include <kernel/cpld.h>
 #include <kernel/gio.h>
 #include <kernel/evt.h>
 
@@ -26,9 +27,6 @@
 #ifdef USE_DEBUG_ON_SCREEN
 #include <kernel/kgraphics.h>
 #endif
-
-#define BTN_NOT_PRESSED(val,btn)    !(val&(0x1<<btn))
-#define BTN_PRESSED(val,btn)        (val&(0x1<<btn))
 
 __IRAM_DATA int mx_press;
 
@@ -46,9 +44,7 @@ __IRAM_DATA int old_state;
 
 __IRAM_CODE int read_btn(void)
 {
-    int val=0;
-    READ_BUTTONS(val)
-    return val;
+    return arch_read_btn();
 }
 
 __IRAM_CODE void process_button_press(int val)
@@ -56,7 +52,7 @@ __IRAM_CODE void process_button_press(int val)
     int btn,fastDir=0;
     
     old_state=val;
-    
+
 #ifdef USE_DEBUG_ON_SCREEN  
     if(BTN_PRESSED(val,BUTTON_ON) && BTN_PRESSED(val,BUTTON_MENU1))
     {
@@ -107,8 +103,12 @@ __IRAM_CODE void process_button_press(int val)
             }
 
                
-            if(!(btn==BUTTON_JOYPRESS && fastDir)) /* discard BTN_JOY evt if fastDir is set */
-            {                 
+            if(!(
+#ifdef ARCH_AV3XX
+                  btn==BUTTON_JOYPRESS &&
+#endif
+                  fastDir)) /* discard BTN_JOY evt if fastDir is set */
+            {
                 if(nb_pressed[btn]==0)
                 {
 #ifdef HAVE_FM_REMOTE

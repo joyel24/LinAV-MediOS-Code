@@ -1,20 +1,14 @@
-.section ".core"  
+.section ".core"
 
 @.align	5
 .global trap_fiq
 
 trap_fiq: @called every 500ns
-  stmfd   sp!, {r0-r3,lr}
   ldr     r9, =0x30500
-  ldrh    r8, [r9]        @DM270_INTC_FIQ0
-  tst     r8, #8          @fiq 3 set?
-  bne     trap_fiq_end
-  ldrh    r8, [r9,#0x28]  @DM270_INTC_IRQ0
-  tst     r8, #8          @irq 3 enabled?
-  beq     trap_fiq_end
   ldrh    r8, [r9]
-  orr     r8, r8, #8
-  strh    r8, [r9]        @set fiq 3
+  orr     r8, r8, #0x08
+  strh    r8, [r9]        @set fiq 3 (timer 3)
+
   ldrh    r10, [r9,#0x8c] @DM270_GIO_OFFSET_BITSET0
   ldr     r8, =.offCounter
   tst     r10, #4         @OFF pressed?
@@ -52,7 +46,6 @@ no_shutdown:
   str     r10, [r8]       @inc wdt counter
 
 trap_fiq_end:
-  ldmfd   sp!, {r0-r3,lr}
   subs    pc, lr, #4
 
 .offCounter:	.long	0x0

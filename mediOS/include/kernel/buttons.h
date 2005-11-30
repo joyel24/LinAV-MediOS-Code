@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/buttons.h
 *
 *   AMOS project
@@ -20,26 +20,20 @@
 #define MAX_PRESSED                 4
 #define MAX_OFF                     15
 
-#define BUTTON_UP            0x0000
-#define BUTTON_LEFT          0x0001
-#define BUTTON_RIGHT         0x0002
-#define BUTTON_DOWN          0x0003
-#define BUTTON_MENU3         0x0004
-#define BUTTON_MENU1         0x0005
-#define BUTTON_MENU2         0x0006
-#define BUTTON_JOYPRESS      0x0007
-#define BUTTON_ON            0x0008
-#define BUTTON_OFF           0x0009
-
-#define NB_BUTTONS            10
-
+#include <kernel/target/arch/buttons.h>
 extern int old_state;
 void process_button_press(int val);
 void init_buttons(void);
-//READ_BUTTONS ;
+
+int read_btn(void);
+int arch_read_btn(void);
+
+#define BTN_NOT_PRESSED(val,btn)    !(val&(0x1<<btn))
+#define BTN_PRESSED(val,btn)        (val&(0x1<<btn))
+
 #define BTN_CHK    {                     \
     int __val ;                          \
-    READ_BUTTONS(__val)                  \
+    __val=read_btn();                    \
     if(old_state==0);                    \
         old_state=__val;                 \
     if(__val!=old_state || __val!=0x3FF) \

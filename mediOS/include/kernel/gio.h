@@ -49,7 +49,7 @@
 #define gio_clear(gio_num)              {outw(0x1<<GIO_NUM(gio_num),GIO_BITCLEAR(gio_num));}
 #define gio_IRQ(gio_num,enable)         GIO_OUT_VAL(enable,gio_num,GIO_ENABLE_IRQ)
 #define gio_is_set(gio_num)             ((inw(GIO_BITSET(gio_num)) & (0x1 << GIO_NUM(gio_num))) != 0)
-#define gio_raw(data,bank,mask)           { outw(data&mask,gio_bank_sel(bankGIO_BITSET0,GIO_BITSET1,GIO_BITSET2);\
-                                          outw(data ^ mask,gio_bank_sel(bankGIO_BITSET0,GIO_BITSET1,GIO_BITSET2));}
+#define gio_raw(data,bank,mask)           { outw(data&mask,gio_bank_sel(bank GIO_BITSET0,GIO_BITSET1,GIO_BITSET2);\
+                                          outw(data ^ mask,gio_bank_sel(bank GIO_BITSET0,GIO_BITSET1,GIO_BITSET2));}
 
 #endif

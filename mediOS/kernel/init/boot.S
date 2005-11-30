@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/boot.S
 *
 *   AMOS project
@@ -47,7 +47,11 @@ clr_bss_loop:
 /* launch start_function */
     ldr    lr, __kernel_start_ptr
     bx     lr
-    
+
+/* Gmini400: reload the firmware */
+    ldr r0,=0x900000
+    bx r0
+
 __kernel_start_ptr:    .word kernel_start
 __real_iram_start_ptr: .word _real_iram_start
 __iram_start_ptr:      .word _iram_start

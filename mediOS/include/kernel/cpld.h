@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/cpld.h
 *
 *   AMOS project
@@ -14,37 +14,12 @@
 #define __CPLD_H
 
 #include <kernel/hardware.h>
+#include <kernel/target/arch/cpld.h>
 
 #define CPLD0                  0x0
 #define CPLD1                  0x1
 #define CPLD2                  0x2
 #define CPLD3                  0x3
-
-/* PORT 0 */
-/*** HD / CF */
-#define CPLD_HD_CF             0x0
-#define CPLD_SEL_HD            0x0
-#define CPLD_SEL_CF            0x1
-
-#define CPLD_FW_EXT            0x1
-#define CPLD_IR                0x2
-
-/* PORT 1*/
-#define CPLD_USB               0x0
-
-/* PORT 2*/
-#define CPLD2_IR               0x1
-#define CPLD_LCD               0x2
-
-/* PORT 3*/
-#define CPLD_FM                0x0
-#define CPLD3_IR               0x1
-#define CPLD_HD_POWER          0x3
-
-#define CPLD_PORT0             (CPLD_BASE+0x000)
-#define CPLD_PORT1             (CPLD_BASE+0x100)
-#define CPLD_PORT2             (CPLD_BASE+0x200)
-#define CPLD_PORT3             (CPLD_BASE+0x300)
 
 extern void cpld_chg_state   (int cpld_port,int bit_num,int direction);
 extern void cpld_select      (int bit_num,int direction);
@@ -62,5 +37,9 @@ extern int  cpld_read        (int cpld_port);
 extern void cpld_do_select(void);
 
 extern void init_cpld(void);
+
+extern int cpld_get_version(void);
+
+int arch_cpld_get_version(void);
 
 #endif

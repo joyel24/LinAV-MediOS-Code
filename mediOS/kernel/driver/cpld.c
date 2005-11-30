@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/driver/cpld.c
 *
 *   AMOS project
@@ -17,10 +17,10 @@
 
 __IRAM_DATA int cpld_port_state[4]=
 {
-    0x0,
-    0x0,
-    0x4,
-    0x8,
+    CPLD_PORT0_INIT,
+    CPLD_PORT1_INIT,
+    CPLD_PORT2_INIT,
+    CPLD_PORT3_INIT,
 };
 
 __IRAM_DATA int cpld_port_array[4] = {
@@ -33,14 +33,14 @@ __IRAM_DATA int cpld_port_array[4] = {
 void init_cpld(void)
 {
     int version;
-    
-    cpld_do_select(); 
+
+    cpld_do_select();
     outw(cpld_port_state[CPLD1],CPLD_PORT1);
     outw(cpld_port_state[CPLD2],CPLD_PORT2);
     outw(cpld_port_state[CPLD3],CPLD_PORT3);
-    
-    version=(cpld_read(CPLD2) & 0x000F) | ((cpld_read(CPLD3) & 0x0007)<<4);
-    
+
+    version=cpld_get_version();
+
     /* everything is ok */
     printk("[init] CPLD Ver:0x%x\n",version);
 }
@@ -54,7 +54,7 @@ __IRAM_CODE void cpld_chg_state(int cpld_port,int bit_num,int direction)
         tmp |= (0x1 << bit_num);
     else
         tmp &= ~(0x1 << bit_num);
-        
+
     if(tmp!=cpld_port_state[cpld_port])
     {
         cpld_port_state[cpld_port]=tmp;
@@ -96,6 +96,8 @@ __IRAM_CODE void cpld_do_select(void)
         res=res2;
 }
 
-
+int cpld_get_version(void){
+    return arch_cpld_get_version();
+}
 
 

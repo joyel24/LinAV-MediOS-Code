@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/main.c
 *
 *   AMOS project
@@ -11,6 +11,9 @@
 */
 
 #include <sys_def/string.h>
+#include <sys_def/colordef.h>
+#include <sys_def/time.h>
+#include <sys_def/font.h>
 
 #include <kernel/malloc.h>
 
@@ -22,6 +25,7 @@
 #include <kernel/kernel.h>
 #include <kernel/irq.h>
 #include <kernel/timer.h>
+#include <kernel/ti_wdt.h>
 
 #include <kernel/uart.h>
 #include <kernel/cpld.h>
@@ -45,13 +49,10 @@
 
 #include <kernel/kfile.h>
 #include <kernel/kdir.h>
-#include <sys_def/colordef.h>
 
 #include <kernel/dsp.h>
 
 #include <kernel/osd.h>
-
-#include <sys_def/font.h>
 
 void print_boot_info(void)
 {
@@ -67,11 +68,11 @@ char * test_string;
 void kernel_start (void)
 {
     DEBUG_UART_INIT
-    LCD_INIT 
-    
+    LCD_INIT
+
     ini_graphics();
-    
-#ifdef USE_DEBUG_ON_SCREEN    
+
+#ifdef USE_DEBUG_ON_SCREEN
     ini_debugOnScreen();
 #endif
     /* malloc of max space in SDRAM */
@@ -79,24 +80,28 @@ void kernel_start (void)
 
     /* print banner on uart */
     printk("MediOS %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);
-  
+
     printk("Initial SP: %08x, kernel end: %08x, size in IRAM: %08x  Malloc start: %08x, size: %08x\n",get_sp(),
         (unsigned int)&_end_kernel,
         (unsigned int)&_iram_end - (unsigned int)&_iram_start,
         (unsigned int)MALLOC_START,
         (unsigned int)MALLOC_SIZE);
-       
+
+    /* init the watchdog timer */
+    init_wdt();
+
     /* init the irq */
     init_irq();
-    
+
     /* init the tick timer */
     init_timer();
-    
+
     /* driver init */
 
     init_uart();
 
     init_cpld();
+
 #ifdef HAVE_CMD_LINE
     init_cmd_line();
 #endif
@@ -105,11 +110,11 @@ void kernel_start (void)
     init_evt();
 #endif
 
-    init_buttons();   
-#ifdef HAVE_BAT_POWER    
+    init_buttons();
+
+#ifdef HAVE_BAT_POWER
     init_power();
 #endif
-
     init_rtc();
 #ifdef HAVE_USB_FW
     init_usb_fw();
@@ -124,12 +129,17 @@ void kernel_start (void)
 #ifdef HAVE_SOUND
     init_sound();
 #endif
+/* gligli
+for(;;){
+  if(read_btn()&BTMASK_OFF) return;
+}
+*/
     /* enable the IRQ */
     printk("[init] INT enabled\n");
     __sti();
-    
+
     printk("[init] ------------ all drivers\n");
-   
+
     print_boot_info();
 
     printk("[init] END\n");

@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/target/arch_G4XX/timer.c
 *
 *   MediOS project
@@ -26,18 +26,35 @@ void arch_init_timer(void)
     *  freq need to be 100Hz
     */
 
-    outw(TMR_SEL_ARM, TIMER0_BASE+TIMER_SEL);
+    outw(TMR_SEL_EXT, TIMER0_BASE+TIMER_SEL);
 
     /* prescale  */
     outw(9, TIMER0_BASE+TIMER_SCAL);
 
     /* div  */
-    outw((CONFIG_ARM_CLK/1000)-1, TIMER0_BASE+TIMER_DIV);
+    outw((CONFIG_EXT_CLK/1000)-1, TIMER0_BASE+TIMER_DIV);
 
     /* freerun */
     outw(TMR_MODE_FREERUN, TIMER0_BASE+TIMER_MODE);
-       
+
     /* enable timer irq */
     enable_irq(IRQ_TMR_0);
+
+    /*
+    * Timer 3 is used for the watchdog
+    * Sends FIQ at 2khz
+    */
+
+    outw(TMR_SEL_EXT, TIMER3_BASE+TIMER_SEL);
+
+    /* prescale  */
+    outw(0, TIMER3_BASE+TIMER_SCAL);
+
+    /* div  */
+    outw((CONFIG_EXT_CLK/2000)-1, TIMER3_BASE+TIMER_DIV);
+
+    /* freerun */
+    outw(TMR_MODE_FREERUN, TIMER3_BASE+TIMER_MODE);
+
 }
 

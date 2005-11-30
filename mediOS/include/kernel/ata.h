@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/ata.h
 *
 *   AMOS project
@@ -15,17 +15,8 @@
 
 #include <kernel/hardware.h>
 //#include <kernel/disk.h>
-
-#define IDE_DATA                          (IDE_BASE+0x000)
-#define IDE_ERROR                         (IDE_BASE+0x080)
-#define IDE_NSECTOR                       (IDE_BASE+0x100)
-#define IDE_SECTOR                        (IDE_BASE+0x180)
-#define IDE_LCYL                          (IDE_BASE+0x200)
-#define IDE_HCYL                          (IDE_BASE+0x280)
-#define IDE_SELECT                        (IDE_BASE+0x300)
-#define IDE_CONTROL                       (IDE_BASE+0x340)
-#define IDE_STATUS                        (IDE_BASE+0x380)
-#define IDE_COMMAND                       (IDE_BASE+0x380)
+#include <kernel/hardware.h>
+#include <kernel/target/arch/arch_def.h>
 
 #define IDE_CMD_READ_SECTORS              0x20
 #define IDE_CMD_WRITE_SECTORS             0x30

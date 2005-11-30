@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/driver/i2c.c
 *
 *   AMOS project
@@ -29,25 +29,19 @@
 #define DELAY_1              { int _x; for(_x=0;_x<10;_x++); };
 #define DELAY_2              { int _x; for(_x=0;_x<10;_x++); };
 
-#define SDA_MASK           0x8
-#define SDA_N_MASK         0xfff7
+#define SDA_HI             gio_set(GIO_I2C_DATA);
+#define SDA_LO             gio_clear(GIO_I2C_DATA);
+#define SDA_IN             gio_dir(GIO_I2C_DATA,GIO_IN);
+#define SDA_OUT            gio_dir(GIO_I2C_DATA,GIO_OUT);
+#define SDA                gio_is_set(GIO_I2C_DATA)
 
-#define SDA_HI             outw(SDA_MASK,GIO_BITSET1);
-#define SDA_LO             outw(SDA_MASK,GIO_BITCLEAR1);
-#define SDA_IN             outw(inw(GIO_DIRECTION1) | SDA_MASK,GIO_DIRECTION1);
-#define SDA_OUT            outw(inw(GIO_DIRECTION1) & SDA_N_MASK,GIO_DIRECTION1);
-#define SDA                inw(GIO_BITSET1)&SDA_MASK
+#define SCL_HI             gio_set(GIO_I2C_CLOCK);
+#define SCL_LO             gio_clear(GIO_I2C_CLOCK);
+#define SCL_IN             gio_dir(GIO_I2C_CLOCK,GIO_IN);
+#define SCL_OUT            gio_dir(GIO_I2C_CLOCK,GIO_OUT);
+#define SCL                gio_is_set(GIO_I2C_CLOCK)
 
-#define SCL_MASK           0x4
-#define SCL_N_MASK         0xfffb
-
-#define SCL_HI             outw(SCL_MASK,GIO_BITSET1);
-#define SCL_LO             outw(SCL_MASK,GIO_BITCLEAR1); 
-#define SCL_IN             outw(inw(GIO_DIRECTION1) | SCL_MASK,GIO_DIRECTION1);
-#define SCL_OUT            outw(inw(GIO_DIRECTION1) & SCL_N_MASK,GIO_DIRECTION1);
-#define SCL                inw(GIO_BITSET1)&SCL_MASK
-
-#define ENA_INT            
+#define ENA_INT
 //sti();
 #define DIS_INT            
 //cli();
@@ -82,7 +76,7 @@ __IRAM_CODE void wait_i2c(void)
 
 __IRAM_CODE void i2c_start(void)
 {
-    DELAY_1        
+    DELAY_1
     CL_1  
     DELAY_1
     DA_0    

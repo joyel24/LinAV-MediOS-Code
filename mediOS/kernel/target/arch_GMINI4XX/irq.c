@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/target/arch_G4XX/irq.c
 *
 *   MediOS project
@@ -66,17 +66,21 @@ __IRAM_DATA struct irq_data_s irq_table[] = {
 
 void arch_init_irq(void)
 {
-    /* disable all irqs */
-    outw(0x0000, INTC_IRQ0_ENABLE);
-    outw(0x0800, INTC_IRQ1_ENABLE);
+    /* disable all irqs (except timer 3 one)*/
+    outw(0x0008, INTC_IRQ0_ENABLE);
+    outw(0x0000, INTC_IRQ1_ENABLE);
+    outw(0x0000, INTC_IRQ2_ENABLE);
 
-    /* Set all to IRQ mode, not FIQ except WDT */
-    outw(0x0000, INTC_FISEL0);
-    outw(0x0800, INTC_FISEL1);
+    /* Set all to IRQ mode (except timer 3 one)*/
+    outw(0x0008, INTC_FISEL0);
+    outw(0x0000, INTC_FISEL1);
+    outw(0x0000, INTC_FISEL2);
 
     /* clear all status */
     outw(0xffff, INTC_FIQ0_STATUS);
     outw(0xffff, INTC_FIQ1_STATUS);
+    outw(0xffff, INTC_FIQ2_STATUS);
     outw(0xffff, INTC_IRQ0_STATUS);
-    outw(0xffff, INTC_IRQ1_STATUS);     
+    outw(0xffff, INTC_IRQ1_STATUS);
+    outw(0xffff, INTC_FIQ2_STATUS);
 }
