@@ -25,7 +25,7 @@ __IRAM_CODE int swi_memory_handler (
 	{
             case nAPI_MALLOC:   //void** ppvBuffer, unsigned long nBytes
                 *((void**)nParam1) = malloc(nParam2);
-                printk("malloc of %x bytes at %x\n",nParam2,*((void**)nParam1));
+                //printk("malloc of %x bytes at %x\n",nParam2,*((void**)nParam1));
                 break;
         
             case nAPI_FREE:     //void* pvBuffer

@@ -1,7 +1,7 @@
 /*
 * kernel/gui/gfx/icons.c
 *
-*   AMOS project
+*   MedoOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -230,7 +230,7 @@ struct icon_elem * addIcon(char * name,unsigned char * data,int w,int h)
         printk("[loadIcon] not enough memory for icon structure\n"); 
         goto err1;
     }
-    printk("- created ");
+    printk("- allocated ");
     ptr->name=name;
     ptr->data=data;
     ptr->bmap_data.data=(unsigned int)ptr->data;
@@ -268,8 +268,6 @@ struct icon_elem * getIcon(char * name)
 
 void iniIcon(void)
 {
-    printk("in iniIcon\n");
-    //icon_list_head=NULL;
     addIcon("linavLogo",(unsigned char*)linav_logo, 65, 10);
     addIcon("usbIcon",(unsigned char*)usb_icon, 15, 6);
     addIcon("fwExtIcon",(unsigned char*)fw_ext_icon, 15, 6);
@@ -286,5 +284,4 @@ void iniIcon(void)
     addIcon("MsgBoxWarningBitmap",(unsigned char*)MsgBoxWarning, 18, 18);
     addIcon("MsgBoxInformationBitmap",(unsigned char*)MsgBoxInformation, 18, 18);
     addIcon("MsgBoxErrorBitmap",(unsigned char*)MsgBoxError, 18, 18);
-    printk("out iniIcon\n");
 }

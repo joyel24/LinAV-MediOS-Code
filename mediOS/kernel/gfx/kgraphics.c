@@ -397,7 +397,7 @@ int swi_gfx_handler(unsigned long nCmd,unsigned long cmd,
     }
     else if(nCmd == nAPI_GFX)
     {    
-        printk("processing GFX fct: %x\n",cmd);
+        //printk("processing GFX fct: %x\n",cmd);
             switch(cmd) {
                 case 0x000:                      /* void open_graphics(void) */
                     error_scr_state=0;    
@@ -412,7 +412,7 @@ int swi_gfx_handler(unsigned long nCmd,unsigned long cmd,
                     current_font=0;
                     buffers[BMAP1]->enable=1;
                     osdSetComponentConfig(OSD_BITMAP1,buffers[BMAP1]->state|OSD_COMPONENT_ENABLE);
-                    printk("BMAP1 @%x\n",buffers[BMAP1]->offset);
+                    //printk("BMAP1 @%x\n",buffers[BMAP1]->offset);
                     break;
                 case 0x001:                      /* void close_graphics(void) */
                     break;

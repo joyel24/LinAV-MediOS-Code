@@ -145,7 +145,7 @@ void kernel_start (void)
     iniIcon();
     open_graphics();
     clearScreen(COLOR_WHITE);
-    setFont(STD6X9);
+    /*setFont(STD6X9);
     ini_file_browser();
     while(1)
     {
@@ -153,7 +153,11 @@ void kernel_start (void)
     if(test_string)
         printk("get %s\n",test_string);
     }
-    printk("[loop] back from browser\n");
+    */
+    iniMsgBox();
+    msgBox("A caption", "a msg", 3, 2);
+    
+    printk("[loop] back from test code\n");
     
     
     while(1);

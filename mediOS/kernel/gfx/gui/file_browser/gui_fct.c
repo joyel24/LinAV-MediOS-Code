@@ -85,8 +85,6 @@ int viewNewDir(struct browser_data *bdata,char *name)
     printAllName(bdata);
     draw_scrollBar(&browser_scroll, bdata->listused, bdata->pos,bdata->nb_disp_entry+bdata->pos);
     
-    
-    
     return 1;
 }
 
