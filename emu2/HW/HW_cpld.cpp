@@ -125,19 +125,19 @@ uint32_t HW_cpld::read(uint32_t addr,int size)
                 BTN_FCT(btn_var[0],0x1)
                 BTN_FCT(btn_var[1],0x2)
                 ret_val |= 0x4;
-                DEBUG_HW(CPLD_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
+                DEBUG_HW(CPLDBTN_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
                 break;
             case CPLD_START+CPLD_PORT_OFFSET+0x700:
                 BTN_FCT(btn_var[2],0x1)
                 BTN_FCT(btn_var[3],0x2)
                 BTN_FCT(btn_var[4],0x4)
-                DEBUG_HW(CPLD_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
+                DEBUG_HW(CPLDBTN_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
                 break;
             case CPLD_START+CPLD_PORT_OFFSET+0x780:
                 BTN_FCT(btn_var[5],0x1)
                 BTN_FCT(btn_var[6],0x2)
                 BTN_FCT(btn_var[7],0x4)
-                DEBUG_HW(CPLD_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
+                DEBUG_HW(CPLDBTN_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
                 break;
             default:
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD - read ERROR ukn addr: @0x%08x, size %x\n",addr,size);
@@ -180,7 +180,7 @@ void HW_cpld::write(uint32_t addr,uint32_t val,int size)
             case CPLD_START+CPLD_PORT_OFFSET+0x680:
             case CPLD_START+CPLD_PORT_OFFSET+0x700:
             case CPLD_START+CPLD_PORT_OFFSET+0x780:
-                DEBUG_HW(CPLD_HW_DEBUG,"CPLD - !!!! write buttons (@0x%08x), size %x\n",addr,size);
+                DEBUG_HW(CPLDBTN_HW_DEBUG,"CPLD - !!!! write buttons (@0x%08x), size %x\n",addr,size);
                 break;
             default:
                 DEBUG_HW(CPLD_HW_DEBUG,"CPLD - write ERROR ukn addr: @0x%08x, size %x\n",addr,size);
@@ -211,6 +211,11 @@ void HW_cpld::init_ata(void)
 void HW_cpld::setStatus(int status)
 {
     this->status=status;
+}
+
+void HW_cpld::setModule(int module)
+{
+    this->cpld_module_type=module;
 }
 
 uint32_t HW_cpld::ata_read(uint32_t addr,int size)

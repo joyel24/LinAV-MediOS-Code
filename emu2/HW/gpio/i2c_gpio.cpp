@@ -21,7 +21,7 @@
 #include <i2c_TSC.h>
 #include <i2c_MAS.h>
 #include <i2c_RTC.h>
-
+#include <i2c_DVR.h>
 
 #define CL_OLD_HI  (clk->old_state)
 #define CL_HI      (clk->new_state)
@@ -122,6 +122,7 @@ i2c_master::i2c_master(HW_gpio * gpio)
     register_i2c((i2c_device *)new i2c_MAS(gpio));
     register_i2c((i2c_device *)new i2c_RTC(gpio));
     register_i2c((i2c_device *)new i2c_TSC(gpio));
+    register_i2c((i2c_device *)new i2c_DVR(gpio));
     
     print_i2c_list();
     
@@ -243,7 +244,10 @@ void i2c_master::i2c_state_has_changed(void)
                             cur_device->start(address&0x1);
                         }
                         else
-                            DEBUG_HW(I2C2_HW_DEBUG," no devcice found\n",cur_device->name);
+                        {
+                            DEBUG_HW(I2C2_HW_DEBUG," no devcice found\n");
+                            
+                        }
                         clock = 0;
                         step = GET_DATA;
                         sav_val = val = 0;

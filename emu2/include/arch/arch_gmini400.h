@@ -77,6 +77,10 @@
 #define UART1_START   TI_REG_START+0x380
 #define UART1_END     TI_REG_START+0x390
 
+/********************** WDT   ****************************************/
+#define WDT_START   TI_REG_START+0x400
+#define WDT_END     TI_REG_START+0x406
+
 /********************** IRQ      ****************************************/
 #define IRQ_START   TI_REG_START+0x500
 #define IRQ_END     TI_REG_START+0x57f

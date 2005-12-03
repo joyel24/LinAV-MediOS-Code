@@ -7,7 +7,7 @@ OBJS = $(SRC:%.cpp=%.o)
 
 TARGET = emu
 
-SUBDIRS = CPU HW cmd_line
+SUBDIRS = CPU HW cmd_line ext_HW
 
 all: builddir subdirs $(TARGET)
 

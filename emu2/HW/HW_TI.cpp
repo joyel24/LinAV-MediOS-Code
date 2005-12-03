@@ -21,6 +21,7 @@
 #include <HW_clock.h>
 #include <HW_gpio.h>
 #include <HW_timer.h>
+#include <HW_wdt.h>
 #include <i2c_gpio.h>
 
 
@@ -70,6 +71,8 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_node(TI_REG
         timer_list[i]=new HW_timer(i,HW_irq);
         add_item(timer_list[i]);
     }
+    
+    add_item(new HW_wdt(HW_irq));
     
     add_item(new HW_TI_ver());
     add_item(new HW_ECR());

@@ -234,7 +234,7 @@ void HW_lcd::drawPix(uint32_t addr,uint32_t val)
 {
     int i,j;
     
-    //addr >>= 1;
+    addr >>= 1;
     i=(addr%SCREEN_WIDTH);
     j=addr/SCREEN_WIDTH;
     XSetForeground(display, gc, colorTab[val&0xFF]);

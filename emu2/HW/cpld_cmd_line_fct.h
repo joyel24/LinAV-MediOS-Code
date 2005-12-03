@@ -56,6 +56,17 @@ int do_cmd_btn_on_s(int argc,char ** argv)
     return cpld_obj->do_cmd_btn(BTN_ON);
 }
 
+int do_cmd_ch_module_s(int argc,char ** argv) 
+{
+    if(argc>0)
+    {
+        int num = my_atoi(argv[0]);
+        cpld_obj->setModule(num&0xF);
+    }
+    return 0;
+}
+
+
 int do_cmd_btn_off_s(int argc,char ** argv) 
 { 
     return cpld_obj->do_cmd_btn(BTN_OFF);
@@ -92,5 +103,6 @@ void init_cpld_static_fct(HW_cpld * cpld)
     add_cmd_fct("f3",do_cmd_btn_f3_s,"Emulate btn F3 press");
     add_cmd_fct("joy",do_cmd_btn_joy_s,"Emulate btn JOY press");
     add_cmd_fct("on",do_cmd_btn_on_s,"Emulate btn ON press");
-    add_cmd_fct("off",do_cmd_btn_off_s,"Emulate btn OFF press");   
+    add_cmd_fct("off",do_cmd_btn_off_s,"Emulate btn OFF press");  
+    add_cmd_fct("ch_module",do_cmd_ch_module_s,"Change the module type (0xF) => no module");  
 }

@@ -80,6 +80,7 @@ class HW_cpld:public HW_access {
         void setONOFF(HW_gpio * gpio);
         
         void setStatus(int status);
+        void setModule(int module);
         
         void write_buffer(char * data,int data_size);
         

@@ -74,6 +74,8 @@ extern void (*cur_irq_fct)(void);
 #define ECR_HW_DEBUG    (0x1<< 16)
 #define OSD_HW_DEBUG    (0x1<< 17)
 #define IRQ_HW_DEBUG    (0x1<< 18)
+#define CPLDBTN_HW_DEBUG (0x1<< 19)
+#define DVR_HW_DEBUG    (0x1<< 20)
 
 #define DEBUG_MODE
 #define DEBUG_MODE_HW
