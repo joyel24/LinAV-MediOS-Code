@@ -1,5 +1,5 @@
 /* 
-*   include/kernel/target/arch_AV3XX/irqs.h
+*   include/kernel/ir_remote.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,17 +10,22 @@
 * KIND, either express of implied.
 */
 
+#ifndef __IR_REMOTE_H
+#define __IR_REMOTE_H
 
-#ifndef __IRQS_ARCH_H
-#define __IRQS_ARCH_H
 
-#define NR_IRQS              32
+void ir_remote_interrupt(int irq);
+void ir_remote_tmr_interrupt(int irq);
+void restartTimer(void);
 
-#define IRQ_IDE              15  // ide
+int  ir_set(void);
 
-#define IRQ_BTN_ON           18  // GIO0
+void processCode(int code);
 
-#define IRQ_MAS_DATA         22  // GIO4
-#define IRQ_IR               24  // GIO6
+void init_ir_remote(void);
+void start_ir_remote(void);
+void stop_ir_remote(void);
+
+
 
 #endif

@@ -27,18 +27,18 @@
 #define CPLD_SEL_CF            0x1
 
 #define CPLD_FW_EXT            0x1
-#define CPLD_IR                0x2
+#define CPLD_DVR               0x2
 
 /* PORT 1*/
 #define CPLD_USB               0x0
 
 /* PORT 2*/
-#define CPLD2_IR               0x1
+#define CPLD2_DVR              0x1
 #define CPLD_LCD               0x2
 
 /* PORT 3*/
 #define CPLD_FM                0x0
-#define CPLD3_IR               0x1
+#define CPLD3_DVR              0x1
 #define CPLD_HD_POWER          0x3
 
 #endif

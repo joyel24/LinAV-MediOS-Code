@@ -1,5 +1,5 @@
 /* 
-*   include/kernel/target/arch_AV3XX/irqs.h
+*   include/kernel/dvr_module.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,17 +10,9 @@
 * KIND, either express of implied.
 */
 
+#ifndef __DVR_MODULE_H
+#define __DVR_MODULE_H
 
-#ifndef __IRQS_ARCH_H
-#define __IRQS_ARCH_H
-
-#define NR_IRQS              32
-
-#define IRQ_IDE              15  // ide
-
-#define IRQ_BTN_ON           18  // GIO0
-
-#define IRQ_MAS_DATA         22  // GIO4
-#define IRQ_IR               24  // GIO6
+void init_dvr_module(void);
 
 #endif

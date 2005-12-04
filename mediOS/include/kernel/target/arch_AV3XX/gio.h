@@ -20,7 +20,7 @@
 #define GIO_SPDIF     0x01
 #define GIO_VID_OUT   0x1D
 
-#define GIO_DVR_IR    0x06
+#define GIO_IR        0x06
 
 #define GIO_MAS_EOD   0x04
 #define GIO_MAS_D0    0x08

@@ -26,6 +26,10 @@
 #define BUTTON_FM_NEXT       0x0010
 #define BUTTON_FM_PLAY       0x0011
 
+#define MAX_PING      3
+#define MAX_NON_GET   5
+#define NB_KEY        8
+
 /********************************************* user functions */
 
 /* remote FM icons */
@@ -98,6 +102,30 @@ void FM_do_turn_on_mic(void);
 void FM_do_turn_off_mic(void);
 
 /***************************************** end user functions */
+
+/*****************************************    timer functions */
+
+extern int FM_connected;
+extern int nbPingSend;
+extern int inHold;
+
+#define FM_REMOTE_CHK {               \
+    if(FM_connected)                  \
+    {                                 \
+        nbPingSend++;                 \
+        if(nbPingSend>MAX_PING)       \
+        {                             \
+            FM_connected=0;           \
+            nbPingSend=0;             \
+            inHold=0;                 \
+            printk("[FM Remote] disconnected\n"); \
+        }                             \
+        uartOut('v',UART_1);          \
+    }                                 \
+}
+
+
+/**************************************** end timer functions */
 
 /****************************************** private functions */
 

@@ -44,11 +44,6 @@
 #define TIMER_TRG                         0x00000008
 #define TIMER_CNT                         0x0000000a
 
-#define TIMER0_MODE                       (TIMER0_BASE+TIMER_MODE)
-#define TIMER1_MODE                       (TIMER0_BASE+TIMER_MODE)
-#define TIMER2_MODE                       (TIMER0_BASE+TIMER_MODE)
-#define TIMER3_MODE                       (TIMER0_BASE+TIMER_MODE)
-
 #define TMR_MODE_STOP                     0x0000
 #define TMR_MODE_ONESHOT                  0x0001
 #define TMR_MODE_FREERUN                  0x0002
