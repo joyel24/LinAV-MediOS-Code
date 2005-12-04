@@ -22,6 +22,7 @@
 #include <kernel/timer.h>
 #include <kernel/uart.h>
 #include <kernel/ata.h>
+#include <kernel/ir_remote.h>
 
 __IRAM_DATA struct irq_data_s irq_table[] = {
     {
@@ -51,11 +52,37 @@ __IRAM_DATA struct irq_data_s irq_table[] = {
         nb_irq  : 0
     },
     {
+        irq     : IRQ_TMR_1,
+        action  : NULL,
+        name    : "timer1",
+        nb_irq  : 0
+    },
+    {
+        irq     : IRQ_TMR_2,
+        action  : NULL,
+        name    : "timer2",
+        nb_irq  : 0
+    },
+    {
+        irq     : IRQ_TMR_3,
+        action  : NULL,
+        name    : "timer3",
+        nb_irq  : 0
+    },
+    {
         irq     : IRQ_IDE,
         action  : ide_intr_action,
         name    : "IDE intr",
         nb_irq  : 0
     },
+#ifdef HAVE_DVR
+    {
+        irq     : IRQ_IR,
+        action  : ir_remote_interrupt,
+        name    : "IR remote",
+        nb_irq  : 0
+    },
+#endif
     {
         irq     : -1,
         action  : NULL,

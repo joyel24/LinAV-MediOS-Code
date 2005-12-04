@@ -22,10 +22,13 @@
 #include <kernel/bat_power.h>
 #include <kernel/usb_fw.h>
 #include <kernel/ext_module.h>
+#include <kernel/fm_remote.h>
 
 unsigned long tick __IRAM_DATA;
 
 struct timer_s * timer_head __IRAM_DATA;
+
+
 
 __IRAM_CODE void main_timer_action(int irq)
 {
@@ -43,8 +46,11 @@ __IRAM_CODE void main_timer_action(int irq)
 #endif
 #ifdef HAVE_EXT_MODULE
     EXT_MODULE_CHK;    
+#endif   
+#ifdef HAVE_FM_REMOTE
+    FM_REMOTE_CHK;    
 #endif
-   
+
     while(ptr!=NULL)
     {
         if(ptr->trigger && ptr->expires<=tick)
@@ -101,11 +107,11 @@ void init_timer(void)
     tick=0;
     
     /* disable all timer */
-    outw(TMR_MODE_STOP, TIMER0_BASE+TIMER_MODE);
-    outw(TMR_MODE_STOP, TIMER1_BASE+TIMER_MODE);
-    outw(TMR_MODE_STOP, TIMER2_BASE+TIMER_MODE);
-    outw(TMR_MODE_STOP, TIMER3_BASE+TIMER_MODE);
-    
+    SET_TIMER_MODE(TMR_MODE_STOP,TMR0);
+    SET_TIMER_MODE(TMR_MODE_STOP,TMR1);
+    SET_TIMER_MODE(TMR_MODE_STOP,TMR2);
+    SET_TIMER_MODE(TMR_MODE_STOP,TMR3);
+        
     arch_init_timer();
     
     printk("[init] timer\n");

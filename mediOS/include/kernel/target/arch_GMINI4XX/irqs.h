@@ -20,6 +20,6 @@
 #define IRQ_BTN_ON           18  // GIO0
 
 #define IRQ_MAS_DATA         22  // GIO4
-#define IRQ_IR_DVR           24  // GIO6
+#define IRQ_IR               24  // GIO6
 
 #endif

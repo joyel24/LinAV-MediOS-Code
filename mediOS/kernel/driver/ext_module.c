@@ -18,7 +18,7 @@
 
 #include <kernel/kernel.h>
 #include <kernel/usb_fw.h>
-//#include <fm_remote.h>
+#include <kernel/fm_remote.h>
 
 #include <kernel/ext_module.h>
 
@@ -66,15 +66,21 @@ struct module_actions *actions_array[NB_EXT_MODULES];
 
 void process_ext_mod_chg(int res)
 {
-    /*if(!FM_is_connected() && !FWIsConnected())
-    {*/
+    if( 1 
+#ifdef HAVE_FM_REMOTE   
+    && !FM_is_connected()
+#endif
+#ifdef HAVE_USB_FW
+     && !FWIsConnected()
+#endif
+    )
+    {
             if(res==AV_MODULE_NONE)
                 do_mod_disconnect(connected_module);
             else
                 do_mod_connect(res);
-            connected_module=res;
-     
-    /*}
+            connected_module=res;   
+    }
     else
     {
         if(connected_module!=AV_MODULE_NONE)
@@ -82,7 +88,7 @@ void process_ext_mod_chg(int res)
             do_mod_disconnect(connected_module);
             connected_module=AV_MODULE_NONE;
         }
-    }*/
+    }
 }
 
 int get_connected_module(void)
@@ -146,14 +152,21 @@ void init_ext_module(void)
     connected_module=0;
     for(i=0;i<NB_EXT_MODULES;i++)
         actions_array[i]=NULL;
-    
-    /*if(!FM_is_connected() && !FWIsConnected())
-    {*/
+        
+    if( 1 
+#ifdef HAVE_FM_REMOTE   
+    && !FM_is_connected()
+#endif
+#ifdef HAVE_USB_FW
+     && !FWIsConnected()
+#endif
+    )
+    {
         connected_module=get_module();        
-    /*}
+    }
     else
         connected_module=AV_MODULE_NONE;
-    */
+
         
     printk("[init] external module (connected: %s)\n",module_name[connected_module]); 
 }

@@ -25,6 +25,10 @@ ifeq ($(HAVE_USB_FW),1)
 	OBJS += usb_fw.o
 endif
 
+ifeq ($(HAVE_DVR),1)
+	OBJS += dvr_module.o ir_remote.o
+endif
+
 all: $(OBJS)
 	@cp -f $(OBJS) ../build
 

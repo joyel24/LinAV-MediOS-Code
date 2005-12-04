@@ -49,8 +49,10 @@ clr_bss_loop:
     bx     lr
 
 /* Gmini400: reload the firmware */
+.ifdef GMINI4XX
     ldr r0,=0x900000
     bx r0
+.endif
 
 __kernel_start_ptr:    .word kernel_start
 __real_iram_start_ptr: .word _real_iram_start

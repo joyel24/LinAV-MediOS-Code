@@ -84,7 +84,8 @@ __IRAM_CODE void do_IRQ(void)
         {              
             irq_table[i].nb_irq++;
             irq_ack(irq);
-            irq_table[i].action(irq);
+            if(irq_table[i].action)
+                irq_table[i].action(irq);
             break;
         }
     }

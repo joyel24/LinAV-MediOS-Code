@@ -27,7 +27,7 @@
 #define GIO_SPDIF     0xff
 #define GIO_VID_OUT   0xff
 
-#define GIO_DVR_IR    0xff
+#define GIO_IR        0xff
 
 #define GIO_LCD_BACKLIGHT 0xFF
 

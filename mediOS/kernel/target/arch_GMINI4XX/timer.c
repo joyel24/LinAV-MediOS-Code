@@ -26,16 +26,17 @@ void arch_init_timer(void)
     *  freq need to be 100Hz
     */
 
-    outw(TMR_SEL_EXT, TIMER0_BASE+TIMER_SEL);
+    SET_TIMER_SEL(TMR_SEL_EXT,TMR0);
 
     /* prescale  */
-    outw(9, TIMER0_BASE+TIMER_SCAL);
+    
+    SET_TIMER_SCAL(9, TMR0);
 
     /* div  */
-    outw((CONFIG_EXT_CLK/1000)-1, TIMER0_BASE+TIMER_DIV);
+    SET_TIMER_DIV(((CONFIG_ARM_CLK/1000)-1), TMR0);
 
     /* freerun */
-    outw(TMR_MODE_FREERUN, TIMER0_BASE+TIMER_MODE);
+    SET_TIMER_MODE(TMR_MODE_FREERUN, TMR0);
 
     /* enable timer irq */
     enable_irq(IRQ_TMR_0);
@@ -45,16 +46,16 @@ void arch_init_timer(void)
     * Sends FIQ at 2khz
     */
 
-    outw(TMR_SEL_EXT, TIMER3_BASE+TIMER_SEL);
+    SET_TIMER_SEL(TMR_SEL_EXT,TMR3);
 
     /* prescale  */
-    outw(0, TIMER3_BASE+TIMER_SCAL);
+    SET_TIMER_SCAL(0, TMR3);
 
     /* div  */
-    outw((CONFIG_EXT_CLK/2000)-1, TIMER3_BASE+TIMER_DIV);
+    SET_TIMER_DIV(((CONFIG_EXT_CLK/2000)-1), TMR3);
 
     /* freerun */
-    outw(TMR_MODE_FREERUN, TIMER3_BASE+TIMER_MODE);
+    SET_TIMER_MODE(TMR_MODE_FREERUN, TMR3);
 
 }
 

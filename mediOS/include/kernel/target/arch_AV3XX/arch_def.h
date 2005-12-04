@@ -85,7 +85,7 @@
 #define WDT_RESET                         (WDT_BASE + 0x0002)
 #define WDT_SCAL                          (WDT_BASE + 0x0004)
 #define WDT_DIV                           (WDT_BASE + 0x0006)
-#define WDT_EXT_RESET                     (WDT_BASE + 0x0008)
+//#define WDT_EXT_RESET                     (WDT_BASE + 0x0008)
 
 #define WDT_MODE_ARM_RESET                0x0004
 #define WDT_MODE_ENABLED                  0x0001

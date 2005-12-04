@@ -1,7 +1,7 @@
 /*
-*   kernel/ti_wdt.c
+*   kernel/core/ti_wdt.c
 *
-*   AMOS project
+*   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -21,7 +21,7 @@
 void init_wdt(void)
 {
   stop_wdt();
-
+  arch_init_wdt();
   printk("[init] TI watchdog timer\n");
 }
 
@@ -31,7 +31,8 @@ void setup_wdt(int prescaler,int divider,bool doreset)
   outw(divider,WDT_DIV);
 
   outw(( inw(WDT_MODE)&(~WDT_MODE_ARM_RESET) ) | ( (doreset)?WDT_MODE_ARM_RESET:0 ),WDT_MODE);
-  outw(( inw(WDT_EXT_RESET)&(~WDT_EXTRST_ARM_RESET) ) | ( (doreset)?WDT_EXTRST_ARM_RESET:0 ),WDT_EXT_RESET);
+  //WDT_EXT_RESET does not exist in DSC25
+  //outw(( inw(WDT_EXT_RESET)&(~WDT_EXTRST_ARM_RESET) ) | ( (doreset)?WDT_EXTRST_ARM_RESET:0 ),WDT_EXT_RESET);
 }
 
 void stop_wdt(void)

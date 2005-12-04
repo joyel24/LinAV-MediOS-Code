@@ -51,6 +51,24 @@ __IRAM_DATA struct irq_data_s irq_table[] = {
         nb_irq  : 0
     },
     {
+        irq     : IRQ_TMR_1,
+        action  : NULL,
+        name    : "timer1",
+        nb_irq  : 0
+    },
+    {
+        irq     : IRQ_TMR_2,
+        action  : NULL,
+        name    : "timer2",
+        nb_irq  : 0
+    },
+    {
+        irq     : IRQ_TMR_3,
+        action  : NULL,
+        name    : "timer3",
+        nb_irq  : 0
+    },    
+    {
         irq     : IRQ_IDE,
         action  : ide_intr_action,
         name    : "IDE intr",

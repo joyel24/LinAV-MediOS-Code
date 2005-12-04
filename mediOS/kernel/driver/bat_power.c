@@ -22,6 +22,7 @@
 #include <kernel/ata.h>
 #include <kernel/evt.h>
 #include <kernel/disk.h>
+#include <kernel/fm_remote.h>
 
 #include <kernel/bat_power.h>
 
@@ -81,8 +82,10 @@ void lcd_timer_action(void)
     if(lcd_timer_used[num])
     {
         lcd_off();
-/*        if(FM_is_connected())
-            FM_lightsOFF();        */
+#ifdef HAVE_FM_REMOTE        
+        if(FM_is_connected())
+            FM_lightsOFF();
+#endif
     }
 }
 
@@ -112,8 +115,10 @@ void lcd_keyPress(void)
     if(lcd_timer_used[num])
     {
         lcd_on();
-/*        if(FM_is_connected())
-            FM_lightsON();*/
+#ifdef HAVE_FM_REMOTE
+        if(FM_is_connected())
+            FM_lightsON();
+#endif
         lcd_launchTimer();        
     }
 }

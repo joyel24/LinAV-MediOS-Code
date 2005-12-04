@@ -9,7 +9,7 @@
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
 */
-
+#include <kernel/kernel.h>
 #include <sys_def/string.h>
 #include <api.h>
 //#include <file.h>

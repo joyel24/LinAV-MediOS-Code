@@ -1,7 +1,7 @@
 /* 
 *   kernel/driver/fm_remote.c
 *
-*   AMOS project
+*   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -26,16 +26,13 @@
 
 #include <kernel/fm_remote.h>
 
-#define MAX_PING      3
-#define MAX_NON_GET   5
-#define NB_KEY        8
+
 
 #define INI_TXT       "--mediOS--"
 
 int FM_connected=0;
 int nbPingSend=0;
 int nbNonGet=0;
-int c;
 int nbPongGet=0,minPongGet=0xFFFF;
 char cmd=0;
 char radio_param[5];
@@ -95,9 +92,11 @@ void fm_remote_INT(int irq_num)
             {
                 case 0xf8:
                     FM_connected=0;
+                    nbPingSend=0;
                     break;
                 case 'V':
                     cmd=3;
+                    nbPingSend=0;
                     break;
                 case 'K':
                     cmd=1;
@@ -114,7 +113,7 @@ void fm_remote_INT(int irq_num)
                         case 1:
                             if(c!=0)
                             {
-                                printk("[FM Remote] get key cmd: %x\n",c);
+                                //printk("[FM Remote] get key cmd: %x\n",c);
                                 processKey(c);
                             }
                             cmd=0;
@@ -159,6 +158,8 @@ void fm_remote_INT(int irq_num)
                     break;
                  case 'V':
                     FM_connected=1;
+                    nbPingSend=0;
+                    inHold=0;
                     FM_do_ini_call();
                     printk("[FM Remote] connected\n");
                     break;
@@ -181,6 +182,7 @@ void processKey(int key)
         inHold=~inHold;
         
         printk("[FM key] hold %s\n",inHold?"enable":"disable");
+        return;
     }
     
     for(i=0;i<NB_KEY;i++)
@@ -585,6 +587,7 @@ void FM_send_data(char cmd,char * data,int size)
 
 void init_fm_remote(void)
 {
+    char c;
     /* setting the gio and cpld */
     gio_dir(GIO_SPDIF,GIO_OUT);
     gio_dir(GIO_VID_OUT,GIO_OUT);
@@ -607,8 +610,10 @@ void init_fm_remote(void)
     FM_put_iniTxt();    
     contrast=0x00;
     
-    //API_TASK_CREATE (FM_remote_thread, UART_1_Pipe, NULL);
-    chg_irq_handler(IRQ_UART1,fm_remote_INT);  
+    chg_irq_handler(IRQ_UART1,fm_remote_INT);
+    /* launch the INT handler once */
+    while(uartIn(&c,UART_1)) /*nothing*/;
+    //fm_remote_INT(IRQ_UART1);
     /* everything is ok */
     printk("[init] fm remote\n");
 }

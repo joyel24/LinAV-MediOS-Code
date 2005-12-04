@@ -39,6 +39,7 @@
 #include <kernel/disk.h>
 #include <kernel/fm_remote.h>
 #include <kernel/ext_module.h>
+#include <kernel/dvr_module.h>
 #include <kernel/sound.h>
 #include <kernel/cmd_line.h>
 #include <kernel/evt.h>
@@ -124,6 +125,9 @@ void kernel_start (void)
 #endif
 #ifdef HAVE_EXT_MODULE
     init_ext_module();
+#endif
+#ifdef HAVE_DVR
+    init_dvr_module();
 #endif
     init_disk();
 #ifdef HAVE_SOUND
