@@ -16,6 +16,7 @@
 #define RTC_DEVICE                        0xd0
 #define TSC_DEVICE                        0x90
 #define MAS_DEVICE                        0x3c
+#define DVR_DEVICE                        0x4a
 
 #define I2C_WRITE_DEVICE(val)                   (val & ~0x01)
 #define I2C_READ_DEVICE(val)                    (val | 0x01)

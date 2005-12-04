@@ -14,5 +14,6 @@
 #define __DVR_MODULE_H
 
 void init_dvr_module(void);
+int dvr_chip_version(void);
 
 #endif

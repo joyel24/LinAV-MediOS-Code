@@ -156,6 +156,7 @@ for(;;){
 #endif
     do_bkpt();
     
+       
     iniIcon();
     open_graphics();
     clearScreen(COLOR_WHITE);

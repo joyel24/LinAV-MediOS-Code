@@ -16,7 +16,9 @@
 #include <kernel/gio.h>
 #include <kernel/timer.h>
 #include <kernel/ir_remote.h>
+#include <kernel/bat_power.h>
 #include <evt.h>
+#include <kernel/evt.h>
 
 int state=0;
 int dataPos=0; // current pos in data
@@ -120,8 +122,16 @@ void processCode(int code)
             {
                 if(repeat_code >= 2)
                 {
-                    //av3xx_add_ext_event(IR_code[i][0]);
-                    printk("EVT: %x\n",IR_code[i][0]);
+                    if(lcd_get_state()==0)
+                    {
+                        /* the lcd is off => turn on and discard the event */
+                        lcd_keyPress();
+                        break;
+                    }
+                    else
+                        lcd_launchTimer(); /* postpone the lcd timer */
+                    halt_launchTimer(); /* postpone the poweroff timer */
+                    send_evt(IR_code[i][0]);                    
                     repeat_code=0;
                 }
                 else
@@ -181,7 +191,7 @@ void stop_ir_remote(void)
     SET_TIMER_MODE(TMR_MODE_STOP,TMR2);
     disable_irq(IRQ_IR); 
     disable_irq(IRQ_TMR_2);
-    printk("DVR disconnect done\n");
+    printk("IR remote stoped\n");
 }
 
 

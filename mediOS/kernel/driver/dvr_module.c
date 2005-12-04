@@ -14,10 +14,12 @@
 
 #include <kernel/cpld.h>
 #include <kernel/irq.h>
+#include <kernel/i2c.h>
 #include <kernel/timer.h>
 #include <kernel/ext_module.h>
 #include <kernel/ir_remote.h>
 
+#include <kernel/dvr_module.h>
 int init_done=0;
 
 void dvr_connected(void)
@@ -28,7 +30,7 @@ void dvr_connected(void)
         cpld_set_port_3(CPLD3_DVR);
         cpld_set_port_2(CPLD2_DVR);
         start_ir_remote();
-        printk("DVR connect done\n");
+        printk("DVR connect done (chip ver %x)\n",dvr_chip_version());
     }
     else
         printk("DVR can't do connect => wait for init\n");
@@ -69,3 +71,16 @@ void init_dvr_module(void)
        
     printk("[init] dvr module\n");
 }
+
+/* saa7113h chip code */
+
+int dvr_chip_version(void)
+{
+    char c;
+    i2c_read(DVR_DEVICE,0,&c,1);
+    /* this returns 0 while the char is egal to 3 
+    => is chip version in first half of byte?
+    => do we have to sawp each byte? */
+    return (int)((c>>4)&0xF);
+}
+

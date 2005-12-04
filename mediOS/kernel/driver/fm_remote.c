@@ -22,7 +22,8 @@
 #include <kernel/bat_power.h>
 #include <kernel/uart.h>
 #include <api.h>
-//#include <evt.h>
+#include <evt.h>
+#include <kernel/evt.h>
 
 #include <kernel/fm_remote.h>
 
@@ -199,8 +200,7 @@ void processKey(int key)
                 lcd_launchTimer(); /* postpone the lcd timer */
             halt_launchTimer(); /* postpone the poweroff timer */
              
-            //process_btn_evt(key_evt_array[i][0]);
-            printk("[FM] get key : %d\n",key_evt_array[i][0]);
+            send_evt(key_evt_array[i][0]);
         }
     }
     
