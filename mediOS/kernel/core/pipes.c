@@ -17,24 +17,23 @@
 
 __IRAM_CODE void kpipe_write  (PIPE* pPipe, void* _pData, unsigned long nBytes)
 {
-	if (!pPipe)
-		return;
-
-	int i;
-	unsigned char* pData = (unsigned char*)_pData;
-	for (i=0;i<nBytes;i++)
-	{
-		pPipe->buffer[pPipe->nSender ++] = pData[i];
-		pPipe->nSender &= PIPE_SIZE_MASK;
-	}
+    int i;
+    unsigned char* pData = (unsigned char*)_pData;
+    if(pPipe)
+        for (i=0;i<nBytes;i++)
+        {
+                pPipe->buffer[pPipe->nSender ++] = pData[i];
+                pPipe->nSender &= PIPE_SIZE_MASK;
+        }
 }
 
 __IRAM_CODE void kpipe_read  (PIPE* pPipe, void* _pData, unsigned long nBytes)
 {
-	unsigned char* pOut = (unsigned char*)_pData;
+    unsigned char* pOut = (unsigned char*)_pData;
+    if(pPipe)
         while (nBytes -- && pPipe->nReceiver != pPipe->nSender)
-	{
-		*pOut++ = pPipe->buffer[pPipe->nReceiver ++];
-		pPipe->nReceiver &= PIPE_SIZE_MASK;
-	};
+        {
+                *pOut++ = pPipe->buffer[pPipe->nReceiver ++];
+                pPipe->nReceiver &= PIPE_SIZE_MASK;
+        }
 }

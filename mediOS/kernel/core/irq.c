@@ -114,17 +114,6 @@ __IRAM_CODE void enable_irq(int irq)
     }
 }
 
-/*
-int irq_state(int irq)
-{
-    if(irq>=0 && irq<NR_IRQS)
-    {
-        return (irq_enabled(irq)!=0);
-    }
-    return 0;
-}
-*/
-
 __IRAM_CODE void chg_irq_handler(int irq_num,void(*fct)(int irq))
 {
     int i=0;

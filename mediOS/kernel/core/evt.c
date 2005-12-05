@@ -75,15 +75,8 @@ void do_send_evt(int evt)
     struct evt_pipes_s * ptr;
     unsigned char c=(unsigned char)evt;
     
-   /* if(evt!=0)
-        printk("get evt : %x |",evt);*/
-    
     for(ptr=head;ptr!=NULL;ptr=ptr->nxt)
-    {        
-        //printk("sending ");
         kpipe_write (&(ptr->evt_pipe), &c, 1);
-    }
-    //printk("\n");
 }
 
 void init_evt(void)
