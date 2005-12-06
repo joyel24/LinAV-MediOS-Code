@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/fs/ata.c
 *
 *   AMOS project
@@ -39,7 +39,7 @@ extern int hd_sleep_state;
 
 extern struct timer_s hd_timer;
 
-#define CALC_BASE(ADDR)     (((unsigned int)(ADDR))&0x00FFFFFF)
+#define CALC_BASE(ADDR)     (((unsigned int)(ADDR))-SDRAM_START)
 
 #define SELECT_DRIVE(DRIVE)   ({ \
     if(DRIVE==HD_DRIVE)         \
@@ -99,14 +99,14 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
 
     outb(av_cmd_array[ata_cmd->xfer_dir],IDE_COMMAND);
 
-    if(((unsigned int)(ata_cmd->data) < 0x03000000) && ata_cmd->use_dma==ATA_WITH_DMA)
+    if(((unsigned int)(ata_cmd->data) < SDRAM_START) && ata_cmd->use_dma==ATA_WITH_DMA)
     {
         printk("Destination buffer not in SDRAM => no DMA\n");    
         ata_cmd->use_dma=ATA_NO_DMA;
     }
 
     //ata_cmd->use_dma=ATA_NO_DMA;
-    
+
     for(i=0;i<ata_cmd->count;i++)
     {
         if(ata_waitForXfer()<0)
@@ -114,13 +114,13 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
 
         if(ata_cmd->use_dma==ATA_WITH_DMA)
         {
-            if( dma_running )
+            if( DMA_RUNNING )
             {
                 printk("Error dma is still running\n");    
                 return -1;
             }
 
-            if((unsigned int)(ata_cmd->data) < 0x03000000)
+            if((unsigned int)(ata_cmd->data) < SDRAM_START)
             {
                 printk("Error buffer not in SDRAM\n");    
                 return -2;
@@ -128,22 +128,22 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
            
             if(ata_cmd->xfer_dir==ATA_DO_READ)
             {
-                dma_set_src(0x10400000);
-                dma_set_dest((CALC_BASE(ata_cmd->data))+i*SECTOR_SIZE);
-                dma_set_size(SECTOR_SIZE);
-                dma_set_dev(DMA_ATA,DMA_SDRAM)
+                DMA_SET_SRC(DMA_ATA_ADDRESS);
+                DMA_SET_DEST((CALC_BASE(ata_cmd->data))+i*SECTOR_SIZE);
+                DMA_SET_SIZE(SECTOR_SIZE);
+                DMA_SET_DEV(DMA_ATA,DMA_SDRAM)
             }
             else
             {
-                dma_set_src((CALC_BASE(ata_cmd->data))+i*SECTOR_SIZE);
-                dma_set_dest(0x10400000);
-                dma_set_size(SECTOR_SIZE);
-                dma_set_dev(DMA_SDRAM,DMA_ATA)
+                DMA_SET_SRC((CALC_BASE(ata_cmd->data))+i*SECTOR_SIZE);
+                DMA_SET_DEST(DMA_ATA_ADDRESS);
+                DMA_SET_SIZE(SECTOR_SIZE);
+                DMA_SET_DEV(DMA_SDRAM,DMA_ATA)
             }
 
-            dma_start
+            DMA_START_TRANSFER;
 
-            while(dma_running) /*nothing*/;
+            while(DMA_RUNNING) /*nothing*/;
         }
         else
         {
@@ -171,21 +171,21 @@ void ata_RW_Data(void * buffer,int count,int direction,int use_dma)
     /* for testing */
     /*use_dma=ATA_NO_DMA;*/
     
-    if(((unsigned int)(buffer) < 0x03000000) && use_dma==ATA_WITH_DMA)
+    if(((unsigned int)(buffer) < SDRAM_START) && use_dma==ATA_WITH_DMA)
     {
-        printk("Destination buffer not in SDRAM => no DMA\n");    
+        printk("Destination buffer not in SDRAM => no DMA\n");
         use_dma=ATA_NO_DMA;
     }
     
     if(use_dma==ATA_WITH_DMA)
     {           
-        if( dma_running )
+        if( DMA_RUNNING )
         {
             printk("Error dma is still running\n");    
             return;
         }
         
-        if((unsigned int)(buffer) < 0x03000000)
+        if((unsigned int)(buffer) < SDRAM_START)
         {
             printk("Error dma is still running\n");    
             return;
@@ -195,22 +195,22 @@ void ata_RW_Data(void * buffer,int count,int direction,int use_dma)
         //printk("dma xfer: base=%08x (buffer=%08x)size=%x\n",base,(unsigned int)buffer,count);    
         if(direction==ATA_DO_READ)
         {
-            dma_set_src(0x10400000);
-            dma_set_dest(base);
-            dma_set_size(count);
-            dma_set_dev(DMA_ATA,DMA_SDRAM)
+            DMA_SET_SRC(DMA_ATA_ADDRESS);
+            DMA_SET_DEST(base);
+            DMA_SET_SIZE(count);
+            DMA_SET_DEV(DMA_ATA,DMA_SDRAM)
         }
         else
         {            
-            dma_set_src(base);
-            dma_set_dest(0x10400000);
-            dma_set_size(count);
-            dma_set_dev(DMA_SDRAM,DMA_ATA)
+            DMA_SET_SRC(base);
+            DMA_SET_DEST(DMA_ATA_ADDRESS);
+            DMA_SET_SIZE(count);
+            DMA_SET_DEV(DMA_SDRAM,DMA_ATA)
         }
         
-        dma_start
+        DMA_START_TRANSFER;
             
-        while(dma_running) /*nothing*/;
+        while(DMA_RUNNING) /*nothing*/;
     }
     else
     {
@@ -280,35 +280,14 @@ int ata_waitForReady(void)
             return 0;
     }
     return -1; /* if we are here => we have a timeout */
-}       
+}
 
 int ata_status(void)
 {
     return inb(IDE_CONTROL);
 }
-      
-void ata_powerUp_HD(void)
-{
-    cpld_set_port_3(CPLD_HD_POWER); /* powering up HD */
-    
-}
 
-void ata_powerDown_HD(void)
-{
-    cpld_clear_port_3(CPLD_HD_POWER);
-}        
-        
-void ata_select_HD(void)
-{
-    cpld_select(CPLD_HD_CF,CPLD_SEL_HD);
-}
-
-void ata_select_CF(void)
-{
-    cpld_select(CPLD_HD_CF,CPLD_SEL_CF);
-}
-
-#if 0              
+#if 0
 int ata_identify(char * buffer)
 {
     if(ata_waitForReady()<0)
@@ -319,8 +298,8 @@ int ata_identify(char * buffer)
     /* begin read */
     if(ata_waitForXfer()<0)
         return -2;
-    
-    ata_RW_Data(buffer,SECTOR_SIZE,ATA_DO_READ,ATA_NO_DMA);    
+
+    ata_RW_Data(buffer,SECTOR_SIZE,ATA_DO_READ,ATA_NO_DMA);
     return 0;
 }
 #else
@@ -328,9 +307,9 @@ int ata_identify(int drive,char * buffer)
 {
     ata_cmd_s * cmd=(ata_cmd_s*)malloc(sizeof(ata_cmd_s));
     int res;
-    
+
     cmd->drive=drive;
-    
+
     cmd->data=buffer;
     cmd->xfer_dir=ATA_DO_IDENT;
     res=ata_process_cmd(cmd);
@@ -339,15 +318,39 @@ int ata_identify(int drive,char * buffer)
 }
 #endif
 
+void ata_reset_HD(void)
+{
+  arch_ata_reset_HD();
+}
+
+void ata_powerUp_HD(void)
+{
+    arch_ata_powerUp_HD();
+}
+
+void ata_powerDown_HD(void)
+{
+    arch_ata_powerDown_HD();
+}
+
+void ata_select_HD(void)
+{
+    arch_ata_select_HD();
+}
+
+void ata_select_CF(void)
+{
+    arch_ata_select_CF();
+}
+
 void init_ata(void)
 {
-    outb(0x8,IDE_CONTROL);          /* enabling ints */
-    enable_irq(IRQ_IDE);
+    arch_init_ata();
 }
 
 void ide_intr_action(int irq)
 {
-    printk("get IDE irq: %d\n",irq);
+    arch_ide_intr_action(irq);
 }
 
 

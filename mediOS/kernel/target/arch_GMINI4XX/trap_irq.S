@@ -4,7 +4,7 @@ irq_reg2 = 0x3050C
 
 .section ".core"  
 
-.align	5
+@.align	5
 .global __irq_trap
 __irq_trap:
     sub     sp, sp, #72
@@ -24,5 +24,5 @@ __irq_svc1:
     msr     spsr, r0
     ldmia   sp, {r0 - pc}^			@ load r0 - pc, cpsr
 
-.align	5
+@.align	5
 .LCirq:		.word	__temp_irq      

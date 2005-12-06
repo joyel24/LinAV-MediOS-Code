@@ -4,7 +4,9 @@
 .global trap_fiq
 
 trap_fiq: @called every 500ns
+
   ldr     r9, =0x30500
+
   ldrh    r8, [r9]
   orr     r8, r8, #0x08
   strh    r8, [r9]        @set fiq 3 (timer 3)

@@ -9,18 +9,18 @@
 
 .section ".core"    
 
-.align 5
+@.align 5
 .global trap_undef
 trap_undef:
     stmfd  sp!,{lr}
     ldr    lr, __trap_undef_ptr
     bx     lr
     ldmfd  sp!,{lr}
-    movs   pc, lr    
-.align 5
+    movs   pc, lr
+@.align 5
 __trap_undef_ptr:  .word do_trap_undef
 
-.align	5
+@.align	5
 .global trap_swi
 trap_swi:
    @// Determine SWI code...
@@ -54,43 +54,43 @@ trap_swi:
 @    bx     lr
 @    ldmfd  sp!,{lr}
 @    movs   pc, lr
-.align 5
-__trap_swi_ptr:  .word do_trap_swi    
-    
-.align	5
+@.align 5
+__trap_swi_ptr:  .word do_trap_swi
+
+@.align	5
 .global trap_prefetch
 trap_prefetch:
     stmfd  sp!,{lr}
     ldr    lr, __trap_prefetch_ptr
     bx     lr
     ldmfd  sp!,{lr}
-    subs   pc, lr, #4    
-.align 5
+    subs   pc, lr, #4
+@.align 5
 __trap_prefetch_ptr:  .word do_trap_prefetch
-        
-.align	5
+
+@.align	5
 .global trap_data
 trap_data:
     stmfd  sp!,{lr}
     ldr    lr, __trap_data_ptr
     bx     lr
     ldmfd  sp!,{lr}
-    subs   pc, lr, #8    
-.align 5
+    subs   pc, lr, #8
+@.align 5
 __trap_data_ptr:  .word do_trap_data
-        
-.align	5
+
+@.align	5
 .global trap_addrexcptn
 trap_addrexcptn:
     stmfd  sp!,{lr}
     ldr    lr, __trap_addrexcptn_ptr
     bx     lr
 trap_addrexcptn_loop:
-    b      trap_addrexcptn_loop    
-.align 5
+    b      trap_addrexcptn_loop
+@.align 5
 __trap_addrexcptn_ptr:  .word do_trap_addrexcptn
 
-.align	8
+@.align	8
 .global trap_irq
 trap_irq:
     @
@@ -109,13 +109,13 @@ trap_irq:
     orr    r13, r13, #0x13      @ 0x1F for SYS_32,   0x13 for SVC_32
     orr    r13, r13, #0x80
     msr    spsr_c, r13          @ switch to correct mode
-    
+
     @and    lr, lr, #15
     ldr    lr, [pc]
     movs   pc, lr                @ Changes mode and branches
 __trap_irq_ptr:  .word __irq_trap
 
-.align 5
+@.align 5
 .LCsirq:	 .word __temp_irq
 
 .global __temp_irq

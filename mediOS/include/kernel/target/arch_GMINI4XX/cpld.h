@@ -20,7 +20,7 @@
 
 /* init values */
 
-#define CPLD_PORT0_INIT        0x0
+#define CPLD_PORT0_INIT        0xf
 #define CPLD_PORT1_INIT        0x7
 #define CPLD_PORT2_INIT        0x0
 #define CPLD_PORT3_INIT        0x0
@@ -29,9 +29,9 @@
 
 /* PORT 1*/
 
-#define CPLD_HD_POWER          0x1
-#define CPLD_HD_RESET          0x2
-#define CPLD_LCD_POWER         0x4
+#define CPLD_HD_POWER          0x0
+#define CPLD_HD_RESET          0x1
+#define CPLD_LCD_POWER         0x2
 
 /* PORT 2*/
 

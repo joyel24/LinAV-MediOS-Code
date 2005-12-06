@@ -15,7 +15,7 @@
 #include <kernel/hardware.h>
 #include <kernel/cpld.h>
 
-__IRAM_DATA int cpld_port_state[4]=
+int cpld_port_state[4]=
 {
     CPLD_PORT0_INIT,
     CPLD_PORT1_INIT,
@@ -23,7 +23,7 @@ __IRAM_DATA int cpld_port_state[4]=
     CPLD_PORT3_INIT,
 };
 
-__IRAM_DATA int cpld_port_array[4] = {
+int cpld_port_array[4] = {
     CPLD_PORT0,
     CPLD_PORT1,
     CPLD_PORT2,
@@ -45,10 +45,10 @@ void init_cpld(void)
     printk("[init] CPLD Ver:0x%x\n",version);
 }
 
-__IRAM_CODE void cpld_chg_state(int cpld_port,int bit_num,int direction)
+void cpld_chg_state(int cpld_port,int bit_num,int direction)
 {
     int tmp;
-    
+
     tmp=cpld_port_state[cpld_port];
     if(direction)
         tmp |= (0x1 << bit_num);
@@ -62,12 +62,12 @@ __IRAM_CODE void cpld_chg_state(int cpld_port,int bit_num,int direction)
     }
 }
 
-__IRAM_CODE int cpld_read(int cpld_port)
+int cpld_read(int cpld_port)
 {
     return inw(cpld_port_array[cpld_port]);
 }
 
-__IRAM_CODE void cpld_select(int bit_num,int direction)
+void cpld_select(int bit_num,int direction)
 {
     int val;
     if(direction)
@@ -81,8 +81,8 @@ __IRAM_CODE void cpld_select(int bit_num,int direction)
     }
 }
 
-__IRAM_CODE void cpld_do_select(void)
-{  
+void cpld_do_select(void)
+{
     int res,res2;
     printk("changing cpld select : %d\n",cpld_port_state[CPLD0]);
     outw(cpld_port_state[CPLD0],CPLD_PORT0);
@@ -90,7 +90,7 @@ __IRAM_CODE void cpld_do_select(void)
     outw(cpld_port_state[CPLD0],CPLD_PORT0);
     outw(cpld_port_state[CPLD0],CPLD_PORT0);
     outw(cpld_port_state[CPLD0],CPLD_PORT0);
-    
+
     res=inw(cpld_port_array[CPLD0]);
     while((res2=inw(cpld_port_array[CPLD0]))!=res) /* wait for the value to become stable */
         res=res2;

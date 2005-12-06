@@ -17,7 +17,7 @@
 #define MALLOC_START  ((((unsigned int)&_end_kernel) & 0xFFFFF000)+0x1000)
 #define MALLOC_SIZE   (SDRAM_END-MALLOC_START)
 
-#define CONFIG_ARM_CLK 54000000
+#define CONFIG_ARM_CLK 100000000
 #define CONFIG_EXT_CLK 27000000
 
 
@@ -105,7 +105,7 @@
 #define WDT_EXTRST_ARM_RESET              0x0001
 
 /* ide interface */
-#define IDE_BASE                          0x02400000
+#define IDE_BASE                          0x05100000
 
 #define IDE_DATA                          (IDE_BASE+0x020)
 #define IDE_ERROR                         (IDE_BASE+0x022)
@@ -124,7 +124,7 @@
 
 /* CPLD		*/
 
-#define CPLD_BASE                         0x02600000
+#define CPLD_BASE                         0x02500000
 
 #define CPLD_PORT0                        (CPLD_BASE+0x00)
 #define CPLD_PORT1                        (CPLD_BASE+0x02)

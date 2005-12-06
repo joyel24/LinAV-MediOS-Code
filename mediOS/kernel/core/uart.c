@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/core/uart.c
 *
 *   AMOS project
@@ -40,7 +40,7 @@ __IRAM_CODE void uart_intr_action(int irq)
     }
 }
 
-__IRAM_CODE int uartIn(unsigned char * data,int uartNum) 
+int uartIn(unsigned char * data,int uartNum)
 {
     if(inw(uartAdrr[uartNum]+UART_SR)&0x0004) /* check if something is in the reception buffer */
     {
@@ -51,16 +51,17 @@ __IRAM_CODE int uartIn(unsigned char * data,int uartNum)
         return 0;
 }
 
-__IRAM_CODE void uartOut(unsigned char data,int uartNum)
+void uartOut(unsigned char data,int uartNum)
 {
     while(!(inw(uartAdrr[uartNum]+UART_SR)&0x400)) /* Nothing */; /* using transmission buffer level */
     outw(data,uartAdrr[uartNum]+UART_DTRR);
 }
 
-__IRAM_CODE void uartOutString(unsigned char * data,int uartNum)
+void uartOutString(unsigned char * data,int uartNum)
 {
     while(*data)
     {
+        if (*data=='\n') uartOut('\r',uartNum); //gligli: uart fix
         uartOut(*data,uartNum);
         data++;
     }
@@ -68,15 +69,15 @@ __IRAM_CODE void uartOutString(unsigned char * data,int uartNum)
 
 void restore_uart_handler(int uartNum)
 {
-    chg_irq_handler(uartNum == 0?IRQ_UART0:IRQ_UART1,uart_intr_action);    
+    chg_irq_handler(uartNum == 0?IRQ_UART0:IRQ_UART1,uart_intr_action);
 }
 
 void init_uart(void)
 {
-        
+
     UART_0_Pipe=&UART_PIPES[0];
     UART_1_Pipe=&UART_PIPES[1];
-    
+
     UART_0_Pipe->nReceiver = 0;
     UART_0_Pipe->nSender   = 0;
     UART_1_Pipe->nReceiver = 0;

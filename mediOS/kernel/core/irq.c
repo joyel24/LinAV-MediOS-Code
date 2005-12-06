@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/irq.c
 *
 *   AMOS project
@@ -29,42 +29,42 @@ __IRAM_DATA int clf_var=0;
 
 extern struct irq_data_s irq_table[];
 
-__IRAM_CODE void sti(void)
+void sti(void)
 {
     pv_sti();
 }
 
-__IRAM_CODE void cli(void)
+void cli(void)
 {
     pv_cli();
 }
 
-__IRAM_CODE void stf(void)
+void stf(void)
 {
     pv_stf();
 }
 
-__IRAM_CODE void clf(void)
+void clf(void)
 {
     pv_clf();
 }
 
-__IRAM_CODE void __sti(void)
+void __sti(void)
 {
     __pv_sti();
 }
 
-__IRAM_CODE void __cli(void)
+void __cli(void)
 {
     __pv_cli();
 }
 
-__IRAM_CODE void __stf(void)
+void __stf(void)
 {
     __pv_stf();
 }
 
-__IRAM_CODE void __clf(void)
+void __clf(void)
 {
     __pv_clf();
 }
@@ -99,13 +99,13 @@ void init_irq(void)
     printk("[init] irq\n");    
 }
 
-__IRAM_CODE void disable_irq(int irq)
+void disable_irq(int irq)
 {
     if(irq>=0 && irq<NR_IRQS)
         mask_irq(irq);
 }
 
-__IRAM_CODE void enable_irq(int irq)
+void enable_irq(int irq)
 {
     if(irq>=0 && irq<NR_IRQS)
     {
@@ -114,7 +114,7 @@ __IRAM_CODE void enable_irq(int irq)
     }
 }
 
-__IRAM_CODE void chg_irq_handler(int irq_num,void(*fct)(int irq))
+void chg_irq_handler(int irq_num,void(*fct)(int irq))
 {
     int i=0;
     int is_enable=0;

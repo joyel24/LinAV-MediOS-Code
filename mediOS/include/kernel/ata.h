@@ -76,4 +76,12 @@ void ata_stop_HD       (void);
 void init_ata          (void);
 void ide_intr_action   (int irq);
 
+void arch_ata_reset_HD(void);
+void arch_ata_powerUp_HD(void);
+void arch_ata_powerDown_HD(void);
+void arch_ata_select_HD(void);
+void arch_ata_select_CF(void);
+void arch_init_ata(void);
+void arch_ide_intr_action(int irq);
+
 #endif

@@ -18,4 +18,6 @@ void setup_wdt(int prescaler,int divider,bool doreset);
 void stop_wdt(void);
 void start_wdt(void);
 
+void arch_init_wdt(void);
+
 #endif

@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/gfx/graphics.c
 *
 *   AMOS project

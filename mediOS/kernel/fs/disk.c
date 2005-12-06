@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/fs/disk.c
 *
 *   AMOS project
@@ -63,7 +63,8 @@ void init_disk(void)
 {
     int nb_mounted=0;
     
-       
+    init_ata();
+
     /* init   the file/dir struct */
     init_file();
     init_dir();
@@ -119,7 +120,7 @@ struct partition_info * setup_disk(int drive)
         return NULL; /* out of space in table */
     
     if(!sector)
-        return NULL;            
+        return NULL;
     /* identify disk */
     identify_disk(drive,&disk_info[drive]);
     printk("[init IDE-CF] reading drive %d\n     %s\n     %s|%s\n     %d sectors per ata request\n",drive,disk_info[drive].model,

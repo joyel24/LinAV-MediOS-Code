@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/core/pipes.c
 *
 *   MediOS project
@@ -15,7 +15,7 @@
 #include <kernel/kernel.h>
 #include <kernel/pipes.h>
 
-__IRAM_CODE void kpipe_write  (PIPE* pPipe, void* _pData, unsigned long nBytes)
+void kpipe_write  (PIPE* pPipe, void* _pData, unsigned long nBytes)
 {
     int i;
     unsigned char* pData = (unsigned char*)_pData;
@@ -27,7 +27,7 @@ __IRAM_CODE void kpipe_write  (PIPE* pPipe, void* _pData, unsigned long nBytes)
         }
 }
 
-__IRAM_CODE void kpipe_read  (PIPE* pPipe, void* _pData, unsigned long nBytes)
+void kpipe_read  (PIPE* pPipe, void* _pData, unsigned long nBytes)
 {
     unsigned char* pOut = (unsigned char*)_pData;
     if(pPipe)

@@ -20,7 +20,6 @@
 
 void arch_init_wdt(void)
 {
-  
 }
 
 

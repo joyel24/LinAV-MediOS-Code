@@ -76,6 +76,7 @@ void kernel_start (void)
 #ifdef USE_DEBUG_ON_SCREEN
     ini_debugOnScreen();
 #endif
+
     /* malloc of max space in SDRAM */
     init_malloc((void*)MALLOC_START,MALLOC_SIZE);
 
@@ -110,9 +111,7 @@ void kernel_start (void)
 #ifdef HAVE_EVT
     init_evt();
 #endif
-
     init_buttons();
-
 #ifdef HAVE_BAT_POWER
     init_power();
 #endif
@@ -133,7 +132,15 @@ void kernel_start (void)
 #ifdef HAVE_SOUND
     init_sound();
 #endif
-/* gligli
+/*
+  int f;
+  char s[255];
+  memset(s,'\0',255);
+  f=fopen("/toto.txt",O_RDONLY);
+  fread(f,s,255);
+  fclose(f);
+  printk("%s\n",s);
+
 for(;;){
   if(read_btn()&BTMASK_OFF) return;
 }
@@ -171,7 +178,7 @@ for(;;){
     */
     while(1)
         virtKbd(get_evt_pipe());
-    
+
     printk("[loop] back from test code\n");
     
     

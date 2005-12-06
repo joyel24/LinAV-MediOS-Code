@@ -33,7 +33,7 @@ void arch_init_timer(void)
     SET_TIMER_SCAL(9, TMR0);
 
     /* div  */
-    SET_TIMER_DIV(((CONFIG_ARM_CLK/1000)-1), TMR0);
+    SET_TIMER_DIV(((CONFIG_EXT_CLK/1000)-1), TMR0);
 
     /* freerun */
     SET_TIMER_MODE(TMR_MODE_FREERUN, TMR0);
