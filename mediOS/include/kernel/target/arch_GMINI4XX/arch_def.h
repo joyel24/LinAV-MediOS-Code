@@ -28,7 +28,6 @@
 
 /* DEBUG */
 #define DEBUG_UART                        UART_0
-#define DEBUG_UART_INIT
 
 #define USE_DEBUG_ON_SCREEN     1
 
@@ -153,15 +152,14 @@
 
 #define VIDEO_BASE                        0x30800
 #define LCD_BACK_LIGHT                    0x02600200
-#define VIDEO_LCD_VSYNC                   (VIDEO_BASE+0x2C)
-#define SCREEN_WIDTH      240
-#define SCREEN_REAL_WIDTH 220
-#define SCREEN_HEIGHT     176
+#define SCREEN_WIDTH                      256
+#define SCREEN_REAL_WIDTH                 220
+#define SCREEN_HEIGHT                     176
+#define SCREEN_ORIGIN_X                   8
+#define SCREEN_ORIGIN_Y                   8
 
-#define MAX_COL      53
-#define MAX_LINE     27
-
-#define LCD_INIT
+#define MAX_COL                           53
+#define MAX_LINE                          27
 
 /* osd */
 #define OSD_BASE                          0x30680

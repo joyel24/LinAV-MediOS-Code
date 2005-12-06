@@ -56,8 +56,8 @@ struct graphicsBuffer ERROR_SCR = {
     width              : SCREEN_WIDTH,
     real_width         : SCREEN_REAL_WIDTH,
     height             : SCREEN_HEIGHT,
-    x                  : 0x14,
-    y                  : 0x12,
+    x                  : SCREEN_ORIGIN_X,
+    y                  : SCREEN_ORIGIN_Y,
     bitsPerPixel       : 8,
 };
 #endif
@@ -70,8 +70,8 @@ struct graphicsBuffer BITMAP_1 = {
     width              : SCREEN_WIDTH,
     real_width         : SCREEN_REAL_WIDTH,
     height             : SCREEN_HEIGHT,
-    x                  : 0x14,
-    y                  : 0x12,
+    x                  : SCREEN_ORIGIN_X,
+    y                  : SCREEN_ORIGIN_Y,
     bitsPerPixel       : 8,   
 };
 
@@ -83,8 +83,8 @@ struct graphicsBuffer BITMAP_2 = {
     width              : SCREEN_WIDTH,
     real_width         : SCREEN_REAL_WIDTH,
     height             : SCREEN_HEIGHT,
-    x                  : 0x14,
-    y                  : 0x12,
+    x                  : SCREEN_ORIGIN_X,
+    y                  : SCREEN_ORIGIN_Y,
     bitsPerPixel       : 8,
 };        
 
@@ -95,8 +95,8 @@ struct graphicsBuffer VIDEO_1 = {
     width              : SCREEN_WIDTH,
     real_width         : SCREEN_REAL_WIDTH,
     height             : SCREEN_HEIGHT,
-    x                  : 0x14,
-    y                  : 0x12,
+    x                  : SCREEN_ORIGIN_X,
+    y                  : SCREEN_ORIGIN_Y,
     bitsPerPixel       : 32,
 };
 
@@ -107,8 +107,8 @@ struct graphicsBuffer VIDEO_2 = {
     width              : SCREEN_WIDTH,
     real_width         : SCREEN_REAL_WIDTH,
     height             : SCREEN_HEIGHT,
-    x                  : 0x14,
-    y                  : 0x12,
+    x                  : SCREEN_ORIGIN_X,
+    y                  : SCREEN_ORIGIN_Y,
     bitsPerPixel       : 32,
 };
 

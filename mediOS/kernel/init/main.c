@@ -68,9 +68,6 @@ char * test_string;
 
 void kernel_start (void)
 {
-    DEBUG_UART_INIT
-    LCD_INIT
-
     ini_graphics();
 
 #ifdef USE_DEBUG_ON_SCREEN
@@ -132,19 +129,7 @@ void kernel_start (void)
 #ifdef HAVE_SOUND
     init_sound();
 #endif
-/*
-  int f;
-  char s[255];
-  memset(s,'\0',255);
-  f=fopen("/toto.txt",O_RDONLY);
-  fread(f,s,255);
-  fclose(f);
-  printk("%s\n",s);
 
-for(;;){
-  if(read_btn()&BTMASK_OFF) return;
-}
-*/
     /* enable the IRQ */
     printk("[init] INT enabled\n");
     __sti();

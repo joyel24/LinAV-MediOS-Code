@@ -26,7 +26,6 @@
 
 /* DEBUG */
 #define DEBUG_UART              UART_0
-#define DEBUG_UART_INIT
 
 //#define USE_DEBUG_ON_SCREEN     1
 
@@ -144,11 +143,11 @@
 #define SCREEN_WIDTH                      320
 #define SCREEN_REAL_WIDTH                 320
 #define SCREEN_HEIGHT                     240
+#define SCREEN_ORIGIN_X                   20
+#define SCREEN_ORIGIN_Y                   18
 
-#define MAX_COL      78
-#define MAX_LINE     38
-
-#define LCD_INIT 
+#define MAX_COL                           78
+#define MAX_LINE                          38
 
 /* osd */
 #define OSD_BASE                          0x30680
