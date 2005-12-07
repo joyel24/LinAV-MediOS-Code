@@ -823,8 +823,8 @@ next:
 	}
 
 	clen <<= 1;
-	//div_advance(clen);
-	//timer_advance(clen);
+	div_advance(clen);
+	timer_advance(clen);
 	clen >>= cpu.speed;
 	lcdc_advance(clen);
 //	sound_advance(clen);

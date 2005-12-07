@@ -34,6 +34,7 @@ struct hw
 
 extern struct hw hw;
 
+__IRAM_CODE void hw_interrupt(byte i, byte mask);
 
 #endif
 

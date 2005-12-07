@@ -40,6 +40,8 @@ static int ver;
 static int sramblock, iramblock, vramblock;
 static int hramofs, hiofs, palofs, oamofs, wavofs;
 
+byte buf[4096];
+
 struct svar svars[] = 
 {
 	I4("GbSs", &ver),
@@ -155,20 +157,21 @@ struct svar svars[] =
 void loadstate(int fd)
 {
 	int i, j;
-	byte buf[4096];
+//	byte buf[4096];
+//	byte * buf;
+  //      buf=(byte *)bget(4096);
 	un32 (*header)[2] = (un32 (*)[2])buf;
 	un32 d;
 	int irl = hw.cgb ? 8 : 2;
 	int vrl = hw.cgb ? 4 : 2;
 	int srl = mbc.ramsize << 1;
-  size_t base_offset;
-
+  //size_t base_offset;
 	ver = hramofs = hiofs = palofs = oamofs = wavofs = 0;
 
   fseek(fd, 0, SEEK_SET);
   
 	fread(fd,buf, 4096);
-	
+
 	for (j = 0; header[j][0]; j++)
 	{
 		for (i = 0; svars[i].ptr; i++)
@@ -210,6 +213,7 @@ void loadstate(int fd)
 	
 	fseek(fd, (sramblock << 12), SEEK_SET);
 	fread(fd,ram.sbank, 4096*srl);
+     //   brel(buf);
         vram_dirty();
         pal_dirty();
         sound_dirty();
@@ -219,8 +223,10 @@ void loadstate(int fd)
 void savestate(int fd)
 {
 	int i;
-	byte buf[4096];
-	un32 (*header)[2] = (un32 (*)[2])buf;
+//	byte buf[4096];
+  //      byte * buf;
+  //      buf=(byte *)bget(4096);
+        un32 (*header)[2] = (un32 (*)[2])buf;
 	un32 d = 0;
 	int irl = hw.cgb ? 8 : 2;
 	int vrl = hw.cgb ? 4 : 2;
@@ -228,7 +234,8 @@ void savestate(int fd)
   //size_t base_offset;
 
 	ver = 0x105;
-	iramblock = 1;
+
+        iramblock = 1;
 	vramblock = 1+irl;
 	sramblock = 1+irl+vrl;
 	wavofs = 4096 - 784;
@@ -274,6 +281,7 @@ void savestate(int fd)
 	
 	fseek(fd, (sramblock << 12), SEEK_SET);
 	fwrite(fd,ram.sbank, 4096*srl);
+     //   brel(buf);
 }
 
 

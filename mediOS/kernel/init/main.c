@@ -148,6 +148,8 @@ void kernel_start (void)
 #endif
     do_bkpt();
     
+    while(1)
+        printk("%x\n",get_tick());
        
     iniIcon();
     open_graphics();

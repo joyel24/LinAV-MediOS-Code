@@ -96,7 +96,7 @@ void graphics8_FillRect(unsigned int color, int x, int y, int width, int height,
 void graphics8_DrawHLine(unsigned int color, int x, int y, int width, struct graphicsBuffer * buff)
 {
     unsigned char * offset=getOffset(x,y,buff,unsigned char);
-    printk("draw Hline start at: %x\n",offset);
+//    printk("draw Hline start at: %x\n",offset);
     graphics8_DrawHorizLine(color,width,offset);
 }
 
@@ -104,7 +104,7 @@ void graphics8_DrawVLine(unsigned int color, int x, int y, int height, struct gr
 {
     int i;
     unsigned char * offset=getOffset(x,y,buff,unsigned char);
-    printk("draw Vline start at: %x\n",offset);
+  //  printk("draw Vline start at: %x\n",offset);
     for(i=0;i<height;i++)
     {
         outb(color,offset);

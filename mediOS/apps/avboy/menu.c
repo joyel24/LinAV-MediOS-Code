@@ -1,27 +1,18 @@
 /*********************************************************************/
 /* menu.c - user menu for rockboy                                    */
 /*                                                                   */
-/* Note: this file only exposes one function: do_user_menu().        */
-/*                                                                   */
-/* Modified by CjNr11 27/11/2005                                     */
+/* Modified by CjNr11 07/12/2005                                     */
 /*********************************************************************/
 
-//#include <stdlib.h>"
-//#include "string.h"
-//#include "button.h"
-//#include "rockmacros.h"
-//#include <sys_def/string.h>
-#include <sys_def/types.h>
 #include <sys_def/ctype.h>
+#include <sys_def/string.h>
 #include "mem.h"
 #include <fs_io.h>
 #include <graphics.h>
-//#include <buttons.h>
-//#include "graph.h"
-//#include "types.h"
-#include <api.h>
-#include <evt.h>
+#include <kernel/malloc.h>
+#include <kernel/buttons.h>
 
+#include "avboy.h"
 
 #define getstringsize(a,b,c) getStringS(a,b,c)
 #define drawline(a,b,c,d,e) drawLine(e,a,b,c,d)
@@ -34,8 +25,6 @@
 #define OSD_BITMAP1_HEIGHT 144
 
 #define USER_MENU_QUIT -2
-
-#define NULL 0
 
 /* load/save state function declarations */
 static void do_slot_menu(bool is_load);
@@ -84,13 +73,13 @@ typedef enum {
  * Note: if you want more save slots, just add more lines 
  * to this array */
 static const char *slot_menu[] = {
-  "1.                 ",
-  "2.                 ",
-  "3.                 ",
-  "4.                 ",
-  "5.                 ",
+  "1.              ",
+  "2.              ",
+  "3.              ",
+  "4.              ",
+  "5.              ",
 //  "Save to File...    ",
-  "Previous Menu...   "
+  "Previous Menu..."
 };
 
 #define OPT_MENU_TITLE "Options"
@@ -122,7 +111,7 @@ int do_user_menu(void) {
   ret = 0; /* return value */
   mi = 0; /* initial menu selection */
   num_items = sizeof(main_menu) / sizeof(char*);
-  
+
   /* loop until we should exit menu */
   while (!done) {
     /* get item selection */
@@ -160,7 +149,7 @@ static void munge_name(char *buf, const size_t bufsiz) {
 
   /* check strlen */
   max = strlen(buf);
-  max = (max < bufsiz) ? max : bufsiz;
+  if(max > bufsiz) max =  bufsiz;
   
   /* iterate over characters and munge them (if necessary) */
   for (i = 0; i < max; i++)
@@ -175,15 +164,17 @@ static void munge_name(char *buf, const size_t bufsiz) {
  * checksum or something like that?
  */
 static void build_slot_path(char *buf, size_t bufsiz, size_t slot_id) {
-  char name_buf[40];
-
+ // char name_buf[40];
+  char *name_buf;
+  name_buf=(char *)bget(40);
   /* munge state file name */
-  strncpy(name_buf, rom.name, sizeof(name_buf));
+  strncpy(name_buf, rom.name,256); // sizeof(name_buf));
   name_buf[16] = '\0';
   munge_name(name_buf, strlen(name_buf));
 
   /* glom the whole mess together */
   snprintf(buf, bufsiz, "%s/%s-%d.avb", STATE_DIR, name_buf, slot_id + 1);
+  brel(name_buf);
 }
 
 /*
@@ -195,38 +186,35 @@ static void build_slot_path(char *buf, size_t bufsiz, size_t slot_id) {
  * If no description is provided, set @desc to NULL.
  *
  */
-static bool do_file(char *path, char *desc, bool is_load) {
-  char buf[200], desc_buf[20];
-  int fd, file_mode;
-    
-  /* set file mode */
-  file_mode = is_load ? O_RDONLY : O_WRONLY | O_CREAT;
-  
-  /* attempt to open file descriptor here */
-  printf("Path : %s, fm : %d\n", path,file_mode);
-  if ((fd = fopen(path, file_mode )) <= 0)
-    return false;
+static bool do_file(char *path/*, char *desc*/, bool is_load) {
+  int fd; //, file_mode;
 
   /* load/save state */
   if (is_load) {
-    /* load description */
-    fread(fd, desc_buf, 20);
+    fd = fopen(path, O_RDONLY );
+    if(!fd) {
+      printf("Retry...\n"); 
+      fd = fopen(path, O_RDONLY );
+      if(!fd) return false;
+      else printf("File opened!\n");
+    }
+    else printf("File opened!\n");
 
     /* load state */
     loadstate(fd);
-
-    /* print out a status message so the user knows the state loaded */
- //   printf(buf, sizeof(buf), "Loaded state from \"%s\"", path);
     printf("Loaded state from \"%s\"\n", path);
-  //splash(buf);
+
   } else {
-    /* build description buffer */
-    memset(desc_buf, 0, sizeof(desc_buf));
-    if (desc)
-      strncpy(desc_buf, desc, sizeof(desc_buf));
+    fd = fopen(path, O_WRONLY | O_CREAT );
+    if(!fd) {
+      printf("Retry...\n"); 
+      fd = fopen(path, O_WRONLY | O_CREAT ); 
+      if(!fd) return false;
+      else printf("File opened!\n");
+    }
+    else printf("File opened!\n");
 
     /* save state */
-   fwrite(fd, desc_buf, 20);
     savestate(fd);
   }
 
@@ -243,51 +231,39 @@ static bool do_file(char *path, char *desc, bool is_load) {
  * Returns true on success and false on failure.
  */
 static bool do_slot(size_t slot_id, bool is_load) {
-  char path_buf[256], desc_buf[20];
- // char path_buf[256], desc_buf="teste";
-  
-  /* build slot filename, clear desc buf */
-  build_slot_path(path_buf, sizeof(path_buf), slot_id);
- printf("Path : %s\n",path_buf);
-  memset(desc_buf, 0, sizeof(desc_buf));
+  char *path_buf;
+  bool res;
+  path_buf=(char *)bget(256);
 
-  /* if we're saving to a slot, then get a brief description */
-  if (!is_load) {
-  //  if (rb->kbd_input(desc_buf, sizeof(desc_buf)) || !strlen(desc_buf)) {   //Maybe a description here?
- //   if (!strlen(desc_buf)) {
-      memset(desc_buf, 0, sizeof(desc_buf));
-   //   sprintf(desc_buf,"Save %d"...
-      strncpy(desc_buf, "Untitled", sizeof(desc_buf));
- //   }
-  }
+  /* build slot filename*/
+  build_slot_path(path_buf, 256, slot_id);
+  printf("Path : %s\n",path_buf);
 
   /* load/save file */
-  return do_file(path_buf, desc_buf, is_load);
+  res = do_file(path_buf/*, desc_buf*/, is_load);
+  brel(path_buf);
+  return  res;
 }
 
-/* 
+/*
  * get information on the given slot
  */
 static void slot_info(char *info_buf, size_t info_bufsiz, size_t slot_id) {
-  char buf[256];
+  char * buf;
   int fd;
+  buf=(char *)bget(256);
 
   /* get slot file path */
-  build_slot_path(buf, sizeof(buf), slot_id);
+  build_slot_path(buf, 256, slot_id);
 
   /* attempt to open slot */
   if ((fd = fopen(buf, O_RDONLY)) >= 0) {
-    /* this slot has a some data in it, read it */
-    if (fread(fd, buf, 20) > 0) {
-      buf[20] = '\0';
-      snprintf(info_buf, info_bufsiz, "%2d. %s", slot_id + 1, buf);
-    } else {
-      snprintf(info_buf, info_bufsiz, "%2d. ERROR", slot_id + 1);
-    }
+    snprintf(info_buf, info_bufsiz, "%2d. State Saved", slot_id + 1);
     fclose(fd);
   } else {
     /* if we couldn't open the file, then the slot is empty */
-    snprintf(info_buf, info_bufsiz, "%2d.", slot_id + 1);
+    snprintf(info_buf, info_bufsiz, "%2d. Empty", slot_id + 1);
+    brel(buf);
   }
 }
 
@@ -297,7 +273,7 @@ static void slot_info(char *info_buf, size_t info_bufsiz, size_t slot_id) {
 static void do_slot_menu(bool is_load) {
   int i, mi, ret, num_items;
   bool done = false;
-  char *title, buf[256];
+  char *title;
 
   /* set defaults */
   ret = 0; /* return value */
@@ -306,41 +282,22 @@ static void do_slot_menu(bool is_load) {
   
   /* create menu items (the last two are file and previous menu,
    * so don't populate those) */
-//  for (i = 0; i < num_items - 2; i++)
- // for (i = 0; i < num_items - 1; i++)
- //   slot_info((char*) slot_menu[i], 20, i);
-  
-  /* set text of file item */
-//  snprintf((char*) slot_menu[SM_ITEM_FILE], 20, "%s File...", is_load ? "Load from" : "Save to");
-  
+  for (i = 0; i < num_items - 1; i++)
+    slot_info((char*) slot_menu[i], 20, i);
+
   /* set menu title */
-  title = is_load ? "Load State" : "Save State";
+  if(is_load) title = "Load State";
+  else title = "Save State";
 
   /* loop until we should exit menu */
   while (!done) {
     /* get item selection */
     mi = do_menu(title, (char**) slot_menu, num_items, mi);
-    
+
     /* handle selected menu item */
     done = true;
     if (mi != MENU_CANCEL && mi != SM_ITEM_BACK) {
-   //   if (mi == SM_ITEM_FILE) {
-    //    char rom_name_buf[40];
-
-        /* munge rom name to valid filename */
-    //    strncpy(rom_name_buf, rom.name, 16);
-     //   munge_name(rom_name_buf, sizeof(rom_name_buf));
-
-        /* create default filename */
-     //   snprintf(buf, sizeof(buf), "/%s.avb", rom_name_buf);
-
-        /* prompt for output filename, save to file */
-  // //     if (!rb->kbd_input(buf, sizeof(buf)))
-       // if (0)
-     //     done = do_file(buf, NULL, is_load);
-    //  } else {
-        done = do_slot(mi, is_load);
-    //  }
+      done = do_slot(mi, is_load);
 
       /* if we couldn't save the state file, then print out an
        * error message */
@@ -381,7 +338,7 @@ static void do_opt_menu(void) {
 /*
  * select_item - select menu item (after deselecting current item)
  */
-void select_item(char *title, int curr_item, size_t item_i) {
+static void select_item(char *title, int curr_item, size_t item_i) {
   int x, y, w, h;
 
   /* get size of title, use that as height ofr all lines */
@@ -392,13 +349,11 @@ void select_item(char *title, int curr_item, size_t item_i) {
   x = MENU_X + MENU_ITEM_PAD;
   w = MENU_WIDTH - 2 * MENU_ITEM_PAD;
 
- // rb->lcd_set_drawmode(DRMODE_COMPLEMENT);
   /* if there is a current item, then deselect it */
   if (curr_item >= 0) {
     /* deselect old item */
     y = MENU_Y + h + MENU_ITEM_PAD * 2; /* account for title */
     y += h * curr_item;
- //   rb->lcd_fillrect(x, y, w, h);
     drawrect(x, y, w, h,0x00);
   }
 
@@ -409,10 +364,6 @@ void select_item(char *title, int curr_item, size_t item_i) {
   y = MENU_Y + h + MENU_ITEM_PAD * 2; /* account for title */
   y += h * curr_item;
   drawrect(x, y, w, h,0xf9);
- // rb->lcd_set_drawmode(DRMODE_SOLID);
-
-  /* update the menu window */
-//  rb->lcd_update_rect(MENU_RECT);
 }
 
 /*
@@ -426,14 +377,9 @@ static void draw_menu(char *title, char **items, size_t num_items)  {
   size_t i;
   int x, y, w, h, by;
 
-  /* set to default? font */
- // rb->lcd_setfont(0);
-  
   /* draw the outline */
   fillRect(0xaf,SHADOW_RECT);
- // rb->lcd_set_drawmode(DRMODE_SOLID|DRMODE_INVERSEVID);
   fillRect(0x00,MENU_RECT);
-//  rb->lcd_set_drawmode(DRMODE_SOLID);
   drawRect(0xff,MENU_RECT);
 
   /* calculate x/y */
@@ -447,9 +393,7 @@ static void draw_menu(char *title, char **items, size_t num_items)  {
     drawline(MENU_X, i, MENU_X + MENU_WIDTH-1, i,0xff);
 
   /* clear title rect */
-//  rb->lcd_set_drawmode(DRMODE_SOLID|DRMODE_INVERSEVID);
   fillrect((OSD_BITMAP1_WIDTH - w) / 2 - 2, y - 2, w + 4, h,0x00);
-//  rb->lcd_set_drawmode(DRMODE_SOLID);
 
   /* draw centered title on screen */
   putsxy((OSD_BITMAP1_WIDTH - w)/2, y, title);
@@ -460,9 +404,6 @@ static void draw_menu(char *title, char **items, size_t num_items)  {
   /* iterate over each item and draw it on the screen */
   for (i = 0; i < num_items; i++)
     putsxy(x+2, by + h * i, items[i]);
-
-  /* update the screen */
-//  rb->lcd_update();
 }
 
 /*
@@ -487,14 +428,12 @@ static int do_menu(char *title, char **items, size_t num_items, int sel) {
 
   /* make sure button state is empty */
   while (read_btn());
- //   rb->yield();
 
   /* loop until the menu is finished */
   while (!done) {
     /* grab a button */
     while (read_btn());
     btn = read_btn();
-//printf("BTN : %x", btn);
 
     /* handle the button */
     if(btn & 0x08) {
@@ -504,7 +443,6 @@ static int do_menu(char *title, char **items, size_t num_items, int sel) {
           sel_item = 0;
         select_item(title, curr_item, sel_item);
         curr_item = sel_item;
-   //     break;
       }
       else if(btn & 0x01) {
         /* select prev item in list */
@@ -513,32 +451,29 @@ static int do_menu(char *title, char **items, size_t num_items, int sel) {
           sel_item = num_items - 1;
         select_item(title, curr_item, sel_item);
         curr_item = sel_item;
-    //    break;
       }
       else if(btn & 0x04) {
         /* select current item */
         ret = curr_item;
         done = true;
-    //    break;
       }
-      else if(btn & 0x02) {
- for (y=0;y<144;y+=9) {
-        for (x=0;x<160;x+=10) {
-    fillRect(c, x, y, 10, 9);
-c++;}}
+      else if(btn & 0x02 && btn & 0x100) {
+        for (y=0;y<144;y+=9) {
+          for (x=0;x<160;x+=10) {
+            fillRect(c, x, y, 10, 9);
+            c++;
+          }
+        }
       }
       else if(btn & 0x200) {
         /* cancel out of menu */
         ret = MENU_CANCEL;
         done = true;
-   //     break;
       }
-    
-    
-    /* give the OS some love */
- //   rb->yield();
+//      else if(btn & 0x100) {
+//      }
   }
-  
+
   /* return selected item */
   return ret;
 }
@@ -547,8 +482,8 @@ void browser(char * rom) {
   int x, y, w, h, by;
   size_t i;
 
-  int btn, sel_item=0, curr_item, num_items=6, nb=0,pos=0; //len=0;
-  char title[]="Start..."; //ext[4]; rom[MAX_PATH],
+  int btn, sel_item=0, curr_item, num_items=6, nb=0,pos=0;
+  char title[]="Start...";
   char (*items)[MAX_PATH];
   char (*list)[MAX_PATH];
   bool done = false;
@@ -565,12 +500,6 @@ else printf("Dir error!\n");
 
   while((romdir=readdir(romd))!=NULL) {
      if(!(romdir->attribute & ATTR_DIRECTORY)) {
-   /*     len = strlen(romdir->d_name);
-        ext[0] = romdir->d_name[len-3];
-        ext[1] = romdir->d_name[len-2];
-        ext[2] = romdir->d_name[len-1];
-        ext[3] = '\0';
-        if(strcmp(*/
      list[nb][0]='\0';
      strcat(list[nb],romdir->d_name);
      nb++;
@@ -652,8 +581,7 @@ while(!done) {
   strcat(rom,"\0");
   brel(items);
   brel(list);
- // return rom;
-return;
+  return;
 }
 
 

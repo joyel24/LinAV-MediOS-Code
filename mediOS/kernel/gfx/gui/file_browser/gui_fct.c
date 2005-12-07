@@ -55,7 +55,7 @@ int viewNewDir(struct browser_data *bdata,char *name)
     {
         if(strlen(name)>PATHLEN)
         {
-            //msgBox("ERROR - Browser", "Can't load dir, path too long", MSGBOX_TYPE_OK, MSGBOX_ICON_ERROR);
+           // msgBox("ERROR - Browser", "Can't load dir, path too long", MSGBOX_TYPE_OK, MSGBOX_ICON_ERROR);
             return 0;
         }
         strcpy(bdata->path,name);
@@ -63,7 +63,7 @@ int viewNewDir(struct browser_data *bdata,char *name)
         
 
     cleanList(bdata);
-    
+    printk("before doLS\n");
     if(!doLs(bdata))
     {
         cleanList(bdata);

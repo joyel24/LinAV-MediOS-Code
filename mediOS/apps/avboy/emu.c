@@ -47,13 +47,13 @@ __IRAM_CODE void emu_run()
 	void *timer = sys_timer();
 	int delay;
 	bool run=true;
-	int ot;
+//	int ot;
 
 	vid_begin();
 	lcd_begin();
 	do
 	{
-    //printf("%d\n",get_tick()-ot);
+    //printf("%d\n",get_tick());//-ot);
 		//ot=get_tick();
     cpu_emulate(2280);
 		while (R_LY > 0 && R_LY < 144)

@@ -107,11 +107,13 @@ static byte *loadfile(int f, int *len)
 {
 	int c, l = 0, p = 0;
 	byte *d = 0;
-	static byte buf[64*1024];
+//	static byte buf[64*1024];
+        char * buf;
 
+        buf=(char *)bget(64*1024);
 	for(;;)
 	{
-		c = fread(f, buf, sizeof buf);
+		c = fread(f, buf, 64*1024); //sizeof buf);
 		if (c <= 0) break;
 		l += c;
 		d = bgetr(d, l);
@@ -120,6 +122,7 @@ static byte *loadfile(int f, int *len)
 		p += c;
 	}
 	*len = l;
+	brel(buf);
 	return d;
 }
 
@@ -165,7 +168,7 @@ int rom_load()
        //  if (f<0) die("cannot open rom file: %s\n", romfile);
          die("cannot open rom file: %s\n", romfile);
       }
-      else printf("File ok!\n");
+      else printf("File opened!\n");
 
 	data = loadfile(f, &len);
 
@@ -340,7 +343,7 @@ static char *ldup(char *s)
 	return n;
 }
 
-static void cleanup()
+void cleanup()
 {
 	sram_save();
 	rtc_save();

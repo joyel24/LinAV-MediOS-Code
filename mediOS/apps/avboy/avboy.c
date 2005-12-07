@@ -10,16 +10,17 @@
  Date:     18/10/2005
  Author:   GliGli
 
- Modified by CjNr11 27/11/2005
+ Modified by CjNr11 06/12/2005
 
 */
 
 #include <sys_def/string.h>
 #include <graphics.h>
 #include <evt.h>
+#include <kernel/malloc.h>
+#include <kernel/buttons.h>
 #include <kernel/delay.h>
 #include <fs_io.h>
-#include <api.h>
 #include "avboy.h"
 
 #define LCD_WIDTH 320
@@ -32,15 +33,8 @@
 
 #define OSD_BITMAP1_CONFIG  OSD_COMPONENT_ENABLE | OSD_BITMAP_8BIT | OSD_BITMAP_MERGEBACK | OSD_BITMAP_A7 | OSD_BITMAP_ZX1 | OSD_BITMAP_RAMCLUT
 
-#define getstringsize(a,b,c) getStringS(a,b,c)
-#define drawline(a,b,c,d,e) drawLine(e,a,b,c,d)
-#define drawrect(a,b,c,d,e) drawRect(e,a,b,c,d)
-#define fillrect(a,b,c,d,e) fillRect(e,a,b,c,d)
-#define putsxy(a,b,c) putS(0xFF,0x00,a,b,c)
-
 int OSD_BITMAP1_ADDRESS;
 
-#include "defs.h"
 #include "regs.h"
 
 #include "lcd.h"
@@ -52,7 +46,7 @@ int OSD_BITMAP1_ADDRESS;
 #include "hw.h"
 #include "rtc.h"
 #include "sound.h"
-//#include "graph.h"
+
 
 extern unsigned long tick;
 struct fb fb;
@@ -60,7 +54,7 @@ struct pcm pcm;
 
 
 int _start(int argc,char* argv) {
-   int fd;
+   char * rom;
    open_graphics();
    OSD_BITMAP1_ADDRESS = getBufferOffset(BMAP1);
    setSize(BMAP1,160,144,8);
@@ -78,7 +72,7 @@ int _start(int argc,char* argv) {
 //  char* rom="/vr.gbc";
  // bpool(0x3f00000,0xfffff);
 
-   char * rom;
+
 
    vid_init();
 	pcm_init();
@@ -127,7 +121,7 @@ void vid_end(void){
 void vid_close(void){
   printf("vid_close\n");
 }
-void vid_settitle(void){
+void vid_settitle(char * title){
   printf("vid_settitle\n");
 }
 void vid_setpal(int i, int r, int g, int b){
@@ -161,6 +155,7 @@ bool doevents(void){
     if(pressed & 0x10)  pad_press(PAD_SELECT);
     if(pressed & 0x200) {if (do_user_menu() == USER_MENU_QUIT) 
           {
+            cleanup();
             die("bye");
   //          cleanshut=1;
           }}
@@ -177,8 +172,7 @@ bool doevents(void){
     if(released & 0x10)  pad_release(PAD_SELECT);
   }
 
-  //return !(bt&BTN_OFF);
-  return !(0);
+  return 1;
 }
 
 void pcm_init(void){
@@ -192,7 +186,7 @@ void pcm_init(void){
 }
 
 int pcm_submit(){
-//  debug("pcm_submit\n");
+//  printf("pcm_submit\n");
 	pcm.pos = 0;
 	return 1;
 }
@@ -201,23 +195,25 @@ void pcm_close(void){
   printf("pcm_close\n");
 }
 
+long tickcounter;
 
-void *sys_timer(){
-//  debug("sys_timer\n");
-  return get_tick()*100;
+void *sys_timer(void){
+  tickcounter=get_tick();
+  return &tickcounter;
 }
 
-int sys_elapsed(void){
-  static int prevtc=0;
+int sys_elapsed(long * oldtick){
   int delta;
-  delta=get_tick()-prevtc;
-  prevtc=get_tick();
-  return delta*100;
-} 
+  long now;
+  now=get_tick();
+  delta=now-*oldtick;
+  *oldtick=now;
+  return (delta*10000);
+}
 
 void  sys_sleep(int us){
 //  debug("sys_sleep\n");
-  mdelay(us*100);
+  mdelay(us/1000);
 }
 
 void  sys_checkdir(char *path, int wr){
@@ -248,4 +244,3 @@ void die(char *fmt, ...)
 }
 
 void drawProgress(int offset,int length,int mode){};
-
