@@ -4,11 +4,16 @@
 
 
 #include "defs.h"
+
+#include "avboy.h"
+#include "sound.h"
 #include "regs.h"
 #include "hw.h"
 #include "cpu.h"
 #include "mem.h"
 #include "lcd.h"
+#include "rtc.h"
+#include "pcm.h"
 
 static int framelen = 16743;
 static int framecount;
@@ -70,7 +75,7 @@ __IRAM_CODE void emu_run()
 		}
 		run=doevents();
 		vid_begin();
-		if (framecount) { if (!--framecount) die("finished\n"); }
+		if (framecount) { if (!--framecount) DIE("finished\n"); }
 
 		if (!(R_LCDC & 0x80))
 			cpu_emulate(32832);

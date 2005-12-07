@@ -1,4 +1,20 @@
+/* 
+*   apps/avboy/lcdc.c
+*
+*   MediOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+* Gameboy / Color Gameboy emulator (port of gnuboy)
+* 
+*  Date:     18/10/2005
+* Author:   GliGli
 
+*  Modified by CjNr11 06/12/2005
+*/
 
 //#include <stdlib.h>
 //#include <debug.h>
@@ -8,7 +24,7 @@
 #include "hw.h"
 #include "cpu.h"
 #include "regs.h"
-
+#include "lcd.h"
 
 #define C (cpu.lcdc)
 
@@ -23,7 +39,7 @@
  * stat_trigger also updates bit 2 of R_STAT to reflect whether LY=LYC.
  */
 
-__IRAM_CODE void stat_trigger()
+__IRAM_CODE void stat_trigger(void)
 {
   static const int condbits[4] = { 0x08, 0x30, 0x20, 0x00 };
 	int flag = 0;
@@ -83,7 +99,7 @@ __IRAM_CODE void lcdc_change(byte b)
 }
 
 
-__IRAM_CODE void lcdc_trans()
+__IRAM_CODE void lcdc_trans(void)
 {
  // debug("LCDC_TRANS!");
   if (!(R_LCDC & 0x80))

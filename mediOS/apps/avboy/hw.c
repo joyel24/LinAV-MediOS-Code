@@ -1,7 +1,25 @@
+/* 
+*   apps/avboy/hw.c
+*
+*   MediOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+* Gameboy / Color Gameboy emulator (port of gnuboy)
+* 
+*  Date:     18/10/2005
+* Author:   GliGli
 
+*  Modified by CjNr11 06/12/2005
+*/
 
+#include <sys_def/string.h>
 
 #include "defs.h"
+#include "avboy.h"
 #include "cpu.h"
 #include "hw.h"
 #include "regs.h"
@@ -87,7 +105,7 @@ __IRAM_CODE void hw_hdma_cmd(byte c)
 }
 
 
-__IRAM_CODE void hw_hdma()
+__IRAM_CODE void hw_hdma(void)
 {
   int cnt;
 	addr sa;
@@ -113,7 +131,7 @@ __IRAM_CODE void hw_hdma()
  * interrupt line) if a transition has been made.
  */
 
-void pad_refresh()
+void pad_refresh(void)
 {
 	byte oldp1;
 	oldp1 = R_P1;
@@ -158,7 +176,7 @@ void pad_set(byte k, int st)
 	st ? pad_press(k) : pad_release(k);
 }
 
-void hw_reset()
+void hw_reset(void)
 {
 	hw.ilines = hw.pad = 0;
 

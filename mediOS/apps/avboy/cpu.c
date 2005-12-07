@@ -1,11 +1,27 @@
+/* 
+*   apps/avboy/cpu.c
+*
+*   MediOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+* Gameboy / Color Gameboy emulator (port of gnuboy)
+* 
+*  Date:     18/10/2005
+* Author:   GliGli
 
-
-
+*  Modified by CjNr11 06/12/2005
+*/
 
 #include "defs.h"
+#include "avboy.h"
 #include "regs.h"
 #include "hw.h"
 #include "cpu.h"
+#include "lcdc.h"
 #include "mem.h"
 #include "fastmem.h"
 #include "cpuregs.h"
@@ -239,7 +255,7 @@ label: op(b); break;
 
 
 
-void cpu_reset()
+void cpu_reset(void)
 {
 	cpu.speed = 0;
 	cpu.halt = 0;
@@ -816,7 +832,7 @@ next:
 		break;
 
 	default:
-		die(
+		DIE(
 			"invalid opcode 0x%02X at address 0x%04X, rombank = %d\n",
 			op, (PC-1) & 0xffff, mbc.rombank);
 		break;
@@ -834,7 +850,8 @@ next:
 	return cycles-i;
 }
 
-void cb_switch(byte cbop){
+void cb_switch(byte cbop)
+{
 	switch (cbop)
 	{
    	CB_REG_CASES(B, 0);

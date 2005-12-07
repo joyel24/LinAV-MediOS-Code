@@ -1,3 +1,21 @@
+/* 
+*   apps/avboy/menu.c
+*
+*   MediOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+* Gameboy / Color Gameboy emulator (port of gnuboy)
+* 
+*  Date:     18/10/2005
+* Author:   GliGli
+
+*  Modified by CjNr11 06/12/2005
+*/
+
 /*********************************************************************/
 /* menu.c - user menu for rockboy                                    */
 /*                                                                   */
@@ -6,13 +24,15 @@
 
 #include <sys_def/ctype.h>
 #include <sys_def/string.h>
-#include "mem.h"
+
 #include <fs_io.h>
 #include <graphics.h>
 #include <kernel/malloc.h>
 #include <kernel/buttons.h>
 
+#include "defs.h"
 #include "avboy.h"
+#include "mem.h"
 
 #define getstringsize(a,b,c) getStringS(a,b,c)
 #define drawline(a,b,c,d,e) drawLine(e,a,b,c,d)
@@ -495,7 +515,11 @@ list = bget(MAX_PATH);
 
 romd=opendir("/avboy/roms");
 if(romd) printf("Dir /avboy/roms/ opened!\n");
-else printf("Dir error!\n");
+else {
+  mkdir("/avboy/roms",0);
+  if(romd) printf("Dir /avboy/roms/ created and opened!\n");
+  else printf("Dir error!\n");
+}
 
 
   while((romdir=readdir(romd))!=NULL) {
@@ -579,6 +603,7 @@ while(!done) {
   strcat(rom,"/AVBOY/ROMS/");
   strcat(rom,items[curr_item]);
   strcat(rom,"\0");
+  closedir(romd);
   brel(items);
   brel(list);
   return;

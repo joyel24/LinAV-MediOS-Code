@@ -1,10 +1,30 @@
+/* 
+*   apps/avboy/loader.c
+*
+*   MediOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+* Gameboy / Color Gameboy emulator (port of gnuboy)
+* 
+*  Date:     18/10/2005
+* Author:   GliGli
 
+*  Modified by CjNr11 06/12/2005
+*/
 
 #include "defs.h"
+#include "avboy.h"
+#include "inflate.h"
 #include "regs.h"
 #include "mem.h"
 #include "hw.h"
 #include "rtc.h"
+#include "lcd.h"
+#include "sound.h"
 #include <sys_def/string.h>
 #include <sys_def/ctype.h>
 #include <sys_def/random.h>
@@ -135,7 +155,7 @@ static void inflate_callback(byte b)
 	{
 		inf_len += 512;
 		inf_buf = bgetr(inf_buf, inf_len);
-		if (!inf_buf) die("out of memory inflating file @ %d bytes\n", inf_pos);
+		if (!inf_buf) DIE("out of memory inflating file @ %d bytes\n", inf_pos);
 	}
 	inf_buf[inf_pos++] = b;
 }
@@ -165,8 +185,8 @@ int rom_load()
 	if (f<0) {
        //  debug("Retry!");
        //  f = fopen(romfile, O_RDONLY);
-       //  if (f<0) die("cannot open rom file: %s\n", romfile);
-         die("cannot open rom file: %s\n", romfile);
+       //  if (f<0) DIE("cannot open rom file: %s\n", romfile);
+         DIE("cannot open rom file: %s\n", romfile);
       }
       else printf("File opened!\n");
 
@@ -191,8 +211,8 @@ int rom_load()
 	mbc.romsize = romsize_table[header[0x0148]];
 	mbc.ramsize = ramsize_table[header[0x0149]];
 
-	if (!mbc.romsize) die("unknown ROM size %02X\n", header[0x0148]);
-	if (!mbc.ramsize) die("unknown SRAM size %02X\n", header[0x0149]);
+	if (!mbc.romsize) DIE("unknown ROM size %02X\n", header[0x0148]);
+	if (!mbc.ramsize) DIE("unknown SRAM size %02X\n", header[0x0149]);
 
 	rlen = 16384 * mbc.romsize;
 	rom.bank = bgetr(data, rlen);
@@ -357,10 +377,11 @@ void loader_init(char *s)
 
 //	sys_checkdir(savedir, 1); /* needs to be writable */
 	dir=opendir(savedir);
-	if(!dir)
+	if(!dir) {
 	  mkdir(savedir,0);
-	else
-	  closedir(dir);
+          printf("Savedir created!");
+        }         
+	else closedir(dir);
 	romfile = s;
       printf("Loading rom...\n");
 	rom_load();

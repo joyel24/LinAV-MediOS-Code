@@ -1,19 +1,23 @@
-/*
+/* 
+*   apps/avboy/avboy.c
+*
+*   MediOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+* Gameboy / Color Gameboy emulator (port of gnuboy)
+* 
+*  Date:     18/10/2005
+* Author:   GliGli
 
- All files in this archive are subject to the GNU General Public License.
- See the file COPYING in the source tree root for full license agreement.
- This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
- KIND, either express of implied.
-
- Gameboy / Color Gameboy emulator (port of gnuboy)
-
- Date:     18/10/2005
- Author:   GliGli
-
- Modified by CjNr11 06/12/2005
-
+*  Modified by CjNr11 06/12/2005
 */
 
+
+/* kernel include */
 #include <sys_def/string.h>
 #include <graphics.h>
 #include <evt.h>
@@ -21,7 +25,21 @@
 #include <kernel/buttons.h>
 #include <kernel/delay.h>
 #include <fs_io.h>
+#include <api.h>
+
+/* avboy include */
+#include "defs.h"
 #include "avboy.h"
+#include "regs.h"
+#include "lcd.h"
+#include "fb.h"
+#include "input.h"
+#include "pcm.h"
+#include "mem.h"
+#include "hw.h"
+#include "rtc.h"
+#include "sound.h"
+#include "pcm.h"
 
 #define LCD_WIDTH 320
 #define LCD_HEIGHT 240
@@ -33,61 +51,36 @@
 
 #define OSD_BITMAP1_CONFIG  OSD_COMPONENT_ENABLE | OSD_BITMAP_8BIT | OSD_BITMAP_MERGEBACK | OSD_BITMAP_A7 | OSD_BITMAP_ZX1 | OSD_BITMAP_RAMCLUT
 
-int OSD_BITMAP1_ADDRESS;
+unsigned long OSD_BITMAP1_ADDRESS;
 
-#include "regs.h"
-
-#include "lcd.h"
-
-#include "fb.h"
-#include "input.h"
-#include "pcm.h"
-#include "mem.h"
-#include "hw.h"
-#include "rtc.h"
-#include "sound.h"
-
-
-extern unsigned long tick;
 struct fb fb;
 struct pcm pcm;
 
+int _start(int argc,char* argv)
+{
+    char * rom;
+    open_graphics();
+    OSD_BITMAP1_ADDRESS = getBufferOffset(BMAP1);
+    setSize(BMAP1,160,144,8);    
+    
+    fillRect(0x00,0,0,160,144);
+    
+    setFont(10);   
+    
+    vid_init();
+    pcm_init();
+    
+    rom = (char *)bget(MAX_PATH);
+    
+    browser(rom);
+    printf("Rom name : %s\n",rom);
+    
+    loader_init(rom);
 
-int _start(int argc,char* argv) {
-   char * rom;
-   open_graphics();
-   OSD_BITMAP1_ADDRESS = getBufferOffset(BMAP1);
-   setSize(BMAP1,160,144,8);
-
- 
-   fillRect(0x00,0,0,160,144);
-
-   setFont(10);
-
-
- // char* rom="/KIRBY.GB";
-//  char* rom="/sml1.gb";
-// char* rom="/AVBOY/ROMS/KIRBY2.gb
-//  char* rom="/dkl.gb";
-//  char* rom="/vr.gbc";
- // bpool(0x3f00000,0xfffff);
-
-
-
-   vid_init();
-	pcm_init();
-
-rom = (char *)bget(MAX_PATH);
-
-browser(rom);
-printf("Rom name : %s\n",rom);
-
-	loader_init(rom);
-
-	emu_reset();
-	emu_run();
-
-  return 0;
+    emu_reset();
+    emu_run();
+    
+    return 0;
 }
 
 void vid_preinit(void){
@@ -124,7 +117,8 @@ void vid_close(void){
 void vid_settitle(char * title){
   printf("vid_settitle\n");
 }
-void vid_setpal(int i, int r, int g, int b){
+void vid_setpal(int i, int r, int g, int b)
+{
 
   printf("vid_setpal %d %d %d %d\n",i,r,g,b);
 setPalletteRGB(r,g,b,i);
@@ -133,66 +127,46 @@ setPalletteRGB(r,g,b,i);
 
 int oldbt=0;
 
-bool doevents(void){
-  int bt,pressed,released;
- // event_t ev;
-
-  bt=read_btn() & 0xF7F;
-  pressed=bt & ~oldbt;
-  released=~bt & oldbt;
-  oldbt=bt;
-
- // printf("%0.8x %0.8x\n",pressed,released);
-
-  if (pressed){
-    if(pressed & 0x01)     pad_press(PAD_UP);
-    if(pressed & 0x08)   pad_press(PAD_DOWN);
-    if(pressed & 0x02)   pad_press(PAD_LEFT);
-    if(pressed & 0x04)  pad_press(PAD_RIGHT);
-    if(pressed & 0x20)  pad_press(PAD_B);
-    if(pressed & 0x40) pad_press(PAD_A);
-    if(pressed & 0x100)     pad_press(PAD_START);
-    if(pressed & 0x10)  pad_press(PAD_SELECT);
-    if(pressed & 0x200) {if (do_user_menu() == USER_MENU_QUIT) 
-          {
+int doevents(void)
+{
+    int bt,pressed,released;
+    
+    bt=read_btn() & 0xF7F;
+    pressed=bt & ~oldbt;
+    released=~bt & oldbt;
+    oldbt=bt;
+    
+    if (pressed)
+    {
+        if(pressed & 0x01)     pad_press(PAD_UP);
+        if(pressed & 0x08)   pad_press(PAD_DOWN);
+        if(pressed & 0x02)   pad_press(PAD_LEFT);
+        if(pressed & 0x04)  pad_press(PAD_RIGHT);
+        if(pressed & 0x20)  pad_press(PAD_B);
+        if(pressed & 0x40) pad_press(PAD_A);
+        if(pressed & 0x100)     pad_press(PAD_START);
+        if(pressed & 0x10)  pad_press(PAD_SELECT);
+        if(pressed & 0x200) {if (do_user_menu() == USER_MENU_QUIT) 
+        {
             cleanup();
-            die("bye");
-  //          cleanshut=1;
-          }}
-  }
-
-  if (released){
-    if(released & 0x01)     pad_release(PAD_UP);
-    if(released & 0x08)   pad_release(PAD_DOWN);
-    if(released & 0x02)   pad_release(PAD_LEFT);
-    if(released & 0x04)  pad_release(PAD_RIGHT);
-    if(released & 0x20)  pad_release(PAD_B);
-    if(released & 0x40) pad_release(PAD_A);
-    if(released & 0x100)     pad_release(PAD_START);
-    if(released & 0x10)  pad_release(PAD_SELECT);
-  }
-
-  return 1;
-}
-
-void pcm_init(void){
-  printf("pcm_init\n");
-
-	pcm.hz = 0;
-	pcm.stereo = 0;
-	pcm.buf = NULL;
-	pcm.len = 0;
-	pcm.pos = 0;
-}
-
-int pcm_submit(){
-//  printf("pcm_submit\n");
-	pcm.pos = 0;
-	return 1;
-}
-
-void pcm_close(void){
-  printf("pcm_close\n");
+            DIE("bye");
+        }
+     }
+    }
+    
+    if (released)
+    {
+        if(released & 0x01)     pad_release(PAD_UP);
+        if(released & 0x08)   pad_release(PAD_DOWN);
+        if(released & 0x02)   pad_release(PAD_LEFT);
+        if(released & 0x04)  pad_release(PAD_RIGHT);
+        if(released & 0x20)  pad_release(PAD_B);
+        if(released & 0x40) pad_release(PAD_A);
+        if(released & 0x100)     pad_release(PAD_START);
+        if(released & 0x10)  pad_release(PAD_SELECT);
+    }
+    
+    return 1;
 }
 
 long tickcounter;
@@ -226,21 +200,6 @@ void  sys_initpath(char *exe){
 
 void  sys_sanitize(char *s){
   printf("sys_sanitize\n");
-}
-
-void die(char *fmt, ...)
-{
-  static char err[200];
-
-
-	va_list ap;
-
-	va_start(ap, fmt);
-	vsnprintf(err,sizeof(err), fmt, ap);
-	va_end(ap);
-	
-	printf("DIE!: %s\n",err);
-	for(;;);
 }
 
 void drawProgress(int offset,int length,int mode){};

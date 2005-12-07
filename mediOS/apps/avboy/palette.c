@@ -1,6 +1,23 @@
+/* 
+*   apps/avboy/palette.c
+*
+*   MediOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+* Gameboy / Color Gameboy emulator (port of gnuboy)
+* 
+*  Date:     18/10/2005
+* Author:   GliGli
 
+*  Modified by CjNr11 06/12/2005
+*/
 
 #include "defs.h"
+#include "avboy.h"
 #include "fb.h"
 #include <sys_def/string.h>
 
@@ -22,7 +39,7 @@ enum plstatus
 	pl_locked
 };
 
-
+/*
 static byte bestmatch(int c)
 {
 	byte n, best;
@@ -51,6 +68,7 @@ static byte bestmatch(int c)
 	}
 	return best;
 }
+*/
 
 static void makecourse(int c, byte n)
 {
@@ -118,7 +136,7 @@ void pal_release(byte n)
 }
 
 
-void pal_expire()
+void pal_expire(void)
 {
 	int i;
 	for (i = 0; i < 256; i++)
@@ -127,7 +145,7 @@ void pal_expire()
 }
 
 
-void pal_set332()
+void pal_set332(void)
 {
 	int i, r, g, b;
 	

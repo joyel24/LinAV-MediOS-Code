@@ -1,5 +1,5 @@
 /* 
-*   apps/avboy/defs.h
+*   apps/avboy/inflate.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -16,34 +16,10 @@
 *  Modified by CjNr11 06/12/2005
 */
 
-#ifndef __DEFS_H__
-#define __DEFS_H__
-
-#include <api.h>
+#ifndef __INFLATE_H__
+#define __INFLATE_H__
 
 
-#define IS_LITTLE_ENDIAN
-
-
-#ifdef IS_LITTLE_ENDIAN
-#define LO 0
-#define HI 1
-#else
-#define LO 1
-#define HI 0
-#endif
-
-typedef unsigned char byte;
-
-typedef unsigned char un8;
-typedef unsigned short un16;
-typedef unsigned int un32;
-
-typedef signed char n8;
-typedef signed short n16;
-typedef signed int n32;
-
-typedef un16 word;
-typedef word addr;
+int unzip (const unsigned char *data, long *p,void (* callback) (unsigned char d));
 
 #endif

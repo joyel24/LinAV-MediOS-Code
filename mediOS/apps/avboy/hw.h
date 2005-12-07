@@ -1,12 +1,24 @@
+/* 
+*   apps/avboy/hw.h
+*
+*   MediOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+* Gameboy / Color Gameboy emulator (port of gnuboy)
+* 
+*  Date:     18/10/2005
+* Author:   GliGli
 
+*  Modified by CjNr11 06/12/2005
+*/
 
 
 #ifndef __HW_H__
 #define __HW_H__
-
-
-#include "defs.h"
-
 
 #define PAD_RIGHT  0x01
 #define PAD_LEFT   0x02
@@ -34,7 +46,15 @@ struct hw
 
 extern struct hw hw;
 
-__IRAM_CODE void hw_interrupt(byte i, byte mask);
+void hw_interrupt(byte i, byte mask);
+void hw_reset(void);
+void hw_hdma_cmd(byte c);
+void hw_dma(byte b);
+void hw_hdma(void);
+
+void pad_release(byte k);
+void pad_press(byte k);
+void pad_refresh(void);
 
 #endif
 

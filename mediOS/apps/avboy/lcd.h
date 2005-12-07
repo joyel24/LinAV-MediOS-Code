@@ -1,9 +1,24 @@
+/* 
+*   apps/avboy/include/lcd.h
+*
+*   MediOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+* Gameboy / Color Gameboy emulator (port of gnuboy)
+* 
+*  Date:     18/10/2005
+* Author:   GliGli
 
+*  Modified by CjNr11 06/12/2005
+*/
 
 #ifndef __LCD_H__
 #define __LCD_H__
 
-#include "defs.h"
 
 struct vissprite
 {
@@ -48,9 +63,16 @@ byte lcd_vbank[2][8192];
 extern struct lcd lcd;
 extern struct scan scan;
 
+void lcd_reset(void);
+void lcd_begin(void);
+void lcd_refreshline(void);
 
+void pal_dirty(void);
+void pal_write_dmg(int i, int mapnum, byte d);
+void pal_write(int i, byte b);
 
-
+void vram_dirty(void);
+void vram_write(int a, byte b);
 
 #endif
 

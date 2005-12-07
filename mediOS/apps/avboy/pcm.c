@@ -1,5 +1,5 @@
 /* 
-*   apps/avboy/defs.h
+*   apps/avboy/pcm.c
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -16,34 +16,27 @@
 *  Modified by CjNr11 06/12/2005
 */
 
-#ifndef __DEFS_H__
-#define __DEFS_H__
+#include <sys_def/string.h>
 
-#include <api.h>
+#include "defs.h"
+#include "pcm.h"
 
+void pcm_init(void)
+{
+    pcm.hz = 0;
+    pcm.stereo = 0;
+    pcm.buf = NULL;
+    pcm.len = 0;
+    pcm.pos = 0;
+}
 
-#define IS_LITTLE_ENDIAN
+int pcm_submit()
+{
+    pcm.pos = 0;
+    return 1;
+}
 
-
-#ifdef IS_LITTLE_ENDIAN
-#define LO 0
-#define HI 1
-#else
-#define LO 1
-#define HI 0
-#endif
-
-typedef unsigned char byte;
-
-typedef unsigned char un8;
-typedef unsigned short un16;
-typedef unsigned int un32;
-
-typedef signed char n8;
-typedef signed short n16;
-typedef signed int n32;
-
-typedef un16 word;
-typedef word addr;
-
-#endif
+void pcm_close(void)
+{
+    printf("pcm_close\n");
+}

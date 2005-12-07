@@ -1,5 +1,5 @@
 /* 
-*   apps/avboy/rtc.h
+*   apps/avboy/lcdc.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -16,30 +16,14 @@
 *  Modified by CjNr11 06/12/2005
 */
 
+#ifndef __LCDC_H__
+#define __LCDC_H__
 
-#ifndef __RTC_H__
-#define __RTC_H__
-
-
-struct rtc
-{
-	int batt;
-	int sel;
-	int latch;
-	int d, h, m, s, t;
-	int stop, carry;
-	byte regs[8];
-};
-
-extern struct rtc rtc;
-
-void rtc_tick(void);
-void rtc_save_internal(int fd);
-void rtc_load_internal(int fd);
-void rtc_latch(byte b);
-void rtc_write(byte b);
+void lcdc_trans(void);
+void stat_write(byte b);
+void stat_trigger(void);
+void lcdc_change(byte b);
 
 #endif
-
 
 
