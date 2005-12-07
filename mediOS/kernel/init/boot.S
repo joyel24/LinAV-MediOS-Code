@@ -9,17 +9,19 @@
 .global entry_code
 entry_code:
 /* initialize the stacks and disable irq+fiq */
-    MSR CPSR_c, #0xD1 @0x80 | 0x40 | 0x11 = 0xD1 [FIQ mode]
+/*    MSR CPSR_c, #0xD1 @0x80 | 0x40 | 0x11 = 0xD1 [FIQ mode]
     mov r0, #0x00000000 @ no stack for FIQ mode
     mov sp, r0
     MSR CPSR_c, #0xD2 @0x80 | 0x40 | 0x12 = 0xD2 [IRQ mode]
     mov r0, #0x00008000
-    mov sp, r0
+    mov sp, r0*/
     MSR CPSR_c, #0xD3 @0x80 | 0x40 | 0x13 = 0xD3 [SVC mode, used in SWI and ]
-    mov r0, #0x00007F00
+    @mov r0, #0x00007F00
+    mov r0, #0x00008000
     mov sp, r0
     MSR CPSR_c, #0xDF @0x80 | 0x40 | 0x1F = 0xDF [SYS mode]
-    mov r0, #0x00007C00
+    @mov r0, #0x00007C00
+    mov r0, #0x00007D00
     mov sp, r0
 /* move iram code */
     ldr r0, __real_iram_start_ptr    

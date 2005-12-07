@@ -70,7 +70,7 @@ int _start(int argc,char* argv)
     vid_init();
     pcm_init();
     
-    rom = (char *)bget(MAX_PATH);
+    rom = (char *)malloc(MAX_PATH);
     
     browser(rom);
     printf("Rom name : %s\n",rom);
@@ -105,8 +105,8 @@ int framenum=0;
 
 void vid_begin(void){
 //  debug("vid_begin\n");
-  framenum=(framenum+1)%2;
-	fb.enabled=!framenum;
+    framenum=(framenum+1)%2;
+    fb.enabled=!framenum;
 }
 void vid_end(void){
 //  debug("vid_end\n");
