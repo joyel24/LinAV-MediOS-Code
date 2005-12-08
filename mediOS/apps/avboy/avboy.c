@@ -1,4 +1,4 @@
-/* 
+/*
 *   apps/avboy/avboy.c
 *
 *   MediOS project
@@ -13,7 +13,7 @@
 *  Date:     18/10/2005
 * Author:   GliGli
 
-*  Modified by CjNr11 06/12/2005
+*  Modified by CjNr11 08/12/2005
 */
 
 
@@ -61,7 +61,8 @@ int _start(int argc,char* argv)
     char * rom;
     open_graphics();
     OSD_BITMAP1_ADDRESS = getBufferOffset(BMAP1);
-    setSize(BMAP1,160,144,8);    
+    setSize(BMAP1,160,144,8);
+    setPos(BMAP1,80,48);    
     
     fillRect(0x00,0,0,160,144);
     
@@ -70,7 +71,7 @@ int _start(int argc,char* argv)
     vid_init();
     pcm_init();
     
-    rom = (char *)malloc(MAX_PATH);
+    rom = (char *)bget(MAX_PATH);
     
     browser(rom);
     printf("Rom name : %s\n",rom);
@@ -102,11 +103,12 @@ void vid_init(void){
 }
 
 int framenum=0;
+int frameskip=1;
 
 void vid_begin(void){
 //  debug("vid_begin\n");
-    framenum=(framenum+1)%2;
-    fb.enabled=!framenum;
+  framenum=(framenum+1)%(frameskip+1);
+	fb.enabled=!framenum;
 }
 void vid_end(void){
 //  debug("vid_end\n");

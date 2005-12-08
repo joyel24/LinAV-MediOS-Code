@@ -1,4 +1,4 @@
-/* 
+/*
 *   apps/avboy/menu.c
 *
 *   MediOS project
@@ -9,17 +9,12 @@
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
 * Gameboy / Color Gameboy emulator (port of gnuboy)
-* 
-*  Date:     18/10/2005
-* Author:   GliGli
-
-*  Modified by CjNr11 06/12/2005
 */
 
 /*********************************************************************/
 /* menu.c - user menu for rockboy                                    */
 /*                                                                   */
-/* Modified by CjNr11 07/12/2005                                     */
+/* Modified by CjNr11 08/12/2005                                     */
 /*********************************************************************/
 
 #include <sys_def/ctype.h>
@@ -45,6 +40,8 @@
 #define OSD_BITMAP1_HEIGHT 144
 
 #define USER_MENU_QUIT -2
+
+extern int frameskip;
 
 /* load/save state function declarations */
 static void do_slot_menu(bool is_load);
@@ -104,11 +101,13 @@ static const char *slot_menu[] = {
 
 #define OPT_MENU_TITLE "Options"
 typedef enum {
+  OM_ITEM_FRAME,
   OM_ITEM_BACK,
   OM_MENU_LAST
 } OptMenuItem;
 
 static const char *opt_menu[] = {
+  "Frameskip       ",
   "Previous Menu..."
 };
 
@@ -303,7 +302,7 @@ static void do_slot_menu(bool is_load) {
   /* create menu items (the last two are file and previous menu,
    * so don't populate those) */
   for (i = 0; i < num_items - 1; i++)
-    slot_info((char*) slot_menu[i], 20, i);
+    slot_info((char*) slot_menu[i], 17, i);
 
   /* set menu title */
   if(is_load) title = "Load State";
@@ -334,11 +333,21 @@ static void do_opt_menu(void) {
   /* set a couple of defaults */
   num_items = sizeof(opt_menu) / sizeof(char*);
   mi = 0;
-  
+  snprintf((char *)opt_menu[0], 17, "Frameskip      %1d", frameskip);
   while (!done) {
     mi = do_menu(OPT_MENU_TITLE, (char**) opt_menu, num_items, mi);
-    if (mi == MENU_CANCEL || mi == OM_ITEM_BACK)
-      done = true;
+    switch(mi) {
+      case OM_ITEM_FRAME:
+        frameskip=(frameskip+1)%10;
+        snprintf((char *)opt_menu[0], 17, "Frameskip      %1d", frameskip);
+        break;
+      case MENU_CANCEL:
+        done = true;
+        break;
+      case OM_ITEM_BACK:
+        done = true;
+        break;
+    }
   }
 }
 
