@@ -6,25 +6,9 @@ GCCFLAGS = -Wall -mlong-calls  -nostdlib -fno-builtin  -mcpu=arm7tdmi -Os
 
 ASFLAGS = -mfpu=softfpa
 
-# target AV3XX or GMINI4XX
-
-TARGET_DEVICE = AV3XX
 
 GCCFLAGS += -D$(TARGET_DEVICE)
 ASFLAGS  += --defsym $(TARGET_DEVICE)=1
-
-#other config
-# HAVE_BAT_POWER has to be set atm, it is used to turn off lcd, HD and device
-HAVE_BAT_POWER = 1
-# if HAVE_USB_FW is not set, HD timer might mess with USB when USB is plugged and enable
-HAVE_USB_FW = 0
-HAVE_EXT_MODULE = 1
-HAVE_FM_REMOTE = 1
-HAVE_SOUND = 0
-HAVE_CMD_LINE = 1
-HAVE_EVT = 1
-HAVE_DVR = 1
-
 
 ifeq ($(HAVE_BAT_POWER),1)
 	GCCFLAGS += -DHAVE_BAT_POWER
