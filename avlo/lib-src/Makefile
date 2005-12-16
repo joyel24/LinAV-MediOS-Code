@@ -1,49 +1,30 @@
 # Lib makefile 
+include ../Makefile.conf
 
-TOOL=arm-linux
-
-GCC=$(TOOL)-gcc
-LD=$(TOOL)-ld
-AR=$(TOOL)-ar
-AS=$(TOOL)-as
-OBJCOPY= $(TOOL)-objcopy
-RANLIB=$(TOOL)-ranlib
-RM=rm
-CP=cp
-MV=mv
+ASFLAGS  += -I../include
+GCCFLAGS += -I../include
 
 TARGET=libav.a
 DEST=../build/lib
 
 SRC1 = $(wildcard *.c)
 OBJS1 = $(SRC1:%.c=%.o)
-SRC2 = $(wildcard *.S)
-OBJS2 = $(SRC2:%.S=%.O)
+SRC2 = $(wildcard *.s)
+OBJS2 = $(SRC2:%.s=%.o)
 OBJS=$(OBJS1) $(OBJS2)
 
-GCCFLAGS = -Wa,-R -fno-zero-initialized-in-bss -Wall -I../include -static-libgcc
-ASFLAGS  = -mfpu=softfpa
+SUBDIRS = fonts/ target/
 
 all: $(TARGET)
 
-$(TARGET): fontDir $(OBJS)
-	$(AR) -rc $(TARGET) $(OBJS) fonts/*.o
+$(TARGET): subdirs $(OBJS)
+	$(AR) -rc $(TARGET) $(OBJS) fonts/*.o target/arch/*.o
 	$(RANLIB) $(TARGET)
-	@$(MV) $(TARGET) $(DEST)
+	$(MV) $(TARGET) $(DEST)
 
-fontDir:
-	@$(MAKE) -C fonts/ all
+clean: clean-subdirs   
+	@rm -f *.o *.O *.bak *~ $(BUILD_DIR)/lib-src/$(TARGET)
         
-clean:    
-	@rm -f *.o *.O *.bak *~ $(BUILD_DIR)/lib/$(TARGET)
-	@$(MAKE) -C fonts/ clean
-        
-.SUFFIXES: .c .S .O .o
-
-.S.O:
-	$(AS) $(ASFLAGS) -o $@ $<
-        
-.c.o:
-	$(GCC) $(GCCFLAGS) -c -o $@ $<
+include ../default.rule
 
 # End of Makefile

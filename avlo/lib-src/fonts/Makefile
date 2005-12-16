@@ -1,32 +1,23 @@
 
-TOOL=arm-linux
+include ../../Makefile.conf
 
-GCC=$(TOOL)-gcc
-LD=$(TOOL)-ld
-AR=$(TOOL)-ar
-AS=$(TOOL)-as
-OBJCOPY= $(TOOL)-objcopy
-RANLIB=$(TOOL)-ranlib
-RM=rm
-CP=cp
+ASFLAGS  += -I../../include
+GCCFLAGS += -I../../include
 
-TARGET=avLib.a
-DEST=../build/lib
+FONT_LIST = 6x9 8x13
 
-SRC = $(wildcard *.c)
-OBJS = $(SRC:%.c=%.o)
+OBJS = $(FONT_LIST:%=%.o)
 
-GCCFLAGS = -Wa,-R -fno-zero-initialized-in-bss -Wall -I../../include -static-libgcc
-ASFLAGS  = -mfpu=softfpa
+OPT = $(OBJS:%.o=-D_std%)
 
+all: $(OBJS) font
+	@cp -f $(OBJS) ../
 
-# State the object files that the main target is made up of
-all: $(OBJS)
+font:
+	$(GCC) $(GCCFLAGS) -c -o font.o font.c $(OPT)
+	@cp -f font.o ../
+        
+clean: 
+	@rm -f *.o *.bak *~ *.gdb
 
-clean:    
-	@rm -f *.o *.O *.bak *~
-
-.c.o:
-	$(GCC) $(GCCFLAGS) -c -o $@ $<
-
-# DO NOT DELETE
+include ../../default.rule
