@@ -1,61 +1,51 @@
-#include "string.h"
+/*
+*   loader/avlo.c
+*
+*   AvLo - linav project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*/
+
+#include <string.h>
 #include <ata.h>
 #include <fat.h>
-#include <file.h>
-#include <system.h>
-#include <graphics.h>
-#include <osdDSC25.h>
-#include <buttons.h>
-#include <fonts.h>
-#include <debug.h>
-#include <usb.h>
-#include <timers.h>
+#include <fs_io.h>
+#include <disk.h>
+#include <irq.h>
+#include <kernel.h>
 
-#include "parse_cfg.h"
+#include <graphics.h>
+#include <buttons.h>
+#include <font.h>
+#include <osd.h>
+
+#include <colordef.h>
+
+#include <parse_cfg.h>
+
+#include <avlo.h>
 
 #define MAX_OFF_PRESS    500
 #define MAX_REPEAT       1000
 #define MAX_DELAY        25000
 
-#define __clf()                            \
-    ({                            \
-        unsigned long temp;                \
-    __asm__ __volatile__(                    \
-    "mrs    %0, cpsr        @ clf\n"        \
-"    orr    %0, %0, #64\n"                    \
-"    msr    cpsr_c, %0"                    \
-    : "=r" (temp)                        \
-    :                            \
-    : "memory");                        \
-    })
+#define COLOR_TSP      COLOR_BLACK
+#define COLOR_TXT      COLOR_WHITE
+#define COLOR_BOX      COLOR_BLUE
+#define COLOR_SEL      COLOR_RED
+#define COLOR_LOAD     COLOR_RED3
+#define COLOR_WAIT     COLOR_ORANGE
+#define COLOR_BOX_BAR  COLOR_DARK_GRAY
 
-#define __cli()							\
-	({							\
-		unsigned long temp;				\
-	__asm__ __volatile__(					\
-	"mrs	%0, cpsr		@ cli\n"		\
-"	orr	%0, %0, #128\n"					\
-"	msr	cpsr_c, %0"					\
-	: "=r" (temp)						\
-	:							\
-	: "memory");						\
-	})   
-    
-
-//#define COLOR_TSP    0x0000
-int COLOR_TSP=         0x0000;
-#define COLOR_TXT      0xffff
-#define COLOR_BOX      0xD6D6
-#define COLOR_SEL      0x0101
-#define COLOR_LOAD     0x2525
-#define COLOR_WAIT     0x0909
-#define COLOR_BOX_BAR  0x0C0C
-
-#define COLOR_MSG_BOX_0 0xA6A6
-#define COLOR_MSG_BOX_1 0xC6C6
+#define COLOR_MSG_BOX_0 COLOR_DARK_GRAY
+#define COLOR_MSG_BOX_1 COLOR_GRAY
 
 #define ENTRY_X      117
-#define ENTRY_Y      53
+#define ENTRY_Y      54
 #define STATUS_X     75
 #define STATUS_Y     227
 #define BAR_X        60
@@ -63,21 +53,11 @@ int COLOR_TSP=         0x0000;
 #define BAR_W        (320-2*BAR_X)
 #define BAR_H        5
 
-#define BTM_TXT      "V2.0 | image: "
-        
-/**************************************************************
-***************************************************************
-I should remove return -1 with clean halt
-***************************************************************
-**************************************************************/
+#define BTM_TXT      "V3.0 | image: "
 
-static struct graphicsBuffer screenBitmap2;
-//static unsigned int * screenDirect = (unsigned int*) 0x03a00000;
-static unsigned char * screenDirect = (unsigned char*) 0x03a00000;
-static int pal32[2] = {0x6c706c93, 0xffffffff};
-static int pal16[2] = {0x0000, COLOR_TXT};
-static struct graphicsBuffer sprite6_9 = {0, 1, 6, 9, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
-static struct graphicsBuffer sprite8_13 = {0, 1, 8, 13, 1, 0, -1, 0, 0, 0, 0, (int**) &pal16, (int**) &pal32};
+#define NO_TIME_OUT    0
+#define WITH_TIME_OUT  1
+
 void (*binCaller)(char * param)=(void (*)(char *))0x03000000;
 
 struct config_image cfg[MAX_CFG];
@@ -90,22 +70,6 @@ char * errorMsg[]={
 "Bad config file (avlo.cfg)",             /*err(3)*/
 };
 
-int  iniHD();
-void moveCursor(int direction);
-void err(int i);
-void iniGraph();
-void affUSB();
-void drawMenu();
-int  processDefault(int key,int nbCfg);
-void printErr(int key);
-void waitKeyReleased(void);
-void chkOFF(int key);
-void drawProgress(int offset,int length,int mode);
-void drawBox(void);
-
-//extern int loadCJBM(char * filename,char * key);
-int fastLoadCJBM(char * filename);
-
 int usbstate,usbenable=0,cleanUSBMsg=0;
 int chkdefault,cnt=0,cursorPos=0,delayCnt;
 int errNoDefault=0,cntNoDefault=0,stateNoDefault=0;
@@ -114,151 +78,140 @@ int * wdt = (int*)0x30a1a;
 int maxRepeat;
 char tmp_txt[100];
 
-#ifdef INCLUDE_IMG
 extern char bg_img[320*4*240];
-#else
-char *bg_img=0x03b00000;
-#endif
 
-int main(int argc,char **argv)
+void start_avlo(void)
 {
     int ret,nbCfg,key,redraw;
-    int i,j,val;
-    int * ptrScreen=(int*)screenDirect;
+    int i;
+    int x,y,h,w;
+    printf("In main AVLO\n");
+    init_cpld();
+
     
-    void (*systemRelocateAdjusted)();
 
-        systemRelocateAdjusted = systemRelocateMeA - 0x00400000;    
-        systemRelocateAdjusted();
-loopErr:  
-  
-pal16[0] = COLOR_TSP;
+    ini_graphics((unsigned int)bg_img);
+    printf("bg @ 0x%x\n",bg_img);
+    print_data(bg_img,0x50);
+    ini_font();
+    setPlane(BMAP1);
+    setState(BMAP1,OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 |OSD_BITMAP_8BIT|OSD_BITMAP_0TRANS);
+    
+    showPlane(VID1);
+    showPlane(BMAP1);
 
+loopErr:
+    usbenable=0;cleanUSBMsg=0;cnt=0;cursorPos=0;errNoDefault=0;cntNoDefault=0;stateNoDefault=0;nbOff=0;
+    clearScreen(COLOR_TSP);
+    setFont(STD8X13);
+    printf("A\n");
+    putS(COLOR_TXT,COLOR_TSP,0,0,"A");
+    
+    getStringS("HD Init",&w,&h);                        
+    drawBox(w,2*h,&x,&y);
+    putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"HD Init");
+    
+    init_disk();
 
-usbenable=0;cleanUSBMsg=0;cnt=0;cursorPos=0;errNoDefault=0;cntNoDefault=0;stateNoDefault=0;nbOff=0;
-    iniGraph();
-   
-    if(iniHD()<0)
-        goto loopErr;
-#ifndef INCLUDE_IMG      
-    if (loadFile("/avlo.img",bg_img,0))
-    {
-        osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
-        COLOR_TSP=0x0000;
-    }
-    else
-    {
-        COLOR_TSP=0xA6A6;
-        pal16[0] = COLOR_TSP;
-        val=COLOR_TSP | (COLOR_TSP<<8) | (COLOR_TSP<<16) | (COLOR_TSP<<24);
-        j=(240*320*2)/4;
-        for(i=0;i<j;i++)                
-            ptrScreen[i] = val;
-        
-        graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader by OxyGen"); 
-    }
-#endif  
+    printf("AV\n");
+    setFont(STD8X13);
+    putS(COLOR_TXT,COLOR_TSP,0,0,"AV");
+
 loop:
     if((ret=file_open("/avlo.cfg"))<0)
     {
         err(2);
-        goto loopErr;
+        goto loopErr;        
     }
 
-    pal32[0] = 0x6c706c93;
-    pal32[1] = 0xffffffff;
-        
-    pal16[0] = COLOR_TSP;
-    pal16[1] = COLOR_TXT;
-    
-    graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AVL");
-        
-    
-    
-    if((nbCfg=do_parse(&cfg,&cfgG))<0)
+    printf("AVL\n");
+    setFont(STD8X13);
+    putS(COLOR_TXT,COLOR_TSP,0,0,"AVL");
+
+
+    if((nbCfg=do_parse(cfg,&cfgG))<0)
     {
-        debug("Error getting config info\n");
+        printf("Error getting config info\n");
         err(3);
         goto loopErr;
     }
-    
-    file_close();    
-    
+
+    file_close();
+
     chkdefault=(!cfgG.defBin[0]==0);
-    
+
     if(cfgG.repeat==0)
-    	maxRepeat=MAX_REPEAT;
+        maxRepeat=MAX_REPEAT;
     else
-    	maxRepeat=cfgG.repeat;
-        
+        maxRepeat=cfgG.repeat;
+
     if(cfgG.timeOut==0)
-    	delayCnt=MAX_DELAY;
+        delayCnt=MAX_DELAY;
     else
-    	delayCnt=cfgG.timeOut;
-       
-    //debug("Gal opt:\n -default=%s,\n-key=%s,\n-repeat=%d,\n-time out=%d\n",cfgG.defBin,cfgG.key,maxRepeat,delayCnt);
-    debug("Gal opt:\n -default=%s,\n-repeat=%d,\n-time out=%d\n",cfgG.defBin,maxRepeat,delayCnt);
-        
-    graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AVLO");
-        
-    //graphicsStringA(&screenBitmap2, 20, 20, &sprite8_13, std8x13_, 8, 0,"Av3xx Loader Version 1.2 by OxyGen");    
-        
-    //graphicsStringA(&screenBitmap2, 70, STATUS_Y, &sprite8_13, std8x13_, 8, 0,"V2.0|image:");
-    
-    usbstate=!usbIsConnectedA();
-    
+        delayCnt=cfgG.timeOut;
+
+    printf("Gal opt:\n-default=%s (=>%s),\n-repeat=%d,\n-time out=%d\n",cfgG.defBin,
+        chkdefault?"has default":"no default",maxRepeat,delayCnt);
+
+    printf("AVLO\n");
+    setFont(STD8X13);
+    putS(COLOR_TXT,COLOR_TSP,0,0,"AVLO");
+
+    usbstate=usbIsConnected();
+
     redraw=1;
-        
+
     while(1)
-    {        
+    {
         if(redraw)
         {
             drawMenu(nbCfg);
             redraw=0;
         }
-        
+
         affUSB();
-        
-        key=buttonsGetStatusA();
-        
+
+        key=read_btn();
+
         if(processDefault(key,nbCfg)<0)
             goto loopErr;
-            
+
         printErr(key);
-        
-        if(key & BUTTONS_AV300_ANY)
+
+        if(key&BTMASK_ANY)
         {
-            if ((key & BUTTONS_AV300_DOWN) && !usbenable) {
+            if ((key&BTMASK_DOWN) && !usbenable) {
                 if(cursorPos<nbCfg)
                 {
-                    moveCursor(+1);                                       
+                    moveCursor(+1);
                 }
             }
-            
-            if ((key & BUTTONS_AV300_UP) && !usbenable) {
+
+            if ((key&BTMASK_UP) && !usbenable) {
                 if(cursorPos>0)
                 {
                     moveCursor(-1);
                 }
             }
-            
-            if (((key & BUTTONS_AV300_ON)||(key & BUTTONS_AV300_RIGHT)) && !usbenable) {
-            	// let's find out the file extension
+
+            if (((key&BTMASK_ON)||(key&BTMASK_RIGHT)) && !usbenable)
+            {
+                // let's find out the file extension
                 char * ext=strrchr(cfg[cursorPos].image,'.')+1;
                 int launch=0;
-                debug("loading: %s ext:%s\n",cfg[cursorPos].image,ext);
-                if(ext[0]=='a' && ext[1]=='j' && ext[2]=='z' && ext[3]=='\0' 
-                		//&& cfgG.key[0]!=0 
+                printf("loading: %s ext:%s\n",cfg[cursorPos].image,ext);
+                if(ext[0]=='a' && ext[1]=='j' && ext[2]=='z' && ext[3]=='\0'
+                        //&& cfgG.key[0]!=0
                                 //&& loadCJBM(cfg[cursorPos].image,cfgG.key))
                                 && fastLoadCJBM(cfg[cursorPos].image))
-                	launch=1;
+                    launch=1;
                 else if (loadFile(cfg[cursorPos].image,(char*)0x03000000,1))
-                	launch=1;
-                
+                    launch=1;
+
                 if(launch)
                 {
-                    debug("File loaded, now launching\n");
-                    debug("append=%s\n",cfg[cursorPos].append);
+                    printf("File loaded, now launching\n");
+                    printf("append=%s\n",cfg[cursorPos].append);
                     if(cfg[cursorPos].append[0])
                     {
                         snprintf(tmp_txt,100,"AV_Pinit=/bin/init_cust myinit=%s",cfg[cursorPos].append);
@@ -269,167 +222,161 @@ loop:
                     while(1);
                 }
                 else
-                    debug("error loading %s\n",cfg[cursorPos].image);
+                    printf("error loading %s\n",cfg[cursorPos].image);
                 redraw=1;
-            }           
-            
-            if(key & BUTTONS_AV300_MENU3)
+            }
+
+            if(key&BTMASK_MENU3)
             {
                 if(usbenable)
                 {
-                    debug("disable usb\n");
+                    printf("disable usb\n");
                     usbenable=0;
-                    usbDisableA();
-                    for(i=0;i<0x10000;i++); /* Nothing */
-                    ataPowerUpHDDA();
-                    for(i=0;i<0x10000;i++); /* Nothing */
-                    ataSelectHDDA();
-                    for(i=0;i<0x10000;i++); /* Nothing */
+                    usb_disable();
                     redraw=1;
                     cleanUSBMsg=1;
-                    waitKeyReleased();
-                    goto loop;
+                    waitKeyReleased(NO_TIME_OUT);
+                    for(i=0;i<0x10000;i++); /* Nothing */
+                    goto loopErr;
                 }
                 else
                 {
                     if(usbstate)
-                    {
-                        debug("enable usb\n");
-                        usbenable=1;
+                    {                        
+                        getStringS("USB Enable, PRESS F3 to resume",&w,&h);
                         
-                        //graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);    
-                        //drawBox();
-                        graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, COLOR_BOX);    
-                        pal32[1]=0xc476c491;
-                        pal32[0] = 0x466c4696;
-                        pal16[0] = COLOR_BOX;
-                        pal16[1] = COLOR_TXT;
-                        graphicsStringA(&screenBitmap2,   65, 115, &sprite6_9, std6x9_, 6, 0,"USB Enable, PRESS F3 to resume");
-                        usbEnableA();
-                        for(i=0;i<0x10000;i++); /* Nothing */
-                        ataPowerUpHDDA();
-                        for(i=0;i<0x10000;i++); /* Nothing */
-                        ataSelectHDDA();
-                        for(i=0;i<0x10000;i++); /* Nothing */
+                        printf("enable usb\n");
+                        usbenable=1;
+                        //fillRect(COLOR_BOX,60, 100, 200, 40);  
+                        drawBox(w,2*h,&x,&y);
+                        putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"USB Enable, PRESS F3 to resume");
+
+                        usb_enable();
+                        waitKeyReleased(NO_TIME_OUT);                        
                     }
                 }
             }
-            waitKeyReleased();
+            waitKeyReleased(WITH_TIME_OUT);
         }
     }
 }
 
-void drawBox(void)
+void drawBox(int txt_width,int txt_height,int * start_x,int * start_y)
 {
-    graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, COLOR_MSG_BOX_0);
-    graphicsBoxfA(&screenBitmap2, 61, 101, 228, 38, COLOR_MSG_BOX_1);
-    graphicsBoxfA(&screenBitmap2, 62, 102, 226, 36, COLOR_BOX);
+    *start_x = (320-(txt_width+8))/2;
+    *start_y = (240-(txt_height+8))/2;
+    drawRect(COLOR_MSG_BOX_0,*start_x,*start_y,txt_width+8,txt_height+8);
+    drawRect(COLOR_MSG_BOX_1,*start_x+1,*start_y+1,txt_width+6,txt_height+6);
+    fillRect(COLOR_BOX,*start_x+2,*start_y+2,txt_width+4,txt_height+4);
+    *start_x += 4;
+    *start_y += 4;
 }
 
-int (*decode)(char * src,char * dst)=(void (*)(char * src,char * dst))0x03F00470;
+void (*decode)(char * src,char * dst)=(void (*)(char * src,char * dst))0x03F00470;
 
 int fastLoadCJBM(char * filename)
 {
     unsigned char * cptr;
-    
+    int x,y,h,w;
+    getStringS("File Loaded, decompressing...",&w,&h);
+
     if (!loadFile(filename,(char*)0x03800000,1))
         return 0;
-    debug("File loaded, now decompressing\n");
-    //drawBox();
-    graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, COLOR_BOX);
-    pal16[0] = COLOR_BOX;
-    pal16[1] = COLOR_TXT;
-    graphicsStringA(&screenBitmap2, 65, 115, &sprite6_9, std6x9_, 6, 0,"File Loaded, decompressing...");
+    printf("File loaded, now decompressing\n");
+    //fillRect(COLOR_BOX,60, 100, 230, 40);
+    setFont(STD6X9);
+    getStringS("File Loaded, decompressing...",&w,&h);
+    drawBox(w,2*h,&x,&y);
+    putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"File Loaded, decompressing...");
     cptr=(unsigned char *)0x03F00860+0x10;
-    *cptr=0; 
-    
+    *cptr=0;
+
     decode((char*)0x03800000,(char*)0x03000000);
-    debug("decompress done\n");    
-    
+    printf("decompress done\n");
+
     return 1;
 }
 
 void moveCursor(int direction)
 {
+    int h,w;
     // unhighlight current
-    pal32[1] = 0xff80ff80;
-    pal32[0] = 0x466c4696;
-    pal16[0] = COLOR_TSP;
-    pal16[1] = COLOR_TXT;
-    graphicsStringA(&screenBitmap2, ENTRY_X, ENTRY_Y + cursorPos*9, &sprite6_9, std6x9_, 6, 0,cfg[cursorPos].label);
+    setFont(STD6X9);
+    putS(COLOR_TXT,COLOR_TSP,ENTRY_X, ENTRY_Y + cursorPos*9,cfg[cursorPos].label);
+    getStringS(cfg[cursorPos].label,&w,&h);
+    w--;
+    h--;
+    drawLine(COLOR_TSP,ENTRY_X-1,ENTRY_Y+1+ cursorPos*9,ENTRY_X-1,ENTRY_Y+h-1+ cursorPos*9);
+    drawLine(COLOR_TSP,ENTRY_X+w+1,ENTRY_Y+1+ cursorPos*9,ENTRY_X+w+1,ENTRY_Y+h-1+ cursorPos*9);
+    drawLine(COLOR_TSP,ENTRY_X-2,ENTRY_Y+2+ cursorPos*9,ENTRY_X-2,ENTRY_Y+h-2+ cursorPos*9);
+    drawLine(COLOR_TSP,ENTRY_X+w+2,ENTRY_Y+2+ cursorPos*9,ENTRY_X+w+2,ENTRY_Y+h-2+ cursorPos*9);
     // move to nxt
     cursorPos+=direction;
     // highlight nxt
-    pal16[0] = COLOR_SEL;
-    pal16[1] = COLOR_TXT;
-    pal32[1] = 0xff80ff80;
-    pal32[0] = 0x00800080;
-    graphicsStringA(&screenBitmap2, ENTRY_X, ENTRY_Y + cursorPos*9, &sprite6_9, std6x9_, 6, 0,cfg[cursorPos].label);
+    putS(COLOR_TXT,COLOR_SEL,ENTRY_X, ENTRY_Y + cursorPos*9,cfg[cursorPos].label);
+    getStringS(cfg[cursorPos].label,&w,&h);
+    w--;
+    h--;
+    drawLine(COLOR_SEL,ENTRY_X-1,ENTRY_Y+1+ cursorPos*9,ENTRY_X-1,ENTRY_Y+h-1+ cursorPos*9);
+    drawLine(COLOR_SEL,ENTRY_X+w+1,ENTRY_Y+1+ cursorPos*9,ENTRY_X+w+1,ENTRY_Y+h-1+ cursorPos*9);
+    drawLine(COLOR_SEL,ENTRY_X-2,ENTRY_Y+2+ cursorPos*9,ENTRY_X-2,ENTRY_Y+h-2+ cursorPos*9);
+    drawLine(COLOR_SEL,ENTRY_X+w+2,ENTRY_Y+2+ cursorPos*9,ENTRY_X+w+2,ENTRY_Y+h-2+ cursorPos*9);
     // change bottom status
-    pal32[1]=0xc476c491;
-    pal32[0] = 0x466c4696;
-    pal16[0] = COLOR_TSP;
-    pal16[1] = COLOR_TXT;
-    //graphicsBoxfA(&screenBitmap2, 10, 230, 280, 10, 0x466c4696);
-    graphicsBoxfA(&screenBitmap2, STATUS_X, STATUS_Y, 200, 10, COLOR_TSP);
+    fillRect(COLOR_TSP,STATUS_X, STATUS_Y, 200, 10);
     snprintf(tmp_txt,100,"%s%s",BTM_TXT,cfg[cursorPos].image);
-    graphicsStringA(&screenBitmap2, STATUS_X, STATUS_Y, &sprite6_9, std6x9_, 6, 0,tmp_txt);
+    putS(COLOR_TXT,COLOR_TSP,STATUS_X, STATUS_Y,tmp_txt);
 }
 
 void err(int i)
 {
-    int key,stop=0;
-    debug("error, let's loop\n");    
-    //graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, 0x466c4696); 
-    //drawBox();
-    graphicsBoxfA(&screenBitmap2, 60, 100, 230, 40, COLOR_BOX); 
-    pal32[1]=0xc476c491;
-    pal32[0] = 0x466c4696;
-    pal16[0] = COLOR_BOX;
-    pal16[1] = COLOR_TXT;
-    graphicsStringA(&screenBitmap2, 65, 105, &sprite6_9, std6x9_, 6, 0,errorMsg[i]);
-    graphicsStringA(&screenBitmap2, 65, 115, &sprite6_9, std6x9_, 6, 0,"USB is enable, you can access the HD");
-    graphicsStringA(&screenBitmap2, 65, 125, &sprite6_9, std6x9_, 6, 0,"Press a key to retry");
-    usbEnableA();
+    int key=0;
+    int x,y,h,w;
+    
+    printf("error, let's loop\n");
+
+    //fillRect(COLOR_BOX,60, 100, 230, 40);
+    setFont(STD6X9);    
+    getStringS("USB is enable, you can access the HD",&w,&h);
+    drawBox(w,3*h,&x,&y);
+    putS(COLOR_TXT,COLOR_BOX,x,y,errorMsg[i]);
+    putS(COLOR_TXT,COLOR_BOX,x,y+h,"USB is enable, you can access the HD");
+    putS(COLOR_TXT,COLOR_BOX,x,y+2*h,"Press a key to retry");
+    usb_enable();
     usbenable=1;
     while(1)
     {
-        key=buttonsGetStatusA();
-        if(key & BUTTONS_AV300_ANY)
+        key=read_btn();
+        if(key&BTMASK_ANY)
         {
-            if(key & BUTTONS_AV300_OFF)
+            if(key&BTMASK_OFF)
                 chkOFF(key);
             else
                 break;
         }
-    }   
+    }
 }
 
 void chkOFF(int key)
 {
     int i;
-    if (key & BUTTONS_AV300_OFF)
+    int x,y,h,w;
+    if (key&BTMASK_OFF)
     {
         nbOff++;
         if(nbOff>MAX_OFF_PRESS)
         {
-            //graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x466c4696);   
-            //drawBox(); 
-            graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, COLOR_BOX);    
-            pal32[1]=0xc476c491;
-            pal32[0] = 0x466c4696;
-            pal16[0] = COLOR_BOX;
-            pal16[1] = COLOR_TXT;
-            graphicsStringA(&screenBitmap2,   65, 115, &sprite6_9, std6x9_, 6, 0,"Shutting down NOW !!");    
+            //fillRect(COLOR_BOX,60, 100, 200, 40);
+            setFont(STD6X9);    
+            getStringS("Shutting down NOW !!",&w,&h);
+            drawBox(w,2*h,&x,&y);
+            putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"Shutting down NOW !!");
+            printf("Shutting down NOW !!\n");
             if(usbenable)
             {
-                usbDisableA();
-            	for(i=0;i<0x14000;i++); /* Nothing */
+                usb_disable();
+                for(i=0;i<0x14000;i++); /* Nothing */
             }
-            ataSleepCmdA();
-            for(i=0;i<0x14000;i++); /* Nothing */
-            ataPowerDownHDDA();
-            //for(i=0;i<1000;i++); /* Nothing */
+           ata_stop_HD();
             __clf();
             while(1) *wdt=0;
         }
@@ -438,120 +385,34 @@ void chkOFF(int key)
         nbOff=0;
 }
 
-void waitKeyReleased(void)
+void waitKeyReleased(int has_time_out)
 {
     int key;
     int nbPressed=0;;
-    key=buttonsGetStatusA();
-    while(key&BUTTONS_AV300_ANY && nbPressed < maxRepeat)
-    {        
-        /*if(key&BUTTONS_AV300_UP || key&BUTTONS_AV300_DOWN)
-        	nbPressed++;*/
+    key=read_btn();
+    while((key&BTMASK_ANY) && nbPressed < maxRepeat)
+    {
         chkOFF(key);
-        key=buttonsGetStatusA();
+        key=read_btn();
+        if(has_time_out)
+            nbPressed++;
     }
     for(key=0;key<100;key++) /* nothing */;
 }
 
-void iniGraph()
-{
-    int i,j,val;
-    int * ptr=(int*)screenDirect;
-    
-    osdInitA();
-    
-    osdSetComponentConfigA(OSD_VIDEO1, 0);
-    osdSetComponentConfigA(OSD_VIDEO2, 0);
-    osdSetComponentConfigA(OSD_BITMAP1, 0);
-    osdSetComponentConfigA(OSD_BITMAP2, 0);
-    osdSetComponentConfigA(OSD_CURSOR1, 0);
-    osdSetComponentConfigA(OSD_CURSOR2, 0);
-    
-    /*screenBitmap2.offset = 0x03a00000;
-        screenBitmap2.bytesPerLine = 320*4;
-        screenBitmap2.width = 320;
-        screenBitmap2.height =240;
-        screenBitmap2.bitsPerPixelShift = 5;
-        screenBitmap2.bitsPerPixel = 32;*/
-        
-    screenBitmap2.offset = 0x03a00000;
-    screenBitmap2.bytesPerLine = 320*2;
-    screenBitmap2.width = 320;
-    screenBitmap2.height = 240;
-    screenBitmap2.bitsPerPixelShift = 4;
-    screenBitmap2.bitsPerPixel = 16;
-    
-    val=COLOR_TSP | (COLOR_TSP<<8) | (COLOR_TSP<<16) | (COLOR_TSP<<24);
-    j=(240*320*2)/4;
-    for(i=0;i<j;i++)                
-        ptr[i] = val;//0x6c706c93;
-    
-    osdSetComponentSizeA(OSD_VIDEO1, 320*2, 240);
-    osdSetComponentPositionA(OSD_VIDEO1, 0x14, 0x12);
-    osdSetComponentOffsetA(OSD_VIDEO1, (int)bg_img);
-    osdSetComponentSourceWidthA(OSD_VIDEO1, 0x28);
-#ifdef INCLUDE_IMG    
-    osdSetComponentConfigA(OSD_VIDEO1, OSD_COMPONENT_ENABLE);
-#endif
-    osdSetComponentSizeA(OSD_BITMAP1, 320*2, 240);
-    osdSetComponentPositionA(OSD_BITMAP1, 0x14, 0x13);
-    osdSetComponentOffsetA(OSD_BITMAP1, 0x03a00000);
-    osdSetComponentSourceWidthA(OSD_BITMAP1, 0x14);
-    osdSetComponentConfigA(OSD_BITMAP1, OSD_COMPONENT_ENABLE
-                                     | OSD_BITMAP_8BIT
-                                     | OSD_BITMAP_0TRANS
-                                     );
-                                     
-                                   
-    
-}
-
-int iniHD(void)
-{
-    int fatHD,c;
-    
-    graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"A");
-    
-    inifile();
-    inidir();
-    inifatinfo();
-    
-    usbDisableA();
-    for (c=0;c<0x1000;c++) {}
-    ataSelectHDDA();
-    for (c=0;c<0x1000;c++) {}
-    usbEnableA();
-    for (c=0;c<0x1000;c++) {}
-    ataPowerUpHDDA();
-    for (c=0;c<0x1000;c++) {}
-    usbDisableA();
-    for (c=0;c<0x14000;c++) {}
-    ataReadMBR();
-    
-    
-    if((fatHD = fatInit(getPartition(0)))<0)
-    {
-        err(0);
-        return -1;
-    }
-    
-    graphicsStringA(&screenBitmap2, 0, 0, &sprite8_13, std8x13_, 8, 0,"AV");
-    return 0;
-}
-
 void affUSB(void)
 {
-    if(usbstate != usbIsConnectedA())
+    if(usbstate != usbIsConnected())
     {
-        usbstate=usbIsConnectedA();
+        usbstate=usbIsConnected();
         if(usbstate)
         {
-            graphicsStringA(&screenBitmap2, 290, STATUS_Y, &sprite6_9, std6x9_, 6, 0,"USB");
+            setFont(STD6X9);
+            putS(COLOR_TXT,0x0,290,STATUS_Y,"USB");
         }
         else
         {
-            //graphicsBoxfA(&screenBitmap2, 290, 230, 20, 10, 0x466c4696);
-            graphicsBoxfA(&screenBitmap2, 290, STATUS_Y, 20, 10, COLOR_TSP);
+            fillRect(COLOR_TSP,290, STATUS_Y, 20, 10);
         }
     }
 }
@@ -561,12 +422,10 @@ int processDefault(int key,int nbCfg)
     int pos;
     if(chkdefault)
     {
-        if(!(key & BUTTONS_AV300_ANY) && cnt < delayCnt)
-            //graphicsBoxfA(&screenBitmap2, (320*(cnt++))/delayCnt, 210, 1, 5, 0x466c4696);
-            graphicsBoxfA(&screenBitmap2, BAR_X+(BAR_W*(cnt++))/delayCnt, BAR_Y, 1, BAR_H, COLOR_WAIT);
-
+        if(!(key&BTMASK_ANY) && cnt < delayCnt)
+            fillRect(COLOR_WAIT,BAR_X+(BAR_W*(cnt++))/delayCnt, BAR_Y, 1, BAR_H);
         if(cnt==delayCnt)
-        {    
+        {
             pos=0;
             while(pos<nbCfg+1 && strcmp(cfg[pos].label,cfgG.defBin))
                 pos++;
@@ -574,7 +433,7 @@ int processDefault(int key,int nbCfg)
             {
                 if(loadFile(cfg[pos].image,(char*)0x03000000,1))
                 {
-                    debug("append=%s\n",cfg[pos].append);
+                    printf("append=%s\n",cfg[pos].append);
                     if(cfg[pos].append[0])
                     {
                         snprintf(tmp_txt,100,"AV_Pinit=/bin/init_cust myinit=%s",cfg[pos].append);
@@ -586,19 +445,18 @@ int processDefault(int key,int nbCfg)
                     return -1;
                 }
                 else
-                    debug("error loading %s\n",cfg[cursorPos].image);
+                    printf("error loading %s\n",cfg[cursorPos].image);
             }
-            
+
             errNoDefault=1;
             chkdefault=0;
             cnt=0;
-            
+
         }
-        
-        if(key & BUTTONS_AV300_ANY)
+
+        if(key&BTMASK_ANY)
         {
-            //graphicsBoxfA(&screenBitmap2, 0, 210, 320, 5, 0x6c706c93);
-            graphicsBoxfA(&screenBitmap2, BAR_X, BAR_Y, BAR_W, BAR_H, COLOR_TSP);
+            fillRect(COLOR_TSP,BAR_X, BAR_Y, BAR_W, BAR_H);
             chkdefault=0;
             cnt=0;
         }
@@ -608,12 +466,10 @@ int processDefault(int key,int nbCfg)
 
 void drawProgress(int offset,int length,int mode)
 {
-	if(mode)
-            //graphicsBoxfA(&screenBitmap2, 10+(300*offset)/length, 210, 1 , 5, 0xffffffff);
-            graphicsBoxfA(&screenBitmap2, BAR_X+(BAR_W*offset)/length, BAR_Y, 1 , BAR_H, COLOR_LOAD);
-        else
-            //graphicsBoxfA(&screenBitmap2, 10, 210, (300*offset)/length+1 , 5, 0xffffffff);
-            graphicsBoxfA(&screenBitmap2, BAR_X, BAR_Y, (BAR_W*offset)/length+1 , BAR_H, COLOR_LOAD);
+    if(mode)
+        fillRect(COLOR_LOAD,BAR_X+(BAR_W*offset)/length, BAR_Y, 1 , BAR_H);
+    else
+        fillRect(COLOR_LOAD,BAR_X,BAR_Y, (BAR_W*offset)/length+1 , BAR_H);
 }
 
 void printErr(int key)
@@ -626,27 +482,20 @@ void printErr(int key)
         {
             if(stateNoDefault)
             {
-                //graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, 0x6c706c93);
-                graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, COLOR_TSP);
+                fillRect(COLOR_TSP,0, 210, 320, 10);
             }
             else
             {
-                //graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, 0x6c706c93);
-                graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, COLOR_TSP);
-                pal32[1]=0xc476c491;
-                pal32[0] = 0x6c706c93;//0x466c4696;
-                pal16[0] = COLOR_TSP;
-                pal16[1] = COLOR_TXT;
-                graphicsStringA(&screenBitmap2, 80, 210, &sprite6_9, std6x9_, 6, 0,"default image can't be found");
+                fillRect(COLOR_TSP,0, 210, 320, 10);
+                putS(COLOR_TXT,COLOR_TSP,80,210,"default image can't be found");
             }
             stateNoDefault=!stateNoDefault;
             cntNoDefault=0;
         }
-        
-        if(key & BUTTONS_AV300_ANY)
+
+        if(key & BTMASK_ANY)
         {
-            //graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, 0x6c706c93);
-            graphicsBoxfA(&screenBitmap2, 0, 210, 320, 10, COLOR_TSP);
+            fillRect(COLOR_TSP,0, 210, 320, 10);
             errNoDefault=0;
         }
     }
@@ -655,49 +504,83 @@ void printErr(int key)
 void drawMenu(int nbCfg)
 {
     int pos;
-    
+    int bg_color;
+    int w,h;
+
     // clean AVLO txt */
-    graphicsBoxfA(&screenBitmap2, 0, 0, 40, 20, COLOR_TSP);
-    
+    clearScreen(COLOR_TSP);
+
     if(cleanUSBMsg)
     {
-        //graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, 0x6c706c93);
-        graphicsBoxfA(&screenBitmap2, 60, 100, 200, 40, COLOR_TSP);
+        fillRect(COLOR_TSP,60, 100, 200, 40);
         cleanUSBMsg=0;
     }
-    //graphicsBoxfA(&screenBitmap2, 110, 52, 100, 100, 0x466c4696);
-    graphicsBoxfA(&screenBitmap2, ENTRY_X, ENTRY_Y, 100-7, 100-7, COLOR_TSP);
-    
-    graphicsBoxfA(&screenBitmap2, BAR_X-2, BAR_Y-2, BAR_W+4, BAR_H+4,COLOR_BOX_BAR);
-    graphicsBoxfA(&screenBitmap2, BAR_X, BAR_Y, BAR_W, BAR_H,COLOR_TSP);
-    
+
+    fillRect(COLOR_TSP,ENTRY_X, ENTRY_Y, 100-7, 100-7);
+
+    drawRect(COLOR_MSG_BOX_0,BAR_X-2,BAR_Y-2,BAR_W+4,BAR_H+4);
+    drawRect(COLOR_MSG_BOX_1,BAR_X-1,BAR_Y-1,BAR_W+2,BAR_H+2);
+    fillRect(COLOR_TSP,BAR_X, BAR_Y, BAR_W, BAR_H);
+
     for(pos=0;pos<nbCfg+1;pos++)
     {
-        pal32[1] = 0xff80ff80;
-        pal16[1] = COLOR_TXT;
         if (pos==cursorPos)
         {
-            pal32[0] = 0x00800080;
-            pal16[0] = COLOR_SEL;
+            bg_color = COLOR_SEL;            
         }
         else
         {
-            pal32[0] = 0x466c4696;
-            pal16[0] = COLOR_TSP;
+            bg_color = COLOR_TSP;
         }
-            
-        graphicsStringA(&screenBitmap2, ENTRY_X, ENTRY_Y + pos*9, &sprite6_9, std6x9_, 6, 0,cfg[pos].label);
-        
+
+        setFont(STD6X9);
+        putS(COLOR_TXT,bg_color,ENTRY_X, ENTRY_Y + pos*9,cfg[pos].label);
+
         if(pos==cursorPos)
         {
-            pal32[1]=0xc476c491;
-            pal32[0] = 0x466c4696;
-            pal16[0] = COLOR_TSP;
-            pal16[1] = COLOR_TXT;
-            //graphicsBoxfA(&screenBitmap2, 10, 230, 280, 10, 0x466c4696);
-            graphicsBoxfA(&screenBitmap2, STATUS_X, STATUS_Y, 200, 10, COLOR_TSP);
+            getStringS(cfg[cursorPos].label,&w,&h);
+            w--;
+            h--;
+            drawLine(COLOR_SEL,ENTRY_X-1,ENTRY_Y+1+ cursorPos*9,ENTRY_X-1,ENTRY_Y+h-1+ cursorPos*9);
+            drawLine(COLOR_SEL,ENTRY_X+w+1,ENTRY_Y+1+ cursorPos*9,ENTRY_X+w+1,ENTRY_Y+h-1+ cursorPos*9);
+            drawLine(COLOR_SEL,ENTRY_X-2,ENTRY_Y+2+ cursorPos*9,ENTRY_X-2,ENTRY_Y+h-2+ cursorPos*9);
+            drawLine(COLOR_SEL,ENTRY_X+w+2,ENTRY_Y+2+ cursorPos*9,ENTRY_X+w+2,ENTRY_Y+h-2+ cursorPos*9);
+            fillRect(COLOR_TSP,STATUS_X, STATUS_Y, 200, 10);
             snprintf(tmp_txt,100,"%s%s",BTM_TXT,cfg[pos].image);
-            graphicsStringA(&screenBitmap2, STATUS_X, STATUS_Y, &sprite6_9, std6x9_, 6, 0,tmp_txt);
+            putS(COLOR_TXT,COLOR_TSP,STATUS_X, STATUS_Y,tmp_txt);
         }
+    }
+}
+
+int loadFile(char * fileN,char* buffer,int prog)
+{
+    int curFile;
+    int offset=0;
+    int size;
+    int clustSize;
+
+    curFile=fopen(fileN,O_RDONLY);
+    printf("openFile(): %d\n",curFile);
+
+
+    if(curFile>=0)
+    {
+        size=filesize(curFile);
+        printf("file size:%d\n",size);
+        clustSize=getClusterSize(0); /* volume 0 */
+
+        while((fread(curFile,&buffer[offset],clustSize))>0)
+        {
+            if(prog)
+                drawProgress(offset,size,0);
+            offset+=clustSize;
+        }
+        fclose(curFile);
+        return 1;
+    }
+    else
+    {
+        printf("Error loading file\n");
+        return 0;
     }
 }

@@ -1,8 +1,7 @@
 
 .text
-#ifdef INCLUDE_IMG
-.align 4
+.align 8
 .globl bg_img
 bg_img:
 .incbin "img.inc"
-#endif
+

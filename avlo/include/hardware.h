@@ -1,5 +1,5 @@
 /*
-*   include/file.h
+*   include/hardware.h
 *
 *   AvLo - linav project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,22 +10,12 @@
 * KIND, either express of implied.
 */
 
-#ifndef __FILE_H_
-#define __FILE_H_
+#ifndef __HARDWARE_H
+#define __HARDWARE_H
 
-#define MAX_PATH 260
+#include <io.h>
+#include <cpld.h>
 
-#define SEEK_SET 0
-#define SEEK_CUR 1
-#define SEEK_END 2
+#include <target/arch/arch_def.h>
 
-#define O_RDONLY 0
-#define O_WRONLY 1
-#define O_RDWR   2
-#define O_CREAT  4
-#define O_APPEND 8
-#define O_TRUNC  0x10
-
-void     init_file   (void);
-
-#endif
+#endif  /* __HARDWARE_H */

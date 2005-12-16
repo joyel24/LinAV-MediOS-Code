@@ -1,79 +1,84 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
-   Copyright 2004, the Avos project.
-
-   This file is free software; we give unlimited permission to copy
-   and/or distribute it, with or without modifications, as long as this
-   notice is preserved.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY, to the extent permitted by law; without
-   even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-   PARTICULAR PURPOSE.
+/*
+*   include/ata.h
+*
+*   AvLo - linav project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
 */
-#ifndef _ATA_H
-#define _ATA_H 1
 
-#ifndef u32_defined
-#define u32_defined yes
-typedef unsigned long u32;
+#ifndef __ATA_H
+#define __ATA_H
+
+#include <hardware.h>
+
+#define IDE_CMD_READ_SECTORS              0x20
+#define IDE_CMD_WRITE_SECTORS             0x30
+#define IDE_CMD_IDENTIFY                  0xec
+#define IDE_CMD_SLEEP                     0xe0
+
+#define IDE_STATUS_BSY                    0x80
+#define IDE_STATUS_RDY                    0x40
+#define IDE_STATUS_DF                     0x20
+#define IDE_STATUS_DRQ                    0x08
+#define IDE_STATUS_ERR                    0x01
+
+#define IDE_SEL_LBA                       0x40
+
+#define ATA_DO_READ                       0
+#define ATA_DO_WRITE                      1
+#define ATA_DO_IDENT                      2
+#define ATA_SLEEP                         3
+
+#define ATA_WITH_DMA                             1
+#define ATA_NO_DMA                               0
+
+#define WAIT_XFER_TIMEOUT                    0x200000
+#define WAIT_READY_TIMEOUT                   0x200000
+
+#define SECTOR_SIZE      512
+
+typedef struct __ATA_CMD {
+    int drive;
+    int use_dma;
+    int xfer_dir;
+    void * data;
+    int count;
+    unsigned int lba;
+    struct __ATA_CMD * nxt;
+} ata_cmd_s;
+
+//int  ata_RW_Sector     (unsigned int lba,int count,void * buffer,int direction);
+int  ata_process_cmd   (ata_cmd_s * ata_cmd);
+void ata_RW_Data       (void * buffer,int count,int direction,int use_dma);
+
+int  ata_identify      (int drive,char * buffer);
+
+int  ata_sleep         (void);
+
+int  ata_waitForXfer   (void);
+int  ata_waitForReady  (void);
+int  ata_status        (void);
+
+void ata_powerUp_HD    (void);
+void ata_powerDown_HD  (void);
+void ata_select_HD     (void);
+void ata_select_CF     (void);
+
+void ata_stop_HD       (void);
+
+void init_ata          (void);
+void ide_intr_action   (int irq);
+
+void arch_ata_reset_HD(void);
+void arch_ata_powerUp_HD(void);
+void arch_ata_powerDown_HD(void);
+void arch_ata_select_HD(void);
+void arch_ata_select_CF(void);
+void arch_init_ata(void);
+void arch_ide_intr_action(int irq);
+
 #endif
-
-#define ATA_BSY 0x80
-#define ATA_RDY 0x40
-#define ATA_DF  0x20
-#define ATA_DRQ 0x08
-#define ATA_ERR 0x01
-
-#define ATA_ERROR_NONE 0
-#define ATA_ERROR_TIMEOUT -1
-
-struct partInfo {
-	int start;
-	int size;
-	int type;
-	char strType[20];
-};
-
-extern void ataSelect(u32 val);
-extern void ataSelectHDD();
-extern void ataSelectMemoryCard();
-extern void ataPowerUpHDD();
-extern void ataPowerDownHDD();
-extern void ataIdentify();
-extern void ataSleepCmd();
-extern u32 ataStatus();
-extern u32 ataWaitForReady();
-extern u32 ataWaitForXfer();
-extern void ataReadData(char *buffer, u32 numHalfWords);
-extern void ataWriteData(char *buffer, u32 numHalfWords);
-extern void ataRead(u32 lba, u32 count);
-extern void ataWrite(u32 lba, u32 count);
-extern u32 ataReadSectors(u32 lba, u32 count, char *buffer);
-extern u32 ataWriteSectors(u32 lba, u32 count, char *buffer);
-extern u32 ataIdentifyDevice(char *buffer);
-
-extern void ataSelectA(u32 val);
-extern void ataSelectHDDA();
-extern void ataSelectMemoryCardA();
-extern void ataPowerUpHDDA();
-extern void ataPowerDownHDDA();
-extern void ataSleepCmdA();
-extern void ataIdentifyA();
-extern u32 ataStatusA();
-extern u32 ataWaitForReadyA();
-extern u32 ataWaitForXferA();
-extern void ataReadDataA(char *buffer, u32 numHalfWords);
-extern void ataWriteDataA(char *buffer, u32 numHalfWords);
-extern void ataReadA(u32 lba, u32 count);
-extern void ataWriteA(u32 lba, u32 count);
-extern u32 ataReadSectorsA(u32 lba, u32 count, char *buffer);
-extern u32 ataWriteSectorsA(u32 lba, u32 count, char *buffer);
-extern u32 ataIdentifyDeviceA(char *buffer);
-
-extern int ataReadMBR();
-extern struct partInfo * getPartition(int i);
-extern void printPartInfo(int i);
-
-#endif
-

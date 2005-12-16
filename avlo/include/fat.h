@@ -1,165 +1,100 @@
-/* libavos.h
-   By oxygen
-   Copyright 2004, the Avos project.
-
-   This file is free software; we give unlimited permission to copy
-   and/or distribute it, with or without modifications, as long as this
-   notice is preserved.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY, to the extent permitted by law; without
-   even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-   PARTICULAR PURPOSE.
+/*
+*   include/fat.h
+*
+*   AvLo - linav project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
 */
 
-#ifndef _FAT_H
-#define _FAT_H 1
+#ifndef __FAT_H
+#define __FAT_H
 
-#include <stdbool.h>
+#include <types.h>
+#include <ata.h> /* for volume definitions */
 
-#define BUFFER_SIZE 512
-
-#ifndef u32_defined
-#define u32_defined yes
-typedef unsigned long u32;
-#endif
-
-//#define FAT_CHAIN_END   0x0ffffff8
-
-#define FAT_ENTRY_SIZE	32
-#define NAME_SIZE 8
-#define EXT_SIZE 3
-
-#define MAX_DEVICE 2
-
-#define FAT_ATTR_READ_ONLY  0x01
-#define FAT_ATTR_HIDDEN     0x02
-#define FAT_ATTR_SYSTEM     0x04
-#define FAT_ATTR_VOLUME_ID  0x08
-#define FAT_ATTR_DIR        0x10
-#define FAT_ATTR_ARCHIVE    0x20
-#define FAT_ATTR_LONG_NAME  FAT_ATTR_READ_ONLY | FAT_ATTR_HIDDEN | FAT_ATTR_SYSTEM | FAT_ATTR_VOLUME_ID
-
-struct fatent {
-	unsigned char cache[BUFFER_SIZE];
-    int cacheoffset;
-	int sectorNumber;
-	int startCluster;
-	int curCluster;
-	int prevCluster;
-	bool eof_disk;
-	int dirCluster;
-	bool isRootDir;
-	int fatId;
+struct fat_direntry
+{
+    unsigned char name[256];        /* Name plus \0 */
+    unsigned short attr;            /* Attributes */
+    unsigned char crttimetenth;     /* Millisecond creation
+                                       time stamp (0-199) */
+    unsigned short crttime;         /* Creation time */
+    unsigned short crtdate;         /* Creation date */
+    unsigned short lstaccdate;      /* Last access date */
+    unsigned short wrttime;         /* Last write time */
+    unsigned short wrtdate;         /* Last write date */
+    unsigned int filesize;          /* File size in bytes */
+    int firstcluster;               /* fstclusterhi<<16 + fstcluslo */
 };
 
-struct dirEntry {
-    char name[NAME_SIZE];
-    char ext[EXT_SIZE];
-    char attr;
-    char ntres;
-    char timeTenth;
-    short crtTime;
-    short crtDate;
-    short lstAccDate;
-    unsigned short fatCluHI;
-    short wrtTime;
-    short wrtDate;
-    unsigned short fatCluLO;
-    int size;
-};                              // SOFTWARE - 4B 30 90 2F [08 00] 93 1A 4B 30 [83 0E] <00 00 00 00>
-                                // reading cluster 00080e81
+#define FAT_ATTR_READ_ONLY   0x01
+#define FAT_ATTR_HIDDEN      0x02
+#define FAT_ATTR_SYSTEM      0x04
+#define FAT_ATTR_VOLUME_ID   0x08
+#define FAT_ATTR_DIRECTORY   0x10
+#define FAT_ATTR_ARCHIVE     0x20
+#define FAT_ATTR_VOLUME      0x40 /* this is a volume, not a real directory */
 
-struct fatCache {
-	char fatBuffer[1024]; // 2* sector size  (for FAT12)
-	int fatBufferLba;
-	bool write_done;
-	int lastFree;
+struct fat_file
+{
+    int firstcluster;    /* first cluster in file */
+    int lastcluster;     /* cluster of last access */
+    int lastsector;      /* sector of last access */
+    int clusternum;      /* current clusternum */
+    int sectornum;       /* sector number in this cluster */
+    unsigned int direntry;   /* short dir entry index from start of dir */
+    unsigned int direntries; /* number of dir entries used by this file */
+    int dircluster;      /* first cluster of dir */
+    bool eof;
+    int volume;          /* file resides on which volume */
 };
 
-struct fat_info {
-	int fatSize;
-	int rootSize;
-	int firstDataSector;
-	int fatStart;
-	int numFats;
-	int totSec;
-	int countOfClusters;
-	int fatType;
-	int LBAFat1;
-	int LBAFat2;
-	int secPerClu;
-	int LBAData;
-	int rootClu;
-	int rootLBA;
-	int maxCluster;
-	int sectorSize;
-
-	struct fatCache fat_cache;
-
-	bool busy;
+struct fat_dir
+{
+    unsigned int entry;
+    unsigned int entrycount;
+    int sector;
+    struct fat_file file;
+    unsigned char sectorcache[3][SECTOR_SIZE];
 };
 
-#include "dirent.h"
-#include "ata.h"
+extern int getClusterSize(int volume);
+extern void fat_init(void);
+extern int fat_mount(int volume,int drive,int startsector);
+extern int fat_unmount(int volume, bool flush);
+extern void fat_size(int volume,unsigned int* size, unsigned int* free); // public for info
+extern void fat_recalc_free(int volume); // public for debug info screen
+extern int fat_create_dir(const char* name,
+                          struct fat_dir* newdir,
+                          struct fat_dir* dir);
+extern int fat_startsector(int volume); // public for config sector
+extern int fat_open(int volume,
+                    int cluster,
+                    struct fat_file* ent,
+                    const struct fat_dir* dir);
+extern int fat_create_file(const char* name,
+                           struct fat_file* ent,
+                           struct fat_dir* dir);
+extern int fat_readwrite(struct fat_file *ent, int sectorcount,
+                         void* buf, bool write );
+extern int fat_closewrite(struct fat_file *ent, int size, int attr);
+extern int fat_seek(struct fat_file *ent, unsigned int sector );
+extern int fat_remove(struct fat_file *ent);
+extern int fat_truncate(const struct fat_file *ent);
+extern int fat_rename(struct fat_file* file,
+                      struct fat_dir* dir,
+                      const unsigned char* newname,
+                      int size, int attr);
 
-extern int fatInit(struct partInfo * partition);
-extern int closeFat(int fd);
-extern int selectFat(int fd);
-extern void inifatinfo();
-
-extern int fatReadCluster(int cluster, char* buffer);
-extern int fatTrace(int cluster);
-extern int countFreeCluster();
-
-extern int fatNxtEntry(struct fatent * fat_ent,struct dirEntry * entry);
-extern int fatCreateEntry(struct fatent * fat_ent,struct dirent* ent,const char * name);
-extern int fatRemoveEntry(struct fatent * fat_ent);
-extern int fatValidateEntry(struct dirEntry * entry);
-extern int fatUpdateEntry(struct dirent * ent);
-
-extern void fatGetData(struct dirent *theent,struct dirEntry * entry);
-
-extern void fatOpendir(struct fatent * fat_ent,int startCluster);
-
-extern int getClusterSize();
-
-extern int fatTruncate(struct fatent * fat_ent,bool total_remove);
-
-//****************************************
-//* internal function
-
-extern int flushFatCache();
-extern int updateFatCache(int cluster);
-extern int writeFatCache(int cluster,int val);
-extern int readFatCache(int cluster);
-
-extern int fatRWSector(struct fatent * fat_ent,bool write);
-extern int fatNxtSector(struct fatent * fat_ent,bool write);
-extern int fatPrevSector(struct fatent * fat_ent);
-
-extern int getNxtFreeCluster(int cluster);
-extern int addNewCluster(int cluster);
-
-extern int fatRWEntry(struct fatent * fat_ent,struct dirEntry * entry,bool write);
-extern int fatPrevEntry(struct fatent * fat_ent);
-extern int fatFindEntry(struct fatent * fat_ent,struct dirent * ent,struct dirEntry * entry);
-
-extern void createDosName(char *name, char *fatName);
-extern char chkChar(char c);
-
-extern int fatCleanCluster(int cluster);
-
-//extern int chkFAT();
-
-extern bool isEOChain(int cluster);
-extern int fatEndValue();
-
-///////////////////////////////////////////////////////////////////////////////////
-// from initial fat.c
-extern int bootRead(int addr, int n);
-extern int fatDirFilter(struct dirEntry dirIn[], struct dirEntry dirOut[], int n);
-extern int fatReadFile(int cluster, char* buffer);
-extern int getRootClu();
+extern int fat_opendir(int volume,
+                       struct fat_dir *ent, unsigned int currdir,
+                       const struct fat_dir *parent_dir);
+extern int fat_getnext(struct fat_dir *ent, struct fat_direntry *entry);
+extern int fat_get_cluster_size(int volume);
+extern bool fat_ismounted(int volume);
 
 #endif

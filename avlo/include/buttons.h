@@ -1,44 +1,34 @@
-/* libavos.h
-   By William Bland (aka awksedgrep)
-   Copyright 2004, the Avos project.
-
-   This file is free software; we give unlimited permission to copy
-   and/or distribute it, with or without modifications, as long as this
-   notice is preserved.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY, to the extent permitted by law; without
-   even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-   PARTICULAR PURPOSE.
+/*
+*   include/buttons.h
+*
+*   AvLo - linav project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
 */
-#ifndef u32_defined
-#define u32_defined yes
-typedef unsigned long u32;
+
+#ifndef __BUTTONS_H
+#define __BUTTONS_H
+
+#include <hardware.h>
+
+#include <target/arch/buttons.h>
+
+int read_btn(void);
+
+#define BTN_NOT_PRESSED(val,btn)    !(val&(0x1<<btn))
+#define BTN_PRESSED(val,btn)        (val&(0x1<<btn))
+
+#define BTN_CHK    {                     \
+    int __val ;                          \
+    __val=read_btn();                    \
+    if(old_state==0);                    \
+        old_state=__val;                 \
+    if(__val!=old_state || __val!=0x3FF) \
+        process_button_press(__val);     \
+}
+
 #endif
-
-#define        BUTTONS_AV300_UP        0x0001
-#define        BUTTONS_AV300_LEFT      0x0002
-#define        BUTTONS_AV300_RIGHT     0x0010
-#define        BUTTONS_AV300_DOWN      0x0020
-#define        BUTTONS_AV300_MENU3     0x0040
-#define        BUTTONS_AV300_MENU1     0x0100
-#define        BUTTONS_AV300_MENU2     0x0200
-#define        BUTTONS_AV300_JOYPRESS  0x0400
-#define        BUTTONS_AV300_ON        0x1000
-#define        BUTTONS_AV300_OFF       0x2000
-#define        BUTTONS_AV300_ANY       0x3777
-        
-#define        BUTTONS_JBMM_UP         0x0080
-#define        BUTTONS_JBMM_DOWN       0x0008
-#define        BUTTONS_JBMM_LEFT       0x0001
-#define        BUTTONS_JBMM_RIGHT      0x0004
-#define        BUTTONS_JBMM_MENU1      0x0010
-#define        BUTTONS_JBMM_MENU2      0x0020
-#define        BUTTONS_JBMM_MENU3      0x0040
-#define        BUTTONS_JBMM_PLAY       0x0002
-#define        BUTTONS_JBMM_ANY        0x00ff
-
-extern u32 buttonsGetStatus();
-
-extern u32 buttonsGetStatusA();
-

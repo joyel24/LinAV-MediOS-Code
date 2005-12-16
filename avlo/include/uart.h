@@ -1,34 +1,31 @@
-/* uart.h
-   By Doggermoore
-   Copyright 2004, the Avos project.
-
-   This file is free software; we give unlimited permission to copy
-   and/or distribute it, with or without modifications, as long as this
-   notice is preserved.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY, to the extent permitted by law; without
-   even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-   PARTICULAR PURPOSE.
-*/
-#ifndef u32_defined
-#define u32_defined yes
-typedef unsigned long u32;
-#endif
-
-#define UART_0  0
-#define UART_1  1
-
-#define UART_BITRATE_9600       0x15f   //
-#define UART_BITRATE_115200     0x1c    //
-
-extern u32 uartGetchA(u32 uart);
-extern void uartOutchA(u32 uart, u32 data);
-extern void uartOutsA(u32 uart, char* string);
-
-extern void stringPutHexA(char *buffer, u32 value, u32 num);
-
 /*
-30300 0000  1C00  0080  0000  1003  E000  0000
-30380 0000  5F01  0080  0000  0003  E000  0304
+*   include/uart.h
+*
+*   AvLo - linav project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
 */
+
+
+#ifndef __UART_H
+#define __UART_H
+
+#define UART_0        0
+#define UART_1        1
+
+#define UART_DTRR     0x00000000
+#define UART_BRSR     0x00000002
+#define UART_MSR      0x00000004
+#define UART_RFCR     0x00000006
+#define UART_TFCR     0x00000008
+#define UART_LCR      0x0000000a
+#define UART_SR       0x0000000c
+
+void uartOut        (unsigned char data,int uartNum);
+void uartOutString  (unsigned char * data,int uartNum);
+
+#endif
