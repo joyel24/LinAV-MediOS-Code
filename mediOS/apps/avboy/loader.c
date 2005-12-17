@@ -1,4 +1,4 @@
-/* 
+/*
 *   apps/avboy/loader.c
 *
 *   MediOS project
@@ -246,7 +246,11 @@ int sram_load()
 	ram.loaded = 1;
 
 	f = fopen(sramfile, O_RDONLY);
-	if (!f) return -1;
+	if (!f)  {
+          printf("Retry...");
+          f = fopen(sramfile, O_RDONLY);
+	  if (!f) return -1;
+	}
 	fread(f,ram.sbank, 8192);
 	fclose(f);
 	
@@ -263,7 +267,11 @@ int sram_save()
 		return -1;
 
 	f = fopen(sramfile, O_WRONLY|O_CREAT|O_TRUNC);
-	if (!f) return -1;
+	if (!f) {
+          printf("Retry...");
+          f = fopen(sramfile, O_WRONLY|O_CREAT|O_TRUNC);
+	  if (!f) return -1;
+	}
 	fwrite(f, ram.sbank, 8192);
 	fclose(f);
 

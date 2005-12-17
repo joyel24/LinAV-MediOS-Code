@@ -62,7 +62,7 @@ int _start(int argc,char* argv)
     open_graphics();
     OSD_BITMAP1_ADDRESS = getBufferOffset(BMAP1);
     setSize(BMAP1,160,144,8);
-    setPos(BMAP1,80,48);    
+    setPos(BMAP1,165,68);    
     
     fillRect(0x00,0,0,160,144);
     

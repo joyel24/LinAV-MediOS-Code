@@ -462,7 +462,7 @@ static int do_menu(char *title, char **items, size_t num_items, int sel) {
   while (!done) {
     /* grab a button */
     while (read_btn());
-    btn = read_btn();
+    while(!(btn = read_btn()));
 
     /* handle the button */
     if(btn & 0x08) {
@@ -513,7 +513,7 @@ void browser(char * rom) {
 
   int btn, sel_item=0, curr_item, num_items=6, nb=0,pos=0;
   char title[]="Start...";
-  char (*items)[MAX_PATH];
+  char (*items)[17];
   char (*list)[MAX_PATH];
   bool done = false;
   struct dirent *romdir;
@@ -562,7 +562,8 @@ else {
 while(!done) {
   if(pos > (nb-6)) num_items=nb-pos;
   else num_items=6;
-  for(i=0;i<num_items;i++) {items[i][0]='\0'; strcat(items[i],list[i+pos]);}
+//  for(i=0;i<num_items;i++) {items[i][0]='\0'; strcat(items[i],list[i+pos]);}
+  for(i=0;i<num_items;i++) {strncpy(items[i],list[i+pos],16); items[i][16]='\0';}
 
   fillRect(0x00,11,29,138,106);
   for (i = 0; i < num_items; i++)
@@ -574,7 +575,7 @@ while(!done) {
 
   while (1) {
     while (read_btn());
-    btn = read_btn();
+    while(!(btn = read_btn()));
 
     if(btn & 0x08) {
         sel_item = curr_item + 1;
@@ -610,7 +611,7 @@ while(!done) {
 
   rom[0]='\0';
   strcat(rom,"/AVBOY/ROMS/");
-  strcat(rom,items[curr_item]);
+  strcat(rom,list[curr_item+pos]);
   strcat(rom,"\0");
   closedir(romd);
   brel(items);
