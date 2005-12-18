@@ -28,24 +28,24 @@ depend:
 	makedepend -Y $(GCCINCDIR) *.c
 # DO NOT DELETE
 
-ata.o: $(BUILDDIR)/arm-linux/include/stdlib.h
-ata.o: $(BUILDDIR)/arm-linux/include/features.h
-ata.o: $(BUILDDIR)/arm-linux/include/sys/cdefs.h
-ata.o: $(BUILDDIR)/arm-linux/include/bits/uClibc_config.h
-ata.o: $(BUILDDIR)/lib/gcc-lib/arm-linux-uclibc/$(BUILDVER)/include/stddef.h
-ata.o: $(BUILDDIR)/arm-linux/include/sys/types.h
-ata.o: $(BUILDDIR)/arm-linux/include/bits/types.h
-ata.o: $(BUILDDIR)/arm-linux/include/bits/kernel_types.h
-ata.o: $(BUILDDIR)/arm-linux/include/bits/pthreadtypes.h
-ata.o: $(BUILDDIR)/arm-linux/include/bits/sched.h
-ata.o: $(BUILDDIR)/arm-linux/include/time.h
-ata.o: $(BUILDDIR)/arm-linux/include/endian.h
-ata.o: $(BUILDDIR)/arm-linux/include/bits/endian.h
-ata.o: $(BUILDDIR)/arm-linux/include/sys/select.h
-ata.o: $(BUILDDIR)/arm-linux/include/bits/select.h
-ata.o: $(BUILDDIR)/arm-linux/include/bits/sigset.h
-ata.o: $(BUILDDIR)/arm-linux/include/bits/time.h
-ata.o: $(BUILDDIR)/arm-linux/include/sys/sysmacros.h
-ata.o: $(BUILDDIR)/arm-linux/include/alloca.h
-ata.o: $(BUILDDIR)/arm-linux/include/string.h
+ata.o: $(BUILDDIR)/include/stdlib.h
+ata.o: $(BUILDDIR)/include/features.h
+ata.o: $(BUILDDIR)/include/sys/cdefs.h
+ata.o: $(BUILDDIR)/include/bits/uClibc_config.h
+ata.o: $(BUILDDIR)/include/linux/stddef.h
+ata.o: $(BUILDDIR)/include/sys/types.h
+ata.o: $(BUILDDIR)/include/bits/types.h
+ata.o: $(BUILDDIR)/include/bits/kernel_types.h
+ata.o: $(BUILDDIR)/include/bits/pthreadtypes.h
+ata.o: $(BUILDDIR)/include/bits/sched.h
+ata.o: $(BUILDDIR)/include/time.h
+ata.o: $(BUILDDIR)/include/endian.h
+ata.o: $(BUILDDIR)/include/bits/endian.h
+ata.o: $(BUILDDIR)/include/sys/select.h
+ata.o: $(BUILDDIR)/include/bits/select.h
+ata.o: $(BUILDDIR)/include/bits/sigset.h
+ata.o: $(BUILDDIR)/include/bits/time.h
+ata.o: $(BUILDDIR)/include/sys/sysmacros.h
+ata.o: $(BUILDDIR)/include/alloca.h
+ata.o: $(BUILDDIR)/include/string.h
 ata.o: ../../include/ata.h ../../include/debug.h

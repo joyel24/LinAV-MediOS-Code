@@ -30,17 +30,17 @@ depend:
 
 avmalloc.o: ../../include/std/assert.h ../../include/std/features.h
 avmalloc.o: ../../include/std/sys/cdefs.h
-avmalloc.o: $(BUILDDIR)/arm-linux/include/bits/uClibc_config.h
+avmalloc.o: $(BUILDDIR)/include/bits/uClibc_config.h
 avmalloc.o: ../../include/std/memory.h ../../include/std/string.h
 avmalloc.o: ../../include/std/stddef.h ../../include/avmalloc.h
 dirent.o: ../../include/std/string.h ../../include/std/features.h
 dirent.o: ../../include/std/sys/cdefs.h
-dirent.o: $(BUILDDIR)/arm-linux/include/bits/uClibc_config.h
+dirent.o: $(BUILDDIR)/include/bits/uClibc_config.h
 dirent.o: ../../include/std/stddef.h ../../include/std/stdlib.h
 dirent.o: ../../include/std/sys/types.h ../../include/std/bits/types.h
-dirent.o: $(BUILDDIR)/arm-linux/include/bits/kernel_types.h
-dirent.o: $(BUILDDIR)/arm-linux/include/bits/pthreadtypes.h
-dirent.o: $(BUILDDIR)/arm-linux/include/bits/sched.h
+dirent.o: $(BUILDDIR)/include/bits/kernel_types.h
+dirent.o: $(BUILDDIR)/include/bits/pthreadtypes.h
+dirent.o: $(BUILDDIR)/include/bits/sched.h
 dirent.o: ../../include/std/time.h ../../include/std/endian.h
 dirent.o: ../../include/std/bits/endian.h ../../include/std/sys/select.h
 dirent.o: ../../include/std/bits/select.h ../../include/std/bits/sigset.h
@@ -50,18 +50,18 @@ dirent.o: ../../include/std/stdbool.h ../../include/fat.h ../../include/ata.h
 dirent.o: ../../include/debug.h
 fat.o: ../../include/std/string.h ../../include/std/features.h
 fat.o: ../../include/std/sys/cdefs.h
-fat.o: $(BUILDDIR)/arm-linux/include/bits/uClibc_config.h
+fat.o: $(BUILDDIR)/include/bits/uClibc_config.h
 fat.o: ../../include/std/stddef.h ../../include/ata.h ../../include/fat.h
 fat.o: ../../include/std/stdbool.h ../../include/dirent.h
 fat.o: ../../include/debug.h
 file.o: ../../include/std/stdlib.h ../../include/std/features.h
 file.o: ../../include/std/sys/cdefs.h
-file.o: $(BUILDDIR)/arm-linux/include/bits/uClibc_config.h
+file.o: $(BUILDDIR)/include/bits/uClibc_config.h
 file.o: ../../include/std/stddef.h ../../include/std/sys/types.h
 file.o: ../../include/std/bits/types.h
-file.o: $(BUILDDIR)/arm-linux/include/bits/kernel_types.h
-file.o: $(BUILDDIR)/arm-linux/include/bits/pthreadtypes.h
-file.o: $(BUILDDIR)/arm-linux/include/bits/sched.h
+file.o: $(BUILDDIR)/include/bits/kernel_types.h
+file.o: $(BUILDDIR)/include/bits/pthreadtypes.h
+file.o: $(BUILDDIR)/include/bits/sched.h
 file.o: ../../include/std/time.h ../../include/std/endian.h
 file.o: ../../include/std/bits/endian.h ../../include/std/sys/select.h
 file.o: ../../include/std/bits/select.h ../../include/std/bits/sigset.h

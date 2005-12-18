@@ -9,7 +9,8 @@ GCCFLAGS = -static-libgcc
 GCCINCDIRS = -I../../include
 
 #LOCAL LDFLAGS
-LDFLAGS = -L../../lib -lavhardware -lavgraphics -lavfonts -lavmisc -lavata -lc -lfloat -lgcc
+LDFLAGS = -L../../lib -lavhardware -lavgraphics -lavfonts -lavmisc -lavata -lc
+#-lfloat -lgcc
 
 
 # State the object files that the main target is made up of
@@ -35,11 +36,11 @@ depend:
 # DO NOT DELETE
 
 ataTest.o: ../../include/ata.h ../../include/uart.h
-ataTest.o: $(BUILDDIR)/arm-linux/include/string.h
-ataTest.o: $(BUILDDIR)/arm-linux/include/features.h
-ataTest.o: $(BUILDDIR)/arm-linux/include/sys/cdefs.h
-ataTest.o: $(BUILDDIR)/arm-linux/include/bits/uClibc_config.h
-ataTest.o: $(BUILDDIR)/lib/gcc-lib/arm-linux-uclibc/$(BUILDVER)/include/stddef.h
+ataTest.o: $(BUILDDIR)/include/string.h
+ataTest.o: $(BUILDDIR)/include/features.h
+ataTest.o: $(BUILDDIR)/include/sys/cdefs.h
+ataTest.o: $(BUILDDIR)/include/bits/uClibc_config.h
+ataTest.o: $(BUILDDIR)/lib/gcc/arm-linux-uclibc/$(BUILDVER)/include/stddef.h
 ataTest.o: ../../include/graphics.h ../../include/osdDSC25.h
 ataTest.o: ../../include/buttons.h ../../include/fonts.h ../../include/usb.h
 ataTest.o: ../../include/system.h
