@@ -41,11 +41,17 @@
 
 #define USER_MENU_QUIT -2
 
+
+
 extern int frameskip;
+int TVState = 0;
+int TVStd = 0;
+int TVInt = 0;
 
 /* load/save state function declarations */
 static void do_slot_menu(bool is_load);
 static void do_opt_menu(void);
+static void do_opt2_menu(void);
 static void munge_name(char *buf, size_t bufsiz);
 
 /* directory ROM save slots belong in */
@@ -102,19 +108,43 @@ static const char *slot_menu[] = {
 #define OPT_MENU_TITLE "Options"
 typedef enum {
   OM_ITEM_FRAME,
+  OM_ITEM_TV,
+  OM_ITEM_TVS,
+  OM_ITEM_TVI,
+  OM_ITEM_MO,
   OM_ITEM_BACK,
   OM_MENU_LAST
 } OptMenuItem;
 
 static const char *opt_menu[] = {
   "Frameskip       ",
+  "TV Out          ",
+  "TV Standard     ",
+  "TV Interlaced   ",
+  "More Options    ",
+  "Previous Menu..."
+};
+
+#define OPT2_MENU_TITLE "More Options"
+typedef enum {
+  OM2_ITEM_ZX,
+  OM2_ITEM_ZN,
+  OM2_ITEM_PAL,
+  OM2_ITEM_BACK,
+  OM2_MENU_LAST
+} Opt2MenuItem;
+
+static const char *opt2_menu[] = {
+  "Zoom X+1        ",
+  "Zoom Normal     ",
+  "Palette         ",
   "Previous Menu..."
 };
 
 /*
  * do_user_menu - create the user menu on the screen.
  *
- * Returns USER_MENU_QUIT if the user selected "quit", otherwise 
+ * Returns USER_MENU_QUIT if the user selected "quit", otherwise
  * returns zero.
  *
  * Note: this is the only non-static function in this file at the
@@ -334,6 +364,9 @@ static void do_opt_menu(void) {
   num_items = sizeof(opt_menu) / sizeof(char*);
   mi = 0;
   snprintf((char *)opt_menu[0], 17, "Frameskip      %1d", frameskip);
+  snprintf((char *)opt_menu[1], 17, "TV Out       %s", (TVState ? " ON" : "OFF"));
+  snprintf((char *)opt_menu[2], 17, "TV Standard %s", (TVStd ? " PAL" : "NTSC"));
+  snprintf((char *)opt_menu[3], 17, "TV Interlaced  %s", (TVInt ? "Y" : "N"));
   while (!done) {
     mi = do_menu(OPT_MENU_TITLE, (char**) opt_menu, num_items, mi);
     switch(mi) {
@@ -341,10 +374,69 @@ static void do_opt_menu(void) {
         frameskip=(frameskip+1)%10;
         snprintf((char *)opt_menu[0], 17, "Frameskip      %1d", frameskip);
         break;
+      case OM_ITEM_TV:
+        (*(volatile unsigned short *)(0x30800))^=0x4;
+        TVState = !TVState;
+        if(TVState)(*(volatile unsigned short *)(0x3058E))=0x2000;
+        else (*(volatile unsigned short *)(0x3058A))=0x2000;
+        snprintf((char *)opt_menu[1], 17, "TV Out       %s", (TVState ? " ON" : "OFF"));
+        break;
+      case OM_ITEM_TVS:
+        (*(volatile unsigned short *)(0x30800))^=0x8000;
+        TVStd = !TVStd;
+        snprintf((char *)opt_menu[2], 17, "TV Standard %s", (TVStd ? " PAL" : "NTSC"));
+        break;
+      case OM_ITEM_TVI:
+        (*(volatile unsigned short *)(0x30800))^=0x4000;
+        TVInt = !TVInt;
+        snprintf((char *)opt_menu[3], 17, "TV Interlaced  %s", (TVInt ? "Y" : "N"));
+        break;
+      case OM_ITEM_MO:
+        do_opt2_menu();
+        break;
       case MENU_CANCEL:
         done = true;
         break;
       case OM_ITEM_BACK:
+        done = true;
+        break;
+    }
+  }
+}
+
+static void do_opt2_menu(void) {
+  int mi, num_items,x,y,c=0;
+  bool done = false;
+
+  /* set a couple of defaults */
+  num_items = sizeof(opt2_menu) / sizeof(char*);
+  mi = 0;
+  while (!done) {
+    mi = do_menu(OPT2_MENU_TITLE, (char**) opt2_menu, num_items, mi);
+    switch(mi) {
+      case OM2_ITEM_ZX:
+        setSize(BMAP1,320,288,8);
+        setPos(BMAP1,0x14,0x12);
+        (*(volatile unsigned short *)(0x30684))+=0x100;
+        break;
+      case OM2_ITEM_ZN:
+        setSize(BMAP1,160,144,8);
+        setPos(BMAP1,168,68);
+        break;
+      case OM2_ITEM_PAL:
+        while (read_btn());
+        for (y=0;y<144;y+=9) {
+          for (x=0;x<160;x+=10) {
+            fillRect(c, x, y, 10, 9);
+            c++;
+          }
+        }
+        while (!read_btn());
+        break;
+      case MENU_CANCEL:
+        done = true;
+        break;
+      case OM2_ITEM_BACK:
         done = true;
         break;
     }
@@ -444,7 +536,7 @@ static void draw_menu(char *title, char **items, size_t num_items)  {
  *
  */
 static int do_menu(char *title, char **items, size_t num_items, int sel) {
-    int btn, sel_item, ret, curr_item,y,x,c=0;
+    int btn, sel_item, ret, curr_item; //,y,x,c=0;
   bool done = false;
   ret = MENU_CANCEL;
 
@@ -486,14 +578,14 @@ static int do_menu(char *title, char **items, size_t num_items, int sel) {
         ret = curr_item;
         done = true;
       }
-      else if(btn & 0x02 && btn & 0x100) {
+  /*    else if(btn & 0x10) {
         for (y=0;y<144;y+=9) {
           for (x=0;x<160;x+=10) {
             fillRect(c, x, y, 10, 9);
             c++;
           }
         }
-      }
+      }   */
       else if(btn & 0x200) {
         /* cancel out of menu */
         ret = MENU_CANCEL;
