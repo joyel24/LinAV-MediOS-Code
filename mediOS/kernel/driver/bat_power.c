@@ -41,6 +41,98 @@ int hd_timer_used[2]={1,1};
 int hd_sleep_state=0;
 struct timer_s hd_timer;
 
+void set_timer_status_freq(int timer_type, int power_mode, int val,int type)
+{
+    int * timer_status;
+    int * timer_freq;
+    switch(timer_type)
+    {
+        case LCD_TIMER:
+            timer_status=lcd_timer_used;
+            timer_freq=lcd_freq_rep;
+            break;
+        case HD_TIMER:
+            timer_status=hd_timer_used;
+            timer_freq=hd_freq_rep;
+            break;
+        case HALT_TIMER:
+            timer_status=halt_timer_used;
+            timer_freq=halt_freq_rep;
+            break;
+        default:
+            return;
+    }
+    
+    if(power_mode!=TIMER_MODE_BAT && power_mode!=TIMER_MODE_DC)
+        return;
+    
+    if(type == 1)
+    {
+        if(val!=MODE_ENABLE &&val!=MODE_DISABLE)
+            return;        
+        timer_status[power_mode] = val;
+    }
+    else
+    {
+        timer_freq[power_mode] = val;
+    }
+}
+
+void kset_timer_status(int timer_type, int power_mode, int status)
+{
+    set_timer_status_freq(timer_type,power_mode,status,1);
+}
+
+void kset_timer_delay(int timer_type, int power_mode, int delay)
+{
+    set_timer_status_freq(timer_type,power_mode,delay,0);
+}
+
+int get_timer_status_freq(int timer_type, int power_mode,int type)
+{
+    int * timer_status;
+    int * timer_freq;
+    switch(timer_type)
+    {
+        case LCD_TIMER:
+            timer_status=lcd_timer_used;
+            timer_freq=lcd_freq_rep;
+            break;
+        case HD_TIMER:
+            timer_status=hd_timer_used;
+            timer_freq=hd_freq_rep;
+            break;
+        case HALT_TIMER:
+            timer_status=halt_timer_used;
+            timer_freq=halt_freq_rep;
+            break;
+        default:
+            return -1;
+    }
+    
+    if(power_mode!=TIMER_MODE_BAT && power_mode!=TIMER_MODE_DC)
+        return -1;
+    
+    if(type==1)
+    {
+        return timer_status[power_mode] ;
+    }
+    else
+    {
+        return timer_freq[power_mode] ;
+    }    
+}
+
+int kget_timer_status(int timer_type, int power_mode)
+{
+    return get_timer_status_freq(timer_type,power_mode,1);
+}
+
+int kget_timer_delay(int timer_type, int power_mode)
+{
+    return get_timer_status_freq(timer_type,power_mode,0);
+}
+
 void lcd_set_state(int state)
 {
     if(state!=lcd_get_state())
@@ -193,9 +285,9 @@ void chgTimer(void)
 int getCurrentTimer(void)
 {
     if(POWER_CONNECTED)
-        return AV_TIMER_ON_DC;
+        return TIMER_MODE_DC;
     else
-        return AV_TIMER_ON_BAT;
+        return TIMER_MODE_BAT;
 }
 
 int kpwrState;
@@ -207,6 +299,11 @@ void process_DC_change(void)
     chgTimer();        
     send_evt(EVT_PWR);
     printk("DC connector %s\n",kpwrState==1?"plugged":"unplugged");
+}
+
+void set_timer(int timer_type,int mode,int state,int delay)
+{
+
 }
 
 void init_power(void)

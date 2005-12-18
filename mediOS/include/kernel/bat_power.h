@@ -1,7 +1,7 @@
 /* 
-*   include/bat_power.h
+*   include/kernel/bat_power.h
 *
-*   AMOS project
+*   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -17,8 +17,7 @@
 #include <kernel/io.h>
 #include <kernel/tsc2003.h>
 
-#define AV_TIMER_ON_BAT        0
-#define AV_TIMER_ON_DC         1
+#include <int_timer.h>
 
 #define LCD_FREQ_DEFAULT_0  20
 #define LCD_FREQ_DEFAULT_1  20
@@ -30,6 +29,14 @@
 #define HD_FREQ_DEFAULT_1    10 /* 10s timer */
 
 #define GET_BAT_LEVEL (tsc2003getVal(CMD_BAT0|INTERNAL_ON))
+
+void kset_timer_status(int timer_type, int power_mode, int status);
+void kset_timer_delay(int timer_type, int power_mode, int delay);
+int  kget_timer_status(int timer_type, int power_mode);
+int  kget_timer_delay(int timer_type, int power_mode);
+
+void set_timer_status_freq(int timer_type, int power_mode, int val,int type);
+int get_timer_status_freq(int timer_type, int power_mode,int type);
 
 extern int kpwrState;
 void process_DC_change(void);
