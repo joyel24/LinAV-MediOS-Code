@@ -127,14 +127,14 @@ void kernel_start (void)
 #endif
     init_disk();
 
-#ifdef HAVE_SOUND
-    init_sound();
-#endif
 
     /* enable the IRQ */
     printk("[init] INT enabled\n");
     __sti();
 
+#ifdef HAVE_SOUND
+    init_sound();
+#endif
 
     
     printk("[init] ------------ all drivers\n");

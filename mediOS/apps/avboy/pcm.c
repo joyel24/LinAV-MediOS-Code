@@ -33,6 +33,7 @@ void pcm_init(void)
 int pcm_submit()
 {
     pcm.pos = 0;
+    
     return 1;
 }
 

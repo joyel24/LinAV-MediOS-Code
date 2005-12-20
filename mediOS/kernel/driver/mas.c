@@ -234,10 +234,14 @@ int mas_read_Di_register(int i,int addr,void * buf,int size) // !!! 20 bit value
 		buffer[j+2]=(ret>>16)&0xFF;
 		buffer[j+1]=(ret>>8)&0xFF;
 		buffer[j]=ret&0xFF;*/
-                buffer[j+3]=(ret>>24)&0xFF;
+                /*buffer[j+3]=(ret>>24)&0xFF;
                 buffer[j+2]=(ret>>16)&0xFF;
 		buffer[j+1]=(ret>>8)&0x0F;
-		buffer[j]=0;
+		buffer[j]=0;*/
+                buffer[j+3]=0;
+		buffer[j+2]=(ret>>16)&0x0F;
+		buffer[j+1]=(ret>>8)&0xFF;
+		buffer[j]=ret&0xFF;
 		if(j+4!=size)
 			i2c_ack();
 	}		
@@ -292,8 +296,8 @@ int mas_write_Di_register(int i,int addr,void * buf,int size) // !!! 20 bit valu
 	OUT_16_VAL(addr)
 	for(j=0;j<size*4;j+=4)
 	{
-		outval=((buffer[j+3]<<24) & 0xFF000000) 
-		          | ((buffer[j+2]<<16) & 0x00FF0000) 
+		outval=((buffer[j+3]<<24) & 0x00000000) 
+		          | ((buffer[j+2]<<16) & 0x000F0000) 
 			  | ((buffer[j+1]<<8) & 0x0000FF00) 
 			  | ((buffer[j]) & 0x000000FF);	  
 		OUT_32_VAL(outval)
@@ -560,7 +564,7 @@ int mas_write_codec(int reg,int val)
 }
 
 /*********************  PCM  code       ***************************/
-#if 1
+#if 0
 
 #include "mas_code/mas_pcm_struct.h"
 #include "mas_code/d0_640_1e.h"
@@ -615,13 +619,14 @@ int mas_stop_data[8][2] = {
 
 void mas_stop_app(void)
 {
-    int i,val;
+    int i,val,val2;
     mas_freeze();
     for(i=0;i<8;i++)
     {
+        val2 = mas_read_register(mas_stop_data[i][0]);
         mas_write_register(mas_stop_data[i][0],mas_stop_data[i][1]);
         val = mas_read_register(mas_stop_data[i][0]);
-        printk("READ back reg : %x=%x should be %x\n",mas_stop_data[i][0],val,mas_stop_data[i][1]);
+        printk("READ back reg : %x=%x was %x, should be %x\n",mas_stop_data[i][0],val,val2,mas_stop_data[i][1]);
     }
 }
 
@@ -630,7 +635,7 @@ void mas_stop_app(void)
 void mas_run_app(void)
 {
     int val=0;
-    
+    int i=0;
     
     mas_write_register(0x6B,0xC0000);
     mas_run();
@@ -671,11 +676,17 @@ void mas_run_app(void)
     while(1)
     {
         val=0;
+        i++;
         mas_read_Di_register(MAS_REGISTER_D0,0x666,&val,1);
-        if(val==0)
+        if(val==0 || i>10)
             break;
         printk("APP get: %x\n",val);
     }
+    if(val!=0)
+        printk("APP get: bad val\n");
+    else
+        printk("APP get: ok\n");
+        //while(1);
     printk("af loop2\n");
     printk("all ok\n");
     

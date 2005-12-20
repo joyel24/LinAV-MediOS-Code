@@ -43,7 +43,7 @@ int arch_read_btn(void){
 
     }else{
       
-			dir = inw(BUTTON_PORT0)&0xf;
+      dir = inw(BUTTON_PORT0)&0xf;
       menu = inw(BUTTON_PORT1)&0x7;
       bt = inw(BUTTON_PORT2)&0x3;
 

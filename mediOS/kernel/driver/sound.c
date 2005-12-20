@@ -81,6 +81,7 @@ __IRAM_DATA sound_buffer_s * g_CurrentBuffer;
 
 __IRAM_CODE void dsp_interrupt(int irq)
 {
+#if 1
 	int bytes_sent, to_send;
 
 	if (!g_CurrentBuffer)
@@ -116,7 +117,7 @@ __IRAM_CODE void dsp_interrupt(int irq)
 	}
 
 
-#if 0
+#else
     int toSend;
     int send;
     char * buffer;
@@ -531,7 +532,7 @@ void init_sound (void)
     /*************************************************************/
     
     //ini_mas_for_mp3();
-#if 0    
+#if 0   
     mas_write_codec(MAS_REG_AUDIO_CONF,MAS_INPUT_AD | MAS_L_AD_CONVERTER | MAS_R_AD_CONVERTER | MAS_DA_CONVERTER
                                 | 0xf  << 4 // mic gain
                                 | 0xf << 8  // adc gain right
@@ -544,10 +545,11 @@ void init_sound (void)
     mas_control_config(MAS_SET,MAS_BALANCE,50);
     mas_control_config(MAS_SET,MAS_VOLUME,70);
     
+    mas_stop_mp3_app();
     
-    /*mas_set_D0(MAS_INTERFACE_CONTROL,0x04);
+    mas_set_D0(MAS_INTERFACE_CONTROL,0x04);
     mas_set_clk_speed(0x4800);
-    mas_set_D0(MAS_MAIN_IO_CONTROL,0x125);*/
+    mas_set_D0(MAS_MAIN_IO_CONTROL,0x125);
     
     mas_test_PCM();
     
