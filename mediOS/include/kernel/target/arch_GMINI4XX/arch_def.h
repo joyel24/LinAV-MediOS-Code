@@ -184,9 +184,9 @@
 
 /** BUTTONS **/
 
-#define BUTTON_BASE                       0x02600008
+#define BUTTON_BASE                       0x02600000
 
-#define BUTTON_PORT0                      (BUTTON_BASE)
+#define BUTTON_PORT0                      (BUTTON_BASE+0x08)
 #define BUTTON_PORT1                      (BUTTON_BASE+0x0a)
 #define BUTTON_PORT2                      (BUTTON_BASE+0x0c)
 
