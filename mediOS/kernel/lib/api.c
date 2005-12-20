@@ -45,17 +45,20 @@ ERROR_CODE API_RUN_GRV              (const char* pGRVPath, HTASK* phTask)       
 
 ///////////////////////////////////////////////////////
 ///////////////////// DEVICE API //////////////////////
-ERROR_CODE API_GET_TICK             (unsigned long * val)                                              { swi_call(nAPI_GET_TICK); }
-ERROR_CODE API_TIME                 (int cmd,struct av_tm * time_data)                                 { swi_call(nAPI_TIME); }
-ERROR_CODE API_POWER                (int cmd,int * val)                                                { swi_call(nAPI_POWER); }
+ERROR_CODE API_GET_TICK             (unsigned long * val)                { swi_call(nAPI_GET_TICK); }
+ERROR_CODE API_TIME                 (int cmd,struct av_tm * time_data)   { swi_call(nAPI_TIME); }
+ERROR_CODE API_POWER                (int cmd,int * val)                  { swi_call(nAPI_POWER); }
 
-ERROR_CODE API_SET_LCD_BRIGHTNESS   (int nBrightness)                                                  { swi_call(nAPI_SET_LCD_BRIGHTNESS); }
-ERROR_CODE API_GET_LCD_BRIGHTNESS   (int* pnBrightness)                                                { swi_call(nAPI_GET_LCD_BRIGHTNESS); }
+ERROR_CODE API_SET_LCD_BRIGHTNESS   (int nBrightness)                    { swi_call(nAPI_SET_LCD_BRIGHTNESS); }
+ERROR_CODE API_GET_LCD_BRIGHTNESS   (int* pnBrightness)                  { swi_call(nAPI_GET_LCD_BRIGHTNESS); }
 
-ERROR_CODE API_GET_EVT_PIPE         (EVT_PIPE * pipe)                                                  { swi_call(nAPI_GET_EVT_PIPE); }
-ERROR_CODE API_RM_EVT_PIPE          (EVT_PIPE pipe)                                                    { swi_call(nAPI_RM_EVT_PIPE); }
-ERROR_CODE API_GET_EVT              (EVT_PIPE pipe,char * data)                                        { swi_call(nAPI_GET_EVT); }
-ERROR_CODE API_BKPT                 (void)                                                             { swi_call(nAPI_BKPT); }
+ERROR_CODE API_GET_EVT_PIPE         (EVT_PIPE * pipe)                    { swi_call(nAPI_GET_EVT_PIPE); }
+ERROR_CODE API_RM_EVT_PIPE          (EVT_PIPE pipe)                      { swi_call(nAPI_RM_EVT_PIPE); }
+ERROR_CODE API_GET_EVT              (EVT_PIPE pipe,char * data)          { swi_call(nAPI_GET_EVT); }
+ERROR_CODE API_BKPT                 (void)                               { swi_call(nAPI_BKPT); }
+
+ERROR_CODE API_SET_GET_INT_TIMER    (int type,int mode,TRI_DATA * pvData)         { swi_call(nAPI_IO_INT_TIMER); }
+
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 
@@ -161,3 +164,40 @@ unsigned long get_tick(void)
     return ret;
 }
 
+void set_timer_status(int timer_type, int power_mode, int status)
+{
+    TRI_DATA pvData;
+    pvData.a = timer_type;
+    pvData.b = power_mode;
+    pvData.c = status;
+    API_SET_GET_INT_TIMER(1,1,&pvData);
+}
+
+void set_timer_delay(int timer_type, int power_mode, int delay)
+{
+    TRI_DATA pvData;
+    pvData.a = timer_type;
+    pvData.b = power_mode;
+    pvData.c = delay;
+    API_SET_GET_INT_TIMER(1,0,&pvData);
+}
+
+int get_timer_status(int timer_type, int power_mode)
+{
+    TRI_DATA pvData;
+    pvData.a = timer_type;
+    pvData.b = power_mode;
+    pvData.c = 0;
+    API_SET_GET_INT_TIMER(0,1,&pvData);
+    return pvData.c;
+}
+
+int get_timer_delay(int timer_type, int power_mode)
+{
+    TRI_DATA pvData;
+    pvData.a = timer_type;
+    pvData.b = power_mode;
+    pvData.c = 0;
+    API_SET_GET_INT_TIMER(0,0,&pvData);
+    return pvData.c;
+}

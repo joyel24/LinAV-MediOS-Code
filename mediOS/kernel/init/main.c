@@ -126,6 +126,7 @@ void kernel_start (void)
     init_dvr_module();
 #endif
     init_disk();
+
 #ifdef HAVE_SOUND
     init_sound();
 #endif
@@ -134,6 +135,8 @@ void kernel_start (void)
     printk("[init] INT enabled\n");
     __sti();
 
+
+    
     printk("[init] ------------ all drivers\n");
 
     print_boot_info();
@@ -148,8 +151,11 @@ void kernel_start (void)
 #endif
     do_bkpt();
     
-    while(1)
-        printk("%x\n",get_tick());
+    //mas_test_PCM();
+    
+    
+    
+   
        
     iniIcon();
     open_graphics();
