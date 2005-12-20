@@ -601,10 +601,11 @@ void init_sound (void)
                 outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);
             }
         }
-        cnt = mas_pio_write(mp3Buff + mp3ptr, 2000);
-        printk("%d ",cnt); 
+        //cnt = mas_pio_write(mp3Buff + mp3ptr, 2000);
+        //printk("%d ",cnt); 
         //mp3ptr+=cnt;
         //if (mp3ptr>=65000){mp3ptr=0; printk("loop ");}
+        }
 #endif
 
 }

@@ -38,10 +38,6 @@ __IRAM_DATA int nb_debug_switch;
 extern int inHold;
 #endif
 
-__IRAM_DATA int old_state;
-
-//__IRAM_DATA struct hw_chk_s btn_chker;
-
 __IRAM_CODE int read_btn(void)
 {
     return arch_read_btn();
@@ -50,8 +46,6 @@ __IRAM_CODE int read_btn(void)
 __IRAM_CODE void process_button_press(int val)
 {
     int btn,fastDir=0;
-    
-    old_state=val;
 
 #ifdef HAVE_DEBUG_ON_SCREEN
     if(BTN_PRESSED(val,BUTTON_ON) && BTN_PRESSED(val,BUTTON_MENU1))
@@ -157,9 +151,7 @@ void init_buttons(void)
     mx_press = MAX_PRESSED;
     nb_off_press=0;
     nb_debug_switch=0;
-    
-    old_state=0;
-    
+       
     for(btn=0;btn<NB_BUTTONS;btn++)
         nb_pressed[btn]=0;
     /* set GIO for ON/OFF to input */

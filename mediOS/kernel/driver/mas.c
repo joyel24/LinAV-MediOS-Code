@@ -98,6 +98,12 @@ int mas_get_frame_count(void)
 	return (mas_get_D0(MAS_MPEG_FRAME_COUNT)&0xFFFFF);
 }
 
+/********************* PIO read/write               ***************************/
+int mas_pio_read(void * buffer,int maxSize)
+{
+	return 0;
+}
+
 /********************* Direct config i2c read/write ***************************/
 
 int mas_read_direct_config(int reg)
@@ -554,7 +560,7 @@ int mas_write_codec(int reg,int val)
 }
 
 /*********************  PCM  code       ***************************/
-#if 0
+#if 1
 
 #include "mas_code/mas_pcm_struct.h"
 #include "mas_code/d0_640_1e.h"

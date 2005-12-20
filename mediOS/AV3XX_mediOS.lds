@@ -39,7 +39,7 @@ SECTIONS
         _iram_end = .;
     } > IRAM
     
-    .bss : AT ( _real_iram_start )
+    .bss (NOLOAD) : AT ( _real_iram_start )
     {
         _bss_start = .;
         *(.bss)

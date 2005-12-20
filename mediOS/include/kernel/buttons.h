@@ -34,9 +34,7 @@ int arch_read_btn(void);
 #define BTN_CHK    {                     \
     int __val ;                          \
     __val=read_btn();                    \
-    if(old_state==0);                    \
-        old_state=__val;                 \
-    if(__val!=old_state || __val!=0x3FF) \
+    if(__val!=0x0)                       \
         process_button_press(__val);     \
 }
 

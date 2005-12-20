@@ -71,7 +71,7 @@ void process_ext_mod_chg(int res)
     && !FM_is_connected()
 #endif
 #ifdef HAVE_USB_FW
-     && !FWIsConnected()
+     && !kFWIsConnected()
 #endif
     )
     {
@@ -158,7 +158,7 @@ void init_ext_module(void)
     && !FM_is_connected()
 #endif
 #ifdef HAVE_USB_FW
-     && !FWIsConnected()
+     && !kFWIsConnected()
 #endif
     )
     {

@@ -92,6 +92,19 @@ __IRAM_CODE int swi_device_handler (
             case nAPI_BKPT:
                 do_bkpt();
                 return 0;
+            case nAPI_IO_INT_TIMER:
+                {
+                    TRI_DATA * pvData = (TRI_DATA *)nParam3;
+                    if(nParam1==1) /* set */
+                    {
+                        set_timer_status_freq(pvData->a, pvData->b, pvData->c,nParam2);
+                    }
+                    else
+                    {
+                        pvData->c=get_timer_status_freq(pvData->a, pvData->b,nParam2);
+                    }
+                }
+                return 0;
             default:
                 printk("Device undefined swi (%d)\n",nCmd);
         }

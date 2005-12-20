@@ -82,6 +82,13 @@ typedef struct _COUPLE_DATA
     void * b;
 } COUPLE_DATA;
 
+typedef struct _TRI_DATA
+{
+    int a;
+    int b;
+    int c;
+} TRI_DATA;
+
 typedef unsigned long HTASK;
 typedef unsigned long HPIPE;
 typedef unsigned long HCRITSEC;

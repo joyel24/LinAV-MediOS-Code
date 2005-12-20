@@ -23,6 +23,8 @@
 #include <kernel/sound.h>
 #include <kernel/ata.h>
 #include <kernel/hardware.h>
+#include <kernel/bat_power.h>
+
 // API definition
 
 
@@ -60,6 +62,9 @@ EVT_PIPE get_evt_pipe(void);
 char get_evt(EVT_PIPE var);
 
 ERROR_CODE API_BKPT                 (void);
+
+ERROR_CODE API_SET_GET_INT_TIMER    (int type,int mode,TRI_DATA * pvData);
+
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 
@@ -112,6 +117,11 @@ unsigned long get_tick(void);
 #define  FWIsConnected()        do_api_power(0x001)
 #define  powerConnected()       do_api_power(0x002)
 #define  getBatLevel()          do_api_power(0x001)
+
+void set_timer_status(int timer_type, int power_mode, int status);
+void set_timer_delay(int timer_type, int power_mode, int delay);
+int  get_timer_status(int timer_type, int power_mode);
+int  get_timer_delay(int timer_type, int power_mode);
 
 
 #endif

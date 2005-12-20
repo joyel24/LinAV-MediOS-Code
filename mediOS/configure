@@ -87,7 +87,7 @@ if [ $CONFIGURE_TARGET_DEVICE = -1 ]
 			echo "Please pick a target device"
 			echo "1	AV3XX"
 			echo "2	GMINI4XX"
-			echo -n "Choose 1 or 2 [1): "
+			echo -n "Choose 1 or 2 [1]: "
 			read -e USERSELECTION
 			if [ "$USERSELECTION" == "" ]; then
 				CONFIGURE_TARGET_DEVICE="AV3XX"

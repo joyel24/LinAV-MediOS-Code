@@ -62,7 +62,7 @@
 #define nAPI_BKPT                 (nAPI_DEVICE_section + 8)
 
 #define nAPI_GET_TICK             (nAPI_DEVICE_section + 9)
-
+#define nAPI_IO_INT_TIMER         (nAPI_DEVICE_section + 10)
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 
