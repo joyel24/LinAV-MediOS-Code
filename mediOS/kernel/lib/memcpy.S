@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/lib/memcopy.S
 *
 *   AMOS project
@@ -9,7 +9,8 @@
 *
 *  ASM optimised string functions
 */
-.text
+/*.text*/
+.section ".core"
 
 /*
  * Prototype: void memcpy(void *to,const void *from,unsigned long n);
@@ -22,7 +23,7 @@
 .global memmove
 memcpy:
 memmove:
-#if 1   
+.if 1
         cmp r2, #0
         beq kmemcpyexit
 	stmdb sp!, {r4, r5}
@@ -72,7 +73,7 @@ kmemcpyveryfastloop:
 	ldmia sp!, {r3, r6, r7, r8, r9, r10}
 	ldmia sp!, {r4, r5}
 	mov pc, lr
-#else
+.else
 		mov	ip,sp
 		stmfd	sp!,{r4-r9,fp,ip,lr,pc}
 		sub	fp,ip,#4
@@ -358,4 +359,4 @@ kmemcpyveryfastloop:
 		bge	36b
 37:		add	r1, r1, #1
 		b	24b
-#endif
+.endif

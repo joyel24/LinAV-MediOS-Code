@@ -27,8 +27,6 @@
 /* DEBUG */
 #define DEBUG_UART              UART_0
 
-//#define USE_DEBUG_ON_SCREEN     1
-
 /* timers */
 
 #define TIMER0_BASE                       0x00030000

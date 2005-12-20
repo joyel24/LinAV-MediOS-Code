@@ -24,7 +24,7 @@
 
 #include <kernel/buttons.h>
 
-#ifdef USE_DEBUG_ON_SCREEN
+#ifdef HAVE_DEBUG_ON_SCREEN
 #include <kernel/kgraphics.h>
 #endif
 
@@ -53,7 +53,7 @@ __IRAM_CODE void process_button_press(int val)
     
     old_state=val;
 
-#ifdef USE_DEBUG_ON_SCREEN  
+#ifdef HAVE_DEBUG_ON_SCREEN
     if(BTN_PRESSED(val,BUTTON_ON) && BTN_PRESSED(val,BUTTON_MENU1))
     {
         if(nb_debug_switch==0)

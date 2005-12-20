@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/core/swi_memory.c
 *
 *   MediOS project
@@ -31,7 +31,7 @@ __IRAM_CODE int swi_memory_handler (
             case nAPI_FREE:     //void* pvBuffer
                 free((void*)nParam1);
                 break;
-                
+
             case nAPI_MEMAVAIL: //unsigned long* pnBytes
                 {
                     long nAllocatedBytes, nFreeBytes, nMaxFree, nAllocCount, nFreeCount;
@@ -39,6 +39,10 @@ __IRAM_CODE int swi_memory_handler (
                     *((unsigned long*)nParam1)=nAllocatedBytes;
                 }
                 break;
+            case nAPI_REALLOC:     //void** ppvBuffer, void* pvBuffer, unsigned long nBytes
+                *((void**)nParam1) = realloc((void*)nParam2,nParam3);
+                break;
+
             default:
                 printk("Memory undefined swi (%d)\n",nCmd);
         }

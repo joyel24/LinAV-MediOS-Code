@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/kernel/swi.h
 *
 *   AMOS project
@@ -38,6 +38,7 @@
 #define nAPI_MALLOC               (nAPI_MEMORY_section+0)
 #define nAPI_FREE                 (nAPI_MEMORY_section+1)
 #define nAPI_MEMAVAIL             (nAPI_MEMORY_section+2)
+#define nAPI_REALLOC              (nAPI_MEMORY_section+3)
 
 ///////////////////////////////////////////////////////
 ////////////////////// FILE API ///////////////////////

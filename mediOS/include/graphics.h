@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/graphics.h
 *
 *   AMOS project
@@ -48,6 +48,8 @@ void  setSize         (int vplane,int width,int height,int bitsPerPixel);
 void  getSize         (int vplane,int * width,int * height,int * bitsPerPixel);
 void  setPos          (int vplane,int x,int y);
 void  getPos          (int vplane,int * x,int * y);
+void* getBufferOffset(int vplane);
+void setBufferOffset(int vplane, void * offset);
 
 /* font */
 void setFont          (int font_nb);
@@ -56,6 +58,4 @@ int  getFont          (void);
 /* osd function on color*/
 
 void setPalletteRGB(int r, int g, int b, int index);
-unsigned int getBufferOffset(int buffer_num);
-
 #endif

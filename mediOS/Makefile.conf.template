@@ -1,4 +1,4 @@
-GCCFLAGS = -Wall -mlong-calls  -nostdlib -fno-builtin  -mcpu=arm7tdmi -Os
+GCCFLAGS = -Wall -mlong-calls  -nostdlib -fno-builtin  -mcpu=arm7tdmi -O2
 #-Os -mlong-calls 
 
 #GCCFLAGS +=   -fomit-frame-pointer -fno-strict-aliasing
@@ -39,6 +39,10 @@ endif
 
 ifeq ($(HAVE_CMD_LINE),1)
 	GCCFLAGS += -DHAVE_CMD_LINE
+endif
+
+ifeq ($(HAVE_DEBUG_ON_SCREEN),1)
+	GCCFLAGS += -DHAVE_DEBUG_ON_SCREEN
 endif
 
 ifeq ($(HAVE_EVT),1)

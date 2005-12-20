@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/gfx/graphics.c
 *
 *   AMOS project
@@ -109,11 +109,25 @@ void setPos(int vplane,int x,int y)
 void getPos(int vplane,int * x,int * y)
 {
     GFX_CONTEXT g_data;
-    API_GFX(0x10A,&g_data,(void*)&vplane);  
-    if(x)  
+    API_GFX(0x10A,&g_data,(void*)&vplane);
+    if(x)
         *x=g_data.x;
     if(y)
         *y=g_data.y;
+}
+
+void* getBufferOffset(int vplane)
+{
+    GFX_CONTEXT g_data;
+    API_GFX(0x10B,&g_data,(void*)&vplane);
+    return (void *)g_data.color;
+}
+
+void setBufferOffset(int vplane, void * offset)
+{
+    GFX_CONTEXT g_data;
+    g_data.color=(long)offset;
+    API_GFX(0x10C,&g_data,(void*)&vplane);
 }
 
 /************************************************** drawing functions ********/
@@ -253,15 +267,6 @@ void setPalletteRGB(int r, int g, int b, int index)
     g_data.h=index;
     API_GFX(0x20D,&g_data,NULL);
 }
-
-unsigned int getBufferOffset(int buffer_num)
-{
-    GFX_CONTEXT g_data;
-    g_data.x=buffer_num;
-    API_GFX(0x20E,&g_data,NULL);
-    return g_data.color;
-}
-
 
 /************************************************** font functions ********/
 

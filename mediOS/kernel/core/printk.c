@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/core/printk.c
 *
 *   MediOS project
@@ -17,7 +17,7 @@
 #include <kernel/uart.h>
 #include <kernel/hardware.h>
 
-#ifdef USE_DEBUG_ON_SCREEN
+#ifdef HAVE_DEBUG_ON_SCREEN
 #include <kernel/kgraphics.h>
 #include <kernel/kfont.h>
 #include <sys_def/colordef.h>
@@ -48,7 +48,7 @@ void printk(char *fmt, ...)
     vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
     va_end(ap);
     uartOutString(debugmembuf,DEBUG_UART);
-#ifdef USE_DEBUG_ON_SCREEN
+#ifdef HAVE_DEBUG_ON_SCREEN
     printOnScreen(debugmembuf);
 #endif
 }
@@ -57,7 +57,7 @@ void user_printf(const char * fmt, va_list args)
 {
     vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, args);
     uartOutString(debugmembuf,DEBUG_UART);
-#ifdef USE_DEBUG_ON_SCREEN
+#ifdef HAVE_DEBUG_ON_SCREEN
     printOnScreen(debugmembuf);
 #endif
 }
@@ -102,7 +102,7 @@ void print_data(char * data,int length)
     printk("\n");
 }
 
-#ifdef USE_DEBUG_ON_SCREEN
+#ifdef HAVE_DEBUG_ON_SCREEN
 void addLine(void)
 {
     cur_col=0;

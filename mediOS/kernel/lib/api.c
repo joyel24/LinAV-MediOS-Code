@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/api.c
 *
 *   AMOS project
@@ -33,6 +33,7 @@
 ERROR_CODE API_MALLOC               (void** ppvBuffer, unsigned long nBytes)                           { swi_call(nAPI_MALLOC); }
 ERROR_CODE API_FREE                 (void* pvBuffer)                                                   { swi_call(nAPI_FREE); }
 ERROR_CODE API_MEMAVAIL             (unsigned long* pnBytes)                                           { swi_call(nAPI_MEMAVAIL); }
+ERROR_CODE API_REALLOC              (void** ppvBuffer, void* pvBuffer, unsigned long nBytes)           { swi_call(nAPI_REALLOC); }
 
 ///////////////////////////////////////////////////////
 ////////////////////// FILE API ///////////////////////
@@ -118,6 +119,12 @@ void * malloc(long size)
 {
     void * ptr;
     API_MALLOC(&ptr,size);
+    return ptr;
+}
+
+void * realloc(void *buff,long size){
+    void * ptr;
+    API_REALLOC(&ptr,buff,size);
     return ptr;
 }
 

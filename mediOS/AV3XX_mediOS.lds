@@ -25,6 +25,8 @@ SECTIONS
     .data :    
     {
         *(.data)
+				*(.got)
+				*(.got.*)
         _real_iram_start = .;
     } > DRAM
     

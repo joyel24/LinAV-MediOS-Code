@@ -19,9 +19,9 @@
 
 int arch_read_btn(void){
     int val;
+    int i,dir,menu,bt;
 
     if(cpld_get_version()==5){
-      int i,dir,menu,bt;
 
       gio_dir(GIO_BTN_SELECT_UDLR,GIO_OUT);
       gio_clear(GIO_BTN_SELECT_UDLR);
@@ -41,12 +41,15 @@ int arch_read_btn(void){
       bt = (inw(GIO_BITSET1) & 0x18) >> 3;
       gio_dir(GIO_BTN_SELECT_SQCR,GIO_IN);
 
-      val=(dir | menu << 4 | bt << 7);
     }else{
-      val =  inw(BUTTON_PORT0)&0xf;
-      val|=((inw(BUTTON_PORT1)&0x7)<<4);
-      val|=((inw(BUTTON_PORT2)&0x3)<<7);
+      
+			dir = inw(BUTTON_PORT0)&0xf;
+      menu = inw(BUTTON_PORT1)&0x7;
+      bt = inw(BUTTON_PORT2)&0x3;
+
     }
+
+    val=(dir | menu << 4 | bt << 7);
 
     /* ON, OFF keys */
     if(gio_is_set(GIO_ON_BTN))  val |= (0x1<<9);

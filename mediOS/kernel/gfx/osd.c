@@ -158,13 +158,8 @@ void osdSetComponentConfig (int component, int config)
 
 void osdRestorePlane(int component, unsigned int address, int x, int y, int w, int h, int bpp, int state,int enable)
 {
-    unsigned int val;
-    
-    outw(((address-SDRAM_START)>>5)&0xFFFF,osdLookupOffsetLO[component]);
-    val=inw(osdLookupOffsetHI[component]);
-    val &= 0xFF00 >> OSD_OFF_HI_SHIFT[component];
-    val |= (((address-SDRAM_START)>>21)&0xFF) << OSD_OFF_HI_SHIFT[component];
-    
+    osdSetComponentOffset (component,address);
+
     outw(2*w,OSD_COMP_W(component));
     outw(h,OSD_COMP_H(component));
     

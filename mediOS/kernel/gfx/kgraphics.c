@@ -36,7 +36,7 @@
 
 //#define abs(val)    (val<0?-val:val)
 
-#ifdef USE_DEBUG_ON_SCREEN 
+#ifdef HAVE_DEBUG_ON_SCREEN
 char screen_ERROR[SCREEN_WIDTH*SCREEN_HEIGHT+40];
 #endif
 char screen_BMAP1[SCREEN_WIDTH*SCREEN_HEIGHT+40];
@@ -47,7 +47,7 @@ char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
 extern struct graphics_operations g8ops;
 extern struct graphics_operations g32ops;
 
-#ifdef USE_DEBUG_ON_SCREEN 
+#ifdef HAVE_DEBUG_ON_SCREEN
 struct graphicsBuffer ERROR_SCR = {
     offset             : 0,
     state              : OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 |
@@ -153,19 +153,11 @@ int     current_font=0;
 int     current_plane=0;
 
 
-#define restoreComp(COMP,BUFF)   {  osdSetComponentOffset      (COMP, BUFF.offset); \
-                                    osdSetComponentSize        (COMP, 2*BUFF.width, BUFF.height); \
-                                    osdSetComponentPosition    (COMP, BUFF.x, BUFF.y); \
-                                    osdSetComponentSourceWidth (COMP, ((BUFF.width*BUFF.bitsPerPixel)/32)/8); \
-                                    if(BUFF.enable) \
-                                        osdSetComponentConfig  (COMP, BUFF.state|OSD_COMPONENT_ENABLE); \
-                                 }
-
 /********************************************************* Error screen ******/
 
 static int error_scr_state;
 
-#ifdef USE_DEBUG_ON_SCREEN 
+#ifdef HAVE_DEBUG_ON_SCREEN
 void clear_error_scr(int color)
 {
     g8ops.fillRect(color,0,0,ERROR_SCR.width,ERROR_SCR.height,&ERROR_SCR);
@@ -187,31 +179,27 @@ void scroll_error_scr(unsigned int bg_color,int x,int y,int height,int UP)
 }
 #endif
 
-/*void restoreComponent(int vplane,struct graphicsBuffer * buff)
+void restoreComponent(int vplane,struct graphicsBuffer * buff)
 {
-    osdSetComponentOffset(buffers_comp[vplane],buff->offset);
-    osdSetComponentSize(buffers_comp[vplane], 2*buff->width, buff->height);
-    osdSetComponentPosition(buffers_comp[vplane],buff->x, buff->y);
-    osdSetComponentSourceWidth(buffers_comp[vplane], ((buff->width*buff->bitsPerPixel)/32)/8);
+    osdRestorePlane(buffers_comp[vplane],buff->offset,
+        buff->x,buff->y,
+        buff->width,buff->height,
+        buff->bitsPerPixel, buff->state, buff->enable);
+
     if(buff->enable)
         osdSetComponentConfig(buffers_comp[vplane],buff->state|OSD_COMPONENT_ENABLE);
-}*/
-
-#define restoreComponent(VPLANE,BUFF) osdRestorePlane(buffers_comp[VPLANE],BUFF->offset, \
-                BUFF->x, BUFF->y,                                                        \
-                BUFF->width,BUFF->height,                                                \
-                BUFF->bitsPerPixel, BUFF->state, BUFF->enable)                           \
-
-
+}
 
 void restoreAllComponent(void)
 {
     int i;
     for(i=0;i<4;i++)
+    {
         restoreComponent(i,buffers[i]);
+    }
 }
 
-#ifdef USE_DEBUG_ON_SCREEN 
+#ifdef HAVE_DEBUG_ON_SCREEN
 void error_scr_switch()
 {
     if(error_scr_state)
@@ -229,7 +217,7 @@ void error_scr_switch()
         osdSetComponentConfig(OSD_BITMAP2, 0);
         osdSetComponentConfig(OSD_CURSOR1, 0);
         osdSetComponentConfig(OSD_CURSOR2, 0);
-        restoreComp(OSD_BITMAP1,ERROR_SCR);        
+        restoreComponent(BMAP1,(&ERROR_SCR));
         printk("Switching to debug screen\n");
     }
 }
@@ -257,7 +245,7 @@ void ini_graphics(void)
     osdSetComponentConfig(OSD_CURSOR2, 0);
     
     setPalette(gui_pal,256);
-#ifdef USE_DEBUG_ON_SCREEN 
+#ifdef HAVE_DEBUG_ON_SCREEN
     error_scr_state=1;
     
     iniComponent(BMAP1,&ERROR_SCR,(unsigned int)&screen_ERROR);
@@ -470,7 +458,16 @@ int swi_gfx_handler(unsigned long nCmd,unsigned long cmd,
                     g_data->x=buffers[p_data->vplane]->x;
                     g_data->y=buffers[p_data->vplane]->y;
                     break;
-                case 0x200:                      /* void clearScreen(unsigned int color) */            
+                case 0x10B:
+                    //printk("Buffer @ of plane : %x => @0x%x\n",g_data->x,buffers[g_data->x]->offset);
+                    g_data->color = buffers[*int_data]->offset;
+                    break;
+                case 0x10C:
+                    buffers[*int_data]->offset=g_data->color;
+                    osdSetComponentOffset(buffers_comp[*int_data],buffers[*int_data]->offset);
+                    break;
+
+                case 0x200:                      /* void clearScreen(unsigned int color) */
                     buffers[current_plane]->gops->fillRect(*int_data,0,0,
                                 buffers[current_plane]->width,
                                 buffers[current_plane]->height,
@@ -554,10 +551,6 @@ int swi_gfx_handler(unsigned long nCmd,unsigned long cmd,
                 case 0x20D:
                     //printk("K set palette (%d,%d,%d) at %d\n",g_data->x,g_data->y,g_data->w,g_data->h);
                     osdSetPaletteRGB(g_data->x,g_data->y,g_data->w,g_data->h);
-                    break;
-                case 0x20E:
-                    printk("Buffer @ of plane : %x => @0x%x\n",g_data->x,buffers[g_data->x]->offset);
-                    g_data->color = buffers[g_data->x]->offset;
                     break;
                 case 0x300:                      /* void setFont(int font_nb) */
                     current_font=*int_data;

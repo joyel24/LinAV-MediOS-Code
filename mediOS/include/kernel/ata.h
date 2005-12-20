@@ -39,8 +39,8 @@
 #define ATA_WITH_DMA                             1
 #define ATA_NO_DMA                               0
 
-#define WAIT_XFER_TIMEOUT                    0x200000
-#define WAIT_READY_TIMEOUT                   0x200000
+#define WAIT_XFER_TIMEOUT                    0x800000
+#define WAIT_READY_TIMEOUT                   0x800000
 
 #define SECTOR_SIZE      512
 

@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/halt_device.c
 *
 *   AMOS project
@@ -17,12 +17,17 @@
 
 void halt_device(void)
 {
-    printk("let's halt the device\n");    
-    
+    printk("let's halt the device\n");
+
     ata_stop_HD(); /* we need to call halt_hd later to unmount all partitions */
 
     udelay(100);
     clf();
     outw(0,0x30a1a);
     while(1) /* nothing */;
+}
+
+void reload_firmware(void)
+{
+
 }

@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/kernel/exit.h
 *
 *   AMOS project

@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/api.h
 *
 *   AMOS project
@@ -31,6 +31,8 @@
 ERROR_CODE API_MALLOC               (void** ppvBuffer, unsigned long nBytes);
 ERROR_CODE API_FREE                 (void* pvBuffer);
 ERROR_CODE API_MEMAVAIL             (unsigned long* pnBytes);
+ERROR_CODE API_REALLOC              (void** ppvBuffer, void* pvBuffer, unsigned long nBytes);
+
 ERROR_CODE API_MEMSET               (void* pvBuffer, int fill, int size);
 ERROR_CODE API_MEMCPY               (void* pvBuffer, const void* pvSrc, int size);
 
@@ -98,6 +100,7 @@ int        do_api_power         (int cmd);
 void       printf               (char *fmt, ...);
 
 void *  malloc(long size);
+void *  realloc(void *buff,long size);
 void    free(void *buff);
 
 unsigned long get_tick(void);
