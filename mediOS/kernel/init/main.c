@@ -70,7 +70,7 @@ void kernel_start (void)
 {
     ini_graphics();
 
-#ifdef USE_DEBUG_ON_SCREEN
+#ifdef HAVE_DEBUG_ON_SCREEN
     ini_debugOnScreen();
 #endif
 
