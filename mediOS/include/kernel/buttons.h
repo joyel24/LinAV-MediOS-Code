@@ -18,7 +18,7 @@
 #include <kernel/gio.h>
 
 #define MAX_PRESSED                 4
-#define MAX_OFF                     15
+#define MAX_OFF                     300
 
 #include <kernel/target/arch/buttons.h>
 extern int old_state;

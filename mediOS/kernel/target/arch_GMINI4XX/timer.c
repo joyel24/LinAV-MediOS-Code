@@ -46,13 +46,14 @@ void arch_init_timer(void)
     * Sends FIQ at 2khz
     */
 
-    SET_TIMER_SEL(TMR_SEL_EXT,TMR3);
+    SET_TIMER_SEL(TMR_SEL_ARM,TMR3);
 
     /* prescale  */
     SET_TIMER_SCAL(0, TMR3);
 
     /* div  */
-    SET_TIMER_DIV(((CONFIG_EXT_CLK/2000)-1), TMR3);
+    SET_TIMER_SEL(1,TMR3);
+    SET_TIMER_DIV(50624, TMR3);
 
     /* freerun */
     SET_TIMER_MODE(TMR_MODE_FREERUN, TMR3);

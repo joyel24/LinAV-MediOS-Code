@@ -7,6 +7,13 @@ trap_fiq: @called every 500ns
 
   ldr     r9, =0x30500
 
+  ldrh    r8, [r9]        @DM270_INTC_FIQ0
+  tst     r8, #8          @fiq 3 set?
+  bne     trap_fiq_end
+  ldrh    r8, [r9,#0x28]  @DM270_INTC_IRQ0
+  tst     r8, #8          @irq 3 enabled?
+  beq     trap_fiq_end
+
   ldrh    r8, [r9]
   orr     r8, r8, #0x08
   strh    r8, [r9]        @set fiq 3 (timer 3)
