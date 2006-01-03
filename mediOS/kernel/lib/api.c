@@ -59,6 +59,8 @@ ERROR_CODE API_BKPT                 (void)                               { swi_c
 
 ERROR_CODE API_SET_GET_INT_TIMER    (int type,int mode,TRI_DATA * pvData)         { swi_call(nAPI_IO_INT_TIMER); }
 
+ERROR_CODE API_EXIT                 (int code)                           { swi_call(nAPI_EXIT); }
+
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 
@@ -117,6 +119,13 @@ void printf(char *fmt, ...)
 }
 
 /// TMP !!!
+
+
+
+void exit(int code)
+{
+    API_EXIT(code);
+}
 
 void * malloc(long size)
 {

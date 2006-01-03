@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:  none
 //
@@ -307,12 +311,12 @@ void G_BuildTiccmd (ticcmd_t* cmd)
     if (gamekeydown[key_up]) 
     {
 	// fprintf(stderr, "up\n");
-	forward += forwardmove[speed]; 
+	forward += forwardmove[speed];
     }
-    if (gamekeydown[key_down]) 
+    if (gamekeydown[key_down])
     {
 	// fprintf(stderr, "down\n");
-	forward -= forwardmove[speed]; 
+	forward -= forwardmove[speed];
     }
     if (joyymove < 0) 
 	forward += forwardmove[speed]; 
@@ -328,7 +332,7 @@ void G_BuildTiccmd (ticcmd_t* cmd)
  
     if (gamekeydown[key_fire] || mousebuttons[mousebfire] 
 	|| joybuttons[joybfire]) 
-	cmd->buttons |= BT_ATTACK; 
+	cmd->buttons |= BT_ATTACK;
  
     if (gamekeydown[key_use] || joybuttons[joybuse] ) 
     { 

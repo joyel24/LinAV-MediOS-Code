@@ -80,7 +80,7 @@ void kernel_start (void)
     /* print banner on uart */
     printk("MediOS %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);
 
-    printk("Initial SP: %08x, kernel end: %08x, size in IRAM: %08x  Malloc start: %08x, size: %08x\n",get_sp(),
+    printk("Initial SP: %08x, kernel end: %08x, size in IRAM: %d  Malloc start: %08x, size: %d\n",get_sp(),
         (unsigned int)&_end_kernel,
         (unsigned int)&_iram_end - (unsigned int)&_iram_start,
         (unsigned int)MALLOC_START,
@@ -139,15 +139,14 @@ void kernel_start (void)
     
     printk("[init] ------------ all drivers\n");
 
-    print_boot_info();
+//    print_boot_info();
 
     printk("[init] END\n");
 
 #ifdef BUILD_LIB
     do_bkpt();
     _start();
-    printk("[loop] back from code\n");
-    while(1) /*nothing*/;
+    reload_firmware();
 #endif
     do_bkpt();
     

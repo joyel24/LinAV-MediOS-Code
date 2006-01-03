@@ -16,6 +16,10 @@
 //
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	Main loop menu stuff.
@@ -283,7 +287,7 @@ void M_SaveDefaults (void)
     int		v;
     int   f;
 
-    f = fopen (defaultfile, O_WRONLY);
+    f = fcreat (defaultfile, O_WRONLY);
     if (f<0)
 	return; // can't write the file, but don't complain
 

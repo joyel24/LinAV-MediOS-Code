@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	DOOM graphics stuff for SDL library
@@ -35,11 +39,17 @@ rcsid[] = "$Id$";
 
 #include "doomdef.h"
 
-char button_to_key[NB_BUTTONS]=
- {KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
+char button_to_key[2][NB_BUTTONS]=
+  // ingame
+ {{KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
   KEY_F11,KEY_F6,KEY_F9,
-  KEY_RCTRL,' ',
-  KEY_ENTER,KEY_ESCAPE};
+  KEY_RCTRL,'1',
+  ' ',KEY_ESCAPE},
+  // menus
+  {KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
+  ' ',' ',' ',
+  KEY_ENTER,'y',
+  KEY_ENTER,KEY_ESCAPE}};
 
 // 320px -> 220px clever resize of the HUD (thx to WireDDD for the idea)
 int hud_resize_table[REALSCREENWIDTH]={
@@ -98,13 +108,26 @@ void DoFullScreenResize(){
   }
 }
 
+__IRAM_DATA static bool hud_resize_side=1;
 __IRAM_CODE void DoHUDResize(){
-  int i,j;
+  int i,j,start,end;
   char * ip;
   char * op;
 
-  op=offset2+(REALSCREENHEIGHT-SBARHEIGHT-1)*SCREENWIDTH;
-  for(i=0;i<REALSCREENWIDTH;++i){
+  // redraw only half of the hud each frame (faster)
+  if (hud_resize_side==1){
+    hud_resize_side=2;
+    start=0;
+    end=REALSCREENWIDTH/2;
+  }else{
+    hud_resize_side=1;
+    start=REALSCREENWIDTH/2;
+    end=REALSCREENWIDTH;
+  }
+
+
+  op=offset2+start+(REALSCREENHEIGHT-SBARHEIGHT-1)*SCREENWIDTH;
+  for(i=start;i<end;++i){
     ip=hud_resize_lookup[i];
     for(j=0;j<SBARHEIGHT;++j){
       *(op+=SCREENWIDTH)=*(ip+=SCREENWIDTH);
@@ -117,7 +140,7 @@ void DoButtonEvent(int button,bool released){
   event_t event;
   event.type = ev_keydown;
   if (released) event.type=ev_keyup;
-  event.data1 = button_to_key[button];
+  event.data1 = button_to_key[menuactive?1:0][button];
   D_PostEvent(&event);
 }
 

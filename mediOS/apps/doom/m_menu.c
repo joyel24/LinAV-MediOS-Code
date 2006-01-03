@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	DOOM selection menu, options, episode etc.
@@ -636,11 +640,16 @@ void M_SaveSelect(int choice)
 {
     // we are going to be intercepting all chars
     saveStringEnter = 1;
-    
+
     saveSlot = choice;
     strcpy(saveOldString,savegamestrings[choice]);
+
     if (!strcmp(savegamestrings[choice],EMPTYSTRING))
 	savegamestrings[choice][0] = 0;
+
+    //gli
+    sprintf(savegamestrings[choice],"Slot %d",choice+1);
+
     saveCharIndex = strlen(savegamestrings[choice]);
 }
 
@@ -1463,7 +1472,10 @@ boolean M_Responder (event_t* ev)
 	    if (savegamestrings[saveSlot][0])
 		M_DoSave(saveSlot);
 	    break;
-				
+
+/*
+gli: no keyboard ;/
+
 	  default:
 	    ch = toupper(ch);
 	    if (ch != 32)
@@ -1478,6 +1490,7 @@ boolean M_Responder (event_t* ev)
 		savegamestrings[saveSlot][saveCharIndex] = 0;
 	    }
 	    break;
+*/
 	}
 	return true;
     }

@@ -1,7 +1,7 @@
 /*
-*   include/kernel/exit.h
+*   kernel/target/arch_AV3XX/exit.c
 *
-*   AMOS project
+*   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -10,12 +10,12 @@
 * KIND, either express of implied.
 */
 
+#include <sys_def/stddef.h>
 
-#ifndef __EXIT_H
-#define __EXIT_H
+#include <kernel/io.h>
+#include <kernel/hardware.h>
 
-void halt_device(void);
-void reload_firmware(void);
-void arch_reload_firmware(void);
+void arch_reload_firmware(void){
+  halt_device();
+}
 
-#endif

@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	Player related stuff.
@@ -46,7 +50,7 @@ rcsid[] = "$Id$";
 //
 
 // 16 pixels of bob
-#define MAXBOB	0x100000	
+#define MAXBOB	0x100000
 
 boolean		onground;
 
@@ -59,11 +63,11 @@ void
 P_Thrust
 ( player_t*	player,
   angle_t	angle,
-  fixed_t	move ) 
+  fixed_t	move )
 {
     angle >>= ANGLETOFINESHIFT;
-    
-    player->mo->momx += FixedMul(move,finecosine[angle]); 
+
+    player->mo->momx += FixedMul(move,finecosine[angle]);
     player->mo->momy += FixedMul(move,finesine[angle]);
 }
 
@@ -126,8 +130,8 @@ void P_CalcHeight (player_t* player)
 	    if (player->deltaviewheight <= 0)
 		player->deltaviewheight = 1;
 	}
-	
-	if (player->deltaviewheight)	
+
+	if (player->deltaviewheight)
 	{
 	    player->deltaviewheight += FRACUNIT/4;
 	    if (!player->deltaviewheight)
@@ -148,27 +152,27 @@ void P_CalcHeight (player_t* player)
 void P_MovePlayer (player_t* player)
 {
     ticcmd_t*		cmd;
-	
+
     cmd = &player->cmd;
-	
+
     player->mo->angle += (cmd->angleturn<<16);
 
     // Do not let the player control movement
     //  if not onground.
     onground = (player->mo->z <= player->mo->floorz);
-	
+
     if (cmd->forwardmove && onground)
 	P_Thrust (player, player->mo->angle, cmd->forwardmove*2048);
-    
+
     if (cmd->sidemove && onground)
 	P_Thrust (player, player->mo->angle-ANG90, cmd->sidemove*2048);
 
-    if ( (cmd->forwardmove || cmd->sidemove) 
+    if ( (cmd->forwardmove || cmd->sidemove)
 	 && player->mo->state == &states[S_PLAY] )
     {
 	P_SetMobjState (player->mo, S_PLAY_RUN1);
     }
-}	
+}
 
 
 
@@ -285,8 +289,16 @@ void P_PlayerThink (player_t* player)
 	// The actual changing of the weapon is done
 	//  when the weapon psprite can do it
 	//  (read: not in the middle of an attack).
-	newweapon = (cmd->buttons&BT_WEAPONMASK)>>BT_WEAPONSHIFT;
-	
+
+	//newweapon = (cmd->buttons&BT_WEAPONMASK)>>BT_WEAPONSHIFT;
+
+        //gli
+        newweapon=player->readyweapon;
+        do{
+         newweapon++;
+         if (newweapon>=NUMWEAPONS) newweapon=0;
+        }while(!player->weaponowned[newweapon]);
+
 	if (newweapon == wp_fist
 	    && player->weaponowned[wp_chainsaw]
 	    && !(player->readyweapon == wp_chainsaw
@@ -294,7 +306,7 @@ void P_PlayerThink (player_t* player)
 	{
 	    newweapon = wp_chainsaw;
 	}
-	
+
 	if ( (gamemode == commercial)
 	    && newweapon == wp_shotgun 
 	    && player->weaponowned[wp_supershotgun]

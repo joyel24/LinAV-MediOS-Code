@@ -150,7 +150,7 @@
 
 #define VIDEO_BASE                        0x30800
 #define LCD_BACK_LIGHT                    0x02600200
-#define SCREEN_WIDTH                      256
+#define SCREEN_WIDTH                      224
 #define SCREEN_REAL_WIDTH                 220
 #define SCREEN_HEIGHT                     176
 #define SCREEN_ORIGIN_X                   8

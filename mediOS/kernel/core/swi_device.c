@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/core/swi_device.c
 *
 *   MediOS project
@@ -16,6 +16,7 @@
 #include <kernel/usb_fw.h>
 #include <kernel/rtc.h>
 #include <kernel/bat_power.h>
+#include <kernel/exit.h>
 #include <types.h>
 
 extern int lcd_bright;
@@ -104,6 +105,10 @@ __IRAM_CODE int swi_device_handler (
                         pvData->c=get_timer_status_freq(pvData->a, pvData->b,nParam2);
                     }
                 }
+                return 0;
+            case nAPI_EXIT:
+                printk("[exit] return code: %d(0x%0.2x)\n",nParam1,nParam1);
+                reload_firmware();
                 return 0;
             default:
                 printk("Device undefined swi (%d)\n",nCmd);

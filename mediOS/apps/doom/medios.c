@@ -12,11 +12,6 @@ int access(char *file, int mode)
 	return(-1);
 }
 
-void exit(int errnum){
-  printf("\nEXIT! code=%d\n",errnum);
-  for(;;);
-}
-
 int fprintf(int f,const char * s,...){
   switch(f){
     case stderr:

@@ -1,5 +1,5 @@
 /*
-*   kernel/halt_device.c
+*   kernel/exit.c
 *
 *   AMOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -17,7 +17,7 @@
 
 void halt_device(void)
 {
-    printk("let's halt the device\n");
+    printk("[exit] device halt\n");
 
     ata_stop_HD(); /* we need to call halt_hd later to unmount all partitions */
 
@@ -29,5 +29,7 @@ void halt_device(void)
 
 void reload_firmware(void)
 {
+    printk("[exit] firmware reload\n");
 
+    arch_reload_firmware();
 }

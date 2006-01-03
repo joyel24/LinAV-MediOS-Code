@@ -29,7 +29,6 @@
 
 int access(char *file, int mode);
 
-void exit(int errnum);
 int fprintf(int f,const char * s,...);
 int fscanf(int f,const char * s,...);
 void * getenv(const char * s);

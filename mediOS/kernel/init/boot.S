@@ -51,12 +51,10 @@ clr_bss_loop:
     mov    lr,pc
     bx     r3
 
-/* Gmini400: reload the firmware */
-.ifdef GMINI4XX
-    ldr r0,=0x900000
-    bx r0
-.endif
-
+/* loop endlessly */
+infinite_loop:
+    b infinite_loop
+    
 __kernel_start_ptr:    .word kernel_start
 __real_iram_start_ptr: .word _real_iram_start
 __iram_start_ptr:      .word _iram_start

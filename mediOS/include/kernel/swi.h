@@ -63,6 +63,8 @@
 
 #define nAPI_GET_TICK             (nAPI_DEVICE_section + 9)
 #define nAPI_IO_INT_TIMER         (nAPI_DEVICE_section + 10)
+
+#define nAPI_EXIT                 (nAPI_DEVICE_section + 11)
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 

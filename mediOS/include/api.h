@@ -104,6 +104,8 @@ int        do_api_power         (int cmd);
 
 void       printf               (char *fmt, ...);
 
+void       exit(int code);
+
 void *  malloc(long size);
 void *  realloc(void *buff,long size);
 void    free(void *buff);
