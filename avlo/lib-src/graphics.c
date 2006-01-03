@@ -135,7 +135,6 @@ void iniComponent(int vplane,struct graphicsBuffer * buff,unsigned int offset)
     if(diff)
         offset+=(32-diff);
     buff->offset=offset;
-    printf("address of %d is 0x%x\n",vplane,offset);
     osdSetComponentOffset(buffers_comp[vplane],offset);
     osdSetComponentSize(buffers_comp[vplane], 2*buff->width, buff->height);
     osdSetComponentPosition(buffers_comp[vplane],buff->x, buff->y);

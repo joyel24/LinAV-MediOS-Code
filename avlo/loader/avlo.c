@@ -53,7 +53,7 @@
 #define BAR_W        (320-2*BAR_X)
 #define BAR_H        5
 
-#define BTM_TXT      "V3.0 | image: "
+#define BTM_TXT      "V3.1 | image: "
 
 #define NO_TIME_OUT    0
 #define WITH_TIME_OUT  1
@@ -91,8 +91,6 @@ void start_avlo(void)
     
 
     ini_graphics((unsigned int)bg_img);
-    printf("bg @ 0x%x\n",bg_img);
-    print_data(bg_img,0x50);
     ini_font();
     setPlane(BMAP1);
     setState(BMAP1,OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 |OSD_BITMAP_8BIT|OSD_BITMAP_0TRANS);
@@ -430,7 +428,32 @@ int processDefault(int key,int nbCfg)
             while(pos<nbCfg+1 && strcmp(cfg[pos].label,cfgG.defBin))
                 pos++;
             if(pos<nbCfg+1)
-            {
+            {            
+                char * ext=strrchr(cfg[pos].image,'.')+1;
+                int launch=0;
+                printf("loading: %s ext:%s\n",cfg[pos].image,ext);
+                if(ext[0]=='a' && ext[1]=='j' && ext[2]=='z' && ext[3]=='\0'                        
+                                && fastLoadCJBM(cfg[pos].image))
+                    launch=1;
+                else if (loadFile(cfg[pos].image,(char*)0x03000000,1))
+                    launch=1;
+
+                if(launch)
+                {
+                    printf("File loaded, now launching\n");
+                    printf("append=%s\n",cfg[pos].append);
+                    if(cfg[pos].append[0])
+                    {
+                        snprintf(tmp_txt,100,"AV_Pinit=/bin/init_cust myinit=%s",cfg[pos].append);
+                        binCaller(tmp_txt);
+                    }
+                    else
+                        binCaller(NULL);
+                    while(1);
+                }
+                else
+                    printf("error loading %s\n",cfg[pos].image);
+/*            
                 if(loadFile(cfg[pos].image,(char*)0x03000000,1))
                 {
                     printf("append=%s\n",cfg[pos].append);
@@ -446,6 +469,7 @@ int processDefault(int key,int nbCfg)
                 }
                 else
                     printf("error loading %s\n",cfg[cursorPos].image);
+*/
             }
 
             errNoDefault=1;
