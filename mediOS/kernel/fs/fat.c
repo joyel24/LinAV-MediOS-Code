@@ -309,7 +309,7 @@ int fat_mount(int volume, int drive, int startsector)
     int rootdirsectors;
 
     /* Read the sector */
-    rc = disk_RW_sector(drive,startsector,1,buf,ATA_DO_READ);
+    rc = ata_rwData(drive,startsector,buf,1,ATA_DO_READ,ATA_WITH_DMA);
     if(rc)
     {
         printk( "fat_mount() - Couldn't read BPB (error code %d)\n", rc);
@@ -399,8 +399,8 @@ int fat_mount(int volume, int drive, int startsector)
     else
     {
         /* Read the fsinfo sector */
-        rc = disk_RW_sector(drive,
-            startsector + fat_bpb->bpb_fsinfo,1,buf,ATA_DO_READ);        
+        rc = ata_rwData(drive,
+            startsector + fat_bpb->bpb_fsinfo,buf,1,ATA_DO_READ,ATA_WITH_DMA);        
         if (rc < 0)
         {
             printk( "fat_mount() - Couldn't read FSInfo (error code %d)\n", rc);
@@ -556,8 +556,8 @@ static void flush_fat_sector(struct fat_cache_entry *fce,
     secnum = fce->secnum + fce->fat_vol->startsector;
 
     /* Write to the first FAT */
-    rc = disk_RW_sector(fce->fat_vol->drive,
-            secnum,1,sectorbuf,ATA_DO_WRITE);
+    rc = ata_rwData(fce->fat_vol->drive,
+            secnum,sectorbuf,1,ATA_DO_WRITE,ATA_WITH_DMA);
     
     if(rc < 0)
     {
@@ -569,8 +569,8 @@ static void flush_fat_sector(struct fat_cache_entry *fce,
     {
         /* Write to the second FAT */
         secnum += fce->fat_vol->fatsize;
-        rc = disk_RW_sector(fce->fat_vol->drive,
-            secnum,1,sectorbuf,ATA_DO_WRITE);
+        rc = ata_rwData(fce->fat_vol->drive,
+            secnum,sectorbuf,1,ATA_DO_WRITE,ATA_WITH_DMA);
         if(rc < 0)
         {
             printk("flush_fat_sector() - Could not write sector %d"
@@ -609,8 +609,8 @@ static void *cache_fat_sector(struct bpb* fat_bpb,
     /* Load the sector if it is not cached */
     if(!fce->inuse)
     {
-        rc = disk_RW_sector(fat_bpb->drive,
-            secnum + fat_bpb->startsector,1,sectorbuf,ATA_DO_READ);
+        rc = ata_rwData(fat_bpb->drive,
+            secnum + fat_bpb->startsector,sectorbuf,1,ATA_DO_READ,ATA_WITH_DMA);
 
         if(rc < 0)
         {
@@ -838,8 +838,8 @@ static int update_fsinfo(struct bpb* fat_bpb)
         return 0; /* FAT16 has no FsInfo */
     
     /* update fsinfo */
-    rc = disk_RW_sector(fat_bpb->drive,fat_bpb->startsector + fat_bpb->bpb_fsinfo,
-                1,fsinfo,ATA_DO_READ);
+    rc = ata_rwData(fat_bpb->drive,fat_bpb->startsector + fat_bpb->bpb_fsinfo,
+                fsinfo,1,ATA_DO_READ,ATA_WITH_DMA);
 
     if (rc < 0)
     {
@@ -852,8 +852,8 @@ static int update_fsinfo(struct bpb* fat_bpb)
     intptr = (int*)&(fsinfo[FSINFO_NEXTFREE]);
     *intptr = SWAB32(fat_bpb->fsinfo.nextfree);
 
-    rc = disk_RW_sector(fat_bpb->drive,fat_bpb->startsector + fat_bpb->bpb_fsinfo,
-                1,fsinfo,ATA_DO_WRITE);
+    rc = ata_rwData(fat_bpb->drive,fat_bpb->startsector + fat_bpb->bpb_fsinfo,
+                fsinfo,1,ATA_DO_WRITE,ATA_WITH_DMA);
     if (rc < 0)
     {
         printk( "flush_fat() - Couldn't write FSInfo (error code %d)\n", rc);
@@ -1826,10 +1826,10 @@ static int transfer(struct bpb* fat_bpb,
         if (start + count > fat_bpb->totalsectors)
             printk("Write %d after data\n",
                 start + count - fat_bpb->totalsectors);
-        rc = disk_RW_sector(fat_bpb->drive,start + fat_bpb->startsector,count,buf,ATA_DO_WRITE);        
+        rc = ata_rwData(fat_bpb->drive,start + fat_bpb->startsector,buf,count,ATA_DO_WRITE,ATA_WITH_DMA);        
     }
     else
-        rc = disk_RW_sector(fat_bpb->drive,start + fat_bpb->startsector,count,buf,ATA_DO_READ);
+        rc = ata_rwData(fat_bpb->drive,start + fat_bpb->startsector,buf,count,ATA_DO_READ,ATA_WITH_DMA);
     if (rc < 0) {
         printk( "transfer() - Couldn't %s sector %x"
                 " (error code %d)\n", 

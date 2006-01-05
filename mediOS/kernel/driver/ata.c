@@ -41,78 +41,67 @@ extern struct timer_s hd_timer;
 
 #define CALC_BASE(ADDR)     (((unsigned int)(ADDR))-SDRAM_START)
 
-#define SELECT_DRIVE(DRIVE)   ({ \
+#define ATA_SELECT_DRIVE(DRIVE)   ({ \
     if(DRIVE==HD_DRIVE)         \
     {                           \
-        ata_select_HD();        \
-        ata_powerUp_HD();       \
+        ata_selectHD();        \
+        ata_powerUpHD();       \
         hd_sleep_state=0;       \
         hd_launchTimer();       \
     }                           \
     else                        \
     {                           \
-        ata_select_CF();        \
+        ata_selectCF();        \
     }                           \
     })
 
-int ata_process_cmd(ata_cmd_s * ata_cmd)
+int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_dma)
 {
     int i,j;
 
-	if (ata_cmd->xfer_dir == ATA_SLEEP)
-	{
-		printk ("calling ata_stop_HD...\n");
-		ata_stop_HD ();
-		return 0;
-	}
+    /* select the right drive */    
+    ATA_SELECT_DRIVE(drive);
 
-    /*select the right drive*/
-
-    //printk("[ata_process_cmd]: mode:%d lba=0x%x count=%d buffer=%08x\n",ata_cmd->xfer_dir,ata_cmd->lba,ata_cmd->count,ata_cmd->data);
-
-    SELECT_DRIVE(ata_cmd->drive);
-
+    /* wait drive ready */
     if(ata_waitForReady()<0)
         return -1;
 
     /* send read/write cmd */
-    switch(ata_cmd->xfer_dir)
+    switch(cmd)
     {
         case ATA_DO_IDENT:
             outb(0,IDE_SELECT); /* send ident. cmd */
             outb(IDE_CMD_IDENTIFY,IDE_COMMAND);
-            ata_cmd->count=1;
+            /*ata_cmd->count=1;
             ata_cmd->xfer_dir=ATA_DO_READ;
-            ata_cmd->use_dma=ATA_WITH_DMA;
+            ata_cmd->use_dma=ATA_WITH_DMA;*/
             break;
 
         case ATA_DO_READ:
         case ATA_DO_WRITE:
-            outb(ata_cmd->lba,IDE_SECTOR);
-            outb(ata_cmd->lba>>8,IDE_LCYL);
-            outb(ata_cmd->lba>>16,IDE_HCYL);
-            outb((ata_cmd->lba>>24) | IDE_SEL_LBA,IDE_SELECT);
-            outb(ata_cmd->count,IDE_NSECTOR);
-            outb(av_cmd_array[ata_cmd->xfer_dir],IDE_COMMAND);
+            outb(lba,IDE_SECTOR);
+            outb(lba>>8,IDE_LCYL);
+            outb(lba>>16,IDE_HCYL);
+            outb((lba>>24) | IDE_SEL_LBA,IDE_SELECT);
+            outb(count,IDE_NSECTOR);
+            outb(av_cmd_array[cmd],IDE_COMMAND);
             break;
     }
 
-    outb(av_cmd_array[ata_cmd->xfer_dir],IDE_COMMAND);
+    //outb(av_cmd_array[ata_cmd->xfer_dir],IDE_COMMAND);
 
-    if(((unsigned int)(ata_cmd->data) < SDRAM_START) && ata_cmd->use_dma==ATA_WITH_DMA)
+    if(((unsigned int)(data) < SDRAM_START) && use_dma==ATA_WITH_DMA)
     {
         printk("Destination buffer not in SDRAM => no DMA\n");    
-        ata_cmd->use_dma=ATA_NO_DMA;
+        use_dma=ATA_NO_DMA;
     }
 
-    //ata_cmd->use_dma=ATA_NO_DMA;
-
-    for(i=0;i<ata_cmd->count;i++)
+    for(i=0;i<count;i++)
     {
         if(ata_waitForXfer()<0)
             return 0;
 
-        if(ata_cmd->use_dma==ATA_WITH_DMA)
+        if(use_dma==ATA_WITH_DMA)
         {
             if( DMA_RUNNING )
             {
@@ -120,22 +109,22 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
                 return -1;
             }
 
-            if((unsigned int)(ata_cmd->data) < SDRAM_START)
+            if((unsigned int)(data) < SDRAM_START)
             {
                 printk("Error buffer not in SDRAM\n");    
                 return -2;
             }
            
-            if(ata_cmd->xfer_dir==ATA_DO_READ)
+            if(cmd == ATA_DO_READ || cmd == ATA_DO_IDENT)
             {
                 DMA_SET_SRC(DMA_ATA_ADDRESS);
-                DMA_SET_DEST((CALC_BASE(ata_cmd->data))+i*SECTOR_SIZE);
+                DMA_SET_DEST((CALC_BASE(data))+i*SECTOR_SIZE);
                 DMA_SET_SIZE(SECTOR_SIZE);
                 DMA_SET_DEV(DMA_ATA,DMA_SDRAM)
             }
             else
             {
-                DMA_SET_SRC((CALC_BASE(ata_cmd->data))+i*SECTOR_SIZE);
+                DMA_SET_SRC((CALC_BASE(data))+i*SECTOR_SIZE);
                 DMA_SET_DEST(DMA_ATA_ADDRESS);
                 DMA_SET_SIZE(SECTOR_SIZE);
                 DMA_SET_DEV(DMA_SDRAM,DMA_ATA)
@@ -147,86 +136,25 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
         }
         else
         {
-            if(ata_cmd->xfer_dir==ATA_DO_READ)
+            if(cmd == ATA_DO_READ || cmd == ATA_DO_IDENT)
+            {
                 for(j=0;j<SECTOR_SIZE;j+=2)
                 {
-                    outw(inw(IDE_DATA),ata_cmd->data+j+i*SECTOR_SIZE);
+                    outw(inw(IDE_DATA),data+j+i*SECTOR_SIZE);
                 }
+            }
             else
+            {
                 for(j=0;j<SECTOR_SIZE;j+=2)
                 {
-                    outw(inw(ata_cmd->data+j+i*SECTOR_SIZE),IDE_DATA);
+                    outw(inw(data+j+i*SECTOR_SIZE),IDE_DATA);
                 }
+            }
         }
     }
 
     return 0;
 }
-#if 0
-void ata_RW_Data(void * buffer,int count,int direction,int use_dma)
-{
-    int i;   
-    unsigned int base;
-    
-    /* for testing */
-    /*use_dma=ATA_NO_DMA;*/
-    
-    if(((unsigned int)(buffer) < SDRAM_START) && use_dma==ATA_WITH_DMA)
-    {
-        printk("Destination buffer not in SDRAM => no DMA\n");
-        use_dma=ATA_NO_DMA;
-    }
-    
-    if(use_dma==ATA_WITH_DMA)
-    {           
-        if( DMA_RUNNING )
-        {
-            printk("Error dma is still running\n");    
-            return;
-        }
-        
-        if((unsigned int)(buffer) < SDRAM_START)
-        {
-            printk("Error dma is still running\n");    
-            return;
-        }
-        
-        base=((unsigned int)(buffer))&0x00FFFFFF;
-        //printk("dma xfer: base=%08x (buffer=%08x)size=%x\n",base,(unsigned int)buffer,count);    
-        if(direction==ATA_DO_READ)
-        {
-            DMA_SET_SRC(DMA_ATA_ADDRESS);
-            DMA_SET_DEST(base);
-            DMA_SET_SIZE(count);
-            DMA_SET_DEV(DMA_ATA,DMA_SDRAM)
-        }
-        else
-        {            
-            DMA_SET_SRC(base);
-            DMA_SET_DEST(DMA_ATA_ADDRESS);
-            DMA_SET_SIZE(count);
-            DMA_SET_DEV(DMA_SDRAM,DMA_ATA)
-        }
-        
-        DMA_START_TRANSFER;
-            
-        while(DMA_RUNNING) /*nothing*/;
-    }
-    else
-    {
-        if(direction==ATA_DO_READ)
-            for(i=0;i<count;i+=2)
-            {
-                outw(inw(IDE_DATA),buffer+i);
-            }
-        else
-            for(i=0;i<count;i+=2)
-            {
-                outw(inw(buffer+i),IDE_DATA);
-            }
-    }
-}
-#endif
 
 int ata_sleep(void)
 {
@@ -237,10 +165,10 @@ int ata_sleep(void)
     return 0;
 }
 
-void ata_stop_HD(void)
+void ata_stopHD(void)
 {
     int j,status;
-    ata_select_HD();
+    ata_selectHD();
     ata_sleep();
     for(j=0;j<100;j++)
     {
@@ -249,7 +177,7 @@ void ata_stop_HD(void)
         if((status & IDE_STATUS_BSY)==0 && (status & IDE_STATUS_RDY)!=0)
             break;
     }    
-    ata_powerDown_HD();
+    ata_powerDownHD();
     //udelay(100);    
     stop_timer(&hd_timer);
     hd_sleep_state=1;
@@ -261,7 +189,6 @@ int ata_waitForXfer(void)
     int i,val;
     for(i=0;i<WAIT_XFER_TIMEOUT;i++)
     {
-        //udelay(10);
         val=inb(IDE_CONTROL);
         if((val & IDE_STATUS_BSY)==0 && (val & IDE_STATUS_DRQ)!=0)
             return 0;
@@ -274,7 +201,6 @@ int ata_waitForReady(void)
     int i,val;
     for(i=0;i<WAIT_READY_TIMEOUT;i++)
     {
-        //udelay(10);
         val=inb(IDE_CONTROL);
         if((val & IDE_STATUS_BSY)==0 && (val & IDE_STATUS_RDY)!=0)
             return 0;
@@ -287,70 +213,38 @@ int ata_status(void)
     return inb(IDE_CONTROL);
 }
 
-#if 0
-int ata_identify(char * buffer)
+void ata_resetHD(void)
 {
-    if(ata_waitForReady()<0)
-        return -1;
-    /* send ident. cmd */
-    outb(0,IDE_SELECT);
-    outb(IDE_CMD_IDENTIFY,IDE_COMMAND);
-    /* begin read */
-    if(ata_waitForXfer()<0)
-        return -2;
-
-    ata_RW_Data(buffer,SECTOR_SIZE,ATA_DO_READ,ATA_NO_DMA);
-    return 0;
-}
-#else
-int ata_identify(int drive,char * buffer)
-{
-    ata_cmd_s * cmd=(ata_cmd_s*)malloc(sizeof(ata_cmd_s));
-    int res;
-
-    cmd->drive=drive;
-
-    cmd->data=buffer;
-    cmd->xfer_dir=ATA_DO_IDENT;
-    res=ata_process_cmd(cmd);
-    free(cmd);
-    return res;
-}
-#endif
-
-void ata_reset_HD(void)
-{
-  arch_ata_reset_HD();
+  arch_ata_resetHD();
 }
 
-void ata_powerUp_HD(void)
+void ata_powerUpHD(void)
 {
-    arch_ata_powerUp_HD();
+    arch_ata_powerUpHD();
 }
 
-void ata_powerDown_HD(void)
+void ata_powerDownHD(void)
 {
-    arch_ata_powerDown_HD();
+    arch_ata_powerDownHD();
 }
 
-void ata_select_HD(void)
+void ata_selectHD(void)
 {
-    arch_ata_select_HD();
+    arch_ata_selectHD();
 }
 
-void ata_select_CF(void)
+void ata_selectCF(void)
 {
-    arch_ata_select_CF();
+    arch_ata_selectCF();
 }
 
-void init_ata(void)
+void ata_init(void)
 {
-    arch_init_ata();
+    arch_ata_init();
 }
 
-void ide_intr_action(int irq)
+void ide_intAction(int irq)
 {
-    arch_ide_intr_action(irq);
+    arch_ide_intAction(irq);
 }
-
 

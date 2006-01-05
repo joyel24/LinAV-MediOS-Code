@@ -27,7 +27,6 @@
 #include <kernel/kfile.h>
 #include <kernel/kdir.h>
 #include <kernel/kernel.h>
-//#include <kernel/pipes.h>
 #include <kernel/bat_power.h>
 
 
@@ -59,11 +58,11 @@ int fatId[]={0x00, 0x01, 0x04, 0x05, 0x06, 0x0B, 0x0C, 0x0E, 0x0F};
 
 extern int hd_sleep_state;
 
-void init_disk(void)
+void disk_init(void)
 {
     int nb_mounted=0;
     
-    init_ata();
+    ata_init();
 
     /* init   the file/dir struct */
     init_file();
@@ -84,7 +83,7 @@ int disk_mount(int drive)
     struct partition_info* pinfo;
     int i;
     
-    pinfo = setup_disk(drive);
+    pinfo = disk_setup(drive);
     if (pinfo == NULL)
         return 0;
     
@@ -108,7 +107,7 @@ int disk_umount(int drive,bool flush)
 }
 
 
-struct partition_info * setup_disk(int drive)
+struct partition_info * disk_setup(int drive)
 {
     int i,j;
     unsigned char * sector=(unsigned char *)malloc(sizeof(unsigned char)*SECTOR_SIZE);
@@ -122,12 +121,13 @@ struct partition_info * setup_disk(int drive)
     if(!sector)
         return NULL;
     /* identify disk */
-    identify_disk(drive,&disk_info[drive]);
-    printk("[init IDE-CF] reading drive %d\n     %s\n     %s|%s\n     %d sectors per ata request\n",drive,disk_info[drive].model,
+    disk_identify(drive,&disk_info[drive]);
+    printk("[init IDE-CF] reading drive %d\n     %s\n     %s|%s\n     %d sectors per ata request\n",
+                drive,disk_info[drive].model,
                 disk_info[drive].firmware,disk_info[drive].serial,disk_info[drive].multi_sector); 
                    
     /* Read MBR */
-    if(disk_RW_sector(drive,0,1,sector,ATA_DO_READ)<0) /* read 1 sector at LBA 0 */
+    if(ata_rwData(drive,0,sector,1,ATA_DO_READ,ATA_WITH_DMA)<0) /* read 1 sector at LBA 0 */
         return NULL;
     
     /* check that the boot sector is initialized */
@@ -165,11 +165,11 @@ struct partition_info * setup_disk(int drive)
     return pinfo;
 }
 
-void identify_disk(int drive, struct hd_info_s * hd_info)
+void disk_identify(int drive, struct hd_info_s * hd_info)
 {
     unsigned char * buffer=(unsigned char *)malloc(sizeof(unsigned char)*SECTOR_SIZE);    
     
-    if(buffer && !ata_identify(drive,buffer))
+    if(buffer && !ata_rwData(drive,0,buffer,1,ATA_DO_IDENT,ATA_WITH_DMA))
     {    
         strncpy(hd_info->serial, &buffer[20], 20);
         dd_swapChar(hd_info->serial,20);
@@ -192,50 +192,14 @@ void identify_disk(int drive, struct hd_info_s * hd_info)
     free(buffer);
 }  
 
-int disk_RW_sector (int drive,unsigned int lba,int count,void * buffer,int direction)
+void disk_haltHD(void)
 {
-    int res;
-    ata_cmd_s cmd;
-
-    cmd.lba = lba;
-    cmd.count = count;
-    cmd.data = buffer;
-    cmd.xfer_dir = direction;
-    cmd.use_dma = ATA_WITH_DMA;
-    cmd.drive = drive;
-    res=ata_process_cmd(&cmd);
-    return res;
+    disk_umount(HD_DRIVE,FLUSH); 
+    hd_sleep_state=1;
+    ata_stopHD();
 }
 
-int exec_disk_cmd_from_irq (int command)
-{
-    /*ata_cmd_s * cmd = (ata_cmd_s *)(g_pAtaCtrlPipe->buffer+g_pAtaCtrlPipe->nSender);
-
-    cmd->lba   = 0;
-    cmd->count = 0;
-    cmd->data  = 0;
-    cmd->xfer_dir = command;
-    cmd->use_dma  = 0;
-    cmd->drive    = 0;
-    cmd->pSenderThread = 0;
-
-    g_pAtaCtrlPipe->nSender = (g_pAtaCtrlPipe->nSender + sizeof(ata_cmd_s)) & PIPE_SIZE_MASK;*/
-        
-    int res;
-    ata_cmd_s cmd;
-
-    cmd.lba = 0;
-    cmd.count = 0;
-    cmd.data = 0;
-    cmd.xfer_dir = command;
-    cmd.use_dma = 0;
-    cmd.drive = 0;
-    res=ata_process_cmd(&cmd);
-
-    return res;
-}
-
-void printPartition_info(struct partition_info * partition_list)
+void disk_printPartInfo(struct partition_info * partition_list)
 {
     int i;
     for(i=0;i<4;i++)

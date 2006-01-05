@@ -14,6 +14,7 @@
 
 #include <kernel/io.h>
 #include <kernel/hardware.h>
+#include <kernel/exit.h>
 
 void arch_reload_firmware(void){
   halt_device();

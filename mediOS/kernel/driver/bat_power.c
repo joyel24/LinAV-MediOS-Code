@@ -238,8 +238,7 @@ void hd_timer_fct(void)
     if(hd_timer_used[num])
 #endif
     {
-        printk("exec_disk_cmd_from_irq\n");
-        exec_disk_cmd_from_irq (ATA_SLEEP);
+        ata_stopHD ();
     }
 #ifdef HAVE_USB_FW    
     if(kusb_fw_status)

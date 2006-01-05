@@ -17,38 +17,38 @@
 #include <kernel/cpld.h>
 #include <kernel/ata.h>
 
-void arch_ata_reset_HD(void)
+void arch_ata_resetHD(void)
 {
 }
 
-void arch_ata_powerUp_HD(void)
+void arch_ata_powerUpHD(void)
 {
     cpld_set_port_3(CPLD_HD_POWER); /* powering up HD */
 
 }
 
-void arch_ata_powerDown_HD(void)
+void arch_ata_powerDownHD(void)
 {
     cpld_clear_port_3(CPLD_HD_POWER);
 }
 
-void arch_ata_select_HD(void)
+void arch_ata_selectHD(void)
 {
     cpld_select(CPLD_HD_CF,CPLD_SEL_HD);
 }
 
-void arch_ata_select_CF(void)
+void arch_ata_selectCF(void)
 {
     cpld_select(CPLD_HD_CF,CPLD_SEL_CF);
 }
 
-void arch_init_ata(void)
+void arch_ata_init(void)
 {
 //    outb(0x8,IDE_CONTROL);          /* enabling ints */
 //    enable_irq(IRQ_IDE);
 }
 
-void arch_ide_intr_action(int irq)
+void arch_ide_intAction(int irq)
 {
 //    printk("get IDE irq: %d\n",irq);
 }

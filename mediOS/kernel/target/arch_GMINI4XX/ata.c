@@ -18,37 +18,37 @@
 #include <kernel/ata.h>
 #include <kernel/delay.h>
 
-void arch_ata_reset_HD(void)
+void arch_ata_resetHD(void)
 {
     cpld_clear_port_1(CPLD_HD_RESET);
     cpld_set_port_1(CPLD_HD_RESET);
 }
 
-void arch_ata_powerUp_HD(void)
+void arch_ata_powerUpHD(void)
 {
     cpld_set_port_1(CPLD_HD_POWER); /* powering up HD */
 }
 
-void arch_ata_powerDown_HD(void)
+void arch_ata_powerDownHD(void)
 {
     cpld_clear_port_1(CPLD_HD_POWER);
 }
 
-void arch_ata_select_HD(void)
+void arch_ata_selectHD(void)
 {
 }
 
-void arch_ata_select_CF(void)
+void arch_ata_selectCF(void)
 {
 }
 
-void arch_init_ata(void)
+void arch_ata_init(void)
 {
-  arch_ata_powerUp_HD();
-  arch_ata_reset_HD();
+  arch_ata_powerUpHD();
+  arch_ata_resetHD();
 }
 
-void arch_ide_intr_action(int irq)
+void arch_ide_intAction(int irq)
 {
 }
 

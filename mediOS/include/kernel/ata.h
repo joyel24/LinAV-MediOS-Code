@@ -14,9 +14,6 @@
 #define __ATA_H
 
 #include <kernel/hardware.h>
-//#include <kernel/disk.h>
-#include <kernel/hardware.h>
-#include <kernel/target/arch/arch_def.h>
 
 #define IDE_CMD_READ_SECTORS              0x20
 #define IDE_CMD_WRITE_SECTORS             0x30
@@ -34,7 +31,6 @@
 #define ATA_DO_READ                       0
 #define ATA_DO_WRITE                      1
 #define ATA_DO_IDENT                      2
-#define ATA_SLEEP                         3
 
 #define ATA_WITH_DMA                             1
 #define ATA_NO_DMA                               0
@@ -44,44 +40,30 @@
 
 #define SECTOR_SIZE      512
 
-typedef struct __ATA_CMD {
-    int drive;
-    int use_dma;
-    int xfer_dir;
-    void * data;
-    int count;
-    unsigned int lba;
-    struct __ATA_CMD * nxt;
-} ata_cmd_s;
+int  ata_rwData           (int drive,unsigned int lba,void * data,int count,int xfer_dir,int use_dma);
 
-//int  ata_RW_Sector     (unsigned int lba,int count,void * buffer,int direction);
-int  ata_process_cmd   (ata_cmd_s * ata_cmd);
-void ata_RW_Data       (void * buffer,int count,int direction,int use_dma);
+int  ata_waitForXfer      (void);
+int  ata_waitForReady     (void);
+int  ata_status           (void);
 
-int  ata_identify      (int drive,char * buffer);
+void ata_powerUpHD        (void);
+void ata_powerDownHD      (void);
+void ata_stopHD           (void);
+int  ata_sleep            (void);
 
-int  ata_sleep         (void);
+void ata_selectHD         (void);
+void ata_selectCF         (void);
 
-int  ata_waitForXfer   (void);
-int  ata_waitForReady  (void);
-int  ata_status        (void);
+void ata_init             (void);
 
-void ata_powerUp_HD    (void);
-void ata_powerDown_HD  (void);
-void ata_select_HD     (void);
-void ata_select_CF     (void);
+void arch_ata_resetHD     (void);
+void arch_ata_powerUpHD   (void);
+void arch_ata_powerDownHD (void);
+void arch_ata_selectHD    (void);
+void arch_ata_selectCF    (void);
+void arch_ata_init        (void);
+void arch_ide_intAction   (int irq);
 
-void ata_stop_HD       (void);
-
-void init_ata          (void);
-void ide_intr_action   (int irq);
-
-void arch_ata_reset_HD(void);
-void arch_ata_powerUp_HD(void);
-void arch_ata_powerDown_HD(void);
-void arch_ata_select_HD(void);
-void arch_ata_select_CF(void);
-void arch_init_ata(void);
-void arch_ide_intr_action(int irq);
+void ide_intAction        (int irq);
 
 #endif

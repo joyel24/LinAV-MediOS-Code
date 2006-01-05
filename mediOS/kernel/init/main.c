@@ -125,7 +125,7 @@ void kernel_start (void)
 #ifdef HAVE_DVR
     init_dvr_module();
 #endif
-    init_disk();
+    disk_init();
 
 
     /* enable the IRQ */

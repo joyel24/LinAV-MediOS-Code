@@ -42,23 +42,18 @@ struct hd_info_s {
 
 #define NUM_VOLUMES  2 /* we can only mount 2 volumes */
 
-void init_disk(void);
-
-int disk_RW_sector(int drive,unsigned int lba,int count,void * buffer,int direction);
+void disk_init(void);
 
 int disk_mount(int drive);
 int disk_umount(int drive,bool flush);
 
-int kata_manager (void* pvParameters);
+struct partition_info * disk_setup(int drive);
 
-struct partition_info * setup_disk(int drive);
+void disk_identify(int drive, struct hd_info_s * hd_info);
 
-void identify_disk(int drive, struct hd_info_s * hd_info);
+void disk_haltHD(void);
 
-void select_drive(int drive);
 void dd_swapChar(char * txt,int size);
 void dd_findEnd(char * txt,int size);
-
-int exec_disk_cmd_from_irq (int command);
 
 #endif

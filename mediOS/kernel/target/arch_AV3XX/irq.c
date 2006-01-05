@@ -71,7 +71,7 @@ __IRAM_DATA struct irq_data_s irq_table[] = {
     },
     {
         irq     : IRQ_IDE,
-        action  : ide_intr_action,
+        action  : ide_intAction,
         name    : "IDE intr",
         nb_irq  : 0
     },
