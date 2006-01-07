@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.2  2006/01/03 20:57:57  sfxgligli
+// - Doom: weapon change, fixed backward move bug, HUD resize optimisation
+// - Medios: added firmware reload function, implemented exit() user function
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -283,7 +287,7 @@ void P_PlayerThink (player_t* player)
     // A special event has no other buttons.
     if (cmd->buttons & BT_SPECIAL)
 	cmd->buttons = 0;			
-		
+
     if (cmd->buttons & BT_CHANGE)
     {
 	// The actual changing of the weapon is done
@@ -299,6 +303,7 @@ void P_PlayerThink (player_t* player)
          if (newweapon>=NUMWEAPONS) newweapon=0;
         }while(!player->weaponowned[newweapon]);
 
+        /*
 	if (newweapon == wp_fist
 	    && player->weaponowned[wp_chainsaw]
 	    && !(player->readyweapon == wp_chainsaw
@@ -308,13 +313,13 @@ void P_PlayerThink (player_t* player)
 	}
 
 	if ( (gamemode == commercial)
-	    && newweapon == wp_shotgun 
+	    && newweapon == wp_shotgun
 	    && player->weaponowned[wp_supershotgun]
 	    && player->readyweapon != wp_supershotgun)
 	{
 	    newweapon = wp_supershotgun;
 	}
-	
+        */
 
 	if (player->weaponowned[newweapon]
 	    && newweapon != player->readyweapon)
@@ -329,7 +334,7 @@ void P_PlayerThink (player_t* player)
 	    }
 	}
     }
-    
+
     // check for use
     if (cmd->buttons & BT_USE)
     {
