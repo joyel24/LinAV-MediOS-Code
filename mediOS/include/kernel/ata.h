@@ -25,7 +25,7 @@ extern int ata_stopping;
         __status=ata_status();   \
         if(((__status & IDE_STATUS_BSY)==0 && (__status & IDE_STATUS_RDY)!=0) || ata_stopping > 1000) \
         {                      \
-            if(ata_stopping > 1000) printk("ata_stoppinf timout\n"); \
+            if(ata_stopping > 1000) printk("ata_stopping timout\n"); \
             ata_stopHDEnd();   \
             ata_stopping = 0;  \
         }                      \
