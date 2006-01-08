@@ -23,6 +23,7 @@
 #include <kernel/usb_fw.h>
 #include <kernel/ext_module.h>
 #include <kernel/fm_remote.h>
+#include <kernel/ata.h>
 
 unsigned long tick __IRAM_DATA;
 
@@ -50,6 +51,8 @@ __IRAM_CODE void main_timer_action(int irq)
 #ifdef HAVE_FM_REMOTE
     FM_REMOTE_CHK;    
 #endif
+
+    ATA_PWR_OFF_TASK;
 
     while(ptr!=NULL)
     {

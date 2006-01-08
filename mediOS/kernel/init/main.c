@@ -64,7 +64,28 @@ void print_boot_info(void)
 
 extern void ini_debugOnScreen(void);
 
-char * test_string;
+void tst_fct(void)
+{
+    int i,j;
+    struct evt_pipes_s * evt_buff = get_evt_handling();
+    char evt_res;
+    int fd;
+    j=0;
+
+    while(1)
+    {
+        for(i=0;i<20;i++) ;
+        printk("%d ---\n",j++);
+        /*kpipe_read(&(evt_buff->evt_pipe),&evt_res,1);
+        if(evt_res > 1 && evt_res < 0xb)
+        {
+            printk("evt\n");
+            fd=kfopen("/avlo.cfg",O_RDONLY);
+            if(fd) kfclose(fd);
+            else printk("error\n");
+        }*/
+    }
+}
 
 void kernel_start (void)
 {
@@ -156,9 +177,9 @@ void kernel_start (void)
     
    
        
-    iniIcon();
-    open_graphics();
-    clearScreen(COLOR_WHITE);
+    //iniIcon();
+    //open_graphics();
+    //clearScreen(COLOR_WHITE);
     /*setFont(STD6X9);
     ini_file_browser();
     while(1)
@@ -168,10 +189,13 @@ void kernel_start (void)
         printk("get %s\n",test_string);
     }
     */
-    while(1)
-        virtKbd(get_evt_pipe());
+    /*while(1)
+        virtKbd(get_evt_pipe());*/
 
-    printk("[loop] back from test code\n");
+    //tst_fct();
+    
+        
+    //printk("[loop] back from test code\n");
     
     
     while(1);
@@ -184,6 +208,4 @@ void kernel_start (void)
     printk("Back from grv\n");
         
     while(1) /*nothing*/;
-
-
 }

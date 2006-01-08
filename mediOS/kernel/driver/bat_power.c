@@ -238,7 +238,7 @@ void hd_timer_fct(void)
     if(hd_timer_used[num])
 #endif
     {
-        ata_stopHD ();
+        ata_stopHD(ATA_DELAY_STOP);
     }
 #ifdef HAVE_USB_FW    
     if(kusb_fw_status)

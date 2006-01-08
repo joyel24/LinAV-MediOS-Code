@@ -30,13 +30,21 @@
 
 typedef struct _SOUND_BUFFER
 {
-	unsigned char* data;
+	/*unsigned char* data;
 	unsigned long  size;
 	unsigned long  bytes_played;
 	unsigned long  loop_counter;
 	unsigned long  loops_played;
-	struct _SOUND_BUFFER* next_buffer;
+	struct _SOUND_BUFFER* next_buffer;*/
+        unsigned long  size;
+        unsigned long  read;
+        unsigned long  write;
+        unsigned char* data;
+        
 } sound_buffer_s;
+
+
+
 
 typedef struct _sound_api_param
 {

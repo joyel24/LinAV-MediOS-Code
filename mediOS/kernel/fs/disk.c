@@ -192,12 +192,14 @@ void disk_identify(int drive, struct hd_info_s * hd_info)
     free(buffer);
 }  
 
+/* !!!!! ata_stopHD should use the correct mode => ATA_FORCE_STOP or ATA_DELAY_STOP
 void disk_haltHD(void)
 {
     disk_umount(HD_DRIVE,FLUSH); 
     hd_sleep_state=1;
     ata_stopHD();
 }
+*/
 
 void disk_printPartInfo(struct partition_info * partition_list)
 {

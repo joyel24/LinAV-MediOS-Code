@@ -34,7 +34,7 @@
 //__IRAM_DATA int playing_sound=0;   // 1 if we are sending data to MAS, 0 if no more data to send or Stop mode or Pause mode
 __IRAM_DATA long g_nPaused = 0;     // 1 if in Pause mode
 
-__IRAM_DATA sound_buffer_s * g_CurrentBuffer;
+__IRAM_DATA sound_buffer_s * current_buffer;
 
 
 // For 32kbps [unstable]
@@ -56,7 +56,7 @@ __IRAM_DATA sound_buffer_s * g_CurrentBuffer;
  ({                                                           \
     int  __i;                                                 \
     int __data;                                               \
-    char * data_buff=BUFFER->data+BUFFER->bytes_played;       \
+    char * data_buff=BUFFER->data+BUFFER->read;                                   \
     for(__i=0;__i<SIZE;__i++)                                 \
     {                                                         \
         if(inw(GIO_BITSET0) & (0x1<<GIO_MAS_EOD))             \
@@ -74,61 +74,27 @@ __IRAM_DATA sound_buffer_s * g_CurrentBuffer;
             /*nothing*/;                                      \
         /* clear latch (lower raise PR) */                    \
         outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);             \
-		GIO_SEND_MAS_DELAY\
+		GIO_SEND_MAS_DELAY                            \
     }                                                         \
     __i;                                                      \
   })
 
 __IRAM_CODE void dsp_interrupt(int irq)
 {
-#if 1
-	int bytes_sent, to_send;
-
-	if (!g_CurrentBuffer)
-	{
-//		disable_irq(IRQ_MAS_DATA);
-		return;
-	}
-
-	if (!g_nPaused)
-	{
-//		printk ("WR\n");
-
-		to_send = g_CurrentBuffer->size - g_CurrentBuffer->bytes_played;
-		bytes_sent = SEND_TO_MAS (g_CurrentBuffer, to_send);
-		g_CurrentBuffer->bytes_played += bytes_sent;
-
-		if (g_CurrentBuffer->bytes_played >= g_CurrentBuffer->size)
-		{
-			g_CurrentBuffer->loops_played ++;
-
-			if (g_CurrentBuffer->loops_played >= g_CurrentBuffer->loop_counter)
-			{
-				g_CurrentBuffer = g_CurrentBuffer->next_buffer;
-				g_CurrentBuffer->loops_played = 0;
-			}
-
-			if (g_CurrentBuffer)
-				g_CurrentBuffer->bytes_played = 0;
-
-//			printk ("SW\n");
-			dsp_interrupt (IRQ_MAS_DATA);
-		}
-	}
-
-
-#else
     int toSend;
     int send;
-    char * buffer;
-    if(playing_sound && current_buffer!=NULL)
+    if(current_buffer!=NULL)
     {
+        disable_irq(IRQ_MAS_DATA);
+        //printk("INT r:%d,w:%d\n",current_buffer->read,current_buffer->write);
+        
         if(current_buffer->read==current_buffer->write) /* nothing in buffer */
-        {
-            disable_irq(IRQ_MAS_DATA);
-            printf("read == write => no more data to play\n");
+        {            
+            printk("read == write => no more data to play\n");
             return;
         }
+        
+        //printk("INT2 r:%d,w:%d\n",current_buffer->read,current_buffer->write);
         
         if(current_buffer->read>current_buffer->write)   /* write before read => count only size till the end of buffer*/
             toSend=current_buffer->size-current_buffer->read;
@@ -139,185 +105,21 @@ __IRAM_CODE void dsp_interrupt(int irq)
         
         current_buffer->read+=send;
         
+        //printk("send: %d/%d r:%d,w:%d\n",send,toSend,current_buffer->read,current_buffer->write);
+               
+        
         if(current_buffer->read >= current_buffer->size)  /* we reached end of buffer => go back to start */
         {
-//            printf("Roll\n");
+           // printk("loop -> read\n");
             current_buffer->read=0;
             dsp_interrupt(IRQ_MAS_DATA);             /* retry to send data */
         }
+        enable_irq(IRQ_MAS_DATA);
     }
     else
     {
         disable_irq(IRQ_MAS_DATA);
     }
-#endif
-}
-
-
-#if 0
-__IRAM_CODE int sound_buff_write(sound_buffer_s * sound_buffer, int (*reader_fct)(char * data,int count,void* param),
-            int count,void * param)
-{
-    int need_wake_up=0;
-    int toSend,send;
-    int totSend=0;
-    
-    if(current_buffer->read==current_buffer->write)
-        need_wake_up=1;
-        
-    if(count>0)
-    {
-        
-        if(sound_buffer->write > sound_buffer->read)
-        {
-            toSend=sound_buffer->size-sound_buffer->write;
-            toSend=MIN(count,toSend);
-            send=reader_fct(sound_buffer->data+sound_buffer->write,toSend,param);
-            count-=send;
-            totSend+=send;
-            
-            if(send<toSend)     /* haven't write enough => go out */
-            {
-                sound_buffer->write+=send;
-                return totSend;
-            }
-            
-            if(count>0)
-            {
-                sound_buffer->write=0;
-                toSend=sound_buffer->read-sound_buffer->write;
-                toSend=MIN(count,toSend);
-                send=reader_fct(sound_buffer->data+sound_buffer->write,toSend,param);
-                totSend+=send;
-            }
-            
-            sound_buffer->write+=send;
-        }
-        else
-        {
-            toSend=sound_buffer->size-sound_buffer->read;
-            toSend=MIN(count,toSend);
-            send=reader_fct(sound_buffer->data+sound_buffer->write,toSend,param);
-            totSend+=send;
-            sound_buffer->write+=send;
-        }
-        
-        if(need_wake_up && !(inw(GIO_BITSET0) & (0x1<<GIO_MAS_EOD)))
-        {
-            enable_irq(IRQ_MAS_DATA);
-            dsp_interrupt(IRQ_MAS_DATA);  
-        }
-        
-    }
-    
-    return totSend;
-}
-#endif
-
-__IRAM_CODE void dsp_ctl(unsigned int cmd, void * arg)
-{
-    int * val;
-    struct av_peak * av_p;
-
-
-    switch(cmd)
-    {
-        case DSP_INI_MP3:
-            ini_mas_for_mp3();
-//            current_buffer=(sound_buffer_s *)arg;
-//            playing_sound=1;
-//            in_pause=0;
-	enable_irq(IRQ_MAS_DATA);
-            break;
-
-		case DSP_SETCURR_MP3_BUFFER:
-			g_CurrentBuffer = (sound_buffer_s *)arg;
-			break;
-
-		case DSP_GETCURR_MP3_BUFFER:
-			break;
-
-		case DSP_ADD_MP3_BUFFER:
-			break;
-
-		case DSP_REMOVE_MP3_BUFFER:
-			break;
-
-		case DSP_START_MP3:
-/*
-            if(g_nPaused)
-            {
-//                playing_sound=1;
-                g_nPaused = 0;
-                dsp_interrupt(IRQ_MAS_DATA);
-            }
-            else
-            {
-//                playing_sound=1;
-                enable_irq(IRQ_MAS_DATA);
-                dsp_interrupt(IRQ_MAS_DATA);                
-            }
-
-            }
-*/
-
-			g_nPaused = 0;
-			enable_irq(IRQ_MAS_DATA);
-
-//			mas_write_direct_config (MAS_CONTROL,0x8C00);
-//			mas_write_direct_config (MAS_CONTROL,0x0C00);
-
-//			mas_start_mp3_app ();
-
-//			printk("MP3 playing\n");
-
-			__cli ();
-			dsp_interrupt (IRQ_MAS_DATA);
-			__sti ();
-
-
-			break;
-
-        case DSP_STOP_MP3:
-            g_nPaused = 1;
-            disable_irq (IRQ_MAS_DATA);
-            break;
-
-        case DSP_PAUSE_MP3:
-            g_nPaused = 1;
-//            in_pause=1;
-            break;
-
-        case DSP_FRAME_CNT:
-            val=(int*)arg;
-            *val=mas_get_frame_count();
-            break;
-
-        case DSP_IN_PEAK:
-            av_p=(struct av_peak *)arg;
-            av_p->left=(mas_read_codec(MAS_REG_INPEAK_LEFT)*100)/0x7FFF;
-            av_p->right=(mas_read_codec(MAS_REG_INPEAK_RIGHT)*100)/0x7FFF;
-            break;
-
-        case DSP_OUT_PEAK:
-            av_p=(struct av_peak *)arg;
-            av_p->left=(mas_read_codec(MAS_REG_OUTPEAK_LEFT)*100)/0x7FFF;
-            av_p->right=(mas_read_codec(MAS_REG_OUTPEAK_RIGHT)*100)/0x7FFF;
-            break;
-
-        case DSP_IN_PEAK_REAL:
-            av_p=(struct av_peak *)arg;
-            av_p->left=mas_read_codec(MAS_REG_INPEAK_LEFT);
-            av_p->right=mas_read_codec(MAS_REG_INPEAK_RIGHT);
-            break;
-
-        case DSP_OUT_PEAK_REAL:
-            av_p=(struct av_peak *)arg;
-            av_p->left=mas_read_codec(MAS_REG_OUTPEAK_LEFT);
-            av_p->right=mas_read_codec(MAS_REG_OUTPEAK_RIGHT);
-            break;
-    }
-
 }
 
 int mas_stop_mp3_app(void)
@@ -524,7 +326,7 @@ void init_sound (void)
 //    in_pause=0;
 
     g_nPaused = 0;
-    g_CurrentBuffer = NULL;
+    current_buffer = NULL;
 
     disable_irq (IRQ_MAS_DATA);
     printk(" done\n");
@@ -553,9 +355,9 @@ void init_sound (void)
     
     mas_test_PCM();
     
-    
+#if 1    
     int mp3ptr=0;
-    int fd = kfopen("/data.bin",O_RDONLY);
+    int fd = kfopen("/out.wav",O_RDONLY);
     if(fd<0)
         printk("Error loading file\n");
     else
@@ -598,7 +400,7 @@ void init_sound (void)
                 outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);
                 
                 data_buff+=2;
-                if ((data_buff-mp3Buff)>=size) {data_buff=mp3Buff; printk("loop\n");}
+                if ((data_buff-mp3Buff)>=size) {data_buff=mp3Buff; printk("loop\n"); break;}
                 
                 outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);
             }
@@ -608,6 +410,7 @@ void init_sound (void)
         //mp3ptr+=cnt;
         //if (mp3ptr>=65000){mp3ptr=0; printk("loop ");}
         }
+#endif
 #endif
 
 }

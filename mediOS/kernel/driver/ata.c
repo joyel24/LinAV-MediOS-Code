@@ -44,14 +44,15 @@ extern struct timer_s hd_timer;
 #define ATA_SELECT_DRIVE(DRIVE)   ({ \
     if(DRIVE==HD_DRIVE)         \
     {                           \
-        ata_selectHD();        \
-        ata_powerUpHD();       \
+        ata_stopping = 0;       \
+        ata_selectHD();         \
+        ata_powerUpHD();        \
         hd_sleep_state=0;       \
         hd_launchTimer();       \
     }                           \
     else                        \
     {                           \
-        ata_selectCF();        \
+        ata_selectCF();         \
     }                           \
     })
 
@@ -165,23 +166,40 @@ int ata_sleep(void)
     return 0;
 }
 
-void ata_stopHD(void)
+int ata_stopping = 0;
+
+void ata_stopHD(int mode)
 {
-    int j,status;
+    printk("[ide sleep] beg\n");
     ata_selectHD();
     ata_sleep();
-    for(j=0;j<100;j++)
+    if(mode == ATA_FORCE_STOP)
     {
-        mdelay(50);
-        status=ata_status();
-        if((status & IDE_STATUS_BSY)==0 && (status & IDE_STATUS_RDY)!=0)
-            break;
-    }    
+        int i,status;
+        ata_stopping = 0;
+        for(i=0;i<100;i++)
+        {
+            mdelay(50);
+            status=ata_status();
+            if((status & IDE_STATUS_BSY)==0 && (status & IDE_STATUS_RDY)!=0)
+                break;
+        }
+        ata_stopHDEnd();
+    }
+    else
+    {
+        ata_stopping = 1;
+    }
+    
+}
+
+void ata_stopHDEnd(void)
+{
     ata_powerDownHD();
-    //udelay(100);    
     stop_timer(&hd_timer);
     hd_sleep_state=1;
-    printk("[ide sleep]\n");
+    ata_stopping = 0;
+    printk("[ide sleep] end\n");    
 }
 
 int ata_waitForXfer(void)
@@ -240,6 +258,7 @@ void ata_selectCF(void)
 
 void ata_init(void)
 {
+    ata_stopping = 0;
     arch_ata_init();
 }
 
