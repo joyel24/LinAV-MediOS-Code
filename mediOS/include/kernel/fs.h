@@ -52,4 +52,9 @@ struct fs_instance {
     struct fs_instance * prev;
 };
 
+/* file system related related functions */
+
+int vfs_registerFileSystem(struct file_system * fs_type);
+int vfs_unRegisterFileSystem(struct file_system * fs_type);
+
 #endif
