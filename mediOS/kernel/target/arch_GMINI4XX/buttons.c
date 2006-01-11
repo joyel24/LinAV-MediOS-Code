@@ -42,10 +42,12 @@ int arch_read_btn(void){
       gio_dir(GIO_BTN_SELECT_SQCR,GIO_IN);
 
     }else{
-      
-      dir = inw(BUTTON_PORT0)&0xf;
-      menu = inw(BUTTON_PORT1)&0x7;
-      bt = inw(BUTTON_PORT2)&0x3;
+
+      dir = inb(BUTTON_PORT0)&0xf;
+      for(i=0;i<16;++i); // delay
+      menu = inb(BUTTON_PORT1)&0x7;
+      for(i=0;i<16;++i); // delay
+      bt = inb(BUTTON_PORT2)&0x3;
 
     }
 

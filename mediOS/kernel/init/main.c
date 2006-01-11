@@ -66,6 +66,7 @@ extern void ini_debugOnScreen(void);
 
 void tst_fct(void)
 {
+#ifdef HAVE_EVT
     int i,j;
     struct evt_pipes_s * evt_buff = get_evt_handling();
     char evt_res;
@@ -85,6 +86,7 @@ void tst_fct(void)
             else printk("error\n");
         }*/
     }
+#endif
 }
 
 void kernel_start (void)

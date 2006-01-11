@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.2  2006/01/03 20:57:57  sfxgligli
+// - Doom: weapon change, fixed backward move bug, HUD resize optimisation
+// - Medios: added firmware reload function, implemented exit() user function
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -205,6 +209,7 @@ int prevt=0;
 
 void I_FinishUpdate (void)
 {
+/*
   char s[20];
   int t;
   t=GET_TIMER_CNT(TMR1);
@@ -212,7 +217,7 @@ void I_FinishUpdate (void)
   prevt=t;
 
   uartOutString(s,0);
-
+*/
   if(menuactive || (gamestate!=GS_LEVEL)){ // not playing?
     // full screen resize
     DoFullScreenResize();

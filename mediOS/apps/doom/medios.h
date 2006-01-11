@@ -22,7 +22,7 @@
 #define stderr -1
 #define stdout -2
 
-#define ROOTFOLDER "/"
+#define ROOTFOLDER "/doom/"
 
 #define REALSCREENWIDTH 224
 #define REALSCREENHEIGHT 176
