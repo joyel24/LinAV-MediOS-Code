@@ -43,28 +43,28 @@
    and prev. For instance when we have next_in_team, prev_in_team,
    prev_global and next_global */
 
-#define list_init_named(list,prev,next) \
+#define LIST_INIT_NAMED(list,prev,next) \
   ((list) = NULL)
 
-#define list_singleton_named(list,item,prev,next) ({ \
+#define LIST_SINGLETON_NAMED(list,item,prev,next) ({ \
   (item)->next = (item)->prev = (item); \
   (list) = (item); \
 })
 
-#define list_is_empty_named(list,prev,next) \
+#define LIST_IS_EMPTY_NAMED(list,prev,next) \
   ((list) == NULL)
 
-#define list_is_singleton_named(list,prev,next) \
+#define LIST_IS_SINGLETON_NAMED(list,prev,next) \
   ( ((list) != NULL) && ((list)->prev == (list)->next) && ((list) == (list)->next) )
 
-#define list_get_head_named(list,prev,next) \
+#define LIST_GET_HEAD_NAMED(list,prev,next) \
   (list)
 
-#define list_get_tail_named(list,prev,next) \
+#define LIST_GET_TAIL_NAMED(list,prev,next) \
   ((list)?((list)->prev):NULL)
 
 /* Internal macro : insert before the head == insert at tail */
-#define __list_insert_atleft_named(before_this,item,prev,next) ({ \
+#define __LIST_INSERT_ATLEFT_NAMED(before_this,item,prev,next) ({ \
    (before_this)->prev->next = (item); \
    (item)->prev = (before_this)->prev; \
    (before_this)->prev = (item); \
@@ -72,36 +72,36 @@
 })
 
 /* @note Before_this and item are expected to be valid ! */
-#define list_insert_before_named(list,before_this,item,prev,next) ({ \
-   __list_insert_atleft_named(before_this,item,prev,next); \
+#define LIST_INSERT_BEFORE_NAMED(list,before_this,item,prev,next) ({ \
+   __LIST_INSERT_ATLEFT_NAMED(before_this,item,prev,next); \
    if ((list) == (before_this)) (list) = (item); \
 })    
 
 /** @note After_this and item are expected to be valid ! */
-#define list_insert_after_named(list,after_this,item,prev,next) ({ \
+#define LIST_INSERT_AFTER_NAMED(list,after_this,item,prev,next) ({ \
    (after_this)->next->prev = (item); \
    (item)->next = (after_this)->next; \
    (after_this)->next = (item); \
    (item)->prev = (after_this); \
 })
 
-#define list_add_head_named(list,item,prev,next) ({ \
+#define LIST_ADD_HEAD_NAMED(list,item,prev,next) ({ \
   if (list) \
-    list_insert_before_named(list,list,item,prev,next); \
+    LIST_INSERT_BEFORE_NAMED(list,list,item,prev,next); \
   else \
-    list_singleton_named(list,item,prev,next); \
+    LIST_SINGLETON_NAMED(list,item,prev,next); \
   (list) = (item); \
 })
 
-#define list_add_tail_named(list,item,prev,next) ({ \
+#define LIST_ADD_TAIL_NAMED(list,item,prev,next) ({ \
   if (list) \
-    __list_insert_atleft_named(list,item,prev,next); \
+    __LIST_INSERT_ATLEFT_NAMED(list,item,prev,next); \
   else \
-    list_singleton_named(list,item,prev,next); \
+    LIST_SINGLETON_NAMED(list,item,prev,next); \
 })
 
 /** @note NO check whether item really is in list ! */
-#define list_delete_named(list,item,prev,next) ({ \
+#define LIST_DELETE_NAMED(list,item,prev,next) ({ \
   if ( ((item)->next == (item)) && ((item)->prev == (item)) ) \
     (item)->next = (item)->prev = (list) = NULL; \
   else { \
@@ -112,30 +112,30 @@
   } \
 })
 
-#define list_pop_head_named(list,prev,next) ({ \
+#define LIST_POP_HEAD_NAMED(list,prev,next) ({ \
   typeof(list) __ret_elt = (list); \
-  list_delete_named(list,__ret_elt,prev,next); \
+  LIST_DELETE_NAMED(list,__ret_elt,prev,next); \
   __ret_elt; })
 
 /** Loop statement that iterates through all of its elements, from
     head to tail */
-#define list_foreach_forward_named(list,iterator,nb_elements,prev,next) \
+#define LIST_FOREACH_FORWARD_NAMED(list,iterator,nb_elements,prev,next) \
         for (nb_elements=0, (iterator) = (list) ; \
              (iterator) && (!nb_elements || ((iterator) != (list))) ; \
              nb_elements++, (iterator) = (iterator)->next )
 
 /** Loop statement that iterates through all of its elements, from
     tail back to head */
-#define list_foreach_backward_named(list,iterator,nb_elements,prev,next) \
-        for (nb_elements=0, (iterator) = list_get_tail_named(list,prev,next) ; \
+#define LIST_FOREACH_BACKWARD_NAMED(list,iterator,nb_elements,prev,next) \
+        for (nb_elements=0, (iterator) = LIST_GET_TAIL_NAMED(list,prev,next) ; \
              (iterator) && (!nb_elements || \
-               ((iterator) != list_get_tail_named(list,prev,next))) ; \
+               ((iterator) != LIST_GET_TAIL_NAMED(list,prev,next))) ; \
              nb_elements++, (iterator) = (iterator)->prev )
 
-#define list_foreach_named list_foreach_forward_named
+#define LIST_FOREACH_NAMED LIST_FOREACH_FORWARD_NAMED
 
 /** True when we exitted early from the foreach loop (ie break) */
-#define list_foreach_early_break(list,iterator,nb_elements) \
+#define LIST_FOREACH_EARLY_BREAK(list,iterator,nb_elements) \
   ((list) && ( \
     ((list) != (iterator)) || \
     ( ((list) == (iterator)) && (nb_elements == 0)) ))
@@ -143,9 +143,9 @@
 /** Loop statement that also removes the item at each iteration. The
     body of the loop is allowed to delete the iterator element from
     memory. */
-#define list_collapse_named(list,iterator,prev,next) \
+#define LIST_COLLAPSE_NAMED(list,iterator,prev,next) \
         for ( ; ({ ((iterator) = (list)) ; \
-                   if (list) list_delete_named(list,iterator,prev,next) ; \
+                   if (list) LIST_DELETE_NAMED(list,iterator,prev,next) ; \
                    (iterator); }) ; )
 
 
@@ -154,54 +154,54 @@
  * named "prev" and "next"
  */
 
-#define list_init(list) \
-  list_init_named(list,prev,next)
+#define LIST_INIT(list) \
+  LIST_INIT_NAMED(list,prev,next)
 
-#define list_singleton(list,item) \
+#define LIST_SINGLETON(list,item) \
   list_singleton_named(list,item,prev,next)
 
-#define list_is_empty(list) \
-  list_is_empty_named(list,prev,next)
+#define LIST_IS_EMPTY(list) \
+  LIST_IS_EMPTY_NAMED(list,prev,next)
 
-#define list_is_singleton(list) \
-  list_is_singleton_named(list,prev,next)
+#define LIST_IS_SINGLETON(list) \
+  LIST_IS_SINGLETON_NAMED(list,prev,next)
 
-#define list_get_head(list) \
-  list_get_head_named(list,prev,next) \
+#define LIST_GET_HEAD(list) \
+  LIST_GET_HEAD_NAMED(list,prev,next) \
 
-#define list_get_tail(list) \
-  list_get_tail_named(list,prev,next) \
+#define LIST_GET_TAIL(list) \
+  LIST_GET_TAIL_NAMED(list,prev,next) \
 
 /* @note Before_this and item are expected to be valid ! */
-#define list_insert_after(list,after_this,item) \
-  list_insert_after_named(list,after_this,item,prev,next)
+#define LIST_INSERT_AFTER(list,after_this,item) \
+  LIST_INSERT_AFTER_NAMED(list,after_this,item,prev,next)
 
 /* @note After_this and item are expected to be valid ! */
-#define list_insert_before(list,before_this,item) \
-  list_insert_before_named(list,before_this,item,prev,next)
+#define LIST_INSERT_BEFORE(list,before_this,item) \
+  LIST_INSERT_BEFORE_NAMED(list,before_this,item,prev,next)
 
-#define list_add_head(list,item) \
-  list_add_head_named(list,item,prev,next)
+#define LIST_ADD_HEAD(list,item) \
+  LIST_ADD_HEAD_NAMED(list,item,prev,next)
 
-#define list_add_tail(list,item) \
-  list_add_tail_named(list,item,prev,next)
+#define LIST_ADD_TAIL(list,item) \
+  LIST_ADD_TAIL_NAMED(list,item,prev,next)
 
 /* @note NO check whether item really is in list ! */
-#define list_delete(list,item) \
-  list_delete_named(list,item,prev,next)
+#define LIST_DELETE(list,item) \
+  LIST_DELETE_NAMED(list,item,prev,next)
 
-#define list_pop_head(list) \
-  list_pop_head_named(list,prev,next)
+#define LIST_POP_HEAD(list) \
+  LIST_POP_HEAD_NAMED(list,prev,next)
 
-#define list_foreach_forward(list,iterator,nb_elements) \
-  list_foreach_forward_named(list,iterator,nb_elements,prev,next)
+#define LIST_FOREACH_FORWARD(list,iterator,nb_elements) \
+  LIST_FOREACH_FORWARD_NAMED(list,iterator,nb_elements,prev,next)
 
-#define list_foreach_backward(list,iterator,nb_elements) \
-  list_foreach_backward_named(list,iterator,nb_elements,prev,next)
+#define LIST_FOREACH_BACKWARD(list,iterator,nb_elements) \
+  LIST_FOREACH_BACKWARD_NAMED(list,iterator,nb_elements,prev,next)
 
-#define list_foreach list_foreach_forward
+#define LIST_FOREACH LIST_FOREACH_FORWARD
 
-#define list_collapse(list,iterator) \
-  list_collapse_named(list,iterator,prev,next)
+#define LIST_COLLAPSE(list,iterator) \
+  LIST_COLLAPSE_NAMED(list,iterator,prev,next)
 
-#endif /* _SOS_LIST_H_ */
+#endif 

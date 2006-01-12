@@ -53,7 +53,7 @@ void dsp_run ()
 	outw (inw (HPIBCTL) | 128, HPIBCTL);
 }
 
-ERROR_CODE load_dsp_program_hdd (const char* pszFilename)
+MED_RET_T load_dsp_program_hdd (const char* pszFilename)
 {
 	printk ("Loading dsp program from hdd into sdram...\n");
 	unsigned char * pDSPCode = 0;
@@ -62,7 +62,7 @@ ERROR_CODE load_dsp_program_hdd (const char* pszFilename)
 	if (fDSPCode < 0)
 	{
 		printk ("Program not loaded.\n");
-		return ERR_FILE_NOT_FOUND;
+		return -MED_ENOENT;
 	}
 	else
 	{
@@ -76,10 +76,10 @@ ERROR_CODE load_dsp_program_hdd (const char* pszFilename)
 	load_dsp_program_mem (pDSPCode, nSize);
 
 	free (pDSPCode);
-	return ERR_OK;
+	return MED_OK;
 }
 
-ERROR_CODE load_dsp_program_mem (void* pDSPCode, int nSize)
+MED_RET_T load_dsp_program_mem (void* pDSPCode, int nSize)
 {
 	printk ("Loading dsp program into dsp...\n");
 
@@ -147,7 +147,7 @@ ERROR_CODE load_dsp_program_mem (void* pDSPCode, int nSize)
 	}
 
 	printk ("Program loaded into dsp.\n");
-	return ERR_OK;
+	return MED_OK;
 }
 
 DSP_HANDLER g_pDSPHandler = 0;//void (*g_pDSPHandler)(void) = 0;

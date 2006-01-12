@@ -61,8 +61,8 @@ typedef struct _COFF_SCNHDR
 //0x0080 STYP_BSS If set, indicates that this section defines uninitialized data, and has no data stored in the coff file for it. 
 } COFF_SCNHDR;
 
-ERROR_CODE load_dsp_program_hdd (const char* pszFilename);
-ERROR_CODE load_dsp_program_mem (void* pCode, int nSize);
+MED_RET_T load_dsp_program_hdd (const char* pszFilename);
+MED_RET_T load_dsp_program_mem (void* pCode, int nSize);
 
 typedef void (*DSP_HANDLER)(void);
 

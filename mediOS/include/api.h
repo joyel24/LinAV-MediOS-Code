@@ -30,73 +30,73 @@
 
 ///////////////////////////////////////////////////////
 ////////////////////// MEMORY API /////////////////////
-ERROR_CODE API_MALLOC               (void** ppvBuffer, unsigned long nBytes);
-ERROR_CODE API_FREE                 (void* pvBuffer);
-ERROR_CODE API_MEMAVAIL             (unsigned long* pnBytes);
-ERROR_CODE API_REALLOC              (void** ppvBuffer, void* pvBuffer, unsigned long nBytes);
+MED_RET_T API_MALLOC               (void** ppvBuffer, unsigned long nBytes);
+MED_RET_T API_FREE                 (void* pvBuffer);
+MED_RET_T API_MEMAVAIL             (unsigned long* pnBytes);
+MED_RET_T API_REALLOC              (void** ppvBuffer, void* pvBuffer, unsigned long nBytes);
 
-ERROR_CODE API_MEMSET               (void* pvBuffer, int fill, int size);
-ERROR_CODE API_MEMCPY               (void* pvBuffer, const void* pvSrc, int size);
+MED_RET_T API_MEMSET               (void* pvBuffer, int fill, int size);
+MED_RET_T API_MEMCPY               (void* pvBuffer, const void* pvSrc, int size);
 
 ///////////////////////////////////////////////////////
 ////////////////////// FILE API ///////////////////////
-ERROR_CODE API_FILE                 (int cmd,void * data1,void * data2);
-ERROR_CODE API_RUN_GRV              (const char* pGRVPath, HTASK* phTask);
+MED_RET_T API_FILE                 (int cmd,void * data1,void * data2);
+MED_RET_T API_RUN_GRV              (const char* pGRVPath, HTASK* phTask);
 ////////////////////// FILE API ///////////////////////
 ///////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////
 ///////////////////// DEVICE API //////////////////////
-ERROR_CODE API_GET_TICK             (unsigned long * val);
-ERROR_CODE API_TIME                 (int cmd,struct av_tm * time_data);
-ERROR_CODE API_POWER                (int cmd,int * val);
+MED_RET_T API_GET_TICK             (unsigned long * val);
+MED_RET_T API_TIME                 (int cmd,struct av_tm * time_data);
+MED_RET_T API_POWER                (int cmd,int * val);
 
-ERROR_CODE API_SET_LCD_BRIGHTNESS   (int nBrightness);
-ERROR_CODE API_GET_LCD_BRIGHTNESS   (int* pnBrightness);
+MED_RET_T API_SET_LCD_BRIGHTNESS   (int nBrightness);
+MED_RET_T API_GET_LCD_BRIGHTNESS   (int* pnBrightness);
 
-ERROR_CODE API_GET_EVT_PIPE         (EVT_PIPE * pipe);
-ERROR_CODE API_RM_EVT_PIPE          (EVT_PIPE pipe);
-ERROR_CODE API_GET_EVT              (EVT_PIPE pipe,char * data);
+MED_RET_T API_GET_EVT_PIPE         (EVT_PIPE * pipe);
+MED_RET_T API_RM_EVT_PIPE          (EVT_PIPE pipe);
+MED_RET_T API_GET_EVT              (EVT_PIPE pipe,char * data);
 #define rm_evt_pipe                 API_RM_EVT_PIPE
 EVT_PIPE get_evt_pipe(void);
 char get_evt(EVT_PIPE var);
 
-ERROR_CODE API_BKPT                 (void);
+MED_RET_T API_BKPT                 (void);
 
-ERROR_CODE API_SET_GET_INT_TIMER    (int type,int mode,TRI_DATA * pvData);
+MED_RET_T API_SET_GET_INT_TIMER    (int type,int mode,TRI_DATA * pvData);
 
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////
 ////////////////////// SOUND API //////////////////////
-ERROR_CODE API_SOUND_PLAY           (void* pvBuffer, unsigned long nBytes, unsigned long nFlags);
-ERROR_CODE API_SOUND_PAUSE          ();
-ERROR_CODE API_SOUND_STOP           ();
-ERROR_CODE API_DSP                  (int cmd, void * arg);
-ERROR_CODE API_MIXER                (int cmd, int dir, void * arg);
+MED_RET_T API_SOUND_PLAY           (void* pvBuffer, unsigned long nBytes, unsigned long nFlags);
+MED_RET_T API_SOUND_PAUSE          ();
+MED_RET_T API_SOUND_STOP           ();
+MED_RET_T API_DSP                  (int cmd, void * arg);
+MED_RET_T API_MIXER                (int cmd, int dir, void * arg);
 int sound_buffer_write(sound_buffer_s * sound_buffer, int (*reader_fct)(char * data,int count,void* param),int count,void * param);
 
-ERROR_CODE API_SOUND_BUFFER_WRITE   (sound_buffer_s * sound_buffer,sound_api_param  * api_param, void * param);
+MED_RET_T API_SOUND_BUFFER_WRITE   (sound_buffer_s * sound_buffer,sound_api_param  * api_param, void * param);
 ////////////////////// SOUND API //////////////////////
 ///////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////
 /////////////////////// GFX API ///////////////////////
-ERROR_CODE API_PRINTF               (const char* fmt, va_list args);
+MED_RET_T API_PRINTF               (const char* fmt, va_list args);
 
-ERROR_CODE API_GFX                  (int cmd, void* ptr, void * pvData);
+MED_RET_T API_GFX                  (int cmd, void* ptr, void * pvData);
 
 ///////////////////////////////////////////////////////
 /////////////////////// DSP API ///////////////////////
-ERROR_CODE API_DSP_OPEN             (void* pHandler);
-ERROR_CODE API_DSP_CLOSE            ();
-ERROR_CODE API_DSP_LOAD_MEMCODE     (void* pCode, int nSize);
-ERROR_CODE API_DSP_LOAD_HDDCODE     (const char* pszCoffProgram);
-ERROR_CODE API_DSP_ON               ();
-ERROR_CODE API_DSP_OFF              ();
-ERROR_CODE API_DSP_RESET            ();
-ERROR_CODE API_DSP_RUN              ();
+MED_RET_T API_DSP_OPEN             (void* pHandler);
+MED_RET_T API_DSP_CLOSE            ();
+MED_RET_T API_DSP_LOAD_MEMCODE     (void* pCode, int nSize);
+MED_RET_T API_DSP_LOAD_HDDCODE     (const char* pszCoffProgram);
+MED_RET_T API_DSP_ON               ();
+MED_RET_T API_DSP_OFF              ();
+MED_RET_T API_DSP_RESET            ();
+MED_RET_T API_DSP_RUN              ();
 /////////////////////// DSP API ///////////////////////
 ///////////////////////////////////////////////////////
 

@@ -101,7 +101,7 @@
 /////////////////////// DSP API ///////////////////////
 ///////////////////////////////////////////////////////
 
-ERROR_CODE swi_call               (long swi_num,long param1,long param2,long param3) ;
+MED_RET_T swi_call               (long swi_num,long param1,long param2,long param3) ;
 
 int swi_file_handler              (unsigned long nCmd,unsigned long nParam1,unsigned long nParam2,unsigned long nParam3);
 int swi_snd_handler               (unsigned long nCmd,unsigned long nParam1,unsigned long nParam2,unsigned long nParam3);

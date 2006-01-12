@@ -20,6 +20,7 @@
 
 #include <kernel/bflat.h>
 
+#include <kernel/errors.h>
 
 #define swap_val(x) (                \
             ((x>>24) & 0x000000FF) |   \
@@ -60,7 +61,7 @@
 #define FLAT_PRINT(s...)
 #endif
                    
-ERROR_CODE load_bflat (const char * fname)
+MED_RET_T load_bflat (const char * fname)
 {
     int fd_bflat;
     int ret,i;
@@ -79,14 +80,14 @@ ERROR_CODE load_bflat (const char * fname)
     if(fd_bflat<0)
     {
         printk("[load_bflat] Can't open file %s\n",fname);
-        return -1;
+        return -MED_ENOENT;
     }
     
     if((ret=kfread(fd_bflat,(void*)&header,sizeof(struct bflat_header)))<sizeof(struct bflat_header))
     {
         printk("[load_bflat] Can't read completly the header (read %d)\n",ret);
         kfclose(fd_bflat);
-        return -1;
+        return -MED_EIO;
     }
     
     if(strncmp(header.magic,"bFLT",4))
@@ -94,7 +95,7 @@ ERROR_CODE load_bflat (const char * fname)
         header.magic[4]=0;
         printk("[load_bflat] Wrong magic (%s)\n",header.magic);
         kfclose(fd_bflat);
-        return -1;
+        return -MED_ERROR;
     }
         
     /* Processing header data */
@@ -130,7 +131,7 @@ ERROR_CODE load_bflat (const char * fname)
     {
         printk("[load_bflat] can't alloc enough mem space (%08x needed)\n",text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
         kfclose(fd_bflat);
-        return -1;
+        return -MED_ENOMEM;
     }
     
     data_pos=text_pos+header.data_start+NB_LIB*sizeof(unsigned long);
@@ -148,7 +149,7 @@ ERROR_CODE load_bflat (const char * fname)
         printk("[load_bflat] can't read text section (ret=%d)\n",ret);
         free((void*)text_pos);
         kfclose(fd_bflat);
-        return -1;
+        return -MED_EIO;
     }
     
     klseek(fd_bflat, header.data_start, SEEK_SET);
@@ -160,7 +161,7 @@ ERROR_CODE load_bflat (const char * fname)
         printk("[load_bflat] can't read data+remoc section (ret=%d)\n",ret);
         free((void*)text_pos);
         kfclose(fd_bflat);
-        return -1;
+        return -MED_EIO;
     }
     
     text_len -= sizeof(struct bflat_header);
@@ -230,5 +231,5 @@ ERROR_CODE load_bflat (const char * fname)
 
     free((void*)text_pos);
     
-    return ERR_OK;
+    return MED_OK;
 }

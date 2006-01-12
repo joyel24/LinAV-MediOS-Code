@@ -30,47 +30,47 @@
 
 ///////////////////////////////////////////////////////
 ////////////////////// MEMORY API /////////////////////
-ERROR_CODE API_MALLOC               (void** ppvBuffer, unsigned long nBytes)                           { swi_call(nAPI_MALLOC); }
-ERROR_CODE API_FREE                 (void* pvBuffer)                                                   { swi_call(nAPI_FREE); }
-ERROR_CODE API_MEMAVAIL             (unsigned long* pnBytes)                                           { swi_call(nAPI_MEMAVAIL); }
-ERROR_CODE API_REALLOC              (void** ppvBuffer, void* pvBuffer, unsigned long nBytes)           { swi_call(nAPI_REALLOC); }
+MED_RET_T API_MALLOC               (void** ppvBuffer, unsigned long nBytes)                           { swi_call(nAPI_MALLOC); }
+MED_RET_T API_FREE                 (void* pvBuffer)                                                   { swi_call(nAPI_FREE); }
+MED_RET_T API_MEMAVAIL             (unsigned long* pnBytes)                                           { swi_call(nAPI_MEMAVAIL); }
+MED_RET_T API_REALLOC              (void** ppvBuffer, void* pvBuffer, unsigned long nBytes)           { swi_call(nAPI_REALLOC); }
 
 ///////////////////////////////////////////////////////
 ////////////////////// FILE API ///////////////////////
-ERROR_CODE API_FILE                 (int cmd,void * data1,void * data2)                                { swi_call(nAPI_FILE); }
-ERROR_CODE API_RUN_GRV              (const char* pGRVPath, HTASK* phTask)                              { swi_call(nAPI_RUN_GRV); }
+MED_RET_T API_FILE                 (int cmd,void * data1,void * data2)                                { swi_call(nAPI_FILE); }
+MED_RET_T API_RUN_GRV              (const char* pGRVPath, HTASK* phTask)                              { swi_call(nAPI_RUN_GRV); }
 
 ////////////////////// FILE API ///////////////////////
 ///////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////
 ///////////////////// DEVICE API //////////////////////
-ERROR_CODE API_GET_TICK             (unsigned long * val)                { swi_call(nAPI_GET_TICK); }
-ERROR_CODE API_TIME                 (int cmd,struct av_tm * time_data)   { swi_call(nAPI_TIME); }
-ERROR_CODE API_POWER                (int cmd,int * val)                  { swi_call(nAPI_POWER); }
+MED_RET_T API_GET_TICK             (unsigned long * val)                { swi_call(nAPI_GET_TICK); }
+MED_RET_T API_TIME                 (int cmd,struct av_tm * time_data)   { swi_call(nAPI_TIME); }
+MED_RET_T API_POWER                (int cmd,int * val)                  { swi_call(nAPI_POWER); }
 
-ERROR_CODE API_SET_LCD_BRIGHTNESS   (int nBrightness)                    { swi_call(nAPI_SET_LCD_BRIGHTNESS); }
-ERROR_CODE API_GET_LCD_BRIGHTNESS   (int* pnBrightness)                  { swi_call(nAPI_GET_LCD_BRIGHTNESS); }
+MED_RET_T API_SET_LCD_BRIGHTNESS   (int nBrightness)                    { swi_call(nAPI_SET_LCD_BRIGHTNESS); }
+MED_RET_T API_GET_LCD_BRIGHTNESS   (int* pnBrightness)                  { swi_call(nAPI_GET_LCD_BRIGHTNESS); }
 
-ERROR_CODE API_GET_EVT_PIPE         (EVT_PIPE * pipe)                    { swi_call(nAPI_GET_EVT_PIPE); }
-ERROR_CODE API_RM_EVT_PIPE          (EVT_PIPE pipe)                      { swi_call(nAPI_RM_EVT_PIPE); }
-ERROR_CODE API_GET_EVT              (EVT_PIPE pipe,char * data)          { swi_call(nAPI_GET_EVT); }
-ERROR_CODE API_BKPT                 (void)                               { swi_call(nAPI_BKPT); }
+MED_RET_T API_GET_EVT_PIPE         (EVT_PIPE * pipe)                    { swi_call(nAPI_GET_EVT_PIPE); }
+MED_RET_T API_RM_EVT_PIPE          (EVT_PIPE pipe)                      { swi_call(nAPI_RM_EVT_PIPE); }
+MED_RET_T API_GET_EVT              (EVT_PIPE pipe,char * data)          { swi_call(nAPI_GET_EVT); }
+MED_RET_T API_BKPT                 (void)                               { swi_call(nAPI_BKPT); }
 
-ERROR_CODE API_SET_GET_INT_TIMER    (int type,int mode,TRI_DATA * pvData)         { swi_call(nAPI_IO_INT_TIMER); }
+MED_RET_T API_SET_GET_INT_TIMER    (int type,int mode,TRI_DATA * pvData)         { swi_call(nAPI_IO_INT_TIMER); }
 
-ERROR_CODE API_EXIT                 (int code)                           { swi_call(nAPI_EXIT); }
+MED_RET_T API_EXIT                 (int code)                           { swi_call(nAPI_EXIT); }
 
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////
 ////////////////////// SOUND API //////////////////////
-ERROR_CODE API_SOUND_PLAY           (void* pvBuffer, unsigned long nBytes, unsigned long nFlags)       { swi_call(nAPI_SOUND_PLAY); }
-ERROR_CODE API_SOUND_PAUSE          ()                                                                 { swi_call(nAPI_SOUND_PAUSE); }
-ERROR_CODE API_SOUND_STOP           ()                                                                 { swi_call(nAPI_SOUND_STOP); }
-ERROR_CODE API_DSP                  (int cmd, void * arg)                                              { swi_call(nAPI_DSP); }
-ERROR_CODE API_MIXER                (int cmd, int dir, void * arg)                                     { swi_call(nAPI_MIXER); }
+MED_RET_T API_SOUND_PLAY           (void* pvBuffer, unsigned long nBytes, unsigned long nFlags)       { swi_call(nAPI_SOUND_PLAY); }
+MED_RET_T API_SOUND_PAUSE          ()                                                                 { swi_call(nAPI_SOUND_PAUSE); }
+MED_RET_T API_SOUND_STOP           ()                                                                 { swi_call(nAPI_SOUND_STOP); }
+MED_RET_T API_DSP                  (int cmd, void * arg)                                              { swi_call(nAPI_DSP); }
+MED_RET_T API_MIXER                (int cmd, int dir, void * arg)                                     { swi_call(nAPI_MIXER); }
 int sound_buffer_write             (sound_buffer_s * sound_buffer, int (*reader_fct)(char * data,int count,void* param),
             int count,void * param)
 {
@@ -81,7 +81,7 @@ int sound_buffer_write             (sound_buffer_s * sound_buffer, int (*reader_
     return api_param.count;
 }
 
-ERROR_CODE API_SOUND_BUFFER_WRITE(sound_buffer_s * sound_buffer,sound_api_param  * api_param, void * param)
+MED_RET_T API_SOUND_BUFFER_WRITE(sound_buffer_s * sound_buffer,sound_api_param  * api_param, void * param)
 {
     swi_call(nAPI_SOUND_BUFFER_WRITE);
 }
@@ -91,22 +91,22 @@ ERROR_CODE API_SOUND_BUFFER_WRITE(sound_buffer_s * sound_buffer,sound_api_param 
 ///////////////////////////////////////////////////////
 /////////////////////// GFX API ///////////////////////
 
-ERROR_CODE API_PRINTF               (const char * fmt, va_list args)                                   { swi_call(nAPI_PRINTF); }
-ERROR_CODE API_GFX                  (int cmd, void* p, void * pvData)                                  { swi_call(nAPI_GFX); }
+MED_RET_T API_PRINTF               (const char * fmt, va_list args)                                   { swi_call(nAPI_PRINTF); }
+MED_RET_T API_GFX                  (int cmd, void* p, void * pvData)                                  { swi_call(nAPI_GFX); }
 
 /////////////////////// GFX API ///////////////////////
 ///////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////
 /////////////////////// DSP API ///////////////////////
-ERROR_CODE API_DSP_OPEN             (void* pHandler)                                                   { swi_call(nAPI_DSP_OPEN); }
-ERROR_CODE API_DSP_CLOSE            ()                                                                 { swi_call(nAPI_DSP_CLOSE); }
-ERROR_CODE API_DSP_LOAD_MEMCODE     (void* pCode, int nSize)                                           { swi_call(nAPI_DSP_LOAD_MEMCODE); }
-ERROR_CODE API_DSP_LOAD_HDDCODE     (const char* pszCoffProgram)                                       { swi_call(nAPI_DSP_LOAD_HDDCODE); }
-ERROR_CODE API_DSP_ON               ()                                                                 { swi_call(nAPI_DSP_ON); }
-ERROR_CODE API_DSP_OFF              ()                                                                 { swi_call(nAPI_DSP_OFF); }
-ERROR_CODE API_DSP_RESET            ()                                                                 { swi_call(nAPI_DSP_RESET); }
-ERROR_CODE API_DSP_RUN              ()                                                                 { swi_call(nAPI_DSP_RUN); }
+MED_RET_T API_DSP_OPEN             (void* pHandler)                                                   { swi_call(nAPI_DSP_OPEN); }
+MED_RET_T API_DSP_CLOSE            ()                                                                 { swi_call(nAPI_DSP_CLOSE); }
+MED_RET_T API_DSP_LOAD_MEMCODE     (void* pCode, int nSize)                                           { swi_call(nAPI_DSP_LOAD_MEMCODE); }
+MED_RET_T API_DSP_LOAD_HDDCODE     (const char* pszCoffProgram)                                       { swi_call(nAPI_DSP_LOAD_HDDCODE); }
+MED_RET_T API_DSP_ON               ()                                                                 { swi_call(nAPI_DSP_ON); }
+MED_RET_T API_DSP_OFF              ()                                                                 { swi_call(nAPI_DSP_OFF); }
+MED_RET_T API_DSP_RESET            ()                                                                 { swi_call(nAPI_DSP_RESET); }
+MED_RET_T API_DSP_RUN              ()                                                                 { swi_call(nAPI_DSP_RUN); }
 /////////////////////// DSP API ///////////////////////
 ///////////////////////////////////////////////////////
 

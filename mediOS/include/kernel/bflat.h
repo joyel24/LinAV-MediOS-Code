@@ -39,6 +39,6 @@ struct bflat_header {
 };
 
 
-ERROR_CODE load_bflat (const char * fname);
+MED_RET_T load_bflat (const char * fname);
 
 #endif

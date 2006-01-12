@@ -15,9 +15,11 @@
 #include <kernel/swi.h>
 #include <kernel/bflat.h>
 
-int fs_swi(int cmd,void * data1, void * data2);
+#include <kernel/errors.h>
 
-__IRAM_CODE int swi_file_handler (
+MED_RET_T fs_swi(int cmd,void * data1, void * data2);
+
+__IRAM_CODE MED_RET_T swi_file_handler (
 	unsigned long nCmd,
 	unsigned long nParam1,
 	unsigned long nParam2,
@@ -27,8 +29,7 @@ __IRAM_CODE int swi_file_handler (
 	{
             case nAPI_RUN_GRV:          //(const char* pGRVPath)
             {
-                    ERROR_CODE code = load_bflat ((const char *)nParam1);
-                    return code;
+                    return load_bflat ((const char *)nParam1);
             }
             break;
             
@@ -37,7 +38,7 @@ __IRAM_CODE int swi_file_handler (
             default:
                 printk("File undefined swi (%d)\n",nCmd);
         }
-        return 0;
+        return MED_OK;
 }
     
 
