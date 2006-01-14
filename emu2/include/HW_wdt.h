@@ -23,6 +23,7 @@ class HW_wdt : public HW_access {
                 
         uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);
+        void HW_wdt::nxt_cycle(void);
                 
     private:
         
@@ -31,7 +32,7 @@ class HW_wdt : public HW_access {
         int pre_scalar;
         int count_cur;
         int count_ini;
-        
+        int tm_ps;
         HW_IRQ * HW_irq;
 };
 

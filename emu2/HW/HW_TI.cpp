@@ -72,14 +72,17 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_node(TI_REG
         add_item(timer_list[i]);
     }
     
-    add_item(new HW_wdt(HW_irq));
+    hw_wdt=new HW_wdt(HW_irq);
+    add_item(hw_wdt);
     
     add_item(new HW_TI_ver());
     add_item(new HW_ECR());
 
     //add_item(new HW_null(0x30700,0x30800,"UKN-0x30700"));
     
-    add_item(new HW_null(VID_START,VID_END,"VIDEO"));
+    add_item(new HW_null(CCD_START,CCD_END,"CCD"));
+    add_item(new HW_null(PREVIEW_START,PREVIEW_END,"Preview"));
+    add_item(new HW_null(PAL_NTSC_ENC_START,PAL_NTSC_ENC_END,"NTSC_PAL Encoder"));
     
     new i2c_master(gpio);
     

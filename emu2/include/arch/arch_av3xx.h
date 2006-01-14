@@ -71,6 +71,8 @@
 #define WDT_START   TI_REG_START+0x400
 #define WDT_END     TI_REG_START+0x406
 
+#define WDT_FIQ     0x1b
+
 /********************** IRQ      ****************************************/
 #define IRQ_START   TI_REG_START+0x500
 #define IRQ_END     TI_REG_START+0x560
@@ -114,9 +116,17 @@
 #define OSD_START   TI_REG_START+0x680
 #define OSD_END     TI_REG_START+0x700
 
-/********************** VIDEO    ****************************************/
-#define VID_START   TI_REG_START+0x800
-#define VID_END     TI_REG_START+0x880
+/********************** CCD     ****************************************/
+#define CCD_START   TI_REG_START+0x700
+#define CCD_END     TI_REG_START+0x73A
+
+/********************** PREVIEW ****************************************/
+#define PREVIEW_START   TI_REG_START+0x780
+#define PREVIEW_END     TI_REG_START+0x7EC
+
+/********************** PAL NTSC Encoder *******************************/
+#define PAL_NTSC_ENC_START   TI_REG_START+0x800
+#define PAL_NTSC_ENC_END     TI_REG_START+0x83A
 
 /********************** CLOCK    ****************************************/
 #define CLOCK_START   TI_REG_START+0x880

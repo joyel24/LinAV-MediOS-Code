@@ -89,6 +89,7 @@ int mode_tab[7] = { 0x0, 0xF, 0x3, 0x7, 0xB, 0x2, 0x1};
 
 #define GET_REG(N)    ((N)==15?((*current_reg[N])&(T_FLAG?0xFFFFFFFE:0xFFFFFFFF))+(T_FLAG?2:4):*current_reg[N])
 #define REG(N)        (*current_reg[N])
+
 #define PC_REAL       (*current_reg[15])
 
 #define RR(N)         (reg_str[N])
@@ -470,6 +471,13 @@ void go(uint32_t start_address,uint32_t stack_address)
     
     while(1)
     {  
+        
+        #if 0
+        if(*current_reg[R_SP]<0x70FC || *current_reg[R_SP]> 0x8000)
+        {
+            printf("Stack out @%x SP=%x\n",PC_REAL,*current_reg[13]);
+        }
+        #endif
         mem->hw_TI->uart_list[0]->nxtEvent();
         mem->hw_TI->uart_list[1]->nxtEvent();
         mem->hw_TI->osd->nxtEvent();
@@ -478,6 +486,7 @@ void go(uint32_t start_address,uint32_t stack_address)
         
         for(int i=0;i<4;i++)            
             mem->hw_TI->timer_list[i]->nxt_cycle();    
+        mem->hw_TI->hw_wdt->nxt_cycle();
         
         #if 0
         if(data_abort)

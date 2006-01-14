@@ -24,6 +24,7 @@
 #include "HW_timer.h"
 #include "HW_OSD.h"
 #include "HW_uart.h"
+#include "HW_wdt.h"
 
 class HW_TI:public HW_node {
     public:
@@ -37,6 +38,7 @@ class HW_TI:public HW_node {
         HW_IRQ * HW_irq;
         HW_gpio * gpio;
         HW_OSD * osd;
+        HW_wdt * hw_wdt;
         
         HW_timer * timer_list[4];
         HW_uart * uart_list[2];

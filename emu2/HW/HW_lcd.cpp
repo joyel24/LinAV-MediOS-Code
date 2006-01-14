@@ -24,7 +24,7 @@ extern mem_space * mem;
 
 int lcd_update_cnt[2] = {0,0};
 
-HW_lcd::HW_lcd(HW_mem * mem2)
+HW_lcd::HW_lcd(HW_mem * mem2,HW_OSD * osd)
 {
     int x,y;
 
@@ -35,7 +35,8 @@ HW_lcd::HW_lcd(HW_mem * mem2)
 #endif
 
     this->mem2 = mem2;
-
+    this->osd = osd;
+    
     display = XOpenDisplay(0);  
     if(!display) 
     {
@@ -234,7 +235,7 @@ void HW_lcd::drawPix(uint32_t addr,uint32_t val)
 {
     int i,j;
     
-    addr >>= 1;
+    addr >>= (osd->OSD_config_regs[2] & 0xc00)==0?1:0;
     i=(addr%SCREEN_WIDTH);
     j=addr/SCREEN_WIDTH;
     XSetForeground(display, gc, colorTab[val&0xFF]);
@@ -268,7 +269,7 @@ void HW_lcd::updte_lcd(uint32_t base_addr,int type)
         for(int j = 0 ; j < SCREEN_HEIGHT+1 ; j++)
             for(int i = 0 ; i < SCREEN_WIDTH+1 ; i++)        
             {
-                color = colorTab[mem2->read(base_addr+(j*(SCREEN_WIDTH)+i),1)&0xFF];
+                color = colorTab[mem2->read(base_addr+(j*(SCREEN_WIDTH)+i)*((osd->OSD_config_regs[2] & 0xc00)==0?2:1),1)&0xFF];
                 XSetForeground(display, gc, color);
                 XDrawPoint(display, window1, gc, i, j);
             }

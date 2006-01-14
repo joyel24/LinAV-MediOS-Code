@@ -16,6 +16,8 @@
 #include "emu.h"
 #include "HW_access.h"
 
+class HW_OSD;
+
 #include <HW_lcd.h>
 #include <HW_mem.h>
 
@@ -39,7 +41,7 @@ class HW_OSD : public HW_access {
         void chk_access(uint32_t addr,uint32_t val);
         int nxtEvent(void);
         
-    private:
+    
         int OSD_config_regs[6];
         int OSD_width_regs[4];
         uint32_t OSD_offset_regs[4];
@@ -55,6 +57,7 @@ class HW_OSD : public HW_access {
         int OSD_pallette_index;
         uint32_t OSD_alt_vid_offset;
         
+     private:   
         HW_lcd * lcd;
 };
 

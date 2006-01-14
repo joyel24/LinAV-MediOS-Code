@@ -67,10 +67,17 @@ void HW_wdt::write(uint32_t addr,uint32_t val,int size)
         case 0x0: /* output selection + enable */
             enable_bit=val&1;
             output_selection=(val>>2)&0x1;
+            
+            if(enable_bit)
+            {
+                count_cur=count_ini;
+                tm_ps=0;
+            }
             DEBUG_HW(TMR_HW_DEBUG,"%s WDTMD write @0x%08x, size %x => %s,%s\n",name,addr,size,
                 enable_bit?"enable":"disable",output_selection?"INT+RESET MCU":"INT MCU");
             break;
         case 0x2: /* reset */
+            count_cur=count_ini;
             DEBUG_HW(TMR_HW_DEBUG,"%s WDTRST write @0x%08x, size %x => %s\n",name,addr,size,val&0x1?"reset":"no Reset");
             break;
         case 0x4: /* prescalar */
@@ -89,3 +96,20 @@ void HW_wdt::write(uint32_t addr,uint32_t val,int size)
     }
 }
 
+void HW_wdt::nxt_cycle(void)
+{
+    if(enable_bit)
+    {
+        tm_ps++;
+        if(tm_ps >= pre_scalar)
+        {
+            tm_ps = 0;
+            count_cur--;
+            if(count_cur==0)
+            {
+                HW_irq->do_IRQ_FIQ(FIQ,WDT_FIQ);
+                count_cur=count_ini;
+            }
+        }
+    }
+}

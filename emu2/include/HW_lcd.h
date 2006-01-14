@@ -13,7 +13,10 @@
 #ifndef __HW_LCD_H
 #define __HW_LCD_H
 
+class HW_lcd;
+
 #include <HW_mem.h>
+#include <HW_OSD.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -32,7 +35,7 @@ class mem_space;
 
 class HW_lcd {
     public:
-        HW_lcd(HW_mem * mem2);
+        HW_lcd(HW_mem * mem2, HW_OSD * osd);
         void updte_lcd(uint32_t base_addr,int type);
         int setPalette(int r,int g, int b, int index);
         void drawPix(uint32_t addr,uint32_t val);     
@@ -41,6 +44,7 @@ class HW_lcd {
           
     private:
         HW_mem * mem2;
+        HW_OSD * osd;
         
         Display* display;
         Window window1;

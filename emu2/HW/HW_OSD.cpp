@@ -59,7 +59,7 @@ HW_OSD::HW_OSD(HW_mem * mem2):HW_access(OSD_START,OSD_END,"OSD")
     OSD_pallette_index=0;
     OSD_alt_vid_offset=0;
     
-    lcd = new HW_lcd(mem2);
+    lcd = new HW_lcd(mem2,this);
 }
 
 #include <osd_cmd_line_fct.h>

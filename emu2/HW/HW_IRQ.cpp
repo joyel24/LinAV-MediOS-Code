@@ -93,7 +93,7 @@ uint32_t HW_IRQ::read(uint32_t addr,int size)
             break;
         default:
             ret_val=0;
-            DEBUG_HW(IRQ_HW_DEBUG,"%s read @0x%08x, size %x\n",name,addr,size);
+            DEBUG_HW(IRQ_HW_DEBUG,"%s UKN read @0x%08x, size %x\n",name,addr,size);
             break;
     }
     return ret_val;
@@ -144,7 +144,7 @@ void HW_IRQ::write(uint32_t addr,uint32_t val,int size)
                 name,val,str_irq_fiq[num],addr,size);            
             break;
         default:
-            DEBUG_HW(IRQ_HW_DEBUG,"%s write %x to @0x%08x, size %x\n",
+            DEBUG_HW(IRQ_HW_DEBUG,"%s UKN write %x to @0x%08x, size %x\n",
                 name,val,addr,size);
             break;
     }
