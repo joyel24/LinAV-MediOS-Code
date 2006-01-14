@@ -120,12 +120,13 @@ MED_RET_T load_bflat (const char * fname)
                    text_len, data_len,bss_len,header.stack_size,header.reloc_count);
                    
     printk("[load_bflat] flags: %08x\n",header.flags);
-    
+
     text_pos = (unsigned long)malloc((long)(text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long)));
 
     if(!text_pos)
     {
-        printk("[load_bflat] can't alloc enough mem space (%08x needed)\n",text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
+        printk("[load_bflat] can't alloc enough mem space (%08x needed)\n",
+            text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
         kfclose(fd_bflat);
         return -MED_ENOMEM;
     }
@@ -134,7 +135,8 @@ MED_RET_T load_bflat (const char * fname)
     reloc_table=(unsigned long *)(text_pos+header.reloc_start+NB_LIB*sizeof(unsigned long));
     start_code=text_pos+sizeof(struct bflat_header);
     
-    printk("[load_bflat] text_pos=%08x start_code=%08x data_pos=%08x\n",text_pos,start_code,data_pos);
+    printk("[load_bflat] text_pos=%08x start_code=%08x data_pos=%08x reloc_table=%08x\n",
+        text_pos,start_code,data_pos,reloc_table);
     
     klseek(fd_bflat, 0, SEEK_SET);
     
@@ -191,7 +193,7 @@ MED_RET_T load_bflat (const char * fname)
         unsigned long addr,reloc_point;
         reloc_point=swap_val(reloc_table[i]);
         
-        FLAT_PRINT("%d: rp=%08x",i,reloc_point);
+        FLAT_PRINT("%d(%08x): rp=%08x",i,&reloc_table[i],reloc_point);
         
         if(reloc_point<text_len)
             reloc_point+=start_code;
@@ -222,7 +224,7 @@ MED_RET_T load_bflat (const char * fname)
     
     run_flat=(int (*)(int ,char**))header.entry+text_pos;
     FLAT_PRINT("[load_bflat] about to launch: %08x\n",run_flat);
-    
+    do_bkpt();
     ret = run_flat(0,NULL);
 
     free((void*)text_pos);

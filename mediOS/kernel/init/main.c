@@ -139,8 +139,7 @@ void kernel_start (void)
 #endif
     do_bkpt();
     
-    load_bflat("/othello.grv");
-    
+    load_bflat("/othello.grv");   
 
     
     printk("Back from grv\n");

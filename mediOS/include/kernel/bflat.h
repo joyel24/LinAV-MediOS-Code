@@ -35,7 +35,7 @@ struct bflat_header {
 	unsigned long reloc_count;  /* Number of relocation records */
 	unsigned long flags;       
 	unsigned long build_date;   /* When the program/library was built */
-	unsigned long filler[6];    /* Reservered, set to zero */
+	unsigned long filler[5];    /* Reservered, set to zero */
 };
 
 
