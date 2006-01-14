@@ -11,6 +11,7 @@
 */
 
 #include <sys_def/string.h>
+#include <kernel/kernel.h>
 
 #include <graphics.h>
 #include <sys_def/colordef.h>

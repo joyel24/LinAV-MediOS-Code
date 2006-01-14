@@ -96,13 +96,14 @@ __IRAM_CODE void process_button_press(int val)
                 }
             }
 
-               
+#ifdef AV3XX               
             if(!(
-#ifdef ARCH_AV3XX
+
                   btn==BUTTON_JOYPRESS &&
-#endif
+
                   fastDir)) /* discard BTN_JOY evt if fastDir is set */
             {
+#endif
                 if(nb_pressed[btn]==0)
                 {
 #ifdef HAVE_FM_REMOTE
@@ -133,13 +134,14 @@ __IRAM_CODE void process_button_press(int val)
 #endif                                
                 }
                 else
-                    nb_pressed[btn]--;                   
-                /* a key is pressed if key num < 4 => it's a dir key we might be in fast dir mode
-                    we need to discard BTN_JOY events   */                        
+                    nb_pressed[btn]--;       
+#ifdef AV3XX                    
+                 /* a key is pressed if key num < 4 => it's a dir key we might be in fast dir mode
+                    we need to discard BTN_JOY events   */  
                 if(btn<4)
                     fastDir=1;
             }
-                
+#endif
         }
     }
 }

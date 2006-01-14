@@ -83,10 +83,10 @@ void init_evt(void)
 {
     head=NULL;
     
-    setup_timer(&evt_timer,"EVT");
+    /*setup_timer(&evt_timer,"EVT");
     evt_timer.action = evt_timer_action;
     evt_timer.expires = tick + EVT_DELAY; 
-    start_timer(&evt_timer);
+    start_timer(&evt_timer);*/
     
     printk("[init] evt\n");
 }
