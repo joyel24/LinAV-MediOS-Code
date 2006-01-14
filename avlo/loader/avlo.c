@@ -27,6 +27,9 @@
 
 #include <parse_cfg.h>
 
+#include <i2c.h>
+#include <tsc2003.h>
+
 #include <avlo.h>
 
 #define MAX_OFF_PRESS    500
@@ -58,6 +61,10 @@
 #define NO_TIME_OUT    0
 #define WITH_TIME_OUT  1
 
+#define BAT_LOOP_SIZE 10000
+
+#define GET_BAT_LEVEL (tsc2003getVal(CMD_BAT0|INTERNAL_ON))
+
 void (*binCaller)(char * param)=(void (*)(char *))0x03000000;
 
 struct config_image cfg[MAX_CFG];
@@ -85,6 +92,12 @@ void start_avlo(void)
     int ret,nbCfg,key,redraw;
     int i;
     int x,y,h,w;
+    int bat_loop=0;
+    
+    /* test code var */
+    int fd_test;
+    /* end test var */
+    
     printf("In main AVLO\n");
     init_cpld();
 
@@ -136,6 +149,29 @@ loop:
 
     file_close();
 
+    /* test code for fsat decode */
+    #if 0
+    fd_test=fopen("/fast_decode.out",O_CREAT|O_WRONLY);
+    if(fd_test<0)
+    {
+        printf("Error opening /fast_decode.out\n");        
+    }
+    else
+    {
+        int i,k,j;
+        for(i=0;i<0x100;i++)
+        {
+            k=fwrite(fd_test,0x03F00470+i*0x10,0x10);
+            printf("%d:",k);
+            for(j=0;j<k;j++)
+                printf("%x",(*((char*)(0x03F00470+i*0x10+j)))&0xFF);
+            printf("\n");
+        }
+        fclose(fd_test);
+    }
+    #endif
+    /* end test code */
+    
     chkdefault=(!cfgG.defBin[0]==0);
 
     if(cfgG.repeat==0)
@@ -155,8 +191,9 @@ loop:
     setFont(STD8X13);
     putS(COLOR_TXT,COLOR_TSP,0,0,"AVLO");
 
-    usbstate=usbIsConnected();
+    usbstate=-1;
 
+    
     redraw=1;
 
     while(1)
@@ -169,6 +206,14 @@ loop:
 
         affUSB();
 
+        /* read bat */
+        bat_loop++;
+        if(bat_loop>BAT_LOOP_SIZE)
+        {
+            drawBat();
+            bat_loop = 0;
+        }
+        
         key=read_btn();
 
         if(processDefault(key,nbCfg)<0)
@@ -198,7 +243,7 @@ loop:
                 char * ext=strrchr(cfg[cursorPos].image,'.')+1;
                 int launch=0;
                 printf("loading: %s ext:%s\n",cfg[cursorPos].image,ext);
-                if(ext[0]=='a' && ext[1]=='j' && ext[2]=='z' && ext[3]=='\0'
+                if(toLower(ext[0])=='a' && toLower(ext[1])=='j' && toLower(ext[2])=='z' && ext[3]=='\0'
                         //&& cfgG.key[0]!=0
                                 //&& loadCJBM(cfg[cursorPos].image,cfgG.key))
                                 && fastLoadCJBM(cfg[cursorPos].image))
@@ -259,6 +304,57 @@ loop:
     }
 }
 
+int chargeProgress = 0;
+
+void drawBat(void)
+{
+    int power=0;
+    int color=0;
+    int level=0;
+    
+    if(!POWER_CONNECTED)
+    {
+        power = GET_BAT_LEVEL;
+        if(power < 1320)
+            color = COLOR_DARK_RED;
+        else if(power < 1400)
+            color = COLOR_RED;
+        else if(power < 1480)
+            color = COLOR_ORANGE2;
+        else
+            color = COLOR_TURQUOISE;
+
+        if(power > 1200)
+            level = (int)(power - 1300) / 15;
+        if(level > 20)
+            level = 20;
+    }
+    else
+    {
+        if(chargeProgress == 0)
+            level = 0;
+        else if(chargeProgress == 1)
+            level = 7;
+        else if(chargeProgress == 2)
+            level = 14;
+        else
+            level = 20;
+
+        if(chargeProgress < 3)
+            chargeProgress++;
+        else
+            chargeProgress = 0;
+
+        color = COLOR_YELLOW;
+    }
+
+    drawRect(COLOR_DARK_GRAY,293,2,22,10);
+    fillRect(COLOR_DARK_GRAY,315,4,3,6);
+    fillRect(COLOR_TSP,294,3,20,8);
+    fillRect(color,294,3,level,8);
+    
+}
+
 void drawBox(int txt_width,int txt_height,int * start_x,int * start_y)
 {
     *start_x = (320-(txt_width+8))/2;
@@ -277,18 +373,17 @@ int fastLoadCJBM(char * filename)
     unsigned char * cptr;
     int x,y,h,w;
     getStringS("File Loaded, decompressing...",&w,&h);
-
     if (!loadFile(filename,(char*)0x03800000,1))
+    {
         return 0;
+    }
     printf("File loaded, now decompressing\n");
     //fillRect(COLOR_BOX,60, 100, 230, 40);
     setFont(STD6X9);
     getStringS("File Loaded, decompressing...",&w,&h);
     drawBox(w,2*h,&x,&y);
-    putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"File Loaded, decompressing...");
     cptr=(unsigned char *)0x03F00860+0x10;
     *cptr=0;
-
     decode((char*)0x03800000,(char*)0x03000000);
     printf("decompress done\n");
 
@@ -383,6 +478,26 @@ void chkOFF(int key)
         nbOff=0;
 }
 
+void waitKey(void)
+{
+    int key;
+    int pressed=0;
+    while(1)
+    {
+        if(!pressed)
+        {
+            key=read_btn();
+            if(key&BTMASK_ANY)
+                pressed = 1;
+        }
+        else
+        {
+            if(key != read_btn())
+                return;
+        }
+    }
+}
+
 void waitKeyReleased(int has_time_out)
 {
     int key;
@@ -398,7 +513,7 @@ void waitKeyReleased(int has_time_out)
     for(key=0;key<100;key++) /* nothing */;
 }
 
-void affUSB(void)
+void affUSB()
 {
     if(usbstate != usbIsConnected())
     {

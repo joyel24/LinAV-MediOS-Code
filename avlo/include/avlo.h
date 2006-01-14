@@ -23,9 +23,11 @@ void drawBox(void);*/
 void chkOFF(int key);
 void drawMenu(int nb);
 void drawBox(int txt_width,int txt_height,int * start_x,int * start_y);
+void waitKey(void);
 void waitKeyReleased(int has_time_out);
 void err(int i);
-void affUSB(void);
+void affUSB();
+void drawBat();
 void moveCursor(int direction);
 int  processDefault(int key,int nbCfg);
 void printErr(int key);
