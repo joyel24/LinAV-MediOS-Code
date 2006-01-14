@@ -100,8 +100,6 @@ MED_RET_T load_bflat (const char * fname)
         
     /* Processing header data */
     
-    print_data(&header,0x50);
-    
     header.rev          = swap_val(header.rev);
     header.entry        = swap_val(header.entry);
     header.data_start   = swap_val(header.data_start);
@@ -122,9 +120,7 @@ MED_RET_T load_bflat (const char * fname)
                    text_len, data_len,bss_len,header.stack_size,header.reloc_count);
                    
     printk("[load_bflat] flags: %08x\n",header.flags);
-    print_data(&header,0x50);
-//    text_pos=(unsigned long)API_MALLOC(text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
-
+    
     text_pos = (unsigned long)malloc((long)(text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long)));
 
     if(!text_pos)

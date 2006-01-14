@@ -44,16 +44,7 @@
 #include <kernel/cmd_line.h>
 #include <kernel/evt.h>
 
-
-#include <kernel/pipes.h>
 #include <kernel/kgraphics.h>
-
-#include <kernel/kfile.h>
-#include <kernel/kdir.h>
-
-#include <kernel/dsp.h>
-
-#include <kernel/osd.h>
 
 void print_boot_info(void)
 {
@@ -63,31 +54,6 @@ void print_boot_info(void)
 }
 
 extern void ini_debugOnScreen(void);
-
-void tst_fct(void)
-{
-#ifdef HAVE_EVT
-    int i,j;
-    struct evt_pipes_s * evt_buff = get_evt_handling();
-    char evt_res;
-    int fd;
-    j=0;
-
-    while(1)
-    {
-        for(i=0;i<20;i++) ;
-        printk("%d ---\n",j++);
-        /*kpipe_read(&(evt_buff->evt_pipe),&evt_res,1);
-        if(evt_res > 1 && evt_res < 0xb)
-        {
-            printk("evt\n");
-            fd=kfopen("/avlo.cfg",O_RDONLY);
-            if(fd) kfclose(fd);
-            else printk("error\n");
-        }*/
-    }
-#endif
-}
 
 void kernel_start (void)
 {
@@ -162,7 +128,7 @@ void kernel_start (void)
     
     printk("[init] ------------ all drivers\n");
 
-//    print_boot_info();
+    print_boot_info();
 
     printk("[init] END\n");
 
@@ -173,39 +139,9 @@ void kernel_start (void)
 #endif
     do_bkpt();
     
-    //mas_test_PCM();
-    
-    
-    
-   
-       
-    //iniIcon();
-    //open_graphics();
-    //clearScreen(COLOR_WHITE);
-    /*setFont(STD6X9);
-    ini_file_browser();
-    while(1)
-    {
-    test_string=browse("/",1);
-    if(test_string)
-        printk("get %s\n",test_string);
-    }
-    */
-    /*while(1)
-        virtKbd(get_evt_pipe());*/
-
-    //tst_fct();
-    
-        
-    //printk("[loop] back from test code\n");
-    
-    
-    while(1);
-    
-    
     load_bflat("/othello.grv");
     
-    //load_med("/othello.grv");
+
     
     printk("Back from grv\n");
         

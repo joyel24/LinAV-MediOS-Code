@@ -18,7 +18,6 @@
 #include <evt.h>
 #include <graphics.h>
 
-struct client_operations * cops;
 struct position {
     int x;
     int y;
@@ -26,13 +25,21 @@ struct position {
 
 struct position cursor_pos={3,2};
 
-#define CELL_SIZE  20
 #define PIECE_SIZE 12
 #define NB_CELL    8
 #define X_INI      10
-#define Y_INI      ((240-((CELL_SIZE+1)*NB_CELL)-1)/2)
 
-#define NB_PIECE_POS 90
+#ifdef GMINI4XX
+#define CELL_SIZE  16
+#define NB_PIECE_Y 156
+#define Y_INI      ((240-((CELL_SIZE+1)*NB_CELL)-1)/2)-46
+#endif
+
+#ifdef AV3XX
+#define CELL_SIZE  20
+#define NB_PIECE_Y 220
+#define Y_INI      ((240-((CELL_SIZE+1)*NB_CELL)-1)/2)
+#endif
 
 #define BG_COLOR     COLOR_BLACK
 #define LINE_COLOR   COLOR_WHITE
@@ -41,7 +48,7 @@ struct position cursor_pos={3,2};
 
 #define EMPTY      -1
 #define HUMAN      0
-#define AV3XX      1
+#define ENEMY      1
 
 #define JUST_TEST   0
 #define NO_MOVE     0
@@ -96,30 +103,9 @@ BITMAP aBitmap = {(unsigned int) av3xx_bmap, 12, 12, 0, 0};
 
 int stop_othello;
 
-inline void help_me(void)
-{
-    printf("help me\n");
-}
+void redraw(void);
 
-/*
-struct helperMenu othelloMenu = {
-    ON_txt        : "New Game",
-    OFF_txt       : "Quit",
-    JOY_txt       : NULL,
-    F1_txt        : "Play",
-    F2_txt        : NULL,
-    F3_txt        : "Nav mode",
-    
-    helperDelay   :  1,
-    helperSpeed   :  300,
-    
-    bg_color      : COLOR_WHITE,
-    border_color  : COLOR_BLUE,
-    txt_color     : COLOR_BLACK,
-    
-    align         : ALIGN_RIGHT
-};
-*/
+
 #define PIECE_OFFSET (CELL_SIZE-PIECE_SIZE)/2+1
 
 
@@ -130,7 +116,7 @@ struct helperMenu othelloMenu = {
         case HUMAN:
             drawBITMAP(&hBitmap,X_INI+PIECE_OFFSET+x*(CELL_SIZE+1),Y_INI+PIECE_OFFSET+y*(CELL_SIZE+1));
             break;
-        case AV3XX:
+        case ENEMY:
             drawBITMAP(&aBitmap,X_INI+PIECE_OFFSET+x*(CELL_SIZE+1),Y_INI+PIECE_OFFSET+y*(CELL_SIZE+1));
             break;
     }
@@ -177,32 +163,30 @@ struct helperMenu othelloMenu = {
     char tmp[10];
 
     sprintf(tmp,"You: %02d",nbPieces[HUMAN]);
-    putS(TXT_COLOR, BG_COLOR, 20, 220, tmp);
-    drawBITMAP(&hBitmap, 4, 220);
+    putS(TXT_COLOR, BG_COLOR, 20, NB_PIECE_Y, tmp);
+    drawBITMAP(&hBitmap, 4, NB_PIECE_Y);
 
-    sprintf(tmp,"Archos: %02d",nbPieces[AV3XX]);
-    putS(TXT_COLOR, BG_COLOR, 120, 220, tmp);
-    drawBITMAP(&aBitmap, 104, 220);
+    sprintf(tmp,"Archos: %02d",nbPieces[ENEMY]);
+    putS(TXT_COLOR, BG_COLOR, 120, NB_PIECE_Y, tmp);
+    drawBITMAP(&aBitmap, 104, NB_PIECE_Y);
 }
 
  void drawMenu()
 {
     int w=0,h=0;
-
-    help_me();
     
     getStringS("Nav Mode:", &w, &h);
-    putS(TXT_COLOR, BG_COLOR, 320-w-5,210, "Nav Mode:");
+    putS(TXT_COLOR, BG_COLOR, 320-w-5,NB_PIECE_Y-10, "Nav Mode:");
 
     if(cursorMoveMode == 0)
     {
         getStringS("Traditional", &w, &h);
-        putS(TXT_COLOR, BG_COLOR, 320-w-5,225, "Traditional");
+        putS(TXT_COLOR, BG_COLOR, 320-w-5,NB_PIECE_Y+5, "Traditional");
     }
     else
     {
         getStringS("Standard   ", &w, &h);
-        putS(TXT_COLOR, BG_COLOR, 320-w-5,225, "Standard   ");
+        putS(TXT_COLOR, BG_COLOR, 320-w-5,NB_PIECE_Y+5, "Standard   ");
     }
 }
 
@@ -218,8 +202,8 @@ void iniBoard(void)
     i=NB_CELL/2-1;
 
     /* setting initial piece */
-    board[i][i]=AV3XX;board[i+1][i]=HUMAN;
-    board[i][i+1]=HUMAN;board[i+1][i+1]=AV3XX;
+    board[i][i]=ENEMY;board[i+1][i]=HUMAN;
+    board[i][i+1]=HUMAN;board[i+1][i+1]=ENEMY;
 
     /* reset scores */
     nbPieces[1] = 2;
@@ -236,7 +220,7 @@ void iniBoard(void)
 
  int tstMove(int player,int x, int y,int dx, int dy,int dispMove)
 {
-    int other=(player==HUMAN?AV3XX:HUMAN);
+    int other=(player==HUMAN?ENEMY:HUMAN);
     int out_of_board=0;
     int tot=0,i;
     x+=dx;y+=dy;
@@ -275,7 +259,7 @@ void iniBoard(void)
 
  int validMove(int player,int x,int y,int chkAll,int dispMove)
 {
-    int other=(player==HUMAN?AV3XX:HUMAN);
+    int other=(player==HUMAN?ENEMY:HUMAN);
 
     int tot=0;
 
@@ -333,7 +317,7 @@ void iniBoard(void)
     for(j=0;j<NB_CELL;j++)
         for(i=0;i<NB_CELL;i++)
         {
-            if(board[i][j] == EMPTY && (tot=validMove(AV3XX,i,j,JUST_TEST,JUST_TEST)))
+            if(board[i][j] == EMPTY && (tot=validMove(ENEMY,i,j,JUST_TEST,JUST_TEST)))
             {
                 if(tot>max)
                 {
@@ -345,11 +329,11 @@ void iniBoard(void)
         }
      if(max>0)
      {
-         tot=validMove(AV3XX,x,y,CHK_ALL,DO_MOVE);
-         board[x][y]=AV3XX;
-         drawPiece(x,y,AV3XX);
-         nbPieces[AV3XX]+=tot;
-         nbPieces[AV3XX]++;
+         tot=validMove(ENEMY,x,y,CHK_ALL,DO_MOVE);
+         board[x][y]=ENEMY;
+         drawPiece(x,y,ENEMY);
+         nbPieces[ENEMY]+=tot;
+         nbPieces[ENEMY]++;
          nbPieces[HUMAN]-=tot;
          return 1;
      }
@@ -366,7 +350,7 @@ void iniBoard(void)
     drawPiece(x,y,HUMAN);
     nbPieces[HUMAN]+=tot;
     nbPieces[HUMAN]++;
-    nbPieces[AV3XX]-=tot;
+    nbPieces[ENEMY]-=tot;
 }
 
 void endGame(void)
@@ -377,9 +361,9 @@ void endGame(void)
 
     putS(COLOR_WHITE,COLOR_BLACK,10,2,"Game Over...");
 
-    if(nbPieces[HUMAN]>nbPieces[AV3XX])
+    if(nbPieces[HUMAN]>nbPieces[ENEMY])
         putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You won! :D");
-    else if(nbPieces[HUMAN]<nbPieces[AV3XX])
+    else if(nbPieces[HUMAN]<nbPieces[ENEMY])
         putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You lost. :(");
     else
         putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You tied. :|");
@@ -555,7 +539,7 @@ void iniCursorPos()
     }
 }
 
- void redraw(void)
+void redraw(void)
 {
     drawBoard();
     drawMenu();
@@ -583,17 +567,89 @@ void _start(void)
     if(!evt_buffer)
     {
         printf("[ini_status_bar] can't register to evt\n");
+        return;
     }
     
     computeAllowed(allowedHuman,HUMAN);
     redraw();
  
+			
     stop_othello=0;
     printf("\nbefore loop\n");
+    
+#ifdef GMINI4XX
+		//FIXME: variables related to the workaround for the broken get_evt() on the gmini
+    int oldbutton;
+    int newbutton;
+    oldbutton = 0;
+#endif
     while(!stop_othello)
     {
-        evt=get_evt(evt_buffer);
-        eventHandler(evt);
+//FIXME: get_evt() never returns on the gmini so until it is fixed this work around is needed.
+#ifdef AV3XX
+      evt=get_evt(evt_buffer); 
+      eventHandler(evt);
+#endif
+#ifdef GMINI4XX
+        newbutton = read_btn();
+				if(newbutton != oldbutton)
+				{
+					switch(newbutton)
+					{
+						case 0x0001: //up
+							if(cursorMoveMode==0)
+								simpleMove(0,-1);
+							break;
+						case 0x0004: //left
+							if(cursorMoveMode==0)
+								simpleMove(-1,0);
+							else
+								nxtCursosPos(PREV_POS,DO_MOVE);
+							break;
+						case 0x0002: //down
+							if(cursorMoveMode==0)
+								simpleMove(0,1);
+							break;
+						case 0x0008: //right
+							if(cursorMoveMode==0)
+								simpleMove(1,0);
+							else
+								nxtCursosPos(NXT_POS,DO_MOVE);
+							break;
+						case 0x0080: //square
+							if(cursorMoveMode==0 && allowedHuman[cursor_pos.x][cursor_pos.y]!=1)
+								break;
+								
+							doMove(cursor_pos.x,cursor_pos.y);
+							computerMove();
+							drawNbPiece();
+							while(!computeAllowed(allowedHuman,HUMAN))
+							{
+								if(!computerMove())
+								{
+									endOfGame=1;
+									endGame();
+									break;
+								}
+							}
+							if(!endOfGame)
+								iniCursorPos();
+							break;
+						case 0x0100: //cross
+							cursorMoveMode = !cursorMoveMode;
+							drawMenu();
+							break;
+						case 0x0200: //on
+							iniBoard();
+							computeAllowed(allowedHuman,HUMAN);
+							break;
+						case 0x0400: //off
+							stop_othello=1;
+							break;
+					}
+				}
+				oldbutton = newbutton;
+#endif
     }
     printf("\nafter loop\n");
     rm_evt_pipe(evt_buffer);
