@@ -86,6 +86,7 @@ int maxRepeat;
 char tmp_txt[100];
 
 extern char bg_img[320*4*240];
+extern struct graphicsBuffer * buffers;
 
 void start_avlo(void)
 {
@@ -93,22 +94,22 @@ void start_avlo(void)
     int i;
     int x,y,h,w;
     int bat_loop=0;
-    
-    /* test code var */
-    int fd_test;
-    /* end test var */
-    
+        
     printf("In main AVLO\n");
     init_cpld();
 
-    
-
+#ifdef HAVE_IMG
     ini_graphics((unsigned int)bg_img);
+#else
+    ini_graphics(0);
+#endif
     ini_font();
     setPlane(BMAP1);
     setState(BMAP1,OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 |OSD_BITMAP_8BIT|OSD_BITMAP_0TRANS);
-    
+
+#ifdef HAVE_IMG   
     showPlane(VID1);
+#endif
     showPlane(BMAP1);
 
 loopErr:
@@ -129,6 +130,10 @@ loopErr:
     putS(COLOR_TXT,COLOR_TSP,0,0,"AV");
 
 loop:
+    getStringS("Reading config",&w,&h);                        
+    drawBox(w,2*h,&x,&y);
+    putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"Reading config");
+    
     if((ret=file_open("/avlo.cfg"))<0)
     {
         err(2);
@@ -149,29 +154,6 @@ loop:
 
     file_close();
 
-    /* test code for fsat decode */
-    #if 0
-    fd_test=fopen("/fast_decode.out",O_CREAT|O_WRONLY);
-    if(fd_test<0)
-    {
-        printf("Error opening /fast_decode.out\n");        
-    }
-    else
-    {
-        int i,k,j;
-        for(i=0;i<0x100;i++)
-        {
-            k=fwrite(fd_test,0x03F00470+i*0x10,0x10);
-            printf("%d:",k);
-            for(j=0;j<k;j++)
-                printf("%x",(*((char*)(0x03F00470+i*0x10+j)))&0xFF);
-            printf("\n");
-        }
-        fclose(fd_test);
-    }
-    #endif
-    /* end test code */
-    
     chkdefault=(!cfgG.defBin[0]==0);
 
     if(cfgG.repeat==0)
@@ -184,15 +166,34 @@ loop:
     else
         delayCnt=cfgG.timeOut;
 
-    printf("Gal opt:\n-default=%s (=>%s),\n-repeat=%d,\n-time out=%d\n",cfgG.defBin,
-        chkdefault?"has default":"no default",maxRepeat,delayCnt);
-
+    printf("Gal opt:\n-default=%s (=>%s),\n-repeat=%d,\n-time out=%d\n-bg img=%s\n",cfgG.defBin,
+        chkdefault?"has default":"no default",maxRepeat,delayCnt,cfgG.bg_img[0]!=0?cfgG.bg_img:"NO IMG");
+#ifndef HAVE_IMG
+    if(cfgG.bg_img[0] != 0)
+    {
+        int fd_img = fopen(cfgG.bg_img,O_RDONLY);
+        if(fd_img<0)
+            printf("[WARNING] File not found: %s\n",cfgG.bg_img);
+        else
+        {
+            int nb_read = fread(fd_img,(void*)buffers[VID1].offset,320*240*4);
+            if(nb_read==320*240*4)
+                showPlane(VID1);
+            else
+                printf("[WARNING] only read %d/%d from %s\n",nb_read,320*240*4,cfgG.bg_img);
+            fclose(fd_img);
+        }
+    }
+    else
+    {
+        printf("[WARNING] No img defined\n");
+    }
+#endif
     printf("AVLO\n");
     setFont(STD8X13);
     putS(COLOR_TXT,COLOR_TSP,0,0,"AVLO");
 
     usbstate=-1;
-
     
     redraw=1;
 
@@ -326,6 +327,7 @@ void drawBat(void)
 
         if(power > 1200)
             level = (int)(power - 1300) / 15;
+            
         if(level > 20)
             level = 20;
     }
@@ -382,6 +384,7 @@ int fastLoadCJBM(char * filename)
     setFont(STD6X9);
     getStringS("File Loaded, decompressing...",&w,&h);
     drawBox(w,2*h,&x,&y);
+    putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"File Loaded, decompressing...");
     cptr=(unsigned char *)0x03F00860+0x10;
     *cptr=0;
     decode((char*)0x03800000,(char*)0x03000000);

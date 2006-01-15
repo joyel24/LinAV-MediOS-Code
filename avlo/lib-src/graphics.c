@@ -104,8 +104,9 @@ void restoreAllComponent(void)
         restoreComponent(i,buffers[i]);
 }
 
+extern unsigned int _end_kernel;
 
-void ini_graphics(unsigned int vid1_addrees)
+void ini_graphics(unsigned int vid1_address)
 {
     buffers[0]=&BITMAP_1;
     buffers[1]=&VIDEO_1;
@@ -124,7 +125,12 @@ void ini_graphics(unsigned int vid1_addrees)
 
     ini_font();
     iniComponent(BMAP1,&BITMAP_1,(unsigned int)&screen_BMAP1);
-    iniComponent(VID1,&VIDEO_1,vid1_addrees);
+    if(vid1_address!=0)
+        iniComponent(VID1,&VIDEO_1,vid1_address);
+    else
+    {
+        iniComponent(VID1,&VIDEO_1,(unsigned int)&_end_kernel);
+    }
     current_plane=BMAP1;
     current_font=0;
 }

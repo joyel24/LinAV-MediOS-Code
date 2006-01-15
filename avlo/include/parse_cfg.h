@@ -25,9 +25,10 @@ struct config_image {
 
 struct config_gene {
     char defBin[MAX_TOKEN];
-       // char key[MAX_TOKEN];
-        int repeat;
-        int timeOut;
+    // char key[MAX_TOKEN];
+    int repeat;
+    int timeOut;
+    char bg_img[MAX_TOKEN];
 };
 
 int file_open(char *name);

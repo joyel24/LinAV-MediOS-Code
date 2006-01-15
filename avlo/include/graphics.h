@@ -46,7 +46,7 @@ void          (*drawVLine)        (unsigned int color, int x, int y, int height,
 };
 
 /* general functions */
-void  ini_graphics        (unsigned int vid1_addrees);
+void  ini_graphics        (unsigned int vid1_address);
 void  iniComponent        (int vplane,struct graphicsBuffer * buff,unsigned int offset);
 
 void         clearScreen      (unsigned int color);

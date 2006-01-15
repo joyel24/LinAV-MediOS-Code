@@ -207,6 +207,7 @@ void iniCfgG(struct config_gene * cfgG)
 //        cfgG->key[0]=0;
         cfgG->repeat=0;
         cfgG->timeOut=0;
+        cfgG->bg_img[0]=0;
 }
 
 int chkCfg(struct config_image * cfg)
@@ -303,6 +304,10 @@ int do_parse(struct config_image * cfg,struct config_gene * cfgG)
         else if(!strcmp(item,"time-out"))
 	{
 		cfgG->timeOut=atoi(value);
+	}
+        else if(!strcmp(item,"bg_img"))
+	{
+		strcpy(cfgG->bg_img,value);
 	}
 	else
 		printf("unknown item type: %s on line %d (cfg_id=%d)\n",item,line_num,cfg_id);

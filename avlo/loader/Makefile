@@ -6,6 +6,8 @@ include ../Makefile.conf
 TARGET = avlo
 BUILD_DIR = ../build
 
+
+
 ASFLAGS  += -I../include
 GCCFLAGS += -I../include
 
@@ -14,7 +16,11 @@ LDFLAGS  = -L../build/lib -lav -lfloat
 #LDFLAGS += -L/home/christophe/gcc-3.3.x/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lgcc
 LDFLAGS +=  -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lgcc
 
-OBJS = bootstart.o avlo.o parse_cfg.o img.o
+OBJS = bootstart.o avlo.o parse_cfg.o 
+
+ifeq ($(HAVE_IMG),1)
+OBJS += img.o
+endif
 
 all:$(TARGET)
 
