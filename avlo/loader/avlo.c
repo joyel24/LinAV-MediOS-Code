@@ -31,6 +31,7 @@
 #include <tsc2003.h>
 
 #include <avlo.h>
+#include <avlo_cfg.h>
 
 #define MAX_OFF_PRESS    500
 #define MAX_REPEAT       1000
@@ -42,19 +43,41 @@
 #define COLOR_SEL      COLOR_RED
 #define COLOR_LOAD     COLOR_RED3
 #define COLOR_WAIT     COLOR_ORANGE
-#define COLOR_BOX_BAR  COLOR_DARK_GRAY
-
 #define COLOR_MSG_BOX_0 COLOR_DARK_GRAY
 #define COLOR_MSG_BOX_1 COLOR_GRAY
+#define COLOR_PWR_CHARGE  COLOR_YELLOW
+#define COLOR_PWR_L0      COLOR_DARK_RED
+#define COLOR_PWR_L1      COLOR_RED
+#define COLOR_PWR_L2      COLOR_ORANGE2
+#define COLOR_PWR_L3      COLOR_TURQUOISE
+#define COLOR_PWR_FRAME_DC_ON   COLOR_DARK_GRAY
+#define COLOR_PWR_FRAME_DC_OFF  COLOR_DARK_GRAY
 
-#define ENTRY_X      117
-#define ENTRY_Y      54
-#define STATUS_X     75
-#define STATUS_Y     227
-#define BAR_X        60
-#define BAR_Y        190
-#define BAR_W        (320-2*BAR_X)
-#define BAR_H        5
+// #define ENTRY_X      117
+// #define ENTRY_Y      54
+// #define STATUS_X     2
+// #define STATUS_Y     228
+// #define BAR_X        10
+// #define BAR_Y        200
+// #define BAR_W        100
+// #define BAR_H        5
+// #define USB_X        290
+// #define USB_Y        228
+// #define BAT_X        293
+// #define BAT_Y        2
+
+#define ENTRY_X      ptr_cfg->menu_x
+#define ENTRY_Y      ptr_cfg->menu_y
+#define STATUS_X     ptr_cfg->status_x
+#define STATUS_Y     ptr_cfg->status_y
+#define BAR_X        ptr_cfg->bar_x
+#define BAR_Y        ptr_cfg->bar_y
+#define BAR_W        ptr_cfg->bar_w
+#define BAR_H        ptr_cfg->bar_h
+#define USB_X        ptr_cfg->usb_x
+#define USB_Y        ptr_cfg->usb_y
+#define BAT_X        ptr_cfg->bat_x
+#define BAT_Y        ptr_cfg->bat_y
 
 #define BTM_TXT      "V3.1 | image: "
 
@@ -88,13 +111,15 @@ char tmp_txt[100];
 extern char bg_img[320*4*240];
 extern struct graphicsBuffer * buffers;
 
+struct avlo_cfg * ptr_cfg;
+
 void start_avlo(void)
 {
     int ret,nbCfg,key,redraw;
     int i;
     int x,y,h,w;
     int bat_loop=0;
-        
+           
     printf("In main AVLO\n");
     init_cpld();
 
@@ -130,6 +155,7 @@ loopErr:
     putS(COLOR_TXT,COLOR_TSP,0,0,"AV");
 
 loop:
+    ptr_cfg = &default_cfg;
     getStringS("Reading config",&w,&h);                        
     drawBox(w,2*h,&x,&y);
     putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"Reading config");
@@ -154,6 +180,8 @@ loop:
 
     file_close();
 
+
+    
     chkdefault=(!cfgG.defBin[0]==0);
 
     if(cfgG.repeat==0)
@@ -172,15 +200,21 @@ loop:
     if(cfgG.bg_img[0] != 0)
     {
         int fd_img = fopen(cfgG.bg_img,O_RDONLY);
+        int size = 320*240*4+sizeof(struct avlo_cfg);
         if(fd_img<0)
             printf("[WARNING] File not found: %s\n",cfgG.bg_img);
         else
         {
-            int nb_read = fread(fd_img,(void*)buffers[VID1].offset,320*240*4);
-            if(nb_read==320*240*4)
+            int nb_read = fread(fd_img,(void*)buffers[VID1].offset,size);
+            if(nb_read==size)
+            {
                 showPlane(VID1);
+                /* changing cfg ptr */
+                ptr_cfg = (struct avlo_cfg*)(buffers[VID1].offset+320*240*4);
+                printf("x=%x,y=%x\n",ptr_cfg->menu_x,ptr_cfg->menu_y);
+            }
             else
-                printf("[WARNING] only read %d/%d from %s\n",nb_read,320*240*4,cfgG.bg_img);
+                printf("[WARNING] only read %d/%d from %s\n",nb_read,size,cfgG.bg_img);
             fclose(fd_img);
         }
     }
@@ -312,24 +346,26 @@ void drawBat(void)
     int power=0;
     int color=0;
     int level=0;
+    int frame_color = 0;
     
     if(!POWER_CONNECTED)
     {
         power = GET_BAT_LEVEL;
         if(power < 1320)
-            color = COLOR_DARK_RED;
+            color = COLOR_PWR_L0;
         else if(power < 1400)
-            color = COLOR_RED;
+            color = COLOR_PWR_L1;
         else if(power < 1480)
-            color = COLOR_ORANGE2;
+            color = COLOR_PWR_L2;
         else
-            color = COLOR_TURQUOISE;
+            color = COLOR_PWR_L3;
 
         if(power > 1200)
             level = (int)(power - 1300) / 15;
             
         if(level > 20)
             level = 20;
+        frame_color = COLOR_PWR_FRAME_DC_OFF;
     }
     else
     {
@@ -342,18 +378,19 @@ void drawBat(void)
         else
             level = 20;
 
-        if(chargeProgress < 3)
+        if(chargeProgress < 3 && chargeProgress >=0)
             chargeProgress++;
         else
             chargeProgress = 0;
 
-        color = COLOR_YELLOW;
+        color = COLOR_PWR_CHARGE;
+        frame_color = COLOR_PWR_FRAME_DC_ON;
     }
 
-    drawRect(COLOR_DARK_GRAY,293,2,22,10);
-    fillRect(COLOR_DARK_GRAY,315,4,3,6);
-    fillRect(COLOR_TSP,294,3,20,8);
-    fillRect(color,294,3,level,8);
+    drawRect(frame_color,BAT_X,BAT_Y,22,10);
+    fillRect(frame_color,BAT_X+22,BAT_Y+1,3,6);
+    fillRect(COLOR_TSP,BAT_X+1,BAT_Y+1,20,8);
+    fillRect(color,BAT_X+1,BAT_Y+1,level,8);
     
 }
 
@@ -524,11 +561,11 @@ void affUSB()
         if(usbstate)
         {
             setFont(STD6X9);
-            putS(COLOR_TXT,0x0,290,STATUS_Y,"USB");
+            putS(COLOR_TXT,0x0,USB_X,USB_Y,"USB");
         }
         else
         {
-            fillRect(COLOR_TSP,290, STATUS_Y, 20, 10);
+            fillRect(COLOR_TSP,USB_X,USB_Y, 20, 10);
         }
     }
 }
