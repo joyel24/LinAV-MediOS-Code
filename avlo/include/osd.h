@@ -217,7 +217,7 @@ void osdSetComponentSourceWidth (int component, int width);
 void osdSetComponentConfig (int component, int config);
 void osdInit();
 void arch_init_osd(void);
-
+void setPaletteRGB(int r,int g, int b, int index);
 
 #define RGB2Y(r,g,b)  ((306*r + 601*g + 117*b) >> 10)
 #define RGB2Cb(r,g,b)  (((-173*r -339*g + 512*b) >> 10) + 128)

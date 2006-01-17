@@ -163,7 +163,7 @@ int nxt_cfg(char *item,char *value)
 {    
     if (!nxt_token(item)) return 0;
     
-    printf("[nxt_cfg]: item=|%s|\n",item);
+    //printf("[nxt_cfg]: item=|%s|\n",item);
     
     if (!strcmp(item,"="))
     {
@@ -183,7 +183,7 @@ int nxt_cfg(char *item,char *value)
 	return 0;
     }
     
-    printf("[nxt_cfg]: value=|%s|\n",value);
+    //printf("[nxt_cfg]: value=|%s|\n",value);
     
     if (!strcmp(value,"="))
     {

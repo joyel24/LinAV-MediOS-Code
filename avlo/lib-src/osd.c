@@ -44,6 +44,15 @@ void setPalette(int palette[256][3],int size)
     }
 }
 
+void setPaletteRGB(int r,int g, int b, int index)
+{
+    int y,cr,cb;
+    y = (306*r + 601*g + 117*b) >> 10 ; 
+    cb = ((-173*r -339*g + 512*b) >> 10) + 128;
+    cr = ((512*r - 428*g - 84*b) >> 10) + 128;
+    osdSetPallette (y, cr, cb, index);
+}
+
 int osdRGB2Packed(int r, int g, int b)
 {
 	return  ((RGB2Cr(r,g,b) << 16) | (RGB2Y(r,g,b) << 8) | RGB2Cb(r,g,b));

@@ -1,4 +1,4 @@
-OBJS = raw2h.o parse_cfg.o
+OBJS = imgCreate.o parse_cfg.o
 TARGET = imgCreate
 
 GCCFLAGS = -I./ -ggdb3

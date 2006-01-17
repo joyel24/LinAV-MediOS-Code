@@ -33,5 +33,6 @@ int  processDefault(int key,int nbCfg);
 void printErr(int key);
 int fastLoadCJBM(char * filename);
 int loadFile(char * fileN,char* buffer,int prog);
+void init_colors(void);
 
 #endif

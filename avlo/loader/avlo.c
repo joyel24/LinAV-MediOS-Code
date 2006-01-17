@@ -37,21 +37,23 @@
 #define MAX_REPEAT       1000
 #define MAX_DELAY        25000
 
+#define CUSTOM_COLOR_START  230
+
 #define COLOR_TSP      COLOR_BLACK
-#define COLOR_TXT      COLOR_WHITE
-#define COLOR_BOX      COLOR_BLUE
-#define COLOR_SEL      COLOR_RED
-#define COLOR_LOAD     COLOR_RED3
-#define COLOR_WAIT     COLOR_ORANGE
-#define COLOR_MSG_BOX_0 COLOR_DARK_GRAY
-#define COLOR_MSG_BOX_1 COLOR_GRAY
-#define COLOR_PWR_CHARGE  COLOR_YELLOW
-#define COLOR_PWR_L0      COLOR_DARK_RED
-#define COLOR_PWR_L1      COLOR_RED
-#define COLOR_PWR_L2      COLOR_ORANGE2
-#define COLOR_PWR_L3      COLOR_TURQUOISE
-#define COLOR_PWR_FRAME_DC_ON   COLOR_DARK_GRAY
-#define COLOR_PWR_FRAME_DC_OFF  COLOR_DARK_GRAY
+#define COLOR_TXT      ptr_cfg->color_txt_index
+#define COLOR_BOX      ptr_cfg->color_box_index
+#define COLOR_SEL      ptr_cfg->color_sel_index
+#define COLOR_LOAD     ptr_cfg->color_load_index
+#define COLOR_WAIT     ptr_cfg->color_wait_index
+#define COLOR_MSG_BOX_0 ptr_cfg->color_msg_box_0_index
+#define COLOR_MSG_BOX_1 ptr_cfg->color_msg_box_1_index
+#define COLOR_PWR_CHARGE  ptr_cfg->color_pwr_charge_index
+#define COLOR_PWR_L0      ptr_cfg->color_pwr_l0_index
+#define COLOR_PWR_L1      ptr_cfg->color_pwr_l1_index
+#define COLOR_PWR_L2      ptr_cfg->color_pwr_l2_index
+#define COLOR_PWR_L3      ptr_cfg->color_pwr_l3_index
+#define COLOR_PWR_FRAME_DC_ON   ptr_cfg->color_pwr_frame_dc_on_index
+#define COLOR_PWR_FRAME_DC_OFF  ptr_cfg->color_pwr_frame_dc_off_index
 
 // #define ENTRY_X      117
 // #define ENTRY_Y      54
@@ -79,7 +81,7 @@
 #define BAT_X        ptr_cfg->bat_x
 #define BAT_Y        ptr_cfg->bat_y
 
-#define BTM_TXT      "V3.1 | image: "
+#define BTM_TXT      "V4.1 | image: "
 
 #define NO_TIME_OUT    0
 #define WITH_TIME_OUT  1
@@ -113,6 +115,8 @@ extern struct graphicsBuffer * buffers;
 
 struct avlo_cfg * ptr_cfg;
 
+
+
 void start_avlo(void)
 {
     int ret,nbCfg,key,redraw;
@@ -122,7 +126,7 @@ void start_avlo(void)
            
     printf("In main AVLO\n");
     init_cpld();
-
+    
 #ifdef HAVE_IMG
     ini_graphics((unsigned int)bg_img);
 #else
@@ -138,6 +142,7 @@ void start_avlo(void)
     showPlane(BMAP1);
 
 loopErr:
+    ptr_cfg = &default_cfg;
     usbenable=0;cleanUSBMsg=0;cnt=0;cursorPos=0;errNoDefault=0;cntNoDefault=0;stateNoDefault=0;nbOff=0;
     clearScreen(COLOR_TSP);
     setFont(STD8X13);
@@ -211,7 +216,7 @@ loop:
                 showPlane(VID1);
                 /* changing cfg ptr */
                 ptr_cfg = (struct avlo_cfg*)(buffers[VID1].offset+320*240*4);
-                printf("x=%x,y=%x\n",ptr_cfg->menu_x,ptr_cfg->menu_y);
+                init_colors();
             }
             else
                 printf("[WARNING] only read %d/%d from %s\n",nb_read,size,cfgG.bg_img);
@@ -339,6 +344,8 @@ loop:
     }
 }
 
+
+
 int chargeProgress = 0;
 
 void drawBat(void)
@@ -388,7 +395,7 @@ void drawBat(void)
     }
 
     drawRect(frame_color,BAT_X,BAT_Y,22,10);
-    fillRect(frame_color,BAT_X+22,BAT_Y+1,3,6);
+    fillRect(frame_color,BAT_X+22,BAT_Y+2,3,6);
     fillRect(COLOR_TSP,BAT_X+1,BAT_Y+1,20,8);
     fillRect(color,BAT_X+1,BAT_Y+1,level,8);
     
@@ -762,4 +769,31 @@ int loadFile(char * fileN,char* buffer,int prog)
         printf("Error loading file\n");
         return 0;
     }
+}
+
+#define TEST_COLOR(VAR,NAME,NAME2,INDEX) {  \
+    if(VAR->NAME.r!=-1)               \
+    {                                 \
+        setPaletteRGB(VAR->NAME.r,VAR->NAME.g,VAR->NAME.b,INDEX); \
+        VAR->NAME2=INDEX;             \
+        printf("new color (%d,%d,%d) at %d\n",VAR->NAME.r,VAR->NAME.g,VAR->NAME.b,INDEX); \
+    }                                 \
+}
+
+void init_colors(void)
+{
+    TEST_COLOR(ptr_cfg,color_txt,color_txt_index,CUSTOM_COLOR_START)
+    TEST_COLOR(ptr_cfg,color_box,color_box_index,CUSTOM_COLOR_START+1)
+    TEST_COLOR(ptr_cfg,color_sel,color_sel_index,CUSTOM_COLOR_START+2)
+    TEST_COLOR(ptr_cfg,color_load,color_load_index,CUSTOM_COLOR_START+3)
+    TEST_COLOR(ptr_cfg,color_wait,color_wait_index,CUSTOM_COLOR_START+4)
+    TEST_COLOR(ptr_cfg,color_msg_box_0,color_msg_box_0_index,CUSTOM_COLOR_START+5)
+    TEST_COLOR(ptr_cfg,color_msg_box_1,color_msg_box_1_index,CUSTOM_COLOR_START+6)
+    TEST_COLOR(ptr_cfg,color_pwr_charge,color_pwr_charge_index,CUSTOM_COLOR_START+7)
+    TEST_COLOR(ptr_cfg,color_pwr_l0,color_pwr_l0_index,CUSTOM_COLOR_START+8)
+    TEST_COLOR(ptr_cfg,color_pwr_l1,color_pwr_l1_index,CUSTOM_COLOR_START+9)
+    TEST_COLOR(ptr_cfg,color_pwr_l2,color_pwr_l2_index,CUSTOM_COLOR_START+10)
+    TEST_COLOR(ptr_cfg,color_pwr_l3,color_pwr_l3_index,CUSTOM_COLOR_START+11)
+    TEST_COLOR(ptr_cfg,color_pwr_frame_dc_on,color_pwr_frame_dc_on_index,CUSTOM_COLOR_START+12)
+    TEST_COLOR(ptr_cfg,color_pwr_frame_dc_off,color_pwr_frame_dc_off_index,CUSTOM_COLOR_START+13)
 }

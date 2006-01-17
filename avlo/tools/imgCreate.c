@@ -2,12 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
+#include "../include/colordef.h"
 #include "../include/avlo_cfg.h"
+
 #include "parse_cfg.h"
 
+void do_parse(struct avlo_cfg * cfg);
+void parse_long(rgb_color * color,char * value,char * name);
 
-#define ITEM_TEST(NAME,VAR) if(!strcmp(item,NAME)) {cfg->VAR=atoi(value); nb++;} 
+#define ITEM_TEST(NAME,VAR) if(!strcmp(item,NAME)) {cfg->VAR=atoi(value); nb++;}
+#define ITEM_LONG_TEST(NAME,VAR) if(!strcmp(item,NAME)) {parse_long(&cfg->VAR,value,NAME); nb++;}
 
 extern char item_buff[MAX_TOKEN+1];
 extern char value_buff[MAX_TOKEN+1];
@@ -34,10 +38,56 @@ void do_parse(struct avlo_cfg * cfg)
         else ITEM_TEST("usb_y",usb_y)
         else ITEM_TEST("bat_x",bat_x)
         else ITEM_TEST("bat_y",bat_y)
+        else ITEM_LONG_TEST("color_txt",color_txt)
+        else ITEM_LONG_TEST("color_box",color_box)
+        else ITEM_LONG_TEST("color_sel",color_sel)
+        else ITEM_LONG_TEST("color_load",color_load)
+        else ITEM_LONG_TEST("color_wait",color_wait)
+        else ITEM_LONG_TEST("color_msg_box_0",color_msg_box_0)
+        else ITEM_LONG_TEST("color_msg_box_1",color_msg_box_1)
+        else ITEM_LONG_TEST("color_pwr_charge",color_pwr_charge)
+        else ITEM_LONG_TEST("color_pwr_l0",color_pwr_l0)
+        else ITEM_LONG_TEST("color_pwr_l1",color_pwr_l1)
+        else ITEM_LONG_TEST("color_pwr_l2",color_pwr_l2)
+        else ITEM_LONG_TEST("color_pwr_l3",color_pwr_l3)
+        else ITEM_LONG_TEST("color_pwr_frame_dc_on",color_pwr_frame_dc_on)
+        else ITEM_LONG_TEST("color_pwr_frame_dc_off",color_pwr_frame_dc_off)
         else
             printf("unknown item type: %s on line %d \n",item,line_num);  
     }
     printf("found %d param\n",nb); 
+}
+
+#define SEARCH_NXT(DEST,INIT,CHAR) {  \
+    char * __ptr; \
+    for(__ptr = INIT;*__ptr!='\0' && *__ptr!=CHAR;__ptr++) /*nothing*/; \
+    if(*__ptr==CHAR) {DEST=INIT;*__ptr='\0';INIT=__ptr+1;} \
+}
+
+void parse_long(rgb_color * color,char * value,char * name)
+{
+    char * ptr_r=NULL;
+    char * ptr_g=NULL;
+    char * ptr_b=NULL;
+    SEARCH_NXT(ptr_r,value,',');
+    if(*value)
+    {
+        SEARCH_NXT(ptr_g,value,',');
+        if(*value)
+        {
+            ptr_b=value;           
+            if(ptr_r && ptr_g && ptr_b)
+            {
+                color->r = atoi(ptr_r);
+                color->g = atoi(ptr_g);
+                color->b = atoi(ptr_b);
+                printf("found: (%d,%d,%d) for '%s'\n",color->r,color->g,color->b,name);
+            }
+        }
+    }
+    
+    
+    
 }
 
 struct avlo_cfg cfg;

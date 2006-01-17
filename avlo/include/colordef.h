@@ -34,7 +34,6 @@
 #define COLOR_PINK         13
 #define COLOR_ORANGE       182
 #define COLOR_PURPLE2      103
-#define COLOR_LIGHT_YELLOW 254
 #define COLOR_PURPLE3      97
 #define COLOR_RED2         64
 #define COLOR_PURPLE4      102
