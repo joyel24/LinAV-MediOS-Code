@@ -64,7 +64,7 @@ __IRAM_CODE void process_button_press(int val)
                 lcd_launchTimer(); /* postpone the lcd timer */                
             halt_launchTimer(); /* postpone the poweroff timer */
 
-            error_scr_switch();
+            gfx_dbgscrSwitch();
         }
         else
             nb_debug_switch--;

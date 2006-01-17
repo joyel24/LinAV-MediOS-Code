@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/graphics.h
 *
 *   AMOS project
@@ -48,14 +48,18 @@ void          (*drawVLine)        (unsigned int color, int x, int y, int height,
 };
 
 /* general functions */
-void  ini_graphics        (void);
-void  iniComponent        (int vplane,struct graphicsBuffer * buff,unsigned int offset);
-
+void gfx_init(void);
+void gfx_initComponent(int vplane,struct graphicsBuffer * buff,unsigned int offset);
+void gfx_restoreComponent(int vplane,struct graphicsBuffer * buff);
+void gfx_restoreAllComponents(void);
 
 /* Error scr */
-void clear_error_scr(int color);
-void putS_error_scr(FONT_ID font,unsigned int color, unsigned int bg_color, int x, int y, unsigned char *s);
-void putC_error_scr(FONT_ID font,unsigned int color, unsigned int bg_color, int x, int y, unsigned char c);
-void scroll_error_scr(unsigned int bg_color,int x,int y,int height,int UP);
-void error_scr_switch(void);
+#ifdef HAVE_DEBUG_ON_SCREEN
+void gfx_dbgscrClear(int color);
+void gfx_dbgscrPutS(FONT_ID font,unsigned int color, unsigned int bg_color, int x, int y, unsigned char *s);
+void gfx_dbgscrPutC(FONT_ID font,unsigned int color, unsigned int bg_color, int x, int y, unsigned char c);
+void gfx_dbgscrScroll(unsigned int bg_color,int x,int y,int height,int UP);
+void gfx_dbgscrSwitch(void);
+#endif
+
 #endif

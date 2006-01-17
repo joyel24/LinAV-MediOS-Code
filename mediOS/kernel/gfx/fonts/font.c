@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/gfx/font.c
 *
 *   AMOS project
@@ -17,66 +17,66 @@
 
 FONT_ID font_table[NBFONT] ;
 
-#define font_ini(name)  extern FONT_ID name; font_table[name->num]=name;
+#define fnt_initFont(name)  extern FONT_ID name; font_table[name->num]=name;
 
-void ini_font(void)
+void fnt_init(void)
 {
     int i;
     for(i=0;i<NBFONT;i++)
         font_table[i]=NULL;
 
 #ifdef _std4x6
-font_ini(std4x6)
+    fnt_initFont(std4x6)
 #endif
 #ifdef _std4x8
-    font_ini(std4x8)
+    fnt_initFont(std4x8)
 #endif
 #ifdef _std5x7
-    font_ini(std5x7)
+    fnt_initFont(std5x7)
 #endif
 #ifdef _std5x8
-    font_ini(std5x8)
+    fnt_initFont(std5x8)
 #endif
 #ifdef _std6x9
-    font_ini(std6x9)
+    fnt_initFont(std6x9)
 #endif
 #ifdef _std6x10
-    font_ini(std6x10)
+    fnt_initFont(std6x10)
 #endif
 #ifdef _std6x12
-    font_ini(std6x12)
+    fnt_initFont(std6x12)
 #endif
 #ifdef _std6x13
-    font_ini(std6x13)
+    fnt_initFont(std6x13)
 #endif
 #ifdef _std7x13
-    font_ini(std7x13)
+    fnt_initFont(std7x13)
 #endif
 #ifdef _std7x14
-    font_ini(std7x14)
+    fnt_initFont(std7x14)
 #endif
 #ifdef _std8x13
-    font_ini(std8x13)
+    fnt_initFont(std8x13)
 #endif
 #ifdef _cursive_9x15
-    font_ini(cursive)
+    fnt_initFont(cursive)
 #endif
 #ifdef _dagger_9x14
-    font_ini(dagger)
+    fnt_initFont(dagger)
 #endif
 #ifdef _inkblot_9x13
-    font_ini(inkblot)
+    fnt_initFont(inkblot)
 #endif
 #ifdef _radon_8x12
-    font_ini(radon)
+    fnt_initFont(radon)
 #endif
 #ifdef _radonWide_9x12
-    font_ini(radonWide)
+    fnt_initFont(radonWide)
 #endif
 #ifdef _shadow_12x18
-    font_ini(shadow)
+    fnt_initFont(shadow)
 #endif
 #ifdef _shadowBold_12x18
-    font_ini(shadowBold)
+    fnt_initFont(shadowBold)
 #endif
 }

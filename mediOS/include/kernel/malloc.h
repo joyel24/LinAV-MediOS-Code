@@ -3,7 +3,7 @@
 
 
 #define memstat(pool)            bpoold(pool,0,0)
-#define init_malloc(beg,size)    {bpool(beg,size);printk("[init] malloc\n");}
+#define malloc_init(beg,size)    {bpool(beg,size);printk("[init] malloc\n");}
 #define malloc                   bget
 #define realloc                  bgetr
 #define free                     brel

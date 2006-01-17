@@ -17,10 +17,10 @@
 #include <kernel/kernel.h>
 #include <kernel/osd.h>
 
-void arch_init_osd(void)
+void arch_osd_init(void)
 {
-	osdSetMainConfig(0x2000);
-	osdSetMainShift(0x79, 0x00);
+	osd_setMainConfig(0x2000);
+	osd_setMainShift(0x79, 0x00);
 
 	outw(0x4071,VIDEO_BASE);
 	outw(0x0f40,VIDEO_BASE+0x2);

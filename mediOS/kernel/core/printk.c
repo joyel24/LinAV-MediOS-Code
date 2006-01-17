@@ -34,8 +34,8 @@ static int cur_col = 0;
 
 static int fontH,fontW;
 
-void printOnScreen(char * str);
-void ini_debugOnScreen(void);
+void dbgscr_printOnScreen(char * str);
+void dbgscr_init(void);
 #endif
 
 //int vsnprintf (char * buf, size_t size, const char * fmt, va_list args);
@@ -49,7 +49,7 @@ void printk(char *fmt, ...)
     va_end(ap);
     uartOutString(debugmembuf,DEBUG_UART);
 #ifdef HAVE_DEBUG_ON_SCREEN
-    printOnScreen(debugmembuf);
+    dbgscr_printOnScreen(debugmembuf);
 #endif
 }
 
@@ -58,7 +58,7 @@ void user_printf(const char * fmt, va_list args)
     vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, args);
     uartOutString(debugmembuf,DEBUG_UART);
 #ifdef HAVE_DEBUG_ON_SCREEN
-    printOnScreen(debugmembuf);
+    dbgscr_printOnScreen(debugmembuf);
 #endif
 }
 
@@ -103,43 +103,43 @@ void print_data(char * data,int length)
 }
 
 #ifdef HAVE_DEBUG_ON_SCREEN
-void addLine(void)
+void dbgscr_addLine(void)
 {
     cur_col=0;
     cur_line++;
     if(cur_line > MAX_LINE)
     {
         cur_line--;
-        scroll_error_scr(COLOR_BLACK,BASE_X,BASE_Y,fontH,1);
+        gfx_dbgscrScroll(COLOR_BLACK,BASE_X,BASE_Y,fontH,1);
     }
 }
 
-void printOnScreen(char * str)
+void dbgscr_printOnScreen(char * str)
 {
     while(*str)
     {
         if(*str=='\r' || *str=='\n')
         {
-            addLine();
+            dbgscr_addLine();
             str++;
         }
         else
         {
-            putC_error_scr(std4x6,COLOR_WHITE, COLOR_BLACK, BASE_X+cur_col*fontW, BASE_Y+cur_line*fontH, *str);
+            gfx_dbgscrPutC(std4x6,COLOR_WHITE, COLOR_BLACK, BASE_X+cur_col*fontW, BASE_Y+cur_line*fontH, *str);
             str++;
             cur_col++;
             if(cur_col > MAX_COL)
-                addLine();
+                dbgscr_addLine();
         }
     }
 }
 
-void ini_debugOnScreen(void)
+void dbgscr_init(void)
 {
     cur_line = 0;
     cur_col = 0;
     fontW=std4x6->width;
     fontH=std4x6->height;
-    clear_error_scr(COLOR_BLACK);
+    gfx_dbgscrClear(COLOR_BLACK);
 }
 #endif

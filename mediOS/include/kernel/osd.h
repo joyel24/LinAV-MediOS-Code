@@ -201,31 +201,29 @@
 
 //#define     OSD_OFF_HI_SHIFT(index)        ((( index<<31 ) >>31)<<3)
 
-        
-void setPalette      (int palette[256][3],int size);
-int  osdRGB2Packed(int r, int g, int b);
-void osdSetCursor2Bitmap (int index, int data);
-void osdSetMainConfig (int config);
-void osdSetMainShift (int horizontal,int vertical);
-void osdSetPallette (int Y, int Cr, int Cb, int index);
-void osdSet16CPallette (int bankN, int index, int value);
-void osdSetAltOffset (int address);
-void osdSetComponentOffset (int component, int address);
-void osdSetComponentSize (int component, int width, int height);
-void osdSetComponentPosition (int component, int x, int y);
-void osdSetComponentSourceWidth (int component, int width);
-void osdSetComponentConfig (int component, int config);
-void osdInit();
-void arch_init_osd(void);
+
+int  osd_RGB2Packed(int r, int g, int b);
+void osd_setCursor2Bitmap (int index, int data);
+void osd_setMainConfig (int config);
+void osd_setMainShift (int horizontal,int vertical);
+void osd_setEntirePalette (int palette[256][3],int size);
+void osd_setPaletteRGB(int r,int g,int b,int index);
+void osd_setPalette (int Y, int Cr, int Cb, int index);
+void osd_set16CPalette (int bankN, int index, int value);
+void osd_setAltOffset (int address);
+void osd_setComponentOffset (int component, int address);
+void osd_setComponentSize (int component, int width, int height);
+void osd_setComponentPosition (int component, int x, int y);
+void osd_setComponentSourceWidth (int component, int width);
+void osd_setComponentConfig (int component, int config);
+void osd_restorePlane(int component, unsigned int address, int x, int y, int w, int h, int bpp, int state,int enable);
+void osd_init();
+void arch_osd_init(void);
 
 
 #define RGB2Y(r,g,b)  ((306*r + 601*g + 117*b) >> 10)
 #define RGB2Cb(r,g,b)  (((-173*r -339*g + 512*b) >> 10) + 128)
 #define RGB2Cr(r,g,b)  (((512*r - 429*g - 83*b) >> 10) + 128)
-
-#define osdSetPaletteRGB(r,g,b,index)  {osdSetPallette(RGB2Y(r,g,b), RGB2Cr(r,g,b),RGB2Cb(r,g,b),index);}
-
-void osdRestorePlane(int component, unsigned int address, int x, int y, int w, int h, int bpp, int state,int enable);
 
 #endif
 

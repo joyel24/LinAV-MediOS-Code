@@ -26,7 +26,37 @@ int osdLookupOffsetHI[4] = { OSD_SDRAM_OFF_HI_VID0_1 ,
 							 
 int OSD_OFF_HI_SHIFT[4] = {0,8,0,8};
 
-void setPalette(int palette[256][3],int size)
+int osd_RGB2Packed(int r, int g, int b)
+{
+	return  ((RGB2Cr(r,g,b) << 16) | (RGB2Y(r,g,b) << 8) | RGB2Cb(r,g,b));
+}
+
+void osd_setCursor2Bitmap (int index, int data)
+{
+    int val;
+    outw(data,OSD_CURSOR2_DATA);           /* Setup data reg */
+    val=inw(OSD_CURSOR2_ADD_LATCH) & 0xFF;
+    index=index<<8;
+    outw(val | index | 0x80,OSD_CURSOR2_ADD_LATCH);       /* Set the data... */
+}
+
+void osd_setBorderColor (int color)
+{
+	outw((inw(OSD_CONF) & 0xFF00) | color,OSD_CONF);
+}
+
+void osd_setMainConfig (int config)
+{
+	outw(((inw(OSD_CONF) & 0xFF) << 8) | config,OSD_CONF);
+}
+
+void osd_setMainShift (int horizontal,int vertical)
+{
+	outw(horizontal,OSD_BITMAP0_SHIFT_HORIZ);
+	outw(vertical,OSD_BITMAP0_SHIFT_VERT);
+}
+
+void osd_setEntirePalette(int palette[256][3],int size)
 {
     int i=0;
     int y,cr,cb;
@@ -40,48 +70,23 @@ void setPalette(int palette[256][3],int size)
                     palette[i][0],palette[i][1],palette[i][2],
                     y,cr,cb);*/
         
-        osdSetPallette (y, cr, cb, i);
+        osd_setPalette (y, cr, cb, i);
     }
 }
 
-int osdRGB2Packed(int r, int g, int b)
+void osd_setPaletteRGB(int r,int g,int b,int index)
 {
-	return  ((RGB2Cr(r,g,b) << 16) | (RGB2Y(r,g,b) << 8) | RGB2Cb(r,g,b));
+  osd_setPalette(RGB2Y(r,g,b), RGB2Cr(r,g,b),RGB2Cb(r,g,b),index);
 }
 
-void osdSetCursor2Bitmap (int index, int data)
-{
-    int val;
-    outw(data,OSD_CURSOR2_DATA);           /* Setup data reg */
-    val=inw(OSD_CURSOR2_ADD_LATCH) & 0xFF;
-    index=index<<8;
-    outw(val | index | 0x80,OSD_CURSOR2_ADD_LATCH);       /* Set the data... */
-}
-
-void osdSetBorderColor (int color)
-{
-	outw((inw(OSD_CONF) & 0xFF00) | color,OSD_CONF);
-}
-
-void osdSetMainConfig (int config)
-{
-	outw(((inw(OSD_CONF) & 0xFF) << 8) | config,OSD_CONF);
-}
-
-void osdSetMainShift (int horizontal,int vertical)
-{
-	outw(horizontal,OSD_BITMAP0_SHIFT_HORIZ);
-	outw(vertical,OSD_BITMAP0_SHIFT_VERT);
-}
-
-void osdSetPallette (int Y, int Cr, int Cb, int index)
+void osd_setPalette (int Y, int Cr, int Cb, int index)
 {
 	Y&=0xFF;
         Cr&=0xFF;
         Cb&=0xFF;
-        
+
         //printk("OSD set palette (%x,%x,%x) at %d\n",Y,Cr,Cb,index);
-        
+
 	while((inw(OSD_PAL_ACCESS_STATUS)&0x1) != 0) /* nothing */ ;
         outw((Y << 8) | Cb,OSD_PAL_DATA_WRITE);
 	while((inw(OSD_PAL_ACCESS_STATUS)&0x1) != 0) /* nothing */ ;
@@ -89,7 +94,7 @@ void osdSetPallette (int Y, int Cr, int Cb, int index)
         while((inw(OSD_PAL_ACCESS_STATUS)&0x1) != 0) /* nothing */ ;
 }
 
-void osdSet16CPallette (int bankN, int index, int value)
+void osd_set16CPalette (int bankN, int index, int value)
 {
 	int val=inw(GET_BANK_ADDR(bankN,index));
 	val &= 0xFF00 >> GET_BANK_SHIFT(index);
@@ -98,7 +103,7 @@ void osdSet16CPallette (int bankN, int index, int value)
 }
 
 
-void osdSetAltOffset (int address)
+void osd_setAltOffset (int address)
 {
 	int offset = address - SDRAM_START;
 	offset = offset >> 5;
@@ -107,7 +112,7 @@ void osdSetAltOffset (int address)
 	outw(offset>>16,OSD_ALT_VID_OFF_LO);
 }
 
-void osdSetComponentOffset (int component, int address)
+void osd_setComponentOffset (int component, int address)
 {
 	int val;
 	int offset = address - SDRAM_START;
@@ -123,24 +128,24 @@ void osdSetComponentOffset (int component, int address)
 	outw(val,osdLookupOffsetHI[component]);
 }
 
-void osdSetComponentSize (int component, int width, int height)
+void osd_setComponentSize (int component, int width, int height)
 {
 	outw(width,OSD_COMP_W(component));
 	outw(height,OSD_COMP_H(component));
 }
 
-void osdSetComponentPosition (int component, int x, int y)
+void osd_setComponentPosition (int component, int x, int y)
 {
 	outw(x,OSD_COMP_X(component));
 	outw(y,OSD_COMP_Y(component));
 }
 
-void osdSetComponentSourceWidth (int component, int width)
+void osd_setComponentSourceWidth (int component, int width)
 {
 	outw(width,OSD_COMP_BUFF_W(component));
 }
 
-void osdSetComponentConfig (int component, int config)
+void osd_setComponentConfig (int component, int config)
 {
 	if(component == OSD_VIDEO1)
 	{
@@ -156,13 +161,13 @@ void osdSetComponentConfig (int component, int config)
 	}
 }
 
-void osdRestorePlane(int component, unsigned int address, int x, int y, int w, int h, int bpp, int state,int enable)
+void osd_restorePlane(int component, unsigned int address, int x, int y, int w, int h, int bpp, int state,int enable)
 {
-    osdSetComponentOffset (component,address);
+    osd_setComponentOffset (component,address);
 
     outw(2*w,OSD_COMP_W(component));
     outw(h,OSD_COMP_H(component));
-    
+
     outw(x,OSD_COMP_X(component));
     outw(y,OSD_COMP_Y(component));
 
@@ -184,7 +189,7 @@ void osdRestorePlane(int component, unsigned int address, int x, int y, int w, i
     }
 }
 
-void osdInit()
+void osd_init()
 {
-  arch_init_osd();
+  arch_osd_init();
 }

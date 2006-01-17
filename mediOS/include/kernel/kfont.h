@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/kernel/kfont.h
 *
 *   AMOS project
@@ -19,7 +19,7 @@
 
 #define NBFONT        0x16
 
-void ini_font(void);
+void fnt_init(void);
 
 typedef enum _E_FONT_TYPE
 {

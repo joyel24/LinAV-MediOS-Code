@@ -53,18 +53,18 @@ void print_boot_info(void)
     print_timer();
 }
 
-extern void ini_debugOnScreen(void);
+extern void dbgscr_init(void);
 
 void kernel_start (void)
 {
-    ini_graphics();
+    gfx_init();
 
 #ifdef HAVE_DEBUG_ON_SCREEN
-    ini_debugOnScreen();
+    dbgscr_init();
 #endif
 
     /* malloc of max space in SDRAM */
-    init_malloc((void*)MALLOC_START,MALLOC_SIZE);
+    malloc_init((void*)MALLOC_START,MALLOC_SIZE);
 
     /* print banner on uart */
     printk("MediOS %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);
@@ -131,6 +131,13 @@ void kernel_start (void)
     print_boot_info();
 
     printk("[init] END\n");
+    
+#ifdef AV3XX
+ printk("av3xx\n");
+#endif
+#ifdef GMINI4XX
+ printk("gmini4xx\n");
+#endif
 
 #ifdef BUILD_LIB
     do_bkpt();
