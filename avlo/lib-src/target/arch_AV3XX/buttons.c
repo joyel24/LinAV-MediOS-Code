@@ -17,10 +17,12 @@
 #include <hardware.h>
 
 int read_btn(void){
-    int val;
+    int val,i;
 
     val =  inw(BUTTON_PORT0)&0x3;
+    for(i=0;i<10;i++) /* nothing */;
     val|=((inw(BUTTON_PORT1)&0x7)<<2);
+    for(i=0;i<10;i++) /* nothing */;
     val|=((inw(BUTTON_PORT2)&0x7)<<5);
     /* ON, OFF keys */
     if(gio_is_set(GIO_ON_BTN))  val |= (0x1<<8);

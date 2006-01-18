@@ -123,6 +123,7 @@ void start_avlo(void)
     int i;
     int x,y,h,w;
     int bat_loop=0;
+    int pass_key_release=0;
            
     printf("In main AVLO\n");
     init_cpld();
@@ -236,6 +237,8 @@ loop:
     
     redraw=1;
 
+    bat_loop=BAT_LOOP_SIZE ;
+    
     while(1)
     {
         if(redraw)
@@ -335,11 +338,15 @@ loop:
                         putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"USB Enable, PRESS F3 to resume");
 
                         usb_enable();
-                        waitKeyReleased(NO_TIME_OUT);                        
+                        waitKeyReleased(NO_TIME_OUT);    
+                        pass_key_release = 1;                    
                     }
                 }
             }
-            waitKeyReleased(WITH_TIME_OUT);
+            if(!pass_key_release)
+                waitKeyReleased(WITH_TIME_OUT);
+            else
+                pass_key_release=0;
         }
     }
 }
@@ -548,14 +555,16 @@ void waitKey(void)
 void waitKeyReleased(int has_time_out)
 {
     int key;
-    int nbPressed=0;;
+    int nbPressed=0;
     key=read_btn();
+    //printf("W:%x\n",key);
     while((key&BTMASK_ANY) && nbPressed < maxRepeat)
     {
         chkOFF(key);
         key=read_btn();
         if(has_time_out)
             nbPressed++;
+        //printf("W:%x\n",key);
     }
     for(key=0;key<100;key++) /* nothing */;
 }
