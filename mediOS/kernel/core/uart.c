@@ -22,57 +22,57 @@ PIPE UART_PIPES[2];
 __IRAM_DATA PIPE * UART_0_Pipe;
 __IRAM_DATA PIPE * UART_1_Pipe;
 
-__IRAM_DATA unsigned int uartAdrr[2]={
+__IRAM_DATA unsigned int uart_addr[2]={
     UART0_BASE,
     UART1_BASE
 };
 
-__IRAM_CODE void uart_intr_action(int irq)
+__IRAM_CODE void uart_intAction(int irq)
 {
     char c;
     int uart = irq - IRQ_UART0;
 
-//    if(inw(uartAdrr[uart]+UART_SR)&0x0004)
-    while(inw(uartAdrr[uart]+UART_SR)&0x0004)
+//    if(inw(uart_addr[uart]+UART_SR)&0x0004)
+    while(inw(uart_addr[uart]+UART_SR)&0x0004)
     {
-        c=(unsigned char)(inw(uartAdrr[uart]+UART_DTRR)&0xFF);
+        c=(unsigned char)(inw(uart_addr[uart]+UART_DTRR)&0xFF);
         kpipe_write (&UART_PIPES[uart], &c, 1);
     }
 }
 
-int uartIn(unsigned char * data,int uartNum)
+int uart_in(unsigned char * data,int uartNum)
 {
-    if(inw(uartAdrr[uartNum]+UART_SR)&0x0004) /* check if something is in the reception buffer */
+    if(inw(uart_addr[uartNum]+UART_SR)&0x0004) /* check if something is in the reception buffer */
     {
-        *data=(unsigned char)(inw(uartAdrr[uartNum]+UART_DTRR)&0xFF);
+        *data=(unsigned char)(inw(uart_addr[uartNum]+UART_DTRR)&0xFF);
         return 1;
     }
     else
         return 0;
 }
 
-void uartOut(unsigned char data,int uartNum)
+void uart_out(unsigned char data,int uartNum)
 {
-    while(!(inw(uartAdrr[uartNum]+UART_SR)&0x400)) /* Nothing */; /* using transmission buffer level */
-    outw(data,uartAdrr[uartNum]+UART_DTRR);
+    while(!(inw(uart_addr[uartNum]+UART_SR)&0x400)) /* Nothing */; /* using transmission buffer level */
+    outw(data,uart_addr[uartNum]+UART_DTRR);
 }
 
-void uartOutString(unsigned char * data,int uartNum)
+void uart_outString(unsigned char * data,int uartNum)
 {
     while(*data)
     {
-        if (*data=='\n') uartOut('\r',uartNum); //gligli: uart fix
-        uartOut(*data,uartNum);
+        if (*data=='\n') uart_out('\r',uartNum); //gligli: uart fix
+        uart_out(*data,uartNum);
         data++;
     }
 }
 
-void restore_uart_handler(int uartNum)
+void uart_restoreIrqHandler(int uartNum)
 {
-    chg_irq_handler(uartNum == 0?IRQ_UART0:IRQ_UART1,uart_intr_action);
+    irq_changeHandler(uartNum == 0?IRQ_UART0:IRQ_UART1,uart_intAction);
 }
 
-void init_uart(void)
+void uart_init(void)
 {
 
     UART_0_Pipe=&UART_PIPES[0];
@@ -82,9 +82,9 @@ void init_uart(void)
     UART_0_Pipe->nSender   = 0;
     UART_1_Pipe->nReceiver = 0;
     UART_1_Pipe->nSender   = 0;
-    
-    enable_irq(IRQ_UART0);
-    enable_irq(IRQ_UART1);
+
+    irq_enable(IRQ_UART0);
+    irq_enable(IRQ_UART1);
 
     printk("[init] uart\n");
 }

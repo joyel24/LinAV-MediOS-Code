@@ -1,5 +1,5 @@
-/* 
-*   include/irq.h
+/*
+*   include/timer.h
 *
 *   AMOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -12,51 +12,71 @@
 
 #include <kernel/io.h>
 
-struct timer_s {
-    unsigned long expires;
-    void (*action)(void);
-    struct timer_s * nxt;
-    struct timer_s * prev;
-    int trigger;
-    char * name;
-};
+#define TMR0_BASE                      0x00030000
+#define TMR1_BASE                      0x00030080
+#define TMR2_BASE                      0x00030100
+#define TMR3_BASE                      0x00030180
 
-extern void main_timer_action(int irq);
+#define TMR_MODE                       0x00000000
+#define TMR_SEL                        0x00000002
+#define TMR_SCAL                       0x00000004
+#define TMR_DIV                        0x00000006
+#define TMR_TRG                        0x00000008
+#define TMR_CNT                        0x0000000a
 
-extern void setup_timer(struct timer_s * timer_data,char * name);
-extern void rm_timer(struct timer_s * timer_data);
-extern void start_timer(struct timer_s * timer_data);
-extern void stop_timer(struct timer_s * timer_data);
+#define TMR_MODE_STOP                  0x0000
+#define TMR_MODE_ONESHOT               0x0001
+#define TMR_MODE_FREERUN               0x0002
+#define TMR_MODE_RES                   0x0003
 
-void init_timer(void);
-void print_timer(void);
+#define TMR_SEL_ARM                    0x0000
+#define TMR_SEL_EXT                    0x0001
 
-void arch_init_timer(void);
+#define TMR_BASE(TMR_NUM)              (TMR0_BASE+0x80*TMR_NUM)
 
-#define TMR_BASE(TMR_NUM)                 (TIMER0_BASE+0x80*TMR_NUM)
-
-#define SET_TIMER_REGS(VAL,REG,TMR_NUM)   {outw(VAL,TMR_BASE(TMR_NUM)+REG);}
-#define GET_TIMER_REGS(REG,TMR_NUM)       (inw(TMR_BASE(TMR_NUM)+REG))
+#define TMR_SET_REGS(VAL,REG,TMR_NUM)  {outw(VAL,TMR_BASE(TMR_NUM)+REG);}
+#define TMR_GET_REGS(REG,TMR_NUM)      (inw(TMR_BASE(TMR_NUM)+REG))
 
 #define TMR0 0
 #define TMR1 1
 #define TMR2 2
 #define TMR3 3
 
-#define SET_TIMER_MODE(MODE,TMR_NUM)     {SET_TIMER_REGS(MODE&0x3,TIMER_MODE,TMR_NUM)}
-#define GET_TIMER_MODE(TMR_NUM)          (GET_TIMER_REGS(TIMER_MODE,TMR_NUM)&0x3)
+#define TMR_SET_MODE(MODE,TMR_NUM)     {TMR_SET_REGS(MODE&0x3,TMR_MODE,TMR_NUM)}
+#define TMR_GET_MODE(TMR_NUM)          (TMR_GET_REGS(TMR_MODE,TMR_NUM)&0x3)
 
-#define SET_TIMER_SEL(MODE,TMR_NUM)      {SET_TIMER_REGS(MODE&0x1,TIMER_SEL,TMR_NUM)}
-#define GET_TIMER_SEL(TMR_NUM)           (GET_TIMER_REGS(TIMER_SEL,TMR_NUM)&0x1)
+#define TMR_SET_SEL(MODE,TMR_NUM)      {TMR_SET_REGS(MODE&0x1,TMR_SEL,TMR_NUM)}
+#define TMR_GET_SEL(TMR_NUM)           (TMR_GET_REGS(TMR_SEL,TMR_NUM)&0x1)
 
-#define SET_TIMER_SCAL(SCAL_VAL,TMR_NUM) {SET_TIMER_REGS(SCAL_VAL&0x3FF,TIMER_SCAL,TMR_NUM)}
-#define GET_TIMER_SCAL(TMR_NUM)          (GET_TIMER_REGS(TIMER_SCAL,TMR_NUM)&0x3FF)
+#define TMR_SET_SCAL(SCAL_VAL,TMR_NUM) {TMR_SET_REGS(SCAL_VAL&0x3FF,TMR_SCAL,TMR_NUM)}
+#define TMR_GET_SCAL(TMR_NUM)          (TMR_GET_REGS(TMR_SCAL,TMR_NUM)&0x3FF)
 
-#define SET_TIMER_DIV(DIV_VAL,TMR_NUM)   {SET_TIMER_REGS(DIV_VAL&0xFFFF,TIMER_DIV,TMR_NUM)}
-#define GET_TIMER_DIV(TMR_NUM)           (GET_TIMER_REGS(TIMER_DIV,TMR_NUM)&0xFFFF)
+#define TMR_SET_DIV(DIV_VAL,TMR_NUM)   {TMR_SET_REGS(DIV_VAL&0xFFFF,TMR_DIV,TMR_NUM)}
+#define TMR_GET_DIV(TMR_NUM)           (TMR_GET_REGS(TMR_DIV,TMR_NUM)&0xFFFF)
 
-#define TRIGGER_TIMER(TMR_NUM)           {SET_TIMER_REGS(0x1,TIMER_TRG,TMR_NUM)}
+#define TMR_TRIGGER(TMR_NUM)           {TMR_SET_REGS(0x1,TMR_TRG,TMR_NUM)}
 
-#define GET_TIMER_CNT(TMR_NUM)           (GET_TIMER_REGS(TIMER_CNT,TMR_NUM)&0xFFFF)
+#define TMR_GET_CNT(TMR_NUM)           (TMR_GET_REGS(TMR_CNT,TMR_NUM)&0xFFFF)
+
+struct tmr_s {
+    unsigned long expires;
+    void (*action)(void);
+    struct tmr_s * nxt;
+    struct tmr_s * prev;
+    int trigger;
+    char * name;
+};
+
+extern void tmr_intAction(int irq);
+
+extern void tmr_setup(struct tmr_s * tmr_data,char * name);
+extern void tmr_remove(struct tmr_s * tmr_data);
+extern void tmr_start(struct tmr_s * tmr_data);
+extern void tmr_stop(struct tmr_s * tmr_data);
+
+void tmr_init(void);
+void tmr_print(void);
+
+void arch_tmr_init(void);
 
 #endif

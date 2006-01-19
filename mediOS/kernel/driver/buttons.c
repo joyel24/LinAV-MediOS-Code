@@ -157,8 +157,8 @@ void init_buttons(void)
     for(btn=0;btn<NB_BUTTONS;btn++)
         nb_pressed[btn]=0;
     /* set GIO for ON/OFF to input */
-    gio_dir(GIO_ON_BTN,GIO_IN);
-    gio_dir(GIO_OFF_BTN,GIO_IN);    
+    GIO_DIRECTION(GIO_ON_BTN,GIO_IN);
+    GIO_DIRECTION(GIO_OFF_BTN,GIO_IN);
             
     printk("[init] buttons\n");
 }

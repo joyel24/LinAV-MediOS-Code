@@ -16,7 +16,7 @@
 #include <kernel/hardware.h>
 #include <kernel/cpld.h>
 
-int arch_cpld_get_version(void){
+int arch_cpld_getVersion(void){
     return (cpld_read(CPLD0) & 0x000F);
 }
 

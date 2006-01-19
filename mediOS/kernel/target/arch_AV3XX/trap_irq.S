@@ -44,7 +44,7 @@ __irq_trap:
     mov     r0, #0
     mov     r1, sp
     adr     lr, __irq_svc1
-    b       do_IRQ
+    b       irq_globalHandler
 __irq_svc1:
     ldr     r0, [sp, #64]		@ irqs are already disabled
     msr     spsr, r0

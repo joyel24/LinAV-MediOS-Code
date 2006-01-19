@@ -23,8 +23,8 @@ int arch_read_btn(void){
     val|=((inw(BUTTON_PORT1)&0x7)<<2);
     val|=((inw(BUTTON_PORT2)&0x7)<<5);
     /* ON, OFF keys */
-    if(gio_is_set(GIO_ON_BTN))  val |= (0x1<<8);
-    if(gio_is_set(GIO_OFF_BTN)) val |= (0x1<<9);
+    if(GIO_IS_SET(GIO_ON_BTN))  val |= (0x1<<8);
+    if(GIO_IS_SET(GIO_OFF_BTN)) val |= (0x1<<9);
     val = (~val)&0x3FF;
     
     return val;

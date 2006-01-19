@@ -21,25 +21,25 @@ int arch_read_btn(void){
     int val;
     int i,dir,menu,bt;
 
-    if(cpld_get_version()==5){
+    if(cpld_getVersion()==5){
 
-      gio_dir(GIO_BTN_SELECT_UDLR,GIO_OUT);
-      gio_clear(GIO_BTN_SELECT_UDLR);
+      GIO_DIRECTION(GIO_BTN_SELECT_UDLR,GIO_OUT);
+      GIO_CLEAR(GIO_BTN_SELECT_UDLR);
       for(i=0;i<256;++i); // delay (keyboard hardware is too slow to read directly)
       dir = (inw(GIO_BITSET1) & 0x78) >> 3;
-      gio_dir(GIO_BTN_SELECT_UDLR,GIO_IN);
+      GIO_DIRECTION(GIO_BTN_SELECT_UDLR,GIO_IN);
 
-      gio_dir(GIO_BTN_SELECT_MENU,GIO_OUT);
-      gio_clear(GIO_BTN_SELECT_MENU);
+      GIO_DIRECTION(GIO_BTN_SELECT_MENU,GIO_OUT);
+      GIO_CLEAR(GIO_BTN_SELECT_MENU);
       for(i=0;i<256;++i); // delay (keyboard hardware is too slow to read directly)
       menu = (inw(GIO_BITSET1) & 0x38) >> 3;
-      gio_dir(GIO_BTN_SELECT_MENU,GIO_IN);
+      GIO_DIRECTION(GIO_BTN_SELECT_MENU,GIO_IN);
 
-      gio_dir(GIO_BTN_SELECT_SQCR,GIO_OUT);
-      gio_clear(GIO_BTN_SELECT_SQCR);
+      GIO_DIRECTION(GIO_BTN_SELECT_SQCR,GIO_OUT);
+      GIO_CLEAR(GIO_BTN_SELECT_SQCR);
       for(i=0;i<256;++i); // delay (keyboard hardware is too slow to read directly)
       bt = (inw(GIO_BITSET1) & 0x18) >> 3;
-      gio_dir(GIO_BTN_SELECT_SQCR,GIO_IN);
+      GIO_DIRECTION(GIO_BTN_SELECT_SQCR,GIO_IN);
 
     }else{
 
@@ -54,8 +54,8 @@ int arch_read_btn(void){
     val=(dir | menu << 4 | bt << 7);
 
     /* ON, OFF keys */
-    if(gio_is_set(GIO_ON_BTN))  val |= (0x1<<9);
-    if(gio_is_set(GIO_OFF_BTN)) val |= (0x1<<10);
+    if(GIO_IS_SET(GIO_ON_BTN))  val |= (0x1<<9);
+    if(GIO_IS_SET(GIO_OFF_BTN)) val |= (0x1<<10);
 
     return (~val)&0x7ff;
 }

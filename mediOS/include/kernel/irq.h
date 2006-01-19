@@ -32,8 +32,6 @@ void __cli(void);
 void __stf(void);
 void __clf(void);
 
-void arch_init_irq(void);
-
 /*
  * Enable IRQs
  */
@@ -170,12 +168,12 @@ void arch_init_irq(void);
         : "memory");                           \
     })
 
-     
+
 #define     irq_ack(IRQ)       ({ outw((1<<INTC_IRQ_SHIFT(IRQ)), INTC_IRQ_STATUS(IRQ)); })
 #define     fiq_ack(FIQ)       ({ outw((1<<INTC_FIQ_SHIFT(FIQ)), INTC_FIQ_STATUS(FIQ)); })
-#define     mask_irq(IRQ)      ({ unsigned int __addr=INTC_IRQ_ENABLE(IRQ); outw(inw(__addr)&(~(1<<INTC_IRQ_SHIFT(IRQ))),__addr); })
-#define     unmask_irq(IRQ)    ({ unsigned int __addr=INTC_IRQ_ENABLE(IRQ); outw(inw(__addr)|(1<<INTC_IRQ_SHIFT(IRQ)),__addr); })
-#define     mask_ack_irq(IRQ)  ({ mask_irq(IRQ); irq_ack(IRQ); })
+#define     irq_mask(IRQ)      ({ unsigned int __addr=INTC_IRQ_ENABLE(IRQ); outw(inw(__addr)&(~(1<<INTC_IRQ_SHIFT(IRQ))),__addr); })
+#define     irq_unmask(IRQ)    ({ unsigned int __addr=INTC_IRQ_ENABLE(IRQ); outw(inw(__addr)|(1<<INTC_IRQ_SHIFT(IRQ)),__addr); })
+#define     irq_maskAndAck(IRQ)  ({ mask_irq(IRQ); irq_ack(IRQ); })
 #define     irq_enabled(IRQ)   ({ int __val; __val=(inw(INTC_IRQ_ENABLE(IRQ)) & (1<<INTC_IRQ_SHIFT(IRQ)))!=0; __val;})
 
 #define     irq_state(IRQ)     ((IRQ>=0 && IRQ<NR_IRQS)?irq_enabled(IRQ)!=0:0)
@@ -187,14 +185,15 @@ struct irq_data_s {
     unsigned int nb_irq;
 };
 
-extern void init_irq(void);
+extern void irq_init(void);
 
-extern void add_irq_handler(int irq,void(*action)(int irqnr),char * name);
-extern void del_irq_handler(int irq);
-extern void disable_irq(int irq);
-extern void enable_irq(int irq);
-//extern int  irq_state(int irq);
-extern void chg_irq_handler(int irq_num,void(*fct)(int irq));
-extern void print_irq(void);
+extern void irq_addHandler(int irq,void(*action)(int irqnr),char * name);
+extern void irq_deleteHandler(int irq);
+extern void irq_changeHandler(int irq_num,void(*fct)(int irq));
+extern void irq_disable(int irq);
+extern void irq_enable(int irq);
+extern void irq_print(void);
+void arch_irq_init(void);
+
 
 #endif

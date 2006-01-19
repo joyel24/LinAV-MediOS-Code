@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //
@@ -98,7 +102,7 @@ int prevtime=0;
 int  I_GetTime (void)
 {
   int time;
-  time=GET_TIMER_CNT(TMR1);
+  time=TMR_GET_CNT(TMR1);
 
   if (time<prevtime) numoverflows++;
 
@@ -115,10 +119,10 @@ int  I_GetTime (void)
 void I_Init (void)
 {
   // init the timer
-  SET_TIMER_MODE(TMR_MODE_FREERUN,TMR1);
-  SET_TIMER_SCAL(753,TMR1);
-  SET_TIMER_DIV(65535,TMR1);
-  SET_TIMER_SEL(TMR_SEL_EXT,TMR1)
+  TMR_SET_MODE(TMR_MODE_FREERUN,TMR1);
+  TMR_SET_SCAL(753,TMR1);
+  TMR_SET_DIV(65535,TMR1);
+  TMR_SET_SEL(TMR_SEL_EXT,TMR1)
 
   I_InitSound();
   //  I_InitGraphics();

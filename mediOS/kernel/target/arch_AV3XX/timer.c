@@ -17,7 +17,7 @@
 #include <kernel/timer.h>
 #include <kernel/kernel.h>
 
-void arch_init_timer(void)
+void arch_tmr_init(void)
 {
     /*
     * System clock formula:
@@ -25,19 +25,19 @@ void arch_init_timer(void)
     *  freq need to be 100Hz
     */
 
-    SET_TIMER_SEL(TMR_SEL_ARM,TMR0);
+    TMR_SET_SEL(TMR_SEL_ARM,TMR0);
 
     /* prescale  */
-    
-    SET_TIMER_SCAL(9, TMR0);
+
+    TMR_SET_SCAL(9, TMR0);
 
     /* div  */
-    SET_TIMER_DIV(((CONFIG_ARM_CLK/1000)-1), TMR0);
+    TMR_SET_DIV(((CONFIG_ARM_CLK/1000)-1), TMR0);
 
     /* freerun */
-    SET_TIMER_MODE(TMR_MODE_FREERUN, TMR0);
-       
+    TMR_SET_MODE(TMR_MODE_FREERUN, TMR0);
+
     /* enable timer irq */
-    enable_irq(IRQ_TMR_0);
+    irq_enable(IRQ_TMR_0);
 }
 

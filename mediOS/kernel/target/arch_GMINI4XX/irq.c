@@ -26,13 +26,13 @@
 __IRAM_DATA struct irq_data_s irq_table[] = {
     {
         irq     : IRQ_UART0,
-        action  : uart_intr_action,
+        action  : uart_intAction,
         name    : "UART0 intr",
         nb_irq  : 0
     },
     {
         irq     : IRQ_UART1,
-        action  : uart_intr_action,
+        action  : uart_intAction,
         name    : "UART1 intr",
         nb_irq  : 0
     },
@@ -46,7 +46,7 @@ __IRAM_DATA struct irq_data_s irq_table[] = {
 #endif
     {
         irq     : IRQ_TMR_0,
-        action  : main_timer_action,
+        action  : tmr_intAction,
         name    : "Tick_timer",
         nb_irq  : 0
     },
@@ -82,7 +82,7 @@ __IRAM_DATA struct irq_data_s irq_table[] = {
     }
 };
 
-void arch_init_irq(void)
+void arch_irq_init(void)
 {
     /* disable all irqs (except timer 3 one)*/
     outw(0x0008, INTC_IRQ0_ENABLE);

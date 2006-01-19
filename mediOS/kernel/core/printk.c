@@ -47,7 +47,7 @@ void printk(char *fmt, ...)
     va_start(ap, fmt);
     vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
     va_end(ap);
-    uartOutString(debugmembuf,DEBUG_UART);
+    uart_outString(debugmembuf,DEBUG_UART);
 #ifdef HAVE_DEBUG_ON_SCREEN
     dbgscr_printOnScreen(debugmembuf);
 #endif
@@ -56,7 +56,7 @@ void printk(char *fmt, ...)
 void user_printf(const char * fmt, va_list args)
 {
     vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, args);
-    uartOutString(debugmembuf,DEBUG_UART);
+    uart_outString(debugmembuf,DEBUG_UART);
 #ifdef HAVE_DEBUG_ON_SCREEN
     dbgscr_printOnScreen(debugmembuf);
 #endif

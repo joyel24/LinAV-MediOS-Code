@@ -18,14 +18,14 @@
 #include <kernel/kernel.h>
 #include <kernel/ti_wdt.h>
 
-void init_wdt(void)
+void wdt_init(void)
 {
-  stop_wdt();
-  arch_init_wdt();
+  wdt_stop();
+  arch_wdt_init();
   printk("[init] TI watchdog timer\n");
 }
 
-void setup_wdt(int prescaler,int divider,bool doreset)
+void wdt_setup(int prescaler,int divider,bool doreset)
 {
   outw(prescaler,WDT_SCAL);
   outw(divider,WDT_DIV);
@@ -35,12 +35,12 @@ void setup_wdt(int prescaler,int divider,bool doreset)
   //outw(( inw(WDT_EXT_RESET)&(~WDT_EXTRST_ARM_RESET) ) | ( (doreset)?WDT_EXTRST_ARM_RESET:0 ),WDT_EXT_RESET);
 }
 
-void stop_wdt(void)
+void wdt_stop(void)
 {
   outw((inw(WDT_MODE)&(~WDT_MODE_ENABLED)),WDT_MODE);
 }
 
-void start_wdt(void)
+void wdt_start(void)
 {
   outw((inw(WDT_MODE)|WDT_MODE_ENABLED),WDT_MODE);
 }

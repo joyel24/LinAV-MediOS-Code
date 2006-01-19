@@ -102,7 +102,7 @@ __IRAM_CODE void cmd_line_INT(int irq_num)
     unsigned char c;
     int uart = irq_num - IRQ_UART0;
     
-    while(uartIn(&c,uart))
+    while(uart_in(&c,uart))
     {
         if(c=='\n' || c=='\r')               /* end of line => add \0 to end the line */
         {
@@ -120,11 +120,11 @@ __IRAM_CODE void cmd_line_INT(int irq_num)
             switch(c)
             {
                 case 0x1B:                      /* ESC */
-                    if(uartIn(&c,uart))
+                    if(uart_in(&c,uart))
                     {
                         if(c=='[')
                         {
-                            if(uartIn(&c,uart))
+                            if(uart_in(&c,uart))
                             {
                                 /*switch(c)
                                 {
@@ -253,9 +253,9 @@ void init_cmd_line(void)
     cur_cmd = (unsigned char*)malloc(sizeof(unsigned char)*MAX_CMD_LEN);
     
     cur_cmd[0]='\0';
-    
-    chg_irq_handler(IRQ_UART0,cmd_line_INT);
-    
+
+    irq_changeHandler(IRQ_UART0,cmd_line_INT);
+
     if(!arg_list)
     {
         printk("[init] cmd line, can't allocate memory for args\n");
@@ -294,8 +294,8 @@ void do_restart (unsigned char ** params)
 
 void print_handler_info (unsigned char ** params)
 {
-    print_irq();
-    print_timer();
+    irq_print();
+    tmr_print();
 }
 
 void do_memory_dump (unsigned char ** params)

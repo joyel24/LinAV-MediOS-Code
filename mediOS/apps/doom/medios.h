@@ -7,7 +7,6 @@
 #include <fs_io.h>
 #include <sys_def/ctype.h>
 #include <sys_def/string.h>
-#include <sys_def/section_types.h>
 #include <graphics.h>
 
 #include <kernel/osd.h>
@@ -26,6 +25,9 @@
 
 #define REALSCREENWIDTH 224
 #define REALSCREENHEIGHT 176
+
+#define __IRAM_CODE
+#define __IRAM_DATA
 
 int access(char *file, int mode);
 

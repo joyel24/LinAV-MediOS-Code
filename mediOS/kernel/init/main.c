@@ -49,8 +49,8 @@
 void print_boot_info(void)
 {
     printk("SP: %08x\n",get_sp());
-    print_irq();
-    print_timer();
+    irq_print();
+    tmr_print();
 }
 
 extern void dbgscr_init(void);
@@ -76,19 +76,19 @@ void kernel_start (void)
         (unsigned int)MALLOC_SIZE);
 
     /* init the watchdog timer */
-    init_wdt();
+    wdt_init();
 
     /* init the irq */
-    init_irq();
+    irq_init();
 
     /* init the tick timer */
-    init_timer();
+    tmr_init();
 
     /* driver init */
 
-    init_uart();
+    uart_init();
 
-    init_cpld();
+    cpld_init();
 
 #ifdef HAVE_CMD_LINE
     init_cmd_line();

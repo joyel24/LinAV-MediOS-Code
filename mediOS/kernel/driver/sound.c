@@ -85,40 +85,40 @@ __IRAM_CODE void dsp_interrupt(int irq)
     int send;
     if(current_buffer!=NULL)
     {
-        disable_irq(IRQ_MAS_DATA);
+        irq_disable(IRQ_MAS_DATA);
         //printk("INT r:%d,w:%d\n",current_buffer->read,current_buffer->write);
-        
+
         if(current_buffer->read==current_buffer->write) /* nothing in buffer */
-        {            
+        {
             printk("read == write => no more data to play\n");
             return;
         }
-        
+
         //printk("INT2 r:%d,w:%d\n",current_buffer->read,current_buffer->write);
-        
+
         if(current_buffer->read>current_buffer->write)   /* write before read => count only size till the end of buffer*/
             toSend=current_buffer->size-current_buffer->read;
         else                                             /* we have less than size-read in buffer */
-            toSend=current_buffer->write-current_buffer->read; 
-        
+            toSend=current_buffer->write-current_buffer->read;
+
         send=SEND_TO_MAS(current_buffer,toSend);
-        
+
         current_buffer->read+=send;
-        
+
         //printk("send: %d/%d r:%d,w:%d\n",send,toSend,current_buffer->read,current_buffer->write);
-               
-        
+
+
         if(current_buffer->read >= current_buffer->size)  /* we reached end of buffer => go back to start */
         {
            // printk("loop -> read\n");
             current_buffer->read=0;
             dsp_interrupt(IRQ_MAS_DATA);             /* retry to send data */
         }
-        enable_irq(IRQ_MAS_DATA);
+        irq_enable(IRQ_MAS_DATA);
     }
     else
     {
-        disable_irq(IRQ_MAS_DATA);
+        irq_disable(IRQ_MAS_DATA);
     }
 }
 
@@ -259,7 +259,7 @@ void mixer_ctl(unsigned int cmd, int dir, void * arg)
                     *val=1;
                 else
                     *val=0;
-            }                        
+            }
             break;
         case MIXER_BASS:
             if(dir==MAS_SET)
@@ -328,7 +328,7 @@ void init_sound (void)
     g_nPaused = 0;
     current_buffer = NULL;
 
-    disable_irq (IRQ_MAS_DATA);
+    irq_disable(IRQ_MAS_DATA);
     printk(" done\n");
 
     /*************************************************************/

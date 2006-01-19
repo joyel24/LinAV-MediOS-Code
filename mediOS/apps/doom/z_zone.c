@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	Zone Memory Allocation. Neat.
@@ -119,7 +123,7 @@ void Z_Init (void)
 //
 // Z_Free
 //
-__IRAM_CODE void Z_Free (void* ptr)
+void Z_Free (void* ptr)
 {
     memblock_t*		block;
     memblock_t*		other;
@@ -180,7 +184,7 @@ __IRAM_CODE void Z_Free (void* ptr)
 #define MINFRAGMENT		64
 
 
-__IRAM_CODE void*
+void*
 Z_Malloc
 ( int		size,
   int		tag,

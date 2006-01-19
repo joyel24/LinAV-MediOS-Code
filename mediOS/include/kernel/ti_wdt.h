@@ -13,11 +13,11 @@
 #ifndef __TI_WDT_H
 #define __TI_WDT_H
 
-void init_wdt(void);
-void setup_wdt(int prescaler,int divider,bool doreset);
-void stop_wdt(void);
-void start_wdt(void);
+void wdt_init(void);
+void wdt_setup(int prescaler,int divider,bool doreset);
+void wdt_stop(void);
+void wdt_start(void);
 
-void arch_init_wdt(void);
+void arch_wdt_init(void);
 
 #endif

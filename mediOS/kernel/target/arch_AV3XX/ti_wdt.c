@@ -18,9 +18,9 @@
 #include <kernel/kernel.h>
 #include <kernel/ti_wdt.h>
 
-void arch_init_wdt(void)
+void arch_wdt_init(void)
 {
-  setup_wdt(0x3e7,0x1a,false);
-  start_wdt();
+  wdt_setup(1000-1,27-1,false);
+  wdt_start();
 }
 

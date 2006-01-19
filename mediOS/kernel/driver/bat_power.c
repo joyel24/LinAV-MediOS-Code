@@ -30,16 +30,16 @@ int lcd_state=1;
 int lcd_bright=10;
 int lcd_timer_used[2]={1,0};
 int lcd_freq_rep[2]={LCD_FREQ_DEFAULT_0,LCD_FREQ_DEFAULT_1};
-struct timer_s lcdOnOff_timer;
+struct tmr_s lcdOnOff_timer;
 
 int halt_timer_used[2]={1,0};
 int halt_freq_rep[2]={HALT_FREQ_DEFAULT_0,HALT_FREQ_DEFAULT_1};
-struct timer_s halt_timer;
+struct tmr_s halt_timer;
 
 int hd_freq_rep[2]={HD_FREQ_DEFAULT_0,HD_FREQ_DEFAULT_1};
 int hd_timer_used[2]={1,1};
 int hd_sleep_state=0;
-struct timer_s hd_timer;
+struct tmr_s hd_timer;
 
 void set_timer_status_freq(int timer_type, int power_mode, int val,int type)
 {
@@ -140,14 +140,14 @@ void lcd_set_state(int state)
         lcd_state=state;
         if(state) /* turn on */
         {
-            cpld_set_port_2(CPLD_LCD);
-            gio_clear(GIO_LCD_BACKLIGHT);
+            CPLD_SET_PORT2(CPLD_LCD);
+            GIO_CLEAR(GIO_LCD_BACKLIGHT);
             printk("Turning on lcd\n");
         }
         else
         {
-            cpld_clear_port_2(CPLD_LCD);
-            gio_set(GIO_LCD_BACKLIGHT);
+            CPLD_CLEAR_PORT2(CPLD_LCD);
+            GIO_CLEAR(GIO_LCD_BACKLIGHT);
             printk("Turning off lcd\n");
         }
    }
@@ -164,17 +164,17 @@ void lcd_launchTimer(void)
     if(lcd_freq_rep[num]!=0 && lcd_timer_used[num] && lcd_state)
     {
         lcdOnOff_timer.expires = tick + (lcd_freq_rep[num]*HZ); /* lcd_freq_rep in sec */
-        start_timer(&lcdOnOff_timer);
+        tmr_start(&lcdOnOff_timer);
     }
 }
 
 void lcd_timer_action(void)
 {
-    int num=getCurrentTimer();    
+    int num=getCurrentTimer();
     if(lcd_timer_used[num])
     {
         lcd_off();
-#ifdef HAVE_FM_REMOTE        
+#ifdef HAVE_FM_REMOTE
         if(FM_is_connected())
             FM_lightsOFF();
 #endif
@@ -187,7 +187,7 @@ void halt_launchTimer(void)
     if(halt_freq_rep[num]!=0 && halt_timer_used[num])
     {
         halt_timer.expires = tick + (halt_freq_rep[num]*HZ); /* lcd_freq_rep in sec */
-        start_timer(&halt_timer);
+        tmr_start(&halt_timer);
     }
 }
 
@@ -221,7 +221,7 @@ void hd_launchTimer(void)
     if(hd_freq_rep[num]!=0 && hd_timer_used[num] && !hd_sleep_state)
     {
         hd_timer.expires = tick + (hd_freq_rep[num]*HZ); /* hd_freq_rep in sec */
-        start_timer(&hd_timer);
+        tmr_start(&hd_timer);
     }
 }
 
@@ -261,20 +261,20 @@ int hd_timer_state(int num)
 void hd_timer_off(int num)
 {
     hd_timer_used[num]=0;
-    stop_timer(&hd_timer);
+    tmr_stop(&hd_timer);
 }
 
 void chgTimer(void)
 {
     int num=getCurrentTimer();
-    stop_timer(&halt_timer);
-    stop_timer(&lcdOnOff_timer);
-    stop_timer(&hd_timer);
-    
+    tmr_stop(&halt_timer);
+    tmr_stop(&lcdOnOff_timer);
+    tmr_stop(&hd_timer);
+
     halt_launchTimer();
     lcd_launchTimer();
     hd_launchTimer();
-    
+
     printk("DC changed => changing timers (LCD:%d,HALT:%d,HD:%d)\n",
             lcd_timer_used[num],
             halt_timer_used[num],
@@ -295,7 +295,7 @@ void process_DC_change(void)
 {
     kpwrState=POWER_CONNECTED;
     /* change the timers */
-    chgTimer();        
+    chgTimer();
     send_evt(EVT_PWR);
     printk("DC connector %s\n",kpwrState==1?"plugged":"unplugged");
 }
@@ -306,12 +306,12 @@ void set_timer(int timer_type,int mode,int state,int delay)
 }
 
 void init_power(void)
-{ 
-    setup_timer(&lcdOnOff_timer,"lcdOnOff");
+{
+    tmr_setup(&lcdOnOff_timer,"lcdOnOff");
     lcdOnOff_timer.action = lcd_timer_action;
-    setup_timer(&halt_timer,"halt");
+    tmr_setup(&halt_timer,"halt");
     halt_timer.action = halt_timer_action;
-    setup_timer(&hd_timer,"HD");
+    tmr_setup(&hd_timer,"HD");
     hd_timer.action = hd_timer_fct;
     
     lcd_state=1;
@@ -335,7 +335,7 @@ void init_power(void)
     halt_launchTimer();
     lcd_launchTimer();
     hd_launchTimer();
-    
+
     kpwrState=POWER_CONNECTED;    
     printk("[init] power : Bat level: %x, DC %s connected\n",GET_BAT_LEVEL,kpwrState==0?"not":"is");
 }

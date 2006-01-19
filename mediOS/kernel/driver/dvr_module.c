@@ -26,9 +26,9 @@ void dvr_connected(void)
 {
     if(init_done)
     {
-        cpld_set_port_0(CPLD_DVR);
-        cpld_set_port_3(CPLD3_DVR);
-        cpld_set_port_2(CPLD2_DVR);
+        CPLD_SET_PORT0(CPLD_DVR);
+        CPLD_SET_PORT3(CPLD3_DVR);
+        CPLD_SET_PORT2(CPLD2_DVR);
         start_ir_remote();
         printk("DVR connect done (chip ver %x)\n",dvr_chip_version());
     }
@@ -40,9 +40,9 @@ void dvr_disconnected(void)
 {
     if(init_done)
     {
-        cpld_clear_port_0(CPLD_DVR);
-        cpld_clear_port_3(CPLD3_DVR);
-        cpld_clear_port_2(CPLD2_DVR);
+        CPLD_CLEAR_PORT0(CPLD_DVR);
+        CPLD_CLEAR_PORT3(CPLD3_DVR);
+        CPLD_CLEAR_PORT2(CPLD2_DVR);
         stop_ir_remote();
         printk("DVR disconnect done\n");
     }

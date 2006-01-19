@@ -37,7 +37,7 @@ int av_cmd_array[]= {
 
 extern int hd_sleep_state;
 
-extern struct timer_s hd_timer;
+extern struct tmr_s hd_timer;
 
 #define CALC_BASE(ADDR)     (((unsigned int)(ADDR))-SDRAM_START)
 
@@ -196,7 +196,7 @@ void ata_stopHD(int mode)
 void ata_stopHDEnd(void)
 {
     ata_powerDownHD();
-    stop_timer(&hd_timer);
+    tmr_stop(&hd_timer);
     hd_sleep_state=1;
     ata_stopping = 0;
     printk("[ide sleep] end\n");    

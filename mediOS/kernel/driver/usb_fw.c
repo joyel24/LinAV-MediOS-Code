@@ -31,7 +31,7 @@ void setUsbFw(int state)
         {
             if(kusbIsConnected())
             {
-                cpld_set_port_1(CPLD_USB);
+                CPLD_SET_PORT1(CPLD_USB);
                 k_usb_fw=1;
                 printk("[usb-FW_EXT] usb enable\n");
             }
@@ -46,7 +46,7 @@ void setUsbFw(int state)
         {
             if(k_usb_fw==1)
             {
-                cpld_clear_port_1(CPLD_USB);
+                CPLD_CLEAR_PORT1(CPLD_USB);
                 printk("[usb-FW_EXT] usb disable\n");
             }
             else if(k_usb_fw==2)

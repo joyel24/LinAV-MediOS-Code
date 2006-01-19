@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // Revision 1.3  1997/01/29 20:10
 // DESCRIPTION:
@@ -296,7 +300,7 @@ __IRAM_CODE void R_GenerateComposite (int texnum)
 //
 // R_GenerateLookup
 //
-__IRAM_CODE void R_GenerateLookup (int texnum)
+void R_GenerateLookup (int texnum)
 {
     texture_t*		texture;
     byte*		patchcount;	// patchcount[texture->width]

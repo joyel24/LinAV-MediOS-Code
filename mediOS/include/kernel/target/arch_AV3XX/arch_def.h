@@ -27,28 +27,6 @@
 /* DEBUG */
 #define DEBUG_UART              UART_0
 
-/* timers */
-
-#define TIMER0_BASE                       0x00030000
-#define TIMER1_BASE                       0x00030080
-#define TIMER2_BASE                       0x00030100
-#define TIMER3_BASE                       0x00030180
-
-#define TIMER_MODE                        0x00000000
-#define TIMER_SEL                         0x00000002
-#define TIMER_SCAL                        0x00000004
-#define TIMER_DIV                         0x00000006
-#define TIMER_TRG                         0x00000008
-#define TIMER_CNT                         0x0000000a
-
-#define TMR_MODE_STOP                     0x0000
-#define TMR_MODE_ONESHOT                  0x0001
-#define TMR_MODE_FREERUN                  0x0002
-#define TMR_MODE_RES                      0x0003
-
-#define TMR_SEL_ARM                       0x0000
-#define TMR_SEL_EXT                       0x0001
-
 /* Interrupts */
 
 #define INTC_BASE                         0x00030500
@@ -115,23 +93,6 @@
 #define CPLD_PORT1                        (CPLD_BASE+0x100)
 #define CPLD_PORT2                        (CPLD_BASE+0x200)
 #define CPLD_PORT3                        (CPLD_BASE+0x300)
-
-/* GIO         */
-
-#define GIO_BASE                          0x30580
-#define GIO_DIRECTION0                    (GIO_BASE+0x00)  // GIO 0-15
-#define GIO_DIRECTION1                    (GIO_BASE+0x02)  // GIO 16-31
-#define GIO_DIRECTION2                    0
-#define GIO_INVERT0                       (GIO_BASE+0x04)  // GIO 0-15
-#define GIO_INVERT1                       (GIO_BASE+0x06)  // GIO 16-31
-#define GIO_INVERT2                       0
-#define GIO_BITSET0                       (GIO_BASE+0x08)  // GIO 0-15
-#define GIO_BITSET1                       (GIO_BASE+0x0a)  // GIO 16-31
-#define GIO_BITSET2                       0
-#define GIO_BITCLEAR0                     (GIO_BASE+0x0c)  // GIO 0-15
-#define GIO_BITCLEAR1                     (GIO_BASE+0x0e)  // GIO 16-31
-#define GIO_BITCLEAR2                     0
-#define GIO_ENABLE_IRQ                    (GIO_BASE+0x10)  // GIO 0-7
 
 /* video */
 

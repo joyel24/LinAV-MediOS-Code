@@ -120,7 +120,7 @@ extern int inHold;
             inHold=0;                 \
             printk("[FM Remote] disconnected\n"); \
         }                             \
-        uartOut('v',UART_1);          \
+        uart_out('v',UART_1);          \
     }                                 \
 }
 

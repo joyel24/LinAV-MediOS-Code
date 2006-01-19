@@ -27,16 +27,14 @@
 
 unsigned long tick __IRAM_DATA;
 
-struct timer_s * timer_head __IRAM_DATA;
+struct tmr_s * tmr_head __IRAM_DATA;
 
-
-
-__IRAM_CODE void main_timer_action(int irq)
+__IRAM_CODE void tmr_intAction(int irq)
 {
-    struct timer_s * ptr=timer_head;
-    
+    struct tmr_s * ptr=tmr_head;
+
     tick++;
-    
+
     /* HW check */
     BTN_CHK;
 #ifdef HAVE_BAT_POWER 
@@ -66,64 +64,64 @@ __IRAM_CODE void main_timer_action(int irq)
     }    
 }
 
-void setup_timer(struct timer_s * timer_data,char * name)
-{   
-    timer_data->expires=0;
-    timer_data->trigger=0;
-    timer_data->name=name;
-    
-    timer_data->nxt=timer_head;
-    timer_data->prev=NULL;
-    timer_head=timer_data;
-    
+void tmr_setup(struct tmr_s * tmr_data,char * name)
+{
+    tmr_data->expires=0;
+    tmr_data->trigger=0;
+    tmr_data->name=name;
+
+    tmr_data->nxt=tmr_head;
+    tmr_data->prev=NULL;
+    tmr_head=tmr_data;
+
 }
 
-void rm_timer(struct timer_s * timer_data)
+void tmr_remove(struct tmr_s * tmr_data)
 {
-    
-    if(!timer_data->prev)
-        timer_head=timer_data->nxt;    
+
+    if(!tmr_data->prev)
+        tmr_head=tmr_data->nxt;
     else
-        timer_data->prev->nxt=timer_data->nxt;
-        
-    if(timer_data->nxt)
-            timer_data->nxt->prev=timer_data->prev;
+        tmr_data->prev->nxt=tmr_data->nxt;
+
+    if(tmr_data->nxt)
+            tmr_data->nxt->prev=tmr_data->prev;
 }
 
-void stop_timer(struct timer_s * timer_data)
+void tmr_stop(struct tmr_s * tmr_data)
 {
-    timer_data->trigger=0;
+    tmr_data->trigger=0;
 }
 
-void start_timer(struct timer_s * timer_data)
+void tmr_start(struct tmr_s * tmr_data)
 {
-    if(timer_data->expires>tick)
-        timer_data->trigger=1;
+    if(tmr_data->expires>tick)
+        tmr_data->trigger=1;
     else
-        timer_data->trigger=0;
+        tmr_data->trigger=0;
 }
 
-void init_timer(void)
+void tmr_init(void)
 {
     /* init the timer structure */
-    timer_head=NULL;
+    tmr_head=NULL;
     tick=0;
-    
+
     /* disable all timer */
-    SET_TIMER_MODE(TMR_MODE_STOP,TMR0);
-    SET_TIMER_MODE(TMR_MODE_STOP,TMR1);
-    SET_TIMER_MODE(TMR_MODE_STOP,TMR2);
-    SET_TIMER_MODE(TMR_MODE_STOP,TMR3);
-        
-    arch_init_timer();
-    
+    TMR_SET_MODE(TMR_MODE_STOP,TMR0);
+    TMR_SET_MODE(TMR_MODE_STOP,TMR1);
+    TMR_SET_MODE(TMR_MODE_STOP,TMR2);
+    TMR_SET_MODE(TMR_MODE_STOP,TMR3);
+
+    arch_tmr_init();
+
     printk("[init] timer\n");
 }
 
 
-void print_timer(void)
+void tmr_print(void)
 {
-    struct timer_s * ptr=timer_head;
+    struct tmr_s * ptr=tmr_head;
     int tmrnr=0;
     printk("Timer list: (cur tick:%d)\n",tick);
     while(ptr!=NULL)

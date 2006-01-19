@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.3  2006/01/11 19:38:50  sfxgligli
+// -Doom: cleanup for v0.1
+// -mediOS: Gmini400 buttons fix
+//
 // Revision 1.2  2006/01/03 20:57:57  sfxgligli
 // - Doom: weapon change, fixed backward move bug, HUD resize optimisation
 // - Medios: added firmware reload function, implemented exit() user function
@@ -171,8 +175,6 @@ void I_StartTic (void)
     if(pressed & BTMASK_MENU1)  DoButtonEvent(BUTTON_MENU1,false);
     if(pressed & BTMASK_MENU2)  DoButtonEvent(BUTTON_MENU2,false);
     if(pressed & BTMASK_MENU3)  DoButtonEvent(BUTTON_MENU3,false);
-    if(pressed & BTMASK_SQUARE) DoButtonEvent(BUTTON_SQUARE,false);
-    if(pressed & BTMASK_CROSS)  DoButtonEvent(BUTTON_CROSS,false);
     if(pressed & BTMASK_ON)     DoButtonEvent(BUTTON_ON,false);
     if(pressed & BTMASK_OFF)    DoButtonEvent(BUTTON_OFF,false);
   }
@@ -185,8 +187,6 @@ void I_StartTic (void)
     if(released & BTMASK_MENU1)  DoButtonEvent(BUTTON_MENU1,true);
     if(released & BTMASK_MENU2)  DoButtonEvent(BUTTON_MENU2,true);
     if(released & BTMASK_MENU3)  DoButtonEvent(BUTTON_MENU3,true);
-    if(released & BTMASK_SQUARE) DoButtonEvent(BUTTON_SQUARE,true);
-    if(released & BTMASK_CROSS)  DoButtonEvent(BUTTON_CROSS,true);
     if(released & BTMASK_ON)     DoButtonEvent(BUTTON_ON,true);
     if(released & BTMASK_OFF)    DoButtonEvent(BUTTON_OFF,true);
   }

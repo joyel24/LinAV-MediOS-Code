@@ -85,7 +85,7 @@ void fm_remote_INT(int irq_num)
 {
     char c;
     int count;
-    while(uartIn(&c,UART_1))
+    while(uart_in(&c,UART_1))
     {
         if(FM_connected)
         {
@@ -141,17 +141,17 @@ void fm_remote_INT(int irq_num)
         }
         else
         {
-            disable_irq(IRQ_UART1);
+            irq_disable(IRQ_UART1);
             switch(c)
             {
                 case 0xf8:
                     while(1)
                     {
                         count=0;
-                        while(!uartIn(&c,UART_1) && count<4200) count++;
+                        while(!uart_in(&c,UART_1) && count<4200) count++;
                         if(count >=4200)
                         {
-                            uartOut('v',UART_1);
+                            uart_out('v',UART_1);
                             printk("is this a pause?\n");
                             break;
                         }
@@ -167,7 +167,7 @@ void fm_remote_INT(int irq_num)
                  default:
                     printk("don't know what to do with %c %02x\n",c,c);
             }
-            enable_irq(IRQ_UART1);
+            irq_enable(IRQ_UART1);
         }
     }
         
@@ -287,8 +287,8 @@ void FM_setLight(int type,int direction)
 
 void FM_do_setLight(void)
 {
-    uartOut('P',UART_1);
-    uartOut(light_state&0xFF,UART_1);
+    uart_out('P',UART_1);
+    uart_out(light_state&0xFF,UART_1);
 }
 
 int FM_getLight(int type)
@@ -387,8 +387,8 @@ void FM_do_putText(void)
 void FM_setContrast(int val)
 {
     contrast=val;
-    uartOut('C',UART_1);
-    uartOut(contrast&0xFF,UART_1);
+    uart_out('C',UART_1);
+    uart_out(contrast&0xFF,UART_1);
 }
 
 int FM_getContrast(void)
@@ -580,20 +580,20 @@ void FM_do_ini_call(void)
 void FM_send_data(char cmd,char * data,int size)
 {
     int i;
-    uartOut(cmd,UART_1);
+    uart_out(cmd,UART_1);
     for(i=0;i<size;i++)
-        uartOut(data[i]&0xFF,UART_1);
+        uart_out(data[i]&0xFF,UART_1);
 }
 
 void init_fm_remote(void)
 {
     char c;
     /* setting the gio and cpld */
-    gio_dir(GIO_SPDIF,GIO_OUT);
-    gio_dir(GIO_VID_OUT,GIO_OUT);
-    gio_set(GIO_SPDIF);
-    gio_set(GIO_VID_OUT);
-    cpld_set_port_3(CPLD_FM);
+    GIO_DIRECTION(GIO_SPDIF,GIO_OUT);
+    GIO_DIRECTION(GIO_VID_OUT,GIO_OUT);
+    GIO_SET(GIO_SPDIF);
+    GIO_SET(GIO_VID_OUT);
+    CPLD_SET_PORT3(CPLD_FM);
     
     /*setting up the UART1 port */
     outw(0x015F,UART1_BASE+UART_BRSR); /* 9600 BAUD */
@@ -609,10 +609,10 @@ void init_fm_remote(void)
     light_state=0x1;
     FM_put_iniTxt();    
     contrast=0x00;
-    
-    chg_irq_handler(IRQ_UART1,fm_remote_INT);
+
+    irq_changeHandler(IRQ_UART1,fm_remote_INT);
     /* launch the INT handler once */
-    while(uartIn(&c,UART_1)) /*nothing*/;
+    while(uart_in(&c,UART_1)) /*nothing*/;
     //fm_remote_INT(IRQ_UART1);
     /* everything is ok */
     printk("[init] fm remote\n");

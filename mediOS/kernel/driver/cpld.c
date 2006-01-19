@@ -15,7 +15,7 @@
 #include <kernel/hardware.h>
 #include <kernel/cpld.h>
 
-int cpld_port_state[4]=
+int cpld_portState[4]=
 {
     CPLD_PORT0_INIT,
     CPLD_PORT1_INIT,
@@ -23,81 +23,81 @@ int cpld_port_state[4]=
     CPLD_PORT3_INIT,
 };
 
-int cpld_port_array[4] = {
+int cpld_portArray[4] = {
     CPLD_PORT0,
     CPLD_PORT1,
     CPLD_PORT2,
     CPLD_PORT3
 };
 
-void init_cpld(void)
+void cpld_init(void)
 {
     int version;
 
-    cpld_do_select();
-    outw(cpld_port_state[CPLD1],CPLD_PORT1);
-    outw(cpld_port_state[CPLD2],CPLD_PORT2);
-    outw(cpld_port_state[CPLD3],CPLD_PORT3);
+    cpld_doSelect();
+    outw(cpld_portState[CPLD1],CPLD_PORT1);
+    outw(cpld_portState[CPLD2],CPLD_PORT2);
+    outw(cpld_portState[CPLD3],CPLD_PORT3);
 
-    version=cpld_get_version();
+    version=cpld_getVersion();
 
     /* everything is ok */
     printk("[init] CPLD Ver:0x%x\n",version);
 }
 
-void cpld_chg_state(int cpld_port,int bit_num,int direction)
+void cpld_changeState(int cpld_port,int bit_num,int direction)
 {
     int tmp;
 
-    tmp=cpld_port_state[cpld_port];
+    tmp=cpld_portState[cpld_port];
     if(direction)
         tmp |= (0x1 << bit_num);
     else
         tmp &= ~(0x1 << bit_num);
 
-    if(tmp!=cpld_port_state[cpld_port])
+    if(tmp!=cpld_portState[cpld_port])
     {
-        cpld_port_state[cpld_port]=tmp;
-        outw(cpld_port_state[cpld_port],cpld_port_array[cpld_port]);
+        cpld_portState[cpld_port]=tmp;
+        outw(cpld_portState[cpld_port],cpld_portArray[cpld_port]);
     }
 }
 
 int cpld_read(int cpld_port)
 {
-    return inw(cpld_port_array[cpld_port]);
+    return inw(cpld_portArray[cpld_port]);
 }
 
 void cpld_select(int bit_num,int direction)
 {
     int val;
     if(direction)
-        val = cpld_port_state[CPLD0] | (0x1 << bit_num);
+        val = cpld_portState[CPLD0] | (0x1 << bit_num);
     else
-        val = cpld_port_state[CPLD0] & ~(0x1 << bit_num);
-    if(val != cpld_port_state[CPLD0])
+        val = cpld_portState[CPLD0] & ~(0x1 << bit_num);
+    if(val != cpld_portState[CPLD0])
     {
-        cpld_port_state[CPLD0]=val;
-        cpld_do_select();
+        cpld_portState[CPLD0]=val;
+        cpld_doSelect();
     }
 }
 
-void cpld_do_select(void)
+void cpld_doSelect(void)
 {
     int res,res2;
-    printk("changing cpld select : %d\n",cpld_port_state[CPLD0]);
-    outw(cpld_port_state[CPLD0],CPLD_PORT0);
-    outw(cpld_port_state[CPLD0],CPLD_PORT0);
-    outw(cpld_port_state[CPLD0],CPLD_PORT0);
-    outw(cpld_port_state[CPLD0],CPLD_PORT0);
-    outw(cpld_port_state[CPLD0],CPLD_PORT0);
+    printk("changing cpld select : %d\n",cpld_portState[CPLD0]);
+    outw(cpld_portState[CPLD0],CPLD_PORT0);
+    outw(cpld_portState[CPLD0],CPLD_PORT0);
+    outw(cpld_portState[CPLD0],CPLD_PORT0);
+    outw(cpld_portState[CPLD0],CPLD_PORT0);
+    outw(cpld_portState[CPLD0],CPLD_PORT0);
 
-    res=inw(cpld_port_array[CPLD0]);
-    while((res2=inw(cpld_port_array[CPLD0]))!=res) /* wait for the value to become stable */
+    res=inw(cpld_portArray[CPLD0]);
+    while((res2=inw(cpld_portArray[CPLD0]))!=res) /* wait for the value to become stable */
         res=res2;
 }
 
-int cpld_get_version(void){
-    return arch_cpld_get_version();
+int cpld_getVersion(void){
+    return arch_cpld_getVersion();
 }
 
 

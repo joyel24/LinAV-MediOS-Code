@@ -50,9 +50,9 @@ int in_32_val(void)
 /********************* init mas                    ***************************/
 int mas_reset(void)
 {
-    gio_clear(GIO_MAS_PWR);  // stop the MAS
+    GIO_CLEAR(GIO_MAS_PWR);  // stop the MAS
     mdelay(100);
-    gio_set(GIO_MAS_PWR);       // start the MAS
+    GIO_SET(GIO_MAS_PWR);       // start the MAS
     mdelay(10);
     mas_write_direct_config(MAS_CONTROL,0x8c00);
     return 0;
@@ -61,15 +61,15 @@ int mas_reset(void)
 int mas_gio_init(void)
 {
     int i;
-    gio_dir(GIO_MAS_EOD,GIO_IN);
+    GIO_DIRECTION(GIO_MAS_EOD,GIO_IN);
     for(i=0;i<8;i++)
-        gio_dir((GIO_MAS_D0+i),GIO_OUT);
-    gio_dir(GIO_MAS_PWR,GIO_OUT);   
-    gio_dir(GIO_MAS_RTR,GIO_IN);
-    gio_dir(GIO_MAS_PR,GIO_OUT);
-    
-    gio_inv(GIO_MAS_EOD,GIO_INVERTED);   
-    gio_IRQ(GIO_MAS_EOD,GIO_IRQ);
+        GIO_DIRECTION((GIO_MAS_D0+i),GIO_OUT);
+    GIO_DIRECTION(GIO_MAS_PWR,GIO_OUT);   
+    GIO_DIRECTION(GIO_MAS_RTR,GIO_IN);
+    GIO_DIRECTION(GIO_MAS_PR,GIO_OUT);
+
+    GIO_INVERT(GIO_MAS_EOD,GIO_INVERTED);
+    GIO_IRQ_ENABLE(GIO_MAS_EOD,GIO_IRQ);
 
     return 0;
 }

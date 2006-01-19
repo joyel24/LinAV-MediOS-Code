@@ -23,13 +23,13 @@ void arch_ata_resetHD(void)
 
 void arch_ata_powerUpHD(void)
 {
-    cpld_set_port_3(CPLD_HD_POWER); /* powering up HD */
+    CPLD_SET_PORT3(CPLD_HD_POWER); /* powering up HD */
 
 }
 
 void arch_ata_powerDownHD(void)
 {
-    cpld_clear_port_3(CPLD_HD_POWER);
+    CPLD_CLEAR_PORT3(CPLD_HD_POWER);
 }
 
 void arch_ata_selectHD(void)

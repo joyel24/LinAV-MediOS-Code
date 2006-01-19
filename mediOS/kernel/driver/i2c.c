@@ -29,17 +29,17 @@
 #define DELAY_1              { int _x; for(_x=0;_x<10;_x++); };
 #define DELAY_2              { int _x; for(_x=0;_x<10;_x++); };
 
-#define SDA_HI             gio_set(GIO_I2C_DATA);
-#define SDA_LO             gio_clear(GIO_I2C_DATA);
-#define SDA_IN             gio_dir(GIO_I2C_DATA,GIO_IN);
-#define SDA_OUT            gio_dir(GIO_I2C_DATA,GIO_OUT);
-#define SDA                gio_is_set(GIO_I2C_DATA)
+#define SDA_HI             GIO_SET(GIO_I2C_DATA);
+#define SDA_LO             GIO_CLEAR(GIO_I2C_DATA);
+#define SDA_IN             GIO_DIRECTION(GIO_I2C_DATA,GIO_IN);
+#define SDA_OUT            GIO_DIRECTION(GIO_I2C_DATA,GIO_OUT);
+#define SDA                GIO_IS_SET(GIO_I2C_DATA)
 
-#define SCL_HI             gio_set(GIO_I2C_CLOCK);
-#define SCL_LO             gio_clear(GIO_I2C_CLOCK);
-#define SCL_IN             gio_dir(GIO_I2C_CLOCK,GIO_IN);
-#define SCL_OUT            gio_dir(GIO_I2C_CLOCK,GIO_OUT);
-#define SCL                gio_is_set(GIO_I2C_CLOCK)
+#define SCL_HI             GIO_SET(GIO_I2C_CLOCK);
+#define SCL_LO             GIO_CLEAR(GIO_I2C_CLOCK);
+#define SCL_IN             GIO_DIRECTION(GIO_I2C_CLOCK,GIO_IN);
+#define SCL_OUT            GIO_DIRECTION(GIO_I2C_CLOCK,GIO_OUT);
+#define SCL                GIO_IS_SET(GIO_I2C_CLOCK)
 
 #define ENA_INT
 //sti();

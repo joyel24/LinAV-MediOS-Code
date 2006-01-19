@@ -12,6 +12,23 @@
 #ifndef __GIO_ARCH_H
 #define __GIO_ARCH_H
 
+/* GIO addresses */
+
+#define GIO_BASE                          0x30580
+#define GIO_DIRECTION0                    (GIO_BASE+0x00)  // GIO 0-15
+#define GIO_DIRECTION1                    (GIO_BASE+0x02)  // GIO 16-31
+#define GIO_DIRECTION2                    0
+#define GIO_INVERT0                       (GIO_BASE+0x04)  // GIO 0-15
+#define GIO_INVERT1                       (GIO_BASE+0x06)  // GIO 16-31
+#define GIO_INVERT2                       0
+#define GIO_BITSET0                       (GIO_BASE+0x08)  // GIO 0-15
+#define GIO_BITSET1                       (GIO_BASE+0x0a)  // GIO 16-31
+#define GIO_BITSET2                       0
+#define GIO_BITCLEAR0                     (GIO_BASE+0x0c)  // GIO 0-15
+#define GIO_BITCLEAR1                     (GIO_BASE+0x0e)  // GIO 16-31
+#define GIO_BITCLEAR2                     0
+#define GIO_ENABLE_IRQ                    (GIO_BASE+0x10)  // GIO 0-7
+
 /* GIO lines */
 
 #define GIO_ON_BTN    0x00
@@ -39,9 +56,5 @@
 #define GIO_I2C_DATA  0x13
 
 #define GIO_LCD_BACKLIGHT 0x17
-
-#define gio_addr(num,addr_bk1,addr_bk2,addr_bk3)   (num<16?addr_bk1:addr_bk2)
-#define GIO_NUM(num)                               (num<16?num:num-16)
-#define gio_bank_sel(bank,addr_bk1,addr_bk2,addr_bk3)   (bank==0?addr_bk1:bank==1?addr_bk2:addr_bk3)
 
 #endif

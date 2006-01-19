@@ -70,7 +70,7 @@ void __clf(void)
 }
 
 
-__IRAM_CODE void do_IRQ(void)
+__IRAM_CODE void irq_globalHandler(void)
 {
     int i,irq;
     unsigned int mask;
@@ -91,30 +91,30 @@ __IRAM_CODE void do_IRQ(void)
     }
 }
 
-void init_irq(void)
+void irq_init(void)
 {
-    
-    arch_init_irq();
-    
-    printk("[init] irq\n");    
+
+    arch_irq_init();
+
+    printk("[init] irq\n");
 }
 
-void disable_irq(int irq)
+void irq_disable(int irq)
 {
     if(irq>=0 && irq<NR_IRQS)
-        mask_irq(irq);
+        irq_mask(irq);
 }
 
-void enable_irq(int irq)
+void irq_enable(int irq)
 {
     if(irq>=0 && irq<NR_IRQS)
     {
-        unmask_irq(irq);
+        irq_unmask(irq);
         irq_ack(irq);
     }
 }
 
-void chg_irq_handler(int irq_num,void(*fct)(int irq))
+void irq_changeHandler(int irq_num,void(*fct)(int irq))
 {
     int i=0;
     int is_enable=0;
@@ -124,13 +124,13 @@ void chg_irq_handler(int irq_num,void(*fct)(int irq))
     {
         if(irq_state(irq_num))
         {
-            disable_irq(irq_num);
+            irq_disable(irq_num);
             is_enable =1;
         }
         printk("IRQ handler for %s (%d) changed\n",irq_table[i].name,irq_num);
         irq_table[i].action = fct;
         if(is_enable)
-            enable_irq(irq_num);        
+            irq_enable(irq_num);
     }
     else
     {
@@ -138,7 +138,7 @@ void chg_irq_handler(int irq_num,void(*fct)(int irq))
     }
 }
 
-void print_irq(void)
+void irq_print(void)
 {
     int i;
     printk("IRQ handler list:\n");

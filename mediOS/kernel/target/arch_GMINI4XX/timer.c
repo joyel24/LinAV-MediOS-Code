@@ -1,5 +1,5 @@
 /*
-*   kernel/target/arch_G4XX/timer.c
+*   kernel/target/arch_GMINI4XX/timer.c
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -18,7 +18,7 @@
 #include <kernel/timer.h>
 #include <kernel/kernel.h>
 
-void arch_init_timer(void)
+void arch_tmr_init(void)
 {
     /*
     * System clock formula:
@@ -26,37 +26,36 @@ void arch_init_timer(void)
     *  freq need to be 100Hz
     */
 
-    SET_TIMER_SEL(TMR_SEL_EXT,TMR0);
+    TMR_SET_SEL(TMR_SEL_EXT,TMR0);
 
     /* prescale  */
     
-    SET_TIMER_SCAL(9, TMR0);
+    TMR_SET_SCAL(9, TMR0);
 
     /* div  */
-    SET_TIMER_DIV(((CONFIG_EXT_CLK/1000)-1), TMR0);
+    TMR_SET_DIV(((CONFIG_EXT_CLK/1000)-1), TMR0);
 
     /* freerun */
-    SET_TIMER_MODE(TMR_MODE_FREERUN, TMR0);
+    TMR_SET_MODE(TMR_MODE_FREERUN, TMR0);
 
     /* enable timer irq */
-    enable_irq(IRQ_TMR_0);
+    irq_enable(IRQ_TMR_0);
 
     /*
     * Timer 3 is used for the watchdog
     * Sends FIQ at 2khz
     */
 
-    SET_TIMER_SEL(TMR_SEL_ARM,TMR3);
+    TMR_SET_SEL(TMR_SEL_ARM,TMR3);
 
     /* prescale  */
-    SET_TIMER_SCAL(0, TMR3);
+    TMR_SET_SCAL(0, TMR3);
 
     /* div  */
-    SET_TIMER_SEL(1,TMR3);
-    SET_TIMER_DIV(50624, TMR3);
+    TMR_SET_DIV(50624, TMR3);
 
     /* freerun */
-    SET_TIMER_MODE(TMR_MODE_FREERUN, TMR3);
+    TMR_SET_MODE(TMR_MODE_FREERUN, TMR3);
 
 }
 

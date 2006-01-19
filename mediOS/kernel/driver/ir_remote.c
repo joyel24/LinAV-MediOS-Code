@@ -57,7 +57,7 @@ void ir_remote_interrupt(int irq)
             lastTmrVal=0;
             break;
         case 1:
-            val=GET_TIMER_CNT(TMR2);
+            val=TMR_GET_CNT(TMR2);
             delta=val-lastTmrVal;
             lastTmrVal=val;
             if(delta<0x7d0)
@@ -82,7 +82,7 @@ void ir_remote_interrupt(int irq)
             }
             break;
         case 2:
-            val=GET_TIMER_CNT(TMR2);
+            val=TMR_GET_CNT(TMR2);
             delta=val-lastTmrVal;
             lastTmrVal=val;
             if (delta>0x64 && delta<0x82)
@@ -104,7 +104,7 @@ void ir_remote_interrupt(int irq)
             if(dataPos==32)
             {
                 state=0;
-                processCode(IRdata);                         
+                processCode(IRdata);
             }
     }
 }
@@ -154,16 +154,16 @@ void processCode(int code)
 
 void restartTimer(void)
 {
-    SET_TIMER_SEL(TMR_SEL_EXT,TMR2);                    /* Ext clk */    
-    SET_TIMER_SCAL(0x10D, TMR2);                        /* prescale  */   
-    SET_TIMER_DIV(0xFFFF, TMR2);                        /* div  */    
-    SET_TIMER_MODE(TMR_MODE_FREERUN, TMR2);             /* freerun */
+    TMR_SET_SEL(TMR_SEL_EXT,TMR2);                    /* Ext clk */
+    TMR_SET_SCAL(0x10D, TMR2);                        /* prescale  */
+    TMR_SET_DIV(0xFFFF, TMR2);                        /* div  */
+    TMR_SET_MODE(TMR_MODE_FREERUN, TMR2);             /* freerun */
 }
 
 void ir_remote_tmr_interrupt(int irq)
 {
     /* timeout in reception => stop current code */
-    SET_TIMER_MODE(TMR_MODE_STOP,TMR2);
+    TMR_SET_MODE(TMR_MODE_STOP,TMR2);
     state=0;
     
 }
@@ -171,26 +171,26 @@ void ir_remote_tmr_interrupt(int irq)
 
 void start_ir_remote(void)
 {
-    
-    gio_dir(GIO_IR,GIO_IN);
-    gio_IRQ(GIO_IR,GIO_IRQ);
-    enable_irq(IRQ_IR);
-    
-    SET_TIMER_MODE(TMR_MODE_STOP,TMR2);
-    enable_irq(IRQ_TMR_2); 
-       
+
+    GIO_DIRECTION(GIO_IR,GIO_IN);
+    GIO_IRQ_ENABLE(GIO_IR,GIO_IRQ);
+    irq_enable(IRQ_IR);
+
+    TMR_SET_MODE(TMR_MODE_STOP,TMR2);
+    irq_enable(IRQ_TMR_2);
+
     state=0;
     dataPos=0;
     IRdata=0;
-    
+
     printk("IR remote started\n");
 }
 
 void stop_ir_remote(void)
 {
-    SET_TIMER_MODE(TMR_MODE_STOP,TMR2);
-    disable_irq(IRQ_IR); 
-    disable_irq(IRQ_TMR_2);
+    TMR_SET_MODE(TMR_MODE_STOP,TMR2);
+    irq_disable(IRQ_IR);
+    irq_disable(IRQ_TMR_2);
     printk("IR remote stoped\n");
 }
 
@@ -198,20 +198,20 @@ void stop_ir_remote(void)
 
 void init_ir_remote(void)
 {
-    disable_irq(IRQ_IR); 
-    disable_irq(IRQ_TMR_2); 
-    
-    /* setting up GIO */   
-    gio_dir(GIO_IR,GIO_IN);    
-    gio_IRQ(GIO_IR,GIO_IRQ);
-    
-    /* setting up IRQ handler */    
-    
-    SET_TIMER_MODE(TMR_MODE_STOP,TMR2);
-    chg_irq_handler(IRQ_TMR_2,ir_remote_tmr_interrupt);
-        
-    disable_irq(IRQ_IR); 
-    disable_irq(IRQ_TMR_2);
-   
-    printk("[init] IR remote\n");   
+    irq_disable(IRQ_IR);
+    irq_disable(IRQ_TMR_2);
+
+    /* setting up GIO */
+    GIO_DIRECTION(GIO_IR,GIO_IN);
+    GIO_IRQ_ENABLE(GIO_IR,GIO_IRQ);
+
+    /* setting up IRQ handler */
+
+    TMR_SET_MODE(TMR_MODE_STOP,TMR2);
+    irq_changeHandler(IRQ_TMR_2,ir_remote_tmr_interrupt);
+
+    irq_disable(IRQ_IR);
+    irq_disable(IRQ_TMR_2);
+
+    printk("[init] IR remote\n");
 }
