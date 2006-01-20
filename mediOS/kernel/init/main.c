@@ -55,6 +55,21 @@ void print_boot_info(void)
 
 extern void dbgscr_init(void);
 
+void tst_fct(void)
+{
+#ifdef HAVE_EVT
+    struct evt_pipes_s * evt_buff = get_evt_handling();
+    char evt_res;
+    while(1)
+    {    
+        evt_res = 0;    
+        kpipe_read(&(evt_buff->evt_pipe),&evt_res,1);
+        if(evt_res)
+            printk("evt %x\n",evt_res);
+    }
+#endif
+}
+
 void kernel_start (void)
 {
     gfx_init();
@@ -138,6 +153,16 @@ void kernel_start (void)
 #ifdef GMINI4XX
  printk("gmini4xx\n");
 #endif
+
+/* evt & btn test */
+
+tst_fct();
+    while(1)
+    {
+        int key=read_btn();
+        if(key)
+            printk("%x\n",key);
+    }
 
 #ifdef BUILD_LIB
     do_bkpt();

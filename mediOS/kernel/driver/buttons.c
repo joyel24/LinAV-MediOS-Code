@@ -38,6 +38,11 @@ __IRAM_DATA int nb_debug_switch;
 extern int inHold;
 #endif
 
+extern int btn_mask[NB_BUTTONS];
+
+#define BTN_NOT_PRESSED(val,btn)    !(val&btn_mask[btn])
+#define BTN_PRESSED(val,btn)        (val&btn_mask[btn])
+
 __IRAM_CODE int read_btn(void)
 {
     return arch_read_btn();
@@ -45,10 +50,10 @@ __IRAM_CODE int read_btn(void)
 
 __IRAM_CODE void process_button_press(int val)
 {
-    int btn,fastDir=0;
+    int btn;
 
 #ifdef HAVE_DEBUG_ON_SCREEN
-    if(BTN_PRESSED(val,BUTTON_ON) && BTN_PRESSED(val,BUTTON_MENU1))
+    if(BTN_PRESSED(val,BTN_ON) && BTN_PRESSED(val,BTN_F1))
     {
         if(nb_debug_switch==0)
         {
@@ -80,13 +85,13 @@ __IRAM_CODE void process_button_press(int val)
         {
             if(nb_pressed[btn]!=0)
                 nb_pressed[btn]=0;   /* reset nb_pressed */
-            if(btn==BUTTON_OFF)
+            if(btn==BTN_OFF)
                 nb_off_press=0;    /* if off btn released -> reset nb_off_press */             
         }
         else            /* the btn i is pressed */
         {    
             
-            if(btn==BUTTON_OFF)    /* OFF btn pressed => check if we have to halt */
+            if(btn==BTN_OFF)    /* OFF btn pressed => check if we have to halt */
             {
                 nb_off_press++;
                 if(nb_off_press>MAX_OFF)
@@ -96,52 +101,37 @@ __IRAM_CODE void process_button_press(int val)
                 }
             }
 
-#ifdef AV3XX               
-            if(!(
-
-                  btn==BUTTON_JOYPRESS &&
-
-                  fastDir)) /* discard BTN_JOY evt if fastDir is set */
+            if(nb_pressed[btn]==0)
             {
-#endif
-                if(nb_pressed[btn]==0)
-                {
 #ifdef HAVE_FM_REMOTE
-                    if(!inHold)
-                    {
+                if(!inHold)
+                {
 #endif
-                        nb_pressed[btn]=mx_press;
-                        if(lcd_get_state()==0)
-                        {
-                            /* the lcd is off => turn on and discard the event */
-                            lcd_keyPress();
-                            break;
-                        }
-                        else
-                            lcd_launchTimer(); /* postpone the lcd timer */
-                            
-                        halt_launchTimer(); /* postpone the poweroff timer */
-  
-                        send_evt(btn+1);
-                        //printk("BTN %d pressed\n",btn);
-#ifdef HAVE_FM_REMOTE                        
+                    nb_pressed[btn]=mx_press;
+                    if(lcd_get_state()==0)
+                    {
+                        /* the lcd is off => turn on and discard the event */
+                        lcd_keyPress();
+                        break;
                     }
                     else
-                    {
-                        //FM_putTmpText("** HOLD **",30);
-                        printk("** HOLD **\n");
-                    }
-#endif                                
+                        lcd_launchTimer(); /* postpone the lcd timer */
+                        
+                    halt_launchTimer(); /* postpone the poweroff timer */
+
+                    send_evt(btn+1);
+                    //printk("BTN %d pressed\n",btn);
+#ifdef HAVE_FM_REMOTE                        
                 }
                 else
-                    nb_pressed[btn]--;       
-#ifdef AV3XX                    
-                 /* a key is pressed if key num < 4 => it's a dir key we might be in fast dir mode
-                    we need to discard BTN_JOY events   */  
-                if(btn<4)
-                    fastDir=1;
+                {
+                    //FM_putTmpText("** HOLD **",30);
+                    printk("** HOLD **\n");
+                }
+#endif                                
             }
-#endif
+            else
+                nb_pressed[btn]--;       
         }
     }
 }

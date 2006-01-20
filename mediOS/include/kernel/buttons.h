@@ -20,6 +20,8 @@
 #define MAX_PRESSED                 4
 #define MAX_OFF                     300
 
+#define NB_BUTTONS                  0x10
+
 #include <kernel/target/arch/buttons.h>
 extern int old_state;
 void process_button_press(int val);
@@ -28,14 +30,31 @@ void init_buttons(void);
 int read_btn(void);
 int arch_read_btn(void);
 
-#define BTN_NOT_PRESSED(val,btn)    !(val&(0x1<<btn))
-#define BTN_PRESSED(val,btn)        (val&(0x1<<btn))
-
 #define BTN_CHK    {                     \
     int __val ;                          \
     __val=read_btn();                    \
     if(__val!=0x0)                       \
         process_button_press(__val);     \
 }
+
+
+#define BTMASK_UP            0x0001
+#define BTMASK_DOWN          0x0002
+#define BTMASK_LEFT          0x0004
+#define BTMASK_RIGHT         0x0008
+
+#define BTMASK_F1            0x0010
+#define BTMASK_F2            0x0020
+#define BTMASK_F3            0x0040
+#define BTMASK_F4            0x0080
+
+#define BTMASK_BTN1          0x0100
+#define BTMASK_BTN2          0x0200
+#define BTMASK_BTN4          0x0400
+#define BTMASK_BTN8          0x0800
+
+#define BTMASK_ON            0x1000
+#define BTMASK_OFF           0x2000
+#define BTMASk_FAST_DIR      0x4000
 
 #endif

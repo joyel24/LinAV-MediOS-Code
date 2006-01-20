@@ -15,17 +15,61 @@
 #include <kernel/io.h>
 #include <kernel/gio.h>
 #include <kernel/hardware.h>
+#include <kernel/target/arch/buttons.h>
+
+int btn_mask[NB_BUTTONS] = 
+{
+BTMASK_UP ,      /*BTN_UP*/
+BTMASK_DOWN,     /*BTN_DOWN*/
+BTMASK_LEFT,     /*BTN_LEFT*/
+BTMASK_RIGHT,    /*BTN_RIGHT*/
+BTMASK_F1,       /*BTN_F1*/
+BTMASK_F2,       /*BTN_F2*/
+BTMASK_F3,       /*BTN_F3*/
+0,               /*BTN_F4*/
+BTMASK_BTN1,     /*BTN_1*/
+0,               /*BTN_2*/
+0,               /*BTN_3*/
+0,               /*BTN_4*/
+BTMASK_ON,       /*BTN_ON*/
+BTMASK_OFF,      /*BTN_OFF*/
+0,               /*BT_FAST_DIR*/
+0
+};
+
+int trad_tab[] = {
+    0x0,0x1,0x4,0x5,
+    0x8,0x9,0xC,0xD,
+    0x2,0x3,0x6,0x7,
+    0xA,0xB,0xE,0xF
+};
 
 int arch_read_btn(void){
+    int dir,fn,bt,on_off_fast;
     int val;
 
-    val =  inw(BUTTON_PORT0)&0x3;
-    val|=((inw(BUTTON_PORT1)&0x7)<<2);
-    val|=((inw(BUTTON_PORT2)&0x7)<<5);
+    dir = (~inw(BUTTON_PORT0))&0x3;
+    fn  = (~inw(BUTTON_PORT1))&0x7;
+    bt  = (~inw(BUTTON_PORT2))&0x7;
+
+    dir = trad_tab[dir|(fn&0x3)<<2];
+    fn  = (fn&0x4)|(bt&0x3);
+    bt  = (bt>>2)&0x1;
+
+    if(bt && dir)
+    {
+       bt = 0;
+       on_off_fast=0x4;
+    }
+    else
+       on_off_fast= 0x0;
+
+
     /* ON, OFF keys */
-    if(GIO_IS_SET(GIO_ON_BTN))  val |= (0x1<<8);
-    if(GIO_IS_SET(GIO_OFF_BTN)) val |= (0x1<<9);
-    val = (~val)&0x3FF;
+    if(!GIO_IS_SET(GIO_ON_BTN))  on_off_fast |= (0x1);
+    if(!GIO_IS_SET(GIO_OFF_BTN)) on_off_fast |= (0x2);
+    
+    val = (dir|(fn<<4)|(bt<<8)|(on_off_fast<<12))&0xFFFF;
     
     return val;
 }

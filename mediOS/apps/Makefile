@@ -10,8 +10,8 @@ GCCFLAGS += -I../include
 TARGET = othello
 OBJS = othello.o
 
-LDFLAGS = -L../ -lLmedios -Wl, -elf2flt   -lgcc
-# -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/
+LDFLAGS = -L../ -lLmedios  -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lgcc 
+# -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -Wl, -elf2flt
 all: 
 #$(OBJS)
 	$(GCC) -o $(TARGET).grv $(TARGET).c $(GCCFLAGS) $(LDFLAGS)

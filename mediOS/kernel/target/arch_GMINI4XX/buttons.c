@@ -17,29 +17,49 @@
 #include <kernel/hardware.h>
 #include <kernel/cpld.h>
 
+int btn_mask[NB_BUTTONS] = 
+{
+BTMASK_UP ,      /*BTN_UP*/
+BTMASK_DOWN,     /*BTN_DOWN*/
+BTMASK_LEFT,     /*BTN_LEFT*/
+BTMASK_RIGHT,    /*BTN_RIGHT*/
+BTMASK_F1,       /*BTN_F1*/
+BTMASK_F2,       /*BTN_F2*/
+BTMASK_F3,       /*BTN_F3*/
+0,               /*BTN_F4*/
+BTMASK_BTN1,     /*BTN_1*/
+BTMASK_BTN2,     /*BTN_2*/
+0,               /*BTN_3*/
+0,               /*BTN_4*/
+BTMASK_ON,       /*BTN_ON*/
+BTMASK_OFF,      /*BTN_OFF*/
+0,               /*BT_FAST_DIR*/
+0
+};
+
 int arch_read_btn(void){
     int val;
     int i,dir,menu,bt;
 
-    if(cpld_getVersion()==5){
+    if(cpld_get_version()==5){
 
-      GIO_DIRECTION(GIO_BTN_SELECT_UDLR,GIO_OUT);
-      GIO_CLEAR(GIO_BTN_SELECT_UDLR);
+      gio_dir(GIO_BTN_SELECT_UDLR,GIO_OUT);
+      gio_clear(GIO_BTN_SELECT_UDLR);
       for(i=0;i<256;++i); // delay (keyboard hardware is too slow to read directly)
       dir = (inw(GIO_BITSET1) & 0x78) >> 3;
-      GIO_DIRECTION(GIO_BTN_SELECT_UDLR,GIO_IN);
+      gio_dir(GIO_BTN_SELECT_UDLR,GIO_IN);
 
-      GIO_DIRECTION(GIO_BTN_SELECT_MENU,GIO_OUT);
-      GIO_CLEAR(GIO_BTN_SELECT_MENU);
+      gio_dir(GIO_BTN_SELECT_MENU,GIO_OUT);
+      gio_clear(GIO_BTN_SELECT_MENU);
       for(i=0;i<256;++i); // delay (keyboard hardware is too slow to read directly)
       menu = (inw(GIO_BITSET1) & 0x38) >> 3;
-      GIO_DIRECTION(GIO_BTN_SELECT_MENU,GIO_IN);
+      gio_dir(GIO_BTN_SELECT_MENU,GIO_IN);
 
-      GIO_DIRECTION(GIO_BTN_SELECT_SQCR,GIO_OUT);
-      GIO_CLEAR(GIO_BTN_SELECT_SQCR);
+      gio_dir(GIO_BTN_SELECT_SQCR,GIO_OUT);
+      gio_clear(GIO_BTN_SELECT_SQCR);
       for(i=0;i<256;++i); // delay (keyboard hardware is too slow to read directly)
       bt = (inw(GIO_BITSET1) & 0x18) >> 3;
-      GIO_DIRECTION(GIO_BTN_SELECT_SQCR,GIO_IN);
+      gio_dir(GIO_BTN_SELECT_SQCR,GIO_IN);
 
     }else{
 
@@ -51,11 +71,11 @@ int arch_read_btn(void){
 
     }
 
-    val=(dir | menu << 4 | bt << 7);
+    val=(dir | bt << 4 | menu << 6);
 
     /* ON, OFF keys */
-    if(GIO_IS_SET(GIO_ON_BTN))  val |= (0x1<<9);
-    if(GIO_IS_SET(GIO_OFF_BTN)) val |= (0x1<<10);
+    if(gio_is_set(GIO_ON_BTN))  val |= (0x1<<9);
+    if(gio_is_set(GIO_OFF_BTN)) val |= (0x1<<10);
 
     return (~val)&0x7ff;
 }

@@ -25,12 +25,14 @@ struct evt_pipes_s * head;
 
 struct tmr_s evt_timer;
 
+#if 0
 void evt_timer_action(void)
 {
     send_evt(EVT_TIMER);
     evt_timer.expires = tick + EVT_DELAY; /* 1s timer */
     tmr_start(&evt_timer);
 }
+#endif
 
 struct evt_pipes_s * get_evt_handling(void)
 {
