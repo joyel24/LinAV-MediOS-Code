@@ -50,8 +50,8 @@ int arch_read_btn(void);
 
 #define BTMASK_BTN1          0x0100
 #define BTMASK_BTN2          0x0200
-#define BTMASK_BTN4          0x0400
-#define BTMASK_BTN3          0x0800
+#define BTMASK_BTN3          0x0400
+#define BTMASK_BTN4          0x0800
 
 #define BTMASK_ON            0x1000
 #define BTMASK_OFF           0x2000
