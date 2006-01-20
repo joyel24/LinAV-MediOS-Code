@@ -29,12 +29,12 @@
 #define        BTN_4         0x0c
 #define        BTN_ON        0x0d
 #define        BTN_OFF       0x0e
-#define        BT_FAST_DIR   0x0f
+#define        BTN_OPT1      0x0f
+#define        BTN_OPT2      0x10
 
 
-
-#define        EVT_TIMER     0x10
-#define        EVT_PWR       0x11
+#define        EVT_TIMER     0x11
+#define        EVT_PWR       0x12
 /*
 
 #define        EVT_WKUP      0x0d
