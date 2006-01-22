@@ -37,7 +37,7 @@ BTMASK_OFF,      /*BTN_OFF*/
 0
 };
 
-int arch_read_btn(void){
+int arch_btn_readState(void){
     int val;
     int i,dir,menu,bt;
 

@@ -206,7 +206,7 @@ int prevTick,frameTickDelta,frameTick;
     
     //evt=get_evt(evt_buffer);
     
-    evt=read_btn() & 0xF7F;
+    evt=btn_readState() & 0xF7F;
     input.pad[0] = evt;
     
     input.system = evt;

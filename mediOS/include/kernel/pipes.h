@@ -13,20 +13,18 @@
 #ifndef __PIPES_H
 #define __PIPES_H
 
-#include <kernel/errors.h>
-
 #define PIPE_SIZE 16384
 #define PIPE_SIZE_MASK 16383
 
-typedef struct _PIPE
+struct pipe
 {
-	unsigned long nReceiver;
-	unsigned long nSender;
-	unsigned char buffer [PIPE_SIZE];
-} PIPE;
+    unsigned long nIN;
+    unsigned long nOUT;
+    unsigned char buffer [PIPE_SIZE];
+};
 
 
-extern void kpipe_write (PIPE* pPipe, void* _pData, unsigned long nBytes);
-extern void kpipe_read  (PIPE* pPipe, void* _pData, unsigned long nBytes);
+extern void pipeWrite (struct pipe* pPipe, void* _pData, unsigned long nBytes);
+extern void pipeRead  (struct pipe* pPipe, void* _pData, unsigned long nBytes);
 
 #endif

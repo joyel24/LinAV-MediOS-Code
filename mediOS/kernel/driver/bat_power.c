@@ -293,10 +293,14 @@ int kpwrState;
 
 void process_DC_change(void)
 {
+    struct evt_t evt;
     kpwrState=POWER_CONNECTED;
     /* change the timers */
     chgTimer();
-    send_evt(EVT_PWR);
+    evt.evt = EVT_PWR;
+    evt.evt_class = CONNECT_CLASS;
+    evt.data = &kpwrState;
+    evt_send(&evt);
     printk("DC connector %s\n",kpwrState==1?"plugged":"unplugged");
 }
 

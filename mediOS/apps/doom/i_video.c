@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.4  2006/01/19 08:51:51  sfxgligli
+// cleanup & name standardisation in wdt/irq/timers/uart/cpld/gio
+//
 // Revision 1.3  2006/01/11 19:38:50  sfxgligli
 // -Doom: cleanup for v0.1
 // -mediOS: Gmini400 buttons fix
@@ -161,7 +164,7 @@ void I_StartTic (void)
 {
   int bt,pressed,released;
 
-  bt=read_btn();
+  bt=btn_readState();
   pressed=bt & ~oldbt;
   released=~bt & oldbt;
   oldbt=bt;

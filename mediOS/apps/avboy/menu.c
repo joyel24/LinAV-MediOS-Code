@@ -424,14 +424,14 @@ static void do_opt2_menu(void) {
         setPos(BMAP1,168,68);
         break;
       case OM2_ITEM_PAL:
-        while (read_btn());
+        while (btn_readState());
         for (y=0;y<144;y+=9) {
           for (x=0;x<160;x+=10) {
             fillRect(c, x, y, 10, 9);
             c++;
           }
         }
-        while (!read_btn());
+        while (!btn_readState());
         break;
       case MENU_CANCEL:
         done = true;
@@ -548,13 +548,13 @@ static int do_menu(char *title, char **items, size_t num_items, int sel) {
   curr_item = sel;
 
   /* make sure button state is empty */
-  while (read_btn());
+  while (btn_readState());
 
   /* loop until the menu is finished */
   while (!done) {
     /* grab a button */
-    while (read_btn());
-    while(!(btn = read_btn()));
+    while (btn_readState());
+    while(!(btn = btn_readState()));
 
     /* handle the button */
     if(btn & 0x08) {
@@ -666,8 +666,8 @@ while(!done) {
   curr_item = sel_item;
 
   while (1) {
-    while (read_btn());
-    while(!(btn = read_btn()));
+    while (btn_readState());
+    while(!(btn = btn_readState()));
 
     if(btn & 0x08) {
         sel_item = curr_item + 1;

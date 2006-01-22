@@ -312,7 +312,7 @@ void rightCursor(void)
     }
 }
 
-void virtKbdEvtHandler(EVT_PIPE evt_buffer)
+void virtKbdEvtHandler(int evt_hanlder)
 {
     int h=0,w=0;
     int stopLoop=0;
@@ -324,7 +324,7 @@ void virtKbdEvtHandler(EVT_PIPE evt_buffer)
     
     while(!stopLoop)
     {
-        evt = get_evt(evt_buffer);
+        evt = evt_get(evt_hanlder);
         if(!evt)
             continue;
         char_num=0;    
@@ -460,7 +460,7 @@ void iniSprite(void)
     spec_horiz[3][2]=&rightArrow_SP;
 }
 
-void virtKbd(EVT_PIPE evt_buffer)
+void virtKbd(int evt_hanlder)
 {
     setFont(STD8X13);
     calcCoord();
@@ -470,5 +470,5 @@ void virtKbd(EVT_PIPE evt_buffer)
     drawTxtZone();
     putSelect(SEL_COLOR);  
     putCursor(SEL_COLOR);
-    virtKbdEvtHandler(evt_buffer);
+    virtKbdEvtHandler(evt_hanlder);
 }

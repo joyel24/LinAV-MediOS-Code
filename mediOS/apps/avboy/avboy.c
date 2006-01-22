@@ -133,7 +133,7 @@ int doevents(void)
 {
     int bt,pressed,released;
     
-    bt=read_btn() & 0xF7F;
+    bt=btn_readState() & 0xF7F;
     pressed=bt & ~oldbt;
     released=~bt & oldbt;
     oldbt=bt;

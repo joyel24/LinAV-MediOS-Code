@@ -30,15 +30,15 @@
 
 ///////////////////////////////////////////////////////
 ////////////////////// MEMORY API /////////////////////
-MED_RET_T API_MALLOC               (void** ppvBuffer, unsigned long nBytes)                           { swi_call(nAPI_MALLOC); }
-MED_RET_T API_FREE                 (void* pvBuffer)                                                   { swi_call(nAPI_FREE); }
-MED_RET_T API_MEMAVAIL             (unsigned long* pnBytes)                                           { swi_call(nAPI_MEMAVAIL); }
-MED_RET_T API_REALLOC              (void** ppvBuffer, void* pvBuffer, unsigned long nBytes)           { swi_call(nAPI_REALLOC); }
+MED_RET_T API_MALLOC   (void** ppvBuffer, unsigned long nBytes)                 { swi_call(nAPI_MALLOC); }
+MED_RET_T API_FREE     (void* pvBuffer)                                         { swi_call(nAPI_FREE); }
+MED_RET_T API_MEMAVAIL (unsigned long* pnBytes)                                 { swi_call(nAPI_MEMAVAIL); }
+MED_RET_T API_REALLOC  (void** ppvBuffer, void* pvBuffer, unsigned long nBytes) { swi_call(nAPI_REALLOC); }
 
 ///////////////////////////////////////////////////////
 ////////////////////// FILE API ///////////////////////
-MED_RET_T API_FILE                 (int cmd,void * data1,void * data2)                                { swi_call(nAPI_FILE); }
-MED_RET_T API_RUN_GRV              (const char* pGRVPath, HTASK* phTask)                              { swi_call(nAPI_RUN_GRV); }
+MED_RET_T API_FILE     (int cmd,void * data1,void * data2)     { swi_call(nAPI_FILE); }
+MED_RET_T API_RUN_GRV  (const char* pGRVPath, HTASK* phTask)   { swi_call(nAPI_RUN_GRV); }
 
 ////////////////////// FILE API ///////////////////////
 ///////////////////////////////////////////////////////
@@ -52,9 +52,9 @@ MED_RET_T API_POWER                (int cmd,int * val)                  { swi_ca
 MED_RET_T API_SET_LCD_BRIGHTNESS   (int nBrightness)                    { swi_call(nAPI_SET_LCD_BRIGHTNESS); }
 MED_RET_T API_GET_LCD_BRIGHTNESS   (int* pnBrightness)                  { swi_call(nAPI_GET_LCD_BRIGHTNESS); }
 
-MED_RET_T API_GET_EVT_PIPE         (EVT_PIPE * pipe)                    { swi_call(nAPI_GET_EVT_PIPE); }
-MED_RET_T API_RM_EVT_PIPE          (EVT_PIPE pipe)                      { swi_call(nAPI_RM_EVT_PIPE); }
-MED_RET_T API_GET_EVT              (EVT_PIPE pipe,char * data)          { swi_call(nAPI_GET_EVT); }
+MED_RET_T API_EVT_GET_HANDLER      (unsigned int mask, int * evt_handler)  { swi_call(nAPI_GET_EVT_PIPE); }
+MED_RET_T API_EVT_FREE_HANDLER     (int evt_handler)                    { swi_call(nAPI_RM_EVT_PIPE); }
+MED_RET_T API_EVT_GET              (int evt_handler,int * data)         { swi_call(nAPI_GET_EVT); }
 MED_RET_T API_BKPT                 (void)                               { swi_call(nAPI_BKPT); }
 
 MED_RET_T API_SET_GET_INT_TIMER    (int type,int mode,TRI_DATA * pvData)         { swi_call(nAPI_IO_INT_TIMER); }
@@ -152,17 +152,17 @@ int do_api_power (int cmd)
     return res;
 }
 
-EVT_PIPE get_evt_pipe(void)
+int evt_get_handler(unsigned int mask)
 {
-    EVT_PIPE val;
-    API_GET_EVT_PIPE(&val);
+    int val;
+    API_EVT_GET_HANDLER(mask, &val);
     return val;
 }
 
-char get_evt(EVT_PIPE var)
+int evt_get(int evt_pipe)
 {
-    char c=0;
-    API_GET_EVT(var,&c);
+    int c=0;
+    API_EVT_GET(evt_pipe,&c);
     return c;
 }
 

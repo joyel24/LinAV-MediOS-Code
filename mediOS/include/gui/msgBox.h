@@ -43,6 +43,6 @@
     #define MSGBOX_ICON_ERROR       5
 
     void iniMsgBox(void);
-    int msgBox(unsigned char* caption, unsigned char* msg, int type, int icon,EVT_PIPE evt_buffer);
+    int msgBox(unsigned char* caption, unsigned char* msg, int type, int icon,int evt_hanlder);
 
 #endif

@@ -10,6 +10,8 @@
 * KIND, either express of implied.
 */
 
+#include <sys_def/stddef.h>
+
 #include <kernel/io.h>
 #include <kernel/hardware.h>
 #include <kernel/kernel.h>
@@ -43,14 +45,15 @@ extern int btn_mask[NB_BUTTONS];
 #define BTN_NOT_PRESSED(val,btn)    !(val&btn_mask[btn])
 #define BTN_PRESSED(val,btn)        (val&btn_mask[btn])
 
-__IRAM_CODE int read_btn(void)
+__IRAM_CODE int btn_readState(void)
 {
-    return arch_read_btn();
+    return arch_btn_readState();
 }
 
-__IRAM_CODE void process_button_press(int val)
+__IRAM_CODE void btn_processPress(int val)
 {
     int btn;
+    struct evt_t evt;
 
 #ifdef HAVE_DEBUG_ON_SCREEN
     if(BTN_PRESSED(val,BTN_ON) && BTN_PRESSED(val,BTN_F1))
@@ -118,8 +121,10 @@ __IRAM_CODE void process_button_press(int val)
                         lcd_launchTimer(); /* postpone the lcd timer */
                         
                     halt_launchTimer(); /* postpone the poweroff timer */
-
-                    send_evt(btn+1);
+                    evt.evt=btn+1;
+                    evt.evt_class=BTN_CLASS;
+                    evt.data=NULL;
+                    evt_send(&evt);
                     //printk("BTN %d pressed\n",btn);
 #ifdef HAVE_FM_REMOTE                        
                 }
@@ -136,7 +141,7 @@ __IRAM_CODE void process_button_press(int val)
     }
 }
 
-void init_buttons(void)
+void btn_init(void)
 {
     int btn;
     

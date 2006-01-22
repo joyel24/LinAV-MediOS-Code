@@ -15,25 +15,25 @@
 #include <kernel/kernel.h>
 #include <kernel/pipes.h>
 
-void kpipe_write  (PIPE* pPipe, void* _pData, unsigned long nBytes)
+void pipeWrite(struct pipe * pPipe, void* _pData, unsigned long nBytes)
 {
     int i;
     unsigned char* pData = (unsigned char*)_pData;
     if(pPipe)
         for (i=0;i<nBytes;i++)
         {
-                pPipe->buffer[pPipe->nSender ++] = pData[i];
-                pPipe->nSender &= PIPE_SIZE_MASK;
+                pPipe->buffer[pPipe->nIN ++] = pData[i];
+                pPipe->nIN &= PIPE_SIZE_MASK;
         }
 }
 
-void kpipe_read  (PIPE* pPipe, void* _pData, unsigned long nBytes)
+void pipeRead(struct pipe* pPipe, void* _pData, unsigned long nBytes)
 {
     unsigned char* pOut = (unsigned char*)_pData;
     if(pPipe)
-        while (nBytes -- && pPipe->nReceiver != pPipe->nSender)
+        while (nBytes -- && pPipe->nIN != pPipe->nOUT)
         {
-                *pOut++ = pPipe->buffer[pPipe->nReceiver ++];
-                pPipe->nReceiver &= PIPE_SIZE_MASK;
+                *pOut++ = pPipe->buffer[pPipe->nOUT ++];
+                pPipe->nOUT &= PIPE_SIZE_MASK;
         }
 }

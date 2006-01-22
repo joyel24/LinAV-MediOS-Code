@@ -58,15 +58,28 @@ extern void dbgscr_init(void);
 void tst_fct(void)
 {
 #ifdef HAVE_EVT
-    struct evt_pipes_s * evt_buff = get_evt_handling();
-    char evt_res;
+    int evt_hand;
+    int evt;
+    if(evt_getHandler(ALL_CLASS,&evt_hand)!=MED_OK)
+    {
+        printk("Can't get evt handler\n");
+        return;
+    }
+
     while(1)
     {    
-        evt_res = 0;    
-        kpipe_read(&(evt_buff->evt_pipe),&evt_res,1);
-        if(evt_res)
-            printk("evt %x\n",evt_res);
+        evt = 0; 
+        if(evt_getStatus(evt_hand, &evt)!=MED_OK)
+        {
+            printk("Can't get evt\n");
+            break;
+        }
+        
+        if(evt)
+            printk("evt %x\n",evt);
     }
+    
+    evt_freeHandler(evt_hand);
 #endif
 }
 
@@ -110,9 +123,9 @@ void kernel_start (void)
 #endif
 
 #ifdef HAVE_EVT
-    init_evt();
+    evt_init();
 #endif
-    init_buttons();
+    btn_init();
 #ifdef HAVE_BAT_POWER
     init_power();
 #endif
@@ -155,15 +168,15 @@ void kernel_start (void)
 #endif
 
 /* evt & btn test */
-
-tst_fct();
+#if 0
+   tst_fct();
     while(1)
     {
-        int key=read_btn();
+        int key=btn_readState();
         if(key)
             printk("%x\n",key);
     }
-
+#endif
 #ifdef BUILD_LIB
     do_bkpt();
     _start();

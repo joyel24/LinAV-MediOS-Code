@@ -524,7 +524,6 @@ void iniCursorPos()
             break;
 
         case BTN_OFF:
-        case EVT_QUIT:
             stop_othello=1;
             break;
 
@@ -533,9 +532,7 @@ void iniCursorPos()
             computeAllowed(allowedHuman,HUMAN);
             break;
 
-        case EVT_REDRAW:
-            redraw();
-            break;
+       
     }
 }
 
@@ -550,7 +547,7 @@ void redraw(void)
 void _start(void)
 {
     int evt;
-    unsigned int evt_buffer;
+    int evt_handler;
     
     printf("\nIn othello\n");
     
@@ -563,13 +560,14 @@ void _start(void)
     iniBoard();
     
 
-    evt_buffer=get_evt_pipe();
-    if(!evt_buffer)
+    evt_handler=evt_get_handler(BTN_CLASS);
+#if 0    
+    if(!evt_buffer)             /* we need a proper error handling in api */
     {
         printf("[ini_status_bar] can't register to evt\n");
         return;
-    }
-    
+    }*/
+#endif    
     computeAllowed(allowedHuman,HUMAN);
     redraw();
  
@@ -587,11 +585,11 @@ void _start(void)
     {
 //FIXME: get_evt() never returns on the gmini so until it is fixed this work around is needed.
 #ifdef AV3XX
-      evt=get_evt(evt_buffer); 
+      evt=evt_get(evt_handler); 
       eventHandler(evt);
 #endif
 #ifdef GMINI4XX
-        newbutton = read_btn();
+        newbutton = btn_readState();
 				if(newbutton != oldbutton)
 				{
 					switch(newbutton)
@@ -652,7 +650,7 @@ void _start(void)
 #endif
     }
     printf("\nafter loop\n");
-    rm_evt_pipe(evt_buffer);
+    evt_freeHandler(evt_handler);
 
     printf("\nout othello\n");
     

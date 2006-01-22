@@ -17,6 +17,8 @@ typedef int MED_RET_T;
 #define MED_ENOMEM           4 /* No more available memory */
 #define MED_EEXIST           5 /* already exists */
 #define MED_EBUSY            6 /* Object still in use */
-#define MED_EINVAL           7 /* bad arg error */
-#define MED_EBADDATA         8 /* bad data */
+#define MED_ENBUSY           7 /* Object not in use */
+#define MED_EINVAL           8 /* bad arg error */
+#define MED_EBADDATA         9 /* bad data */
+#define MED_EMOBJ           10 /* No more obj available */
 #endif

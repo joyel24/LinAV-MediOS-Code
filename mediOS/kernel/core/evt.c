@@ -20,12 +20,15 @@
 #include <kernel/timer.h>
 
 #include <kernel/evt.h>
+#include <kernel/errors.h>
 
-struct evt_pipes_s * head;
+struct evt_pipes evt_pipe_tab[NB_EVT_PIPES];
 
-struct tmr_s evt_timer;
+
 
 #if 0
+
+struct tmr_s evt_timer;
 void evt_timer_action(void)
 {
     send_evt(EVT_TIMER);
@@ -34,57 +37,85 @@ void evt_timer_action(void)
 }
 #endif
 
-struct evt_pipes_s * get_evt_handling(void)
+int evt_getHandler(unsigned int mask,int * result)
 {
-    struct evt_pipes_s * ptr = (struct evt_pipes_s *)malloc(sizeof(struct evt_pipes_s));
-    if(!ptr)
-    {
-        printk("[evt handling] can't alloc\n");
-        return NULL;
-    }
+    int i;
+    
+    if(result == NULL)
+        return -MED_EINVAL;
+    
+    /* look for a free evt_pipe */
+    for(i=0;i<NB_EVT_PIPES;i++)
+        if(!evt_pipe_tab[i].used)
+            break;
+    
+    if(i==NB_EVT_PIPES)
+        return -MED_EMOBJ;
 
-    ptr->evt_pipe.nReceiver = 0;
-    ptr->evt_pipe.nSender   = 0;
-
-    ptr->nxt=head;
-    head=ptr;
-
-    printk("[evt handling] register: %08x\n",ptr);
-
-    return ptr;
+    evt_pipe_tab[i].evt_pipe.nIN = evt_pipe_tab[i].evt_pipe.nOUT = 0;
+    evt_pipe_tab[i].used = 1;
+    evt_pipe_tab[i].mask = mask;
+    
+    *result = i;
+    
+    printk("[evt handling] register: %d (mask=%x)\n",i,mask);
+    return MED_OK;
 }
 
-void rm_evt_handling(struct evt_pipes_s * evt_pipes)
+int evt_freeHandler(int num_evt_pipe)
 {
-    struct evt_pipes_s * ptr=head;
-
-    printk("[evt handling] UNregister: %08x",evt_pipes);
-
-    if(evt_pipes==head)
+    if(num_evt_pipe >= 0 && num_evt_pipe < NB_EVT_PIPES)
     {
-        head=head->nxt;
+        if(evt_pipe_tab[num_evt_pipe].used!=1)
+            return -MED_ENBUSY;
+        evt_pipe_tab[num_evt_pipe].used = 0;
+        printk("[evt handling] UNregister: %d",num_evt_pipe);
     }
     else
+        return -MED_EINVAL;    
+    return MED_OK;
+}
+
+void evt_send(struct evt_t * evt)
+{
+    int i;
+    for(i=0;i<NB_EVT_PIPES;i++)
     {
-        while(ptr!=NULL && ptr->nxt!=evt_pipes) ptr=ptr->nxt;
-        ptr=ptr->nxt;
+        if(evt_pipe_tab[i].used && (evt_pipe_tab[i].mask&evt->evt_class))
+        {
+            pipeWrite(&(evt_pipe_tab[i].evt_pipe), evt, sizeof(struct evt_t));
+        }
     }
-    printk(" done\n");
+    
 }
 
-void do_send_evt(int evt)
+int  evt_getStatus(int num_evt_pipe, int * result)
 {
-    struct evt_pipes_s * ptr;
-    unsigned char c=(unsigned char)evt;
-
-    for(ptr=head;ptr!=NULL;ptr=ptr->nxt)
-        kpipe_write (&(ptr->evt_pipe), &c, 1);
+    struct evt_t evt;
+    evt.evt=0;
+    evt.evt_class=0;
+    evt.data=0;
+    if(num_evt_pipe >= 0 && num_evt_pipe < NB_EVT_PIPES && result != NULL)
+    {
+        if(evt_pipe_tab[num_evt_pipe].used!=1)
+            return -MED_ENBUSY;
+        pipeRead(&(evt_pipe_tab[num_evt_pipe].evt_pipe), &evt, sizeof(struct evt_t));
+        *result=evt.evt;        
+    }
+    else
+        return -MED_EINVAL;    
+    return MED_OK;
 }
 
-void init_evt(void)
+void evt_init(void)
 {
-    head=NULL;
-
+    int i;
+    for(i=0;i<NB_EVT_PIPES;i++)
+    {
+        evt_pipe_tab[i].evt_pipe.nIN=evt_pipe_tab[i].evt_pipe.nOUT=0;
+        evt_pipe_tab[i].used=0;
+    }
+    
     /*setup_timer(&evt_timer,"EVT");
     evt_timer.action = evt_timer_action;
     evt_timer.expires = tick + EVT_DELAY;

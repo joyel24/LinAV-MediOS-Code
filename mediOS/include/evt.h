@@ -35,6 +35,12 @@
 
 #define        EVT_TIMER     0x11
 #define        EVT_PWR       0x12
+
+
+/* EVT class */
+#define        ALL_CLASS         0xFFFFFFFF
+#define        BTN_CLASS         0x1
+#define        CONNECT_CLASS     0x2
 /*
 
 #define        EVT_WKUP      0x0d
@@ -53,5 +59,7 @@
 #define        EVT_QUIT        0x57
 */
       
+
+
 
 #endif

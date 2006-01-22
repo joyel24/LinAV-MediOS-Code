@@ -24,17 +24,17 @@
 
 #include <kernel/target/arch/buttons.h>
 extern int old_state;
-void process_button_press(int val);
-void init_buttons(void);
+void btn_processPress(int val);
+void btn_init(void);
 
-int read_btn(void);
-int arch_read_btn(void);
+int btn_readState(void);
+int arch_btn_readState(void);
 
 #define BTN_CHK    {                     \
     int __val ;                          \
-    __val=read_btn();                    \
+    __val=btn_readState();                    \
     if(__val!=0x0)                       \
-        process_button_press(__val);     \
+        btn_processPress(__val);     \
 }
 
 

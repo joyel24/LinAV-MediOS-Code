@@ -41,12 +41,12 @@ int g_type = MSGBOX_TYPE_OK;
 int fontVal;
 
 /* msg_box event handler */
-void msgBoxEvtHandler(EVT_PIPE evt_buffer)
+void msgBoxEvtHandler(int evt_hanlder)
 {
     char evt=0;
     while(!stopBoxLoop)
     {
-        evt = get_evt(evt_buffer);
+        evt = evt_get(evt_hanlder);
         if(!evt)
             continue;
         
@@ -289,12 +289,12 @@ void eraseMsgBox(void)
 }
 
 /* main function */
-int msgBox(unsigned char* caption, unsigned char* msg, int type, int icon, EVT_PIPE evt_buffer)
+int msgBox(unsigned char* caption, unsigned char* msg, int type, int icon, int evt_hanlder)
 {
     g_type = type;
     fontVal=getFont();
     drawMsgBox(caption,msg,type,icon);
-    msgBoxEvtHandler(evt_buffer);
+    msgBoxEvtHandler(evt_hanlder);
     eraseMsgBox();
     return res;
 }

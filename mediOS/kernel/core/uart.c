@@ -17,10 +17,10 @@
 #include <kernel/kernel.h>
 #include <kernel/pipes.h>
 
-PIPE UART_PIPES[2];
+struct pipe UART_PIPES[2];
 
-__IRAM_DATA PIPE * UART_0_Pipe;
-__IRAM_DATA PIPE * UART_1_Pipe;
+__IRAM_DATA struct pipe * UART_0_Pipe;
+__IRAM_DATA struct pipe * UART_1_Pipe;
 
 __IRAM_DATA unsigned int uart_addr[2]={
     UART0_BASE,
@@ -36,7 +36,7 @@ __IRAM_CODE void uart_intAction(int irq)
     while(inw(uart_addr[uart]+UART_SR)&0x0004)
     {
         c=(unsigned char)(inw(uart_addr[uart]+UART_DTRR)&0xFF);
-        kpipe_write (&UART_PIPES[uart], &c, 1);
+        pipeWrite (&UART_PIPES[uart], &c, 1);
     }
 }
 
@@ -78,10 +78,8 @@ void uart_init(void)
     UART_0_Pipe=&UART_PIPES[0];
     UART_1_Pipe=&UART_PIPES[1];
 
-    UART_0_Pipe->nReceiver = 0;
-    UART_0_Pipe->nSender   = 0;
-    UART_1_Pipe->nReceiver = 0;
-    UART_1_Pipe->nSender   = 0;
+    UART_0_Pipe->nOUT = UART_0_Pipe->nIN = 0;
+    UART_1_Pipe->nOUT = UART_1_Pipe->nIN = 0;
 
     irq_enable(IRQ_UART0);
     irq_enable(IRQ_UART1);

@@ -53,7 +53,7 @@ struct browser_data realData = {
 };
 
 struct browser_data * bdata;
-EVT_PIPE evt_buffer;
+int evt_handler;
 
 void printList(struct browser_data * bdata,int val)
 {
@@ -68,7 +68,7 @@ void printList(struct browser_data * bdata,int val)
 void ini_file_browser(void)
 {
     bdata = &realData;
-    evt_buffer = get_evt_pipe();
+    evt_handler = evt_get_handler(ALL_CLASS);
     iniBrowser();
 }
 

@@ -21,7 +21,7 @@
 #include <gui/scrollbar.h>
 
 extern struct scroll_bar browser_scroll;
-extern EVT_PIPE evt_buffer;
+extern int evt_handler;
 
 void browserEvt(struct browser_data * bdata)
 {
@@ -34,7 +34,7 @@ void browserEvt(struct browser_data * bdata)
 
     while(!stop)
     {
-        evt = get_evt(evt_buffer);
+        evt = evt_get(evt_handler);
         if(!evt)
             continue;
             

@@ -76,20 +76,24 @@ __IRAM_CODE int swi_device_handler (
             
             case nAPI_GET_EVT_PIPE:
 #ifdef HAVE_EVT
-                *((EVT_PIPE*) nParam1) = (EVT_PIPE) get_evt_handling();
+                return evt_getHandler(nParam1,(int*)nParam2);
+#else
+                return MED_OK;
 #endif
-                return 0;
             
             case nAPI_RM_EVT_PIPE:
 #ifdef HAVE_EVT
-                rm_evt_handling((struct evt_pipes_s *)nParam1);
-                return 0;
+                return evt_freeHandler(nParam1);
+#else
+                return MED_OK;
 #endif                
             case nAPI_GET_EVT:
-#ifdef HAVE_EVT
-                kpipe_read(&(((struct evt_pipes_s *)nParam1)->evt_pipe),(char*)nParam2,1);
+#ifdef HAVE_EVT                
+                return evt_getStatus(nParam1,(int*)nParam2);
+#else
+                return MED_OK;
 #endif
-                return 0;
+
             case nAPI_BKPT:
                 do_bkpt();
                 return 0;

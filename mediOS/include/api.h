@@ -54,12 +54,12 @@ MED_RET_T API_POWER                (int cmd,int * val);
 MED_RET_T API_SET_LCD_BRIGHTNESS   (int nBrightness);
 MED_RET_T API_GET_LCD_BRIGHTNESS   (int* pnBrightness);
 
-MED_RET_T API_GET_EVT_PIPE         (EVT_PIPE * pipe);
-MED_RET_T API_RM_EVT_PIPE          (EVT_PIPE pipe);
-MED_RET_T API_GET_EVT              (EVT_PIPE pipe,char * data);
-#define rm_evt_pipe                 API_RM_EVT_PIPE
-EVT_PIPE get_evt_pipe(void);
-char get_evt(EVT_PIPE var);
+MED_RET_T API_EVT_GET_HANDLER      (unsigned int mask, int * evt_handler);
+MED_RET_T API_EVT_FREE_HANDLER     (int evt_handler);
+MED_RET_T API_EVT_GET              (int evt_handler,int * data);
+#define evt_freeHandler API_EVT_FREE_HANDLER
+int evt_get_handler(unsigned int mask);
+int evt_get(int evt_handler);
 
 MED_RET_T API_BKPT                 (void);
 
