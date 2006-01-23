@@ -55,6 +55,6 @@ int arch_btn_readState(void);
 
 #define BTMASK_ON            0x1000
 #define BTMASK_OFF           0x2000
-#define BTMASk_FAST_DIR      0x4000
+#define BTMASK_FAST_DIR      0x4000
 
 #endif

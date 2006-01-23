@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.2  2006/01/19 08:51:51  sfxgligli
+// cleanup & name standardisation in wdt/irq/timers/uart/cpld/gio
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -123,7 +126,7 @@ void Z_Init (void)
 //
 // Z_Free
 //
-void Z_Free (void* ptr)
+__IRAM_CODE void Z_Free (void* ptr)
 {
     memblock_t*		block;
     memblock_t*		other;
@@ -184,7 +187,7 @@ void Z_Free (void* ptr)
 #define MINFRAGMENT		64
 
 
-void*
+__IRAM_CODE void*
 Z_Malloc
 ( int		size,
   int		tag,

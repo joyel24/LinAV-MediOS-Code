@@ -39,7 +39,7 @@
 #define GIO_I2C_DATA  0x08
 
 #define GIO_BTN_SELECT_UDLR   0x0e
-#define GIO_BTN_SELECT_MENU   0x10
+#define GIO_BTN_SELECT_FN     0x10
 #define GIO_BTN_SELECT_SQCR   0x11
 
 #define GIO_SPDIF     0xff

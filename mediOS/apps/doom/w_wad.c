@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.2  2006/01/19 08:51:51  sfxgligli
+// cleanup & name standardisation in wdt/irq/timers/uart/cpld/gio
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -360,7 +363,7 @@ int W_NumLumps (void)
 // Returns -1 if name not found.
 //
 
-int W_CheckNumForName (char* name)
+__IRAM_CODE int W_CheckNumForName (char* name)
 {
     union {
 	char	s[9];
@@ -406,7 +409,7 @@ int W_CheckNumForName (char* name)
 // W_GetNumForName
 // Calls W_CheckNumForName, but bombs out if not found.
 //
-int W_GetNumForName (char* name)
+__IRAM_CODE int W_GetNumForName (char* name)
 {
     int	i;
 
@@ -466,8 +469,6 @@ W_ReadLump
     fseek (handle, l->position, SEEK_SET);
     c = fread (handle,dest, l->size);
 
-    printf("%d ",l->size);
-
     if (c < l->size)
 	I_Error ("W_ReadLump: only read %i of %i on lump %i",
 		 c,l->size,lump);
@@ -484,7 +485,7 @@ W_ReadLump
 //
 // W_CacheLumpNum
 //
-void*
+__IRAM_CODE void*
 W_CacheLumpNum
 ( int		lump,
   int		tag )

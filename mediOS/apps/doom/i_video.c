@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.5  2006/01/22 13:15:38  oxygen77
+// new evt handling system
+//
 // Revision 1.4  2006/01/19 08:51:51  sfxgligli
 // cleanup & name standardisation in wdt/irq/timers/uart/cpld/gio
 //
@@ -53,7 +56,7 @@ rcsid[] = "$Id$";
 char button_to_key[2][NB_BUTTONS]=
   // ingame
  {{KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
-  KEY_F11,KEY_F6,KEY_F9,
+  KEY_F11,KEY_RSHIFT,KEY_RALT,
   KEY_RCTRL,'1',
   ' ',KEY_ESCAPE},
   // menus
@@ -175,23 +178,28 @@ void I_StartTic (void)
     if(pressed & BTMASK_DOWN)   DoButtonEvent(BUTTON_DOWN,false);
     if(pressed & BTMASK_LEFT)   DoButtonEvent(BUTTON_LEFT,false);
     if(pressed & BTMASK_RIGHT)  DoButtonEvent(BUTTON_RIGHT,false);
-    if(pressed & BTMASK_MENU1)  DoButtonEvent(BUTTON_MENU1,false);
-    if(pressed & BTMASK_MENU2)  DoButtonEvent(BUTTON_MENU2,false);
-    if(pressed & BTMASK_MENU3)  DoButtonEvent(BUTTON_MENU3,false);
+    if(pressed & BTMASK_F1)     DoButtonEvent(BUTTON_MENU1,false);
+    if(pressed & BTMASK_F2)     DoButtonEvent(BUTTON_MENU2,false);
+    if(pressed & BTMASK_F3)     DoButtonEvent(BUTTON_MENU3,false);
+    if(pressed & BTMASK_BTN1)   DoButtonEvent(BUTTON_SQUARE,false);
+    if(pressed & BTMASK_BTN2)   DoButtonEvent(BUTTON_CROSS,false);
     if(pressed & BTMASK_ON)     DoButtonEvent(BUTTON_ON,false);
     if(pressed & BTMASK_OFF)    DoButtonEvent(BUTTON_OFF,false);
   }
 
   if (released){
-    if(released & BTMASK_UP)     DoButtonEvent(BUTTON_UP,true);
-    if(released & BTMASK_DOWN)   DoButtonEvent(BUTTON_DOWN,true);
-    if(released & BTMASK_LEFT)   DoButtonEvent(BUTTON_LEFT,true);
-    if(released & BTMASK_RIGHT)  DoButtonEvent(BUTTON_RIGHT,true);
-    if(released & BTMASK_MENU1)  DoButtonEvent(BUTTON_MENU1,true);
-    if(released & BTMASK_MENU2)  DoButtonEvent(BUTTON_MENU2,true);
-    if(released & BTMASK_MENU3)  DoButtonEvent(BUTTON_MENU3,true);
-    if(released & BTMASK_ON)     DoButtonEvent(BUTTON_ON,true);
-    if(released & BTMASK_OFF)    DoButtonEvent(BUTTON_OFF,true);
+    if(released & BTMASK_UP)    DoButtonEvent(BUTTON_UP,true);
+    if(released & BTMASK_DOWN)  DoButtonEvent(BUTTON_DOWN,true);
+    if(released & BTMASK_LEFT)  DoButtonEvent(BUTTON_LEFT,true);
+    if(released & BTMASK_RIGHT) DoButtonEvent(BUTTON_RIGHT,true);
+    if(released & BTMASK_F1)    DoButtonEvent(BUTTON_MENU1,true);
+    if(released & BTMASK_F2)    DoButtonEvent(BUTTON_MENU2,true);
+    if(released & BTMASK_F3)    DoButtonEvent(BUTTON_MENU3,true);
+    if(released & BTMASK_ON)    DoButtonEvent(BUTTON_ON,true);
+    if(released & BTMASK_BTN1)  DoButtonEvent(BUTTON_SQUARE,true);
+    if(released & BTMASK_BTN2)  DoButtonEvent(BUTTON_CROSS,true);
+    if(released & BTMASK_ON)    DoButtonEvent(BUTTON_ON,true);
+    if(released & BTMASK_OFF)   DoButtonEvent(BUTTON_OFF,true);
   }
 }
 

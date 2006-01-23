@@ -36,7 +36,7 @@
 typedef __attribute__ ((packed)) struct
 {
     signed char	__attribute__ ((packed)) forwardmove;	// *2048 for move
-    char	__attribute__ ((packed)) sidemove;	// *2048 for move
+    signed char	__attribute__ ((packed)) sidemove;	// *2048 for move
     short	__attribute__ ((packed)) angleturn;	// <<16 for angle delta
     short	__attribute__ ((packed)) consistancy;	// checks for net game
     byte	__attribute__ ((packed)) chatchar;
@@ -49,6 +49,10 @@ typedef __attribute__ ((packed)) struct
 //-----------------------------------------------------------------------------
 //
 // $Log$
+// Revision 1.2  2006/01/03 20:57:56  sfxgligli
+// - Doom: weapon change, fixed backward move bug, HUD resize optimisation
+// - Medios: added firmware reload function, implemented exit() user function
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
