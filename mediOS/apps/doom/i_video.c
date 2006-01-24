@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.6  2006/01/23 17:21:08  sfxgligli
+// - mediOS: Gmini400 new buttons
+// - gDoom: added strafe & speed buttons, cleaned up things that shouldn't have been commited
+//
 // Revision 1.5  2006/01/22 13:15:38  oxygen77
 // new evt handling system
 //
@@ -53,6 +57,7 @@ rcsid[] = "$Id$";
 
 #include "doomdef.h"
 
+#ifdef GMINI4XX
 char button_to_key[2][NB_BUTTONS]=
   // ingame
  {{KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
@@ -64,7 +69,22 @@ char button_to_key[2][NB_BUTTONS]=
   ' ',' ',' ',
   KEY_ENTER,'y',
   KEY_ENTER,KEY_ESCAPE}};
+#endif
 
+#ifdef AV3XX
+  char button_to_key[2][NB_BUTTONS]=
+  // ingame
+ {{KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
+  KEY_RCTRL,KEY_RALT,KEY_RSHIFT,
+  ' ',KEY_F11,
+  KEY_F11,KEY_ESCAPE},
+  // menus
+  {KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
+  ' ','y',' ',
+  KEY_ESCAPE,KEY_F11,
+  KEY_ENTER,KEY_ESCAPE}};
+#endif
+#ifdef GMINI4XX
 // 320px -> 220px clever resize of the HUD (thx to WireDDD for the idea)
 int hud_resize_table[REALSCREENWIDTH]={
 0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,
@@ -78,6 +98,7 @@ int hud_resize_table[REALSCREENWIDTH]={
 254,255,256,257,258,259,260,261,262,263,264,265,266,267,268,269,270,271,275,
 276,277,278,279,280,281,282,283,284,285,286,287,288,292,293,294,295,296,297,
 301,302,303,304,305,306,307,308,309,310,311,312,313,314,319};
+#endif
 
 static char * offset1;
 static char * offset2;
@@ -85,6 +106,7 @@ static char * offset2;
 int x_resize_lookup[REALSCREENWIDTH];
 char * y_resize_lookup[REALSCREENHEIGHT];
 
+#ifdef GMINI4XX
 __IRAM_DATA char * hud_resize_lookup[REALSCREENWIDTH];
 
 void InitResizeLookups(){
@@ -149,6 +171,7 @@ __IRAM_CODE void DoHUDResize(){
     op-=SBARHEIGHT*SCREENWIDTH-1;
   }
 }
+#endif
 
 void DoButtonEvent(int button,bool released){
   event_t event;
@@ -195,7 +218,7 @@ void I_StartTic (void)
     if(released & BTMASK_F1)    DoButtonEvent(BUTTON_MENU1,true);
     if(released & BTMASK_F2)    DoButtonEvent(BUTTON_MENU2,true);
     if(released & BTMASK_F3)    DoButtonEvent(BUTTON_MENU3,true);
-    if(released & BTMASK_ON)    DoButtonEvent(BUTTON_ON,true);
+ //   if(released & BTMASK_ON)    DoButtonEvent(BUTTON_ON,true);
     if(released & BTMASK_BTN1)  DoButtonEvent(BUTTON_SQUARE,true);
     if(released & BTMASK_BTN2)  DoButtonEvent(BUTTON_CROSS,true);
     if(released & BTMASK_ON)    DoButtonEvent(BUTTON_ON,true);
@@ -229,6 +252,7 @@ void I_FinishUpdate (void)
 
   uartOutString(s,0);
 */
+#ifdef GMINI4XX
   if(menuactive || (gamestate!=GS_LEVEL)){ // not playing?
     // full screen resize
     DoFullScreenResize();
@@ -242,6 +266,10 @@ void I_FinishUpdate (void)
       memcpy(offset2,offset1,SCREENWIDTH*REALSCREENHEIGHT);
     }
   }
+#endif
+#ifdef AV3XX
+    memcpy(offset2,offset1,SCREENWIDTH*REALSCREENHEIGHT);
+#endif
 }
 
 
@@ -287,7 +315,9 @@ void I_InitGraphics(void)
 
   setSize(BMAP1,SCREENWIDTH,SCREENHEIGHT,8);
 
+#ifdef GMINI4XX
   InitResizeLookups();
+#endif
 }
 
 

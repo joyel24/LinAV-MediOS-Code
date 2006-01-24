@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	DOOM main program (D_DoomMain) and game loop (D_DoomLoop),
@@ -110,7 +114,7 @@ int             startepisode;
 int		startmap;
 boolean		autostart;
 
-int		debugfile; //gli
+int		debugfile=0; //gli   //CJ Init debugfile
 
 boolean		advancedemo;
 
@@ -558,9 +562,11 @@ void IdentifyVersion (void)
     char*	plutoniawad;
     char*	tntwad;
 
+    int i;
     char *home;
     char *doomwaddir;
     doomwaddir = getenv("DOOMWADDIR");
+    for(i=0;i<MAXWADFILES;i++) wadfiles[i]=(char*)0;      //CJ Init wadfiles
     if (!doomwaddir)
 	doomwaddir = ROOTFOLDER;
 

@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.3  2006/01/23 17:21:08  sfxgligli
+// - mediOS: Gmini400 new buttons
+// - gDoom: added strafe & speed buttons, cleaned up things that shouldn't have been commited
+//
 // Revision 1.2  2006/01/19 08:51:51  sfxgligli
 // cleanup & name standardisation in wdt/irq/timers/uart/cpld/gio
 //
@@ -363,12 +367,15 @@ int W_NumLumps (void)
 // Returns -1 if name not found.
 //
 
-__IRAM_CODE int W_CheckNumForName (char* name)
+#ifdef GMINI4XX
+__IRAM_CODE
+#endif
+int W_CheckNumForName (char* name)
 {
     union {
 	char	s[9];
 	int	x[2];
-	
+
     } name8;
     
     int		v1;
@@ -409,7 +416,10 @@ __IRAM_CODE int W_CheckNumForName (char* name)
 // W_GetNumForName
 // Calls W_CheckNumForName, but bombs out if not found.
 //
-__IRAM_CODE int W_GetNumForName (char* name)
+#ifdef GMINI4XX
+__IRAM_CODE
+#endif
+int W_GetNumForName (char* name)
 {
     int	i;
 
@@ -485,7 +495,10 @@ W_ReadLump
 //
 // W_CacheLumpNum
 //
-__IRAM_CODE void*
+#ifdef GMINI4XX
+__IRAM_CODE
+#endif
+void*
 W_CacheLumpNum
 ( int		lump,
   int		tag )

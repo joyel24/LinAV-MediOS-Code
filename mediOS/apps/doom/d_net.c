@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	DOOM Network game communication and protocol,
@@ -68,10 +72,10 @@ int		resendcount[MAXNETNODES];
 
 int		nodeforplayer[MAXPLAYERS];
 
-int             maketic;
+int             maketic=0;      //CJ Init to 0
 int		lastnettic;
 int		skiptics;
-int		ticdup;		
+int		ticdup=0;	//CJ Init to 0
 int		maxsend;	// BACKUPTICS/(2*ticdup)-1
 
 
@@ -627,9 +631,9 @@ void D_QuitNetGame (void)
 // TryRunTics
 //
 int	frametics[4];
-int	frameon;
+int	frameon=0;        //CJ Init to 0
 int	frameskip[4];
-int	oldnettics;
+int	oldnettics=0;     //CJ Init to 0
 
 extern	boolean	advancedemo;
 

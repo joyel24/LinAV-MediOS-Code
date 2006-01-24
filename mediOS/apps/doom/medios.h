@@ -23,8 +23,15 @@
 
 #define ROOTFOLDER "/doom/"
 
+#ifdef GMINI4XX
 #define REALSCREENWIDTH 224
 #define REALSCREENHEIGHT 176
+#endif
+
+#ifdef AV3XX
+#define REALSCREENWIDTH 320
+#define REALSCREENHEIGHT 200
+#endif
 
 // buttons
 

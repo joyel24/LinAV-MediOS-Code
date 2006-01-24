@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.3  2006/01/23 17:21:08  sfxgligli
+// - mediOS: Gmini400 new buttons
+// - gDoom: added strafe & speed buttons, cleaned up things that shouldn't have been commited
+//
 // Revision 1.2  2006/01/19 08:51:51  sfxgligli
 // cleanup & name standardisation in wdt/irq/timers/uart/cpld/gio
 //
@@ -126,11 +130,15 @@ void Z_Init (void)
 //
 // Z_Free
 //
-__IRAM_CODE void Z_Free (void* ptr)
+
+#ifdef GMINI4XX
+__IRAM_CODE
+#endif
+void Z_Free (void* ptr)
 {
     memblock_t*		block;
     memblock_t*		other;
-	
+
     block = (memblock_t *) ( (byte *)ptr - sizeof(memblock_t));
 
     if (block->id != ZONEID)
@@ -187,7 +195,10 @@ __IRAM_CODE void Z_Free (void* ptr)
 #define MINFRAGMENT		64
 
 
-__IRAM_CODE void*
+#ifdef GMINI4XX
+__IRAM_CODE
+#endif
+void*
 Z_Malloc
 ( int		size,
   int		tag,

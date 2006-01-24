@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.2  2006/01/03 20:57:57  sfxgligli
+// - Doom: weapon change, fixed backward move bug, HUD resize optimisation
+// - Medios: added firmware reload function, implemented exit() user function
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -115,15 +119,15 @@ boolean         noblit;                 // for comparative timing purposes
 int             starttime;          	// for comparative timing purposes  	 
  
 boolean         viewactive; 
- 
-boolean         deathmatch;           	// only if started as net death 
-boolean         netgame;                // only true if packets are broadcast 
-boolean         playeringame[MAXPLAYERS]; 
+
+boolean         deathmatch=0;           // only if started as net death     //CJ Init to 0
+boolean         netgame;                // only true if packets are broadcast
+boolean         playeringame[MAXPLAYERS];
 player_t        players[MAXPLAYERS]; 
  
 int             consoleplayer;          // player taking events and displaying 
 int             displayplayer;          // view being displayed 
-int             gametic; 
+int             gametic=0;                                                  //CJ Init to 0
 int             levelstarttic;          // gametic at level start 
 int             totalkills, totalitems, totalsecret;    // for intermission 
  

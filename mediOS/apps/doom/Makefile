@@ -2,7 +2,7 @@ include ../../Makefile.conf
 
 ASFLAGS  += -I../../include -I. -Icpu
 #-mfpu=softfpa
-GCCFLAGS += -I../../include -I.
+GCCFLAGS += -I../../include -I. -O3
 
 #GCCFLAGS +=  -mno-long-calls
 
