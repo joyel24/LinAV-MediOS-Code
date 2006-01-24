@@ -173,6 +173,44 @@ void browserEvt(struct browser_data * bdata)
                     }
                 }
                 break;
+#ifdef GMINI4XX
+            case BTN_1:
+                switch(bdata->list[bdata->pos+bdata->nselect].type)
+                {
+                    case TYPE_BACK:
+                        upDir(bdata);
+                        if(!viewNewDir(bdata,NULL))
+                        {
+                            stop=1;
+                            break;
+                        }
+                        break;
+                    case TYPE_DIR:
+                        inDir(bdata,bdata->list[bdata->pos+bdata->nselect].name);
+                        if(!viewNewDir(bdata,NULL))
+                        {
+                            stop=1;
+                            break;
+                        }
+                        break;
+                    case TYPE_FILE:
+												chgSelect(bdata,bdata->pos+bdata->nselect);
+												if(bdata->mode)
+														stop=1;
+                        break;
+                }
+                break;
+            case BTN_2:
+                if(upDir(bdata))
+                {              
+                    if(!viewNewDir(bdata,NULL))
+                    {
+                        stop=1;
+                        break;
+                    }
+                }
+                break;
+#endif
         }
     }
 }
