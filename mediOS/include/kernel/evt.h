@@ -39,6 +39,7 @@ int evt_freeHandler(int num_evt_pipe);
 
 void evt_send(struct evt_t * evt);                      /* kernel drivers use it to send evt */
 int  evt_getStatus(int num_evt_pipe, int * result);         /* apps use it to read evt on their pipe */
+int  evt_getFullStatus(int num_evt_pipe, struct evt_t * evt);
 
 void evt_init(void);
 

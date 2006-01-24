@@ -89,21 +89,30 @@ void evt_send(struct evt_t * evt)
     
 }
 
-int  evt_getStatus(int num_evt_pipe, int * result)
+int  evt_getFullStatus(int num_evt_pipe, struct evt_t * evt)
 {
-    struct evt_t evt;
-    evt.evt=0;
-    evt.evt_class=0;
-    evt.data=0;
-    if(num_evt_pipe >= 0 && num_evt_pipe < NB_EVT_PIPES && result != NULL)
+    evt->evt=0;
+    evt->evt_class=0;
+    evt->data=0;
+    if(num_evt_pipe >= 0 && num_evt_pipe < NB_EVT_PIPES && evt != NULL)
     {
         if(evt_pipe_tab[num_evt_pipe].used!=1)
             return -MED_ENBUSY;
-        pipeRead(&(evt_pipe_tab[num_evt_pipe].evt_pipe), &evt, sizeof(struct evt_t));
-        *result=evt.evt;        
+        pipeRead(&(evt_pipe_tab[num_evt_pipe].evt_pipe), evt, sizeof(struct evt_t));
     }
     else
         return -MED_EINVAL;    
+    return MED_OK;
+}
+
+int  evt_getStatus(int num_evt_pipe, int * result)
+{
+    struct evt_t evt;
+    int ret_val;
+    ret_val = evt_getFullStatus( num_evt_pipe,&evt);
+    if(ret_val!=MED_OK)
+        return ret_val;
+    *result=evt.evt;
     return MED_OK;
 }
 

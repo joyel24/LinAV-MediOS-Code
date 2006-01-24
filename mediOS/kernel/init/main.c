@@ -57,9 +57,16 @@ extern void dbgscr_init(void);
 
 void tst_fct(void)
 {
+    iniIcon();
+    open_graphics();
+    clearScreen(COLOR_WHITE);
+    setFont(STD6X9);
+    ini_file_browser();
+    browse("/",1);
+
 #ifdef HAVE_EVT
     int evt_hand;
-    int evt;
+    struct evt_t evt;
     if(evt_getHandler(ALL_CLASS,&evt_hand)!=MED_OK)
     {
         printk("Can't get evt handler\n");
@@ -67,16 +74,15 @@ void tst_fct(void)
     }
 
     while(1)
-    {    
-        evt = 0; 
-        if(evt_getStatus(evt_hand, &evt)!=MED_OK)
+    {
+        if(evt_getFullStatus(evt_hand, &evt)!=MED_OK)
         {
             printk("Can't get evt\n");
             break;
         }
         
-        if(evt)
-            printk("evt %x\n",evt);
+        if(evt.evt)
+            printk("evt %x:%x\n",evt.evt,(int)evt.data);
     }
     
     evt_freeHandler(evt_hand);

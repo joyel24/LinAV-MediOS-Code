@@ -17,7 +17,11 @@
 #include <kernel/kernel.h>
 #include <kernel/gio.h>
 
-#define MAX_PRESSED                 4
+#define DEFAULT_INIT_DELAY      20
+#define DEFAULT_SECOND_DELAY    10
+#define DEFAULT_MIN_DELAY       2
+#define DEFAULT_DEC_VALUE       1
+
 #define MAX_OFF                     300
 
 #define NB_BUTTONS                  0x10
@@ -37,6 +41,12 @@ int arch_btn_readState(void);
         btn_processPress(__val);     \
 }
 
+struct btn_repeatParam {
+    int init_delay;
+    int second_delay;
+    int min_delay;
+    int dec_value;
+};
 
 #define BTMASK_UP            0x0001
 #define BTMASK_DOWN          0x0002

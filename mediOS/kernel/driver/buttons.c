@@ -30,9 +30,16 @@
 #include <kernel/kgraphics.h>
 #endif
 
-__IRAM_DATA int mx_press;
-
+__IRAM_DATA int mx_press[NB_BUTTONS];
+__IRAM_DATA struct btn_repeatParam default_repeatParam = {
+    DEFAULT_INIT_DELAY,
+    DEFAULT_SECOND_DELAY,
+    DEFAULT_MIN_DELAY,
+    DEFAULT_DEC_VALUE 
+};
+__IRAM_DATA struct btn_repeatParam * current_repeatParam;
 __IRAM_DATA int nb_pressed[NB_BUTTONS];
+__IRAM_DATA int press_step[NB_BUTTONS];
 __IRAM_DATA int nb_off_press;
 __IRAM_DATA int nb_debug_switch;
 
@@ -60,7 +67,7 @@ __IRAM_CODE void btn_processPress(int val)
     {
         if(nb_debug_switch==0)
         {
-            nb_debug_switch=mx_press*3;
+            nb_debug_switch=current_repeatParam->init_delay*3;
             
             if(lcd_get_state()==0)
             {
@@ -86,8 +93,9 @@ __IRAM_CODE void btn_processPress(int val)
     {
         if(BTN_NOT_PRESSED(val,btn)) /* the btn is NOT pressed */
         {
-            if(nb_pressed[btn]!=0)
-                nb_pressed[btn]=0;   /* reset nb_pressed */
+            nb_pressed[btn]=0;   /* reset nb_pressed */
+            mx_press[btn] = current_repeatParam->init_delay;
+            press_step[btn] = 0;
             if(btn==BTN_OFF)
                 nb_off_press=0;    /* if off btn released -> reset nb_off_press */             
         }
@@ -110,7 +118,28 @@ __IRAM_CODE void btn_processPress(int val)
                 if(!inHold)
                 {
 #endif
-                    nb_pressed[btn]=mx_press;
+                    switch(press_step[btn])
+                    {
+                        case 0:
+                            press_step[btn] = 1;
+                            nb_pressed[btn] = current_repeatParam->init_delay;
+                            break;
+                        case 1:
+                            press_step[btn] = 2;
+                            nb_pressed[btn] = current_repeatParam->second_delay;
+                            mx_press[btn] = current_repeatParam->second_delay;
+                            break;
+                        case 2:
+                            mx_press[btn] -= current_repeatParam->dec_value;
+                            if(mx_press[btn]<current_repeatParam->min_delay)
+                                mx_press[btn]=current_repeatParam->min_delay;
+                            nb_pressed[btn] = mx_press[btn];
+                            break;
+                        default:
+                            press_step[btn] = 0;
+                            mx_press[btn] = current_repeatParam->init_delay;
+                    }
+                    
                     if(lcd_get_state()==0)
                     {
                         /* the lcd is off => turn on and discard the event */
@@ -123,7 +152,7 @@ __IRAM_CODE void btn_processPress(int val)
                     halt_launchTimer(); /* postpone the poweroff timer */
                     evt.evt=btn+1;
                     evt.evt_class=BTN_CLASS;
-                    evt.data=NULL;
+                    evt.data=mx_press[btn];
                     evt_send(&evt);
                     //printk("BTN %d pressed\n",btn);
 #ifdef HAVE_FM_REMOTE                        
@@ -145,12 +174,17 @@ void btn_init(void)
 {
     int btn;
     
-    mx_press = MAX_PRESSED;
+    current_repeatParam = & default_repeatParam;
+    
     nb_off_press=0;
     nb_debug_switch=0;
        
     for(btn=0;btn<NB_BUTTONS;btn++)
+    {
         nb_pressed[btn]=0;
+        mx_press[btn] = current_repeatParam->init_delay;
+        press_step[btn] = 0;
+    }
     /* set GIO for ON/OFF to input */
     GIO_DIRECTION(GIO_ON_BTN,GIO_IN);
     GIO_DIRECTION(GIO_OFF_BTN,GIO_IN);
