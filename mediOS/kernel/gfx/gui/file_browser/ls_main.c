@@ -19,7 +19,15 @@
 #include <gui/file_browser.h>
 #include <file_type.h>
 
+#ifdef GMINI4XX
+#define LCD_WIDTH 220
+#define LCD_HEIGHT 176
+#endif
 
+#ifdef AV3XX
+#define LCD_WIDTH 320
+#define LCD_HEIGHT 240
+#endif
 
 struct browser_data realData = {
     path            : "/",
@@ -39,12 +47,18 @@ struct browser_data realData = {
     nbDir           : 0,
     totSize         : 0,
     
+#ifdef GMINI4XX
+    nb_disp_entry   : 14,
+#endif
+#ifdef AV3XX
     nb_disp_entry   : 20,
+#endif
+
     x_start         : 0,
     y_start         : 18,
     
-    width           : 320,
-    height          : 202,
+    width           : LCD_WIDTH,
+    height          : LCD_HEIGHT-38,
     entry_height    : 10,
     
     draw_bottom_status : draw_bottom_status,
@@ -94,7 +108,7 @@ char * browse(char * path,int mode)
     return NULL;
 }
 
-int x=320;
+int x=LCD_WIDTH;
 
 void draw_file_size(struct dir_entry * entry)
 {
@@ -103,13 +117,13 @@ void draw_file_size(struct dir_entry * entry)
     
     /* erase previsous drawing */
 
-    fillRect(COLOR_WHITE,x, 230,320-x,10);
+    fillRect(COLOR_WHITE,x, LCD_HEIGHT-10,LCD_WIDTH-x,10);
     if(entry->type == TYPE_FILE)
     {
         createSizeString(tmpS,entry->size);
         getStringS(tmpS,&w,&h);
-        x=320-w;
-        putS(COLOR_BLUE, COLOR_WHITE,x, 230, tmpS);
+        x=LCD_WIDTH-w;
+        putS(COLOR_BLUE, COLOR_WHITE,x, LCD_HEIGHT-10, tmpS);
     }
 }
 
@@ -122,21 +136,21 @@ void draw_bottom_status(struct browser_data *bdata)
     
     createSizeString(tmpS,bdata->totSize);
         
-    fillRect(COLOR_WHITE,2, 220,316,20);
+    fillRect(COLOR_WHITE,2, LCD_HEIGHT-20,LCD_WIDTH-4,20);
           
-    putS(COLOR_BLUE, COLOR_WHITE,2, 220,bdata->path);  
+    putS(COLOR_BLUE, COLOR_WHITE,2, LCD_HEIGHT-20,bdata->path);  
     
 
     snprintf(tmp,100,"%d %s, %d %s, %s",bdata->nbFile,bdata->nbFile>0?"files":"file",
             bdata->nbDir,bdata->nbDir>0?"folders":"folders",tmpS);
     printk("%s\n",tmp);
     
-    putS(COLOR_BLUE, COLOR_WHITE,2, 230, tmp);    
+    putS(COLOR_BLUE, COLOR_WHITE,2, LCD_HEIGHT-10, tmp);    
 }
 
 void clear_status(struct browser_data *bdata)
 {
-    fillRect(COLOR_WHITE,2, 220,316,20);
+    fillRect(COLOR_WHITE,2, LCD_HEIGHT-20,LCD_WIDTH-24,20);
 }
 
 void createSizeString(char * str,int Isize)
