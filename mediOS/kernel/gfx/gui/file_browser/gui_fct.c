@@ -102,6 +102,10 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
     int             color=COLOR_BLACK;
     int             select_color=COLOR_BLUE;
     char *          cp;
+#ifdef GMINI4XX
+    char						trimmed_filename[34];
+    int							i;
+#endif
     int             type;
     int             H=bdata->entry_height;
     int             X=bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0);
@@ -158,7 +162,6 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
     {
         if(dEntry->selected)
             select_color=COLOR_ORANGE2;
-        putS(color, select_color,X+11, Y, dEntry->name);
         if(bdata->draw_file_size)
             bdata->draw_file_size(dEntry);
     }
@@ -168,8 +171,18 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
             select_color=COLOR_ORANGE;
         else
             select_color= COLOR_WHITE;
-        putS(color, select_color,X+11, Y, dEntry->name);
     }
+#ifdef GMINI4XX
+    for(i=0;i<=32;i++)
+    {
+    	trimmed_filename[i]=dEntry->name[i];
+    }
+    trimmed_filename[33]='\0';
+    putS(color, select_color,X+11, Y, trimmed_filename);
+#endif
+#ifdef AV3XX
+    putS(color, select_color,X+11, Y, dEntry->name);
+#endif
 }
 
 void printAllName(struct browser_data *bdata)
