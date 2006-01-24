@@ -71,14 +71,14 @@ int bat_state_array[]={0x0000,0x0002,0x000A,0x000E,0x001E};
 int vol_state_array[]={0x0000,0x0004,0x0006,0x0007,0x0807,0x0C07,0x0D07};
 
 int key_evt_array[NB_KEY][2] = {
-    { BUTTON_FM_REC,   0x20 }, /* REC */
-    { -1            ,  0x80 }, /* HOLD */
-    { BUTTON_FM_MP3FM, 0x10 }, /* MP3_FM */
-    { BUTTON_UP,       0x08 }, /* UP */
-    { BUTTON_DOWN,     0x40 }, /* DOWN */
-    { BUTTON_LEFT,     0x04 }, /* LEFT */
-    { BUTTON_RIGHT,    0x01 }, /* RIGHT */
-    { BUTTON_ON,       0x02 }  /* PRESS */
+    { BTN_FM_REC   , 0x20 }, /* REC */
+    { -1           , 0x80 }, /* HOLD */
+    { BTN_FM_MP3FM , 0x10 }, /* MP3_FM */
+    { BTN_UP       , 0x08 }, /* UP */
+    { BTN_DOWN     , 0x40 }, /* DOWN */
+    { BTN_LEFT     , 0x04 }, /* LEFT */
+    { BTN_RIGHT    , 0x01 }, /* RIGHT */
+    { BTN_ON       , 0x02 }  /* PRESS */
 };
 
 void fm_remote_INT(int irq_num)
@@ -189,7 +189,8 @@ void processKey(int key)
     for(i=0;i<NB_KEY;i++)
     {
         if(key_evt_array[i][0]!=-1 && (key & key_evt_array[i][1]) )
-        {                
+        {     
+            struct evt_t _evt;           
             if(lcd_get_state()==0)
             {
                 /* the lcd is off => turn on and discard the event */
@@ -199,8 +200,10 @@ void processKey(int key)
             else
                 lcd_launchTimer(); /* postpone the lcd timer */
             halt_launchTimer(); /* postpone the poweroff timer */
-             
-            send_evt(key_evt_array[i][0]);
+            _evt.evt= key_evt_array[i][0];
+            _evt.evt_class=BTN_CLASS;
+            _evt.data=NULL;
+            evt_send(&_evt);
         }
     }
     

@@ -10,6 +10,7 @@
 * KIND, either express of implied.
 */
 
+#include <sys_def/stddef.h>
 #include <kernel/kernel.h>
 
 #include <kernel/irq.h>
@@ -38,7 +39,7 @@ unsigned int IR_code[NB_CODE][2] = {
     { BTN_RIGHT,     0x00fff20d },
     { BTN_UP,        0x00ff926d },
     { BTN_DOWN,      0x00ff52ad },
-    { BTN_JOY,       0x00ffb24d },
+    { BTN_1,         0x00ffb24d },
     { BTN_OFF,       0x00ffd22d }
 };
 
@@ -122,6 +123,7 @@ void processCode(int code)
             {
                 if(repeat_code >= 2)
                 {
+                    struct evt_t _evt;
                     if(lcd_get_state()==0)
                     {
                         /* the lcd is off => turn on and discard the event */
@@ -131,7 +133,10 @@ void processCode(int code)
                     else
                         lcd_launchTimer(); /* postpone the lcd timer */
                     halt_launchTimer(); /* postpone the poweroff timer */
-                    send_evt(IR_code[i][0]);                    
+                    _evt.evt= IR_code[i][0];
+                    _evt.evt_class=BTN_CLASS;
+                    _evt.data=NULL;
+                    evt_send(&_evt);              
                     repeat_code=0;
                 }
                 else

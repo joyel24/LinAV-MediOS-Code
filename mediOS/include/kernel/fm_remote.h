@@ -17,15 +17,6 @@
 #include <kernel/uart.h>
 #define FM_UART 1
 
-#define BUTTON_FM_REC        0x000A
-#define BUTTON_FM_HOLD       0x000B
-#define BUTTON_FM_MP3FM      0x000C
-#define BUTTON_FM_UP         0x000D
-#define BUTTON_FM_DOWN       0x000E
-#define BUTTON_FM_PREV       0x000F
-#define BUTTON_FM_NEXT       0x0010
-#define BUTTON_FM_PLAY       0x0011
-
 #define MAX_PING      3
 #define MAX_NON_GET   5
 #define NB_KEY        8
