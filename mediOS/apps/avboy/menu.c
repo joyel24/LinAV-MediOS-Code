@@ -47,6 +47,8 @@ extern int frameskip;
 int TVState = 0;
 int TVStd = 0;
 int TVInt = 0;
+int ARMFreq = 0;
+int SDRFreq = 0;
 
 /* load/save state function declarations */
 static void do_slot_menu(bool is_load);
@@ -127,16 +129,22 @@ static const char *opt_menu[] = {
 
 #define OPT2_MENU_TITLE "More Options"
 typedef enum {
-  OM2_ITEM_ZX,
-  OM2_ITEM_ZN,
+  OM2_ITEM_OCS,
+  OM2_ITEM_CSN,
+  OM2_ITEM_OCA,
+  OM2_ITEM_CAN,
   OM2_ITEM_PAL,
   OM2_ITEM_BACK,
   OM2_MENU_LAST
 } Opt2MenuItem;
 
 static const char *opt2_menu[] = {
-  "Zoom X+1        ",
-  "Zoom Normal     ",
+ // "Zoom X+1        ",
+ // "Zoom Normal     ",
+  "Overclock SDR   ",
+  "Clock SDR Normal",
+  "Overclock ARM   ",
+  "Clock ARM Normal",
   "Palette         ",
   "Previous Menu..."
 };
@@ -411,10 +419,12 @@ static void do_opt2_menu(void) {
   /* set a couple of defaults */
   num_items = sizeof(opt2_menu) / sizeof(char*);
   mi = 0;
+  snprintf((char *)opt2_menu[0], 17, "Overclock SDR  %1d", SDRFreq);
+  snprintf((char *)opt2_menu[2], 17, "Overclock ARM  %1d", ARMFreq);
   while (!done) {
     mi = do_menu(OPT2_MENU_TITLE, (char**) opt2_menu, num_items, mi);
     switch(mi) {
-      case OM2_ITEM_ZX:
+  /*    case OM2_ITEM_ZX:
         setSize(BMAP1,320,288,8);
         setPos(BMAP1,0x14,0x12);
         (*(volatile unsigned short *)(0x30684))+=0x100;
@@ -422,6 +432,26 @@ static void do_opt2_menu(void) {
       case OM2_ITEM_ZN:
         setSize(BMAP1,160,144,8);
         setPos(BMAP1,168,68);
+        break;                  */
+      case OM2_ITEM_OCS:
+        SDRFreq++;
+        snprintf((char *)opt2_menu[0], 17, "Overclock SDR  %1d", SDRFreq);
+        (*(volatile unsigned short *)(0x30884))=0x80C0 + (SDRFreq<<4);
+       break;
+      case OM2_ITEM_CSN:
+        SDRFreq=0;
+        snprintf((char *)opt2_menu[0], 17, "Overclock SDR  %1d", SDRFreq);
+        (*(volatile unsigned short *)(0x30884))=0x8031;
+        break;
+       case OM2_ITEM_OCA:
+        ARMFreq++;
+        snprintf((char *)opt2_menu[2], 17, "Overclock ARM  %1d", ARMFreq);
+        (*(volatile unsigned short *)(0x30880))=0x8080 + (ARMFreq<<4);
+       break;
+      case OM2_ITEM_CAN:
+        ARMFreq=0;
+        snprintf((char *)opt2_menu[2], 17, "Overclock ARM  %1d", ARMFreq);
+        (*(volatile unsigned short *)(0x30880))=0x8021;
         break;
       case OM2_ITEM_PAL:
         while (btn_readState());
@@ -518,7 +548,7 @@ static void draw_menu(char *title, char **items, size_t num_items)  {
 
   /* draw centered title on screen */
   putsxy((OSD_BITMAP1_WIDTH - w)/2, y, title);
-  
+
   /* calculate base Y for items */
   by = y + h + MENU_ITEM_PAD;
   
@@ -557,7 +587,7 @@ static int do_menu(char *title, char **items, size_t num_items, int sel) {
     while(!(btn = btn_readState()));
 
     /* handle the button */
-    if(btn & 0x08) {
+    if(btn & BTMASK_DOWN) {
         /* select next item in list */
         sel_item = curr_item + 1;
         if (sel_item >= (int) num_items)
@@ -565,7 +595,7 @@ static int do_menu(char *title, char **items, size_t num_items, int sel) {
         select_item(title, curr_item, sel_item);
         curr_item = sel_item;
       }
-      else if(btn & 0x01) {
+      else if(btn & BTMASK_UP) {
         /* select prev item in list */
         sel_item = curr_item - 1;
         if (sel_item < 0)
@@ -573,7 +603,7 @@ static int do_menu(char *title, char **items, size_t num_items, int sel) {
         select_item(title, curr_item, sel_item);
         curr_item = sel_item;
       }
-      else if(btn & 0x04) {
+      else if(btn & BTMASK_RIGHT) {
         /* select current item */
         ret = curr_item;
         done = true;
@@ -646,7 +676,7 @@ else {
 
   fillrect((160 - w) / 2 - 2, y - 2, w + 4, h,0x00);
   putsxy((160 - w)/2, y, title);
-  
+
   by = y + h + 2;
   
 
@@ -669,7 +699,7 @@ while(!done) {
     while (btn_readState());
     while(!(btn = btn_readState()));
 
-    if(btn & 0x08) {
+    if(btn & BTMASK_DOWN) {
         sel_item = curr_item + 1;
         if (sel_item >= (int) num_items) {
            if(pos < (nb-6)) {sel_item=0;pos+=6;break;}
@@ -680,7 +710,7 @@ while(!done) {
            curr_item = sel_item;
         }
       }
-      else if(btn & 0x01) {
+      else if(btn & BTMASK_UP) {
         sel_item = curr_item - 1;
         if (sel_item < 0) {
            if(pos > 0) {sel_item=5;pos-=6;break;}
@@ -691,11 +721,11 @@ while(!done) {
            curr_item = sel_item;
         }
       }
-      else if(btn & 0x04) {
+      else if(btn & BTMASK_RIGHT) {
         done = true;
         break;
       }
-      else if(btn & 0x02) {
+      else if(btn & BTMASK_LEFT) {
       }
 
   }

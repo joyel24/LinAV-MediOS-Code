@@ -60,9 +60,9 @@ int _start(int argc,char* argv)
 {
     char * rom;
     open_graphics();
-    OSD_BITMAP1_ADDRESS = getBufferOffset(BMAP1);
+    OSD_BITMAP1_ADDRESS = (int)getBufferOffset(BMAP1);
     setSize(BMAP1,160,144,8);
-    setPos(BMAP1,180,66);    
+    setPos(BMAP1,180,66);
     
     fillRect(0x00,0,0,160,144);
     
@@ -133,22 +133,22 @@ int doevents(void)
 {
     int bt,pressed,released;
     
-    bt=btn_readState() & 0xF7F;
+    bt=btn_readState();// & 0xF7F;
     pressed=bt & ~oldbt;
     released=~bt & oldbt;
     oldbt=bt;
-    
+
     if (pressed)
     {
-        if(pressed & 0x01)     pad_press(PAD_UP);
-        if(pressed & 0x08)   pad_press(PAD_DOWN);
-        if(pressed & 0x02)   pad_press(PAD_LEFT);
-        if(pressed & 0x04)  pad_press(PAD_RIGHT);
-        if(pressed & 0x20)  pad_press(PAD_B);
-        if(pressed & 0x40) pad_press(PAD_A);
-        if(pressed & 0x100)     pad_press(PAD_START);
-        if(pressed & 0x10)  pad_press(PAD_SELECT);
-        if(pressed & 0x200) {if (do_user_menu() == USER_MENU_QUIT) 
+        if(pressed & BTMASK_UP)     pad_press(PAD_UP);
+        if(pressed & BTMASK_DOWN)   pad_press(PAD_DOWN);
+        if(pressed & BTMASK_LEFT)   pad_press(PAD_LEFT);
+        if(pressed & BTMASK_RIGHT)  pad_press(PAD_RIGHT);
+        if(pressed & BTMASK_F2)  pad_press(PAD_B);
+        if(pressed & BTMASK_F1) pad_press(PAD_A);
+        if(pressed & BTMASK_ON)     pad_press(PAD_START);
+        if(pressed & BTMASK_F3)  pad_press(PAD_SELECT);
+        if(pressed & BTMASK_OFF) {if (do_user_menu() == USER_MENU_QUIT)
         {
             cleanup();
             DIE("bye");
@@ -158,14 +158,14 @@ int doevents(void)
     
     if (released)
     {
-        if(released & 0x01)     pad_release(PAD_UP);
-        if(released & 0x08)   pad_release(PAD_DOWN);
-        if(released & 0x02)   pad_release(PAD_LEFT);
-        if(released & 0x04)  pad_release(PAD_RIGHT);
-        if(released & 0x20)  pad_release(PAD_B);
-        if(released & 0x40) pad_release(PAD_A);
-        if(released & 0x100)     pad_release(PAD_START);
-        if(released & 0x10)  pad_release(PAD_SELECT);
+        if(released & BTMASK_UP)     pad_release(PAD_UP);
+        if(released & BTMASK_DOWN)   pad_release(PAD_DOWN);
+        if(released & BTMASK_LEFT)   pad_release(PAD_LEFT);
+        if(released & BTMASK_RIGHT)  pad_release(PAD_RIGHT);
+        if(released & BTMASK_F2)  pad_release(PAD_B);
+        if(released & BTMASK_F1) pad_release(PAD_A);
+        if(released & BTMASK_ON)     pad_release(PAD_START);
+        if(released & BTMASK_F3)  pad_release(PAD_SELECT);
     }
     
     return 1;

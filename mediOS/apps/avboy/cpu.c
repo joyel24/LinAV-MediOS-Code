@@ -1,4 +1,4 @@
-/* 
+/*
 *   apps/avboy/cpu.c
 *
 *   MediOS project
@@ -329,7 +329,7 @@ __IRAM_CODE void cpu_timers(int cnt)
 	timer_advance(cnt << cpu.speed);
 	lcdc_advance(cnt);
         cpu.snd += cnt;
-	sound_advance(cnt);
+//	sound_advance(cnt);
 }
 
 __IRAM_CODE int cpu_idle(int max)
@@ -843,7 +843,7 @@ next:
 	timer_advance(clen);
 	clen >>= cpu.speed;
 	lcdc_advance(clen);
-	sound_advance(clen);
+//	sound_advance(clen);
 
 	i -= clen;
 	if (i > 0) goto next;
