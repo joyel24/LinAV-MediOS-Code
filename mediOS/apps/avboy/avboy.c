@@ -41,8 +41,15 @@
 #include "sound.h"
 #include "pcm.h"
 
+#ifdef GMINI4XX
+#define LCD_WIDTH 220
+#define LCD_HEIGHT 176
+#endif
+
+#ifdef AV3XX
 #define LCD_WIDTH 320
 #define LCD_HEIGHT 240
+#endif
 
 #define OSD_BITMAP1_WIDTH 160
 #define OSD_BITMAP1_HEIGHT 144
@@ -62,7 +69,7 @@ int _start(int argc,char* argv)
     open_graphics();
     OSD_BITMAP1_ADDRESS = (int)getBufferOffset(BMAP1);
     setSize(BMAP1,160,144,8);
-    setPos(BMAP1,180,66);
+		setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH),(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2);    
     
     fillRect(0x00,0,0,160,144);
     
@@ -140,6 +147,18 @@ int doevents(void)
 
     if (pressed)
     {
+#ifdef GMINI4XX
+        if(pressed & BTMASK_UP)     pad_press(PAD_UP);
+        if(pressed & BTMASK_DOWN)   pad_press(PAD_DOWN);
+        if(pressed & BTMASK_LEFT)   pad_press(PAD_LEFT);
+        if(pressed & BTMASK_RIGHT)  pad_press(PAD_RIGHT);
+        if(pressed & BTMASK_BTN1)  pad_press(PAD_B);
+        if(pressed & BTMASK_BTN2) pad_press(PAD_A);
+        if(pressed & BTMASK_ON)     pad_press(PAD_START);
+        if(pressed & BTMASK_F3)  pad_press(PAD_SELECT);
+        if(pressed & BTMASK_F1) {if (do_user_menu() == USER_MENU_QUIT)
+#endif
+#ifdef AV3XX
         if(pressed & BTMASK_UP)     pad_press(PAD_UP);
         if(pressed & BTMASK_DOWN)   pad_press(PAD_DOWN);
         if(pressed & BTMASK_LEFT)   pad_press(PAD_LEFT);
@@ -149,6 +168,7 @@ int doevents(void)
         if(pressed & BTMASK_ON)     pad_press(PAD_START);
         if(pressed & BTMASK_F3)  pad_press(PAD_SELECT);
         if(pressed & BTMASK_OFF) {if (do_user_menu() == USER_MENU_QUIT)
+#endif
         {
             cleanup();
             DIE("bye");
@@ -158,6 +178,19 @@ int doevents(void)
     
     if (released)
     {
+
+#ifdef GMINI4XX
+        if(released & BTMASK_UP)     pad_release(PAD_UP);
+        if(released & BTMASK_DOWN)   pad_release(PAD_DOWN);
+        if(released & BTMASK_LEFT)   pad_release(PAD_LEFT);
+        if(released & BTMASK_RIGHT)  pad_release(PAD_RIGHT);
+        if(released & BTMASK_BTN1)  pad_release(PAD_B);
+        if(released & BTMASK_BTN2) pad_release(PAD_A);
+        if(released & BTMASK_ON)     pad_release(PAD_START);
+        if(released & BTMASK_BTN3)  pad_release(PAD_SELECT);
+#endif
+
+#ifdef AV3XX
         if(released & BTMASK_UP)     pad_release(PAD_UP);
         if(released & BTMASK_DOWN)   pad_release(PAD_DOWN);
         if(released & BTMASK_LEFT)   pad_release(PAD_LEFT);
@@ -166,6 +199,7 @@ int doevents(void)
         if(released & BTMASK_F1) pad_release(PAD_A);
         if(released & BTMASK_ON)     pad_release(PAD_START);
         if(released & BTMASK_F3)  pad_release(PAD_SELECT);
+#endif
     }
     
     return 1;
