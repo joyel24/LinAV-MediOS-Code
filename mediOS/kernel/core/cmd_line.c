@@ -13,6 +13,7 @@
 #include <sys_def/string.h>
 
 #include <kernel/kernel.h>
+#include <kernel/io.h>
 #include <kernel/uart.h>
 
 #include <kernel/irq.h>
@@ -34,6 +35,8 @@
 
 #define MAX_CMD_LEN     100
 #define MAX_ARGS        10
+
+struct pt_regs * cur_regs;
 
 struct cmd_line_s cmd_tab[] = {
     {
@@ -72,6 +75,12 @@ struct cmd_line_s cmd_tab[] = {
         cmd_action : do_memory_dump,
         nb_args    : 1
     },
+    {
+        cmd        : "reg",
+        help_str   : "Print current regs value",
+        cmd_action : do_reg_print,
+        nb_args    : 0
+    },
     /* this has to be the last entry */
     {
         cmd        : NULL,
@@ -97,7 +106,7 @@ __IRAM_DATA int cur_pos;
 
 __IRAM_DATA unsigned char ** arg_list;
 
-__IRAM_CODE void cmd_line_INT(int irq_num)
+__IRAM_CODE void cmd_line_INT(int irq_num,struct pt_regs * regs)
 {
     unsigned char c;
     int uart = irq_num - IRQ_UART0;
@@ -107,7 +116,7 @@ __IRAM_CODE void cmd_line_INT(int irq_num)
         if(c=='\n' || c=='\r')               /* end of line => add \0 to end the line */
         {
             cur_cmd[cur_pos++]='\0';
-            process_cmd();
+            process_cmd(regs);
             continue;
         }
         
@@ -167,11 +176,13 @@ __IRAM_CODE void cmd_line_INT(int irq_num)
     }
 }
 
-__IRAM_CODE void process_cmd(void)
+__IRAM_CODE void process_cmd(struct pt_regs * regs)
 {        
     int nb_args=0;    
     struct cmd_line_s * cmd_line;
     unsigned  char * ptr;
+    
+    cur_regs = regs;
     
     if(cur_pos==1)
     {
@@ -296,6 +307,26 @@ void print_handler_info (unsigned char ** params)
 {
     irq_print();
     tmr_print();
+}
+
+void do_reg_print (unsigned char ** params)
+{
+    int i=0,j=0;
+    
+    for(i=0;i<13;i++)
+    {
+         printk("R%02d=0x%08x ",i,cur_regs->uregs[i]);
+         j++;
+         if(j==4)
+         {
+            j=0;
+            printk("\n");
+         }         
+    }
+    printk("\n");
+    
+    printk("sp_SVC=0x%08x lr_SVC=0x%08x pc=0x%08x\n",cur_regs->uregs[13],cur_regs->uregs[14],cur_regs->uregs[15]);
+    printk("cpsr=0x%08x old_ro==0x%08x\n",cur_regs->uregs[16],cur_regs->uregs[17]);
 }
 
 void do_memory_dump (unsigned char ** params)

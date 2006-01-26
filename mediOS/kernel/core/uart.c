@@ -27,7 +27,7 @@ __IRAM_DATA unsigned int uart_addr[2]={
     UART1_BASE
 };
 
-__IRAM_CODE void uart_intAction(int irq)
+__IRAM_CODE void uart_intAction(int irq,struct pt_regs * regs)
 {
     char c;
     int uart = irq - IRQ_UART0;

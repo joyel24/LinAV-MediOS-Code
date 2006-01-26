@@ -81,7 +81,7 @@ int key_evt_array[NB_KEY][2] = {
     { BTN_ON       , 0x02 }  /* PRESS */
 };
 
-void fm_remote_INT(int irq_num)
+void fm_remote_INT(int irq_num,struct pt_regs * reg)
 {
     char c;
     int count;

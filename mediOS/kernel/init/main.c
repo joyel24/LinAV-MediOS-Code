@@ -172,7 +172,7 @@ void kernel_start (void)
 #ifdef GMINI4XX
  printk("gmini4xx\n");
 #endif
-
+while(1);
 /* evt & btn test */
 #if 0
    tst_fct();

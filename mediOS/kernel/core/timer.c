@@ -29,7 +29,7 @@ unsigned long tick __IRAM_DATA;
 
 struct tmr_s * tmr_head __IRAM_DATA;
 
-__IRAM_CODE void tmr_intAction(int irq)
+__IRAM_CODE void tmr_intAction(int irq,struct pt_regs * regs)
 {
     struct tmr_s * ptr=tmr_head;
 

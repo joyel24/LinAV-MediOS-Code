@@ -30,8 +30,10 @@ void do_tasks (unsigned char ** params);
 void do_restart (unsigned char ** params);
 void print_handler_info (unsigned char ** params);
 void do_memory_dump (unsigned char ** params);
+void do_reg_print (unsigned char ** params);
+
 void init_cmd_line(void);
 
-void process_cmd(void);
+void process_cmd(struct pt_regs * regs);
 
 #endif

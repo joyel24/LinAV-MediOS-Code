@@ -14,6 +14,9 @@
 #ifndef __UART_H
 #define __UART_H
 
+
+#include <kernel/irq.h>
+
 #define UART_0        0
 #define UART_1        1
 
@@ -25,7 +28,7 @@
 #define UART_LCR      0x0000000a
 #define UART_SR       0x0000000c
 
-void uart_intAction(int irq);
+void uart_intAction(int irq,struct pt_regs * regs);
 
 int  uart_in         (unsigned char * data,int uartNum);
 void uart_out        (unsigned char data,int uartNum);

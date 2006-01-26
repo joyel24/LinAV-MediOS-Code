@@ -14,6 +14,7 @@
 #define __ATA_H
 
 #include <kernel/hardware.h>
+#include <kernel/irq.h>
 
 extern int ata_stopping;
 
@@ -83,8 +84,8 @@ void arch_ata_powerDownHD (void);
 void arch_ata_selectHD    (void);
 void arch_ata_selectCF    (void);
 void arch_ata_init        (void);
-void arch_ide_intAction   (int irq);
+void arch_ide_intAction   (int irq,struct pt_regs * regs);
 
-void ide_intAction        (int irq);
+void ide_intAction        (int irq,struct pt_regs * regs);
 
 #endif

@@ -48,7 +48,7 @@ void arch_ata_init(void)
   arch_ata_resetHD();
 }
 
-void arch_ide_intAction(int irq)
+void arch_ide_intAction(int irq,struct pt_regs * regs)
 {
 }
 

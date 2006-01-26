@@ -14,8 +14,8 @@
 #define __IR_REMOTE_H
 
 
-void ir_remote_interrupt(int irq);
-void ir_remote_tmr_interrupt(int irq);
+void ir_remote_interrupt(int irq,struct pt_regs * regs);
+void ir_remote_tmr_interrupt(int irq,struct pt_regs * regs);
 void restartTimer(void);
 
 int  ir_set(void);

@@ -70,7 +70,7 @@ void __clf(void)
 }
 
 
-__IRAM_CODE void irq_globalHandler(void)
+__IRAM_CODE void irq_globalHandler(struct pt_regs * regs)
 {
     int i,irq;
     unsigned int mask;
@@ -85,7 +85,7 @@ __IRAM_CODE void irq_globalHandler(void)
             irq_table[i].nb_irq++;
             irq_ack(irq);
             if(irq_table[i].action)
-                irq_table[i].action(irq);
+                irq_table[i].action(irq,regs);
             break;
         }
     }
@@ -114,7 +114,7 @@ void irq_enable(int irq)
     }
 }
 
-void irq_changeHandler(int irq_num,void(*fct)(int irq))
+void irq_changeHandler(int irq_num,void(*fct)(int irq,struct pt_regs * regs))
 {
     int i=0;
     int is_enable=0;

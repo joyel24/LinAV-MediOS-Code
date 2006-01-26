@@ -15,8 +15,9 @@ __irq_trap:
     add     r4, sp, #52
     mov     r6, lr
     stmia   r4, {r5, r6, r7, r8, r9}	@ save sp_SVC, lr_SVC, pc, cpsr, old_ro
-    mov     r0, #0
-    mov     r1, sp
+    @mov     r0, #0
+    @mov     r1, sp
+    mov     r0, sp
     adr     lr, __irq_svc1
     b       irq_globalHandler
 __irq_svc1:

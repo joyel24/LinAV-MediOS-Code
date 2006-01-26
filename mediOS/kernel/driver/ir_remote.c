@@ -47,7 +47,7 @@ int last_code=-1;
 int repeat_code=0;
 
 
-void ir_remote_interrupt(int irq)
+void ir_remote_interrupt(int irq,struct pt_regs * regs)
 {
     int val,delta;
     switch(state)
@@ -165,7 +165,7 @@ void restartTimer(void)
     TMR_SET_MODE(TMR_MODE_FREERUN, TMR2);             /* freerun */
 }
 
-void ir_remote_tmr_interrupt(int irq)
+void ir_remote_tmr_interrupt(int irq,struct pt_regs * regs)
 {
     /* timeout in reception => stop current code */
     TMR_SET_MODE(TMR_MODE_STOP,TMR2);

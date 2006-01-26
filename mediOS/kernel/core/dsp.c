@@ -151,7 +151,7 @@ MED_RET_T load_dsp_program_mem (void* pDSPCode, int nSize)
 }
 
 DSP_HANDLER g_pDSPHandler = 0;//void (*g_pDSPHandler)(void) = 0;
-/*__IRAM_CODE*/ void c54_dsp_interrupt (int irq)
+/*__IRAM_CODE*/ void c54_dsp_interrupt (int irq,struct pt_regs * regs)
 {
 	if (g_pDSPHandler)
 		g_pDSPHandler ();

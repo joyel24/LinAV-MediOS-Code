@@ -14,6 +14,7 @@
 #ifndef __IRQ_H
 #define __IRQ_H
 
+#include <kernel/kernel.h>
 #include <kernel/irqs.h>
 #include <kernel/hardware.h>
 
@@ -180,16 +181,16 @@ void __clf(void);
 
 struct irq_data_s {
     int irq;
-    void (*action)(int irqnr);
+    void (*action)(int irqnr,struct pt_regs * regs);
     char * name;
     unsigned int nb_irq;
 };
 
 extern void irq_init(void);
 
-extern void irq_addHandler(int irq,void(*action)(int irqnr),char * name);
+extern void irq_addHandler(int irq,void(*action)(int irqnr,struct pt_regs * regs),char * name);
 extern void irq_deleteHandler(int irq);
-extern void irq_changeHandler(int irq_num,void(*fct)(int irq));
+extern void irq_changeHandler(int irq_num,void(*fct)(int irq,struct pt_regs * regs));
 extern void irq_disable(int irq);
 extern void irq_enable(int irq);
 extern void irq_print(void);

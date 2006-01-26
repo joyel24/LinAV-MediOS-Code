@@ -15,7 +15,7 @@
 
 
 #include <sound.h>
-
+#include <kernel/irq.h>
 #include <kernel/mas.h>
 
 /********************* Sound buffer           ***************************/
@@ -58,7 +58,7 @@ extern int sound_buff_write(sound_buffer_s * sound_buffer, int (*reader_fct)(cha
 
 /********************* DSP                    ***************************/
 /* dev functions */
-void    dsp_interrupt     (int irq);
+void    dsp_interrupt     (int irq,struct pt_regs * regs);
 void    dsp_ctl           (unsigned int cmd, void * arg);
 
 /* mp3 functions */

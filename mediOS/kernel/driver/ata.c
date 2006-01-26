@@ -262,8 +262,8 @@ void ata_init(void)
     arch_ata_init();
 }
 
-void ide_intAction(int irq)
+void ide_intAction(int irq,struct pt_regs * regs)
 {
-    arch_ide_intAction(irq);
+    arch_ide_intAction(irq,regs);
 }
 

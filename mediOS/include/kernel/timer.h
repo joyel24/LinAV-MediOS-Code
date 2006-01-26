@@ -67,7 +67,7 @@ struct tmr_s {
     char * name;
 };
 
-extern void tmr_intAction(int irq);
+extern void tmr_intAction(int irq,struct pt_regs * regs);
 
 extern void tmr_setup(struct tmr_s * tmr_data,char * name);
 extern void tmr_remove(struct tmr_s * tmr_data);

@@ -79,7 +79,7 @@ __IRAM_DATA sound_buffer_s * current_buffer;
     __i;                                                      \
   })
 
-__IRAM_CODE void dsp_interrupt(int irq)
+__IRAM_CODE void dsp_interrupt(int irq,struct pt_regs * regs)
 {
     int toSend;
     int send;
@@ -112,7 +112,7 @@ __IRAM_CODE void dsp_interrupt(int irq)
         {
            // printk("loop -> read\n");
             current_buffer->read=0;
-            dsp_interrupt(IRQ_MAS_DATA);             /* retry to send data */
+            dsp_interrupt(IRQ_MAS_DATA,NULL);             /* retry to send data */
         }
         irq_enable(IRQ_MAS_DATA);
     }
