@@ -34,11 +34,37 @@ void btn_init(void);
 int btn_readState(void);
 int arch_btn_readState(void);
 
+extern int nb_off_press;
+extern int nb_pressed[NB_BUTTONS];
+extern int press_step[NB_BUTTONS];
+extern int mx_press[NB_BUTTONS];
+
 #define BTN_CHK    {                     \
-    int __val ;                          \
-    __val=btn_readState();                    \
+    int __val,__val2;                    \
+    __val=btn_readState();               \
+    if(__val&BTMASK_OFF)                 \
+    {                                    \
+        nb_off_press++;                  \
+        if(nb_off_press>MAX_OFF)         \
+        {                                \
+            printk("[OFF button] => halt\n"); \
+            halt_device();               \
+        }                                \
+    }                                    \
+    else                                 \
+        nb_off_press = 0;                \
     if(__val!=0x0)                       \
-        btn_processPress(__val);     \
+    {                                    \
+        INTERNAL_TMR_CHK(__val2);        \
+        if(__val2)                       \
+            btn_processPress(__val);     \
+    }                                    \
+    else                                 \
+    {                                    \
+        memset(nb_pressed,0x0,sizeof(int)*NB_BUTTONS);\
+        memset(mx_press,0x0,sizeof(int)*NB_BUTTONS);\
+        memset(press_step,0x0,sizeof(int)*NB_BUTTONS);\
+    }                                     \
 }
 
 struct btn_repeatParam {

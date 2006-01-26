@@ -68,7 +68,7 @@ __IRAM_CODE void btn_processPress(int val)
         if(nb_debug_switch==0)
         {
             nb_debug_switch=current_repeatParam->init_delay*3;
-            
+#if 0            
             if(lcd_get_state()==0)
             {
                 /* the lcd is off => turn on and discard the event */
@@ -78,7 +78,7 @@ __IRAM_CODE void btn_processPress(int val)
             else
                 lcd_launchTimer(); /* postpone the lcd timer */                
             halt_launchTimer(); /* postpone the poweroff timer */
-
+#endif
             gfx_dbgscrSwitch();
         }
         else
@@ -96,21 +96,21 @@ __IRAM_CODE void btn_processPress(int val)
             nb_pressed[btn]=0;   /* reset nb_pressed */
             mx_press[btn] = current_repeatParam->init_delay;
             press_step[btn] = 0;
-            if(btn==BTN_OFF)
-                nb_off_press=0;    /* if off btn released -> reset nb_off_press */             
+            /*if(btn==BTN_OFF)
+                nb_off_press=0;   */ /* if off btn released -> reset nb_off_press */             
         }
         else            /* the btn i is pressed */
         {    
             
-            if(btn==BTN_OFF)    /* OFF btn pressed => check if we have to halt */
-            {
+            /*if(btn==BTN_OFF)  */  /* OFF btn pressed => check if we have to halt */
+            /*{
                 nb_off_press++;
                 if(nb_off_press>MAX_OFF)
                 {
                     printk("[OFF button] => halt\n");
                     halt_device();                    
                 }
-            }
+            }*/
 
             if(nb_pressed[btn]==0)
             {
@@ -139,7 +139,7 @@ __IRAM_CODE void btn_processPress(int val)
                             press_step[btn] = 0;
                             mx_press[btn] = current_repeatParam->init_delay;
                     }
-                    
+#if 0
                     if(lcd_get_state()==0)
                     {
                         /* the lcd is off => turn on and discard the event */
@@ -147,9 +147,9 @@ __IRAM_CODE void btn_processPress(int val)
                         break;
                     }
                     else
-                        lcd_launchTimer(); /* postpone the lcd timer */
-                        
+                        lcd_launchTimer(); /* postpone the lcd timer */                        
                     halt_launchTimer(); /* postpone the poweroff timer */
+#endif
                     evt.evt=btn+1;
                     evt.evt_class=BTN_CLASS;
                     evt.data=mx_press[btn];

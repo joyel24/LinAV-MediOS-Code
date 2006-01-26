@@ -10,7 +10,7 @@
 * KIND, either express of implied.
 */
 
-#include <sys_def/stddef.h>
+#include <sys_def/string.h>
 
 #include <kernel/io.h>
 #include <kernel/hardware.h>
@@ -23,7 +23,9 @@
 #include <kernel/usb_fw.h>
 #include <kernel/ext_module.h>
 #include <kernel/fm_remote.h>
+#include <kernel/bat_power.h>
 #include <kernel/ata.h>
+#include <kernel/exit.h>
 
 unsigned long tick __IRAM_DATA;
 
@@ -51,7 +53,6 @@ __IRAM_CODE void tmr_intAction(int irq,struct pt_regs * regs)
 #endif
 
     ATA_PWR_OFF_TASK;
-
     while(ptr!=NULL)
     {
         if(ptr->trigger && ptr->expires<=tick)

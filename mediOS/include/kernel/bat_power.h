@@ -46,6 +46,20 @@ void process_DC_change(void);
         process_DC_change();         \
 }
 
+#define INTERNAL_TMR_CHK(VAR) {  \
+    if(lcd_get_state()==0)       \
+    {                            \
+        lcd_keyPress();          \
+        VAR=0;                   \
+    }                            \
+    else                         \
+    {                            \
+        lcd_launchTimer();       \
+        VAR = 1;                 \
+    }                            \
+    halt_launchTimer();          \
+}
+
 #define lcd_off()           lcd_set_state(0)
 #define lcd_on()            lcd_set_state(1)
 

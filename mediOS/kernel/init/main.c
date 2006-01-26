@@ -57,12 +57,12 @@ extern void dbgscr_init(void);
 
 void tst_fct(void)
 {
-    iniIcon();
+    /*iniIcon();
     open_graphics();
     clearScreen(COLOR_WHITE);
     setFont(STD6X9);
     ini_file_browser();
-    browse("/",1);
+    browse("/",1);*/
 
 #ifdef HAVE_EVT
     int evt_hand;
@@ -172,7 +172,6 @@ void kernel_start (void)
 #ifdef GMINI4XX
  printk("gmini4xx\n");
 #endif
-while(1);
 /* evt & btn test */
 #if 0
    tst_fct();
