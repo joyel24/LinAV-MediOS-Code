@@ -52,6 +52,8 @@ extern int btn_mask[NB_BUTTONS];
 #define BTN_NOT_PRESSED(val,btn)    !(val&btn_mask[btn])
 #define BTN_PRESSED(val,btn)        (val&btn_mask[btn])
 
+int need_clean;
+
 __IRAM_CODE int btn_readState(void)
 {
     return arch_btn_readState();
@@ -178,6 +180,7 @@ void btn_init(void)
     
     nb_off_press=0;
     nb_debug_switch=0;
+    need_clean=0;
        
     for(btn=0;btn<NB_BUTTONS;btn++)
     {

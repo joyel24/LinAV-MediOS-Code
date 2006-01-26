@@ -45,14 +45,14 @@ int trad_tab[] = {
 };
 
 int arch_btn_readState(void){
-    int dir,fn,bt,on_off_fast;
+    int dir,fn,bt,on_off_fast=0;
     int val;
 
     dir = (~inw(BUTTON_PORT0))&0x3;
     fn  = (~inw(BUTTON_PORT1))&0x7;
     bt  = (~inw(BUTTON_PORT2))&0x7;
-
-    dir = trad_tab[dir|(fn&0x3)<<2];
+    
+    dir = trad_tab[dir|(fn&0x3)<<2];    
     fn  = (fn&0x4)|(bt&0x3);
     bt  = (bt>>2)&0x1;
 
@@ -61,11 +61,9 @@ int arch_btn_readState(void){
        bt = 0;
        on_off_fast=0x4;
     }
-    else
-       on_off_fast= 0x0;
 
 
-    /* ON, OFF keys */
+    /* ON/OFF keys */
     if(!GIO_IS_SET(GIO_ON_BTN))  on_off_fast |= (0x1);
     if(!GIO_IS_SET(GIO_OFF_BTN)) on_off_fast |= (0x2);
     

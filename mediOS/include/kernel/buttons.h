@@ -22,7 +22,7 @@
 #define DEFAULT_MIN_DELAY       2
 #define DEFAULT_DEC_VALUE       1
 
-#define MAX_OFF                     300
+#define MAX_OFF                     200
 
 #define NB_BUTTONS                  0x10
 
@@ -38,7 +38,7 @@ extern int nb_off_press;
 extern int nb_pressed[NB_BUTTONS];
 extern int press_step[NB_BUTTONS];
 extern int mx_press[NB_BUTTONS];
-
+extern int need_clean;
 #define BTN_CHK    {                     \
     int __val,__val2;                    \
     __val=btn_readState();               \
@@ -57,12 +57,15 @@ extern int mx_press[NB_BUTTONS];
     {                                    \
         INTERNAL_TMR_CHK(__val2);        \
         if(__val2)                       \
+        {                                \
+            need_clean=1;                \
             btn_processPress(__val);     \
+        }                                \
     }                                    \
-    else                                 \
+    else if(need_clean)                  \
     {                                    \
+        need_clean=0;                    \
         memset(nb_pressed,0x0,sizeof(int)*NB_BUTTONS);\
-        memset(mx_press,0x0,sizeof(int)*NB_BUTTONS);\
         memset(press_step,0x0,sizeof(int)*NB_BUTTONS);\
     }                                     \
 }
