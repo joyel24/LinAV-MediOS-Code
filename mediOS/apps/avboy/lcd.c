@@ -31,9 +31,8 @@
 #include "asm.h"
 #endif
 
-struct lcd lcd;
-
-struct scan scan;
+__IRAM_DATA struct lcd lcd;
+__IRAM_DATA struct scan scan;
 
 #define BG (scan.bg)
 #define WND (scan.wnd)
@@ -60,7 +59,12 @@ struct scan scan;
 #define WV (scan.wv)
 
 static byte patpix[4096][8][8];
+#ifdef GMINI4XX
+__IRAM_DATA static byte patdirty[1024];
+#endif
+#ifdef AV3XX
 static byte patdirty[1024];
+#endif
 __IRAM_DATA static byte anydirty;
 
 __IRAM_DATA static int scale = 1;
