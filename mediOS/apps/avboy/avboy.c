@@ -44,11 +44,15 @@
 #ifdef GMINI4XX
 #define LCD_WIDTH 220
 #define LCD_HEIGHT 176
+#define X_OFFSET 0
+#define Y_OFFSET 0
 #endif
 
 #ifdef AV3XX
 #define LCD_WIDTH 320
 #define LCD_HEIGHT 240
+#define X_OFFSET 0x14
+#define Y_OFFSET 0x12
 #endif
 
 #define OSD_BITMAP1_WIDTH 160
@@ -69,7 +73,7 @@ int _start(int argc,char* argv)
     open_graphics();
     OSD_BITMAP1_ADDRESS = (int)getBufferOffset(BMAP1);
     setSize(BMAP1,160,144,8);
-		setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH),(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2);    
+		setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
     
     fillRect(0x00,0,0,160,144);
     
