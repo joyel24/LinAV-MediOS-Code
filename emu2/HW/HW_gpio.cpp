@@ -1,4 +1,4 @@
-/* 
+/*
 *   HW_gpio.cpp
 *
 *   AV3XX emulator
@@ -102,19 +102,19 @@ uint32_t HW_gpio::read(uint32_t addr,int size)
 {    
     switch(addr)
     {
-        case GPIO_START+0x0:                                              /* DIR 0 */
+        case GPIO_DIRECTION0:                                              /* DIR 0 */
             DEBUG_HW(GPIO_HW_DEBUG,"GPIO read direction 0 : %04x\n",DIR_0);
             return DIR_0;
-        case GPIO_START+0x2:                                              /* DIR 1 */
+        case GPIO_DIRECTION1:                                              /* DIR 1 */
             DEBUG_HW(GPIO_HW_DEBUG,"GPIO read direction 1 : %04x\n",DIR_1);
             return DIR_1;
-        case GPIO_START+0x4:                                              /* INV 0 */
+        case GPIO_INVERT0:                                              /* INV 0 */
             DEBUG_HW(GPIO_HW_DEBUG,"GPIO read inversion 0 : %04x\n",INV_0);
             return INV_0;
-        case GPIO_START+0x6:                                              /* INV 1 */
+        case GPIO_INVERT1:                                              /* INV 1 */
             DEBUG_HW(GPIO_HW_DEBUG,"GPIO read inversion 1 : %04x\n",INV_1);
             return INV_1;
-        case GPIO_START+0x8:                                              /* SET 0 */
+        case GPIO_BITSET0:                                              /* SET 0 */
             {        
                 uint32_t tmp_val =0;
                 for(int k=0;k<0x10;k++)
@@ -130,7 +130,7 @@ uint32_t HW_gpio::read(uint32_t addr,int size)
                 DEBUG_HW(GPIO_HW_DEBUG,"GPIO read state 0: %04x\n",tmp_val);
                 return tmp_val;
             }
-        case GPIO_START+0xA:                                              /* SET 1 */
+        case GPIO_BITSET1:                                              /* SET 1 */
             {        
                 uint32_t tmp_val =0;
                 for(int k=0;k<0x10;k++)
@@ -145,7 +145,7 @@ uint32_t HW_gpio::read(uint32_t addr,int size)
                 DEBUG_HW(GPIO_HW_DEBUG,"GPIO read state 1: %04x\n",tmp_val);
                 return tmp_val;
             }
-        case GPIO_START+0xC:                                              /* CLR 0 */
+        case GPIO_BITCLEAR0:                                              /* CLR 0 */
             {        
                 uint32_t tmp_val =0;
                 for(int k=0;k<0x10;k++)
@@ -161,7 +161,7 @@ uint32_t HW_gpio::read(uint32_t addr,int size)
                 DEBUG_HW(GPIO_HW_DEBUG,"GPIO read state 0: %04x\n",tmp_val);
                 return tmp_val;
             }
-        case GPIO_START+0xE:                                              /* CLR 1 */
+        case GPIO_BITCLEAR1:                                              /* CLR 1 */
             {        
                 uint32_t tmp_val =0;
                 for(int k=0;k<0x10;k++)
@@ -177,15 +177,15 @@ uint32_t HW_gpio::read(uint32_t addr,int size)
                 DEBUG_HW(GPIO_HW_DEBUG,"GPIO read state 1: %04x\n",tmp_val);
                 return tmp_val;
             }
-        case GPIO_START+0x10:                                              /* IRQ */
+        case GPIO_ENABLE_IRQ:                                              /* IRQ */
             DEBUG_HW(GPIO_HW_DEBUG,"GPIO read IRQ : %04x\n",IRQPORT);
             return IRQPORT;
             break;
-        case GPIO_START+0x12:                                              /* FSEL */
+        case GPIO_FSEL:                                              /* FSEL */
             DEBUG_HW(GPIO_HW_DEBUG,"GPIO read FSEL : %04x\n",FSEL);
             return FSEL;
             break;
-        case GPIO_START+0x14:                                              /* BITRATE */
+        case GPIO_BITRATE:                                              /* BITRATE */
             DEBUG_HW(GPIO_HW_DEBUG,"GPIO read BITRATE : %04x\n",BITRATE);
             return BITRATE;
             break;
@@ -198,7 +198,7 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
 {
     switch(addr)
     {
-        case GPIO_START+0x0:                                              /* DIR 0 */
+        case GPIO_DIRECTION0:                                              /* DIR 0 */
             {        
                 int tmp = val ^ DIR_0;          // compute what has changed
                 int tmp2 = val;
@@ -221,7 +221,7 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
                             {
                                 //DEBUG_HW(GPIO_HW_DEBUG," & CLR");
                                 CLR_GPIO(k);
-                            }                         
+                            }
                         }   
                         GPIO_DIR_CHG(k,tmp2&0x1);
                         //DEBUG_HW(GPIO_HW_DEBUG,"|");                     
@@ -232,7 +232,7 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
                 DEBUG_HW(GPIO_HW_DEBUG,"\n");                
                 break;
             }
-        case GPIO_START+0x2:                                              /* DIR 1 */
+        case GPIO_DIRECTION1:                                              /* DIR 1 */
             {        
                 int tmp = val ^ DIR_1;          /* compute what has changed */
                                 
@@ -267,15 +267,15 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
                 //DEBUG_HW(GPIO_HW_DEBUG,"\n");
                 break;
             }
-        case GPIO_START+0x4:                                              /* INV 0 */
+        case GPIO_INVERT0:                                              /* INV 0 */
             DEBUG_HW(GPIO_HW_DEBUG,"GPIO write INV_0 : %04x change to %04x\n",INV_0,val&0xFFFF);
             INV_0=val&0xFFFF;
             break;
-        case GPIO_START+0x6:                                              /* INV 1 */
+        case GPIO_INVERT1:                                              /* INV 1 */
             DEBUG_HW(GPIO_HW_DEBUG,"GPIO write INV_1 : %04x change to %04x\n",INV_1,val&0xFFFF);
             INV_1=val&0xFFFF;
             break;
-        case GPIO_START+0x8:                                              /* SET 0 */
+        case GPIO_BITSET0:                                              /* SET 0 */
             {
                 //DEBUG_HW(GPIO_HW_DEBUG,"GPIO set 0: %04x (with DIR mask:%08x): ",val,DIR_0);        
                 //val &= ~DIR_0;        
@@ -298,7 +298,7 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
             }
             //DEBUG_HW(GPIO_HW_DEBUG,"\n");
             break;
-        case GPIO_START+0xA:                                              /* SET 1 */
+        case GPIO_BITSET1:                                              /* SET 1 */
             {
                 //DEBUG_HW(GPIO_HW_DEBUG,"GPIO set 1: %04x (with DIR mask:%08x): ",val,DIR_1);        
                 //val &= ~DIR_1;        
@@ -321,7 +321,7 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
             }
             //DEBUG_HW(GPIO_HW_DEBUG,"\n");
             break;
-        case GPIO_START+0xC:                                              /* CLR 0 */
+        case GPIO_BITCLEAR0:                                              /* CLR 0 */
             {
                 //DEBUG_HW(GPIO_HW_DEBUG,"GPIO clr 0: %04x (with DIR mask:%08x): ",val,DIR_0);        
                 //val &= ~DIR_0;        
@@ -344,7 +344,7 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
             }
             //DEBUG_HW(GPIO_HW_DEBUG,"\n");
             break;
-        case GPIO_START+0xE:                                              /* CLR 1 */
+        case GPIO_BITCLEAR1:                                              /* CLR 1 */
             {
                 //DEBUG_HW(GPIO_HW_DEBUG,"GPIO clr 1: %04x (with DIR mask:%08x): ",val,DIR_1);        
                 //val &= ~DIR_1;        
@@ -367,15 +367,15 @@ void HW_gpio::write(uint32_t addr,uint32_t val,int size)
             }
             //DEBUG_HW(GPIO_HW_DEBUG,"\n");
             break;
-        case GPIO_START+0x10:                                              /* IRQ */            
+        case GPIO_ENABLE_IRQ:                                              /* IRQ */
             IRQPORT=val & 0xFF;
             DEBUG_HW(GPIO_HW_DEBUG,"GPIO write IRQ : %04x\n",IRQPORT);
             break;
-        case GPIO_START+0x12:                                              /* FSEL */            
+        case GPIO_FSEL:                                              /* FSEL */
             FSEL = val & 0x7FFF;
             DEBUG_HW(GPIO_HW_DEBUG,"GPIO write FSEL : %04x\n",FSEL);
             break;
-        case GPIO_START+0x14:                                              /* BITRATE */
+        case GPIO_BITRATE:                                              /* BITRATE */
             BITRATE = val & 0xFFFF;
             DEBUG_HW(GPIO_HW_DEBUG,"GPIO write BITRATE : %04x\n",BITRATE);
             break;

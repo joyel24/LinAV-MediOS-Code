@@ -1,4 +1,4 @@
-/* 
+/*
 *   HW_dma.cpp
 *
 *   AV3XX emulator
@@ -101,10 +101,10 @@ void HW_dma::write(uint32_t addr,uint32_t val,int size)
             if(val & 0x1)
             {
                 DEBUG_HW(DMA_HW_DEBUG," - xfer from %x to %x, size = %x, dir : %s->%s ... ",dma_src,dma_dst,dma_size,
-                    ((device_sel>>4)&0xf)==1?"ATA":"SDRAM",(device_sel&0xf)==1?"ATA":"SDRAM");
+                    (device_sel==DMA_SDRAM_TO_ATA)?"SDRAM":"ATA",(device_sel==DMA_SDRAM_TO_ATA)?"ATA":"SDRAM");
                 switch(device_sel)
-                {     
-                    case 0x51:                          
+                {
+                    case DMA_SDRAM_TO_ATA:
                         for (int i = 0; i < dma_size; i++)
                             data[i+data_ptr] = mem->read(SDRAM_START + dma_src + i,1);
                         data_ptr+=dma_size;
@@ -117,7 +117,7 @@ void HW_dma::write(uint32_t addr,uint32_t val,int size)
                         }                        
                         DEBUG_HW(DMA_HW_DEBUG,"done");
                         break;
-                    case 0x15:
+                    case DMA_ATA_TO_SDRAM:
                         DEBUG_HW(DMA_HW_DEBUG,"real dest = %x , src val (%x/%x) %02x%02x%02x%02x  ",SDRAM_START + dma_dst,data_ptr,
                             data_size,data[data_ptr]&0xFF,data[data_ptr+1]&0xFF,data[data_ptr+2]&0xFF,data[data_ptr+3]&0xFF);
                         for (int i = 0; i < dma_size; i++)

@@ -94,6 +94,22 @@
 #define GPIO_START   TI_REG_START+0x580
 #define GPIO_END     TI_REG_START+0x596
 
+#define GPIO_DIRECTION0                    (GPIO_START+0x00)  // GIO 0-15
+#define GPIO_DIRECTION1                    (GPIO_START+0x02)  // GIO 16-31
+#define GPIO_DIRECTION2                    0
+#define GPIO_INVERT0                       (GPIO_START+0x04)  // GIO 0-15
+#define GPIO_INVERT1                       (GPIO_START+0x06)  // GIO 16-31
+#define GPIO_INVERT2                       0
+#define GPIO_BITSET0                       (GPIO_START+0x08)  // GIO 0-15
+#define GPIO_BITSET1                       (GPIO_START+0x0a)  // GIO 16-31
+#define GPIO_BITSET2                       0
+#define GPIO_BITCLEAR0                     (GPIO_START+0x0c)  // GIO 0-15
+#define GPIO_BITCLEAR1                     (GPIO_START+0x0e)  // GIO 16-31
+#define GPIO_BITCLEAR2                     0
+#define GPIO_ENABLE_IRQ                    (GPIO_START+0x10)  // GIO 0-7
+#define GPIO_FSEL                          (GPIO_START+0x12)
+#define GPIO_BITRATE                       (GPIO_START+0x14)
+
 #define GPIO_STR  \
 { "ON" , "SPDIF/UART1_RX", "UKN", "UKN", "MAS_EOD", "UKN", "IR", "UKN", \
   "MAS_D0", "MAS_D1", "MAS_D2", "MAS_D3", "MAS_D4", "MAS_D5", "MAS_D6", "MAS_D7", \
@@ -109,6 +125,9 @@
 
 #define GPIO_OFF_NUM  0x1C
 #define GPIO_MAS_PR   0x1F
+
+#define GPIO_I2C_SDA  0x13
+#define GPIO_I2C_SCL  0x12
 
 /********************** I2C     ****************************************/
 
@@ -152,9 +171,23 @@
 #define DMA_START   TI_REG_START+0xa38
 #define DMA_END     TI_REG_START+0xa48
 
-/********************** IDE BASE ****************************************/
+#define DMA_SDRAM_TO_ATA  0x51
+#define DMA_ATA_TO_SDRAM  0x15
+
+/********************** IDE ****************************************/
 #define IDE_BASE    0x02400000
 #define IDE_END     0x02400400
+
+#define IDE_DATA                          (IDE_BASE+0x000)
+#define IDE_ERROR                         (IDE_BASE+0x080)
+#define IDE_NSECTOR                       (IDE_BASE+0x100)
+#define IDE_SECTOR                        (IDE_BASE+0x180)
+#define IDE_LCYL                          (IDE_BASE+0x200)
+#define IDE_HCYL                          (IDE_BASE+0x280)
+#define IDE_SELECT                        (IDE_BASE+0x300)
+#define IDE_CONTROL                       (IDE_BASE+0x340)
+#define IDE_STATUS                        (IDE_BASE+0x380)
+#define IDE_COMMAND                       (IDE_BASE+0x380)
 
 /********************** CPLD     ****************************************/
 #define CPLD_START       0x02000000

@@ -12,7 +12,7 @@
 
 #define ARCH_NAME         "Gmini400"
 
-//#define homebrew //or let it be ;-)
+#define homebrew //or let it be ;-)
 
 /************************************************************ Memory Zone */
 
@@ -102,15 +102,31 @@
 
 /********************** GPIO     ****************************************/
 #define GPIO_START   TI_REG_START+0x580
-#define GPIO_END     TI_REG_START+0x596
+#define GPIO_END     TI_REG_START+0x5FF
+
+#define GPIO_DIRECTION0                    (GPIO_START+0x00)  // GIO 0-15
+#define GPIO_DIRECTION1                    (GPIO_START+0x02)  // GIO 16-31
+#define GPIO_DIRECTION2                    (GPIO_START+0x04)
+#define GPIO_INVERT0                       (GPIO_START+0x06)  // GIO 0-15
+#define GPIO_INVERT1                       (GPIO_START+0x08)  // GIO 16-31
+#define GPIO_INVERT2                       (GPIO_START+0x0a)
+#define GPIO_BITSET0                       (GPIO_START+0x0c)  // GIO 0-15
+#define GPIO_BITSET1                       (GPIO_START+0x0e)  // GIO 16-31
+#define GPIO_BITSET2                       (GPIO_START+0x10)
+#define GPIO_BITCLEAR0                     (GPIO_START+0x12)  // GIO 0-15
+#define GPIO_BITCLEAR1                     (GPIO_START+0x14)  // GIO 16-31
+#define GPIO_BITCLEAR2                     (GPIO_START+0x16)
+#define GPIO_ENABLE_IRQ                    (GPIO_START+0x24)  // GIO 0-7
+#define GPIO_FSEL                          (GPIO_START+0x26)
+#define GPIO_BITRATE                       (GPIO_START+0x28)
 
 #define GPIO_STR  \
-{ "ON" , "SPDIF/UART1_RX", "UKN", "UKN", "MAS_EOD", "UKN", "IR", "UKN", \
-  "MAS_D0", "MAS_D1", "MAS_D2", "MAS_D3", "MAS_D4", "MAS_D5", "MAS_D6", "MAS_D7", \
+{ "UKN", "UKN", "UKN", "UKN", "UKN", "UKN", "UKN", "UKN", \
+  "I2C_DA", "I2C_CLK", "UKN", "UKN", "UKN", "BUTTON", "UKN", "UKN", \
                     \
-  "MAS_PWR", "UKN", "I2C_CLK", "I2C_DA", "UKN", "CPLD_MOD_SENSE", "CPLD_SIGNAL", "BCK_LIGHT", \
-  "UKN", "UKN", "UKN", "UKN", "OFF", "VIDEO/UART1_TX", "MAS_RTR", "MAS_PR"  \
-} 
+  "UKN", "UKN", "UKN", "UKN", "UKN", "UKN", "UKN", "UKN", \
+  "UKN", "UKN", "UKN", "UKN", "UKN", "UKN", "UKN", "UKN", \
+}
 
 #define GPIO_ON_NUM   0x00
 #define GPIO_MAS_EOD  0x04
@@ -119,6 +135,9 @@
 
 #define GPIO_OFF_NUM  0x1C
 #define GPIO_MAS_PR   0x1F
+
+#define GPIO_I2C_SDA  0x08
+#define GPIO_I2C_SCL  0x09
 
 /********************** I2C     ****************************************/
 
@@ -165,13 +184,27 @@
 #define DMA_START   TI_REG_START+0xa38
 #define DMA_END     TI_REG_START+0xa48
 
-/********************** IDE BASE ****************************************/
-#define IDE_BASE    0x02400000
-#define IDE_END     0x02400400
+#define DMA_SDRAM_TO_ATA  0x53
+#define DMA_ATA_TO_SDRAM  0x35
+
+/********************** IDE ****************************************/
+#define IDE_BASE    0x05100000
+#define IDE_END     0x05100100
+
+#define IDE_DATA                          (IDE_BASE+0x20)
+#define IDE_ERROR                         (IDE_BASE+0x22)
+#define IDE_NSECTOR                       (IDE_BASE+0x24)
+#define IDE_SECTOR                        (IDE_BASE+0x26)
+#define IDE_LCYL                          (IDE_BASE+0x28)
+#define IDE_HCYL                          (IDE_BASE+0x2a)
+#define IDE_SELECT                        (IDE_BASE+0x2c)
+#define IDE_CONTROL                       (IDE_BASE+0x1c)
+#define IDE_STATUS                        (IDE_BASE+0x2e)
+#define IDE_COMMAND                       (IDE_BASE+0x2e)
 
 /********************** CPLD     ****************************************/
 #define CPLD_START       0x02000000
-#define CPLD_END         0x03000000
+#define CPLD_END         0x06000000
 #define CPLD_PORT_OFFSET 0x00500000
 
 /********************** LCD      ****************************************/

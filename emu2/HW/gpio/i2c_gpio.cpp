@@ -1,4 +1,4 @@
-/* 
+/*
 *   i2c_gpio.cpp
 *
 *   AV3XX emulator
@@ -104,13 +104,13 @@ void i2c_gpio::i2c_gpio_set_state(int state)
 i2c_master::i2c_master(HW_gpio * gpio)
 {
     
-    clk = new i2c_gpio(0x12,this);
-    data = new i2c_gpio(0x13,this);
+    clk = new i2c_gpio(GPIO_I2C_SCL,this);
+    data = new i2c_gpio(GPIO_I2C_SDA,this);
     
     this->gpio = gpio;
     
-    gpio->register_port(0x12,(gpio_port *)clk);
-    gpio->register_port(0x13,(gpio_port *)data);
+    gpio->register_port(GPIO_I2C_SCL,(gpio_port *)clk);
+    gpio->register_port(GPIO_I2C_SDA,(gpio_port *)data);
        
     
     /* ini variables */
@@ -119,7 +119,10 @@ i2c_master::i2c_master(HW_gpio * gpio)
     cur_device = NULL;
     
     i2c_head=NULL;
+
+#ifdef AV3XX
     register_i2c((i2c_device *)new i2c_MAS(gpio));
+#endif
     register_i2c((i2c_device *)new i2c_RTC(gpio));
     register_i2c((i2c_device *)new i2c_TSC(gpio));
     register_i2c((i2c_device *)new i2c_DVR(gpio));
@@ -152,12 +155,27 @@ i2c_device * i2c_master::find_device(int address)
 
 void i2c_master::i2c_state_has_changed(void)
 {
+    int sda_mask;
+    int scl_mask;
+
     CL_OLD_HI = CL_HI;
     DA_OLD_HI = DA_HI;
-    
-    CL_HI = (gpio->DIR_1 & 0x4)==0x4;
-    DA_HI = (gpio->DIR_1 & 0x8)==0x8;
-    
+
+    sda_mask=1<<GPIO_I2C_SDA;
+    scl_mask=1<<GPIO_I2C_SCL;
+
+    if (sda_mask>0xFFFF){
+      DA_HI = (gpio->DIR_1 & (sda_mask>>16))!=0;
+    }else{
+      DA_HI = (gpio->DIR_0 & (sda_mask))!=0;
+    }
+
+    if (scl_mask>0xFFFF){
+      CL_HI = (gpio->DIR_1 & (scl_mask>>16))!=0;
+    }else{
+      CL_HI = (gpio->DIR_0 & (scl_mask))!=0;
+    }
+
     clk->i2c_gpio_set_state(CL_HI);
     data->i2c_gpio_set_state(DA_HI);
 
