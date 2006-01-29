@@ -62,7 +62,21 @@
 
 #define OSD_BITMAP1_CONFIG  OSD_COMPONENT_ENABLE | OSD_BITMAP_8BIT | OSD_BITMAP_MERGEBACK | OSD_BITMAP_A7 | OSD_BITMAP_ZX1 | OSD_BITMAP_RAMCLUT
 
+#ifdef AV3XX
+int bt_UP = BTMASK_UP;
+int bt_DOWN = BTMASK_DOWN;
+int bt_LEFT = BTMASK_LEFT;
+int bt_RIGHT = BTMASK_RIGHT;
+int bt_A = BTMASK_F2;
+int bt_B = BTMASK_F1;
+int bt_START = BTMASK_ON;
+int bt_SELECT = BTMASK_F3;
+int bt_MENU = BTMASK_OFF;
+#endif
+
 unsigned long OSD_BITMAP1_ADDRESS;
+
+extern int RotScreen;
 
 struct fb fb;
 struct pcm pcm;
@@ -76,7 +90,7 @@ int _start(int argc,char* argv)
 		setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
     
     fillRect(0x00,0,0,160,144);
-    
+
     setFont(10);   
     
     vid_init();
@@ -163,15 +177,15 @@ int doevents(void)
         if(pressed & BTMASK_F1) {if (do_user_menu() == USER_MENU_QUIT)
 #endif
 #ifdef AV3XX
-        if(pressed & BTMASK_UP)     pad_press(PAD_UP);
-        if(pressed & BTMASK_DOWN)   pad_press(PAD_DOWN);
-        if(pressed & BTMASK_LEFT)   pad_press(PAD_LEFT);
-        if(pressed & BTMASK_RIGHT)  pad_press(PAD_RIGHT);
-        if(pressed & BTMASK_F2)  pad_press(PAD_B);
-        if(pressed & BTMASK_F1) pad_press(PAD_A);
-        if(pressed & BTMASK_ON)     pad_press(PAD_START);
-        if(pressed & BTMASK_F3)  pad_press(PAD_SELECT);
-        if(pressed & BTMASK_OFF) {if (do_user_menu() == USER_MENU_QUIT)
+        if(pressed & bt_UP)     pad_press(PAD_UP);
+        if(pressed & bt_DOWN)   pad_press(PAD_DOWN);
+        if(pressed & bt_LEFT)   pad_press(PAD_LEFT);
+        if(pressed & bt_RIGHT)  pad_press(PAD_RIGHT);
+        if(pressed & bt_B)  pad_press(PAD_B);
+        if(pressed & bt_A) pad_press(PAD_A);
+        if(pressed & bt_START)     pad_press(PAD_START);
+        if(pressed & bt_SELECT)  pad_press(PAD_SELECT);
+        if(pressed & bt_MENU) {if (do_user_menu() == USER_MENU_QUIT)
 #endif
         {
             cleanup();
@@ -179,7 +193,7 @@ int doevents(void)
         }
      }
     }
-    
+
     if (released)
     {
 
@@ -195,14 +209,14 @@ int doevents(void)
 #endif
 
 #ifdef AV3XX
-        if(released & BTMASK_UP)     pad_release(PAD_UP);
-        if(released & BTMASK_DOWN)   pad_release(PAD_DOWN);
-        if(released & BTMASK_LEFT)   pad_release(PAD_LEFT);
-        if(released & BTMASK_RIGHT)  pad_release(PAD_RIGHT);
-        if(released & BTMASK_F2)  pad_release(PAD_B);
-        if(released & BTMASK_F1) pad_release(PAD_A);
-        if(released & BTMASK_ON)     pad_release(PAD_START);
-        if(released & BTMASK_F3)  pad_release(PAD_SELECT);
+        if(released & bt_UP)     pad_release(PAD_UP);
+        if(released & bt_DOWN)   pad_release(PAD_DOWN);
+        if(released & bt_LEFT)   pad_release(PAD_LEFT);
+        if(released & bt_RIGHT)  pad_release(PAD_RIGHT);
+        if(released & bt_B)  pad_release(PAD_B);
+        if(released & bt_A) pad_release(PAD_A);
+        if(released & bt_START)     pad_release(PAD_START);
+        if(released & bt_SELECT)  pad_release(PAD_SELECT);
 #endif
     }
     

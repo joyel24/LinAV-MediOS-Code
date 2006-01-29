@@ -42,7 +42,19 @@
 
 #define USER_MENU_QUIT -2
 
+#ifdef GMINI4XX
+#define LCD_WIDTH 220
+#define LCD_HEIGHT 176
+#define X_OFFSET 0
+#define Y_OFFSET 0
+#endif
 
+#ifdef AV3XX
+#define LCD_WIDTH 320
+#define LCD_HEIGHT 240
+#define X_OFFSET 0x14
+#define Y_OFFSET 0x12
+#endif
 
 extern int frameskip;
 int TVState = 0;
@@ -50,7 +62,23 @@ int TVStd = 0;
 int TVInt = 0;
 int ARMFreq = 0;
 int RotScreen = 0;
+int ZoomX=0;
+
+int MENU_X=10;
+
 //int SDRFreq = 0;
+
+#ifdef AV3XX
+extern int bt_UP;
+extern int bt_DOWN;
+extern int bt_LEFT;
+extern int bt_RIGHT;
+extern int bt_A;
+extern int bt_B;
+extern int bt_START;
+extern int bt_SELECT;
+extern int bt_MENU;
+#endif
 
 /* load/save state function declarations */
 static void do_slot_menu(bool is_load);
@@ -131,8 +159,10 @@ static const char *opt_menu[] = {
 
 #define OPT2_MENU_TITLE "More Options"
 typedef enum {
+#ifdef AV3XX
   OM2_ITEM_ZMX,
   OM2_ITEM_ROT,
+#endif
   OM2_ITEM_OCA,
   OM2_ITEM_CAN,
   OM2_ITEM_PAL,
@@ -143,8 +173,10 @@ typedef enum {
 static const char *opt2_menu[] = {
  // "Zoom X+1        ",
  // "Zoom Normal     ",
+#ifdef AV3XX
   "Zoom X          ",
-  "Rotate Screen   ",
+  "Rotate Scr.     ",
+#endif
   "Overclock ARM   ",
   "Clock ARM Normal",
   "Palette         ",
@@ -422,7 +454,11 @@ static void do_opt2_menu(void) {
   num_items = sizeof(opt2_menu) / sizeof(char*);
   mi = 0;
 //  snprintf((char *)opt2_menu[0], 17, "Overclock SDR  %1d", SDRFreq);
-  snprintf((char *)opt2_menu[2], 17, "Overclock ARM  %1d", ARMFreq);
+#ifdef AV3XX
+  snprintf((char *)opt2_menu[1], 17, "Rotate Scr.    %1d", RotScreen);
+  snprintf((char *)opt2_menu[0], 17, "Zoom X       %s", (ZoomX ? " ON" : "OFF"));
+#endif
+  snprintf((char *)opt2_menu[OM2_ITEM_OCA], 17, "Overclock ARM  %1d", ARMFreq);
   while (!done) {
     mi = do_menu(OPT2_MENU_TITLE, (char**) opt2_menu, num_items, mi);
     switch(mi) {
@@ -445,35 +481,70 @@ static void do_opt2_menu(void) {
         snprintf((char *)opt2_menu[0], 17, "Overclock SDR  %1d", SDRFreq);
         (*(volatile unsigned short *)(0x30884))=0x8031;
         break;*/
+#ifdef AV3XX
       case OM2_ITEM_ZMX:
+        if(!RotScreen) ZoomX=!ZoomX;
+        if(ZoomX) {
+           setSize(BMAP1,320,144,8);
+           setPos(BMAP1, X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+           fb.pitch=320;
+        }
+        else {
+           setSize(BMAP1,160,144,8);
+           setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+           fb.pitch=OSD_BITMAP1_WIDTH;
+        }
+        snprintf((char *)opt2_menu[0], 17, "Zoom X       %s", (ZoomX ? " ON" : "OFF"));
         break;
       case OM2_ITEM_ROT:
-        RotScreen = (RotScreen+1)%3;
+        if(!ZoomX) RotScreen = (RotScreen+1)%3;
+        snprintf((char *)opt2_menu[1], 17, "Rotate Scr.    %1d", RotScreen);
         if(RotScreen==2) {
            fb.pitch=-1;
            setSize(BMAP1,144,160,8);
-   //        setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
-
+           bt_UP = BTMASK_RIGHT;
+           bt_DOWN = BTMASK_LEFT;
+           bt_LEFT = BTMASK_UP;
+           bt_RIGHT = BTMASK_DOWN;
+           bt_A = BTMASK_F2;
+           bt_B = BTMASK_F3;
+           bt_SELECT = BTMASK_F1;
+           MENU_X=2;
         }
         else if(RotScreen==1) {
            fb.pitch=1;
            setSize(BMAP1,144,160,8);
-     //      setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+           bt_UP = BTMASK_LEFT;
+           bt_DOWN = BTMASK_RIGHT;
+           bt_LEFT = BTMASK_DOWN;
+           bt_RIGHT = BTMASK_UP;
+           bt_A = BTMASK_F3;
+           bt_B = BTMASK_F2;
+           bt_SELECT = BTMASK_F1;
+           MENU_X=2;
         }
         else {
            fb.pitch=OSD_BITMAP1_WIDTH;
            setSize(BMAP1,160,144,8);
-     //      setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+           bt_UP = BTMASK_UP;
+           bt_DOWN = BTMASK_DOWN;
+           bt_LEFT = BTMASK_LEFT;
+           bt_RIGHT = BTMASK_RIGHT;
+           bt_A = BTMASK_F2;
+           bt_B = BTMASK_F1;
+           bt_SELECT = BTMASK_F3;
+           MENU_X=10;
         }
         break;
+#endif
       case OM2_ITEM_OCA:
         ARMFreq++;
-        snprintf((char *)opt2_menu[2], 17, "Overclock ARM  %1d", ARMFreq);
+        snprintf((char *)opt2_menu[OM2_ITEM_OCA], 17, "Overclock ARM  %1d", ARMFreq);
         (*(volatile unsigned short *)(0x30880))=0x8080 + (ARMFreq<<4);
        break;
       case OM2_ITEM_CAN:
         ARMFreq=0;
-        snprintf((char *)opt2_menu[2], 17, "Overclock ARM  %1d", ARMFreq);
+        snprintf((char *)opt2_menu[OM2_ITEM_OCA], 17, "Overclock ARM  %1d", ARMFreq);
         (*(volatile unsigned short *)(0x30880))=0x8021;
         break;
       case OM2_ITEM_PAL:
@@ -501,12 +572,12 @@ static void do_opt2_menu(void) {
 /*********************************************************************/
 /* at some point i'll make this a generic menu interface, but for now,
  * these defines will suffice */
-#define MENU_X 10
+#define MENU2_X 10                      // MENU_X defined at the top
 #define MENU_Y 8
-#define MENU_WIDTH (OSD_BITMAP1_WIDTH - 2 * MENU_X)
+#define MENU_WIDTH (OSD_BITMAP1_WIDTH - 2 * MENU2_X)
 #define MENU_HEIGHT (OSD_BITMAP1_HEIGHT - 2 * MENU_Y)
-#define MENU_RECT MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT
-#define SHADOW_RECT MENU_X + 1, MENU_Y + 1, MENU_WIDTH, MENU_HEIGHT
+//#define MENU_RECT MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT
+//#define SHADOW_RECT MENU_X + 1, MENU_Y + 1, MENU_WIDTH, MENU_HEIGHT
 #define MENU_ITEM_PAD 2
 
 /*
@@ -552,9 +623,9 @@ static void draw_menu(char *title, char **items, size_t num_items)  {
   int x, y, w, h, by;
 
   /* draw the outline */
-  fillRect(0xaf,SHADOW_RECT);
-  fillRect(0x00,MENU_RECT);
-  drawRect(0xff,MENU_RECT);
+  fillRect(0xaf,MENU_X + 1, MENU_Y + 1, MENU_WIDTH, MENU_HEIGHT); // fillRect(0xaf,SHADOW_RECT);
+  fillRect(0x00,MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);   // fillRect(0x00,MENU_RECT);
+  drawRect(0xff,MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);   // drawRect(0xff,MENU_RECT);
 
   /* calculate x/y */
   x = MENU_X + MENU_ITEM_PAD;

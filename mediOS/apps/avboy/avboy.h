@@ -1,4 +1,4 @@
-/* 
+/*
 *   apps/avboy/avboy.h
 *
 *   MediOS project
@@ -41,6 +41,7 @@ void cleanup();
 
 
 void refresh_1(byte *dest, byte *src, byte *pal, int cnt);
+void refresh_1_2x(byte *dest, byte *src, byte *pal, int cnt);
 
 
 #define DIE(fmt, arg...) {printf(fmt,## arg); while(1) /*nothing*/;}

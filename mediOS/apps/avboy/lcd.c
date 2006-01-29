@@ -1,4 +1,4 @@
-/* 
+/*
 *   apps/avboy/lcd.c
 *
 *   MediOS project
@@ -64,6 +64,7 @@ __IRAM_DATA static byte patdirty[1024];
 #endif
 #ifdef AV3XX
 static byte patdirty[1024];
+extern int ZoomX;
 #endif
 __IRAM_DATA static byte anydirty;
 
@@ -643,8 +644,13 @@ __IRAM_CODE void lcd_refreshline(void)
 
 	if (fb.dirty) memset(fb.ptr, 0, fb.pitch * fb.h);
 	fb.dirty = 0;
-
+ #ifdef AV3XX
+  if(ZoomX) refresh_1_2x(vdest, BUF, PAL1, 160);
+  else refresh_1(vdest, BUF, PAL1, 160);
+ #endif
+ #ifdef GMINI4XX
   refresh_1(vdest, BUF, PAL1, 160);
+ #endif
 	vdest += fb.pitch;
 }
 

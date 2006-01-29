@@ -9,7 +9,7 @@
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
 * Gameboy / Color Gameboy emulator (port of gnuboy)
-* 
+*
 *  Date:     18/10/2005
 * Author:   GliGli
 
@@ -25,22 +25,28 @@
 #include "asm.h"
 #endif
 
+#ifdef AV3XX
 extern int RotScreen;
+#endif
 
 #ifndef ASM_REFRESH_1
 __IRAM_CODE void refresh_1(byte *dest, byte *src, byte *pal, int cnt)
 {
+#ifdef AV3XX
 	if(RotScreen==2) {
            dest+=143;
-           while(cnt--) *(dest+=160) = pal[*(src++)];
+           while(cnt--) {*dest = pal[*(src++)]; dest+=160;}
         }
         else if(RotScreen==1) {
            src+=cnt-1;
-	   while(cnt--) *(dest+=160) = pal[*(src--)];
+	   while(cnt--) {*dest = pal[*(src--)]; dest+=160;}
         }
         else {
+#endif
            while(cnt--) *(dest++) = pal[*(src++)];
+#ifdef AV3XX
         }
+#endif
 }
 #endif
 
@@ -76,6 +82,9 @@ void refresh_4(un32 *dest, byte *src, un32 *pal, int cnt)
 
 
 #ifndef ASM_REFRESH_1_2X
+#ifdef AV3XX 
+__IRAM_CODE 
+#endif
 void refresh_1_2x(byte *dest, byte *src, byte *pal, int cnt)
 {
 	byte c;
