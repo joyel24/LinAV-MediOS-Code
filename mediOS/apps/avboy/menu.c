@@ -28,6 +28,7 @@
 #include "defs.h"
 #include "avboy.h"
 #include "mem.h"
+#include "fb.h"
 
 #define getstringsize(a,b,c) getStringS(a,b,c)
 #define drawline(a,b,c,d,e) drawLine(e,a,b,c,d)
@@ -48,7 +49,8 @@ int TVState = 0;
 int TVStd = 0;
 int TVInt = 0;
 int ARMFreq = 0;
-int SDRFreq = 0;
+int RotScreen = 0;
+//int SDRFreq = 0;
 
 /* load/save state function declarations */
 static void do_slot_menu(bool is_load);
@@ -129,8 +131,8 @@ static const char *opt_menu[] = {
 
 #define OPT2_MENU_TITLE "More Options"
 typedef enum {
-  OM2_ITEM_OCS,
-  OM2_ITEM_CSN,
+  OM2_ITEM_ZMX,
+  OM2_ITEM_ROT,
   OM2_ITEM_OCA,
   OM2_ITEM_CAN,
   OM2_ITEM_PAL,
@@ -141,8 +143,8 @@ typedef enum {
 static const char *opt2_menu[] = {
  // "Zoom X+1        ",
  // "Zoom Normal     ",
-  "Overclock SDR   ",
-  "Clock SDR Normal",
+  "Zoom X          ",
+  "Rotate Screen   ",
   "Overclock ARM   ",
   "Clock ARM Normal",
   "Palette         ",
@@ -419,7 +421,7 @@ static void do_opt2_menu(void) {
   /* set a couple of defaults */
   num_items = sizeof(opt2_menu) / sizeof(char*);
   mi = 0;
-  snprintf((char *)opt2_menu[0], 17, "Overclock SDR  %1d", SDRFreq);
+//  snprintf((char *)opt2_menu[0], 17, "Overclock SDR  %1d", SDRFreq);
   snprintf((char *)opt2_menu[2], 17, "Overclock ARM  %1d", ARMFreq);
   while (!done) {
     mi = do_menu(OPT2_MENU_TITLE, (char**) opt2_menu, num_items, mi);
@@ -432,7 +434,7 @@ static void do_opt2_menu(void) {
       case OM2_ITEM_ZN:
         setSize(BMAP1,160,144,8);
         setPos(BMAP1,168,68);
-        break;                  */
+        break;                  
       case OM2_ITEM_OCS:
         SDRFreq++;
         snprintf((char *)opt2_menu[0], 17, "Overclock SDR  %1d", SDRFreq);
@@ -442,8 +444,29 @@ static void do_opt2_menu(void) {
         SDRFreq=0;
         snprintf((char *)opt2_menu[0], 17, "Overclock SDR  %1d", SDRFreq);
         (*(volatile unsigned short *)(0x30884))=0x8031;
+        break;*/
+      case OM2_ITEM_ZMX:
         break;
-       case OM2_ITEM_OCA:
+      case OM2_ITEM_ROT:
+        RotScreen = (RotScreen+1)%3;
+        if(RotScreen==2) {
+           fb.pitch=-1;
+           setSize(BMAP1,144,160,8);
+   //        setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+
+        }
+        else if(RotScreen==1) {
+           fb.pitch=1;
+           setSize(BMAP1,144,160,8);
+     //      setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+        }
+        else {
+           fb.pitch=OSD_BITMAP1_WIDTH;
+           setSize(BMAP1,160,144,8);
+     //      setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+        }
+        break;
+      case OM2_ITEM_OCA:
         ARMFreq++;
         snprintf((char *)opt2_menu[2], 17, "Overclock ARM  %1d", ARMFreq);
         (*(volatile unsigned short *)(0x30880))=0x8080 + (ARMFreq<<4);

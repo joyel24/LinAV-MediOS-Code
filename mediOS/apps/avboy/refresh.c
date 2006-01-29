@@ -1,4 +1,4 @@
-/* 
+/*
 *   apps/avboy/refresh.c
 *
 *   MediOS project
@@ -25,11 +25,22 @@
 #include "asm.h"
 #endif
 
+extern int RotScreen;
 
 #ifndef ASM_REFRESH_1
 __IRAM_CODE void refresh_1(byte *dest, byte *src, byte *pal, int cnt)
 {
-	while(cnt--) *(dest++) = pal[*(src++)];
+	if(RotScreen==2) {
+           dest+=143;
+           while(cnt--) *(dest+=160) = pal[*(src++)];
+        }
+        else if(RotScreen==1) {
+           src+=cnt-1;
+	   while(cnt--) *(dest+=160) = pal[*(src--)];
+        }
+        else {
+           while(cnt--) *(dest++) = pal[*(src++)];
+        }
 }
 #endif
 

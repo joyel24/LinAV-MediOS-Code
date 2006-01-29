@@ -105,7 +105,7 @@ void vid_init(void){
   fb.w = OSD_BITMAP1_WIDTH;
   fb.h = OSD_BITMAP1_HEIGHT;
   fb.pelsize = 1;
-  fb.pitch = OSD_BITMAP1_WIDTH;
+  fb.pitch =OSD_BITMAP1_WIDTH;
   fb.ptr = (unsigned char *)OSD_BITMAP1_ADDRESS;
   fb.enabled = 1;
   fb.dirty = 0; ///1????
