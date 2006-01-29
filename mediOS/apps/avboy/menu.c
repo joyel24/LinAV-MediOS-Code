@@ -483,57 +483,61 @@ static void do_opt2_menu(void) {
         break;*/
 #ifdef AV3XX
       case OM2_ITEM_ZMX:
-        if(!RotScreen) ZoomX=!ZoomX;
-        if(ZoomX) {
-           setSize(BMAP1,320,144,8);
-           setPos(BMAP1, X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
-           fb.pitch=320;
+        if(!RotScreen) {
+           ZoomX=!ZoomX;
+           if(ZoomX) {
+              setSize(BMAP1,320,144,8);
+              setPos(BMAP1, X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+              fb.pitch=320;
+           }
+           else {
+              setSize(BMAP1,160,144,8);
+              setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+              fb.pitch=OSD_BITMAP1_WIDTH;
+           }
+           snprintf((char *)opt2_menu[0], 17, "Zoom X       %s", (ZoomX ? " ON" : "OFF"));
         }
-        else {
-           setSize(BMAP1,160,144,8);
-           setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
-           fb.pitch=OSD_BITMAP1_WIDTH;
-        }
-        snprintf((char *)opt2_menu[0], 17, "Zoom X       %s", (ZoomX ? " ON" : "OFF"));
         break;
       case OM2_ITEM_ROT:
-        if(!ZoomX) RotScreen = (RotScreen+1)%3;
-        snprintf((char *)opt2_menu[1], 17, "Rotate Scr.    %1d", RotScreen);
-        if(RotScreen==2) {
-           fb.pitch=-1;
-           setSize(BMAP1,144,160,8);
-           bt_UP = BTMASK_RIGHT;
-           bt_DOWN = BTMASK_LEFT;
-           bt_LEFT = BTMASK_UP;
-           bt_RIGHT = BTMASK_DOWN;
-           bt_A = BTMASK_F2;
-           bt_B = BTMASK_F3;
-           bt_SELECT = BTMASK_F1;
-           MENU_X=2;
-        }
-        else if(RotScreen==1) {
-           fb.pitch=1;
-           setSize(BMAP1,144,160,8);
-           bt_UP = BTMASK_LEFT;
-           bt_DOWN = BTMASK_RIGHT;
-           bt_LEFT = BTMASK_DOWN;
-           bt_RIGHT = BTMASK_UP;
-           bt_A = BTMASK_F3;
-           bt_B = BTMASK_F2;
-           bt_SELECT = BTMASK_F1;
-           MENU_X=2;
-        }
-        else {
-           fb.pitch=OSD_BITMAP1_WIDTH;
-           setSize(BMAP1,160,144,8);
-           bt_UP = BTMASK_UP;
-           bt_DOWN = BTMASK_DOWN;
-           bt_LEFT = BTMASK_LEFT;
-           bt_RIGHT = BTMASK_RIGHT;
-           bt_A = BTMASK_F2;
-           bt_B = BTMASK_F1;
-           bt_SELECT = BTMASK_F3;
-           MENU_X=10;
+        if(!ZoomX) {
+           RotScreen = (RotScreen+1)%3;
+           snprintf((char *)opt2_menu[1], 17, "Rotate Scr.    %1d", RotScreen);
+           if(RotScreen==2) {
+              fb.pitch=-1;
+              setSize(BMAP1,144,160,8);
+              bt_UP = BTMASK_RIGHT;
+              bt_DOWN = BTMASK_LEFT;
+              bt_LEFT = BTMASK_UP;
+              bt_RIGHT = BTMASK_DOWN;
+              bt_A = BTMASK_F2;
+              bt_B = BTMASK_F3;
+              bt_SELECT = BTMASK_F1;
+              MENU_X=2;
+           }
+           else if(RotScreen==1) {
+              fb.pitch=1;
+              setSize(BMAP1,144,160,8);
+              bt_UP = BTMASK_LEFT;
+              bt_DOWN = BTMASK_RIGHT;
+              bt_LEFT = BTMASK_DOWN;
+              bt_RIGHT = BTMASK_UP;
+              bt_A = BTMASK_F3;
+              bt_B = BTMASK_F2;
+              bt_SELECT = BTMASK_F1;
+              MENU_X=2;
+           }
+           else {
+              fb.pitch=OSD_BITMAP1_WIDTH;
+              setSize(BMAP1,160,144,8);
+              bt_UP = BTMASK_UP;
+              bt_DOWN = BTMASK_DOWN;
+              bt_LEFT = BTMASK_LEFT;
+              bt_RIGHT = BTMASK_RIGHT;
+              bt_A = BTMASK_F2;
+              bt_B = BTMASK_F1;
+              bt_SELECT = BTMASK_F3;
+              MENU_X=10;
+           }
         }
         break;
 #endif
