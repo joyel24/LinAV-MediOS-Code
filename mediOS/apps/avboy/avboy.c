@@ -27,6 +27,14 @@
 #include <fs_io.h>
 #include <api.h>
 
+/* MediOS browser include */
+#ifdef USE_MEDIOS_BROWSER
+#include <gui/file_browser.h>
+#include <kernel/osd.h>
+#include <sys_def/font.h>
+#include <sys_def/colordef.h>
+#endif
+
 /* avboy include */
 #include "defs.h"
 #include "avboy.h"
@@ -44,8 +52,8 @@
 #ifdef GMINI4XX
 #define LCD_WIDTH 220
 #define LCD_HEIGHT 176
-#define X_OFFSET 0
-#define Y_OFFSET 0
+#define X_OFFSET 0x09
+#define Y_OFFSET 0x09
 #endif
 
 #ifdef AV3XX
@@ -81,9 +89,57 @@ extern int RotScreen;
 struct fb fb;
 struct pcm pcm;
 
+#ifdef USE_MEDIOS_BROWSER
+extern int gui_pal[256][3];
+#endif
 int _start(int argc,char* argv)
 {
-    char * rom;
+    char * rom;		
+/*
+		 to use the medios browser you have to define USE_MEDIOS_BROWSER. This completely changes the way the emu works, it mapps button_off
+		 to exit the emulator and return to the browser, While exit in the emu ingame menu still completly exits.
+		 Cj tell me if you want to do it this way and also let me know if it works for you?
+*/
+#ifdef USE_MEDIOS_BROWSER
+	while(1)
+	{
+		osd_setEntirePalette(gui_pal,256);
+		setSize(BMAP1,LCD_WIDTH,LCD_HEIGHT,8);
+		setPos(BMAP1,X_OFFSET,Y_OFFSET);
+		iniIcon();
+		open_graphics();
+		clearScreen(COLOR_WHITE);
+		setFont(STD6X9);
+		ini_file_browser();
+		rom=browse("/",1);
+		if (rom=='0')
+		{
+			cleanup();
+			reload_firmware();
+		}
+		open_graphics();
+		OSD_BITMAP1_ADDRESS = (int)getBufferOffset(BMAP1);
+		setSize(BMAP1,160,144,8);
+		setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+		
+		fillRect(0x00,0,0,160,144);
+		
+		setFont(10);   
+    
+    vid_init();
+    pcm_init();
+    
+    //rom = (char *)bget(MAX_PATH);
+    printf("Rom name : %s\n",rom);
+    
+    loader_init(rom);
+
+    emu_reset();
+    emu_run();
+	} 
+#endif
+#ifndef USE_MEDIOS_BROWSER
+		//this uses the avBoy browser and is the default
     open_graphics();
     OSD_BITMAP1_ADDRESS = (int)getBufferOffset(BMAP1);
     setSize(BMAP1,160,144,8);
@@ -105,7 +161,7 @@ int _start(int argc,char* argv)
 
     emu_reset();
     emu_run();
-    
+#endif
     return 0;
 }
 
@@ -119,7 +175,7 @@ void vid_init(void){
   fb.w = OSD_BITMAP1_WIDTH;
   fb.h = OSD_BITMAP1_HEIGHT;
   fb.pelsize = 1;
-  fb.pitch =OSD_BITMAP1_WIDTH;
+  fb.pitch = OSD_BITMAP1_WIDTH;
   fb.ptr = (unsigned char *)OSD_BITMAP1_ADDRESS;
   fb.enabled = 1;
   fb.dirty = 0; ///1????
@@ -147,7 +203,7 @@ void vid_settitle(char * title){
 void vid_setpal(int i, int r, int g, int b)
 {
 
-  printf("vid_setpal %d %d %d %d\n",i,r,g,b);
+  //printf("vid_setpal %d %d %d %d\n",i,r,g,b);
 setPalletteRGB(r,g,b,i);
 
 }
@@ -170,9 +226,12 @@ int doevents(void)
         if(pressed & BTMASK_DOWN)   pad_press(PAD_DOWN);
         if(pressed & BTMASK_LEFT)   pad_press(PAD_LEFT);
         if(pressed & BTMASK_RIGHT)  pad_press(PAD_RIGHT);
-        if(pressed & BTMASK_BTN1)  pad_press(PAD_B);
-        if(pressed & BTMASK_BTN2) pad_press(PAD_A);
+        if(pressed & BTMASK_BTN1)  pad_press(PAD_A);
+        if(pressed & BTMASK_BTN2) pad_press(PAD_B);
         if(pressed & BTMASK_ON)     pad_press(PAD_START);
+#ifdef USE_MEDIOS_BROWSER
+        if(pressed & BTMASK_OFF) return 0;
+#endif
         if(pressed & BTMASK_F3)  pad_press(PAD_SELECT);
         if(pressed & BTMASK_F1) {if (do_user_menu() == USER_MENU_QUIT)
 #endif
@@ -185,15 +244,23 @@ int doevents(void)
         if(pressed & bt_A) pad_press(PAD_A);
         if(pressed & bt_START)     pad_press(PAD_START);
         if(pressed & bt_SELECT)  pad_press(PAD_SELECT);
+#ifdef USE_MEDIOS_BROWSER
+        if(pressed & BTMASK_OFF) return 0;
+#endif
         if(pressed & bt_MENU) {if (do_user_menu() == USER_MENU_QUIT)
 #endif
         {
             cleanup();
+#ifdef GMINI4XX
+            reload_firmware();
+#endif
+#ifdef AV3XX
             DIE("bye");
+#endif
         }
      }
     }
-
+    
     if (released)
     {
 
@@ -202,8 +269,8 @@ int doevents(void)
         if(released & BTMASK_DOWN)   pad_release(PAD_DOWN);
         if(released & BTMASK_LEFT)   pad_release(PAD_LEFT);
         if(released & BTMASK_RIGHT)  pad_release(PAD_RIGHT);
-        if(released & BTMASK_BTN1)  pad_release(PAD_B);
-        if(released & BTMASK_BTN2) pad_release(PAD_A);
+        if(released & BTMASK_BTN1)  pad_release(PAD_A);
+        if(released & BTMASK_BTN2) pad_release(PAD_B);
         if(released & BTMASK_ON)     pad_release(PAD_START);
         if(released & BTMASK_BTN3)  pad_release(PAD_SELECT);
 #endif
