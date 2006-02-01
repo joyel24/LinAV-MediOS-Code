@@ -462,7 +462,7 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
             break;
         case OSD_START+0x42:
             OSD_info_regs[3].height=val;
-            DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap1 height",val,size);            
+            DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Bmap1 height",val,size);
             break;
         case OSD_START+0x44:
             OSD_info_regs[4].x=val;
@@ -541,7 +541,7 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
                 /*lcd->updte_lcd(OSD_offset_regs[2],LCD_BMAP);*/
                 /*lcd->updte_lcd(OSD_offset_regs[0],LCD_VID);*/
                 OSD_pallette_index=0;
-                OSD_pallette_data_wr=0;         
+                OSD_pallette_data_wr=0;
                 DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Pallette data & index",val,size);
                 DEBUG_HW(OSD_HW_DEBUG,"Palette update: Y=%x,Cr=%x,Cb=%x => r=%x,g=%x,b=%x index=%x => Xindex=%x\n",
                     Y,Cb,Cr,YCrCb2R(Y,Cr,Cb),YCrCb2G(Y,Cr,Cb),YCrCb2B(Y,Cr,Cb),index,ret);
@@ -551,16 +551,16 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
             //OSD_alt_vid_offset = (OSD_alt_vid_offset & 0xFFFF) | ((val & 0x3F)<<21);
             OSD_alt_vid_offset = (((val&0x3F)<<21) | ((OSD_alt_vid_offset-SDRAM_START) & 0x1FFFFF));
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (OSD ALT=%x)\n",name,"OSD ALT buffer HI",
-                val,size,OSD_alt_vid_offset);            
+                val,size,OSD_alt_vid_offset);
             break;
         case OSD_START+0x7E:
             //OSD_alt_vid_offset = (OSD_alt_vid_offset & 0x3F0000) | (val & 0xFFFF);
             OSD_alt_vid_offset = (((OSD_alt_vid_offset-SDRAM_START)&0x03E0000) | ((val<<5)&0x1FFFFF))+SDRAM_START;
             DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x) (OSD ALT=%x)\n",name,"Pallette data & index",
-                val,size,OSD_alt_vid_offset);            
+                val,size,OSD_alt_vid_offset);
             break;
     }
-    
+
 }
 
 int HW_OSD::nxtEvent(void)
@@ -568,15 +568,27 @@ int HW_OSD::nxtEvent(void)
     return lcd->nxtEvent(OSD_config_regs,OSD_offset_regs);
 }
 
-void HW_OSD::chk_access(uint32_t addr,uint32_t val)
+void HW_OSD::chk_access(uint32_t addr,uint32_t val,int size)
 {
-    if((OSD_config_regs[2]&0x1) && addr>=OSD_offset_regs[2] 
-            && addr <= (OSD_offset_regs[2]+SCREEN_WIDTH*SCREEN_HEIGHT*2))
-            lcd->drawPix(addr-OSD_offset_regs[2],val);
-#ifdef HAS_VID0            
-    else if ((OSD_config_regs[1]&0x1) && addr>=OSD_offset_regs[0] 
+    if((OSD_config_regs[2]&0x1) && addr>=OSD_offset_regs[2]
+            && addr <= (OSD_offset_regs[2]+SCREEN_WIDTH*SCREEN_HEIGHT*2)){
+        uint32_t v=val;
+        uint32_t a=addr-OSD_offset_regs[2];
+        switch(size){ /* no break intended */
+            case 4:
+                lcd->drawPix(a,v&0xff);++a;v>>=8;
+                lcd->drawPix(a,v&0xff);++a;v>>=8;
+            case 2:
+                lcd->drawPix(a,v&0xff);++a;v>>=8;
+            case 1:
+                lcd->drawPix(a,v&0xff);++a;v>>=8;
+        }
+    }
+
+#ifdef HAS_VID0
+    else if ((OSD_config_regs[1]&0x1) && addr>=OSD_offset_regs[0]
             && addr <= (OSD_offset_regs[0]+SCREEN_WIDTH*SCREEN_HEIGHT*4))
             lcd->drawVidPix(addr-OSD_offset_regs[0],val);
-#endif        
+#endif
 }
 

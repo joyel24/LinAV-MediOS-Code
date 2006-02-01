@@ -102,8 +102,8 @@ void mem_space::write(uint32_t addr,uint32_t val,int size)
     bkpt->fct(bkpt,addr,BKPT_MEM_WRITE);
      
     HW_node::write(addr,val,size);
-    
-    hw_OSD->chk_access(addr,val);
+
+    hw_OSD->chk_access(addr,val,size);
 }
 
 void mem_space::set_OSD(HW_OSD * hw_osd)
