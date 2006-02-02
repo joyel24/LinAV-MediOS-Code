@@ -46,6 +46,7 @@
 #define        EVT_USB       0x0022
 #define        EVT_FW_EXT    0x0023
 
+#define        EVT_REDRAW    0x0050
 
 /* EVT class */
 #define        ALL_CLASS         0xFFFFFFFF

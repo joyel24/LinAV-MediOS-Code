@@ -57,14 +57,29 @@ extern void dbgscr_init(void);
 
 void tst_fct(void)
 {
-    /*iniIcon();
+    int evt_hand;
+    int evt;
+    iniIcon();
     open_graphics();
     clearScreen(COLOR_WHITE);
     setFont(STD6X9);
-    ini_file_browser();
+    
+    ini_menu();
+    if(evt_getHandler(ALL_CLASS,&evt_hand)!=MED_OK)
+    {
+        printk("Can't get evt handler\n");
+        return;
+    }
+    
+    while(1)
+    {
+        evt_getStatus(evt_hand,&evt);
+        menuEvtHandler(evt);
+    }
+    /*ini_file_browser();
     browse("/",1);*/
 
-#ifdef HAVE_EVT
+#if 0
     int evt_hand;
     struct evt_t evt;
     if(evt_getHandler(ALL_CLASS,&evt_hand)!=MED_OK)
@@ -173,7 +188,7 @@ void kernel_start (void)
  printk("gmini4xx\n");
 #endif
 /* evt & btn test */
-#if 0
+#if 1
    tst_fct();
     while(1)
     {

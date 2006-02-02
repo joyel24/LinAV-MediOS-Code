@@ -15,7 +15,7 @@
 #include <sys_def/file.h>
 #include <sys_def/dir.h>
 
-int      fopen(const char* pathname, int flags);
+int      fopen      (const char* pathname, int flags);
 int      fclose     (int fd);
 int      fsync      (int fd);
 ssize_t  fread      (int fd, void *buf, size_t count);
