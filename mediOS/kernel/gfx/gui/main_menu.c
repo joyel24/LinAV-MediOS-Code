@@ -198,7 +198,7 @@ int ini_menu(void)
     clearScreen(COLOR_BLACK);
     
     putS(COLOR_WHITE,COLOR_BLACK,5,110,"[ini_menu] reading menu file");
-    
+    rootMenu = NULL;
     if(loadMenu(MENU_FILE_NAME)<0)
     {
         putS(COLOR_RED,COLOR_BLACK,5,120,"[ini_menu] Error reading menu => stoping");
@@ -224,8 +224,7 @@ int ini_menu(void)
     start_menu(&menu_cfg);
     menuEvtHandler(EVT_REDRAW);
     
-    printMenu();
-    
+        
     return 1;
 }
 
@@ -309,7 +308,7 @@ int insertItem(struct menu_item * item)
             }
             else
             {
-                printk("parent not found %s\n",cfg_data->name);
+                printk("parent not found for %s (parent=%s)\n",cfg_data->name,cfg_data->parent);
                 return -1; // parent not found
             }
         }
@@ -331,6 +330,7 @@ void addItem(struct cfg_menu ** cfg)
     current_item->param[0]=0;
     current_item->type=TYPE_STD;
     current_item->icon=NULL;
+    current_item->nxt=NULL;
 }
 
 void cfgCleanMenu(struct cfg_menu * cfg)
