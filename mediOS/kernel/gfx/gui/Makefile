@@ -7,7 +7,7 @@ SRC = $(wildcard *.c)
 SRC2 = $(wildcard *.S)
 OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 
-SUBDIRS = file_browser scrollbar widgets
+SUBDIRS = file_browser widgets
 
 all: subdirs $(OBJS)
 	@cp -f *.o ../../build
