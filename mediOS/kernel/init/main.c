@@ -188,7 +188,7 @@ void kernel_start (void)
  printk("gmini4xx\n");
 #endif
 /* evt & btn test */
-#if 1
+#if 0
    tst_fct();
     while(1)
     {
