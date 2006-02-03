@@ -179,7 +179,7 @@ void ata_stopHD(int mode)
         ata_stopping = 0;
         for(i=0;i<100;i++)
         {
-            mdelay(50);
+            kmdelay(50);
             status=ata_status();
             if((status & IDE_STATUS_BSY)==0 && (status & IDE_STATUS_RDY)!=0)
                 break;

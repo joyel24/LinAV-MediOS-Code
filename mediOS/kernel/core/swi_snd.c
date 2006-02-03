@@ -16,7 +16,7 @@
 
 #include <kernel/sound.h>
 
-__IRAM_CODE int swi_snd_handler (
+int swi_snd_handler (
 	unsigned long nCmd,
 	unsigned long nParam1,
 	unsigned long nParam2,

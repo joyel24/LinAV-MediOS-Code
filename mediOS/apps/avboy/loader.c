@@ -31,7 +31,7 @@
 
 
 #include <fs_io.h>
-#include <kernel/malloc.h>
+
 
 char *strdup();
 
@@ -130,19 +130,19 @@ static byte *loadfile(int f, int *len)
 //	static byte buf[64*1024];
         char * buf;
 
-        buf=(char *)bget(64*1024);
+        buf=(char *)malloc(64*1024);
 	for(;;)
 	{
 		c = fread(f, buf, 64*1024); //sizeof buf);
 		if (c <= 0) break;
 		l += c;
-		d = bgetr(d, l);
+		d = realloc(d, l);
 		if (!d) return 0;
 		memcpy(d+p, buf, c);
 		p += c;
 	}
 	*len = l;
-	brel(buf);
+	free(buf);
 	return d;
 }
 
@@ -154,7 +154,7 @@ static void inflate_callback(byte b)
 	if (inf_pos >= inf_len)
 	{
 		inf_len += 512;
-		inf_buf = bgetr(inf_buf, inf_len);
+		inf_buf = realloc(inf_buf, inf_len);
 		if (!inf_buf) DIE("out of memory inflating file @ %d bytes\n", inf_pos);
 	}
 	inf_buf[inf_pos++] = b;
@@ -215,10 +215,10 @@ int rom_load()
 	if (!mbc.ramsize) DIE("unknown SRAM size %02X\n", header[0x0149]);
 
 	rlen = 16384 * mbc.romsize;
-	rom.bank = bgetr(data, rlen);
+	rom.bank = realloc(data, rlen);
 	if (rlen > len) memset(rom.bank[0]+len, 0xff, rlen - len);
 
-	ram.sbank = bget(8192 * mbc.ramsize);
+	ram.sbank = malloc(8192 * mbc.ramsize);
 
 	initmem(ram.sbank, 8192 * mbc.ramsize);
 	initmem(ram.ibank, 4096 * 8);
@@ -286,7 +286,7 @@ void state_save(int n)
 
 	if (n < 0) n = saveslot;
 	if (n < 0) n = 0;
-	name = bget(strlen(saveprefix) + 5);
+	name = malloc(strlen(saveprefix) + 5);
 	sprintf(name, "%s.%03d", saveprefix, n);
 
 	if ((f = fopen(name, O_WRONLY|O_CREAT|O_TRUNC)))
@@ -294,7 +294,7 @@ void state_save(int n)
 		savestate(f);
 		fclose(f);
 	}
-	brel(name);
+	free(name);
 }
 
 
@@ -305,7 +305,7 @@ void state_load(int n)
 
 	if (n < 0) n = saveslot;
 	if (n < 0) n = 0;
-	name = bget(strlen(saveprefix) + 5);
+	name = malloc(strlen(saveprefix) + 5);
 	sprintf(name, "%s.%03d", saveprefix, n);
 
 	if ((f = fopen(name, O_RDONLY)))
@@ -317,7 +317,7 @@ void state_load(int n)
 		sound_dirty();
 		mem_updatemap();
 	}
-	brel(name);
+	free(name);
 }
 
 void rtc_save()
@@ -342,11 +342,11 @@ void rtc_load()
 void loader_unload()
 {
 	sram_save();
-	if (romfile) brel(romfile);
-	if (sramfile) brel(sramfile);
-	if (saveprefix) brel(saveprefix);
-	if (rom.bank) brel(rom.bank);
-	if (ram.sbank) brel(ram.sbank);
+	if (romfile) free(romfile);
+	if (sramfile) free(sramfile);
+	if (saveprefix) free(saveprefix);
+	if (rom.bank) free(rom.bank);
+	if (ram.sbank) free(ram.sbank);
 	romfile = sramfile = saveprefix = 0;
 	rom.bank = 0;
 	ram.sbank = 0;
@@ -365,7 +365,7 @@ static char *ldup(char *s)
 {
 	int i;
 	char *n, *p;
-	p = n = bget(strlen(s));
+	p = n = malloc(strlen(s));
 	for (i = 0; s[i]; i++) if (isalnum(s[i])) *(p++) = tolower(s[i]);
 	*p = 0;
 	return n;
@@ -382,7 +382,7 @@ void loader_init(char *s)
 {
 	char *name, *p;
 	DIR* dir;
-
+        printf("%s - %s\n",s,savedir);
 //	sys_checkdir(savedir, 1); /* needs to be writable */
 	dir=opendir(savedir);
 	if(!dir) {
@@ -397,6 +397,7 @@ void loader_init(char *s)
 
 	vid_settitle(rom.name);
 
+        
 	if (savename && *savename)
 	{
 		if (savename[0] == '-' && savename[1] == 0)
@@ -412,20 +413,20 @@ void loader_init(char *s)
 	else name = ldup(rom.name);
      // name=rom.name;
 
-	saveprefix = bget(strlen(savedir) + strlen(name) + 2);
+	saveprefix = malloc(strlen(savedir) + strlen(name) + 2);
 	sprintf(saveprefix, "%s/%s", savedir, name);
 
-	sramfile = bget(strlen(saveprefix) + 5);
+	sramfile = malloc(strlen(saveprefix) + 5);
 	strcpy(sramfile, saveprefix);
 	strcat(sramfile, ".sav");
 
-	rtcfile = bget(strlen(saveprefix) + 5);
+	rtcfile = malloc(strlen(saveprefix) + 5);
 	strcpy(rtcfile, saveprefix);
 	strcat(rtcfile, ".rtc");
-	
+	printf("before sram / rtc load ...");
 	sram_load();
 	rtc_load();
-
+        printf("       done\n");
 //	atexit(cleanup);
 }
 

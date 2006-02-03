@@ -131,7 +131,7 @@ __IRAM_CODE void hw_hdma(void)
  * interrupt line) if a transition has been made.
  */
 
-void pad_refresh(void)
+__IRAM_CODE void pad_refresh(void)
 {
 	byte oldp1;
 	oldp1 = R_P1;
@@ -155,7 +155,7 @@ void pad_refresh(void)
  * pad.
  */
 
-void pad_press(byte k)
+__IRAM_CODE void pad_press(byte k)
 {
 	if (hw.pad & k)
 		return;
@@ -163,7 +163,7 @@ void pad_press(byte k)
 	pad_refresh();
 }
 
-void pad_release(byte k)
+__IRAM_CODE void pad_release(byte k)
 {
 	if (!(hw.pad & k))
 		return;
@@ -171,7 +171,7 @@ void pad_release(byte k)
 	pad_refresh();
 }
 
-void pad_set(byte k, int st)
+__IRAM_CODE void pad_set(byte k, int st)
 {
 	st ? pad_press(k) : pad_release(k);
 }

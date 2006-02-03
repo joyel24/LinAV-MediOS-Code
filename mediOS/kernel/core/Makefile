@@ -3,9 +3,9 @@ include ../../Makefile.conf
 ASFLAGS  += -I../../include
 GCCFLAGS += -I../../include
 
-OBJS = delay.o dsp.o irq.o malloc.o pipes.o printk.o timer.o trap_fct.o trap.o uart.o ti_wdt.o
+OBJS = delay.o dsp.o irq.o malloc.o pipes.o printk.o timer.o trap_fct.o trap.o uart.o ti_wdt.o 
 
-OBJS += swi.o swi_device.o swi_dsp.o swi_file.o swi_memory.o swi_snd.o bkpt.o
+OBJS += swi.o swi_device.o swi_dsp.o swi_file.o swi_memory.o swi_snd.o bkpt.o swi_libfloat.o
 
 ifeq ($(HAVE_CMD_LINE),1)
 	OBJS += cmd_line.o

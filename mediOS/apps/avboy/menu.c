@@ -22,7 +22,6 @@
 
 #include <fs_io.h>
 #include <graphics.h>
-#include <kernel/malloc.h>
 #include <kernel/buttons.h>
 
 #include "defs.h"
@@ -257,7 +256,7 @@ static void munge_name(char *buf, const size_t bufsiz) {
 static void build_slot_path(char *buf, size_t bufsiz, size_t slot_id) {
  // char name_buf[40];
   char *name_buf;
-  name_buf=(char *)bget(40);
+  name_buf=(char *)malloc(40);
   /* munge state file name */
   strncpy(name_buf, rom.name,256); // sizeof(name_buf));
   name_buf[16] = '\0';
@@ -265,7 +264,7 @@ static void build_slot_path(char *buf, size_t bufsiz, size_t slot_id) {
 
   /* glom the whole mess together */
   snprintf(buf, bufsiz, "%s/%s-%d.avb", STATE_DIR, name_buf, slot_id + 1);
-  brel(name_buf);
+  free(name_buf);
 }
 
 /*
@@ -324,7 +323,7 @@ static bool do_file(char *path/*, char *desc*/, bool is_load) {
 static bool do_slot(size_t slot_id, bool is_load) {
   char *path_buf;
   bool res;
-  path_buf=(char *)bget(256);
+  path_buf=(char *)malloc(256);
 
   /* build slot filename*/
   build_slot_path(path_buf, 256, slot_id);
@@ -332,7 +331,7 @@ static bool do_slot(size_t slot_id, bool is_load) {
 
   /* load/save file */
   res = do_file(path_buf/*, desc_buf*/, is_load);
-  brel(path_buf);
+  free(path_buf);
   return  res;
 }
 
@@ -342,7 +341,7 @@ static bool do_slot(size_t slot_id, bool is_load) {
 static void slot_info(char *info_buf, size_t info_bufsiz, size_t slot_id) {
   char * buf;
   int fd;
-  buf=(char *)bget(256);
+  buf=(char *)malloc(256);
 
   /* get slot file path */
   build_slot_path(buf, 256, slot_id);
@@ -354,7 +353,7 @@ static void slot_info(char *info_buf, size_t info_bufsiz, size_t slot_id) {
   } else {
     /* if we couldn't open the file, then the slot is empty */
     snprintf(info_buf, info_bufsiz, "%2d. Empty", slot_id + 1);
-    brel(buf);
+    free(buf);
   }
 }
 
@@ -552,14 +551,14 @@ static void do_opt2_menu(void) {
         (*(volatile unsigned short *)(0x30880))=0x8021;
         break;
       case OM2_ITEM_PAL:
-        while (btn_readState());
+        while (btn_get());
         for (y=0;y<144;y+=9) {
           for (x=0;x<160;x+=10) {
             fillRect(c, x, y, 10, 9);
             c++;
           }
         }
-        while (!btn_readState());
+        while (!btn_get());
         break;
       case MENU_CANCEL:
         done = true;
@@ -676,13 +675,13 @@ static int do_menu(char *title, char **items, size_t num_items, int sel) {
   curr_item = sel;
 
   /* make sure button state is empty */
-  while (btn_readState());
+  while (btn_get());
 
   /* loop until the menu is finished */
   while (!done) {
     /* grab a button */
-    while (btn_readState());
-    while(!(btn = btn_readState()));
+    while (btn_get());
+    while(!(btn = btn_get()));
 
     /* handle the button */
     if(btn & BTMASK_DOWN) {
@@ -739,8 +738,8 @@ void browser(char * rom) {
   struct dirent *romdir;
   DIR * romd=NULL;
 
-items = bget(MAX_PATH*6);
-list = bget(MAX_PATH);
+items = malloc(MAX_PATH*6);
+list = malloc(MAX_PATH);
 
 romd=opendir("/avboy/roms");
 if(romd) printf("Dir /avboy/roms/ opened!\n");
@@ -756,7 +755,7 @@ else {
      list[nb][0]='\0';
      strcat(list[nb],romdir->d_name);
      nb++;
-     list = bgetr(list,MAX_PATH*(nb+1));
+     list = realloc(list,MAX_PATH*(nb+1));
      }
   }
 
@@ -794,8 +793,8 @@ while(!done) {
   curr_item = sel_item;
 
   while (1) {
-    while (btn_readState());
-    while(!(btn = btn_readState()));
+    while (btn_get());
+    while(!(btn = btn_get()));
 
     if(btn & BTMASK_DOWN) {
         sel_item = curr_item + 1;
@@ -834,8 +833,8 @@ while(!done) {
   strcat(rom,list[curr_item+pos]);
   strcat(rom,"\0");
   closedir(romd);
-  brel(items);
-  brel(list);
+  free(items);
+  free(list);
   return;
 }
 

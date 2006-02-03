@@ -21,9 +21,7 @@
 #include <sys_def/string.h>
 #include <graphics.h>
 #include <evt.h>
-#include <kernel/malloc.h>
 #include <kernel/buttons.h>
-#include <kernel/delay.h>
 #include <fs_io.h>
 #include <api.h>
 
@@ -129,7 +127,7 @@ int _start(int argc,char* argv)
     vid_init();
     pcm_init();
     
-    //rom = (char *)bget(MAX_PATH);
+    //rom = (char *)malloc(MAX_PATH);
     printf("Rom name : %s\n",rom);
     
     loader_init(rom);
@@ -152,16 +150,18 @@ int _start(int argc,char* argv)
     vid_init();
     pcm_init();
     
-    rom = (char *)bget(MAX_PATH);
+    rom = (char *)malloc(MAX_PATH);
     
     browser(rom);
-    printf("Rom name : %s\n",rom);
-    
+
+    printf("Rom name : %s (%x,%x)\n",rom,rom,rom+MAX_PATH);
+
     loader_init(rom);
 
     emu_reset();
     emu_run();
 #endif
+    printf("before return\n");
     return 0;
 }
 
@@ -214,7 +214,7 @@ int doevents(void)
 {
     int bt,pressed,released;
     
-    bt=btn_readState();// & 0xF7F;
+    bt=btn_get();// & 0xF7F;
     pressed=bt & ~oldbt;
     released=~bt & oldbt;
     oldbt=bt;
@@ -255,7 +255,7 @@ int doevents(void)
             reload_firmware();
 #endif
 #ifdef AV3XX
-            DIE("bye");
+           return 0;
 #endif
         }
      }

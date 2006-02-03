@@ -70,7 +70,8 @@ void tst_fct(void)
         printk("Can't get evt handler\n");
         return;
     }
-    
+    virtKbd(evt_hand);
+    while(1) ;
     while(1)
     {
         evt_getStatus(evt_hand,&evt);
@@ -204,10 +205,10 @@ void kernel_start (void)
 #endif
     do_bkpt();
     
-    load_bflat("/othello.grv");   
+    load_med("/avboy.med");   
 
     
-    printk("Back from grv\n");
+    printk("Back from med\n");
         
     while(1) /*nothing*/;
 }

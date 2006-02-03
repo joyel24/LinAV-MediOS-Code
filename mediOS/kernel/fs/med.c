@@ -24,8 +24,10 @@
 
 #define CORE_START   ((char*)&_iram_end+0x10)
 
+//#define DO_MED_DEBUG
+
 #ifdef DO_MED_DEBUG
-#define DEBUG_MED (s...)   printk(s)
+#define DEBUG_MED(s...)   printk(s)
 #else
 #define DEBUG_MED(s...)
 #endif
@@ -78,7 +80,7 @@ int test_section(char * name,char ** name_list)
 
 void load_med(char * file_name)
 {
-    int fd,ret,i,j,k,res,res2;
+    int fd,ret,i,j,k,res,res2,res1;
     
     int (*run_med)(int argc,char**argv);
     
@@ -98,6 +100,8 @@ void load_med(char * file_name)
     char * iram_ptr=NULL;
     int first_sdram=-1;
     int first_iram=-1;
+    
+    unsigned int diff;
         
     fd = kfopen(file_name,O_RDONLY);
     if(fd<0)
@@ -197,19 +201,27 @@ void load_med(char * file_name)
         /* is this a SDRAM section */
         if(test_section(section_list[i].name,SDRAM_SECTIONS))
         {
+            DEBUG_MED("Section %s will be loaded in SDRAM size=%x\n",section_list[i].name,section_list[i].size);
             if(section_list[i].type!=MED_BSS)
                 section_list[i].type = MED_BIT;
             section_list[i].dest = MED_DEST_SDRAM;
             sdram_size += section_list[i].size;
+            diff = section_list[i].size % 32;
+            if(diff)
+                sdram_size+=(32-diff);
             if(first_sdram!=-1)
                 first_sdram=i;
         }
         else if(test_section(section_list[i].name,IRAM_SECTIONS))
         {
+            DEBUG_MED("Section %s will be loaded in IRAM size=%x\n",section_list[i].name,section_list[i].size);
             if(section_list[i].type!=MED_BSS)
                 section_list[i].type = MED_BIT;
             section_list[i].dest = MED_DEST_IRAM;
             iram_size += section_list[i].size;
+            diff = section_list[i].size % 32;
+            if(diff)
+                iram_size+=(32-diff);
             if(first_iram!=-1)
                 first_iram=i;
         }
@@ -239,7 +251,7 @@ void load_med(char * file_name)
         goto exit_point2;
     }
     else
-        printk("buffer in SDRAM created; size: %x\n",sdram_size);
+        printk("buffer in SDRAM created; size: %x, start:%x\n",sdram_size,sdram_start);
     
     /* loading sections in mem */
     
@@ -255,11 +267,17 @@ void load_med(char * file_name)
         {
             section_list[i].addr = sdram_ptr;
             sdram_ptr+=section_list[i].size;
+            diff = section_list[i].size % 32;
+            if(diff)
+                sdram_ptr+=(32-diff);
         }
         else if(section_list[i].dest == MED_DEST_IRAM)
         {
             section_list[i].addr = iram_ptr;
             iram_ptr+=section_list[i].size;
+            diff = section_list[i].size % 32;
+            if(diff)
+                iram_ptr+=(32-diff);
         }
         
         if(section_list[i].type == MED_BSS)
@@ -287,7 +305,7 @@ void load_med(char * file_name)
             rel_entry rel_data;
             uint32_t addr;
             uint32_t content;
-            res=0;res2=0;
+            res=0;res2=0;res1=0;
             printk("we'll have to process %d relocs for %s - \n",section_list[i].rel->nb_ent,section_list[i].rel->name);
             for(j=0;j<section_list[i].rel->nb_ent;j++)
             {
@@ -296,23 +314,39 @@ void load_med(char * file_name)
                 /* only considering type 2 rel */
                 if(ELF32_R_TYPE(rel_data.r_info) == 0x2)
                 {
+                    int found=0;
                     res++;
                     addr = rel_data.r_offset-section_list[i].vaddr+(uint32_t)section_list[i].addr;                
                     content = inl(addr);
+                    
                     /* searching where is this addr */
                     for(k=0;k<header.e_shnum;k++)
+                    {
+                        if(section_list[k].type == MED_DISCARD || section_list[k].type == MED_REL)
+                            continue;
                         if(section_list[k].vaddr<=content && (section_list[k].vaddr+section_list[k].size)>content)
                         {
                             outl(content-section_list[k].vaddr+(uint32_t)section_list[k].addr,addr);
                             res2++;
+                            found=1;
                             DEBUG_MED("REL: from %x(%x), data %x changed to %x (in section %d start: %x(%x))\n",rel_data.r_offset,addr,content,
                                 content-section_list[k].vaddr+(uint32_t)section_list[k].addr,k,
                                 section_list[k].vaddr,
                                 (uint32_t)section_list[k].addr);
-                        }                    
+                        }    
+                    }     
+                    if(!found)
+                        DEBUG_MED("REL: from %x(%x), data %x NOT FOUND\n",rel_data.r_offset,addr,content);
                 }
+                else if(ELF32_R_TYPE(rel_data.r_info)==1)
+                {
+                    res1++;
+                }
+                else
+                    DEBUG_MED("REL: %x of type %d \n",rel_data.r_offset,ELF32_R_TYPE(rel_data.r_info));
             }
-            printk("%d were of type 2, %d were found\n",res,res2);
+            printk("%d of type 1, %d were of type 2, %d were found, %d of other type\n",
+                res1,res,res2,section_list[i].rel->nb_ent-res-res1);
         }
     }
     
@@ -342,6 +376,7 @@ void load_med(char * file_name)
     
     DEBUG_MED("calling app\n");      
     
+    do_bkpt();
     
     run_med(0,NULL);
     

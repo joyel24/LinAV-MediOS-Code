@@ -176,7 +176,7 @@ void loadstate(int fd)
 	int i, j;
 //	byte buf[4096];
 //	byte * buf;
-  //      buf=(byte *)bget(4096);
+  //      buf=(byte *)malloc(4096);
 	un32 (*header)[2] = (un32 (*)[2])buf;
 	un32 d;
 	int irl = hw.cgb ? 8 : 2;
@@ -230,7 +230,7 @@ void loadstate(int fd)
 	
 	fseek(fd, (sramblock << 12), SEEK_SET);
 	fread(fd,ram.sbank, 4096*srl);
-     //   brel(buf);
+     //   free(buf);
         vram_dirty();
         pal_dirty();
         sound_dirty();
@@ -242,7 +242,7 @@ void savestate(int fd)
 	int i;
 //	byte buf[4096];
   //      byte * buf;
-  //      buf=(byte *)bget(4096);
+  //      buf=(byte *)malloc(4096);
         un32 (*header)[2] = (un32 (*)[2])buf;
 	un32 d = 0;
 	int irl = hw.cgb ? 8 : 2;
@@ -298,7 +298,7 @@ void savestate(int fd)
 	
 	fseek(fd, (sramblock << 12), SEEK_SET);
 	fwrite(fd,ram.sbank, 4096*srl);
-     //   brel(buf);
+     //   free(buf);
 }
 
 

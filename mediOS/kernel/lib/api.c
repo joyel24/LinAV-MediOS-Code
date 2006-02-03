@@ -49,15 +49,19 @@ MED_RET_T API_GET_TICK             (unsigned long * val)                { swi_ca
 MED_RET_T API_TIME                 (int cmd,struct av_tm * time_data)   { swi_call(nAPI_TIME); }
 MED_RET_T API_POWER                (int cmd,int * val)                  { swi_call(nAPI_POWER); }
 
+MED_RET_T udelay                   (int val)                            { swi_call(nAPI_UDELAY); }
+MED_RET_T mdelay                   (int val)                            { swi_call(nAPI_MDELAY); }
+
 MED_RET_T API_SET_LCD_BRIGHTNESS   (int nBrightness)                    { swi_call(nAPI_SET_LCD_BRIGHTNESS); }
 MED_RET_T API_GET_LCD_BRIGHTNESS   (int* pnBrightness)                  { swi_call(nAPI_GET_LCD_BRIGHTNESS); }
 
 MED_RET_T API_EVT_GET_HANDLER      (unsigned int mask, int * evt_handler)  { swi_call(nAPI_GET_EVT_PIPE); }
 MED_RET_T API_EVT_FREE_HANDLER     (int evt_handler)                    { swi_call(nAPI_RM_EVT_PIPE); }
 MED_RET_T API_EVT_GET              (int evt_handler,int * data)         { swi_call(nAPI_GET_EVT); }
+MED_RET_T API_BTN_GET              (int * data)                         { swi_call(nAPI_GET_BTN); }
 MED_RET_T API_BKPT                 (void)                               { swi_call(nAPI_BKPT); }
 
-MED_RET_T API_SET_GET_INT_TIMER    (int type,int mode,TRI_DATA * pvData)         { swi_call(nAPI_IO_INT_TIMER); }
+MED_RET_T API_SET_GET_INT_TIMER    (int type,int mode,TRI_DATA * pvData) { swi_call(nAPI_IO_INT_TIMER); }
 
 MED_RET_T API_EXIT                 (int code)                           { swi_call(nAPI_EXIT); }
 
@@ -99,16 +103,56 @@ MED_RET_T API_GFX                  (int cmd, void* p, void * pvData)            
 
 ///////////////////////////////////////////////////////
 /////////////////////// DSP API ///////////////////////
-MED_RET_T API_DSP_OPEN             (void* pHandler)                                                   { swi_call(nAPI_DSP_OPEN); }
-MED_RET_T API_DSP_CLOSE            ()                                                                 { swi_call(nAPI_DSP_CLOSE); }
-MED_RET_T API_DSP_LOAD_MEMCODE     (void* pCode, int nSize)                                           { swi_call(nAPI_DSP_LOAD_MEMCODE); }
-MED_RET_T API_DSP_LOAD_HDDCODE     (const char* pszCoffProgram)                                       { swi_call(nAPI_DSP_LOAD_HDDCODE); }
-MED_RET_T API_DSP_ON               ()                                                                 { swi_call(nAPI_DSP_ON); }
-MED_RET_T API_DSP_OFF              ()                                                                 { swi_call(nAPI_DSP_OFF); }
-MED_RET_T API_DSP_RESET            ()                                                                 { swi_call(nAPI_DSP_RESET); }
-MED_RET_T API_DSP_RUN              ()                                                                 { swi_call(nAPI_DSP_RUN); }
+MED_RET_T API_DSP_OPEN             (void* pHandler)             { swi_call(nAPI_DSP_OPEN); }
+MED_RET_T API_DSP_CLOSE            ()                           { swi_call(nAPI_DSP_CLOSE); }
+MED_RET_T API_DSP_LOAD_MEMCODE     (void* pCode, int nSize)     { swi_call(nAPI_DSP_LOAD_MEMCODE); }
+MED_RET_T API_DSP_LOAD_HDDCODE     (const char* pszCoffProgram) { swi_call(nAPI_DSP_LOAD_HDDCODE); }
+MED_RET_T API_DSP_ON               ()    { swi_call(nAPI_DSP_ON); }
+MED_RET_T API_DSP_OFF              ()    { swi_call(nAPI_DSP_OFF); }
+MED_RET_T API_DSP_RESET            ()    { swi_call(nAPI_DSP_RESET); }
+MED_RET_T API_DSP_RUN              ()    { swi_call(nAPI_DSP_RUN); }
 /////////////////////// DSP API ///////////////////////
 ///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+///////////////////// LIB FLOAT ///////////////////////
+MED_RET_T API_MODSI3      (long a, long b,long * res)    { swi_call(nAPI_MODSI3); }
+MED_RET_T API_DIVSI3      (long a, long b,long * res)    { swi_call(nAPI_DIVSI3); }
+MED_RET_T API_UMODSI3     (long a, long b,long * res)    { swi_call(nAPI_UMODSI3); }
+MED_RET_T API_UDIVSI3     (long a, long b,long * res)    { swi_call(nAPI_UDIVSI3); }
+
+#ifdef BUILD_LIB
+long __modsi3(long a, long b)
+{
+    long res=0;
+    API_MODSI3(a,b,&res);
+    return res;
+}
+
+long __divsi3(long a, long b)
+{
+    long res=0;
+    API_DIVSI3(a,b,&res);
+    return res;
+}
+
+long __umodsi3(long a, long b)
+{
+    long res=0;
+    API_UMODSI3(a,b,&res);
+    return res;
+}
+
+long __udivsi3(long a, long b)
+{
+    long res=0;
+    API_UDIVSI3(a,b,&res);
+    return res;
+}
+#endif
+///////////////////////////////////////////////////////
+///////////////////// LIB FLOAT ///////////////////////
+
 
 void printf(char *fmt, ...)
 {
@@ -163,6 +207,13 @@ int evt_get(int evt_pipe)
 {
     int c=0;
     API_EVT_GET(evt_pipe,&c);
+    return c;
+}
+
+int btn_get(void)
+{
+    int c=0;
+    API_BTN_GET(&c);
     return c;
 }
 

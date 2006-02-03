@@ -582,7 +582,7 @@ __IRAM_CODE void spr_scan()
 
 
 
-void lcd_begin(void)
+__IRAM_CODE void lcd_begin(void)
 {
     if (fb.indexed)
     {

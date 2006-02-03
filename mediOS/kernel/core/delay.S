@@ -14,8 +14,8 @@
 /*
  * 0 <= r0 <= 2000
  */
-.global udelay
-udelay:
+.global kudelay
+kudelay:
     mov    r2, #0x6800
     orr    r2, r2, #0x00db
     mul    r1, r0, r2

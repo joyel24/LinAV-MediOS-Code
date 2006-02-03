@@ -21,7 +21,7 @@ void halt_device(void)
 
     ata_stopHD(ATA_FORCE_STOP); /* we need to call halt_hd later to unmount all partitions */
 
-    udelay(100);
+    kudelay(100);
     clf();
     outw(0,0x30a1a);
     while(1) /* nothing */;

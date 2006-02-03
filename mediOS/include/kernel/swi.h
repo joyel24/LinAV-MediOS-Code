@@ -23,6 +23,7 @@
 #define nAPI_DEVICE_section_code   4
 #define nAPI_MEMORY_section_code   5
 #define nAPI_DSP_section_code      6
+#define nAPI_FLOAT_section_code    7
 
 #define nAPI_GFX_section     (nAPI_GFX_section_code    << 8)
 #define nAPI_SND_section     (nAPI_SND_section_code    << 8)
@@ -30,6 +31,7 @@
 #define nAPI_DEVICE_section  (nAPI_DEVICE_section_code << 8)
 #define nAPI_MEMORY_section  (nAPI_MEMORY_section_code << 8)
 #define nAPI_DSP_section     (nAPI_DSP_section_code    << 8)
+#define nAPI_FLOAT_section   (nAPI_FLOAT_section_code  << 8)
 ///////////////////// API SECTIONS ////////////////////
 ///////////////////////////////////////////////////////
 
@@ -49,22 +51,23 @@
 
 ///////////////////////////////////////////////////////
 ///////////////////// DEVICE API //////////////////////
-#define nAPI_TIME                 (nAPI_DEVICE_section + 0)
-#define nAPI_POWER                (nAPI_DEVICE_section + 1)
+#define nAPI_TIME                 (nAPI_DEVICE_section + 0x0)
+#define nAPI_GET_TICK             (nAPI_DEVICE_section + 0x1)
+#define nAPI_IO_INT_TIMER         (nAPI_DEVICE_section + 0x2)
+#define nAPI_UDELAY               (nAPI_DEVICE_section + 0x3)
+#define nAPI_MDELAY               (nAPI_DEVICE_section + 0x4)
 
-#define nAPI_SET_LCD_BRIGHTNESS   (nAPI_DEVICE_section + 3)
-#define nAPI_GET_LCD_BRIGHTNESS   (nAPI_DEVICE_section + 4)
+#define nAPI_POWER                (nAPI_DEVICE_section + 0x10)
+#define nAPI_SET_LCD_BRIGHTNESS   (nAPI_DEVICE_section + 0x12)
+#define nAPI_GET_LCD_BRIGHTNESS   (nAPI_DEVICE_section + 0x13)
 
-#define nAPI_GET_EVT_PIPE         (nAPI_DEVICE_section + 5)
-#define nAPI_RM_EVT_PIPE          (nAPI_DEVICE_section + 6)
-#define nAPI_GET_EVT              (nAPI_DEVICE_section + 7)
+#define nAPI_GET_EVT_PIPE         (nAPI_DEVICE_section + 0x20)
+#define nAPI_RM_EVT_PIPE          (nAPI_DEVICE_section + 0x21)
+#define nAPI_GET_EVT              (nAPI_DEVICE_section + 0x22)
+#define nAPI_GET_BTN              (nAPI_DEVICE_section + 0x23)
 
-#define nAPI_BKPT                 (nAPI_DEVICE_section + 8)
-
-#define nAPI_GET_TICK             (nAPI_DEVICE_section + 9)
-#define nAPI_IO_INT_TIMER         (nAPI_DEVICE_section + 10)
-
-#define nAPI_EXIT                 (nAPI_DEVICE_section + 11)
+#define nAPI_EXIT                 (nAPI_DEVICE_section + 0x30)
+#define nAPI_BKPT                 (nAPI_DEVICE_section + 0x31)
 ///////////////////// DEVICE API //////////////////////
 ///////////////////////////////////////////////////////
 
@@ -100,6 +103,17 @@
 #define nAPI_DSP_RUN              (nAPI_DSP_section + 7)
 /////////////////////// DSP API ///////////////////////
 ///////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////
+///////////////////// LIB FLOAT ///////////////////////
+#define nAPI_MODSI3               (nAPI_FLOAT_section + 0)
+#define nAPI_DIVSI3               (nAPI_FLOAT_section + 1)
+#define nAPI_UMODSI3              (nAPI_FLOAT_section + 2)
+#define nAPI_UDIVSI3              (nAPI_FLOAT_section + 3)
+///////////////////// LIB FLOAT ///////////////////////
+///////////////////////////////////////////////////////
+
 
 MED_RET_T swi_call               (long swi_num,long param1,long param2,long param3) ;
 

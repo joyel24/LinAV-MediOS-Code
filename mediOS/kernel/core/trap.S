@@ -42,7 +42,10 @@ trap_swi:
 @// HERE INTERRUPTS ALREADY ENABLED TO GET API CALL REENTRANCY
 
    stmdb sp!, {r5, lr}
-   bl kcswi_handler
+   ldr r5, __trap_swi_ptr
+   mov lr, pc
+   mov pc, r5
+   @bl kcswi_handler
    ldmia sp!, {r5, lr}
    mov pc, r5       @// return to user code...
 
@@ -55,7 +58,7 @@ trap_swi:
 @    ldmfd  sp!,{lr}
 @    movs   pc, lr
 @.align 5
-__trap_swi_ptr:  .word do_trap_swi
+__trap_swi_ptr:  .word kcswi_handler
 
 @.align	5
 .global trap_prefetch

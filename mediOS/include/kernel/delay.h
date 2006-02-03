@@ -33,10 +33,10 @@
  * while loop for the common cases where n <= MAX_UDELAY_MS  --  Paul G.
  */
 
-void udelay(unsigned long usecs);
+void kudelay(unsigned long usecs);
  
-#define mdelay(n) (\
-	{unsigned long msec=(n); while (msec--) udelay(1000);})
+#define kmdelay(n) (\
+	{unsigned long msec=(n); while (msec--) kudelay(1000);})
 
 
 #endif

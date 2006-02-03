@@ -57,9 +57,14 @@ MED_RET_T API_GET_LCD_BRIGHTNESS   (int* pnBrightness);
 MED_RET_T API_EVT_GET_HANDLER      (unsigned int mask, int * evt_handler);
 MED_RET_T API_EVT_FREE_HANDLER     (int evt_handler);
 MED_RET_T API_EVT_GET              (int evt_handler,int * data);
+MED_RET_T API_BTN_GET              (int * data);
 #define evt_freeHandler API_EVT_FREE_HANDLER
 int evt_get_handler(unsigned int mask);
 int evt_get(int evt_handler);
+int btn_get(void);
+
+MED_RET_T udelay                   (int val);
+MED_RET_T mdelay                   (int val);
 
 MED_RET_T API_BKPT                 (void);
 
@@ -99,6 +104,20 @@ MED_RET_T API_DSP_RESET            ();
 MED_RET_T API_DSP_RUN              ();
 /////////////////////// DSP API ///////////////////////
 ///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+///////////////////// LIB FLOAT ///////////////////////
+MED_RET_T API_MODSI3      (long a, long b,long * res);
+MED_RET_T API_DIVSI3      (long a, long b,long * res);
+MED_RET_T API_UMODSI3     (long a, long b,long * res);
+MED_RET_T API_UDIVSI3     (long a, long b,long * res);
+
+long __modsi3             (long a, long b);
+long __divsi3             (long a, long b);
+long __umodsi3            (long a, long b);
+long __udivsi3            (long a, long b);
+///////////////////////////////////////////////////////
+///////////////////// LIB FLOAT ///////////////////////
 
 int        do_api_power         (int cmd);
 

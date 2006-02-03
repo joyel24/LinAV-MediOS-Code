@@ -1,8 +1,10 @@
 include ../../Makefile.conf
 
+#GCCFLAGS = -Wall -mlong-calls  -nostdlib -fno-builtin  -mcpu=arm7tdmi -Os
+
 ASFLAGS  += -I./include -I../../include -I. 
 #-mfpu=softfpa
-GCCFLAGS += -I./include -I../../include -I. -O3
+GCCFLAGS += -I./include -I../../include -I. 
 
 #GCCFLAGS +=  -mno-long-calls
 
@@ -24,15 +26,17 @@ OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 SUBDIRS =
 
 
-LDFLAGS =  -nostdlib -Wl, -elf2flt -L/home/Rona/toolchain/gcc-3.3.x/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -L../../ -lmedios 
+
+LDFLAGS =  -nostdlib --emit-relocs -L../../ -lLmedios -TAV3XX_aoboy.lds
 #-Wl,-Map test.map -Wl,--embedded-relocs -Wl,-s --emit-relocs
 # -Wl, -elf2flt -Tapps.lds
 #LDFLAGS = -L/home/christophe/gcc-3.3.x/toolchain_arm_nofpu/arm-linux/lib/ -lgcc
 
 all: subdirs $(OBJS)
 	@cp -f $(OBJS) build
-	$(GCC) build/*.o -o $(TARGET).grv  $(LDFLAGS) 
-#	$(LD) build/*.o -o $(TARGET).grv $(LDFLAGS)
+#	$(GCC) build/*.o -o $(TARGET).grv  $(LDFLAGS) 
+	$(LD)  build/*.o -o $(TARGET).med $(LDFLAGS) -Map avboy.map
+	$(LD)  build/*.o -o $(TARGET).elf -nostdlib -L../../ -lLmedios -TAV3XX_aoboy.lds
 	@rm -f .elf *.gdb *.elf2flt
         
 stdalone: subdirs $(OBJS)
@@ -41,6 +45,6 @@ stdalone: subdirs $(OBJS)
 	@$(RANLIB) libavboy.a
 
 clean:   clean-subdirs
-	@rm -f *.o *.bak *~ *.elf *.elf2flt $(TARGET).grv *.gdb
+	@rm -f *.o *.bak *~ *.elf *.elf2flt $(TARGET).grv *.gdb build/*
 
 include ../../default.rule

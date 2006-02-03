@@ -17,12 +17,13 @@
 #include <kernel/rtc.h>
 #include <kernel/bat_power.h>
 #include <kernel/exit.h>
+#include <kernel/delay.h>
 #include <types.h>
 
 extern int lcd_bright;
 extern unsigned long tick;
 
-__IRAM_CODE int swi_device_handler (
+int swi_device_handler (
 	unsigned long nCmd,
 	unsigned long nParam1,
 	unsigned long nParam2,
@@ -44,7 +45,12 @@ __IRAM_CODE int swi_device_handler (
                         printk("time swi %d not implemented\n",(int)nParam1);
                 }
                 return 0;
-        
+            case nAPI_UDELAY:
+                kudelay((int)nParam1);
+                return MED_OK;
+            case nAPI_MDELAY:
+                kmdelay((int)nParam1);
+                return MED_OK;
             case nAPI_POWER:
                 switch((int)nParam1)
                 {
@@ -93,7 +99,9 @@ __IRAM_CODE int swi_device_handler (
 #else
                 return MED_OK;
 #endif
-
+            case nAPI_GET_BTN:
+                 *(int*)nParam1=btn_readState();
+                return MED_OK;
             case nAPI_BKPT:
                 do_bkpt();
                 return 0;

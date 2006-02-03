@@ -15,7 +15,7 @@
 #include <kernel/swi.h>
 #include <kernel/malloc.h>
 
-__IRAM_CODE int swi_memory_handler (
+int swi_memory_handler (
 	unsigned long nCmd,
 	unsigned long nParam1,
 	unsigned long nParam2,

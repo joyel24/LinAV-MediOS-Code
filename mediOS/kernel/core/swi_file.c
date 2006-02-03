@@ -19,7 +19,7 @@
 
 MED_RET_T fs_swi(int cmd,void * data1, void * data2);
 
-__IRAM_CODE MED_RET_T swi_file_handler (
+MED_RET_T swi_file_handler (
 	unsigned long nCmd,
 	unsigned long nParam1,
 	unsigned long nParam2,

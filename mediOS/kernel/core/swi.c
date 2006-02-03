@@ -14,7 +14,7 @@
 #include <kernel/swi.h>
 
 
-__IRAM_CODE int kcswi_handler (
+int kcswi_handler (
 	unsigned long nCmd,
 	unsigned long nParam2,
 	unsigned long nParam3,
@@ -39,7 +39,9 @@ __IRAM_CODE int kcswi_handler (
     
         case nAPI_DSP_section_code:
                 return swi_dsp_handler (nCmd, nParam1, nParam2, nParam3);
-    
+                
+        case nAPI_FLOAT_section_code:
+                return swi_float_handler (nCmd, nParam1, nParam2, nParam3);
         default:
                 printk("Unknown SWI module call %x\n", nCmd);
     }
