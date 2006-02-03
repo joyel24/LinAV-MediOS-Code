@@ -18,6 +18,7 @@
 #include <kernel/bat_power.h>
 #include <kernel/exit.h>
 #include <kernel/delay.h>
+#include <kernel/buttons.h>
 #include <types.h>
 
 extern int lcd_bright;

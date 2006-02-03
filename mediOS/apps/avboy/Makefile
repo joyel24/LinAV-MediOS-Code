@@ -27,7 +27,7 @@ SUBDIRS =
 
 
 
-LDFLAGS =  -nostdlib --emit-relocs -L../../ -lLmedios -TAV3XX_aoboy.lds
+LDFLAGS =  -nostdlib --emit-relocs -L../../ -lLmedios -T$(TARGET_DEVICE)_aoboy.lds
 #-Wl,-Map test.map -Wl,--embedded-relocs -Wl,-s --emit-relocs
 # -Wl, -elf2flt -Tapps.lds
 #LDFLAGS = -L/home/christophe/gcc-3.3.x/toolchain_arm_nofpu/arm-linux/lib/ -lgcc
@@ -36,7 +36,7 @@ all: subdirs $(OBJS)
 	@cp -f $(OBJS) build
 #	$(GCC) build/*.o -o $(TARGET).grv  $(LDFLAGS) 
 	$(LD)  build/*.o -o $(TARGET).med $(LDFLAGS) -Map avboy.map
-	$(LD)  build/*.o -o $(TARGET).elf -nostdlib -L../../ -lLmedios -TAV3XX_aoboy.lds
+	#$(LD)  build/*.o -o $(TARGET).elf -nostdlib -L../../ -lLmedios -T$(TARGET_DEVICE)_aoboy.lds
 	@rm -f .elf *.gdb *.elf2flt
         
 stdalone: subdirs $(OBJS)

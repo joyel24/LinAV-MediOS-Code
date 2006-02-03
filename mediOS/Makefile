@@ -31,8 +31,8 @@ lib : incdir
 	#make -C apps/avboy stdalone
 	make -C apps/ othello.o
 	make -C kernel/ kernel_lib
-	#$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) -Lapps/avboy -lavboy $(LDFLAGS) -Map medios.map
-	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) apps/othello.o  $(LDFLAGS) -Map medios.map
+	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) -Lapps/avboy -lavboy $(LDFLAGS) -Map medios.map
+	#$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) apps/othello.o  $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).bin
     
     

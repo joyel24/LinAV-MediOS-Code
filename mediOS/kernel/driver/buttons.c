@@ -154,7 +154,7 @@ __IRAM_CODE void btn_processPress(int val)
 #endif
                     evt.evt=btn+1;
                     evt.evt_class=BTN_CLASS;
-                    evt.data=mx_press[btn];
+                    evt.data=(void*)mx_press[btn];
                     evt_send(&evt);
                     //printk("BTN %d pressed\n",btn);
 #ifdef HAVE_FM_REMOTE                        

@@ -122,8 +122,9 @@ int swi_snd_handler               (unsigned long nCmd,unsigned long nParam1,unsi
 int swi_memory_handler            (unsigned long nCmd,unsigned long nParam1,unsigned long nParam2,unsigned long nParam3);
 int swi_kernel_handler            (unsigned long nCmd,unsigned long nParam1,unsigned long nParam2,unsigned long nParam3);
 //int swi_gfx_handler               (unsigned long nCmd,unsigned long nParam1,unsigned long nParam2,unsigned long nParam3);
-int swi_dsp_handler               (unsigned long nCmd,unsigned long nParam1,unsigned long nParam2,unsigned long nParam3);
-int swi_device_handler            (unsigned long nCmd,unsigned long nParam1,unsigned long nParam2,unsigned long nParam3);     
+int swi_dsp_handler              (unsigned long nCmd,unsigned long nParam1,unsigned long nParam2,unsigned long nParam3);
+int swi_device_handler           (unsigned long nCmd,unsigned long nParam1,unsigned long nParam2,unsigned long nParam3);
+int swi_float_handler           (unsigned long nCmd,unsigned long nParam1,unsigned long nParam2,unsigned long nParam3);
 
 int swi_gfx_handler(unsigned long nCmd,unsigned long cmd,
     unsigned long nParam2,
