@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.7  2006/01/24 21:51:39  cjnr11
+// AV support (but with some bugs). Start the Archos FW then Doom
+//
 // Revision 1.6  2006/01/23 17:21:08  sfxgligli
 // - mediOS: Gmini400 new buttons
 // - gDoom: added strafe & speed buttons, cleaned up things that shouldn't have been commited
@@ -190,7 +193,7 @@ void I_StartTic (void)
 {
   int bt,pressed,released;
 
-  bt=btn_readState();
+  bt=btn_get();
   pressed=bt & ~oldbt;
   released=~bt & oldbt;
   oldbt=bt;

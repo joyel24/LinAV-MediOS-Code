@@ -31,7 +31,7 @@ LDFLAGS =  -nostdlib --emit-relocs -L../../ -lLmedios
 
 all: subdirs $(OBJS)
 	@cp -f $(OBJS) build
-	$(GCC) build/*.o -o $(TARGET).grv  $(LDFLAGS) 
+	$(GCC) build/*.o -o $(TARGET).med  $(LDFLAGS) 
 #	$(LD) build/*.o -o $(TARGET).grv $(LDFLAGS)
 	@rm -f .elf *.gdb *.elf2flt
         
