@@ -24,7 +24,7 @@ OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 SUBDIRS =
 
 
-LDFLAGS =  -nostdlib -Wl, -elf2flt -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -L../../ -lmedios 
+LDFLAGS =  -nostdlib --emit-relocs -L../../ -lLmedios 
 #-Wl,-Map test.map -Wl,--embedded-relocs -Wl,-s --emit-relocs
 # -Wl, -elf2flt -Tapps.lds
 #LDFLAGS = -L/home/christophe/gcc-3.3.x/toolchain_arm_nofpu/arm-linux/lib/ -lgcc

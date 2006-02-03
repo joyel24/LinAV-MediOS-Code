@@ -111,6 +111,7 @@
 #define nAPI_DIVSI3               (nAPI_FLOAT_section + 1)
 #define nAPI_UMODSI3              (nAPI_FLOAT_section + 2)
 #define nAPI_UDIVSI3              (nAPI_FLOAT_section + 3)
+#define nAPI_DIVDI3               (nAPI_FLOAT_section + 4)
 ///////////////////// LIB FLOAT ///////////////////////
 ///////////////////////////////////////////////////////
 

@@ -111,11 +111,13 @@ MED_RET_T API_MODSI3      (long a, long b,long * res);
 MED_RET_T API_DIVSI3      (long a, long b,long * res);
 MED_RET_T API_UMODSI3     (long a, long b,long * res);
 MED_RET_T API_UDIVSI3     (long a, long b,long * res);
+MED_RET_T API_DIVDI3     (unsigned int a, unsigned int b,unsigned int * res);
 
 long __modsi3             (long a, long b);
 long __divsi3             (long a, long b);
 long __umodsi3            (long a, long b);
 long __udivsi3            (long a, long b);
+unsigned int __divdi3     (unsigned int a, unsigned int b);
 ///////////////////////////////////////////////////////
 ///////////////////// LIB FLOAT ///////////////////////
 

@@ -16,7 +16,7 @@ extern long __modsi3(long a, long b);
 extern long __umodsi3(long a, long b);
 extern long __divsi3(long a, long b);
 extern long __udivsi3(long a, long b);
-
+extern unsigned int __divdi3(unsigned int a, unsigned int b);
 
 int swi_float_handler (
 	unsigned long nCmd,
@@ -37,7 +37,10 @@ int swi_float_handler (
                 return MED_OK;
             case nAPI_UDIVSI3:
                 *(long*)nParam3=__udivsi3(nParam1,nParam2);
-                return MED_OK;        
+                return MED_OK;   
+            case nAPI_DIVDI3:        
+                *(unsigned int*)nParam3=__divdi3((unsigned int)nParam1,(unsigned int)nParam2);
+                return MED_OK;    
             default:
                 printk("Device undefined libfloat swi (%d)\n",nCmd);
         }

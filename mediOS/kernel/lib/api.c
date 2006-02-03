@@ -120,7 +120,7 @@ MED_RET_T API_MODSI3      (long a, long b,long * res)    { swi_call(nAPI_MODSI3)
 MED_RET_T API_DIVSI3      (long a, long b,long * res)    { swi_call(nAPI_DIVSI3); }
 MED_RET_T API_UMODSI3     (long a, long b,long * res)    { swi_call(nAPI_UMODSI3); }
 MED_RET_T API_UDIVSI3     (long a, long b,long * res)    { swi_call(nAPI_UDIVSI3); }
-
+MED_RET_T API_DIVDI3      (unsigned int a, unsigned int b,unsigned int * res)    { swi_call(nAPI_DIVDI3); }
 #ifdef BUILD_LIB
 long __modsi3(long a, long b)
 {
@@ -147,6 +147,13 @@ long __udivsi3(long a, long b)
 {
     long res=0;
     API_UDIVSI3(a,b,&res);
+    return res;
+}
+
+unsigned int __divdi3(unsigned int a, unsigned int b)
+{
+    unsigned int res=0;
+    API_DIVDI3(a,b,&res);
     return res;
 }
 #endif
