@@ -43,6 +43,8 @@ __IRAM_DATA int press_step[NB_BUTTONS];
 __IRAM_DATA int nb_off_press;
 __IRAM_DATA int nb_debug_switch;
 
+
+
 #ifdef HAVE_FM_REMOTE
 extern int inHold;
 #endif
@@ -181,7 +183,9 @@ void btn_init(void)
     nb_off_press=0;
     nb_debug_switch=0;
     need_clean=0;
-       
+    
+
+    
     for(btn=0;btn<NB_BUTTONS;btn++)
     {
         nb_pressed[btn]=0;

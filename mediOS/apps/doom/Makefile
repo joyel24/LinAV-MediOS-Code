@@ -24,15 +24,15 @@ OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 SUBDIRS =
 
 
-LDFLAGS =  -nostdlib --emit-relocs -L../../ -lLmedios 
+LDFLAGS =  -nostdlib --emit-relocs -L../../ -lLmedios -T$(TARGET_DEVICE)_doom.lds
 #-Wl,-Map test.map -Wl,--embedded-relocs -Wl,-s --emit-relocs
 # -Wl, -elf2flt -Tapps.lds
 #LDFLAGS = -L/home/christophe/gcc-3.3.x/toolchain_arm_nofpu/arm-linux/lib/ -lgcc
 
 all: subdirs $(OBJS)
 	@cp -f $(OBJS) build
-	$(GCC) build/*.o -o $(TARGET).med  $(LDFLAGS) 
-#	$(LD) build/*.o -o $(TARGET).grv $(LDFLAGS)
+#	$(GCC) build/*.o -o $(TARGET).med  $(LDFLAGS) -Map doom.map
+	$(LD) build/*.o -o $(TARGET).med $(LDFLAGS) -Map doom.map
 	@rm -f .elf *.gdb *.elf2flt
         
 stdalone: subdirs $(OBJS)

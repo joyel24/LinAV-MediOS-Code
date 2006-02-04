@@ -107,6 +107,7 @@ void tst_fct(void)
 
 void kernel_start (void)
 {
+
     gfx_init();
 
 #ifdef HAVE_DEBUG_ON_SCREEN
@@ -125,6 +126,8 @@ void kernel_start (void)
         (unsigned int)MALLOC_START,
         (unsigned int)MALLOC_SIZE);
 
+    
+        
     /* init the watchdog timer */
     wdt_init();
 
@@ -205,7 +208,8 @@ void kernel_start (void)
 #endif
     do_bkpt();
     
-    load_med("/avboy.med");   
+    
+    load_med("/doom.med");   
 
     
     printk("Back from med\n");

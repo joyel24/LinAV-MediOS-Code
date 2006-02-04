@@ -14,6 +14,11 @@ trap_fiq:
     ldrh    r9, [r8]
     movs    r9, r9, lsr #0xD
     bcs     iniAvLoopVal2
+    ldr     r9, =powering_off
+    ldr     r8, [r9]
+    mov     r9, #1
+    cmp     r9,r8
+    beq     iniAvLoopVal2
     ldr     r9, =.avLOOPval2
     ldr     r8, [r9]
     add     r8, r8, #1

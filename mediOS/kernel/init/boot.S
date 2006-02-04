@@ -23,6 +23,10 @@ entry_code:
     @mov r0, #0x00007C00
     mov r0, #0x00007D00
     mov sp, r0
+/* init lock var for power off */
+    ldr r0, =powering_off
+    mov r1, #0
+    str r1, [r0]
 /* move iram code */
     ldr r0, __real_iram_start_ptr    
     ldr r1, __iram_start_ptr
