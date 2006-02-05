@@ -40,8 +40,9 @@
 #define SDRAM_LOAD_OFFSET	0x310000 //gmini400 homebrew;
 #endif
 
-
-
+//#define HAS_VID0
+#define HAS_LCD
+#define HAS_UART_XWIN
 
 /************************************************************ initial state */
 

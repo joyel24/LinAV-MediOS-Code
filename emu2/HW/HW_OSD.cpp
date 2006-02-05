@@ -565,11 +565,14 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
 
 int HW_OSD::nxtEvent(void)
 {
+#ifdef HAS_LCD
     return lcd->nxtEvent(OSD_config_regs,OSD_offset_regs);
+#endif
 }
 
 void HW_OSD::chk_access(uint32_t addr,uint32_t val,int size)
 {
+#ifdef HAS_LCD
     if((OSD_config_regs[2]&0x1) && addr>=OSD_offset_regs[2]
             && addr <= (OSD_offset_regs[2]+SCREEN_WIDTH*SCREEN_HEIGHT*2)){
         uint32_t v=val;
@@ -589,6 +592,7 @@ void HW_OSD::chk_access(uint32_t addr,uint32_t val,int size)
     else if ((OSD_config_regs[1]&0x1) && addr>=OSD_offset_regs[0]
             && addr <= (OSD_offset_regs[0]+SCREEN_WIDTH*SCREEN_HEIGHT*4))
             lcd->drawVidPix(addr-OSD_offset_regs[0],val);
+#endif
 #endif
 }
 

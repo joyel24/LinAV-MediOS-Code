@@ -26,6 +26,7 @@ int lcd_update_cnt[2] = {0,0};
 
 HW_lcd::HW_lcd(HW_mem * mem2,HW_OSD * osd)
 {
+#ifdef HAS_LCD
     int x,y;
 
     skip=0;
@@ -100,6 +101,7 @@ HW_lcd::HW_lcd(HW_mem * mem2,HW_OSD * osd)
     XSelectInput(display, window2, ExposureMask);
     XMapWindow(display, window2);
 #endif     
+#endif
     printf("LCD init done\n");
 }
 
@@ -119,6 +121,7 @@ void HW_lcd::setPalette(int palette[256][3],int size)
 
 int HW_lcd::setPalette(int r,int g, int b, int index)
 {
+#ifdef HAS_LCD
     XColor c;
         
     c.red = r*0x100+r;
@@ -127,11 +130,14 @@ int HW_lcd::setPalette(int r,int g, int b, int index)
     XAllocColor(display, pal, &c);
     colorTab[index] = c.pixel;    
     return c.pixel;
+#else
+    return 0;
+#endif
 }
 
 int HW_lcd::nxtEvent(int * config,uint32_t * addr)
 {   
- #if 1
+#ifdef HAS_LCD
     ++skip;
     if(skip<10000) return 0;
     skip=0;
@@ -228,7 +234,7 @@ int HW_lcd::nxtEvent(int * config,uint32_t * addr)
             break;
     }
    }  
-   #endif
+#endif
 }
 
 void HW_lcd::drawPix(uint32_t addr,uint32_t val)
@@ -259,6 +265,7 @@ void HW_lcd::drawVidPix(uint32_t addr,uint32_t val)
 
 void HW_lcd::updte_lcd(uint32_t base_addr,int type)
 {
+#ifdef HAS_LCD
     int a=0;
     int b=0;
     char data[4];
@@ -286,6 +293,7 @@ void HW_lcd::updte_lcd(uint32_t base_addr,int type)
             }
             
     }
+#endif
 #endif
 }
 

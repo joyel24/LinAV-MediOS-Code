@@ -50,7 +50,7 @@ HW_uart::HW_uart(uint32_t start,uint32_t end,char * name):HW_access(start,end,na
         fprintf(fd,"%s ouptput\n",name);
         fflush(fd);
     }    
-
+#ifdef HAS_UART_XWIN
     display = XOpenDisplay(0);
     if(!display)
     {
@@ -80,6 +80,7 @@ HW_uart::HW_uart(uint32_t start,uint32_t end,char * name):HW_access(start,end,na
     XSelectInput(display, window, StructureNotifyMask | ExposureMask | KeyPressMask | KeyReleaseMask);
 
     XMapWindow(display, window);
+#endif
 }
 
 HW_uart::~HW_uart()
@@ -89,7 +90,7 @@ HW_uart::~HW_uart()
 
 int HW_uart::nxtEvent()
 {   
-    #if 1
+#ifdef HAS_UART_XWIN
     ++skip;
     if(skip<10000) return 0;
     skip=0;
@@ -116,7 +117,7 @@ int HW_uart::nxtEvent()
             break;
       }
     }
-   #endif
+#endif
 }
 
 uint32_t HW_uart::read(uint32_t addr,int size)
@@ -163,9 +164,9 @@ void HW_uart::write(uint32_t addr,uint32_t val,int size)
                 fflush(fd);
             }
                 //DEBUG_HW(UART_HW_DEBUG,"%c",val&0xFF);
-
+#ifdef HAS_UART_XWIN
             add_char(c);
-
+#endif
             break;
         default:
             DEBUG_HW(UART_HW_DEBUG,"%s write %x @0x%08x, size %x\n",name,val,addr,size);
@@ -203,7 +204,7 @@ void HW_uart::add_char(char c){
     }
 
     term[ty][tx]=0;
-
+#ifdef HAS_UART_XWIN
     if (full_update){
         update_window();
     }else{
@@ -211,14 +212,16 @@ void HW_uart::add_char(char c){
         XDrawString(display,window,gc,MARGIN,ty*FONT_HEIGHT+FONT_HEIGHT+MARGIN,term[ty],strlen(term[ty]));
         XFlush(display);
     }
+#endif
 }
 
 void HW_uart::update_window(){
-
+#ifdef HAS_UART_XWIN   
 	  for (int i=0;i<TERM_HEIGHT;++i){
 	      XClearArea(display,window,MARGIN,i*FONT_HEIGHT+2+MARGIN,TERM_WIDTH*FONT_WIDTH+MARGIN,FONT_HEIGHT,false);
         XDrawString(display,window,gc,MARGIN,i*FONT_HEIGHT+FONT_HEIGHT+MARGIN,term[i],strlen(term[i]));
     }
 
     XFlush(display);
+#endif
 }
