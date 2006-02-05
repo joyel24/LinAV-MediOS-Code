@@ -1,7 +1,7 @@
-/* 
-*   include/time.h
+/*
+*   include/kernel/libfloat.h
 *
-*   MediOS project
+*   AMOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -10,18 +10,14 @@
 * KIND, either express of implied.
 */
 
-#ifndef __TIME_H
-#define __TIME_H
 
-struct med_tm {
-    int tm_ms;
-    int tm_sec;
-    int tm_min;
-    int tm_hour;
-    int tm_wday;
-    int tm_mday;
-    int tm_mon;
-    int tm_year;
-};
+#ifndef __LIBFLOAT_H
+#define __LIBFLOAT_H
+
+long __modsi3(long a, long b);
+long __umodsi3(long a, long b);
+long __divsi3(long a, long b);
+long __udivsi3(long a, long b);
+unsigned int __divdi3(unsigned int a, unsigned int b);
 
 #endif

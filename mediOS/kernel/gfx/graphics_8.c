@@ -13,7 +13,7 @@
 #include <kernel/io.h>
 #include <sys_def/string.h>
 
-#include <kernel/kgraphics.h>
+#include <kernel/graphics.h>
 
 void         graphics8_DrawPixel         (unsigned int color, int x, int y, struct graphicsBuffer * buff);
 unsigned int graphics8_ReadPixel         (int x, int y, struct graphicsBuffer * buff);

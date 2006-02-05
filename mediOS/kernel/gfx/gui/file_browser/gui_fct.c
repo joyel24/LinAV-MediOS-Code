@@ -13,7 +13,7 @@
 #include <sys_def/string.h>
 #include <kernel/kernel.h>
 
-#include <graphics.h>
+#include <kernel/graphics.h>
 #include <sys_def/colordef.h>
 
 #include <gui/icons.h>
@@ -74,7 +74,7 @@ int viewNewDir(struct browser_data *bdata,char *name)
 
     
     
-    fillRect(COLOR_WHITE,bdata->x_start,bdata->y_start,bdata->width,bdata->height);
+    gfx_fillRect(COLOR_WHITE,bdata->x_start,bdata->y_start,bdata->width,bdata->height);
 
     browser_scroll.x=bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?1:bdata->width-10);
     browser_scroll.y=bdata->y_start;
@@ -92,7 +92,7 @@ int viewNewDir(struct browser_data *bdata,char *name)
 void clearBrowser(struct browser_data *bdata)
 {
     cleanList(bdata);
-    fillRect(COLOR_WHITE,bdata->x_start,bdata->y_start,bdata->width,bdata->height);
+    gfx_fillRect(COLOR_WHITE,bdata->x_start,bdata->y_start,bdata->width,bdata->height);
     if(bdata->clear_status)
         bdata->clear_status(bdata);
 }
@@ -119,7 +119,7 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
         cp = dEntry->name;
 
     if(clear)
-        fillRect(COLOR_WHITE, X, Y , W, H);
+        gfx_fillRect(COLOR_WHITE, X, Y , W, H);
 
     switch(dEntry->type)
     {
@@ -130,7 +130,7 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
         case TYPE_DIR:
             color=COLOR_RED;
             select_color=COLOR_BLUE;
-            drawBITMAP(gui_ls_dirBitmap, X+2, Y);
+            gfx_drawBitmap(gui_ls_dirBitmap, X+2, Y);
             break;
         case TYPE_FILE:
             color=COLOR_BLACK;
@@ -140,19 +140,19 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
             switch(type)
             {
                 case IMG_TYPE:
-                    drawBITMAP(gui_ls_imageBitmap, X+2, Y);
+                    gfx_drawBitmap(gui_ls_imageBitmap, X+2, Y);
                     break;
                 case MP3_TYPE:
-                    drawBITMAP(gui_ls_mp3Bitmap, X+2, Y);
+                    gfx_drawBitmap(gui_ls_mp3Bitmap, X+2, Y);
                     break;
                 case TXT_TYPE:
-                    drawBITMAP(gui_ls_textBitmap, X+2, Y);
+                    gfx_drawBitmap(gui_ls_textBitmap, X+2, Y);
                     break;
                 case BIN_TYPE:
                 case SCRIPT_TYPE:
                 case UKN_TYPE:
                 default:
-                    fillRect(COLOR_WHITE, X+2, Y, 8, 8); /* no icon */
+                    gfx_fillRect(COLOR_WHITE, X+2, Y, 8, 8); /* no icon */
                     break;
             }
             break;
@@ -178,10 +178,10 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
     	trimmed_filename[i]=dEntry->name[i];
     }
     trimmed_filename[33]='\0';
-    putS(color, select_color,X+11, Y, trimmed_filename);
+    gfx_putS(color, select_color,X+11, Y, trimmed_filename);
 #endif
 #ifdef AV3XX
-    putS(color, select_color,X+11, Y, dEntry->name);
+    gfx_putS(color, select_color,X+11, Y, dEntry->name);
 #endif
 }
 
@@ -198,10 +198,10 @@ void printAllName(struct browser_data *bdata)
     for (i = pos; i < bdata->listused && i < pos+bdata->nb_disp_entry; i++)
         printName(&bdata->list[i], i-pos,1,(i-pos)==nselect,bdata);
 
-    /*fillRect(COLOR_WHITE,X, Y+(i-pos)*H, W,H);
-    We should replace this with one call to fillRect !! */
+    /*gfx_fillRect(COLOR_WHITE,X, Y+(i-pos)*H, W,H);
+    We should replace this with one call to gfx_fillRect !! */
     for(;i<pos+bdata->nb_disp_entry;i++)
-        fillRect(COLOR_WHITE,X, Y+(i-pos)*H, W,H);
+        gfx_fillRect(COLOR_WHITE,X, Y+(i-pos)*H, W,H);
     if(bdata->draw_bottom_status)
         bdata->draw_bottom_status(bdata);
 }

@@ -14,11 +14,12 @@
 #ifndef __KERNEL_H
 #define __KERNEL_H
 
-
 #include <sys_def/section_types.h>
 
 void printk(char *fmt, ...);
+void printf(char *fmt, ...);
 void print_data(char * data,int length);
+void do_bkpt(void);
 
 unsigned int get_sp(void);
 
@@ -28,9 +29,7 @@ extern unsigned int _end_kernel;
 extern unsigned int _iram_start;
 extern unsigned int _iram_end;
 
-struct pt_regs {
-	long uregs[18];
-};
+
 
 #define HZ 100
 

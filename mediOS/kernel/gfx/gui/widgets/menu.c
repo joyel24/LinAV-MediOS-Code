@@ -14,7 +14,7 @@
 #include <sys_def/string.h>
 #include <kernel/kernel.h>
 
-#include <graphics.h>
+#include <kernel/graphics.h>
 #include <evt.h>
 #include <gui/common_def.h>
 #include <gui/menu.h>
@@ -22,8 +22,8 @@
 #define MAXPOS       10
 #define TITLE_OFFSET  2
 
-#define CHG_PLANE     {if(current_menu->useOwnDisp) setPlane(BMAP2);}
-#define RESTORE_PLANE  {if(current_menu->useOwnDisp) setPlane(BMAP1);}
+#define CHG_PLANE     {if(current_menu->useOwnDisp) gfx_setPlane(BMAP2);}
+#define RESTORE_PLANE  {if(current_menu->useOwnDisp) gfx_setPlane(BMAP1);}
 
 int nselect,iselect,jselect;
 struct menu_item *pos;
@@ -39,7 +39,7 @@ int dispName_norm(struct menu_item * item,int x,int y,int clear,int selected)
     int w = 0;
     int h = 0;
     
-    getStringS("M", &w, &h);
+    gfx_getStringSize("M", &w, &h);
 
     if(item->sub)
     {
@@ -55,12 +55,12 @@ int dispName_norm(struct menu_item * item,int x,int y,int clear,int selected)
     CHG_PLANE
        
     if(clear)
-        fillRect(current_menu->bg_color,x, y , current_menu->width-x, h+1);
+        gfx_fillRect(current_menu->bg_color,x, y , current_menu->width-x, h+1);
 
     if(selected)
-        putS(color, current_menu->select_color,x, y, tmp);
+        gfx_putS(color, current_menu->select_color,x, y, tmp);
     else
-        putS(color, current_menu->bg_color,x, y, tmp);
+        gfx_putS(color, current_menu->bg_color,x, y, tmp);
     RESTORE_PLANE
     return 1;
 }
@@ -98,22 +98,22 @@ int dispName_icon(struct menu_item * item,int i,int j,int clear_txt,int clear_ic
        
     if(clear_icon)
     {
-        fillRect(current_menu->bg_color,x, y , item_width, icon->height);
+        gfx_fillRect(current_menu->bg_color,x, y , item_width, icon->height);
         if(icon && icon->width<=item_width && icon->height<=icon_zone_height)
-            drawBITMAP(icon,x+(item_width-icon->width)/2,y+(icon_zone_height-icon->height)/2);
+            gfx_drawBitmap(icon,x+(item_width-icon->width)/2,y+(icon_zone_height-icon->height)/2);
     }
     
     if(clear_txt)
     {
-        fillRect(current_menu->bg_color,x, y + icon_zone_height+1, item_width,item_height-(icon_zone_height+1));
+        gfx_fillRect(current_menu->bg_color,x, y + icon_zone_height+1, item_width,item_height-(icon_zone_height+1));
     }
     
-       getStringS(tmp, &w, &h); 
+       gfx_getStringSize(tmp, &w, &h); 
     
     if(selected)
-        putS(color, current_menu->select_color,x+(item_width-w)/2, y+icon_zone_height+1, tmp);
+        gfx_putS(color, current_menu->select_color,x+(item_width-w)/2, y+icon_zone_height+1, tmp);
     else
-        putS(color, current_menu->bg_color,x+(item_width-w)/2, y+icon_zone_height+1, tmp);
+        gfx_putS(color, current_menu->bg_color,x+(item_width-w)/2, y+icon_zone_height+1, tmp);
     RESTORE_PLANE
     return 1;
 }
@@ -122,7 +122,7 @@ void dispAllName_norm(struct menu_item * pos,int nselect)
 {
     struct menu_item * i;
     int nbAff=0,w=0,h=0;
-    getStringS("M", &w, &h);
+    gfx_getStringSize("M", &w, &h);
 
     for (i = pos; i !=NULL && nbAff < MAXPOS; i=i->nxt) {
         dispName_norm(i,current_menu->dx,TITLE_OFFSET + nbAff*(h+1) + current_menu->dy,0,nbAff==nselect);
@@ -154,7 +154,7 @@ void dispAllName_icon(struct menu_item * pos,int nselect)
 void dispAName_norm(struct menu_item * pos, int posY, int clear, int selected)
 {
     int w=0,h=0;
-    getStringS("M", &w, &h);
+    gfx_getStringSize("M", &w, &h);
     dispName_norm(pos,current_menu->dx,TITLE_OFFSET + posY*(h+1)+ current_menu->dy,clear,selected);
 }
 
@@ -164,21 +164,21 @@ void start_menu(struct menu_data * client_menu)
     
     if(current_menu->useOwnDisp)
     {
-        setSize(BMAP2,current_menu->width,current_menu->height,8);
-        showPlane(BMAP2);
+        gfx_planeSetSize(BMAP2,current_menu->width,current_menu->height,8);
+        gfx_planeShow(BMAP2);
 
-        setPlane(BMAP2);
-        clearScreen(current_menu->bg_color);
+        gfx_setPlane(BMAP2);
+        gfx_clearScreen(current_menu->bg_color);
                 
-        setPos(BMAP2,0x14 +2*current_menu->x,0x13+current_menu->y);
-        setPlane(BMAP1);
+        gfx_planeSetPos(BMAP2,0x14 +2*current_menu->x,0x13+current_menu->y);
+        gfx_setPlane(BMAP1);
     }
 }
 
 void stop_menu(void)
 {
     if(current_menu->useOwnDisp)
-        hidePlane(BMAP2);
+        gfx_planeHide(BMAP2);
 }
 
 void menuEvtHandler(int evt)
@@ -194,7 +194,7 @@ void normMenu_handler(int evt)
    int w = 0;
    int h = 0;
 
-   getStringS("M", &w, &h);
+   gfx_getStringSize("M", &w, &h);
 
    switch(evt) {
         case BTN_UP:
@@ -210,7 +210,7 @@ void normMenu_handler(int evt)
                 pselect=pos;
 
                 CHG_PLANE
-                scrollWindowVert(current_menu->bg_color,current_menu->dx, current_menu->dy,
+                gfx_scrollWindowVert(current_menu->bg_color,current_menu->dx, current_menu->dy,
                                     current_menu->width-current_menu->dx, (h+1)*MAXPOS, h+1,0);
                 RESTORE_PLANE
             }
@@ -234,7 +234,7 @@ void normMenu_handler(int evt)
                 pos=pos->nxt;
                 pselect=pos;
                 CHG_PLANE
-                scrollWindowVert(current_menu->bg_color, current_menu->dx, current_menu->dy,
+                gfx_scrollWindowVert(current_menu->bg_color, current_menu->dx, current_menu->dy,
                                     current_menu->width-current_menu->dx, (h+1)*MAXPOS, h+1,1);
                 RESTORE_PLANE
             }
@@ -253,11 +253,11 @@ void normMenu_handler(int evt)
                 nselect=0;
                 pselect=pos;
                 CHG_PLANE
-                fillRect(current_menu->bg_color,current_menu->dx, current_menu->dy,
+                gfx_fillRect(current_menu->bg_color,current_menu->dx, current_menu->dy,
                              current_menu->width-current_menu->dx,(h+1)*MAXPOS);
                 if(current_menu->has_border)
                 {
-                    drawRect(current_menu->border_color,0,0,current_menu->width,current_menu->height);
+                    gfx_drawRect(current_menu->border_color,0,0,current_menu->width,current_menu->height);
                 }
                 RESTORE_PLANE
                 dispAllName_norm(pos,nselect);
@@ -279,7 +279,7 @@ void normMenu_handler(int evt)
                     nselect=0;
                     pselect=pos;
                     CHG_PLANE
-                    fillRect(current_menu->bg_color,current_menu->dx, current_menu->dy,
+                    gfx_fillRect(current_menu->bg_color,current_menu->dx, current_menu->dy,
                                 current_menu->width-current_menu->dx,(h+1)*MAXPOS);
                     RESTORE_PLANE
                     dispAllName_norm(pos,nselect);
@@ -288,11 +288,11 @@ void normMenu_handler(int evt)
             break;
         case EVT_REDRAW:        
             CHG_PLANE
-            fillRect(current_menu->bg_color,0 , current_menu->dy,
+            gfx_fillRect(current_menu->bg_color,0 , current_menu->dy,
                         current_menu->width, current_menu->height-current_menu->dy);
             if(current_menu->has_border)
             {
-                drawRect(current_menu->border_color,0,0,current_menu->width,current_menu->height);
+                gfx_drawRect(current_menu->border_color,0,0,current_menu->width,current_menu->height);
             }
             RESTORE_PLANE
             pos=current_menu->root;
@@ -389,7 +389,7 @@ void iconMenu_handler(int evt)
                     pselect=getPrevLine(pselect);
                     pos=ptr;
                     CHG_PLANE
-                    scrollWindowVert(current_menu->bg_color, current_menu->dx, current_menu->dy,
+                    gfx_scrollWindowVert(current_menu->bg_color, current_menu->dx, current_menu->dy,
                                     (item_width+space_btw_items)*MaxI,(item_height+space_btw_items)*MaxJ,
                                     item_height+space_btw_items,0);
                     RESTORE_PLANE
@@ -410,7 +410,7 @@ void iconMenu_handler(int evt)
                 {
                     pos=pselect=getMaxPrevLine(pos);
                     CHG_PLANE
-                    fillRect(current_menu->bg_color,0 , current_menu->dy,
+                    gfx_fillRect(current_menu->bg_color,0 , current_menu->dy,
                                 current_menu->width, current_menu->height-current_menu->dy);
                     RESTORE_PLANE
                     iselect=jselect=0;
@@ -448,7 +448,7 @@ void iconMenu_handler(int evt)
                 }
                 dispName_icon(pselect,iselect,jselect,1,0,0);
                 CHG_PLANE
-                scrollWindowVert(current_menu->bg_color, current_menu->dx, current_menu->dy,
+                gfx_scrollWindowVert(current_menu->bg_color, current_menu->dx, current_menu->dy,
                                 (item_width+space_btw_items)*MaxI,(item_height+space_btw_items)*MaxJ,
                                 item_height+space_btw_items,1);
                 RESTORE_PLANE
@@ -537,7 +537,7 @@ void iconMenu_handler(int evt)
                     iselect=jselect=0;
                     pselect=pos;
                     CHG_PLANE
-                    fillRect(current_menu->bg_color,current_menu->dx, current_menu->dy,
+                    gfx_fillRect(current_menu->bg_color,current_menu->dx, current_menu->dy,
                                 current_menu->width-current_menu->dx,current_menu->height-current_menu->dy);
                     RESTORE_PLANE
                     dispAllName_icon(pos,0);
@@ -546,7 +546,7 @@ void iconMenu_handler(int evt)
             break;*/
         case EVT_REDRAW:        
             CHG_PLANE
-            fillRect(current_menu->bg_color,0 , current_menu->dy,
+            gfx_fillRect(current_menu->bg_color,0 , current_menu->dy,
                         current_menu->width, current_menu->height-current_menu->dy);
             RESTORE_PLANE
             pos=current_menu->root;
@@ -564,7 +564,7 @@ void iconMenu_handler(int evt)
                 iselect=jselect=0;
                 pselect=pos;
                 CHG_PLANE
-                fillRect(current_menu->bg_color,current_menu->dx, current_menu->dy,
+                gfx_fillRect(current_menu->bg_color,current_menu->dx, current_menu->dy,
                              current_menu->width-current_menu->dx,current_menu->height-current_menu->dy);
                 RESTORE_PLANE
                 dispAllName_icon(pos,0);

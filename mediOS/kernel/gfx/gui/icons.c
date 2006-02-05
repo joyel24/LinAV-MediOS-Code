@@ -11,10 +11,10 @@
 */
 #include <kernel/kernel.h>
 #include <sys_def/string.h>
-#include <api.h>
-#include <fs_io.h>
-
-#include <graphics.h>
+#include <kernel/file.h>
+#include <kernel/dir.h>
+#include <kernel/malloc.h>
+#include <kernel/graphics.h>
 #include <gui/icons.h>
 #include <gui/icons_data.h>
 

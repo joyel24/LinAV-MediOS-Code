@@ -13,7 +13,7 @@
 #include <sys_def/stddef.h>
 
 #include <kernel/kfont.h>
-#include <kernel/kgraphics.h>
+#include <kernel/graphics.h>
 
 FONT_ID font_table[NBFONT] ;
 

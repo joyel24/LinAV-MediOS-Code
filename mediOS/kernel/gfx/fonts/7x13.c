@@ -226,7 +226,7 @@ std7x13_240, std7x13_241, std7x13_242, std7x13_243, std7x13_244, std7x13_245, st
 std7x13_248, std7x13_249, std7x13_250, std7x13_251, std7x13_252, std7x13_253, std7x13_254, std7x13_255};
 
 
-#include "kgraphics.h"
+#include "graphics.h"
 #include "kfont.h"
 
 struct graphicsFont std7x13_o = {

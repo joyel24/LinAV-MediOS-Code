@@ -4,21 +4,20 @@
 
 #define memstat(pool)            bpoold(pool,0,0)
 #define malloc_init(beg,size)    {bpool(beg,size);printk("[init] malloc\n");}
-#define malloc                   bget
-#define realloc                  bgetr
-#define free                     brel
-
 
 typedef long bufsize;
 
 
-void	bpool	    (void *buffer, bufsize len);
-void   *bget	    (bufsize size);
-void   *bgetz	    (bufsize size);
-void   *bgetr	    (void *buffer, bufsize newsize);
-void	brel	    (void *buf);
-void	bpoold	    (void *pool, int dumpalloc, int dumpfree);
-void    bstats(bufsize *curalloc, bufsize *totfree, bufsize *maxfree,long * nget, long *nrel);
+void  mem_addPool  (void *buffer, long len);
+void* malloc       (long size);
+void* realloc      (void *buffer, long newsize);
+void  free         (void *buf);
+void  mem_dump     (void *pool, int dumpalloc, int dumpfree);
+void  mem_stat     (long *curalloc, long *totfree, long *maxfree,long * nget, long *nrel);
+#ifdef HAS_bgetz
+void* bgetz        (long size);
+#endif
+
 /*
 
 PROVIDES:  equivalent functions to malloc, calloc, realloc, and free

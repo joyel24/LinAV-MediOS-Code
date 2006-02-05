@@ -1,7 +1,7 @@
 /* 
-*   include/errors.h
+*   include/kernel/errors.h
 *
-*   AMOS project
+*   MediOS project
 *
 */
 

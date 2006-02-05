@@ -10,6 +10,7 @@
 #include <kernel/i2c.h>
 #include <kernel/rtc.h>
 #include <kernel/kernel.h>
+#include <kernel/errors.h>
 
 struct tm_pv {
     unsigned char tm_ms;
@@ -55,7 +56,7 @@ int getDayOfWeek(int day,int month,int year)
     return result;
 }
 
-int rtc_getTime(struct av_tm * valTime)
+MED_RET_T rtc_getTime(struct med_tm * valTime)
 {
     struct tm_pv pv_dt;
     int retVal;
@@ -82,13 +83,13 @@ int rtc_getTime(struct av_tm * valTime)
     valTime->tm_mday=pvToUser(pv_dt.tm_mday);
     valTime->tm_mon=pvToUser(pv_dt.tm_mon);
     valTime->tm_year=2000+pvToUser(pv_dt.tm_year);
-    return 0;
+    return MED_OK;
 }
 
 #define sendRTC(addr,val)        {int __ret;int __val=val; __ret=i2c_write(RTC_DEVICE, addr, (void*)(&__val), 1); \
                                         if(retVal<0) printk("[I2C - rtc] Error, writting (err:%d)\n",retVal);}
 
-int rtc_setTime(struct av_tm *newTime)
+MED_RET_T rtc_setTime(struct med_tm *newTime)
 {
     struct tm_pv pv_dt;
     struct tm_pv pv_dt_ini;
@@ -175,16 +176,16 @@ int rtc_setTime(struct av_tm *newTime)
     /*if(newTime->tm_mday == 27 && newTime->tm_mon == 11)
         sendRTC(RTC_DW,RTC_MK_DW(pv_dt_ini.tm_wday,5))*/
     
-    return 0;
+    return MED_OK;
 }
 
-int init_rtc(void)
+MED_RET_T init_rtc(void)
 {
     unsigned char cb;
     int retVal;
     int cwd;
     
-    struct av_tm valTime;
+    struct med_tm valTime;
         
     /*cb=0x10;
     if((retVal=av3xx_i2c_write(AV3XX_RTC_DEVICE, 0x13, (void*)&cb, 1))<0)
@@ -252,6 +253,6 @@ int init_rtc(void)
     
     printk("[init] rtc :%02d/%02d/%04d %02d:%02d:%02d\n",valTime.tm_mday,valTime.tm_mon,valTime.tm_year
                 ,valTime.tm_hour,valTime.tm_min,valTime.tm_sec);
-    return 0;
+    return MED_OK;
 }
 

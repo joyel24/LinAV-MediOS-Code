@@ -14,8 +14,8 @@
 *
 */
 
-#ifndef __FILE_H_
-#define __FILE_H_
+#ifndef __SYS_FILE_H_
+#define __SYS_FILE_H_
 
 #define MAX_PATH 260
 

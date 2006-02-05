@@ -11,6 +11,7 @@
 #define __TIMER_H
 
 #include <kernel/io.h>
+#include <sys_def/types.h>
 
 #define TMR0_BASE                      0x00030000
 #define TMR1_BASE                      0x00030080
@@ -76,6 +77,8 @@ extern void tmr_stop(struct tmr_s * tmr_data);
 
 void tmr_init(void);
 void tmr_print(void);
+
+unsigned int tmr_getTick(void);
 
 void arch_tmr_init(void);
 

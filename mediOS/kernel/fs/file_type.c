@@ -12,7 +12,6 @@
 
 #include <sys_def/string.h>
 
-#include <api.h>
 
 #include <file_type.h>
 

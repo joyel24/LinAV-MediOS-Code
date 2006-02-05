@@ -9,10 +9,9 @@
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
 */
-
-#include <graphics.h>
-#include <api.h>
-#include <evt.h>
+#include <kernel/kernel.h>
+#include <kernel/graphics.h>
+#include <kernel/evt.h>
 #include <sys_def/colordef.h>
 #include <sys_def/font.h>
 #include <sys_def/string.h>
@@ -161,7 +160,7 @@ int txt_x,txt_y;
 void calcCoord(void)
 {
     int h=0,w=0,x,y;
-    getStringS("M", &w, &h);
+    gfx_getStringSize("M", &w, &h);
     /* horizontal lines coordinates */
     x=(TOT_WIDTH-(NB_CELL_PER_LINE*(w+CELL_SPACE)-CELL_SPACE+2*CELL_DIST))/2;
     coord_horiz[0][0]=coord_horiz[1][0]=coord_horiz[2][0]=coord_horiz[3][0]=coord_horiz[4][0]=coord_horiz[5][0]=x;
@@ -193,19 +192,19 @@ void calcCoord(void)
 void drawHoriz(int pos)
 {
     int h=0,w=0,i;
-    getStringS("M", &w, &h);
+    gfx_getStringSize("M", &w, &h);
     for(i=0;i<NB_CELL_PER_LINE;i++)
     {
         if(char_horiz[pos][i][0] || spec_horiz[pos][i])
-            fillRect(bg_txt_colors[i],coord_horiz[pos][0]+i*(w+CELL_SPACE),coord_horiz[pos][1],w+2*CELL_DIST,h+2*CELL_DIST);
+            gfx_fillRect(bg_txt_colors[i],coord_horiz[pos][0]+i*(w+CELL_SPACE),coord_horiz[pos][1],w+2*CELL_DIST,h+2*CELL_DIST);
         if(char_horiz[pos][i][0])
-            putS(TXT_COLOR,bg_txt_colors[i],coord_horiz[pos][0]+i*(w+CELL_SPACE)+CELL_DIST,
+            gfx_putS(TXT_COLOR,bg_txt_colors[i],coord_horiz[pos][0]+i*(w+CELL_SPACE)+CELL_DIST,
                     coord_horiz[pos][1]+CELL_DIST,char_horiz[pos][i]);
         else
             if(spec_horiz[pos][i])
             {
                 pal[0]=bg_txt_colors[i];
-                drawSprite ((PALETTE*)&pal, spec_horiz[pos][i], coord_horiz[pos][0]+i*(w+CELL_SPACE)+CELL_DIST,
+                gfx_drawSprite ((PALETTE*)&pal, spec_horiz[pos][i], coord_horiz[pos][0]+i*(w+CELL_SPACE)+CELL_DIST,
                         coord_horiz[pos][1]+CELL_DIST);
             }
     }
@@ -214,19 +213,19 @@ void drawHoriz(int pos)
 void drawVert(int pos)
 {
     int h=0,w=0,i;
-    getStringS("M", &w, &h);
+    gfx_getStringSize("M", &w, &h);
     for(i=0;i<NB_CELL_PER_LINE;i++)
     {
         if(char_vert[pos][i][0] || spec_vert[pos][i])
-            fillRect(bg_txt_colors[i],coord_vert[pos][0],coord_vert[pos][1]+i*(h+CELL_SPACE),w+2*CELL_DIST,h+2*CELL_DIST);
+            gfx_fillRect(bg_txt_colors[i],coord_vert[pos][0],coord_vert[pos][1]+i*(h+CELL_SPACE),w+2*CELL_DIST,h+2*CELL_DIST);
         if(char_vert[pos][i][0])
-            putS(TXT_COLOR,bg_txt_colors[i],coord_vert[pos][0]+CELL_DIST,
+            gfx_putS(TXT_COLOR,bg_txt_colors[i],coord_vert[pos][0]+CELL_DIST,
                     coord_vert[pos][1]+i*(h+CELL_SPACE)+CELL_DIST,char_vert[pos][i]);
         else
             if(spec_vert[pos][i])
             {
                 pal[0]=bg_txt_colors[i];
-                drawSprite ((PALETTE*)&pal, spec_vert[pos][i],coord_vert[pos][0]+i*(w+CELL_SPACE)+CELL_DIST,
+                gfx_drawSprite ((PALETTE*)&pal, spec_vert[pos][i],coord_vert[pos][0]+i*(w+CELL_SPACE)+CELL_DIST,
                         coord_vert[pos][1]+CELL_DIST);
             }
     }
@@ -235,8 +234,8 @@ void drawVert(int pos)
 void drawTxtZone(void)
 {
     int h=0,w=0;
-    getStringS("M", &w, &h);
-    drawRect(BLK_COLOR,txt_x-2*CELL_DIST,txt_y-2*CELL_DIST,MAX_CHAR_DISP*w+4*CELL_DIST,h+4*CELL_DIST+2);
+    gfx_getStringSize("M", &w, &h);
+    gfx_drawRect(BLK_COLOR,txt_x-2*CELL_DIST,txt_y-2*CELL_DIST,MAX_CHAR_DISP*w+4*CELL_DIST,h+4*CELL_DIST+2);
     /* +2 => space for the cursor*/
 }
 
@@ -244,23 +243,23 @@ void drawBtn(void)
 {    
     int x,y;
     int h=0,w=0;
-    getStringS("M", &w, &h);
+    gfx_getStringSize("M", &w, &h);
     x=coord_horiz[0][0]+NB_CELL_PER_LINE*(w+CELL_SPACE)-CELL_SPACE+2*CELL_DIST;
     y=coord_vert[0][1]+NB_CELL_PER_LINE*(h+CELL_SPACE)-CELL_SPACE+2*CELL_DIST;
     x=x+(TOT_WIDTH-x)/2;
     y=y+(TOT_HEIGHT-y)/2;
-    getStringS("F3", &w, &h);
-    drawRect(BLK_COLOR,x-w-CELL_SPACE-2*CELL_DIST,y-h-CELL_SPACE-2*CELL_DIST,
+    gfx_getStringSize("F3", &w, &h);
+    gfx_drawRect(BLK_COLOR,x-w-CELL_SPACE-2*CELL_DIST,y-h-CELL_SPACE-2*CELL_DIST,
             3*(w+CELL_SPACE)-CELL_SPACE+4*CELL_DIST,2*(h+CELL_SPACE)-CELL_SPACE+4*CELL_DIST);
-    putS(TXT_COLOR,bg_txt_colors[0],x-w-CELL_SPACE,y,"F1");
-    putS(TXT_COLOR,bg_txt_colors[1],x,y-h-CELL_SPACE,"F2");
-    putS(TXT_COLOR,bg_txt_colors[2],x+w+CELL_SPACE,y,"F3"); 
+    gfx_putS(TXT_COLOR,bg_txt_colors[0],x-w-CELL_SPACE,y,"F1");
+    gfx_putS(TXT_COLOR,bg_txt_colors[1],x,y-h-CELL_SPACE,"F2");
+    gfx_putS(TXT_COLOR,bg_txt_colors[2],x+w+CELL_SPACE,y,"F3"); 
 }
 
 void drawPage(void)
 {
     int i;
-    clearScreen(BG_COLOR);
+    gfx_clearScreen(BG_COLOR);
     for(i=0;i<6;i++)
     {
         drawVert(i);
@@ -268,19 +267,19 @@ void drawPage(void)
     }
 }
 
-void putSelect(int color)
+void gfx_putSelect(int color)
 {
     int h=0,w=0;
-    getStringS("M", &w, &h);
-    printf("[putCursor] %s %s %d\n",color==COLOR_WHITE?"WHITE":"BLUE",mode==1?"HORIZ":"VERT",elem);
+    gfx_getStringSize("M", &w, &h);
+    printk("[putCursor] %s %s %d\n",color==COLOR_WHITE?"WHITE":"BLUE",mode==1?"HORIZ":"VERT",elem);
     if(mode) // horizontal
     {
-        drawRect(color,coord_horiz[elem][0],coord_horiz[elem][1],NB_CELL_PER_LINE*(w+CELL_SPACE)-CELL_SPACE+2*CELL_DIST,
+        gfx_drawRect(color,coord_horiz[elem][0],coord_horiz[elem][1],NB_CELL_PER_LINE*(w+CELL_SPACE)-CELL_SPACE+2*CELL_DIST,
                         h+2*CELL_DIST);
     }
     else    // vertical
     {
-        drawRect(color,coord_vert[elem][0],coord_vert[elem][1],w+2*CELL_DIST,
+        gfx_drawRect(color,coord_vert[elem][0],coord_vert[elem][1],w+2*CELL_DIST,
                         NB_CELL_PER_LINE*(h+CELL_SPACE)-CELL_SPACE+2*CELL_DIST);
     }
 }
@@ -288,8 +287,8 @@ void putSelect(int color)
 void putCursor(int color)
 {
     int h=0,w=0;
-    getStringS("M", &w, &h);
-    drawLine(color,txt_x+cur_index*w,txt_y+h+1,txt_x+cur_index*w+w,txt_y+h+1);
+    gfx_getStringSize("M", &w, &h);
+    gfx_drawLine(color,txt_x+cur_index*w,txt_y+h+1,txt_x+cur_index*w+w,txt_y+h+1);
 }
 
 void leftCursor(void)
@@ -319,12 +318,12 @@ void virtKbdEvtHandler(int evt_hanlder)
     int char_num=0;
     char * str;
     void (*routine)(void);
-    getStringS("M", &w, &h);
+    gfx_getStringSize("M", &w, &h);
     char evt=0;
     
     while(!stopLoop)
     {
-        evt = evt_get(evt_hanlder);
+        evt = evt_getHandler(evt_hanlder);
         if(!evt)
             continue;
         char_num=0;    
@@ -332,73 +331,73 @@ void virtKbdEvtHandler(int evt_hanlder)
             case BTN_DOWN:
                 if(mode)
                 {
-                    putSelect(BG_COLOR);
+                    gfx_putSelect(BG_COLOR);
                     if(elem==5)
                         elem=0;
                     else
                         elem++;
-                    putSelect(SEL_COLOR);    
+                    gfx_putSelect(SEL_COLOR);    
                 }
                 else
                 {
-                    putSelect(BG_COLOR);
+                    gfx_putSelect(BG_COLOR);
                     elem=3;
                     mode=1;
-                    putSelect(SEL_COLOR);
+                    gfx_putSelect(SEL_COLOR);
                 }
                 break;
             case BTN_UP:
                 if(mode)
                 {
-                    putSelect(BG_COLOR);
+                    gfx_putSelect(BG_COLOR);
                     if(elem==0)
                         elem=5;
                     else
                         elem--;
-                    putSelect(SEL_COLOR);    
+                    gfx_putSelect(SEL_COLOR);    
                 }
                 else
                 {
-                    putSelect(BG_COLOR);
+                    gfx_putSelect(BG_COLOR);
                     elem=2;
                     mode=1;
-                    putSelect(SEL_COLOR);
+                    gfx_putSelect(SEL_COLOR);
                 }
                 break;
             case BTN_LEFT:
                 if(!mode)
                 {
-                    putSelect(BG_COLOR);
+                    gfx_putSelect(BG_COLOR);
                     if(elem==0)
                         elem=5;
                     else
                         elem--;
-                    putSelect(SEL_COLOR);    
+                    gfx_putSelect(SEL_COLOR);    
                 }
                 else
                 {
-                    putSelect(BG_COLOR);
+                    gfx_putSelect(BG_COLOR);
                     elem=2;
                     mode=0;
-                    putSelect(SEL_COLOR);
+                    gfx_putSelect(SEL_COLOR);
                 }
                 break;
             case BTN_RIGHT:
                 if(!mode)
                 {
-                    putSelect(BG_COLOR);
+                    gfx_putSelect(BG_COLOR);
                     if(elem==5)
                         elem=0;
                     else
                         elem++;
-                    putSelect(SEL_COLOR);    
+                    gfx_putSelect(SEL_COLOR);    
                 }
                 else
                 {
-                    putSelect(BG_COLOR);
+                    gfx_putSelect(BG_COLOR);
                     elem=3;
                     mode=0;
-                    putSelect(SEL_COLOR);
+                    gfx_putSelect(SEL_COLOR);
                 }
                 break;
             case BTN_OFF:
@@ -419,7 +418,7 @@ void virtKbdEvtHandler(int evt_hanlder)
                     if(str[0])
                     {
                         putCursor(BG_COLOR);
-                        putS(TXT_COLOR,BG_COLOR,txt_x+cur_index*w,txt_y,str);
+                        gfx_putS(TXT_COLOR,BG_COLOR,txt_x+cur_index*w,txt_y,str);
                         cur_str[cur_index]=str[0];
                         if(cur_index+1!=MAX_CHAR_DISP)
                         {
@@ -462,13 +461,13 @@ void iniSprite(void)
 
 void virtKbd(int evt_hanlder)
 {
-    setFont(STD8X13);
+    gfx_fontSet(STD8X13);
     calcCoord();
     iniSprite();
     drawPage();
     drawBtn();
     drawTxtZone();
-    putSelect(SEL_COLOR);  
+    gfx_putSelect(SEL_COLOR);  
     putCursor(SEL_COLOR);
     virtKbdEvtHandler(evt_hanlder);
 }

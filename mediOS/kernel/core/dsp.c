@@ -10,7 +10,7 @@
 #include <kernel/kernel.h>
 #include <kernel/dsp.h>
 #include <kernel/io.h>
-#include <kernel/kfile.h>
+#include <kernel/file.h>
 
 #include <kernel/malloc.h>
 
@@ -57,7 +57,7 @@ MED_RET_T load_dsp_program_hdd (const char* pszFilename)
 {
 	printk ("Loading dsp program from hdd into sdram...\n");
 	unsigned char * pDSPCode = 0;
-	int fDSPCode = kfopen (pszFilename, O_RDONLY);
+	int fDSPCode = fopen (pszFilename, O_RDONLY);
 	int nSize;
 	if (fDSPCode < 0)
 	{
@@ -66,11 +66,11 @@ MED_RET_T load_dsp_program_hdd (const char* pszFilename)
 	}
 	else
 	{
-		nSize = kfilesize (fDSPCode);
+		nSize = filesize (fDSPCode);
 		pDSPCode = malloc (nSize);
-		int nReaded = kfread (fDSPCode, pDSPCode, nSize);
+		int nReaded = fread (fDSPCode, pDSPCode, nSize);
 		printk ("Program loaded into sdram (%d bytes)\n", nReaded);
-		kfclose (fDSPCode);
+		fclose (fDSPCode);
 	}
 
 	load_dsp_program_mem (pDSPCode, nSize);

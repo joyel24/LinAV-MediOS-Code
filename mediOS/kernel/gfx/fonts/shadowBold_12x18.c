@@ -189,7 +189,7 @@ shadowBold_224, shadowBold_225, shadowBold_226, shadowBold_227, shadowBold_228, 
 shadowBold_240, shadowBold_241, 0, 0, 0, 0, 0, shadowBold_247, 
 shadowBold_248, 0, 0, 0, 0, shadowBold_253, shadowBold_254, shadowBold_255};
 
-#include "kgraphics.h"
+#include "graphics.h"
 #include "kfont.h"
 
 struct graphicsFont shadowBold_o = {

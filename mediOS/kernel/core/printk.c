@@ -18,7 +18,7 @@
 #include <kernel/hardware.h>
 
 #ifdef HAVE_DEBUG_ON_SCREEN
-#include <kernel/kgraphics.h>
+#include <kernel/graphics.h>
 #include <kernel/kfont.h>
 #include <sys_def/colordef.h>
 
@@ -53,11 +53,16 @@ void printk(char *fmt, ...)
 #endif
 }
 
-void user_printf(const char * fmt, va_list args)
+void printf(char * fmt, ...)
 {
-    vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, args);
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
+    va_end(ap);
+    uart_outString("USER:",DEBUG_UART);
     uart_outString(debugmembuf,DEBUG_UART);
 #ifdef HAVE_DEBUG_ON_SCREEN
+    dbgscr_printOnScreen("USER:");
     dbgscr_printOnScreen(debugmembuf);
 #endif
 }

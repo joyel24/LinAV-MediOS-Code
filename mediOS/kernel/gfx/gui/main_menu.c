@@ -15,7 +15,7 @@
 #include <kernel/kernel.h>
 #include <kernel/malloc.h>
 #include <sys_def/colordef.h>
-
+#include <kernel/graphics.h>
 #include <evt.h>
 
 #include <gui/parse_cfg.h>
@@ -195,18 +195,18 @@ int ini_menu(void)
 {
     int i,h,w;
     
-    clearScreen(COLOR_BLACK);
+    gfx_clearScreen(COLOR_BLACK);
     
-    putS(COLOR_WHITE,COLOR_BLACK,5,110,"[ini_menu] reading menu file");
+    gfx_putS(COLOR_WHITE,COLOR_BLACK,5,110,"[ini_menu] reading menu file");
     rootMenu = NULL;
     if(loadMenu(MENU_FILE_NAME)<0)
     {
-        putS(COLOR_RED,COLOR_BLACK,5,120,"[ini_menu] Error reading menu => stoping");
+        gfx_putS(COLOR_RED,COLOR_BLACK,5,120,"[ini_menu] Error reading menu => stoping");
         for(i=0;i<10000;i++) /* nothing */
         return 0;
     }
     
-    getStringS("M", &w, &h);
+    gfx_getStringSize("M", &w, &h);
     menu_cfg.root=rootMenu;
     menu_cfg.dx=5;
     menu_cfg.dy=0;//+MENU_SHADOW;
@@ -219,7 +219,7 @@ int ini_menu(void)
     back_icon=loadIcon("back_icon.ico");
     plugin_icon=loadIcon("plugin_icon.ico");
     
-    putS(COLOR_WHITE,COLOR_BLACK,5,120,"[ini_menu] reading icons");
+    gfx_putS(COLOR_WHITE,COLOR_BLACK,5,120,"[ini_menu] reading icons");
     
     start_menu(&menu_cfg);
     menuEvtHandler(EVT_REDRAW);

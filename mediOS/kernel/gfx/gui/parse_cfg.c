@@ -12,8 +12,9 @@
 
 #include <sys_def/string.h>
 
-#include <fs_io.h>
-#include <api.h>
+#include <kernel/file.h>
+#include <kernel/dir.h>
+#include <kernel/kernel.h>
 
 #include <gui/parse_cfg.h>
 
@@ -38,7 +39,7 @@ int next_char(void)
     {
         if(fread(file,buff,1)!=1)
             feof_reached=1;
-        //printf("read: %c\n",buff[0]);
+        //printk("read: %c\n",buff[0]);
         return buff[0];
     }
     ch = back;
@@ -80,16 +81,16 @@ int nxt_token(char * buff)
 	here = buff;
 	while (here-buff < MAX_TOKEN) {
 	    ch = next_char();
-	    if (feof(file)) printf("EOF in quoted string");
+	    if (feof(file)) printk("EOF in quoted string");
 	    if (ch == '"') {
 		*here = 0;
                 return 1;
 	    }
 	    if (ch == '\n' || ch == '\r' || ch == '\t')
-		printf("\\n and \\t are not allowed in quoted strings");
+		printk("\\n and \\t are not allowed in quoted strings");
 	    *here++ = ch;
 	}
-	printf("Quoted string is too long");
+	printk("Quoted string is too long");
 	return 0; /* not reached */
     }
 
@@ -105,7 +106,7 @@ int nxt_token(char * buff)
 	*here++ = ch;
 	ch = next_char();
     }
-    printf("Token is too long");
+    printk("Token is too long");
     return 0; /* not reached */
 }
 
@@ -114,35 +115,35 @@ int nxt_cfg(char *item,char *value)
     
     if (!nxt_token(item)) return 0;
     
-    //printf("get item: %s\n",item); 
+    //printk("get item: %s\n",item); 
        
     if (!strcmp(item,"="))
     {
-    	printf("Syntax error");
+    	printk("Syntax error");
 	return 0;
     }   
     
     if (!nxt_token(value)) return 0;
     
-    //printf("get item: %s\n",value);
+    //printk("get item: %s\n",value);
     
     if (strcmp(value,"="))
     
     {
-    	printf("Error '=' expected (get: %s)\n",value);
+    	printk("Error '=' expected (get: %s)\n",value);
 	return 0;
     }
     if (!nxt_token(value))
     {
-    	printf("Value expected");
+    	printk("Value expected");
 	return 0;
     }
     
-    //printf("get item: %s\n",value);
+    //printk("get item: %s\n",value);
     
     if (!strcmp(value,"="))
     {
-    	printf("Syntax error after %s",item);
+    	printk("Syntax error after %s",item);
 	return 0;
     }
     return 1;
@@ -152,7 +153,7 @@ int openFile(char * filename,int mode)
 {    
     if ((file = fopen(filename,mode))<0)
     {
-        printf("error reading config file %s (%d)\n",filename,mode);
+        printk("error reading config file %s (%d)\n",filename,mode);
         return -1;
     }
     cfg_line_num=1;
@@ -177,7 +178,7 @@ int write_cfg(char * item,char * value)
         fmt="%s=\"%s\"\n";
     else
         fmt="%s=%s\n";
-    snprintf(str,MAX_TOKEN,fmt,item,value);    
+    snprintk(str,MAX_TOKEN,fmt,item,value);    
     fwrite(file, str, strlen(str));    */
     fwrite(file, item, strlen(item));
     fwrite(file, "=", 1);

@@ -225,7 +225,7 @@ std5x7_232, std5x7_233, std5x7_234, std5x7_235, std5x7_236, std5x7_237, std5x7_2
 std5x7_240, std5x7_241, std5x7_242, std5x7_243, std5x7_244, std5x7_245, std5x7_246, std5x7_247, 
 std5x7_248, std5x7_249, std5x7_250, std5x7_251, std5x7_252, std5x7_253, std5x7_254, std5x7_255};
 
-#include "kgraphics.h"
+#include "graphics.h"
 #include "kfont.h"
 
 struct graphicsFont std5x7_o = {

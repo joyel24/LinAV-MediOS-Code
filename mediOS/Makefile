@@ -24,10 +24,12 @@ all: $(TARGET)
 
 force: clean all        
 
+mk_api_file:
+	make -C tools/api_files/
 incdir:
 	make -C include/kernel/target incdir
         
-lib : incdir
+lib : incdir mk_api_file
 	#make -C apps/avboy stdalone
 	make -C apps/ othello.o
 	make -C kernel/ kernel_lib
@@ -37,7 +39,7 @@ lib : incdir
     
     
 
-$(TARGET) : incdir subdirs
+$(TARGET) : incdir mk_api_file subdirs
 	@echo '-----   building kernel'
 	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).bin

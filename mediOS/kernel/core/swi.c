@@ -12,38 +12,40 @@
 
 #include <kernel/kernel.h>
 #include <kernel/swi.h>
+#include <sys_def/string.h>
 
+void hello_fct(void)
+{
+    printk("hello from kernel\n");
+}
 
-int kcswi_handler (
+#include "api_fct_list.h"
+
+void badFctName(void)
+{
+    printk("BAD fct \n");
+}
+
+unsigned int swi_handler (
 	unsigned long nCmd,
 	unsigned long nParam2,
 	unsigned long nParam3,
 	unsigned long nParam1)
 {
-    switch (nCmd >> 8)
-    {
-        case nAPI_GFX_section_code:
-                return swi_gfx_handler (nCmd, nParam1, nParam2, nParam3);
-    
-        case nAPI_SND_section_code:
-                return swi_snd_handler (nCmd, nParam1, nParam2, nParam3);
-    
-        case nAPI_FILE_section_code:
-                return swi_file_handler (nCmd, nParam1, nParam2, nParam3);
-    
-        case nAPI_DEVICE_section_code:
-                return swi_device_handler (nCmd, nParam1, nParam2, nParam3);
-    
-        case nAPI_MEMORY_section_code:
-                return swi_memory_handler (nCmd, nParam1, nParam2, nParam3);
-    
-        case nAPI_DSP_section_code:
-                return swi_dsp_handler (nCmd, nParam1, nParam2, nParam3);
-                
-        case nAPI_FLOAT_section_code:
-                return swi_float_handler (nCmd, nParam1, nParam2, nParam3);
-        default:
-                printk("Unknown SWI module call %x\n", nCmd);
-    }
-	return 0;
+        if(nCmd == nAPI_INIAPI)
+        {
+            int i=0;
+            char * name = (char*)nParam1;
+            while(fct_array[i].name!=NULL)
+            {
+                if(!strcmp(fct_array[i].name,name))
+                    return fct_array[i].ptr;
+                i++;
+            }            
+            printk("fct %s not found\n",name);
+            return (unsigned int)badFctName;            
+        }
+        else
+            printk("Unknown SWI %x\n",nCmd);
+        return 0;
 }

@@ -12,10 +12,10 @@
 
 #include <kernel/kernel.h>
 #include <sys_def/string.h>
-#include <api.h>
 
-#include <fs_io.h>
-
+#include <kernel/file.h>
+#include <kernel/dir.h>
+#include <kernel/malloc.h>
 #include <gui/file_browser.h>
 
 #define LISTSIZE   256

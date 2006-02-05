@@ -14,7 +14,6 @@
 #define __SOUND_K_H
 
 
-#include <sound.h>
 #include <kernel/irq.h>
 #include <kernel/mas.h>
 

@@ -78,6 +78,17 @@ void disableUsbFw(void)
     setUsbFw(0);
 }
 
+int usb_isConnected(void)
+{
+    return kusbIsConnected();
+}
+
+int FW_isConnected(void)
+{
+    return kFWIsConnected();
+}
+
+
 void init_usb_fw(void)
 {
     kusb_state=kusbIsConnected();

@@ -306,7 +306,7 @@ void mixer_ctl(unsigned int cmd, int dir, void * arg)
 
 /********************* OSS init               ***************************/
 
-#include <kernel/kfile.h>
+#include <kernel/file.h>
 
 void init_sound (void)
 {
@@ -357,23 +357,23 @@ void init_sound (void)
     
 #if 1    
     int mp3ptr=0;
-    int fd = kfopen("/out.wav",O_RDONLY);
+    int fd = fopen("/out.wav",O_RDONLY);
     if(fd<0)
         printk("Error loading file\n");
     else
     {
         char * mp3Buff = malloc(1024*1024*7);
         int cnt=1;
-        int size=kfilesize(fd);
+        int size=filesize(fd);
         /*
         while(cnt>0)
         {
-            cnt = kfread(fd,mp3Buff+size,1024);
+            cnt = fread(fd,mp3Buff+size,1024);
             size += cnt;            
         }*/
-        size = kfread(fd,mp3Buff,size);
+        size = fread(fd,mp3Buff,size);
         printk("Read from file: %x\n",size);
-        kfclose(fd);
+        fclose(fd);
         //int size=0x46500;
         char * data_buff = mp3Buff;
         int data;

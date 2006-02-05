@@ -16,9 +16,9 @@
 
 #include <sys_def/string.h>
 
-#include <kernel/kfile.h>
+#include <kernel/file.h>
 #include <kernel/fat.h>
-#include <kernel/kdir.h>
+#include <kernel/dir.h>
 #include <kernel/kernel.h>
 
 /*
@@ -56,13 +56,13 @@ void init_file(void)
         openfiles[fd].busy=false;
 }
 
-int kfcreat(const char *pathname, mode_t mode)
+int fcreat(const char *pathname, mode_t mode)
 {
     (void)mode;
-    return kfopen(pathname, O_WRONLY|O_CREAT|O_TRUNC);
+    return fopen(pathname, O_WRONLY|O_CREAT|O_TRUNC);
 }
 
-int kfopen(const char* pathname, int flags)
+int fopen(const char* pathname, int flags)
 {
     DIR* dir;
     struct dirent* entry;
@@ -108,12 +108,12 @@ int kfopen(const char* pathname, int flags)
     name=strrchr(pathnamecopy+1,'/');
     if ( name ) {
         *name = 0; 
-        dir = kopendir(pathnamecopy);
+        dir = opendir(pathnamecopy);
         *name = '/';
         name++;
     }
     else {
-        dir = kopendir("/");
+        dir = opendir("/");
         name = pathnamecopy+1;
     }
     if (!dir) {
@@ -125,12 +125,12 @@ int kfopen(const char* pathname, int flags)
     if(name[0] == 0) {
         printk("Empty file name\n");
         file->busy = false;
-        kclosedir(dir);
+        closedir(dir);
         return -5;
     }
     
     /* scan dir for name */
-    while ((entry = kreaddir(dir))) {
+    while ((entry = readdir(dir))) {
         if ( !strcasecmp(name, entry->d_name) ) {
             fat_open(dir->fatdir.file.volume,
                      entry->startcluster,
@@ -151,7 +151,7 @@ int kfopen(const char* pathname, int flags)
             if (rc < 0) {
                 printk("Couldn't create %s in %s\n",name,pathnamecopy);
                 file->busy = false;
-                kclosedir(dir);
+                closedir(dir);
                 return rc * 10 - 6;
             }
             file->size = 0;
@@ -160,23 +160,23 @@ int kfopen(const char* pathname, int flags)
         else {
             printk("Couldn't find %s in %s\n",name,pathnamecopy);
             file->busy = false;
-            kclosedir(dir);
+            closedir(dir);
             return -7;
         }
     } else {
         if(file->write && (file->attr & FAT_ATTR_DIRECTORY)) {
             file->busy = false;
-            kclosedir(dir);
+            closedir(dir);
             return -8;
         }
     }
-    kclosedir(dir);
+    closedir(dir);
 
     file->cacheoffset = -1;
     file->fileoffset = 0;
 
     if (file->write && (flags & O_APPEND)) {
-        rc = klseek(fd,0,SEEK_END);
+        rc = lseek(fd,0,SEEK_END);
         if (rc < 0 )
             return rc * 10 - 9;
     }
@@ -184,7 +184,7 @@ int kfopen(const char* pathname, int flags)
     return fd;
 }
 
-int kfclose(int fd)
+int fclose(int fd)
 {
     struct filedesc* file = &openfiles[fd];
     int rc = 0;
@@ -198,7 +198,7 @@ int kfclose(int fd)
         return -2;
     }
     if (file->write) {
-        rc = kfsync(fd);
+        rc = fsync(fd);
         if (rc < 0)
             return rc * 10 - 3;
     }
@@ -207,7 +207,7 @@ int kfclose(int fd)
     return 0;
 }
 
-int kfsync(int fd)
+int fsync(int fd)
 {
     struct filedesc* file = &openfiles[fd];
     int rc = 0;
@@ -230,7 +230,7 @@ int kfsync(int fd)
 
         /* truncate? */
         if (file->trunc) {
-            rc = kftruncate(fd, file->size);
+            rc = ftruncate(fd, file->size);
             if (rc < 0)
                 return rc * 10 - 4;
         }
@@ -243,11 +243,11 @@ int kfsync(int fd)
     return 0;
 }
 
-int kfremove(const char* name)
+int fremove(const char* name)
 {
     int rc;
     struct filedesc* file;
-    int fd = kfopen(name, O_WRONLY);
+    int fd = fopen(name, O_WRONLY);
     if ( fd < 0 )
         return fd * 10 - 1;
 
@@ -260,14 +260,14 @@ int kfremove(const char* name)
 
     file->size = 0;
 
-    rc = kfclose(fd);
+    rc = fclose(fd);
     if (rc<0)
         return rc * 10 - 4;
 
     return 0;
 }
 
-int kfrename(const char* path, const char* newpath)
+int frename(const char* path, const char* newpath)
 {
     int rc, fd;
     DIR* dir;
@@ -278,15 +278,15 @@ int kfrename(const char* path, const char* newpath)
 
     /* verify new path does not already exist */
     /* If it is a directory, errno == EISDIR if the name exists */
-    fd = kfopen(newpath, O_RDONLY);
+    fd = fopen(newpath, O_RDONLY);
 #warning original code was also checking || errno == EISDIR
     if ( fd >= 0 ) {
-        kfclose(fd);
+        fclose(fd);
         return -1;
     }
-    kfclose(fd);
+    fclose(fd);
 
-    fd = kfopen(path, O_RDONLY);
+    fd = fopen(path, O_RDONLY);
     if ( fd < 0 ) {
         return fd * 10 - 2;
     }
@@ -313,7 +313,7 @@ int kfrename(const char* path, const char* newpath)
         dirptr = "/";
     }
     
-    dir = kopendir(dirptr);
+    dir = opendir(dirptr);
     if(!dir)
         return - 5;
     
@@ -325,12 +325,12 @@ int kfrename(const char* path, const char* newpath)
         return rc * 10 - 6;
     }
 
-    rc = kfclose(fd);
+    rc = fclose(fd);
     if (rc<0) {
         return rc * 10 - 7;
     }
 
-    rc = kclosedir(dir);
+    rc = closedir(dir);
     if (rc<0) {
         return rc * 10 - 8;
     }
@@ -338,7 +338,7 @@ int kfrename(const char* path, const char* newpath)
     return 0;
 }
 
-int kftruncate(int fd, off_t size)
+int ftruncate(int fd, off_t size)
 {
     int rc, sector;
     struct filedesc* file = &openfiles[fd];
@@ -531,7 +531,7 @@ static int readwrite(int fd, void* buf, int count, bool write)
     return nread;
 }
 
-ssize_t kfwrite(int fd, const void* buf, size_t count)
+ssize_t fwrite(int fd, const void* buf, size_t count)
 {
     if (!openfiles[fd].write) {
         return -1;
@@ -539,12 +539,12 @@ ssize_t kfwrite(int fd, const void* buf, size_t count)
     return readwrite(fd, (void *)buf, count, true);
 }
 
-ssize_t kfread(int fd, void* buf, size_t count)
+ssize_t fread(int fd, void* buf, size_t count)
 {
     return readwrite(fd, buf, count, false);
 }
 
-off_t kftell(int fd)
+off_t ftell(int fd)
 {
     struct filedesc* file = &openfiles[fd];
     if ( !file->busy ) {
@@ -553,7 +553,7 @@ off_t kftell(int fd)
     return file->fileoffset;
 }
 
-off_t klseek(int fd, off_t offset, int whence)
+off_t lseek(int fd, off_t offset, int whence)
 {
     int pos;
     int newsector;
@@ -628,7 +628,7 @@ off_t klseek(int fd, off_t offset, int whence)
     return pos;
 }
 
-int kfilesize(int fd)
+int filesize(int fd)
 {
     struct filedesc* file = &openfiles[fd];
 

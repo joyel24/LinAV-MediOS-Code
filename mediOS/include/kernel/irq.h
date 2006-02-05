@@ -14,9 +14,9 @@
 #ifndef __IRQ_H
 #define __IRQ_H
 
-#include <kernel/kernel.h>
 #include <kernel/irqs.h>
 #include <kernel/hardware.h>
+#include <sys_def/types.h>
 
 #define MAX_IRQ_CNT  10
 

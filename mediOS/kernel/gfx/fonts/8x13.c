@@ -225,7 +225,7 @@ std8x13_232, std8x13_233, std8x13_234, std8x13_235, std8x13_236, std8x13_237, st
 std8x13_240, std8x13_241, std8x13_242, std8x13_243, std8x13_244, std8x13_245, std8x13_246, std8x13_247, 
 std8x13_248, std8x13_249, std8x13_250, std8x13_251, std8x13_252, std8x13_253, std8x13_254, std8x13_255};
 
-#include "kgraphics.h"
+#include "graphics.h"
 #include "kfont.h"
 
 struct graphicsFont std8x13_o = {

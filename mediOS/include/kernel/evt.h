@@ -16,6 +16,7 @@
 
 #include <evt.h>
 #include <kernel/pipes.h>
+#include <kernel/errors.h>
 
 #define EVT_DELAY HZ
 #define NB_EVT_PIPES 10
@@ -26,20 +27,11 @@ struct evt_pipes {
     int used;
 };
 
-struct evt_t {
-    int evt;
-    unsigned int evt_class;
-    void * data;
-};
-
-int evt_getHandler(unsigned int mask,int * result);
-int evt_freeHandler(int num_evt_pipe);
-
-
-
-void evt_send(struct evt_t * evt);                      /* kernel drivers use it to send evt */
-int  evt_getStatus(int num_evt_pipe, int * result);         /* apps use it to read evt on their pipe */
-int  evt_getFullStatus(int num_evt_pipe, struct evt_t * evt);
+int evt_getHandler(unsigned int mask);
+MED_RET_T evt_freeHandler(int num_evt_pipe);
+void evt_send(struct evt_t * evt);                
+int  evt_getStatus(int num_evt_pipe);        
+MED_RET_T evt_getFullStatus(int num_evt_pipe, struct evt_t * evt);
 
 void evt_init(void);
 

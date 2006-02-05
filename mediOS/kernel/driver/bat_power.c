@@ -41,6 +41,16 @@ int hd_timer_used[2]={1,1};
 int hd_sleep_state=0;
 struct tmr_s hd_timer;
 
+void lcd_setBrightness(int val)
+{
+    lcd_bright = val;
+}
+
+int lcd_getBrightness(void)
+{
+    return lcd_bright;
+}
+
 void set_timer_status_freq(int timer_type, int power_mode, int val,int type)
 {
     int * timer_status;
@@ -78,12 +88,12 @@ void set_timer_status_freq(int timer_type, int power_mode, int val,int type)
     }
 }
 
-void kset_timer_status(int timer_type, int power_mode, int status)
+void set_timer_status(int timer_type, int power_mode, int status)
 {
     set_timer_status_freq(timer_type,power_mode,status,1);
 }
 
-void kset_timer_delay(int timer_type, int power_mode, int delay)
+void set_timer_delay(int timer_type, int power_mode, int delay)
 {
     set_timer_status_freq(timer_type,power_mode,delay,0);
 }
@@ -123,12 +133,12 @@ int get_timer_status_freq(int timer_type, int power_mode,int type)
     }    
 }
 
-int kget_timer_status(int timer_type, int power_mode)
+int get_timer_status(int timer_type, int power_mode)
 {
     return get_timer_status_freq(timer_type,power_mode,1);
 }
 
-int kget_timer_delay(int timer_type, int power_mode)
+int get_timer_delay(int timer_type, int power_mode)
 {
     return get_timer_status_freq(timer_type,power_mode,0);
 }
@@ -304,9 +314,14 @@ void process_DC_change(void)
     printk("DC connector %s\n",kpwrState==1?"plugged":"unplugged");
 }
 
-void set_timer(int timer_type,int mode,int state,int delay)
+int DC_isConnected(void)
 {
+    return POWER_CONNECTED;
+}
 
+int batLevel(void)
+{
+    return GET_BAT_LEVEL;
 }
 
 void init_power(void)

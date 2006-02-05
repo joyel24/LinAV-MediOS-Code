@@ -27,7 +27,7 @@
 #include <kernel/buttons.h>
 
 #ifdef HAVE_DEBUG_ON_SCREEN
-#include <kernel/kgraphics.h>
+#include <kernel/graphics.h>
 #endif
 
 __IRAM_DATA int mx_press[NB_BUTTONS];

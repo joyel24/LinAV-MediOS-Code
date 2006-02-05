@@ -128,7 +128,7 @@ radonWide_120, radonWide_121, radonWide_122, radonWide_123, radonWide_124, radon
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0};
 
-#include "kgraphics.h"
+#include "graphics.h"
 #include "kfont.h"
 
 struct graphicsFont radonWide_o = {

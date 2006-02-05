@@ -287,7 +287,7 @@ void do_help(unsigned char ** params)
 void do_mem (unsigned char ** params)
 {
     long nAllocatedBytes, nFreeBytes, nMaxFree, nAllocCount, nFreeCount;
-    bstats (&nAllocatedBytes, &nFreeBytes, &nMaxFree, &nAllocCount, &nFreeCount);
+    mem_stat (&nAllocatedBytes, &nFreeBytes, &nMaxFree, &nAllocCount, &nFreeCount);
     printk("Free memory: %i KB - Alloc: %i KB\n", nFreeBytes >> 10 , nAllocatedBytes >> 10);
 }
 

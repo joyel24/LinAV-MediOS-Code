@@ -129,7 +129,7 @@ inkblot_120, inkblot_121, inkblot_122, inkblot_123, inkblot_124, inkblot_125, in
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0};
 
-#include "kgraphics.h"
+#include "graphics.h"
 #include "kfont.h"
 
 struct graphicsFont inkblot_o = {

@@ -14,8 +14,8 @@
 *
 */
 
-#ifndef __DIR_H_
-#define __DIR_H_
+#ifndef __SYS_DIR_H_
+#define __SYS_DIR_H_
 
 #include <sys_def/types.h>
 #include <sys_def/file.h>

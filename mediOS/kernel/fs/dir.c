@@ -17,7 +17,7 @@
 #include <sys_def/string.h>
 
 #include <kernel/fat.h>
-#include <kernel/kdir.h>
+#include <kernel/dir.h>
 #include <kernel/disk.h>
 #include <kernel/kernel.h>
 
@@ -61,7 +61,7 @@ static int strip_volume(const char* name, char* namecopy)
 }
 
 
-DIR* kopendir(const char* name)
+DIR* opendir(const char* name)
 {
     char namecopy[MAX_PATH];
     char* part;
@@ -129,13 +129,13 @@ DIR* kopendir(const char* name)
     return pdir;
 }
 
-int kclosedir(DIR* dir)
+int closedir(DIR* dir)
 {
     dir->busy=false;
     return 0;
 }
 
-struct dirent* kreaddir(DIR* dir)
+struct dirent* readdir(DIR* dir)
 {
     struct fat_direntry entry;
     struct dirent* theent = &(dir->theent);
@@ -176,7 +176,7 @@ struct dirent* kreaddir(DIR* dir)
     return theent;
 }
 
-int kmkdir(const char *name, int mode)
+int mkdir(const char *name, int mode)
 {
     DIR *dir;
     char namecopy[MAX_PATH];
@@ -209,7 +209,7 @@ int kmkdir(const char *name, int mode)
         
     printk("mkdir: parent: %s, name: %s\n", parent, basename);
 
-    dir = kopendir(parent);
+    dir = opendir(parent);
     
     if(!dir) {
         printk("mkdir: can't open parent dir\n");
@@ -222,10 +222,10 @@ int kmkdir(const char *name, int mode)
     }
     
     /* Now check if the name already exists */
-    while ((entry = kreaddir(dir))) {
+    while ((entry = readdir(dir))) {
         if ( !strcasecmp(basename, entry->d_name) ) {
             printk("mkdir error: file exists\n");
-            kclosedir(dir);
+            closedir(dir);
             return - 4;
         }
     }
@@ -234,18 +234,18 @@ int kmkdir(const char *name, int mode)
     
     rc = fat_create_dir(basename, &newdir, &(dir->fatdir));
     
-    kclosedir(dir);
+    closedir(dir);
     
     return rc;
 }
 
-int krmdir(const char* name)
+int rmdir(const char* name)
 {
     int rc;
     DIR* dir;
     struct dirent* entry;
     
-    dir = kopendir(name);
+    dir = opendir(name);
     if (!dir)
     {
      /* open error */
@@ -253,13 +253,13 @@ int krmdir(const char* name)
     }
 
     /* check if the directory is empty */
-    while ((entry = kreaddir(dir)))
+    while ((entry = readdir(dir)))
     {
         if (strcmp(entry->d_name, ".") &&
             strcmp(entry->d_name, ".."))
         {
             printk("rmdir error: not empty\n");
-            kclosedir(dir);
+            closedir(dir);
             return -2;
         }
     }
@@ -270,7 +270,7 @@ int krmdir(const char* name)
         rc = rc * 10 - 3;
     }
 
-    kclosedir(dir);
+    closedir(dir);
     
     return rc;
 }

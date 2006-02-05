@@ -44,7 +44,7 @@
 #include <kernel/cmd_line.h>
 #include <kernel/evt.h>
 
-#include <kernel/kgraphics.h>
+#include <kernel/graphics.h>
 
 void print_boot_info(void)
 {
@@ -57,6 +57,7 @@ extern void dbgscr_init(void);
 
 void tst_fct(void)
 {
+#if 0
     int evt_hand;
     int evt;
     iniIcon();
@@ -80,7 +81,6 @@ void tst_fct(void)
     /*ini_file_browser();
     browse("/",1);*/
 
-#if 0
     int evt_hand;
     struct evt_t evt;
     if(evt_getHandler(ALL_CLASS,&evt_hand)!=MED_OK)
@@ -115,8 +115,8 @@ void kernel_start (void)
 #endif
 
     /* malloc of max space in SDRAM */
-    malloc_init((void*)MALLOC_START,MALLOC_SIZE);
-
+    mem_addPool((void*)MALLOC_START,MALLOC_SIZE);
+    printk("Initial memory buffer pool added\n");
     /* print banner on uart */
     printk("MediOS %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);
 
@@ -177,7 +177,6 @@ void kernel_start (void)
 #ifdef HAVE_SOUND
     init_sound();
 #endif
-
     
     printk("[init] ------------ all drivers\n");
 
@@ -209,7 +208,7 @@ void kernel_start (void)
     do_bkpt();
     
     
-    load_med("/doom.med");   
+    load_bflat("/test.grv");   
 
     
     printk("Back from med\n");

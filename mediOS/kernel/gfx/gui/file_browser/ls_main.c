@@ -12,9 +12,9 @@
 #include <kernel/kernel.h>
 #include <sys_def/string.h>
 
-#include <graphics.h>
-#include <evt.h>
-#include <api.h>
+#include <kernel/graphics.h>
+#include <kernel/evt.h>
+
 #include <sys_def/colordef.h>
 #include <gui/file_browser.h>
 #include <file_type.h>
@@ -82,7 +82,7 @@ void printList(struct browser_data * bdata,int val)
 void ini_file_browser(void)
 {
     bdata = &realData;
-    evt_handler = evt_get_handler(ALL_CLASS);
+    evt_handler = evt_getHandler(ALL_CLASS);
     iniBrowser();
 }
 
@@ -117,13 +117,13 @@ void draw_file_size(struct dir_entry * entry)
     
     /* erase previsous drawing */
 
-    fillRect(COLOR_WHITE,x, LCD_HEIGHT-10,LCD_WIDTH-x,10);
+    gfx_fillRect(COLOR_WHITE,x, LCD_HEIGHT-10,LCD_WIDTH-x,10);
     if(entry->type == TYPE_FILE)
     {
         createSizeString(tmpS,entry->size);
-        getStringS(tmpS,&w,&h);
+        gfx_getStringSize(tmpS,&w,&h);
         x=LCD_WIDTH-w;
-        putS(COLOR_BLUE, COLOR_WHITE,x, LCD_HEIGHT-10, tmpS);
+        gfx_putS(COLOR_BLUE, COLOR_WHITE,x, LCD_HEIGHT-10, tmpS);
     }
 }
 
@@ -136,21 +136,21 @@ void draw_bottom_status(struct browser_data *bdata)
     
     createSizeString(tmpS,bdata->totSize);
         
-    fillRect(COLOR_WHITE,2, LCD_HEIGHT-20,LCD_WIDTH-4,20);
+    gfx_fillRect(COLOR_WHITE,2, LCD_HEIGHT-20,LCD_WIDTH-4,20);
           
-    putS(COLOR_BLUE, COLOR_WHITE,2, LCD_HEIGHT-20,bdata->path);  
+    gfx_putS(COLOR_BLUE, COLOR_WHITE,2, LCD_HEIGHT-20,bdata->path);  
     
 
     snprintf(tmp,100,"%d %s, %d %s, %s",bdata->nbFile,bdata->nbFile>0?"files":"file",
             bdata->nbDir,bdata->nbDir>0?"folders":"folders",tmpS);
     printk("%s\n",tmp);
     
-    putS(COLOR_BLUE, COLOR_WHITE,2, LCD_HEIGHT-10, tmp);    
+    gfx_putS(COLOR_BLUE, COLOR_WHITE,2, LCD_HEIGHT-10, tmp);    
 }
 
 void clear_status(struct browser_data *bdata)
 {
-    fillRect(COLOR_WHITE,2, LCD_HEIGHT-20,LCD_WIDTH-24,20);
+    gfx_fillRect(COLOR_WHITE,2, LCD_HEIGHT-20,LCD_WIDTH-24,20);
 }
 
 void createSizeString(char * str,int Isize)

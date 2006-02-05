@@ -14,6 +14,7 @@
 #define __KERNEL_RTC_H
 
 #include <sys_def/time.h>
+#include <kernel/errors.h>
 
 #define RTC_MS       0
 #define RTC_S        1
@@ -34,9 +35,9 @@
 #define RTC_MK_Y(ini,new)        (new & 0xFF)
 
 
-int init_rtc(void);
+MED_RET_T init_rtc(void);
 int getDayOfWeek(int day,int month,int year);
-int rtc_getTime(struct av_tm * valTime);
-int rtc_setTime(struct av_tm * newTime);
+MED_RET_T rtc_getTime(struct med_tm * valTime);
+MED_RET_T rtc_setTime(struct med_tm * newTime);
 
 #endif

@@ -14,8 +14,6 @@
 #ifndef __SECTION_TYPES_H
 #define __SECTION_TYPES_H
 
-void do_bkpt(void);
-
 /* section definition */
 
 #define __IRAM_CODE    __attribute__((section(".core")))

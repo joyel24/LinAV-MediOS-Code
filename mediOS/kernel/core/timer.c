@@ -65,6 +65,11 @@ __IRAM_CODE void tmr_intAction(int irq,struct pt_regs * regs)
     }    
 }
 
+unsigned int tmr_getTick(void)
+{
+    return tick;
+}
+
 void tmr_setup(struct tmr_s * tmr_data,char * name)
 {
     tmr_data->expires=0;

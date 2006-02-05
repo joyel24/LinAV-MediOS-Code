@@ -24,25 +24,9 @@
 
 struct evt_pipes evt_pipe_tab[NB_EVT_PIPES];
 
-
-
-#if 0
-
-struct tmr_s evt_timer;
-void evt_timer_action(void)
-{
-    send_evt(EVT_TIMER);
-    evt_timer.expires = tick + EVT_DELAY; /* 1s timer */
-    tmr_start(&evt_timer);
-}
-#endif
-
-int evt_getHandler(unsigned int mask,int * result)
+int evt_getHandler(unsigned int mask)
 {
     int i;
-    
-    if(result == NULL)
-        return -MED_EINVAL;
     
     /* look for a free evt_pipe */
     for(i=0;i<NB_EVT_PIPES;i++)
@@ -55,14 +39,12 @@ int evt_getHandler(unsigned int mask,int * result)
     evt_pipe_tab[i].evt_pipe.nIN = evt_pipe_tab[i].evt_pipe.nOUT = 0;
     evt_pipe_tab[i].used = 1;
     evt_pipe_tab[i].mask = mask;
-    
-    *result = i;
-    
+      
     printk("[evt handling] register: %d (mask=%x)\n",i,mask);
-    return MED_OK;
+    return i;
 }
 
-int evt_freeHandler(int num_evt_pipe)
+MED_RET_T evt_freeHandler(int num_evt_pipe)
 {
     if(num_evt_pipe >= 0 && num_evt_pipe < NB_EVT_PIPES)
     {
@@ -89,7 +71,7 @@ void evt_send(struct evt_t * evt)
     
 }
 
-int  evt_getFullStatus(int num_evt_pipe, struct evt_t * evt)
+MED_RET_T evt_getFullStatus(int num_evt_pipe, struct evt_t * evt)
 {
     evt->evt=0;
     evt->evt_class=0;
@@ -105,15 +87,14 @@ int  evt_getFullStatus(int num_evt_pipe, struct evt_t * evt)
     return MED_OK;
 }
 
-int  evt_getStatus(int num_evt_pipe, int * result)
+int evt_getStatus(int num_evt_pipe)
 {
     struct evt_t evt;
     int ret_val;
     ret_val = evt_getFullStatus( num_evt_pipe,&evt);
     if(ret_val!=MED_OK)
         return ret_val;
-    *result=evt.evt;
-    return MED_OK;
+    return evt.evt;
 }
 
 void evt_init(void)

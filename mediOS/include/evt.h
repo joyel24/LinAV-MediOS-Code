@@ -14,6 +14,12 @@
 #ifndef __EVT_H
 #define __EVT_H
 
+struct evt_t {
+    int evt;
+    unsigned int evt_class;
+    void * data;
+};
+
 #define        NO_EVENT      0x0000
 #define        BTN_UP        0x0001
 #define        BTN_DOWN      0x0002
@@ -52,6 +58,7 @@
 #define        ALL_CLASS         0xFFFFFFFF
 #define        BTN_CLASS         0x1
 #define        CONNECT_CLASS     0x2
+
 /*
 
 #define        EVT_WKUP      0x0d

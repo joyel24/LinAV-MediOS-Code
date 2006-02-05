@@ -1,5 +1,5 @@
 /* 
-*   include/time.h
+*   kernel/core/kdelay.c
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,18 +10,9 @@
 * KIND, either express of implied.
 */
 
-#ifndef __TIME_H
-#define __TIME_H
+#include <kernel/delay.h>
 
-struct med_tm {
-    int tm_ms;
-    int tm_sec;
-    int tm_min;
-    int tm_hour;
-    int tm_wday;
-    int tm_mday;
-    int tm_mon;
-    int tm_year;
-};
-
-#endif
+void mdelay(unsigned long msecs)
+{
+    while (msecs--) udelay(1000);
+}

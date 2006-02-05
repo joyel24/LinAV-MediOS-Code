@@ -24,8 +24,8 @@
 #include <kernel/disk.h>
 #include <kernel/timer.h>
 #include <kernel/fat.h>
-#include <kernel/kfile.h>
-#include <kernel/kdir.h>
+#include <kernel/file.h>
+#include <kernel/dir.h>
 #include <kernel/kernel.h>
 #include <kernel/bat_power.h>
 

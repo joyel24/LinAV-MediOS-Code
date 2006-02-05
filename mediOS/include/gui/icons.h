@@ -13,7 +13,7 @@
 #ifndef __GUI_ICONS_H
 #define __GUI_ICONS_H
 
-#include <graphics.h>
+#include <sys_def/graphics.h>
 
 struct icon_elem {
     char * name;

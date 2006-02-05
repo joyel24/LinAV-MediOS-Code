@@ -1,7 +1,7 @@
 /* 
-*   include/fat.h
+*   include/kernel/dir.h
 *
-*   AMOS project
+*   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -14,19 +14,18 @@
 *
 */
 
-#ifndef __K_DIR_H_
-#define __K_DIR_H_
+#ifndef __DIR_H_
+#define __DIR_H_
 
 #include <sys_def/types.h>
 #include <sys_def/dir.h>
 
 void init_dir(void);
 
-extern DIR* kopendir(const char* name);
-extern int kclosedir(DIR* dir);
-extern int kmkdir(const char* name, int mode);
-extern int krmdir(const char* name);
-
-extern struct dirent* kreaddir(DIR* dir);
+extern DIR* opendir(const char* name);
+extern int closedir(DIR* dir);
+extern int mkdir(const char* name, int mode);
+extern int rmdir(const char* name);
+extern struct dirent* readdir(DIR* dir);
 
 #endif

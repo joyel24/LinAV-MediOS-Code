@@ -30,8 +30,6 @@
 #include <sys_def/types.h>
 #include <sys_def/string.h>
 #include <sys_def/ctype.h>
-//#include <kernel/kernel.h>
-
 #include <sys_def/div64.h>
 
 /**

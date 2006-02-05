@@ -75,7 +75,7 @@ static long numget = 0, numrel = 0;   /* Number of bget() and brel() calls */
 #define ESent	((bufsize) (-(((1L << (sizeof(bufsize) * 8 - 2)) - 1) * 2) - 2))
 
 /*  BGET  --  Allocate a buffer.  */
-void * bget(bufsize requested_size)
+void * malloc(bufsize requested_size)
 {
     bufsize size = requested_size;
     struct bfhead *b;
@@ -155,6 +155,7 @@ void * bget(bufsize requested_size)
 /*  BGETZ  --  Allocate a buffer and clear its contents to zero.  We clear
 	       the  entire  contents  of  the buffer to zero, not just the
 	       region requested by the caller. */
+#ifdef HAS_bgetz
 void * bgetz(bufsize size)
 {
     char *buf = (char *) bget(size);
@@ -178,17 +179,17 @@ void * bgetz(bufsize size)
     }
     return ((void *) buf);
 }
-
+#endif
 /*  BGETR  --  Reallocate a buffer.  This is a minimal implementation,
 	       simply in terms of brel()  and  bget().	 It  could  be
 	       enhanced to allow the buffer to grow into adjacent free
 	       blocks and to avoid moving data unnecessarily.  */
-void *bgetr(void *buf, bufsize size)
+void *realloc(void *buf, bufsize size)
 {
     void *nbuf;
     bufsize osize; /* Old size of buffer */
     struct bhead *b;
-    if ((nbuf = bget(size)) == NULL) /* Acquire new buffer */
+    if ((nbuf = malloc(size)) == NULL) /* Acquire new buffer */
         return NULL;
 
     if (buf == NULL)
@@ -199,12 +200,12 @@ void *bgetr(void *buf, bufsize size)
     osize -= sizeof(struct bhead);
     /* Copy the data */
     memcpy((char *) nbuf, (char *) buf,(MemSize) ((size < osize) ? size : osize));
-    brel(buf);
+    free(buf);
     return nbuf;
 }
 
 /*  BREL  --  Release a buffer.  */
-void brel(void *buf)
+void free(void *buf)
 {
     struct bfhead *b, *bn;
     b = BFH(((char *) buf) - sizeof(struct bhead));
@@ -274,7 +275,7 @@ void brel(void *buf)
 }
 
 /*  BPOOL  --  Add a region of memory to the buffer pool.  */
-void bpool(void *buf,bufsize len)
+void mem_addPool(void *buf,bufsize len)
 {
     struct bfhead *b = BFH(buf);
     struct bhead *bn;
@@ -315,7 +316,7 @@ void bpool(void *buf,bufsize len)
 }
 
 /*  BSTATS  --	Return buffer allocation free space statistics.  */
-void bstats(bufsize *curalloc, bufsize *totfree, bufsize *maxfree,long * nget, long *nrel)
+void mem_stat(bufsize *curalloc, bufsize *totfree, bufsize *maxfree,long * nget, long *nrel)
 {
     struct bfhead *b = freelist.ql.flink;
     *nget = numget;
@@ -333,12 +334,13 @@ void bstats(bufsize *curalloc, bufsize *totfree, bufsize *maxfree,long * nget, l
     }
 }
 
-/*  BPOOLD  --	Dump a buffer pool.  The buffer headers are always listed.
+
+/*  mem_stat  --	Dump a buffer pool.  The buffer headers are always listed.
 		If DUMPALLOC is nonzero, the contents of allocated buffers
 		are  dumped.   If  DUMPFREE  is  nonzero,  free blocks are
 		dumped as well.  If FreeWipe  checking	is  enabled,  free
 		blocks	which  have  been clobbered will always be dumped. */
-void bpoold(void *buf,int dumpalloc,int dumpfree)
+void mem_dump(void *buf,int dumpalloc,int dumpfree)
 {
     struct bfhead *b = BFH(buf);
     while (b->bh.bsize != ESent)

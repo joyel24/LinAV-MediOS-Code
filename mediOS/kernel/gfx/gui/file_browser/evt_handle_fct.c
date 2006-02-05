@@ -12,9 +12,9 @@
 
 #include <sys_def/stddef.h>
 
-#include <graphics.h>
+#include <kernel/graphics.h>
 #include <evt.h>
-#include <api.h>
+#include <kernel/evt.h>
 #include <sys_def/colordef.h>
 
 #include <gui/file_browser.h>
@@ -30,11 +30,11 @@ void browserEvt(struct browser_data * bdata)
     
     int stop=0;;
     char evt=0;
-    getStringS("M", &w, &h);
+    gfx_getStringSize("M", &w, &h);
 
     while(!stop)
     {
-        evt = evt_get(evt_handler);
+        evt = evt_getStatus(evt_handler);
         if(!evt)
             continue;
             
@@ -70,7 +70,7 @@ void browserEvt(struct browser_data * bdata)
                     }
                     else // not going up, scrolling
                     {
-                        scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
+                        gfx_scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
                                     bdata->width-10, (h+1)*bdata->nb_disp_entry, h+1,0);
                         printAName(bdata,bdata->pos+bdata->nselect+1,bdata->nselect+1,1,0);
                         printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);
@@ -121,7 +121,7 @@ void browserEvt(struct browser_data * bdata)
                         }
                         else // not going down, scrolling
                         {
-                            scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
+                            gfx_scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
                                     bdata->width-10, (h+1)*bdata->nb_disp_entry, h+1,1);
                             printAName(bdata,bdata->pos+bdata->nselect-1,bdata->nselect-1,1,0);
                             printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);

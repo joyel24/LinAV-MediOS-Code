@@ -10,14 +10,17 @@
 * KIND, either express of implied.
 */
 
-#include <graphics.h>
-#include <api.h>
-#include <evt.h>
+#include <kernel/graphics.h>
+
+#include <kernel/evt.h>
 #include <sys_def/colordef.h>
 #include <sys_def/font.h>
 #include <sys_def/string.h>
 #include <gui/msgBox.h>
 #include <gui/icons.h>
+
+#define SCREEN_WIDTH  320
+#define SCREEN_HEIGHT 240
 
 BITMAP * MsgBox_ExclamationBitmap;
 BITMAP * MsgBox_QuestionBitmap;
@@ -46,7 +49,7 @@ void msgBoxEvtHandler(int evt_hanlder)
     char evt=0;
     while(!stopBoxLoop)
     {
-        evt = evt_get(evt_hanlder);
+        evt = evt_getHandler(evt_hanlder);
         if(!evt)
             continue;
         
@@ -127,10 +130,10 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
     char strButtonText[10];
 
     // calculate width
-    setFont(STD7X13);
-    getStringS(caption, &w1, &h1);
-    setFont(STD5X8);
-    getStringS(msg, &w2, &h2);
+    gfx_fontSet(STD7X13);
+    gfx_getStringSize(caption, &w1, &h1);
+    gfx_fontSet(STD5X8);
+    gfx_getStringSize(msg, &w2, &h2);
     
     // calculate width of box for text
     if(w1>w2)
@@ -162,42 +165,42 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
     buttonPos = (width-(2*BUTTON_DISTANCE))/cntButtons;
     buttonOffset = (buttonPos - BUTTON_WIDTH)/2;
 
-    setSize(BMAP2,width,MSGBOX_HEIGHT,8);
+    gfx_planeSetSize(BMAP2,width,MSGBOX_HEIGHT,8);
 
     // center box
     posX = SCREEN_WIDTH-width;
     posY = (SCREEN_HEIGHT/2)-(MSGBOX_HEIGHT/2);
 
-    setPos(BMAP2,0x14+posX,0x13+posY);
+    gfx_planeSetPos(BMAP2,0x14+posX,0x13+posY);
 
     // show box
-    setPlane(BMAP2);
+    gfx_setPlane(BMAP2);
     
     // fill background
-    drawRect(COLOR_BLACK, 0, 0, width, MSGBOX_HEIGHT);
-    fillRect(COLOR_WHITE, 1, 1, width-2, MSGBOX_HEIGHT-2);
+    gfx_drawRect(COLOR_BLACK, 0, 0, width, MSGBOX_HEIGHT);
+    gfx_fillRect(COLOR_WHITE, 1, 1, width-2, MSGBOX_HEIGHT-2);
     // write caption
-    setFont(STD7X13);
+    gfx_fontSet(STD7X13);
     posX = (width/2)-(w1/2);
-    putS(COLOR_BLACK, COLOR_WHITE, posX, 2, caption);
-    drawLine(COLOR_BLACK,0, h1+2+2, width, h1+2+2);
+    gfx_putS(COLOR_BLACK, COLOR_WHITE, posX, 2, caption);
+    gfx_drawLine(COLOR_BLACK,0, h1+2+2, width, h1+2+2);
     // draw bitmap and buttons
     if(icon == MSGBOX_ICON_EXCLAMATION)
-        drawBITMAP (MsgBox_ExclamationBitmap, 2,h1+2+2+5);
+        gfx_drawBitmap (MsgBox_ExclamationBitmap, 2,h1+2+2+5);
     else if(icon == MSGBOX_ICON_WARNING)
-        drawBITMAP (MsgBox_WarningBitmap, 2,h1+2+2+5);
+        gfx_drawBitmap (MsgBox_WarningBitmap, 2,h1+2+2+5);
     else if(icon == MSGBOX_ICON_INFORMATION)
-        drawBITMAP (MsgBox_InformationBitmap, 2,h1+2+2+5);
+        gfx_drawBitmap (MsgBox_InformationBitmap, 2,h1+2+2+5);
     else if(icon == MSGBOX_ICON_QUESTION)
-        drawBITMAP (MsgBox_QuestionBitmap, 2,h1+2+2+5);
+        gfx_drawBitmap (MsgBox_QuestionBitmap, 2,h1+2+2+5);
     else if(icon == MSGBOX_ICON_ERROR)
-        drawBITMAP (MsgBox_ErrorBitmap, 2,h1+2+2+5);
+        gfx_drawBitmap (MsgBox_ErrorBitmap, 2,h1+2+2+5);
     // print message
-    setFont(STD5X8);
+    gfx_fontSet(STD5X8);
     if(icon == MSGBOX_ICON_NO_ICON)
-        putS(COLOR_BLACK, COLOR_WHITE, 2, h1+2+2+10, msg); // if no icon, print the text on the left side
+        gfx_putS(COLOR_BLACK, COLOR_WHITE, 2, h1+2+2+10, msg); // if no icon, print the text on the left side
     else
-        putS(COLOR_BLACK, COLOR_WHITE, 25, h1+2+2+10, msg); // xPos with offset for icon
+        gfx_putS(COLOR_BLACK, COLOR_WHITE, 25, h1+2+2+10, msg); // xPos with offset for icon
     // print buttons
     if(type == MSGBOX_TYPE_OK)
     {
@@ -208,12 +211,12 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
 
         for(i = 0; i < cntButtons; i++)
         {
-            drawRect(COLOR_BLACK, BUTTON_DISTANCE+i*buttonPos+buttonOffset, MSGBOX_HEIGHT-20, BUTTON_WIDTH, BUTTON_HEIGHT);
+            gfx_drawRect(COLOR_BLACK, BUTTON_DISTANCE+i*buttonPos+buttonOffset, MSGBOX_HEIGHT-20, BUTTON_WIDTH, BUTTON_HEIGHT);
 
-            getStringS("Ok(F1)", &w_buttonText, &h_buttonText);
+            gfx_getStringSize("Ok(F1)", &w_buttonText, &h_buttonText);
             buttonTextOffsetX = (BUTTON_WIDTH/2)-(w_buttonText/2);
             buttonTextOffsetY = (BUTTON_HEIGHT/2)-(h_buttonText/2);
-            putS(COLOR_BLACK, COLOR_WHITE, BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX, MSGBOX_HEIGHT-20+buttonTextOffsetY , "Ok(F1)");
+            gfx_putS(COLOR_BLACK, COLOR_WHITE, BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX, MSGBOX_HEIGHT-20+buttonTextOffsetY , "Ok(F1)");
         }
     }
     else if(type == MSGBOX_TYPE_YESNOCANCEL)
@@ -225,7 +228,7 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
 
         for(i = 0; i < cntButtons; i++)
         {
-            drawRect(COLOR_BLACK, BUTTON_DISTANCE+i*buttonPos+buttonOffset, MSGBOX_HEIGHT-20, BUTTON_WIDTH, BUTTON_HEIGHT);
+            gfx_drawRect(COLOR_BLACK, BUTTON_DISTANCE+i*buttonPos+buttonOffset, MSGBOX_HEIGHT-20, BUTTON_WIDTH, BUTTON_HEIGHT);
 
             if(i == 0)
                 strcpy(strButtonText,"Yes(F1)");
@@ -234,10 +237,10 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
             else
                 strcpy(strButtonText,"Cancel(F3)");
 
-            getStringS(strButtonText, &w_buttonText, &h_buttonText);
+            gfx_getStringSize(strButtonText, &w_buttonText, &h_buttonText);
             buttonTextOffsetX = (BUTTON_WIDTH/2)-(w_buttonText/2);
             buttonTextOffsetY = (BUTTON_HEIGHT/2)-(h_buttonText/2);
-            putS(COLOR_BLACK, COLOR_WHITE, BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX, MSGBOX_HEIGHT-20+buttonTextOffsetY , strButtonText);
+            gfx_putS(COLOR_BLACK, COLOR_WHITE, BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX, MSGBOX_HEIGHT-20+buttonTextOffsetY , strButtonText);
         }
     }
     else
@@ -249,7 +252,7 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
 
         for(i = 0; i < cntButtons; i++)
         {
-            drawRect(COLOR_BLACK, BUTTON_DISTANCE+i*buttonPos+buttonOffset, MSGBOX_HEIGHT-20, BUTTON_WIDTH, BUTTON_HEIGHT);
+            gfx_drawRect(COLOR_BLACK, BUTTON_DISTANCE+i*buttonPos+buttonOffset, MSGBOX_HEIGHT-20, BUTTON_WIDTH, BUTTON_HEIGHT);
 
             if(i == 0)
             {
@@ -266,16 +269,16 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
                     strcpy(strButtonText,"Cancel(F2)");
             }
 
-            getStringS(strButtonText, &w_buttonText, &h_buttonText);
+            gfx_getStringSize(strButtonText, &w_buttonText, &h_buttonText);
             buttonTextOffsetX = (BUTTON_WIDTH/2)-(w_buttonText/2);
             buttonTextOffsetY = (BUTTON_HEIGHT/2)-(h_buttonText/2);
-            putS(COLOR_BLACK, COLOR_WHITE, BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX, MSGBOX_HEIGHT-20+buttonTextOffsetY , strButtonText);
+            gfx_putS(COLOR_BLACK, COLOR_WHITE, BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX, MSGBOX_HEIGHT-20+buttonTextOffsetY , strButtonText);
         }
     }
     
-    showPlane(BMAP2);
+    gfx_planeShow(BMAP2);
 
-    setPlane(BMAP1);
+    gfx_setPlane(BMAP1);
 }
 
 
@@ -283,16 +286,16 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
 /* restore the previous state */
 void eraseMsgBox(void)
 {
-    hidePlane(BMAP2);
-    setPlane(BMAP1);
-    setFont(fontVal);
+    gfx_planeHide(BMAP2);
+    gfx_setPlane(BMAP1);
+    gfx_fontSet(fontVal);
 }
 
 /* main function */
 int msgBox(unsigned char* caption, unsigned char* msg, int type, int icon, int evt_hanlder)
 {
     g_type = type;
-    fontVal=getFont();
+    fontVal=gfx_fontGet();
     drawMsgBox(caption,msg,type,icon);
     msgBoxEvtHandler(evt_hanlder);
     eraseMsgBox();

@@ -13,7 +13,7 @@
 #ifndef __GUI_PARSE_CFG_H
 #define __GUI_PARSE_CFG_H
 
-#include <fs_io.h>
+#include <sys_def/file.h>
 
 #define MAX_TOKEN 250
 

@@ -30,13 +30,19 @@
 
 #define GET_BAT_LEVEL (tsc2003getVal(CMD_BAT0|INTERNAL_ON))
 
-void kset_timer_status(int timer_type, int power_mode, int status);
-void kset_timer_delay(int timer_type, int power_mode, int delay);
-int  kget_timer_status(int timer_type, int power_mode);
-int  kget_timer_delay(int timer_type, int power_mode);
+void set_timer_status(int timer_type, int power_mode, int status);
+void set_timer_delay(int timer_type, int power_mode, int delay);
+int  get_timer_status(int timer_type, int power_mode);
+int  get_timer_delay(int timer_type, int power_mode);
 
 void set_timer_status_freq(int timer_type, int power_mode, int val,int type);
 int get_timer_status_freq(int timer_type, int power_mode,int type);
+
+int DC_isConnected(void);
+int batLevel(void);
+
+void lcd_setBrightness(int val);
+int  lcd_getBrightness(void);
 
 extern int kpwrState;
 void process_DC_change(void);

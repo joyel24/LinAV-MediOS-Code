@@ -7,7 +7,7 @@ SRC = $(wildcard *.c)
 SRC2 = $(wildcard *.S)
 OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 
-SUBDIRS = gui fonts
+SUBDIRS = fonts gui
 
 all: subdirs $(OBJS)
 	@cp -f *.o ../build

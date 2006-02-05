@@ -161,7 +161,7 @@ std4x8_120, std4x8_121, std4x8_122, std4x8_123, std4x8_124, std4x8_125, std4x8_1
 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0};
 
-#include "kgraphics.h"
+#include "graphics.h"
 #include "kfont.h"
 
 struct graphicsFont std4x8_o = {

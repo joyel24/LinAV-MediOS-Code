@@ -21,7 +21,7 @@
 #include <kernel/buttons.h>
 #include <kernel/bat_power.h>
 #include <kernel/uart.h>
-#include <api.h>
+
 #include <evt.h>
 #include <kernel/evt.h>
 

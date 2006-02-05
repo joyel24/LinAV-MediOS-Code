@@ -58,7 +58,7 @@ trap_swi:
 @    ldmfd  sp!,{lr}
 @    movs   pc, lr
 @.align 5
-__trap_swi_ptr:  .word kcswi_handler
+__trap_swi_ptr:  .word swi_handler
 
 @.align	5
 .global trap_prefetch

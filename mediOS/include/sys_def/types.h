@@ -40,5 +40,8 @@ typedef unsigned long long   uint64_t;
 
 typedef enum {FALSE=0,TRUE=1}    bool;
 
+struct pt_regs {
+	long uregs[18];
+};
 
 #endif

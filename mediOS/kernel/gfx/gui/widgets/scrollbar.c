@@ -10,7 +10,7 @@
 * KIND, either express of implied.
 */
 
-#include <graphics.h>
+#include <kernel/graphics.h>
 #include <gui/scrollbar.h>
 
 /*
@@ -35,16 +35,16 @@ void draw_scrollBar(struct scroll_bar * scrollBar, int items, int min_shown,int 
     orientation=scrollBar->orientation;
     
     /* draw box */
-    drawRect(border_color, x, y, width, height);
+    gfx_drawRect(border_color, x, y, width, height);
 
     /* clear edge pixels */
-    drawPixel(bg_color, x, y);
-    drawPixel(bg_color, (x + width - 1), y);
-    drawPixel(bg_color, x, (y + height - 1));
-    drawPixel(bg_color, (x + width - 1), (y + height - 1));
+    gfx_drawPixel(bg_color, x, y);
+    gfx_drawPixel(bg_color, (x + width - 1), y);
+    gfx_drawPixel(bg_color, x, (y + height - 1));
+    gfx_drawPixel(bg_color, (x + width - 1), (y + height - 1));
 
     /* clear pixels in progress bar */
-    fillRect(bg_color, x + 1, y + 1, width - 2, height - 2);
+    gfx_fillRect(bg_color, x + 1, y + 1, width - 2, height - 2);
 
     /* min should be min */
     if(min_shown < max_shown) {
@@ -89,18 +89,18 @@ void draw_scrollBar(struct scroll_bar * scrollBar, int items, int min_shown,int 
     /* knob has a width */
     if(size != 0) {
         if(orientation == VERTICAL)
-            fillRect(color, x + 1, y + start + 1, width - 2, size);
+            gfx_fillRect(color, x + 1, y + start + 1, width - 2, size);
         else
-            fillRect(color, x + start + 1, y + 1, size, height - 2);
+            gfx_fillRect(color, x + start + 1, y + 1, size, height - 2);
     }
     else { /* width of knob is null */
         if(orientation == VERTICAL) {
             start = (height - 2 - 1) * min / items;
-            fillRect(color, x + 1, y + start + 1, width - 2, 1);
+            gfx_fillRect(color, x + 1, y + start + 1, width - 2, 1);
         }
         else {
             start = (width - 2 - 1) * min / items;
-            fillRect(color, x + start + 1, y + 1, 1, height - 2);
+            gfx_fillRect(color, x + start + 1, y + 1, 1, height - 2);
         }
     }
 }

@@ -1,7 +1,7 @@
 /* 
-*   kernel/lib/delay.S
+*   kernel/core/delay.S
 *
-*   AMOS project
+*   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 *   Code from uClinux
@@ -14,8 +14,8 @@
 /*
  * 0 <= r0 <= 2000
  */
-.global kudelay
-kudelay:
+.global udelay
+udelay:
     mov    r2, #0x6800
     orr    r2, r2, #0x00db
     mul    r1, r0, r2
