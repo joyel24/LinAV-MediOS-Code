@@ -1,0 +1,240 @@
+    { "malloc",
+      (unsigned int)malloc
+    },
+    { "realloc",
+      (unsigned int)realloc
+    },
+    { "free",
+      (unsigned int)free
+    },
+    { "tmr_getTick",
+      (unsigned int)tmr_getTick
+    },
+    { "rtc_getTime",
+      (unsigned int)rtc_getTime
+    },
+    { "rtc_setTime",
+      (unsigned int)rtc_setTime
+    },
+    { "udelay",
+      (unsigned int)udelay
+    },
+    { "mdelay",
+      (unsigned int)mdelay
+    },
+    { "set_timer_status",
+      (unsigned int)set_timer_status
+    },
+    { "set_timer_delay",
+      (unsigned int)set_timer_delay
+    },
+    { "get_timer_status",
+      (unsigned int)get_timer_status
+    },
+    { "get_timer_delay",
+      (unsigned int)get_timer_delay
+    },
+    { "DC_isConnected",
+      (unsigned int)DC_isConnected
+    },
+    { "batLevel",
+      (unsigned int)batLevel
+    },
+    { "lcd_setBrightness",
+      (unsigned int)lcd_setBrightness
+    },
+    { "lcd_getBrightness",
+      (unsigned int)lcd_getBrightness
+    },
+    { "usb_isConnected",
+      (unsigned int)usb_isConnected
+    },
+    { "FW_isConnected",
+      (unsigned int)FW_isConnected
+    },
+    { "evt_getHandler",
+      (unsigned int)evt_getHandler
+    },
+    { "evt_freeHandler",
+      (unsigned int)evt_freeHandler
+    },
+    { "evt_getStatus",
+      (unsigned int)evt_getStatus
+    },
+    { "evt_getFullStatus",
+      (unsigned int)evt_getFullStatus
+    },
+    { "btn_readState",
+      (unsigned int)btn_readState
+    },
+    { "halt_device",
+      (unsigned int)halt_device
+    },
+    { "reload_firmware",
+      (unsigned int)reload_firmware
+    },
+    { "printf",
+      (unsigned int)printf
+    },
+    { "do_bkpt",
+      (unsigned int)do_bkpt
+    },
+    { "__modsi3",
+      (unsigned int)__modsi3
+    },
+    { "__umodsi3",
+      (unsigned int)__umodsi3
+    },
+    { "__divsi3",
+      (unsigned int)__divsi3
+    },
+    { "__udivsi3",
+      (unsigned int)__udivsi3
+    },
+    { "__divdi3",
+      (unsigned int)__divdi3
+    },
+    { "fopen",
+      (unsigned int)fopen
+    },
+    { "fclose",
+      (unsigned int)fclose
+    },
+    { "fsync",
+      (unsigned int)fsync
+    },
+    { "fread",
+      (unsigned int)fread
+    },
+    { "lseek",
+      (unsigned int)lseek
+    },
+    { "ftell",
+      (unsigned int)ftell
+    },
+    { "fcreat",
+      (unsigned int)fcreat
+    },
+    { "fwrite",
+      (unsigned int)fwrite
+    },
+    { "fremove",
+      (unsigned int)fremove
+    },
+    { "frename",
+      (unsigned int)frename
+    },
+    { "ftruncate",
+      (unsigned int)ftruncate
+    },
+    { "filesize",
+      (unsigned int)filesize
+    },
+    { "opendir",
+      (unsigned int)opendir
+    },
+    { "closedir",
+      (unsigned int)closedir
+    },
+    { "mkdir",
+      (unsigned int)mkdir
+    },
+    { "rmdir",
+      (unsigned int)rmdir
+    },
+    { "readdir",
+      (unsigned int)readdir
+    },
+    { "gfx_openGraphics",
+      (unsigned int)gfx_openGraphics
+    },
+    { "gfx_closeGraphics",
+      (unsigned int)gfx_closeGraphics
+    },
+    { "gfx_setPlane",
+      (unsigned int)gfx_setPlane
+    },
+    { "gfx_getPlane",
+      (unsigned int)gfx_getPlane
+    },
+    { "gfx_planeHide",
+      (unsigned int)gfx_planeHide
+    },
+    { "gfx_planeShow",
+      (unsigned int)gfx_planeShow
+    },
+    { "gfx_planeIsShown",
+      (unsigned int)gfx_planeIsShown
+    },
+    { "gfx_planeSetState",
+      (unsigned int)gfx_planeSetState
+    },
+    { "gfx_planeGetState",
+      (unsigned int)gfx_planeGetState
+    },
+    { "gfx_planeSetSize",
+      (unsigned int)gfx_planeSetSize
+    },
+    { "gfx_planeGetSize",
+      (unsigned int)gfx_planeGetSize
+    },
+    { "gfx_planeSetPos",
+      (unsigned int)gfx_planeSetPos
+    },
+    { "gfx_planeGetPos",
+      (unsigned int)gfx_planeGetPos
+    },
+    { "gfx_planeGetBufferOffset",
+      (unsigned int)gfx_planeGetBufferOffset
+    },
+    { "gfx_planeSetBufferOffset",
+      (unsigned int)gfx_planeSetBufferOffset
+    },
+    { "gfx_clearScreen",
+      (unsigned int)gfx_clearScreen
+    },
+    { "gfx_drawPixel",
+      (unsigned int)gfx_drawPixel
+    },
+    { "gfx_readPixel",
+      (unsigned int)gfx_readPixel
+    },
+    { "gfx_drawRect",
+      (unsigned int)gfx_drawRect
+    },
+    { "gfx_fillRect",
+      (unsigned int)gfx_fillRect
+    },
+    { "gfx_drawLine",
+      (unsigned int)gfx_drawLine
+    },
+    { "gfx_putS",
+      (unsigned int)gfx_putS
+    },
+    { "gfx_getStringSize",
+      (unsigned int)gfx_getStringSize
+    },
+    { "gfx_putC",
+      (unsigned int)gfx_putC
+    },
+    { "gfx_drawSprite",
+      (unsigned int)gfx_drawSprite
+    },
+    { "gfx_drawBitmap",
+      (unsigned int)gfx_drawBitmap
+    },
+    { "gfx_scrollWindowVert",
+      (unsigned int)gfx_scrollWindowVert
+    },
+    { "gfx_scrollWindowHoriz",
+      (unsigned int)gfx_scrollWindowHoriz
+    },
+    { "gfx_setPalletteRGB",
+      (unsigned int)gfx_setPalletteRGB
+    },
+    { "gfx_fontSet",
+      (unsigned int)gfx_fontSet
+    },
+    { "gfx_fontGet",
+      (unsigned int)gfx_fontGet
+    },

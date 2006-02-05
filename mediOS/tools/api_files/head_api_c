@@ -1,0 +1,33 @@
+/*
+*   kernel/lib/api.c
+*
+*   MediOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*/
+
+#include <api.h>
+#include <kernel/swi.h>
+#include <kernel/errors.h>
+
+#define swi_call(SWI_NUM)                \
+    ({                                   \
+        register long _r0 asm("r0");     \
+        asm volatile(                    \
+            "stmdb sp!, {r3-r5} \n"     \
+            "swi %0\n"                   \
+            "ldmia sp!, {r3-r5}"        \
+        :                                \
+        : "i"(SWI_NUM)                   \
+        : "memory");                     \
+        return (long) _r0;               \
+    })    
+
+unsigned int api_getFctPtr(char * name)    { swi_call(nAPI_INIAPI); }
+
+void ini_api(void)
+{

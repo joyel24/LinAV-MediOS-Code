@@ -1,0 +1,8 @@
+# create files
+
+awk 'BEGIN{FS="[\t ]*#[\t ]*"} NF==0{next} {if ($2=="api_inc") {print "#include <" $3 ">" }}' $1 > api_inc_h.tmp
+awk 'BEGIN{FS="[\t ]*#[\t ]*"} NF==0{next} \
+{if ($2!="api_inc" && $2!="k_inc") {print $1 " (*" $2 ")(" $3 ");"}}' $1 > api_h.tmp
+
+cat head_api_h api_inc_h.tmp med_api_h api_h.tmp tail_api_h > $2
+rm -f api_h.tmp api_inc_h.tmp 

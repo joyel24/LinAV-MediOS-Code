@@ -1,0 +1,10 @@
+#!/bin/sh
+
+BASE_FILE="api_list.h"
+API_H_DEST="../../include/api.h"
+API_C_DEST="../../kernel/lib/api.c"
+API_FCT_LIST_DEST="../../kernel/core/api_fct_list.h"
+
+./create_api_h $BASE_FILE $API_H_DEST
+./create_api_c $BASE_FILE $API_C_DEST
+./create_api_fct_list_h $BASE_FILE $API_FCT_LIST_DEST
