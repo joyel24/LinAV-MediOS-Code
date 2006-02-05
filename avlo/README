@@ -1,4 +1,4 @@
-Version: 4.1 
+
     * To avoid any risks, keep your AV300 plugged into the power supply during the whole installation process.
     * This installation is not without its risks and danger. However, if you follow the instructions carefully you should be okay. 
 
@@ -11,6 +11,8 @@ Contact
 
 
 Introduction
+
+Avlo Version: 4.1 
 
     * This readme will help you install avlo to the av3xx. This bootloader features a config file based menu (a bit like LILO) loader. It is designed to be light and fast.
     * Special features:
