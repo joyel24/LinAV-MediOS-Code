@@ -21,6 +21,9 @@ void printf(char *fmt, ...);
 void print_data(char * data,int length);
 void do_bkpt(void);
 
+int getArch(void);
+void getResolution(int * width,int * height);
+
 unsigned int get_sp(void);
 
 extern unsigned long tick;

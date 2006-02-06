@@ -51,9 +51,9 @@ int in_32_val(void)
 int mas_reset(void)
 {
     GIO_CLEAR(GIO_MAS_PWR);  // stop the MAS
-    kmdelay(100);
+    mdelay(100);
     GIO_SET(GIO_MAS_PWR);       // start the MAS
-    kmdelay(10);
+    mdelay(10);
     mas_write_direct_config(MAS_CONTROL,0x8c00);
     return 0;
 }

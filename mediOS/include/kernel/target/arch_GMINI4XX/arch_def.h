@@ -10,6 +10,7 @@
 #ifndef __GMINI4XX_DEF_H
 #define __GMINI4XX_DEF_H
 
+#include <sys_def/arch.h>
 
 #define SDRAM_START       0x0900000
 #define SDRAM_END         0x1900000
@@ -20,6 +21,7 @@
 #define CONFIG_ARM_CLK 100000000
 #define CONFIG_EXT_CLK 27000000
 
+#define CURRENT_ARCH  GMINI4XX_ARCH
 
 /* uarts */
 

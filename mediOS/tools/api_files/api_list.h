@@ -48,8 +48,10 @@ void # halt_device     # void
 void # reload_firmware # void
 
 #k_inc#kernel/kernel.h
-void # printf  # char *fmt, ...
-void # do_bkpt # void
+void # printf        # char *fmt, ...
+void # do_bkpt       # void
+int  # getArch       # void
+void # getResolution # int * width,int * height
 
 #k_inc#kernel/libfloat.h
 long         # __modsi3  # long a, long b

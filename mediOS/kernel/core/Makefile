@@ -5,7 +5,7 @@ GCCFLAGS += -I../../include
 
 OBJS = delay.o dsp.o irq.o malloc.o pipes.o printk.o timer.o trap_fct.o trap.o uart.o ti_wdt.o 
 
-OBJS += swi.o  bkpt.o kdelay.o
+OBJS += swi.o  bkpt.o kdelay.o kernel.o
 
 ifeq ($(HAVE_CMD_LINE),1)
 	OBJS += cmd_line.o

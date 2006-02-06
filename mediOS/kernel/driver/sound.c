@@ -22,7 +22,7 @@
 
 #include <kernel/mas.h>
 #include <kernel/sound.h>
-
+#include <sys_def/sound.h>
 
 #define MAS_DELAY        {int ___i; for(___i=0;___i<20;___i++);}
 #define MIN(a, b)        (((a)<(b))?(a):(b))

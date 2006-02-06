@@ -10,6 +10,8 @@
 #ifndef __AV3XX_DEF_H
 #define __AV3XX_DEF_H
 
+#include <sys_def/arch.h>
+
 #define SDRAM_START   0x03000000
 #define SDRAM_END     0x04000000
 
@@ -18,6 +20,7 @@
 
 #define CONFIG_ARM_CLK 54000000
 
+#define CURRENT_ARCH  AV3XX_ARCH
 
 /* uarts */
 
