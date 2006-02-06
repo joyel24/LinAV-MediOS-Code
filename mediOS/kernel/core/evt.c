@@ -51,7 +51,7 @@ MED_RET_T evt_freeHandler(int num_evt_pipe)
         if(evt_pipe_tab[num_evt_pipe].used!=1)
             return -MED_ENBUSY;
         evt_pipe_tab[num_evt_pipe].used = 0;
-        printk("[evt handling] UNregister: %d",num_evt_pipe);
+        printk("[evt handling] UNregister: %d\n",num_evt_pipe);
     }
     else
         return -MED_EINVAL;    

@@ -29,5 +29,11 @@
 
 unsigned int api_getFctPtr(char * name)    { swi_call(nAPI_INIAPI); }
 
+long __modsi3(long a, long b)  { return float_modsi3(a,b);}
+long __umodsi3(long a, long b) { return float_umodsi3(a,b);}
+long __divsi3(long a, long b)  { return float_divsi3(a,b);}
+long __udivsi3(long a, long b) { return float_udivsi3(a,b);}
+unsigned int __divdi3(unsigned int a, unsigned int b) { return float_divdi3(a,b);}
+
 void ini_api(void)
 {

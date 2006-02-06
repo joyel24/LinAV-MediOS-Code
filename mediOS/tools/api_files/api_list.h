@@ -54,11 +54,11 @@ int  # getArch       # void
 void # getResolution # int * width,int * height
 
 #k_inc#kernel/libfloat.h
-long         # __modsi3  # long a, long b
-long         # __umodsi3 # long a, long b
-long         # __divsi3  # long a, long b
-long         # __udivsi3 # long a, long b
-unsigned int # __divdi3  # unsigned int a, unsigned int b
+long         # float_modsi3  # long a, long b
+long         # float_umodsi3 # long a, long b
+long         # float_divsi3  # long a, long b
+long         # float_udivsi3 # long a, long b
+unsigned int # float_divdi3  # unsigned int a, unsigned int b
 
 #k_inc#kernel/file.h
 #api_inc#sys_def/types.h

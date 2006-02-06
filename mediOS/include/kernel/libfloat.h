@@ -14,6 +14,12 @@
 #ifndef __LIBFLOAT_H
 #define __LIBFLOAT_H
 
+long float_modsi3(long a, long b);
+long float_umodsi3(long a, long b);
+long float_divsi3(long a, long b);
+long float_udivsi3(long a, long b);
+unsigned int float_divdi3(unsigned int a, unsigned int b);
+
 long __modsi3(long a, long b);
 long __umodsi3(long a, long b);
 long __divsi3(long a, long b);

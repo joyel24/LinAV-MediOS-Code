@@ -16,7 +16,6 @@
 
 #include <api.h>
 #include <evt.h>
-#include <graphics.h>
 
 struct position {
     int x;
@@ -114,32 +113,32 @@ void redraw(void);
     switch(player)
     {
         case HUMAN:
-            drawBITMAP(&hBitmap,X_INI+PIECE_OFFSET+x*(CELL_SIZE+1),Y_INI+PIECE_OFFSET+y*(CELL_SIZE+1));
+            gfx_drawBitmap(&hBitmap,X_INI+PIECE_OFFSET+x*(CELL_SIZE+1),Y_INI+PIECE_OFFSET+y*(CELL_SIZE+1));
             break;
         case ENEMY:
-            drawBITMAP(&aBitmap,X_INI+PIECE_OFFSET+x*(CELL_SIZE+1),Y_INI+PIECE_OFFSET+y*(CELL_SIZE+1));
+            gfx_drawBitmap(&aBitmap,X_INI+PIECE_OFFSET+x*(CELL_SIZE+1),Y_INI+PIECE_OFFSET+y*(CELL_SIZE+1));
             break;
     }
 }
 
  void erasePiece(int x, int y)
 {
-    fillRect(BG_COLOR,X_INI+1+x*(CELL_SIZE+1),Y_INI+1+y*(CELL_SIZE+1),CELL_SIZE,CELL_SIZE);
+    gfx_fillRect(BG_COLOR,X_INI+1+x*(CELL_SIZE+1),Y_INI+1+y*(CELL_SIZE+1),CELL_SIZE,CELL_SIZE);
 }
 
  void drawBoard(void)
 {
     int i,j;
 
-    clearScreen(BG_COLOR);
+    gfx_clearScreen(BG_COLOR);
 
 
     for(i=0;i<NB_CELL+1;i++)
     {
         /* horizontal line */
-        drawLine(LINE_COLOR,X_INI,Y_INI+i*(CELL_SIZE+1),X_INI+NB_CELL*(CELL_SIZE+1),Y_INI+i*(CELL_SIZE+1));
+        gfx_drawLine(LINE_COLOR,X_INI,Y_INI+i*(CELL_SIZE+1),X_INI+NB_CELL*(CELL_SIZE+1),Y_INI+i*(CELL_SIZE+1));
         /* vertical line */
-        drawLine(LINE_COLOR,X_INI+i*(CELL_SIZE+1),Y_INI,X_INI+i*(CELL_SIZE+1),Y_INI+NB_CELL*(CELL_SIZE+1));
+        gfx_drawLine(LINE_COLOR,X_INI+i*(CELL_SIZE+1),Y_INI,X_INI+i*(CELL_SIZE+1),Y_INI+NB_CELL*(CELL_SIZE+1));
     }
 
     for(j=0;j<NB_CELL;j++)
@@ -150,43 +149,41 @@ void redraw(void);
 
  void selectCell(int x, int y)
 {
-    drawRect(SEL_COLOR,X_INI+x*(CELL_SIZE+1),Y_INI+y*(CELL_SIZE+1),CELL_SIZE+2,CELL_SIZE+2);
+    gfx_drawRect(SEL_COLOR,X_INI+x*(CELL_SIZE+1),Y_INI+y*(CELL_SIZE+1),CELL_SIZE+2,CELL_SIZE+2);
 }
 
  void unSelectCell(int x, int y)
 {
-    drawRect(LINE_COLOR,X_INI+x*(CELL_SIZE+1),Y_INI+y*(CELL_SIZE+1),CELL_SIZE+2,CELL_SIZE+2);
+    gfx_drawRect(LINE_COLOR,X_INI+x*(CELL_SIZE+1),Y_INI+y*(CELL_SIZE+1),CELL_SIZE+2,CELL_SIZE+2);
 }
 
  void drawNbPiece()
 {
     char tmp[10];
-
     sprintf(tmp,"You: %02d",nbPieces[HUMAN]);
-    putS(TXT_COLOR, BG_COLOR, 20, NB_PIECE_Y, tmp);
-    drawBITMAP(&hBitmap, 4, NB_PIECE_Y);
-
+    gfx_putS(TXT_COLOR, BG_COLOR, 20, NB_PIECE_Y, tmp);
+    gfx_drawBitmap(&hBitmap, 4, NB_PIECE_Y);
     sprintf(tmp,"Archos: %02d",nbPieces[ENEMY]);
-    putS(TXT_COLOR, BG_COLOR, 120, NB_PIECE_Y, tmp);
-    drawBITMAP(&aBitmap, 104, NB_PIECE_Y);
+    gfx_putS(TXT_COLOR, BG_COLOR, 120, NB_PIECE_Y, tmp);
+    gfx_drawBitmap(&aBitmap, 104, NB_PIECE_Y);
 }
 
  void drawMenu()
 {
     int w=0,h=0;
     
-    getStringS("Nav Mode:", &w, &h);
-    putS(TXT_COLOR, BG_COLOR, 320-w-5,NB_PIECE_Y-10, "Nav Mode:");
+    gfx_getStringSize("Nav Mode:", &w, &h);
+    gfx_putS(TXT_COLOR, BG_COLOR, 320-w-5,NB_PIECE_Y-10, "Nav Mode:");
 
     if(cursorMoveMode == 0)
     {
-        getStringS("Traditional", &w, &h);
-        putS(TXT_COLOR, BG_COLOR, 320-w-5,NB_PIECE_Y+5, "Traditional");
+        gfx_getStringSize("Traditional", &w, &h);
+        gfx_putS(TXT_COLOR, BG_COLOR, 320-w-5,NB_PIECE_Y+5, "Traditional");
     }
     else
     {
-        getStringS("Standard   ", &w, &h);
-        putS(TXT_COLOR, BG_COLOR, 320-w-5,NB_PIECE_Y+5, "Standard   ");
+        gfx_getStringSize("Standard   ", &w, &h);
+        gfx_putS(TXT_COLOR, BG_COLOR, 320-w-5,NB_PIECE_Y+5, "Standard   ");
     }
 }
 
@@ -357,16 +354,16 @@ void endGame(void)
 {
     int w,h;
 
-    getStringS("Game Over... ",&w,&h);
+    gfx_getStringSize("Game Over... ",&w,&h);
 
-    putS(COLOR_WHITE,COLOR_BLACK,10,2,"Game Over...");
+    gfx_putS(COLOR_WHITE,COLOR_BLACK,10,2,"Game Over...");
 
     if(nbPieces[HUMAN]>nbPieces[ENEMY])
-        putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You won! :D");
+        gfx_putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You won! :D");
     else if(nbPieces[HUMAN]<nbPieces[ENEMY])
-        putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You lost. :(");
+        gfx_putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You lost. :(");
     else
-        putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You tied. :|");
+        gfx_putS(COLOR_WHITE,COLOR_BLACK,10+w,2,"You tied. :|");
 }
 
  void nxtCursosPos(int direction,int dispMove)
@@ -544,34 +541,33 @@ void redraw(void)
     drawNbPiece();
 }
 
-void _start(void)
+void _start(int argc, char ** argv)
 {
     int evt;
     int evt_handler;
-    
+    ini_api();
     printf("\nIn othello\n");
-    
-    open_graphics();
+
+    gfx_openGraphics();
    
-    clearScreen(COLOR_WHITE);
+    gfx_clearScreen(COLOR_WHITE);
     
-    setFont(STD8X13);
+    gfx_fontSet(STD8X13);
 
     iniBoard();
     
 
-    evt_handler=evt_get_handler(BTN_CLASS);
-#if 0    
-    if(!evt_buffer)             /* we need a proper error handling in api */
+    evt_handler=evt_getHandler(BTN_CLASS);
+  
+    if(evt_handler<0)             /* we need a proper error handling in api */
     {
-        printf("[ini_status_bar] can't register to evt\n");
+        printf("[othello init] can't register to evt\n");
         return;
-    }*/
-#endif    
+    }
+  
     computeAllowed(allowedHuman,HUMAN);
     redraw();
- 
-			
+    			
     stop_othello=0;
     printf("\nbefore loop\n");
     
@@ -585,7 +581,7 @@ void _start(void)
     {
 //FIXME: get_evt() never returns on the gmini so until it is fixed this work around is needed.
 #ifdef AV3XX
-      evt=evt_get(evt_handler); 
+      evt=evt_getStatus(evt_handler); 
       eventHandler(evt);
 #endif
 #ifdef GMINI4XX

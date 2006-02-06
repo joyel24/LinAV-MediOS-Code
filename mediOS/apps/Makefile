@@ -7,8 +7,8 @@ GCCFLAGS += -I../include
 
 #GCCFLAGS +=  -mno-long-calls
 
-TARGET = test
-OBJS = test.o
+TARGET = othello
+OBJS = othello.o
 
 LDFLAGS = -L../ -lLmedios -Wl, -elf2flt -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lgcc 
 # -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -Wl, -elf2flt
