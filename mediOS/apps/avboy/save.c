@@ -29,7 +29,6 @@
 #include "mem.h"
 #include "sound.h"
 
-#include <fs_io.h>
 
 
 
@@ -185,7 +184,7 @@ void loadstate(int fd)
   //size_t base_offset;
 	ver = hramofs = hiofs = palofs = oamofs = wavofs = 0;
 
-  fseek(fd, 0, SEEK_SET);
+  lseek(fd, 0, SEEK_SET);
   
 	fread(fd,buf, 4096);
 
@@ -222,13 +221,13 @@ void loadstate(int fd)
 	if (wavofs) memcpy(snd.wave, buf+wavofs, sizeof snd.wave);
 	else memcpy(snd.wave, ram.hi+0x30, 16); /* patch data from older files */
 
-	fseek(fd, (iramblock << 12), SEEK_SET);
+	lseek(fd, (iramblock << 12), SEEK_SET);
 	fread(fd,ram.ibank, 4096*irl);
 	
-	fseek(fd, (vramblock << 12), SEEK_SET);
+	lseek(fd, (vramblock << 12), SEEK_SET);
 	fread(fd,lcd_vbank, 4096*vrl);
 	
-	fseek(fd, (sramblock << 12), SEEK_SET);
+	lseek(fd, (sramblock << 12), SEEK_SET);
 	fread(fd,ram.sbank, 4096*srl);
      //   free(buf);
         vram_dirty();
@@ -287,16 +286,16 @@ void savestate(int fd)
 
   /* calculate base offset for output file */
   /* (we'll seek relative to that from now on) */
-	fseek(fd, 0, SEEK_SET);
+	lseek(fd, 0, SEEK_SET);
 	fwrite(fd,buf, 4096);
 	
-	fseek(fd, (iramblock << 12), SEEK_SET);
+	lseek(fd, (iramblock << 12), SEEK_SET);
 	fwrite(fd,ram.ibank, 4096*irl);
 	
-	fseek(fd, (vramblock << 12), SEEK_SET);
+	lseek(fd, (vramblock << 12), SEEK_SET);
 	fwrite(fd,lcd_vbank, 4096*vrl);
 	
-	fseek(fd, (sramblock << 12), SEEK_SET);
+	lseek(fd, (sramblock << 12), SEEK_SET);
 	fwrite(fd,ram.sbank, 4096*srl);
      //   free(buf);
 }

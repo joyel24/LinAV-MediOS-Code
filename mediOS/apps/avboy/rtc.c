@@ -24,7 +24,6 @@
 #include "mem.h"
 #include "rtc.h"
 
-#include <fs_io.h>
 
 struct rtc rtc;
 

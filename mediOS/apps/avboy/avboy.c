@@ -19,10 +19,8 @@
 
 /* kernel include */
 #include <sys_def/string.h>
-#include <graphics.h>
 #include <evt.h>
-#include <kernel/buttons.h>
-#include <fs_io.h>
+#include <buttons.h>
 #include <api.h>
 
 /* MediOS browser include */
@@ -98,16 +96,17 @@ int _start(int argc,char* argv)
 		 to exit the emulator and return to the browser, While exit in the emu ingame menu still completly exits.
 		 Cj tell me if you want to do it this way and also let me know if it works for you?
 */
+    ini_api();
 #ifdef USE_MEDIOS_BROWSER
 	while(1)
 	{
 		osd_setEntirePalette(gui_pal,256);
-		setSize(BMAP1,LCD_WIDTH,LCD_HEIGHT,8);
-		setPos(BMAP1,X_OFFSET,Y_OFFSET);
+		gfx_planeSetSize(BMAP1,LCD_WIDTH,LCD_HEIGHT,8);
+		gfx_planeSetPos(BMAP1,X_OFFSET,Y_OFFSET);
 		iniIcon();
-		open_graphics();
+		gfx_openGraphics();
 		clearScreen(COLOR_WHITE);
-		setFont(STD6X9);
+		gfx_fontSet(STD6X9);
 		ini_file_browser();
 		rom=browse("/",1);
 		if (rom=='0')
@@ -115,14 +114,14 @@ int _start(int argc,char* argv)
 			cleanup();
 			reload_firmware();
 		}
-		open_graphics();
-		OSD_BITMAP1_ADDRESS = (int)getBufferOffset(BMAP1);
-		setSize(BMAP1,160,144,8);
-		setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+		gfx_openGraphics();
+		OSD_BITMAP1_ADDRESS = (int)gfx_planeGetBufferOffset(BMAP1);
+		gfx_planeSetSize(BMAP1,160,144,8);
+		gfx_planeSetPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
 		
-		fillRect(0x00,0,0,160,144);
+		gfx_fillRect(0x00,0,0,160,144);
 		
-		setFont(10);   
+		gfx_fontSet(10);   
     
     vid_init();
     pcm_init();
@@ -138,14 +137,14 @@ int _start(int argc,char* argv)
 #endif
 #ifndef USE_MEDIOS_BROWSER
 		//this uses the avBoy browser and is the default
-    open_graphics();
-    OSD_BITMAP1_ADDRESS = (int)getBufferOffset(BMAP1);
-    setSize(BMAP1,160,144,8);
-		setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+    gfx_openGraphics();
+    OSD_BITMAP1_ADDRESS = (int)gfx_planeGetBufferOffset(BMAP1);
+    gfx_planeSetSize(BMAP1,160,144,8);
+		gfx_planeSetPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
     
-    fillRect(0x00,0,0,160,144);
+    gfx_fillRect(0x00,0,0,160,144);
 
-    setFont(10);   
+    gfx_fontSet(10);   
     
     vid_init();
     pcm_init();
@@ -204,7 +203,7 @@ void vid_setpal(int i, int r, int g, int b)
 {
 
   //printf("vid_setpal %d %d %d %d\n",i,r,g,b);
-setPalletteRGB(r,g,b,i);
+gfx_setPalletteRGB(r,g,b,i);
 
 }
 
@@ -214,7 +213,7 @@ int doevents(void)
 {
     int bt,pressed,released;
     
-    bt=btn_get();// & 0xF7F;
+    bt=btn_readState();// & 0xF7F;
     pressed=bt & ~oldbt;
     released=~bt & oldbt;
     oldbt=bt;
@@ -293,14 +292,14 @@ int doevents(void)
 long tickcounter;
 
 void *sys_timer(void){
-  tickcounter=get_tick();
+  tickcounter=tmr_getTick();
   return &tickcounter;
 }
 
 int sys_elapsed(long * oldtick){
   int delta;
   long now;
-  now=get_tick();
+  now=tmr_getTick();
   delta=now-*oldtick;
   *oldtick=now;
   return (delta*10000);

@@ -20,6 +20,7 @@
 #define __DEFS_H__
 
 #include <api.h>
+#include <sys_def/section_types.h>
 
 
 #define IS_LITTLE_ENDIAN

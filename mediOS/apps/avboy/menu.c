@@ -20,20 +20,18 @@
 #include <sys_def/ctype.h>
 #include <sys_def/string.h>
 
-#include <fs_io.h>
-#include <graphics.h>
-#include <kernel/buttons.h>
+#include <buttons.h>
 
 #include "defs.h"
 #include "avboy.h"
 #include "mem.h"
 #include "fb.h"
 
-#define getstringsize(a,b,c) getStringS(a,b,c)
-#define drawline(a,b,c,d,e) drawLine(e,a,b,c,d)
-#define drawrect(a,b,c,d,e) drawRect(e,a,b,c,d)
-#define fillrect(a,b,c,d,e) fillRect(e,a,b,c,d)
-#define putsxy(a,b,c) putS(0xFF,0x00,a,b,c)
+#define getstringsize(a,b,c) gfx_getStringSize(a,b,c)
+#define drawline(a,b,c,d,e) gfx_drawLine(e,a,b,c,d)
+#define drawrect(a,b,c,d,e) gfx_drawRect(e,a,b,c,d)
+#define fillrect(a,b,c,d,e) gfx_fillRect(e,a,b,c,d)
+#define putsxy(a,b,c) gfx_putS(0xFF,0x00,a,b,c)
 
  
 #define OSD_BITMAP1_WIDTH 160
@@ -462,13 +460,13 @@ static void do_opt2_menu(void) {
     mi = do_menu(OPT2_MENU_TITLE, (char**) opt2_menu, num_items, mi);
     switch(mi) {
   /*    case OM2_ITEM_ZX:
-        setSize(BMAP1,320,288,8);
-        setPos(BMAP1,0x14,0x12);
+        gfx_planeSetSize(BMAP1,320,288,8);
+        gfx_planeSetPos(BMAP1,0x14,0x12);
         (*(volatile unsigned short *)(0x30684))+=0x100;
         break;
       case OM2_ITEM_ZN:
-        setSize(BMAP1,160,144,8);
-        setPos(BMAP1,168,68);
+        gfx_planeSetSize(BMAP1,160,144,8);
+        gfx_planeSetPos(BMAP1,168,68);
         break;                  
       case OM2_ITEM_OCS:
         SDRFreq++;
@@ -485,13 +483,13 @@ static void do_opt2_menu(void) {
         if(!RotScreen) {
            ZoomX=!ZoomX;
            if(ZoomX) {
-              setSize(BMAP1,320,144,8);
-              setPos(BMAP1, X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+              gfx_planeSetSize(BMAP1,320,144,8);
+              gfx_planeSetPos(BMAP1, X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
               fb.pitch=320;
            }
            else {
-              setSize(BMAP1,160,144,8);
-              setPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
+              gfx_planeSetSize(BMAP1,160,144,8);
+              gfx_planeSetPos(BMAP1,(LCD_WIDTH-OSD_BITMAP1_WIDTH) + X_OFFSET,(LCD_HEIGHT-OSD_BITMAP1_HEIGHT)/2 + Y_OFFSET);
               fb.pitch=OSD_BITMAP1_WIDTH;
            }
            snprintf((char *)opt2_menu[0], 17, "Zoom X       %s", (ZoomX ? " ON" : "OFF"));
@@ -503,7 +501,7 @@ static void do_opt2_menu(void) {
            snprintf((char *)opt2_menu[1], 17, "Rotate Scr.    %1d", RotScreen);
            if(RotScreen==2) {
               fb.pitch=-1;
-              setSize(BMAP1,144,160,8);
+              gfx_planeSetSize(BMAP1,144,160,8);
               bt_UP = BTMASK_RIGHT;
               bt_DOWN = BTMASK_LEFT;
               bt_LEFT = BTMASK_UP;
@@ -515,7 +513,7 @@ static void do_opt2_menu(void) {
            }
            else if(RotScreen==1) {
               fb.pitch=1;
-              setSize(BMAP1,144,160,8);
+              gfx_planeSetSize(BMAP1,144,160,8);
               bt_UP = BTMASK_LEFT;
               bt_DOWN = BTMASK_RIGHT;
               bt_LEFT = BTMASK_DOWN;
@@ -527,7 +525,7 @@ static void do_opt2_menu(void) {
            }
            else {
               fb.pitch=OSD_BITMAP1_WIDTH;
-              setSize(BMAP1,160,144,8);
+              gfx_planeSetSize(BMAP1,160,144,8);
               bt_UP = BTMASK_UP;
               bt_DOWN = BTMASK_DOWN;
               bt_LEFT = BTMASK_LEFT;
@@ -551,14 +549,14 @@ static void do_opt2_menu(void) {
         (*(volatile unsigned short *)(0x30880))=0x8021;
         break;
       case OM2_ITEM_PAL:
-        while (btn_get());
+        while (btn_readState());
         for (y=0;y<144;y+=9) {
           for (x=0;x<160;x+=10) {
-            fillRect(c, x, y, 10, 9);
+            gfx_fillRect(c, x, y, 10, 9);
             c++;
           }
         }
-        while (!btn_get());
+        while (!btn_readState());
         break;
       case MENU_CANCEL:
         done = true;
@@ -626,9 +624,9 @@ static void draw_menu(char *title, char **items, size_t num_items)  {
   int x, y, w, h, by;
 
   /* draw the outline */
-  fillRect(0xaf,MENU_X + 1, MENU_Y + 1, MENU_WIDTH, MENU_HEIGHT); // fillRect(0xaf,SHADOW_RECT);
-  fillRect(0x00,MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);   // fillRect(0x00,MENU_RECT);
-  drawRect(0xff,MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);   // drawRect(0xff,MENU_RECT);
+  gfx_fillRect(0xaf,MENU_X + 1, MENU_Y + 1, MENU_WIDTH, MENU_HEIGHT); // fillrect(0xaf,SHADOW_RECT);
+  gfx_fillRect(0x00,MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);   // fillrect(0x00,MENU_RECT);
+  gfx_drawRect(0xff,MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);   // drawrect(0xff,MENU_RECT);
 
   /* calculate x/y */
   x = MENU_X + MENU_ITEM_PAD;
@@ -675,13 +673,13 @@ static int do_menu(char *title, char **items, size_t num_items, int sel) {
   curr_item = sel;
 
   /* make sure button state is empty */
-  while (btn_get());
+  while (btn_readState());
 
   /* loop until the menu is finished */
   while (!done) {
     /* grab a button */
-    while (btn_get());
-    while(!(btn = btn_get()));
+    while (btn_readState());
+    while(!(btn = btn_readState()));
 
     /* handle the button */
     if(btn & BTMASK_DOWN) {
@@ -708,7 +706,7 @@ static int do_menu(char *title, char **items, size_t num_items, int sel) {
   /*    else if(btn & 0x10) {
         for (y=0;y<144;y+=9) {
           for (x=0;x<160;x+=10) {
-            fillRect(c, x, y, 10, 9);
+            gfx_fillRect(c, x, y, 10, 9);
             c++;
           }
         }
@@ -759,9 +757,9 @@ else {
      }
   }
 
-  fillRect(0xaf,11,9,140,128);
-  fillRect(0x00,10,8,140,128);
-  drawRect(0xff,10,8,140,128);
+  gfx_fillRect(0xaf,11,9,140,128);
+  gfx_fillRect(0x00,10,8,140,128);
+  gfx_drawRect(0xff,10,8,140,128);
 
   x = 10 + 2;
   y = 8 + 2 * 2;
@@ -784,7 +782,7 @@ while(!done) {
 //  for(i=0;i<num_items;i++) {items[i][0]='\0'; strcat(items[i],list[i+pos]);}
   for(i=0;i<num_items;i++) {strncpy(items[i],list[i+pos],16); items[i][16]='\0';}
 
-  fillRect(0x00,11,29,138,106);
+  gfx_fillRect(0x00,11,29,138,106);
   for (i = 0; i < num_items; i++)
     putsxy(x+2, by + h * i, items[i]);
 
@@ -793,8 +791,8 @@ while(!done) {
   curr_item = sel_item;
 
   while (1) {
-    while (btn_get());
-    while(!(btn = btn_get()));
+    while (btn_readState());
+    while(!(btn = btn_readState()));
 
     if(btn & BTMASK_DOWN) {
         sel_item = curr_item + 1;

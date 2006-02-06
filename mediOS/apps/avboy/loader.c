@@ -28,9 +28,9 @@
 #include <sys_def/string.h>
 #include <sys_def/ctype.h>
 #include <sys_def/random.h>
+#include <api.h>
 
 
-#include <fs_io.h>
 
 
 char *strdup();
