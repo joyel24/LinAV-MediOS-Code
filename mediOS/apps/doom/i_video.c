@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.8  2006/02/03 21:52:50  oxygen77
+// one last change to doom
+//
 // Revision 1.7  2006/01/24 21:51:39  cjnr11
 // AV support (but with some bugs). Start the Archos FW then Doom
 //
@@ -193,7 +196,7 @@ void I_StartTic (void)
 {
   int bt,pressed,released;
 
-  bt=btn_get();
+  bt=btn_readState();
   pressed=bt & ~oldbt;
   released=~bt & oldbt;
   oldbt=bt;
@@ -297,14 +300,14 @@ void I_SetPalette (byte* palette)
     g = gammatable[usegamma][*palette++];
     b = gammatable[usegamma][*palette++];
 
-    setPalletteRGB(r,g,b,i);
+    gfx_setPalletteRGB(r,g,b,i);
   }
 }
 
 
 void I_InitGraphics(void)
 {
-  open_graphics();
+  gfx_openGraphics();
 
   offset1=malloc(SCREENWIDTH*SCREENHEIGHT);
   offset2=malloc(SCREENWIDTH*SCREENHEIGHT+256);
@@ -314,9 +317,9 @@ void I_InitGraphics(void)
   memset(offset2,0,SCREENWIDTH*SCREENHEIGHT);
 
   screens[0]=offset1;
-  setBufferOffset (BMAP1,offset2);
+  gfx_planeSetBufferOffset (BMAP1,offset2);
 
-  setSize(BMAP1,SCREENWIDTH,SCREENHEIGHT,8);
+  gfx_planeSetSize(BMAP1,SCREENWIDTH,SCREENHEIGHT,8);
 
 #ifdef GMINI4XX
   InitResizeLookups();

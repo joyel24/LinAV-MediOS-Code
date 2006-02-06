@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.2  2006/01/24 21:51:39  cjnr11
+// AV support (but with some bugs). Start the Archos FW then Doom
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -732,12 +735,13 @@ void FindResponseFile (void)
 	    if (!handle)
 	    {
 		printf ("\nNo such response file!");
-		exit(1);
+                #warning need exit
+		//exit(1);
 	    }
 	    printf("Found response file %s!\n",&myargv[i][1]);
-	    fseek (handle,0,SEEK_END);
+	    lseek (handle,0,SEEK_END);
 	    size = ftell(handle);
-	    fseek (handle,0,SEEK_SET);
+	    lseek (handle,0,SEEK_SET);
 	    file = malloc (size);
 	    fread (handle,file,size); //gli
 	    fclose (handle);

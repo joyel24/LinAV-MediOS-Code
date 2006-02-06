@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.2  2006/01/19 08:51:51  sfxgligli
+// cleanup & name standardisation in wdt/irq/timers/uart/cpld/gio
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -138,7 +141,9 @@ void I_Quit (void)
     I_ShutdownMusic();
     M_SaveDefaults ();
     I_ShutdownGraphics();
-    exit(0);
+    #warning need exit
+   // exit(0);
+   
 }
 
 void I_WaitVBL(int count)
@@ -188,6 +193,6 @@ void I_Error (char *error, ...)
 
     D_QuitNetGame ();
     I_ShutdownGraphics();
-    
-    exit(-1);
+ #warning need exit   
+   // exit(-1);
 }

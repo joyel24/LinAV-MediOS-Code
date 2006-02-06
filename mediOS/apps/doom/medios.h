@@ -4,16 +4,17 @@
 #include <stdarg.h>
 
 #include <api.h>
-#include <fs_io.h>
+
 #include <sys_def/ctype.h>
 #include <sys_def/string.h>
-#include <graphics.h>
 
-#include <kernel/osd.h>
-#include <kernel/buttons.h>
 
-#include <kernel/timer.h>
-#include <kernel/uart.h>
+//#include <kernel/osd.h>
+#include <buttons.h>
+#include <kernel/io.h>
+#include <sys_def/timer.h>
+#include <sys_def/section_types.h>
+//#include <kernel/uart.h>
 
 //TODO: ugly hack
 #define alloca malloc

@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	Main program, simply calls D_DoomMain high level loop.
@@ -33,7 +37,7 @@ rcsid[] = "$Id$";
 int _start(){
     myargc = 0;
     myargv = NULL;
-
+    ini_api();
     D_DoomMain ();
 
     return 0;

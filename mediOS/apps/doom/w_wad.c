@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.4  2006/01/24 21:51:39  cjnr11
+// AV support (but with some bugs). Start the Archos FW then Doom
+//
 // Revision 1.3  2006/01/23 17:21:08  sfxgligli
 // - mediOS: Gmini400 new buttons
 // - gDoom: added strafe & speed buttons, cleaned up things that shouldn't have been commited
@@ -79,9 +82,9 @@ int filelength (int handle)
 
     pos = ftell(handle);
 printf("Position was %lu\n", pos);
-    fseek(handle, 0, SEEK_END);
+    lseek(handle, 0, SEEK_END);
     size = ftell(handle);
-    fseek(handle, pos, SEEK_SET);
+    lseek(handle, pos, SEEK_SET);
 printf("Size is %lu\n", size);
 
     return (int)size;
@@ -213,7 +216,7 @@ void W_AddFile (char *filename)
 	header.infotableofs = LONG(header.infotableofs);
 	length = header.numlumps*sizeof(filelump_t);
 	fileinfo = alloca (length);
-	fseek (handle, header.infotableofs, SEEK_SET);
+	lseek (handle, header.infotableofs, SEEK_SET);
 	fread (handle, fileinfo, length);
 	numlumps += header.numlumps;
     }
@@ -273,7 +276,7 @@ void W_Reload (void)
     header.infotableofs = LONG(header.infotableofs);
     length = lumpcount*sizeof(filelump_t);
     fileinfo = alloca (length);
-    fseek (handle, header.infotableofs, SEEK_SET);
+    lseek (handle, header.infotableofs, SEEK_SET);
     fread (handle,fileinfo, length);
 
     // Fill in lumpinfo
@@ -476,7 +479,7 @@ W_ReadLump
     else
 	handle = l->handle;
 
-    fseek (handle, l->position, SEEK_SET);
+    lseek (handle, l->position, SEEK_SET);
     c = fread (handle,dest, l->size);
 
     if (c < l->size)

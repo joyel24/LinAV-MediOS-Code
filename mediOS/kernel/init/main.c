@@ -207,8 +207,8 @@ void kernel_start (void)
 #endif
     do_bkpt();
     
-    
-    load_bflat("/test.grv");   
+    load_med("/doom.med");
+    //load_bflat("/test.grv");   
 
     
     printk("Back from med\n");

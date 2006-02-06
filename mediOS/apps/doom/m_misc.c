@@ -16,6 +16,10 @@
 //
 //
 // $Log$
+// Revision 1.2  2006/01/03 20:57:57  sfxgligli
+// - Doom: weapon change, fixed backward move bug, HUD resize optimisation
+// - Medios: added firmware reload function, implemented exit() user function
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -147,9 +151,9 @@ M_ReadFile
     handle = fopen (name, O_RDONLY);
     if (handle < 0)
 	I_Error ("Couldn't read file %s", name);
-    fseek(handle, 0, SEEK_END);
+    lseek(handle, 0, SEEK_END);
     length = ftell(handle);
-    fseek(handle, 0, SEEK_SET);
+    lseek(handle, 0, SEEK_SET);
     buf = Z_Malloc (length, PU_STATIC, NULL);
     count = fread (handle, buf, length);
     fclose (handle);
