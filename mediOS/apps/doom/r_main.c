@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.2  2006/02/08 17:45:40  oxygen77
+// big cleanup in makefiles
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -641,22 +644,22 @@ extern int	screenblocks;
 void R_Init (void)
 {
     R_InitData ();
-    printf ("\nR_InitData");
+//    printf ("\nR_InitData");
     R_InitPointToAngle ();
-    printf ("\nR_InitPointToAngle");
+ //   printf ("\nR_InitPointToAngle");
     R_InitTables ();
     // viewwidth / viewheight / detailLevel are set by the defaults
-    printf ("\nR_InitTables");
+ //   printf ("\nR_InitTables");
 
     R_SetViewSize (screenblocks, detailLevel);
     R_InitPlanes ();
-    printf ("\nR_InitPlanes");
+  //  printf ("\nR_InitPlanes");
     R_InitLightTables ();
-    printf ("\nR_InitLightTables");
+  //  printf ("\nR_InitLightTables");
     R_InitSkyMap ();
-    printf ("\nR_InitSkyMap");
+  //  printf ("\nR_InitSkyMap");
     R_InitTranslationTables ();
-    printf ("\nR_InitTranslationsTables");
+  //  printf ("\nR_InitTranslationsTables");
 	
     framecount = 0;
 }

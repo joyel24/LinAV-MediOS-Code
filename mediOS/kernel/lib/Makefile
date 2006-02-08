@@ -12,7 +12,7 @@ all: clean subdirs $(OBJS)
 	@cp -f $(OBJS) ../build
 
 lib: GCCFLAGS += -DBUILD_LIB
-lib:  clean $(OBJS) $(OBJS2)
+lib:  clean subdirs   $(OBJS) $(OBJS2)
         
 kernel_lib: all
                 

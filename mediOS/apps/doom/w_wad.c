@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.5  2006/02/06 22:45:48  oxygen77
+// make doom work with new api, we lack of exit() now
+//
 // Revision 1.4  2006/01/24 21:51:39  cjnr11
 // AV support (but with some bugs). Start the Archos FW then Doom
 //
@@ -171,12 +174,15 @@ void W_AddFile (char *filename)
 
     // open the file and add to directory
 
+//    printf("W_AddFile: %s\n",filename);
+    
     // handle reload indicator.
     if (filename[0] == '~')
     {
 	filename++;
 	reloadname = filename;
 	reloadlump = numlumps;
+      //  printf("reloadname = %s\n",reloadname);
     }
 
     if ( (handle = fopen (filename,O_RDONLY)) <0)
@@ -425,9 +431,9 @@ __IRAM_CODE
 int W_GetNumForName (char* name)
 {
     int	i;
-
+    //printf("W_GetNumForName: %s\n",name);
     i = W_CheckNumForName (name);
-    
+    //printf("W_GetNumForName res: %d\n",i);
     if (i == -1)
       I_Error ("W_GetNumForName: %s not found!", name);
       
@@ -463,11 +469,15 @@ W_ReadLump
     lumpinfo_t*	l;
     int	handle;
 
+    //printf("in W_ReadLump %d\n",lump);
+    
     if (lump >= numlumps)
 	I_Error ("W_ReadLump: %i >= numlumps",lump);
 
     l = lumpinfo+lump;
 
+    //printf("file = %s @0x%x\n",reloadname,reloadname);
+    
     // ??? I_BeginRead ();
 
     if (l->handle == -1)
@@ -508,6 +518,8 @@ W_CacheLumpNum
 {
     byte*	ptr;
 
+    //printf("W_CacheLumpNum in: %d,%d\n",lump,tag);
+    
     if ((unsigned)lump >= numlumps)
 	I_Error ("W_CacheLumpNum: %i >= numlumps",lump);
 		
@@ -538,6 +550,7 @@ W_CacheLumpName
 ( char*		name,
   int		tag )
 {
+    //printf("%s,tag=%d\n",name,tag);
     return W_CacheLumpNum (W_GetNumForName(name), tag);
 }
 
