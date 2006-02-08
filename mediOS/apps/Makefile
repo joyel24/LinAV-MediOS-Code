@@ -2,23 +2,34 @@ include ../Makefile.conf
 
 
 ASFLAGS  += -I../include
-#-mfpu=softfpa
+
 GCCFLAGS += -I../include
 
-#GCCFLAGS +=  -mno-long-calls
+LIBS = ../lib/libmedios.a
 
-TARGET = othello
-OBJS = othello.o
+LDFLAGS = ../lib/*.o -L../lib -lmedios --emit-relocs
+all: $(LIBS) othello test apps
 
-LDFLAGS = -L../ -lLmedios -Wl, -elf2flt -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lgcc 
-# -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -Wl, -elf2flt
-all: 
-#$(OBJS)
-	$(GCC) -o $(TARGET).grv $(TARGET).c $(GCCFLAGS) $(LDFLAGS)
-	$(GCC) -o $(TARGET).elf $(TARGET).c $(GCCFLAGS) -L../ -lLmedios -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lgcc 
+othello: othello.o
+	@$(LD) -o othello.elf othello.o $(LDFLAGS)
+	@$(ELF2FLT) -o othello.grv othello.elf
+	@rm -f .elf *.gdb *.elf2flt
+
+test: test.o
+	@$(LD) -o test.elf test.o $(LDFLAGS)
+	@$(ELF2FLT) -o test.grv test.elf
 	@rm -f .elf *.gdb *.elf2flt
         
-clean:  
+$(LIBS):
+	@make -C ../kernel --no-print-directory lib_medios
+
+apps:
+	@make -C doom --no-print-directory
+	@make -C avboy --no-print-directory
+                                
+clean:
+	@make -C doom --no-print-directory clean
+	@make -C avboy --no-print-directory clean
 	@rm -f *.o *.bak *~ *.elf *.elf2flt $(TARGET).grv *.gdb
 
 include ../default.rule

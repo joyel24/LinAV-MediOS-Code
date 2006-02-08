@@ -26,7 +26,7 @@
 #include "fb.h"
 #include "palette.h"
 #include "avboy.h"
-#include <api.h>
+
 #ifdef USE_ASM
 #include "asm.h"
 #endif

@@ -1,5 +1,5 @@
-/*
-* test.c
+/* 
+*   kernel/lib/apps_init/apps_start.c
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -8,20 +8,14 @@
 * See the file COPYING in the source tree root for full license agreement.
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
-*
 */
 
 #include <api.h>
-#include <sys_def/arch.h>
 
+extern void app_main(void);
 
-void app_main(int argc,char* argv)
+void _start(void)
 {
-    int ver,w,h;
-
-    ver=getArch();
-    getResolution(&w,&h);
-    printf("We are on %s\n resolution is: (%d,%d)\n",ver==AV3XX_ARCH?"AV3XX":ver==GMINI4XX_ARCH?"Gmini4xx":"UKN ARCH",
-        w,h
-    );
+    ini_api();
+    app_main();
 }

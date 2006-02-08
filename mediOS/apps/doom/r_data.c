@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.2  2006/01/19 08:51:51  sfxgligli
+// cleanup & name standardisation in wdt/irq/timers/uart/cpld/gio
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -450,6 +453,8 @@ void R_InitTextures (void)
     int			temp3;
 
 
+    printf("in init textures\n");
+    
     // Load the patch names from pnames.lmp.
     name[8] = 0;
     names = W_CacheLumpName ("PNAMES", PU_STATIC);
@@ -463,7 +468,7 @@ void R_InitTextures (void)
 	patchlookup[i] = W_CheckNumForName (name);
     }
     Z_Free (names);
-    
+    printf("St1\n");
     // Load the map texture definitions from textures.lmp.
     // The data is contained in one or two lumps,
     //  TEXTURE1 for shareware, plus TEXTURE2 for commercial.
@@ -471,7 +476,7 @@ void R_InitTextures (void)
     numtextures1 = LONG(*maptex);
     maxoff = W_LumpLength (W_GetNumForName ("TEXTURE1"));
     directory = maptex+1;
-	
+	printf("St2\n");
     if (W_CheckNumForName ("TEXTURE2") != -1)
     {
 	maptex2 = W_CacheLumpName ("TEXTURE2", PU_STATIC);
@@ -485,7 +490,7 @@ void R_InitTextures (void)
 	maxoff2 = 0;
     }
     numtextures = numtextures1 + numtextures2;
-	
+	printf("St3\n");
     textures = Z_Malloc (numtextures*4, PU_STATIC, 0);
     texturecolumnlump = Z_Malloc (numtextures*4, PU_STATIC, 0);
     texturecolumnofs = Z_Malloc (numtextures*4, PU_STATIC, 0);
@@ -495,18 +500,19 @@ void R_InitTextures (void)
     textureheight = Z_Malloc (numtextures*4, PU_STATIC, 0);
 
     totalwidth = 0;
-    
+    printf("St4\n");
     //	Really complex printing shit...
     temp1 = W_GetNumForName ("S_START");  // P_???????
     temp2 = W_GetNumForName ("S_END") - 1;
     temp3 = ((temp2-temp1+63)/64) + ((numtextures+63)/64);
-/*    printf("[");
+    printf("St5\n");
+    printf("[");
     for (i = 0; i < temp3; i++)
 	printf(" ");
     printf("         ]");
     for (i = 0; i < temp3; i++)
 	printf("\x8");
-    printf("\x8\x8\x8\x8\x8\x8\x8\x8\x8\x8");*/
+    printf("\x8\x8\x8\x8\x8\x8\x8\x8\x8\x8");
 	
     for (i=0 ; i<numtextures ; i++, directory++)
     {
@@ -680,13 +686,13 @@ void R_InitColormaps (void)
 void R_InitData (void)
 {
     R_InitTextures ();
-//    printf ("\nInitTextures");
+    printf ("\nInitTextures");
     R_InitFlats ();
-//    printf ("\nInitFlats");
+    printf ("\nInitFlats");
     R_InitSpriteLumps ();
-//    printf ("\nInitSprites");
+    printf ("\nInitSprites");
     R_InitColormaps ();
-//    printf ("\nInitColormaps");
+    printf ("\nInitColormaps");
 }
 
 

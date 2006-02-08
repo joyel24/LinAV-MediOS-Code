@@ -202,7 +202,7 @@ void kernel_start (void)
 #endif
 #ifdef BUILD_LIB
     do_bkpt();
-    _start();
+    app_main();
     reload_firmware();
 #endif
     do_bkpt();

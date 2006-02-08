@@ -14,8 +14,6 @@ all: subdirs $(OBJS)
 
 kernel_lib: all
 
-force: clean all        
-
 clean: clean-subdirs 
 	@rm -f *.o *.bak *~ $(TARGET)
 

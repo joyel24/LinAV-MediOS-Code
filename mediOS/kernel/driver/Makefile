@@ -34,8 +34,6 @@ all: $(OBJS)
 
 kernel_lib: all
 
-force: clean all        
-
 clean:  
 	@rm -f *.o *.bak *~ $(TARGET)
 

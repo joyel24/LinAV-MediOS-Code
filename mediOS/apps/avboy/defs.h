@@ -19,7 +19,20 @@
 #ifndef __DEFS_H__
 #define __DEFS_H__
 
+
+#ifdef BUILD_STDALONE
+#include <kernel/graphics.h>
+#include <kernel/file.h>
+#include <kernel/dir.h>
+#include <kernel/malloc.h>
+#define printf printk
+#include <kernel/buttons.h>
+#include <kernel/timer.h>
+#include <kernel/delay.h>
+#else
 #include <api.h>
+#endif
+
 #include <sys_def/section_types.h>
 
 

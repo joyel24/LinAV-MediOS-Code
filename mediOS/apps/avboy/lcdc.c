@@ -16,9 +16,7 @@
 *  Modified by CjNr11 06/12/2005
 */
 
-//#include <stdlib.h>
-//#include <debug.h>
-#include <api.h>
+
 
 #include "defs.h"
 #include "hw.h"

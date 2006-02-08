@@ -1,55 +1,53 @@
 include Makefile.conf
 
 ASFLAGS  += -I../include
-#-mfpu=softfpa
 GCCFLAGS += -I../include
-
-SRC = $(wildcard *.c)
-SRC2 = $(wildcard *.S)
-OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
-
 
 LDFLAGS =  -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lgcc
 #LDFLAGS = -L/home/christophe/gcc-3.3.x/toolchain_arm_nofpu/arm-linux/lib/ -lgcc
 
-TARGET = medios
-
 SUBDIRS = kernel
-#apps
-#gui
-LIBS = kernel/build/*.o kernel/target/arch_$(TARGET_DEVICE)/*.o
-#gui/gui.a
+KERNEL_OBJS = kernel/build/*.o kernel/target/arch_$(TARGET_DEVICE)/*.o
 
-all: $(TARGET)
+all: medios lib
 
 force: clean all        
 
 mk_api_file:
-	make -C tools/api_files/
+	@make -C tools/api_files/ --no-print-directory
 incdir:
-	make -C include/kernel/target incdir
+	@make -C include/kernel/target --no-print-directory incdir
         
-lib : incdir mk_api_file
-	#make -C apps/avboy stdalone
-	make -C apps/ othello.o
-	make -C kernel/ kernel_lib
-	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) -Lapps/avboy -lavboy $(LDFLAGS) -Map medios.map
-	#$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) apps/othello.o  $(LDFLAGS) -Map medios.map
-	@$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).bin
-    
-    
+lib:
+	@echo '-----   building libMedios'
+	@make -C kernel --no-print-directory lib_medios
+	@echo '-----   building libMedios done'
 
-$(TARGET) : incdir mk_api_file subdirs
+medios: incdir mk_api_file subdirs
 	@echo '-----   building kernel'
-	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(TARGET).elf $(LIBS) $(LDFLAGS) -Map medios.map
-	@$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).bin
+	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o medios.elf $(KERNEL_OBJS) $(LDFLAGS) -Map medios.map
+	@$(OBJCOPY) -O binary medios.elf medios.bin
 
-clean:  clean-subdirs
-	@echo '-----   cleaining MAIN'
-	@rm -f *.o *.bak *~ $(TARGET).bin $(TARGET).elf *.map libKmedios.a libKboot.a
-	@rm -f include/*~ include/kernel/*~ include/sys_def/*~  include/gui/*~ 
+aoboy: 
+	@make -C kernel/ --no-print-directory kernel_lib
+	@make -C apps/avboy --no-print-directory stdalone
+	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o aoboy.elf $(KERNEL_OBJS) apps/avboy/build/*.o $(LDFLAGS) -Map medios.map
+	@$(OBJCOPY) -O binary aoboy.elf aoboy.bin
 
+doom: 
+	@make -C kernel/ --no-print-directory kernel_lib
+	@make -C apps/doom --no-print-directory stdalone
+	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o doom.elf $(KERNEL_OBJS) apps/doom/build/*.o $(LDFLAGS) -Map medios.map
+	@$(OBJCOPY) -O binary doom.elf doom.bin
+                
+clean:  clean-subdirs clean_aoboy clean_doom
+	@echo '-----   cleaning MAIN'
+	@rm -f *.o *.bak *~ *.bin *.elf *.map
+	@rm -f include/*~ include/kernel/*~ include/sys_def/*~  include/gui/*~ lib/* include/kernel/target/*~
 
+clean_aoboy:
+	@make -C apps/avboy --no-print-directory clean
         
-        
+clean_doom:
+	@make -C apps/doom --no-print-directory clean        
 include default.rule

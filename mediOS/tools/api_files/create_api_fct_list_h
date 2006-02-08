@@ -7,4 +7,4 @@ NF==0{next} \
 $1 > api_fct_list_h.tmp
 
 cat head_api_fct_list_h api_fct_listinc_h.tmp med_api_fct_list_h api_fct_list_h.tmp tail_api_fct_list_h > $2
-rm -f api_c.tmp api_fct_listinc_h.tmp
+rm -f api_fct_list_h.tmp api_fct_listinc_h.tmp

@@ -3,14 +3,12 @@ include ../../Makefile.conf
 ASFLAGS  += -I../../include
 GCCFLAGS += -I../../include
 
-#SRC = $(wildcard *.c)
-#SRC2 = $(wildcard *.S)
-#OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
-
 OBJS = ctype.o memchr.o memcpy.o memset.o memzero.o qsort.o strchr.o random.o string.o strrchr.o vsprintf.o
 OBJS2 = api.o 
 
-all: clean $(OBJS)
+SUBDIRS = apps_init
+
+all: clean subdirs $(OBJS)
 	@cp -f $(OBJS) ../build
 
 lib: GCCFLAGS += -DBUILD_LIB
@@ -20,7 +18,7 @@ kernel_lib: all
                 
 force: clean all        
 
-clean:  
+clean: clean-subdirs
 	@rm -f *.o *.bak *~ $(TARGET)
 
 include ../../default.rule

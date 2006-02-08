@@ -16,12 +16,15 @@
 *  Modified by CjNr11 08/12/2005
 */
 
+#include "defs.h"
 
 /* kernel include */
+
+
 #include <sys_def/string.h>
 #include <evt.h>
 #include <buttons.h>
-#include <api.h>
+
 
 /* MediOS browser include */
 #ifdef USE_MEDIOS_BROWSER
@@ -88,7 +91,7 @@ struct pcm pcm;
 #ifdef USE_MEDIOS_BROWSER
 extern int gui_pal[256][3];
 #endif
-int _start(int argc,char* argv)
+int app_main(int argc,char* argv)
 {
     char * rom;		
 /*
@@ -96,7 +99,8 @@ int _start(int argc,char* argv)
 		 to exit the emulator and return to the browser, While exit in the emu ingame menu still completly exits.
 		 Cj tell me if you want to do it this way and also let me know if it works for you?
 */
-    ini_api();
+
+
 #ifdef USE_MEDIOS_BROWSER
 	while(1)
 	{

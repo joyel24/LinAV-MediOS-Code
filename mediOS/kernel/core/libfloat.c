@@ -10,6 +10,8 @@
 * KIND, either express of implied.
 */
 
+#include <kernel/libfloat.h>
+
 long float_modsi3(long a, long b) { return __modsi3(a,b); }
 long float_umodsi3(long a, long b) { return __umodsi3(a,b); }
 long float_divsi3(long a, long b) { return __divsi3(a,b); }

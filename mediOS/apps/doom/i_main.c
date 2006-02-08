@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.2  2006/02/06 22:45:48  oxygen77
+// make doom work with new api, we lack of exit() now
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -34,10 +37,10 @@ rcsid[] = "$Id$";
 #include "m_argv.h"
 #include "d_main.h"
 
-int _start(){
+int app_main(){
     myargc = 0;
     myargv = NULL;
-    ini_api();
+
     D_DoomMain ();
 
     return 0;

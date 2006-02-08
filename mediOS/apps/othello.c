@@ -541,11 +541,11 @@ void redraw(void)
     drawNbPiece();
 }
 
-void _start(int argc, char ** argv)
+void app_main(int argc, char ** argv)
 {
     int evt;
     int evt_handler;
-    ini_api();
+    
     printf("\nIn othello\n");
 
     gfx_openGraphics();

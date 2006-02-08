@@ -1,19 +1,9 @@
 include ../../Makefile.conf
 
 ASFLAGS  += -I../../include -I. -Icpu
-#-mfpu=softfpa
+
 GCCFLAGS += -I../../include -I. -O3
 
-#GCCFLAGS +=  -mno-long-calls
-
-#TOOL=arm-linux
-#GCC=$(TOOL)-gcc
-#AS=$(TOOL)-as
-#LD=$(TOOL)-ld
-#OBJCOPY= $(TOOL)-objcopy
-#RM=rm
-#AR=$(TOOL)-ar
-#RANLIB=$(TOOL)-ranlib
 
 TARGET = doom
 
@@ -21,26 +11,28 @@ SRC = $(wildcard *.c)
 SRC2 = $(wildcard *.S)
 OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 
-SUBDIRS =
+LIBS = ../../lib/libmedios.a
+
+LDFLAGS =  -nostdlib --emit-relocs -L../../lib -lmedios -T$(TARGET_DEVICE)_doom.lds
 
 
-LDFLAGS =  -nostdlib --emit-relocs -L../../ -lLmedios -T$(TARGET_DEVICE)_doom.lds
-#-Wl,-Map test.map -Wl,--embedded-relocs -Wl,-s --emit-relocs
-# -Wl, -elf2flt -Tapps.lds
-#LDFLAGS = -L/home/christophe/gcc-3.3.x/toolchain_arm_nofpu/arm-linux/lib/ -lgcc
-
-all: subdirs $(OBJS)
+all: builddir $(LIBS) $(OBJS)
 	@cp -f $(OBJS) build
-#	$(GCC) build/*.o -o $(TARGET).med  $(LDFLAGS) -Map doom.map
-	$(LD) build/*.o -o $(TARGET).med $(LDFLAGS) -Map doom.map
+	@$(LD) build/*.o ../../lib/*.o -o $(TARGET).med $(LDFLAGS) -Map doom.map
 	@rm -f .elf *.gdb *.elf2flt
         
-stdalone: subdirs $(OBJS)
-	@cp -f $(OBJS) build
-	@$(AR) -rc lib$(TARGET).a build/*.o
-	@$(RANLIB) lib$(TARGET).a
 
+stdalone: GCCFLAGS += -DBUILD_STDALONE
+stdalone: builddir $(OBJS)
+	@cp -f $(OBJS) build
+        
+$(LIBS):
+	make -C ../../kernel lib_medios 
+               
+builddir:
+	@mkdir -p build   
+             
 clean:   clean-subdirs
-	@rm -f *.o *.bak *~ *.elf *.elf2flt $(TARGET).grv *.gdb
+	@rm -f *.o *.bak *~ *.elf *.elf2flt *.grv *.gdb build/*
 
 include ../../default.rule
