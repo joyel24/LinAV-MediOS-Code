@@ -10,8 +10,8 @@ ASFLAGS = -mfpu=softfpa
 GCCFLAGS += -D$(TARGET_DEVICE)
 ASFLAGS  += --defsym $(TARGET_DEVICE)=1
 
-ifeq ($(HAVE_BAT_POWER),1)
-	GCCFLAGS += -DHAVE_BAT_POWER
+ifeq ($(CHK_BAT_POWER),1)
+	GCCFLAGS += -DCHK_BAT_POWER
 endif
 
 ifeq ($(HAVE_EXT_MODULE),1)

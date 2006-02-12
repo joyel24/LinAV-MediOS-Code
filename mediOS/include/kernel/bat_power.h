@@ -13,9 +13,7 @@
 #ifndef __BAT_POWER_H
 #define __BAT_POWER_H
 
-#include <kernel/hardware.h>
-#include <kernel/io.h>
-#include <kernel/tsc2003.h>
+#include <kernel/target/arch/bat_power.h>
 
 #include <int_timer.h>
 
@@ -27,8 +25,6 @@
 
 #define HD_FREQ_DEFAULT_0    10 /* 10s timer */
 #define HD_FREQ_DEFAULT_1    10 /* 10s timer */
-
-#define GET_BAT_LEVEL (tsc2003getVal(CMD_BAT0|INTERNAL_ON))
 
 void set_timer_status(int timer_type, int power_mode, int status);
 void set_timer_delay(int timer_type, int power_mode, int delay);

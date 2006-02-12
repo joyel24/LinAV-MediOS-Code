@@ -106,26 +106,13 @@
 /* video */
 
 #define VIDEO_BASE                        0x30800
-#define LCD_BACK_LIGHT                    0x02600200
-#define SCREEN_WIDTH                      224
-#define SCREEN_REAL_WIDTH                 220
-#define SCREEN_HEIGHT                     176
-#define SCREEN_ORIGIN_X                   8
-#define SCREEN_ORIGIN_Y                   8
 
-#define MAX_COL                           53
-#define MAX_LINE                          27
 
 /* osd */
 #define OSD_BASE                          0x30680
 
 /* video in/out */
 #define VIDEO_IO_BASE                     0x30780
-   
-/** power state **/
-
-#define POWER_STATE                       0x30a24
-#define POWER_CONNECTED                   ((inw(POWER_STATE) >> 0x5)&0x1)
 
 /** I2C **/
 

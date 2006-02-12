@@ -1,5 +1,5 @@
 /* 
-*   kernel/core/kernel.c
+*   include/kernel/target/arch_GMINI4XX.bat_power.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,17 +10,20 @@
 * KIND, either express of implied.
 */
 
-#include <kernel/hardware.h>
-#include <kernel/target/arch/lcd.h>
-#include <kernel/kernel.h>
+#ifndef __ARCH_BAT_POWER_H
+#define __ARCH_BAT_POWER_H
 
-int getArch(void)
-{
-    return CURRENT_ARCH;
-}
+#include <kernel/io.h>
 
-void getResolution(int * width,int * height)
-{
-    if(width) *width=SCREEN_REAL_WIDTH;
-    if(height) *height=SCREEN_HEIGHT;
-}
+
+/** power state **/
+
+#define POWER_STATE                       0
+#define POWER_CONNECTED                   0
+
+/** Bat level **/
+
+#define GET_BAT_LEVEL                     0
+
+
+#endif

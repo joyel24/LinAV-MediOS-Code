@@ -10,21 +10,20 @@
 * KIND, either express of implied.
 */
 
-#include <kernel/io.h>
-#include <kernel/hardware.h>
-#include <kernel/i2c.h>
-#include <kernel/tsc2003.h>
+
+
 #include <kernel/exit.h>
-#include <kernel/cpld.h>
-#include <kernel/gio.h>
+
 #include <kernel/kernel.h>
 #include <kernel/timer.h>
 #include <kernel/ata.h>
 #include <kernel/evt.h>
 #include <kernel/disk.h>
+
 #include <kernel/fm_remote.h>
 
 #include <kernel/bat_power.h>
+#include <kernel/target/arch/lcd.h>
 
 int lcd_state=1;
 int lcd_bright=10;
@@ -150,14 +149,12 @@ void lcd_set_state(int state)
         lcd_state=state;
         if(state) /* turn on */
         {
-            CPLD_SET_PORT2(CPLD_LCD);
-            GIO_CLEAR(GIO_LCD_BACKLIGHT);
+            lcd_ON();
             printk("Turning on lcd\n");
         }
         else
         {
-            CPLD_CLEAR_PORT2(CPLD_LCD);
-            GIO_CLEAR(GIO_LCD_BACKLIGHT);
+            lcd_OFF();
             printk("Turning off lcd\n");
         }
    }

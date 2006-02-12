@@ -3,11 +3,7 @@ include ../../Makefile.conf
 ASFLAGS  += -I../../include
 GCCFLAGS += -I../../include
 
-OBJS = ata.o cpld.o i2c.o rtc.o tsc2003.o buttons.o usb_fw.o
-
-ifeq ($(HAVE_BAT_POWER),1)
-	OBJS += bat_power.o
-endif
+OBJS = ata.o cpld.o i2c.o rtc.o buttons.o usb_fw.o bat_power.o
 
 ifeq ($(HAVE_EXT_MODULE),1)
 	OBJS += ext_module.o

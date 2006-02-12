@@ -18,6 +18,8 @@
 #include <kernel/malloc.h>
 #include <kernel/kernel.h>
 
+#include <kernel/target/arch/lcd.h>
+
 #include <kernel/graphics.h>
 #include <kernel/osd.h>
 

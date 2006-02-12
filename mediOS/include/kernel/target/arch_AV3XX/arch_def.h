@@ -119,10 +119,7 @@
 /* video in/out */
 #define VIDEO_IO_BASE                     0x30780
 
-/** power state **/
 
-#define POWER_STATE                       0x30a24
-#define POWER_CONNECTED                   ((inw(POWER_STATE) >> 0x5)&0x1)
 
 /** I2C **/
 

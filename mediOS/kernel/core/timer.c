@@ -39,20 +39,25 @@ __IRAM_CODE void tmr_intAction(int irq,struct pt_regs * regs)
 
     /* HW check */
     BTN_CHK;
-#ifdef HAVE_BAT_POWER 
+    
+#ifdef CHK_BAT_POWER 
     BAT_POWER_CHK;
 #endif
+
 #ifdef CHK_USB_FW
     USB_FW_CHK;
 #endif
+
 #ifdef HAVE_EXT_MODULE
     EXT_MODULE_CHK;    
-#endif   
+#endif 
+  
 #ifdef HAVE_FM_REMOTE
     FM_REMOTE_CHK;    
 #endif
 
     ATA_PWR_OFF_TASK;
+    
     while(ptr!=NULL)
     {
         if(ptr->trigger && ptr->expires<=tick)
