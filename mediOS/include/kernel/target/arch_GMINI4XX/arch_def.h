@@ -121,15 +121,7 @@
 
 /* video in/out */
 #define VIDEO_IO_BASE                     0x30780
-
-/** USB state **/
-
-#define USB_STATE                         0x30a24
-#define kusbIsConnected()                 ((inw(USB_STATE) & 0x40)!=0)
-#define kFWIsConnected()                  ((cpld_read(CPLD3) & 0x8)==0)
-#define FW_enable()                       cpld_select(CPLD_FW_EXT,0x1)
-#define FW_disable()                      cpld_select(CPLD_FW_EXT,0x0)
-
+   
 /** power state **/
 
 #define POWER_STATE                       0x30a24

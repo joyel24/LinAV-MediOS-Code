@@ -42,7 +42,7 @@ __IRAM_CODE void tmr_intAction(int irq,struct pt_regs * regs)
 #ifdef HAVE_BAT_POWER 
     BAT_POWER_CHK;
 #endif
-#ifdef HAVE_USB_FW
+#ifdef CHK_USB_FW
     USB_FW_CHK;
 #endif
 #ifdef HAVE_EXT_MODULE

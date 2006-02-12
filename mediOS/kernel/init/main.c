@@ -154,10 +154,10 @@ void kernel_start (void)
 #ifdef HAVE_BAT_POWER
     init_power();
 #endif
+
     init_rtc();
-#ifdef HAVE_USB_FW
     init_usb_fw();
-#endif
+
 #ifdef HAVE_FM_REMOTE
     init_fm_remote();
 #endif

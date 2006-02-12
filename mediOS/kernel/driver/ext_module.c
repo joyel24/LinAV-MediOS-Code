@@ -70,9 +70,7 @@ void process_ext_mod_chg(int res)
 #ifdef HAVE_FM_REMOTE   
     && !FM_is_connected()
 #endif
-#ifdef HAVE_USB_FW
      && !kFWIsConnected()
-#endif
     )
     {
             if(res==AV_MODULE_NONE)
@@ -157,9 +155,7 @@ void init_ext_module(void)
 #ifdef HAVE_FM_REMOTE   
     && !FM_is_connected()
 #endif
-#ifdef HAVE_USB_FW
      && !kFWIsConnected()
-#endif
     )
     {
         connected_module=get_module();        

@@ -33,8 +33,8 @@ ifeq ($(HAVE_SOUND),1)
 	GCCFLAGS += -DHAVE_SOUND
 endif
 
-ifeq ($(HAVE_USB_FW),1)
-	GCCFLAGS += -DHAVE_USB_FW
+ifeq ($(CHK_USB_FW),1)
+	GCCFLAGS += -DCHK_USB_FW
 endif
 
 ifeq ($(HAVE_CMD_LINE),1)

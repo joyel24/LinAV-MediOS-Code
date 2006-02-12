@@ -1,18 +1,22 @@
 /* 
-*   include/usb_fw.h
+*   include/target/arch_GMINI4XX/usb_fw.h
 *
-*   AMOS project
+*   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
 */
 
 
 #ifndef __USB_FW_H
 #define __USB_FW_H
 
-#include <kernel/io.h>
-#include <kernel/hardware.h>
-#include <kernel/cpld.h>
+
+
+#include <kernel/target/arch/usb_fw.h>
 #include <kernel/evt.h>
 #include <kernel/kernel.h>
 
