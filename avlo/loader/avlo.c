@@ -34,7 +34,7 @@
 #include <avlo_cfg.h>
 
 #define MAX_OFF_PRESS    500
-#define MAX_REPEAT       1000
+#define MAX_REPEAT       6000
 #define MAX_DELAY        25000
 
 #define CUSTOM_COLOR_START  230
@@ -81,7 +81,7 @@
 #define BAT_X        ptr_cfg->bat_x
 #define BAT_Y        ptr_cfg->bat_y
 
-#define BTM_TXT      "V4.1 | image: "
+#define BTM_TXT      "V4.2 | image: "
 
 #define NO_TIME_OUT    0
 #define WITH_TIME_OUT  1
@@ -120,7 +120,7 @@ struct avlo_cfg * ptr_cfg;
 void start_avlo(void)
 {
     int ret,nbCfg,key,redraw;
-    int i;
+    int i,dd;
     int x,y,h,w;
     int bat_loop=0;
     int pass_key_release=0;
@@ -338,8 +338,9 @@ loop:
                         putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"USB Enable, PRESS F3 to resume");
 
                         usb_enable();
-                        waitKeyReleased(NO_TIME_OUT);    
-                        pass_key_release = 1;                    
+                        waitKeyReleased(NO_TIME_OUT);  
+                        for(dd=0;dd<1000;dd++) /* nothing */;  
+                        pass_key_release = 1;
                     }
                 }
             }
@@ -534,7 +535,7 @@ void chkOFF(int key)
 
 void waitKey(void)
 {
-    int key;
+    int key=0;
     int pressed=0;
     while(1)
     {
