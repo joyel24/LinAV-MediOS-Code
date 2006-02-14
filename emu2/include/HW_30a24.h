@@ -30,6 +30,9 @@ class HW_30a24 : public HW_access {
         int HDD_power;
         int power_connected;
         int usb_connected;
+#ifdef AV1XX
+        int bat_ok ;
+#endif   
 };
 #endif // HAS_HW_30A24
 

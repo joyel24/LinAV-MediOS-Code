@@ -77,6 +77,23 @@ int i2c_MAS::do_cmd_clear_pio_buffer(int argc,char ** argv)
     return 0;
 }
 
+int do_cmd_set_bat_val_s(int argc,char ** argv)
+{ 
+    return i2c_MAS_obj->do_cmd_set_bat_val(argc,argv);    
+}
+
+int i2c_MAS::do_cmd_set_bat_val(int argc,char ** argv)
+{
+    if(argc>0)
+    {
+        bat_val = my_atoi(argv[0]);
+        printf("Setting bat val to %x\n",bat_val);
+    }
+    else
+        printf("bat val is %x\n",bat_val);
+    return 0;
+}
+
 int do_cmd_dump_D0D1_s(int argc,char ** argv)
 { 
     return i2c_MAS_obj->do_cmd_dump_D0D1(argc,argv);    
@@ -133,6 +150,7 @@ i2c_MAS::i2c_MAS(HW_gpio * gpio):i2c_device(0x3c,"MAS",gpio)
     add_cmd_fct("dump_mas_pio",do_cmd_dump_pio_buffer_s,"Dump pio data send to MAS");
     add_cmd_fct("clear_mas_pio",do_cmd_clear_pio_buffer_s,"Clear mas pio buffer");
     add_cmd_fct("mas_pio_to_file",do_cmd_dump_pio_to_file_s,"Enable dump of MAS pio data to a file");
+    add_cmd_fct("set_bat",do_cmd_set_bat_val_s,"Change bat level");
     
     control_reg=0x3000;
     DCCF_reg=0x5050;
@@ -141,6 +159,8 @@ i2c_MAS::i2c_MAS(HW_gpio * gpio):i2c_device(0x3c,"MAS",gpio)
     pio_index = 0;
     pio_full = false;
     dump_to_file = false;
+    
+    bat_val = 0x8;
     
     for(int i=0;i<0x30;i++)
         codec_reg[i]=0;
@@ -371,6 +391,15 @@ void i2c_MAS::write(int val)
                 break;
             case 0x77:
                 MAS_WRITE_REG(DCFR_reg,0);
+                if(index == 2)
+                {
+                    int bat_chk=(DCFR_reg>>10)&0xF;
+                    DEBUG_HW(MAS_HW_DEBUG,"bat chk: read=%x bat_val=%x\n",bat_chk,bat_val)
+                    if(bat_val<bat_chk)
+                        DCFR_reg &= 0x7FFF;
+                    else
+                        DCFR_reg |= 0x8000;
+                }
                 break;
             case 0x68:
             case 0x69:

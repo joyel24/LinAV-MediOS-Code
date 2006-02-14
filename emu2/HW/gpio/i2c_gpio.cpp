@@ -122,9 +122,14 @@ i2c_master::i2c_master(HW_gpio * gpio)
 
 #ifdef AV3XX
     register_i2c((i2c_device *)new i2c_MAS(gpio));
-#endif
-    register_i2c((i2c_device *)new i2c_RTC(gpio));
     register_i2c((i2c_device *)new i2c_TSC(gpio));
+#endif
+
+#ifdef AV1XX
+    register_i2c((i2c_device *)new i2c_MAS(gpio));
+#endif
+
+    register_i2c((i2c_device *)new i2c_RTC(gpio));
     register_i2c((i2c_device *)new i2c_DVR(gpio));
     
     print_i2c_list();

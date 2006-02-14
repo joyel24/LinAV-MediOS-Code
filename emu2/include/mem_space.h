@@ -18,6 +18,7 @@
 #include <bkpt_list.h>
 #include <HW_OSD.h>
 #include <HW_cpld.h>
+#include <HW_ata.h>
 //#include <HW_TI.h>
 
 class HW_TI;
@@ -37,6 +38,7 @@ class mem_space:public HW_node {
         
         HW_TI * hw_TI;
         HW_cpld * hw_cpld;
+        HW_ata * hw_ata;
         
     private:
         bkpt_list * bkpt;

@@ -27,13 +27,15 @@
 
 #include <HW_30a24.h>
 #include <HW_cpld.h>
+#include <HW_ata.h>
 #include <HW_TI_ver.h>
 #include <HW_ECR.h>
 #include <HW_OSD.h>
 #include <HW_IRQ.h>
 #include <HW_access.h>
 
-HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_node(TI_REG_START,TI_REG_END,4,"DSC25")
+HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld,
+    HW_ata * hw_ata):HW_node(TI_REG_START,TI_REG_END,4,"DSC25")
 {
     exit_on_not_match = false;
     
@@ -59,7 +61,7 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld):HW_node(TI_REG
     add_item(hw_30a24);  
 #endif
 
-    hw_dma = new HW_dma(mem,hw_cpld);      
+    hw_dma = new HW_dma(mem,hw_ata);      
     add_item(hw_dma);
     
     HW_irq = new HW_IRQ();

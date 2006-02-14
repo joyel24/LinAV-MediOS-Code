@@ -28,7 +28,7 @@
 
 class HW_TI:public HW_node {
     public:
-        HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld);
+        HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld,HW_ata * hw_ata);
         ~HW_TI();  
 #ifdef HAS_HW_30A24
         HW_30a24 * hw_30a24;

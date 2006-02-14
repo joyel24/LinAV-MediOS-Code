@@ -17,11 +17,12 @@
 #include "HW_access.h"
 #include "HW_mem.h"
 
-class HW_cpld;
+
+class HW_ata;
 
 class HW_dma : public HW_access {
     public:
-        HW_dma(HW_mem * mem,HW_cpld * hw_cpld);
+        HW_dma(HW_mem * mem,HW_ata * hw_ata);
                 
         uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);
@@ -40,7 +41,7 @@ class HW_dma : public HW_access {
         int data_size;
         
         HW_mem * mem;
-        HW_cpld * hw_cpld;
+        HW_ata * hw_ata;
 };
 
 #endif // __HW_DMA_H

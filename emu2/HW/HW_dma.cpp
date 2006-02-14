@@ -13,15 +13,15 @@
 #include <stdio.h>
 
 #include <HW_dma.h>
-#include "HW_cpld.h"
+#include "HW_ata.h"
 
 
-HW_dma::HW_dma(HW_mem * mem,HW_cpld * hw_cpld):HW_access(DMA_START,DMA_END,"DMA")
+HW_dma::HW_dma(HW_mem * mem,HW_ata * hw_ata):HW_access(DMA_START,DMA_END,"DMA")
 {
     dma_src=dma_dst=dma_size=0;
     device_sel=dma_endian=0;
     this->mem=mem;
-    this->hw_cpld=hw_cpld;
+    this->hw_ata=hw_ata;
 }
 
 uint32_t HW_dma::read(uint32_t addr,int size)
@@ -112,8 +112,8 @@ void HW_dma::write(uint32_t addr,uint32_t val,int size)
                         if(data_ptr>=data_size)
                         {
                             DEBUG_HW(DMA_HW_DEBUG," (finale) \n");
-                            hw_cpld->write_buffer(data,data_size);
-                            hw_cpld->setStatus(IDE_STATUS_RDY);
+                            hw_ata->write_buffer(data,data_size);
+                            hw_ata->setStatus(IDE_STATUS_RDY);
                         }                        
                         DEBUG_HW(DMA_HW_DEBUG,"done");
                         break;
@@ -127,7 +127,7 @@ void HW_dma::write(uint32_t addr,uint32_t val,int size)
                         if(data_ptr>=data_size)
                         {
                             DEBUG_HW(DMA_HW_DEBUG," (finale) ");
-                            hw_cpld->setStatus(IDE_STATUS_RDY);
+                            hw_ata->setStatus(IDE_STATUS_RDY);
                         }
                         DEBUG_HW(DMA_HW_DEBUG,"done");
                         break;

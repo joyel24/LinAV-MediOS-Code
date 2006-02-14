@@ -10,7 +10,7 @@
 * KIND, either express of implied.
 */
 
-#define ARCH_NAME         "AV3XX"
+#define ARCH_NAME         "AV1XX"
 
 /************************************************************ Memory Zone */
 
@@ -29,8 +29,8 @@
 #define FLASH_END         0x180000
 #define FLASH_LOAD_OFFSET 0x000000
 
-#define SDRAM_START       0x03000000
-#define SDRAM_END         0x04000000
+#define SDRAM_START       0x00900000
+#define SDRAM_END         0x018FFFFF
 #define SDRAM_LOAD_OFFSET 0x00000000
 
 
@@ -177,8 +177,8 @@
 #define DMA_ATA_TO_SDRAM  0x15
 
 /********************** IDE ****************************************/
-#define IDE_BASE    0x02400000
-#define IDE_END     0x02400400
+#define IDE_BASE    0x02500000
+#define IDE_END     0x02500400
 
 #define IDE_DATA                          (IDE_BASE+0x000)
 #define IDE_ERROR                         (IDE_BASE+0x080)
@@ -192,10 +192,10 @@
 #define IDE_COMMAND                       (IDE_BASE+0x380)
 
 /********************** CPLD     ****************************************/
-#define CPLD_START       0x02000000
-#define CPLD_END         0x03000000
-#define CPLD_PORT_OFFSET 0x00600000
+#define CPLD_START       0x05100000
+#define CPLD_END         0x06000000
+#define CPLD_PORT_OFFSET 0x00000000
 
 /********************** LCD      ****************************************/
-#define SCREEN_WIDTH  320
-#define SCREEN_HEIGHT 240
+#define SCREEN_WIDTH  336
+#define SCREEN_HEIGHT 234

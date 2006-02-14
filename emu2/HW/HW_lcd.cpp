@@ -198,7 +198,10 @@ int HW_lcd::nxtEvent(int * config,uint32_t * addr)
                     printf("down\n");
                     mem->hw_cpld->btn_var[BTN_DOWN]=val;
                     break;
-                
+                case XK_KP_5:
+                    printf("ok\n");
+                    mem->hw_cpld->btn_var[BTN_OK]=val;
+                    break;
                 case XK_KP_Add:
                 case XK_Q:
                 case XK_q:

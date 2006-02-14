@@ -51,6 +51,7 @@ class i2c_MAS:i2c_device {
         int do_cmd_dump_pio_buffer(int argc,char ** argv);
         int do_cmd_clear_pio_buffer(int argc,char ** argv);
         int do_cmd_dump_pio_to_file(int argc,char ** argv);
+        int do_cmd_set_bat_val(int argc,char ** argv);
         
     private:
         int index;
@@ -69,6 +70,8 @@ class i2c_MAS:i2c_device {
               
         int * D0_ram;
         int * D1_ram;
+        
+        int bat_val;
         
         int main_regs[256];
         

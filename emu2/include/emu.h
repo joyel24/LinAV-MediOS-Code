@@ -22,7 +22,11 @@
 #ifdef Gmini400hb
 #include <arch/arch_gmini400.h>
 #else
+#ifdef AV1XX
+#include <arch/arch_av1xx.h>
+#else
     #error "undef arch"
+#endif
 #endif
 #endif
 #endif
