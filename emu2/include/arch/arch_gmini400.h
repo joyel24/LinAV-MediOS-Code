@@ -12,7 +12,7 @@
 
 #define ARCH_NAME         "Gmini400"
 
-#define homebrew //or let it be ;-)
+//#define homebrew //or let it be ;-)
 
 /************************************************************ Memory Zone */
 
@@ -31,8 +31,8 @@
 #define FLASH_END         0x0180000
 #define FLASH_LOAD_OFFSET	0x0010000
 
-#define SDRAM_START       0x0900000
-#define SDRAM_END         0x1900000
+#define SDRAM_START       0x00900000
+#define SDRAM_END         0x01900000
 
 #ifndef homebrew
 #define SDRAM_LOAD_OFFSET	0x0000000 // original;
@@ -130,9 +130,9 @@
 }
 
 #define GPIO_ON_NUM   0x00
-#define GPIO_MAS_EOD  0x04
-#define GPIO_MAS_Di   0x08
-#define GPIO_MAS_PW   0x10
+#define GPIO_MAS_EOD  0x01
+#define GPIO_MAS_Di   0x02
+#define GPIO_MAS_PW   0x03
 
 #define GPIO_OFF_NUM  0x1C
 #define GPIO_MAS_PR   0x1F

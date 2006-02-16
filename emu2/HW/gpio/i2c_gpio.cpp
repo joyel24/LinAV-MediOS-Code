@@ -32,7 +32,7 @@
 #define GET_ADDR    1
 #define GET_DATA    2
 
-char * master_str[2] = { "CLK", "DA" };
+//char * master_str[2] = { "CLK", "DA" };
 
 i2c_gpio::i2c_gpio(int num,i2c_master * master):gpio_port(num)
 {
@@ -46,8 +46,8 @@ i2c_gpio::i2c_gpio(int num,char * name,i2c_master * master):gpio_port(num)
 
 void i2c_gpio::init_i2c_gpio(int num,i2c_master * master)
 {
-    printf("Creating I2C master %s (%x)\n",master_str[num-0x12],num);
-    this->name = master_str[num-0x12];
+    printf("Creating I2C master %s (%x)\n",num==GPIO_I2C_SDA?"DA":"CLK",num);
+    this->name = (num==GPIO_I2C_SDA?"DA":"CLK");
     new_state = old_state = state = 0;
     this->master=master;
 }
