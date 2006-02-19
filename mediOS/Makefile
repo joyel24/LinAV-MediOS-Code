@@ -9,9 +9,11 @@ LDFLAGS =  -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lgcc
 SUBDIRS = kernel
 KERNEL_OBJS = kernel/build/*.o kernel/target/arch_$(TARGET_DEVICE)/*.o
 
-all: medios lib bin2wav
-ifeq "$(TARGET_DEVICE)" "Gmini4XX"
+all: medios lib
+ifeq "$(TARGET_DEVICE)" "GMINI4XX"
+	@make bin2wav	--no-print-directory
 bin2wav:
+
 endif
 
 force: clean all        
@@ -50,8 +52,8 @@ doom:
                 
 clean:  clean-subdirs clean_aoboy clean_doom
 	@echo '-----   cleaning MAIN'
-	@rm -f *.o *.bak *~ *.bin *.elf *.map
-	@rm -f include/*~ include/kernel/*~ include/sys_def/*~  include/gui/*~ lib/* include/kernel/target/*~
+	@rm -f *.o *.bak *~ *.bin *.elf *.map *.bin.wav
+	@rm -f include/*~ include/kernel/*~ include/sys_def/*~  include/gui/*~ include/kernel/target/*~
 
 clean_aoboy:
 	@make -C apps/avboy --no-print-directory clean
