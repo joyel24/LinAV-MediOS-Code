@@ -15,13 +15,14 @@
 
 #include <kernel/io.h>
 #include <kernel/cpld.h>
+#include <kernel/gio.h>
 
 /** USB state **/
 
 #define USB_STATE                         0x30a24
 #define USB_enable()                      
 #define USB_disable()                     
-#define kusbIsConnected()                 0
+#define kusbIsConnected()                 (GIO_IS_SET(GIO_USB_CONNECTED))
 #define kFWIsConnected()                  0
 #define FW_enable()                       
 #define FW_disable()                      

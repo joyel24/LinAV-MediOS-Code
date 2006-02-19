@@ -17,26 +17,8 @@
 #include <kernel/uart.h>
 #include <kernel/hardware.h>
 
-#ifdef HAVE_DEBUG_ON_SCREEN
-#include <kernel/graphics.h>
-#include <kernel/kfont.h>
-#include <sys_def/colordef.h>
-
-
-
-#define BASE_X       2
-#define BASE_Y       2
-
-needFont(std4x6);
-
-static int cur_line = 0;
-static int cur_col = 0;
-
-static int fontH,fontW;
-
-void dbgscr_printOnScreen(char * str);
-void dbgscr_init(void);
-#endif
+#include <kernel/lcd.h>
+#include <kernel/console.h>
 
 //int vsnprintf (char * buf, size_t size, const char * fmt, va_list args);
 static char debugmembuf[255];
@@ -48,9 +30,8 @@ void printk(char *fmt, ...)
     vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
     va_end(ap);
     uart_outString(debugmembuf,DEBUG_UART);
-#ifdef HAVE_DEBUG_ON_SCREEN
-    dbgscr_printOnScreen(debugmembuf);
-#endif
+
+    con_write(debugmembuf);
 }
 
 void printf(char * fmt, ...)
@@ -61,10 +42,9 @@ void printf(char * fmt, ...)
     va_end(ap);
     uart_outString("USER:",DEBUG_UART);
     uart_outString(debugmembuf,DEBUG_UART);
-#ifdef HAVE_DEBUG_ON_SCREEN
-    dbgscr_printOnScreen("USER:");
-    dbgscr_printOnScreen(debugmembuf);
-#endif
+
+    con_write("USER:");
+    con_write(debugmembuf);
 }
 
 void print_nonhexa(char * str)
@@ -106,45 +86,3 @@ void print_data(char * data,int length)
     print_nonhexa(str);
     printk("\n");
 }
-
-#ifdef HAVE_DEBUG_ON_SCREEN
-void dbgscr_addLine(void)
-{
-    cur_col=0;
-    cur_line++;
-    if(cur_line > MAX_LINE)
-    {
-        cur_line--;
-        gfx_dbgscrScroll(COLOR_BLACK,BASE_X,BASE_Y,fontH,1);
-    }
-}
-
-void dbgscr_printOnScreen(char * str)
-{
-    while(*str)
-    {
-        if(*str=='\r' || *str=='\n')
-        {
-            dbgscr_addLine();
-            str++;
-        }
-        else
-        {
-            gfx_dbgscrPutC(std4x6,COLOR_WHITE, COLOR_BLACK, BASE_X+cur_col*fontW, BASE_Y+cur_line*fontH, *str);
-            str++;
-            cur_col++;
-            if(cur_col > MAX_COL)
-                dbgscr_addLine();
-        }
-    }
-}
-
-void dbgscr_init(void)
-{
-    cur_line = 0;
-    cur_col = 0;
-    fontW=std4x6->width;
-    fontH=std4x6->height;
-    gfx_dbgscrClear(COLOR_BLACK);
-}
-#endif

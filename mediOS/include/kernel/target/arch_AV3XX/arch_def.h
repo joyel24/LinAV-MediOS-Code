@@ -100,16 +100,6 @@
 /* video */
 
 #define VIDEO_BASE                        0x30800
-#define LCD_BACK_LIGHT                    0x02600200
-
-#define SCREEN_WIDTH                      320
-#define SCREEN_REAL_WIDTH                 320
-#define SCREEN_HEIGHT                     240
-#define SCREEN_ORIGIN_X                   20
-#define SCREEN_ORIGIN_Y                   18
-
-#define MAX_COL                           78
-#define MAX_LINE                          38
 
 /* osd */
 #define OSD_BASE                          0x30680

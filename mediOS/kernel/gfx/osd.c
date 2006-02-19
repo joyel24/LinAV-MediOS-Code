@@ -13,6 +13,7 @@
 #include <kernel/io.h>
 #include <kernel/hardware.h>
 #include <kernel/osd.h>
+#include <kernel/lcd.h>
 
 
 int osdLookupOffsetLO[4] = { OSD_SDRAM_OFF_VID0 ,

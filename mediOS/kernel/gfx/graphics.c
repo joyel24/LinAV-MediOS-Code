@@ -17,6 +17,7 @@
 #include <kernel/io.h>
 #include <kernel/malloc.h>
 #include <kernel/kernel.h>
+#include <kernel/console.h>
 
 #include <kernel/target/arch/lcd.h>
 
@@ -36,9 +37,6 @@
 
 //#define abs(val)    (val<0?-val:val)
 
-#ifdef HAVE_DEBUG_ON_SCREEN
-char screen_DEBUG[SCREEN_WIDTH*SCREEN_HEIGHT+40];
-#endif
 char screen_BMAP1[SCREEN_WIDTH*SCREEN_HEIGHT+40];
 char screen_BMAP2[SCREEN_WIDTH*SCREEN_HEIGHT+40];
 char screen_VID1[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
@@ -46,21 +44,6 @@ char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
 
 extern struct graphics_operations g8ops;
 extern struct graphics_operations g32ops;
-
-#ifdef HAVE_DEBUG_ON_SCREEN
-struct graphicsBuffer DEBUG_SCR = {
-    offset             : 0,
-    state              : OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 |
-                    OSD_BITMAP_8BIT | COLOR_TRSP << OSD_BITMAP_A_SHIFT,
-    enable             : 0,
-    width              : SCREEN_WIDTH,
-    real_width         : SCREEN_REAL_WIDTH,
-    height             : SCREEN_HEIGHT,
-    x                  : SCREEN_ORIGIN_X,
-    y                  : SCREEN_ORIGIN_Y,
-    bitsPerPixel       : 8,
-};
-#endif
 
 struct graphicsBuffer BITMAP_1 = {
     offset             : 0,
@@ -72,7 +55,7 @@ struct graphicsBuffer BITMAP_1 = {
     height             : SCREEN_HEIGHT,
     x                  : SCREEN_ORIGIN_X,
     y                  : SCREEN_ORIGIN_Y,
-    bitsPerPixel       : 8,   
+    bitsPerPixel       : 8,
 };
 
 struct graphicsBuffer BITMAP_2 = {
@@ -86,7 +69,7 @@ struct graphicsBuffer BITMAP_2 = {
     x                  : SCREEN_ORIGIN_X,
     y                  : SCREEN_ORIGIN_Y,
     bitsPerPixel       : 8,
-};        
+};
 
 struct graphicsBuffer VIDEO_1 = {
     offset             : 0,
@@ -120,7 +103,7 @@ struct graphicsBuffer CURSOR_1 = {
     height             : 0,
     x                  : 0,
     y                  : 0,
-    bitsPerPixel       : 0,   
+    bitsPerPixel       : 0,
 };
 
 struct graphicsBuffer CURSOR_2 = {
@@ -131,7 +114,7 @@ struct graphicsBuffer CURSOR_2 = {
     height             : 0,
     x                  : 0,
     y                  : 0,
-    bitsPerPixel       : 0,   
+    bitsPerPixel       : 0,
 };
 
 #define NB_BUFFER 6
@@ -153,56 +136,6 @@ int     current_font=0;
 int     current_plane=0;
 
 
-/********************************************************* Debug on screen ******/
-
-static int debug_scr_state;
-
-#ifdef HAVE_DEBUG_ON_SCREEN
-void gfx_dbgscrClear(int color)
-{
-    g8ops.fillRect(color,0,0,DEBUG_SCR.width,DEBUG_SCR.height,&DEBUG_SCR);
-}
-
-void gfx_dbgscrPutS(FONT_ID font,unsigned int color, unsigned int bg_color, int x, int y, unsigned char *s)
-{
-    g8ops.drawString(font,color,bg_color,x,y,s,&DEBUG_SCR);
-}
-
-void gfx_dbgscrPutC(FONT_ID font,unsigned int color, unsigned int bg_color, int x, int y, unsigned char c)
-{
-    g8ops.drawChar(font,color,bg_color,x,y,c,&DEBUG_SCR);
-}
-
-void gfx_dbgscrScroll(unsigned int bg_color,int x,int y,int height,int UP)
-{
-    g8ops.scrollWindowVert(bg_color, x, y, SCREEN_WIDTH-x, SCREEN_HEIGHT-y, height, UP, &DEBUG_SCR);
-}
-
-void gfx_dbgscrSwitch()
-{
-    if(debug_scr_state)
-    {
-        debug_scr_state=0;
-        gfx_restoreAllComponents();
-        printk("Switching to normal screen\n");
-    }
-    else
-    {
-        debug_scr_state=1;
-        osd_setComponentConfig(OSD_VIDEO1,  0);
-        osd_setComponentConfig(OSD_VIDEO2,  0);
-        osd_setComponentConfig(OSD_BITMAP1, 0);
-        osd_setComponentConfig(OSD_BITMAP2, 0);
-        osd_setComponentConfig(OSD_CURSOR1, 0);
-        osd_setComponentConfig(OSD_CURSOR2, 0);
-        gfx_restoreComponent(BMAP1,(&DEBUG_SCR));
-        printk("Switching to debug screen\n");
-    }
-}
-#endif
-
-/****************************************************************************/
-
 void gfx_init(void)
 {
     buffers[0]=&BITMAP_1;
@@ -211,7 +144,7 @@ void gfx_init(void)
     buffers[3]=&VIDEO_2;
     buffers[4]=&CURSOR_1;
     buffers[5]=&CURSOR_2;
-    
+
     osd_init();
 
     /* reset everything */
@@ -223,13 +156,7 @@ void gfx_init(void)
     osd_setComponentConfig(OSD_CURSOR2, 0);
 
     osd_setEntirePalette(gui_pal,256);
-#ifdef HAVE_DEBUG_ON_SCREEN
-    debug_scr_state=1;
 
-    gfx_initComponent(BMAP1,&DEBUG_SCR,(unsigned int)&screen_DEBUG);
-    osd_setComponentConfig(OSD_BITMAP1,DEBUG_SCR.state|OSD_COMPONENT_ENABLE);
-    DEBUG_SCR.enable=1;
-#endif
     fnt_init();
 }
 
@@ -366,10 +293,9 @@ void gfx_kdrawLine(unsigned int color, int x1, int y1, int x2, int y2,struct gra
 
 void gfx_openGraphics(void)
 {
-    debug_scr_state=0;    
     /* hidding bmap1 */
     osd_setComponentConfig(OSD_BITMAP1, 0);
-    /*setting up planes */              
+    /*setting up planes */
     gfx_initComponent(BMAP1,&BITMAP_1,(unsigned int)&screen_BMAP1);
     gfx_initComponent(BMAP2,&BITMAP_2,(unsigned int)&screen_BMAP2);
     gfx_initComponent(VID1,&VIDEO_1,(unsigned int)&screen_VID1);
@@ -399,14 +325,14 @@ int gfx_getPlane(void)
 void gfx_planeHide(int vplane)
 {
     buffers[vplane]->enable=0;
-    if(!debug_scr_state)
+    if(!con_screenIsVisible())
         osd_setComponentConfig(buffers_comp[vplane],0);
 }
 
 void gfx_planeShow(int vplane)
 {
     buffers[vplane]->enable=1;
-    if(!debug_scr_state)
+    if(!con_screenIsVisible())
         osd_setComponentConfig(buffers_comp[vplane],buffers[vplane]->state|OSD_COMPONENT_ENABLE);
 }
 
@@ -434,7 +360,7 @@ void gfx_planeSetSize(int vplane,int width,int height,int bitsPerPixel)
         buffers[vplane]->width=width;
     buffers[vplane]->height=height;
     buffers[vplane]->bitsPerPixel=bitsPerPixel;
-    if(!debug_scr_state)
+    if(!con_screenIsVisible())
     {
         osd_setComponentSize(buffers_comp[vplane], 2*buffers[vplane]->real_width, height);
         osd_setComponentSourceWidth(buffers_comp[vplane], ((buffers[vplane]->width*bitsPerPixel)/32)/8);
@@ -455,7 +381,7 @@ void gfx_planeSetPos(int vplane,int x,int y)
 {
     buffers[vplane]->x=x;
     buffers[vplane]->y=y;
-    if(!debug_scr_state)
+    if(!con_screenIsVisible())
         osd_setComponentPosition(buffers_comp[vplane],x,y);
 }
 

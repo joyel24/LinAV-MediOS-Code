@@ -26,16 +26,14 @@
 
 #include <kernel/buttons.h>
 
-#ifdef HAVE_DEBUG_ON_SCREEN
-#include <kernel/graphics.h>
-#endif
+#include <kernel/console.h>
 
 __IRAM_DATA int mx_press[NB_BUTTONS];
 __IRAM_DATA struct btn_repeatParam default_repeatParam = {
     DEFAULT_INIT_DELAY,
     DEFAULT_SECOND_DELAY,
     DEFAULT_MIN_DELAY,
-    DEFAULT_DEC_VALUE 
+    DEFAULT_DEC_VALUE
 };
 __IRAM_DATA struct btn_repeatParam * current_repeatParam;
 __IRAM_DATA int nb_pressed[NB_BUTTONS];
@@ -66,33 +64,6 @@ __IRAM_CODE void btn_processPress(int val)
     int btn;
     struct evt_t evt;
 
-#ifdef HAVE_DEBUG_ON_SCREEN
-    if(BTN_PRESSED(val,BTN_ON) && BTN_PRESSED(val,BTN_F1))
-    {
-        if(nb_debug_switch==0)
-        {
-            nb_debug_switch=current_repeatParam->init_delay*3;
-#if 0            
-            if(lcd_get_state()==0)
-            {
-                /* the lcd is off => turn on and discard the event */
-                lcd_keyPress();
-                return;
-            }
-            else
-                lcd_launchTimer(); /* postpone the lcd timer */                
-            halt_launchTimer(); /* postpone the poweroff timer */
-#endif
-            gfx_dbgscrSwitch();
-        }
-        else
-            nb_debug_switch--;
-        return;
-    }
-    else
-        nb_debug_switch=0;
-#endif
-
     for(btn=0;btn<NB_BUTTONS;btn++)
     {
         if(BTN_NOT_PRESSED(val,btn)) /* the btn is NOT pressed */
@@ -101,7 +72,7 @@ __IRAM_CODE void btn_processPress(int val)
             mx_press[btn] = current_repeatParam->init_delay;
             press_step[btn] = 0;
             /*if(btn==BTN_OFF)
-                nb_off_press=0;   */ /* if off btn released -> reset nb_off_press */             
+                nb_off_press=0;   */ /* if off btn released -> reset nb_off_press */
         }
         else            /* the btn i is pressed */
         {    
@@ -151,7 +122,7 @@ __IRAM_CODE void btn_processPress(int val)
                         break;
                     }
                     else
-                        lcd_launchTimer(); /* postpone the lcd timer */                        
+                        lcd_launchTimer(); /* postpone the lcd timer */
                     halt_launchTimer(); /* postpone the poweroff timer */
 #endif
                     evt.evt=btn+1;
@@ -159,17 +130,37 @@ __IRAM_CODE void btn_processPress(int val)
                     evt.data=(void*)mx_press[btn];
                     evt_send(&evt);
                     //printk("BTN %d pressed\n",btn);
-#ifdef HAVE_FM_REMOTE                        
+#ifdef HAVE_FM_REMOTE
                 }
                 else
                 {
                     //FM_putTmpText("** HOLD **",30);
                     printk("** HOLD **\n");
                 }
-#endif                                
+#endif
+
+                // console buttons handling
+                if (val&BTMASK_F1)
+                {
+                    switch(btn+1)
+                    {
+                        case BTN_ON:
+                            con_screenSwitch();
+                            break;
+                        case BTN_OFF:
+                            con_clear();
+                            break;
+                        case BTMASK_UP:
+                            if(con_screenIsVisible()) con_screenScroll(-1);
+                            break;
+                        case BTMASK_DOWN:
+                            if(con_screenIsVisible()) con_screenScroll(1);
+                            break;
+                    }
+                }
             }
             else
-                nb_pressed[btn]--;       
+                nb_pressed[btn]--;
         }
     }
 }
@@ -177,15 +168,15 @@ __IRAM_CODE void btn_processPress(int val)
 void btn_init(void)
 {
     int btn;
-    
+
     current_repeatParam = & default_repeatParam;
-    
+
     nb_off_press=0;
     nb_debug_switch=0;
     need_clean=0;
     
 
-    
+
     for(btn=0;btn<NB_BUTTONS;btn++)
     {
         nb_pressed[btn]=0;

@@ -23,6 +23,9 @@
 #include <kernel/io.h>
 #include <kernel/hardware.h>
 #include <kernel/kernel.h>
+#include <kernel/delay.h>
+#include <kernel/exit.h>
+#include <kernel/console.h>
 #include <kernel/irq.h>
 #include <kernel/timer.h>
 #include <kernel/ti_wdt.h>
@@ -107,18 +110,16 @@ void tst_fct(void)
 
 void kernel_start (void)
 {
+    /* malloc of max space in SDRAM */
+    mem_addPool((void*)MALLOC_START,MALLOC_SIZE);
 
     gfx_init();
 
-#ifdef HAVE_DEBUG_ON_SCREEN
-    dbgscr_init();
-#endif
+    con_init();
+    con_screenSwitch();
 
-    /* malloc of max space in SDRAM */
-    mem_addPool((void*)MALLOC_START,MALLOC_SIZE);
-    printk("Initial memory buffer pool added\n");
     /* print banner on uart */
-    printk("MediOS %d.%d - kernel loading\n",VER_MAJOR,VER_MINOR);
+    printk("MediOS %d.%d - kernel loading\n\n",VER_MAJOR,VER_MINOR);
 
     printk("Initial SP: %08x, kernel end: %08x, size in IRAM: %d  Malloc start: %08x, size: %d\n",get_sp(),
         (unsigned int)&_end_kernel,
@@ -169,7 +170,6 @@ void kernel_start (void)
 #endif
     disk_init();
 
-
     /* enable the IRQ */
     printk("[init] INT enabled\n");
     __sti();
@@ -177,19 +177,13 @@ void kernel_start (void)
 #ifdef HAVE_SOUND
     init_sound();
 #endif
-    
+
     printk("[init] ------------ all drivers\n");
 
     print_boot_info();
 
     printk("[init] END\n");
-    
-#ifdef AV3XX
- printk("av3xx\n");
-#endif
-#ifdef GMINI4XX
- printk("gmini4xx\n");
-#endif
+
 /* evt & btn test */
 #if 0
    tst_fct();
@@ -206,12 +200,11 @@ void kernel_start (void)
     reload_firmware();
 #endif
     do_bkpt();
-    
-    load_med("/doom.med");
-    //load_bflat("/test.grv");   
 
-    
+    load_med("/doom.med");
+    //load_bflat("/test.grv");
+
     printk("Back from med\n");
-        
-    while(1) /*nothing*/;
+
+    while(1);
 }

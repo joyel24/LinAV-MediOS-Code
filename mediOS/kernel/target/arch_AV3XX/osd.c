@@ -16,6 +16,7 @@
 #include <kernel/hardware.h>
 #include <kernel/kernel.h>
 #include <kernel/osd.h>
+#include <kernel/lcd.h>
 
 void arch_osd_init(void)
 {

@@ -42,6 +42,11 @@
 #define GIO_BTN_SELECT_FN     0x10
 #define GIO_BTN_SELECT_SQCR   0x11
 
+#define GIO_POWER_CONNECTED   0x03
+#define GIO_USB_CONNECTED     0x0b
+#define GIO_CF_CONNECTED      0x07
+
+
 #define GIO_SPDIF     0xff
 #define GIO_VID_OUT   0xff
 

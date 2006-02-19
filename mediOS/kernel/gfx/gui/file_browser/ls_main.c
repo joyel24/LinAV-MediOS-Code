@@ -12,6 +12,7 @@
 #include <kernel/kernel.h>
 #include <sys_def/string.h>
 
+#include <kernel/lcd.h>
 #include <kernel/graphics.h>
 #include <kernel/evt.h>
 
@@ -19,19 +20,12 @@
 #include <gui/file_browser.h>
 #include <file_type.h>
 
-#ifdef GMINI4XX
-#define LCD_WIDTH 220
-#define LCD_HEIGHT 176
-#endif
-
-#ifdef AV3XX
-#define LCD_WIDTH 320
-#define LCD_HEIGHT 240
-#endif
+#define LCD_WIDTH SCREEN_REAL_WIDTH
+#define LCD_HEIGHT SCREEN_HEIGHT
 
 struct browser_data realData = {
     path            : "/",
-    
+
     list            : NULL,
     listused        : 0,
     listsize        : 0,

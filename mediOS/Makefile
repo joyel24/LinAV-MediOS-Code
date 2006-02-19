@@ -9,9 +9,17 @@ LDFLAGS =  -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lgcc
 SUBDIRS = kernel
 KERNEL_OBJS = kernel/build/*.o kernel/target/arch_$(TARGET_DEVICE)/*.o
 
-all: medios lib
+all: medios lib bin2wav
+ifeq "$(TARGET_DEVICE)" "Gmini4XX"
+bin2wav:
+endif
 
 force: clean all        
+
+bin2wav:
+	@make -C tools/bin2wav/ --no-print-directory
+	@tools/bin2wav/bin2wav `echo *.bin` tools/bin2wav/400loader.bin.wav `echo *.bin`.wav #TODO: find something better
+#	@cp *.bin.wav /cygdrive/p/Info
 
 mk_api_file:
 	@make -C tools/api_files/ --no-print-directory

@@ -14,12 +14,13 @@
 #define __ARCH_BAT_POWER_H
 
 #include <kernel/io.h>
+#include <kernel/gio.h>
 
 
 /** power state **/
 
 #define POWER_STATE                       0
-#define POWER_CONNECTED                   0
+#define POWER_CONNECTED                   (GIO_IS_SET(GIO_POWER_CONNECTED))
 
 /** Bat level **/
 
