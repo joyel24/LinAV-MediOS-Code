@@ -293,6 +293,9 @@ void gfx_kdrawLine(unsigned int color, int x1, int y1, int x2, int y2,struct gra
 
 void gfx_openGraphics(void)
 {
+    // hide the console since we're going to use the screen
+    if(con_screenIsVisible()) con_screenSwitch();
+
     /* hidding bmap1 */
     osd_setComponentConfig(OSD_BITMAP1, 0);
     /*setting up planes */

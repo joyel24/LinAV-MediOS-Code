@@ -79,7 +79,7 @@ static int con_nextLineEnd(int pos,bool up){
       ++i;
     }
     // find next line end
-    while((i<=con_bufferEnd) && (CON_RING_BUFFER(i)!='\n')){
+    while((i<con_bufferEnd) && (CON_RING_BUFFER(i)!='\n')){
       ++i;
     }
     // line wrap
