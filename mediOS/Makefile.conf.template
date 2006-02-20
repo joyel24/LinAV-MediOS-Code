@@ -61,3 +61,4 @@ OBJCOPY= $(TOOL)-objcopy
 RM=rm
 AR=$(TOOL)-ar
 RANLIB=$(TOOL)-ranlib
+ELF2FLT=arm-linux-elf2flt

@@ -1,4 +1,4 @@
-ENTRY(entry_code)
+ENTRY(_start)
 
 MEMORY
 {

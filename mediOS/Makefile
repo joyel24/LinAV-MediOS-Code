@@ -13,15 +13,12 @@ all: medios lib
 
 force: clean all
 
-bin2wav:
-ifeq "$(TARGET_DEVICE)" "GMINI4XX"
-	@make -C tools/bin2wav/ --no-print-directory
-	@tools/bin2wav/bin2wav `echo *.bin` tools/bin2wav/400loader.bin.wav `echo *.bin`.wav #TODO: find something better
-#	@cp *.bin.wav /cygdrive/p/Info
-endif
-
 mk_api_file:
 	@make -C tools/api_files/ --no-print-directory
+        
+tools/bin2wav/bin2wav:        
+	@make -C tools/bin2wav/ --no-print-directory
+             
 incdir:
 	@make -C include/kernel/target --no-print-directory incdir
 
@@ -30,29 +27,35 @@ lib:
 	@make -C kernel --no-print-directory lib_medios
 	@echo '-----   building libMedios done'
 
-medios: incdir mk_api_file subdirs
+medios: base_clean medios.bin medios.wav
+        
+medios.bin: incdir mk_api_file subdirs
 	@echo '-----   building kernel'
 	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o medios.elf $(KERNEL_OBJS) $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary medios.elf medios.bin
-	@make bin2wav	--no-print-directory
 
-aoboy:
+aoboy: base_clean aoboy.bin aoboy.wav
+
+aoboy.bin:
 	@make -C kernel/ --no-print-directory kernel_lib
 	@make -C apps/avboy --no-print-directory stdalone
 	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o aoboy.elf $(KERNEL_OBJS) apps/avboy/build/*.o $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary aoboy.elf aoboy.bin
-	@make bin2wav	--no-print-directory
 
-doom:
+doom: base_clean doom.bin doom.wav
+        
+doom.bin:
 	@make -C kernel/ --no-print-directory kernel_lib
 	@make -C apps/doom --no-print-directory stdalone
 	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o doom.elf $(KERNEL_OBJS) apps/doom/build/*.o $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary doom.elf doom.bin
-	@make bin2wav	--no-print-directory
 
-clean:  clean-subdirs clean_aoboy clean_doom
+base_clean:
+	@rm -f *.wav *.map *.elf *.bin
+        
+clean:  clean-subdirs base_clean clean_aoboy clean_doom 
 	@echo '-----   cleaning MAIN'
-	@rm -f *.o *.bak *~ *.bin *.elf *.map *.bin.wav
+	@rm -f *.o *.bak *~
 	@rm -f include/*~ include/kernel/*~ include/sys_def/*~  include/gui/*~ include/kernel/target/*~
 
 clean_aoboy:

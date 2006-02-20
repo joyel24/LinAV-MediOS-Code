@@ -25,3 +25,13 @@ clean-subdirs:
 .S.o:
 	@echo "[$@]"
 	@$(AS) $(ASFLAGS) -o $@ $<
+
+ifeq ("$(TARGET_DEVICE)","GMINI4XX")        
+%.wav: %.bin tools/bin2wav/bin2wav
+	@echo "[$@]"
+	@tools/bin2wav/bin2wav $< tools/bin2wav/400loader.bin.wav $@
+        @echo "End"
+else
+%.wav:
+	@echo "End"
+endif

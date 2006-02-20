@@ -300,7 +300,7 @@ void process_DC_change(void)
     chgTimer();
     evt.evt = EVT_PWR;
     evt.evt_class = CONNECT_CLASS;
-    evt.data = &kpwrState;
+    evt.data = (int)kpwrState;
     evt_send(&evt);
     printk("DC connector %s\n",kpwrState==1?"plugged":"unplugged");
 }
