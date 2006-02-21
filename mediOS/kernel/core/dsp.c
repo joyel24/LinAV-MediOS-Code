@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/core/dsp.c
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -120,6 +120,13 @@ MED_RET_T load_dsp_program_mem (void* pDSPCode, int nSize)
 		unsigned long nVirtAddress = psec->s_vaddr_lo;
 		unsigned long nSectSize    = psec->s_size_lo;
 
+		if (!nVirtAddress)
+		{
+			printk ("Skipping address 0 %s section...\n",
+				sec_name);
+			continue;
+		}
+
 		printk ("Loading section %s (addr: 0x%.4X, size: 0x%.4X words)...\n",
 			sec_name,
 			nVirtAddress,
@@ -138,10 +145,11 @@ MED_RET_T load_dsp_program_mem (void* pDSPCode, int nSize)
 //		}
 //		else
 		{
-			unsigned short* pSrcCode = (unsigned short*)(pDSPCode + psec->s_scnptr_lo);
-			for (j=0;j<psec->s_size_lo;j++)
-			{
-				outw (pSrcCode[j], 0x00040000 + (nVirtAddress + j)*2);
+			unsigned long fileOffset=psec->s_scnptr_lo | psec->s_scnptr_hi<<16;
+      unsigned char* pSrcCode = (unsigned char*)(pDSPCode + fileOffset);
+      for (j=0;j<psec->s_size_lo*2;j+=2)
+      {
+        outw (pSrcCode[j] | pSrcCode[j+1]<<8 , 0x00040000 + nVirtAddress*2 + j);
 			}
 		}
 	}
