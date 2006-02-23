@@ -19,6 +19,8 @@ void app_main(int argc,char* argv)
 {
     int ver,w,h;
 
+    printf("in test\n");
+    
     ver=getArch();
     getResolution(&w,&h);
     printf("We are on %s\n resolution is: (%d,%d)\n",ver==AV3XX_ARCH?"AV3XX":ver==GMINI4XX_ARCH?"Gmini4xx":"UKN ARCH",

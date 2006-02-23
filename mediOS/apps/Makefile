@@ -11,14 +11,14 @@ LDFLAGS = ../lib/*.o -L../lib -lmedios --emit-relocs
 all: $(LIBS) othello test apps
 
 othello: othello.o
-	@$(LD) -o othello.elf othello.o $(LDFLAGS)
-	@$(ELF2FLT) -o othello.grv othello.elf
-	@rm -f .elf *.gdb *.elf2flt
+	@$(LD) -o othello.med othello.o $(LDFLAGS)
+#	@$(ELF2FLT) -o othello.grv othello.elf
+#	@rm -f .elf *.gdb *.elf2flt
 
 test: test.o
-	@$(LD) -o test.elf test.o $(LDFLAGS)
-	@$(ELF2FLT) -o test.grv test.elf
-	@rm -f .elf *.gdb *.elf2flt
+	@$(LD) -o test.med test.o $(LDFLAGS)
+#	@$(ELF2FLT) -o test.grv test.elf
+#	@rm -f .elf *.gdb *.elf2flt
         
 $(LIBS):
 	@make -C ../kernel --no-print-directory lib_medios
@@ -30,6 +30,6 @@ apps:
 clean:
 	@make -C doom --no-print-directory clean
 	@make -C avboy --no-print-directory clean
-	@rm -f *.o *.bak *~ *.elf *.elf2flt $(TARGET).grv *.gdb
+	@rm -f *.o *.bak *~ *.elf *.elf2flt *.grv *.gdb
 
 include ../default.rule

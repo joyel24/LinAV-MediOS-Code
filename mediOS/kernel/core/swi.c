@@ -40,7 +40,7 @@ unsigned int swi_handler (
             {
                 if(!strcmp(fct_array[i].name,name))
                 {
-                    printk("found %s @ 0x%08x\n",fct_array[i].name,fct_array[i].ptr);
+                    //printk("found %s @ 0x%08x\n",fct_array[i].name,fct_array[i].ptr);
                     return fct_array[i].ptr;
                 }
                 i++;
