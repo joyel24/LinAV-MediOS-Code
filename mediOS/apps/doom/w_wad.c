@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.6  2006/02/08 18:49:52  oxygen77
+// small bugfix from previous CI on Makfiles / build process
+//
 // Revision 1.5  2006/02/06 22:45:48  oxygen77
 // make doom work with new api, we lack of exit() now
 //
@@ -148,17 +151,8 @@ ExtractFileBase
 //  specially to allow map reloads.
 // But: the reload feature is a fragile hack...
 
-#ifdef __BEOS__
-#ifdef __GNUC__
-extern void *alloca(int);
-#else
-#include <alloca.h>
-#endif
-#endif /* __BEOS__ */
-
 int			reloadlump;
 char*			reloadname;
-
 
 void W_AddFile (char *filename)
 {
@@ -221,7 +215,7 @@ void W_AddFile (char *filename)
 	header.numlumps = LONG(header.numlumps);
 	header.infotableofs = LONG(header.infotableofs);
 	length = header.numlumps*sizeof(filelump_t);
-	fileinfo = alloca (length);
+	fileinfo = malloc(length);
 	lseek (handle, header.infotableofs, SEEK_SET);
 	fread (handle, fileinfo, length);
 	numlumps += header.numlumps;
@@ -247,7 +241,7 @@ void W_AddFile (char *filename)
 	strncpy (lump_p->name, fileinfo->name, 8);
     }
 
-
+    free(fileinfo);
 
     if (reloadname)
 	fclose (handle);
@@ -281,7 +275,7 @@ void W_Reload (void)
     lumpcount = LONG(header.numlumps);
     header.infotableofs = LONG(header.infotableofs);
     length = lumpcount*sizeof(filelump_t);
-    fileinfo = alloca (length);
+    fileinfo = malloc (length);
     lseek (handle, header.infotableofs, SEEK_SET);
     fread (handle,fileinfo, length);
 
@@ -298,6 +292,8 @@ void W_Reload (void)
 	lump_p->position = LONG(fileinfo->filepos);
 	lump_p->size = LONG(fileinfo->size);
     }
+
+    free(fileinfo);
 
     fclose (handle);
 }

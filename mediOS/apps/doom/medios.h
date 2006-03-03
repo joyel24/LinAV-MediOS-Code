@@ -24,11 +24,12 @@
 #include <buttons.h>
 #include <kernel/io.h>
 #include <sys_def/timer.h>
+#include <sys_def/alloca.h>
 #include <sys_def/section_types.h>
 //#include <kernel/uart.h>
 
-//TODO: ugly hack
-#define alloca malloc
+//#define __IRAM_CODE
+//#define __IRAM_DATA
 
 #define stderr -1
 #define stdout -2

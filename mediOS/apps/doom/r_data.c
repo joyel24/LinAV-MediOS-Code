@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.4  2006/02/08 18:49:52  oxygen77
+// small bugfix from previous CI on Makfiles / build process
+//
 // Revision 1.2  2006/01/19 08:51:51  sfxgligli
 // cleanup & name standardisation in wdt/irq/timers/uart/cpld/gio
 //
@@ -33,14 +36,6 @@
 
 static const char
 rcsid[] = "$Id$";
-
-#ifdef __BEOS__
-#ifdef __GNUC__
-extern void *alloca(int);
-#else
-#include <alloca.h>
-#endif
-#endif /* __BEOS__ */
 
 #include "m_swap.h"
 
@@ -792,7 +787,7 @@ void R_PrecacheLevel (void)
     
     // Precache flats.
     flatpresent = alloca(numflats);
-    memset (flatpresent,0,numflats);	
+    memset (flatpresent,0,numflats);
 
     for (i=0 ; i<numsectors ; i++)
     {
@@ -846,7 +841,7 @@ void R_PrecacheLevel (void)
 	    W_CacheLumpNum(lump , PU_CACHE);
 	}
     }
-    
+
     // Precache sprites.
     spritepresent = alloca(numsprites);
     memset (spritepresent,0, numsprites);
