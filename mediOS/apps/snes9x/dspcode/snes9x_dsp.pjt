@@ -1,0 +1,29 @@
+; Code Composer Project File, Version 2.0 (do not modify or remove this line)
+
+[Project Settings]
+ProjectDir="E:\gmini\Dev\mediOS\apps\snes9x\dspcode\"
+ProjectType=Executable
+CPUFamily=TMS320C54XX
+Tool="Compiler"
+Tool="CustomBuilder"
+Tool="DspBiosBuilder"
+Tool="Linker"
+Config="Release"
+
+[Source Files]
+Source="F:\CCStudio_v3.1_EVAL\C5400\cgtools\lib\rts.lib"
+Source="F:\CCStudio_v3.1_EVAL\C5400\csl\lib\csl5409.lib"
+Source="gminisms_dsp.c"
+Source="sn76496.c"
+Source="vectors.asm"
+Source="lnk.cmd"
+
+["Compiler" Settings: "Release"]
+Options=-o2 -fr"$(Proj_dir)\Release" -d"CHIP_5409" -d"DSPCODE"
+
+["Linker" Settings: "Release"]
+Options=-c -m".\Release\test.map" -o".\Release\test.out" -w -x
+
+["lnk.cmd" Settings: "Release"]
+LinkOrder=1
+
