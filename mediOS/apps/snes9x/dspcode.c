@@ -88,10 +88,10 @@ void initDSP()
   dspcode=(unsigned char *) chunks[0].chunk;
   len=chunks[0].size;
 #else
-  extern char _binary_apps_snes9x_dspcode_gminisms_dsp_out_start;
-  extern char _binary_apps_snes9x_dspcode_gminisms_dsp_out_end;
-  dspcode=&_binary_apps_snes9x_dspcode_gminisms_dsp_out_start;
-  len=&_binary_apps_snes9x_dspcode_gminisms_dsp_out_end-&_binary_apps_snes9x_dspcode_gminisms_dsp_out_start;
+  extern char _binary_apps_snes9x_dspcode_snes9x_dsp_out_start;
+  extern char _binary_apps_snes9x_dspcode_snes9x_dsp_out_end;
+  dspcode=&_binary_apps_snes9x_dspcode_snes9x_dsp_out_start;
+  len=&_binary_apps_snes9x_dspcode_snes9x_dsp_out_end-&_binary_apps_snes9x_dspcode_snes9x_dsp_out_start;
 #endif
 
   printf("initDSP() dspcode=%0.8X len=%d\n",dspcode,len);

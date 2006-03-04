@@ -83,10 +83,15 @@ int viewNewDir(struct browser_data *bdata,char *name)
     
     bdata->pos=0;
     bdata->nselect=0;
-    printAllName(bdata);
-    draw_scrollBar(&browser_scroll, bdata->listused, bdata->pos,bdata->nb_disp_entry+bdata->pos);
+    redrawBrowser(bdata);
     
     return 1;
+}
+
+void redrawBrowser(struct browser_data *bdata)
+{
+    printAllName(bdata);
+    draw_scrollBar(&browser_scroll, bdata->listused, bdata->pos,bdata->nb_disp_entry+bdata->pos);
 }
 
 void clearBrowser(struct browser_data *bdata)

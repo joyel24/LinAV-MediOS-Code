@@ -25,6 +25,7 @@
 #define LONG_MIN	(-LONG_MAX - 1)
 #define ULONG_MAX	(~0UL)
 
+typedef short                int16_t;
 typedef unsigned short       uint16_t;
 
 typedef unsigned int         size_t;
@@ -34,11 +35,14 @@ typedef unsigned int         mode_t;
 typedef signed long          off_t;
 
 typedef int                  int32_t;
-
 typedef unsigned int         uint32_t;
+
+typedef long long            int64_t;
 typedef unsigned long long   uint64_t;
 
+#ifndef __cplusplus
 typedef enum {FALSE=0,TRUE=1}    bool;
+#endif
 
 struct pt_regs {
 	long uregs[18];

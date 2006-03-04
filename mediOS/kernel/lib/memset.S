@@ -11,7 +11,8 @@
 */
 
 
-.text
+/*.text*/
+.section ".core"
 
 /*
  * Prototype: void memcpy(void *to,const void *from,unsigned long n);

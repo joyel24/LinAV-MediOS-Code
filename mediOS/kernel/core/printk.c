@@ -34,17 +34,19 @@ void printk(char *fmt, ...)
     con_write(debugmembuf);
 }
 
-void printf(char * fmt, ...)
+int printf(__const char * fmt, ...)
 {
+  int res;
     va_list ap;
     va_start(ap, fmt);
-    vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
+    res = vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
     va_end(ap);
     uart_outString("USER:",DEBUG_UART);
     uart_outString(debugmembuf,DEBUG_UART);
 
     con_write("USER:");
     con_write(debugmembuf);
+    return res;
 }
 
 void print_nonhexa(char * str)

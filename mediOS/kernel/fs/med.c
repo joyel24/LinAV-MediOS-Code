@@ -34,6 +34,7 @@
 
 char * SDRAM_SECTIONS[] = {
     ".texte",
+    ".ctor",
     ".data",
     ".bss",
     ".rodata",
@@ -51,7 +52,6 @@ char * BSS_SECTIONS[] = {
     ".bss",
     NULL
 };
-
 
 
 int cmp_string(char * str1,char * str2)
@@ -351,11 +351,22 @@ void load_med(char * file_name)
     }
     
     /* now finding where to start */
-    for(k=0;k<header.e_shnum;k++)
-    if(section_list[k].vaddr<=header.e_entry && (section_list[k].vaddr+section_list[k].size)>header.e_entry)
-    {
+    for(k=0;k<header.e_shnum;k++) {
+      //
+      if (!strcmp(section_list[k].name, ".ctors")) {
+ 	printk( "CTOR %d", k);
+	int j;
+	for (j=0; j<section_list[k].size; j+=4) {
+	  uint32_t * rout = *(uint32_t **)((section_list[k].addr)+j);
+	  printk("CTOR -->%p [%p [%08x]]\n", section_list[k].addr, rout, *rout);
+	  ((void (*)(void))rout)();
+	}
+      }
+
+      if(section_list[k].vaddr<=header.e_entry && (section_list[k].vaddr+section_list[k].size)>header.e_entry)	{
         entry=header.e_entry-section_list[k].vaddr+(uint32_t)section_list[k].addr;
         break;
+      }
     }
     
     if(entry==-1)
@@ -374,7 +385,8 @@ void load_med(char * file_name)
     
     run_med = (int (*)(int ,char**))entry;
     
-    DEBUG_MED("calling app\n");      
+    printk("calling app (entry %x)\n", run_med);      
+    DEBUG_MED("calling app (entry %x)\n", run_med);      
     
     do_bkpt();
     

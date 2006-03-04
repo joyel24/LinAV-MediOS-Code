@@ -181,6 +181,8 @@ int doLs(struct browser_data * bdata)
     printk( "[dols] folder parsed: find %d files %d folder => %d entires\n",bdata->nbFile,bdata->nbDir,bdata->listused);
        
     closedir(dirp);
+
+    printk("[dols] closed dir\n");
     
     qsort(bdata->list,bdata->listused,sizeof(struct dir_entry),qSortEntry);
     

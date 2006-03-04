@@ -17,7 +17,7 @@
 #include <sys_def/section_types.h>
 
 void printk(char *fmt, ...);
-void printf(char *fmt, ...);
+int printf(__const char *fmt, ...);
 void print_data(char * data,int length);
 void do_bkpt(void);
 

@@ -93,6 +93,7 @@ void draw_bottom_status (struct browser_data *bdata);
 void draw_file_size     (struct dir_entry * entry);
 void createSizeString   (char * str,int Isize);
 void clearBrowser       (struct browser_data *bdata);
+void redrawBrowser      (struct browser_data *bdata);
 
 /* main fct */
 void  bwseventHandler       (int evt);

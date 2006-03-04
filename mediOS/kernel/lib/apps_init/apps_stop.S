@@ -16,4 +16,5 @@ exit:
     ldr     sp, [r0]
     ldmia   sp, {r0 - r12}			@ read r0 - r12
     add     sp, sp, #72
+    mor     r0, #0
     ldr     pc, [sp],#4

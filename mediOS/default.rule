@@ -22,6 +22,10 @@ clean-subdirs:
 	@echo "[$@]"
 	@$(GCC) $(GCCFLAGS) -c -o $@ $<
         
+.cpp.o:
+	@echo "[$@]"
+	@$(GCC) $(GCCFLAGS) -c -o $@ $<
+        
 .S.o:
 	@echo "[$@]"
 	@$(AS) $(ASFLAGS) -o $@ $<

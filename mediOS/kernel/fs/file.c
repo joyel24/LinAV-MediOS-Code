@@ -553,6 +553,11 @@ off_t ftell(int fd)
     return file->fileoffset;
 }
 
+off_t fseek(int fd, off_t offset, int whence)
+{
+  return lseek(fd, offset, whence);
+}
+
 off_t lseek(int fd, off_t offset, int whence)
 {
     int pos;
@@ -637,4 +642,23 @@ int filesize(int fd)
     }
     
     return file->size;
+}
+
+#ifndef EOF
+# define EOF (-1)
+#endif
+int fgetc(int fd)
+{
+  char res;
+  int n = fread(fd, &res, 1);
+  if (n<=0) return EOF;
+  return res;
+}
+
+int __fgetc_unlocked(int fd)
+{
+  char res;
+  int n = fread(fd, &res, 1);
+  if (n<=0) return EOF;
+  return res;
 }

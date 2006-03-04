@@ -29,11 +29,12 @@ extern int      fsync      (int fd);
 extern ssize_t  fread      (int fd, void *buf, size_t count);
 extern off_t    lseek      (int fildes, off_t offset, int whence);
 extern off_t    ftell      (int fd);
-extern int      fcreat      (const char *pathname, mode_t mode);
-extern ssize_t  fwrite      (int fd, const void *buf, size_t count);
-extern int      fremove     (const char* pathname);
-extern int      frename     (const char* path, const char* newname);
+extern int      fcreat     (const char *pathname, mode_t mode);
+extern ssize_t  fwrite     (int fd, const void *buf, size_t count);
+extern int      fremove    (const char* pathname);
+extern int      frename    (const char* path, const char* newname);
 extern int      ftruncate  (int fd, off_t length);
 extern int      filesize   (int fd);
+extern int      fgetc      (int fd);
 
 #endif

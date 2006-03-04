@@ -12,6 +12,7 @@ SECTIONS
     {   
         *(.text.init)             
         *(.text)        
+        *(.gnu.linkonce.t.*)        
         *(.glue_7t)
         *(.glue_7)        
     } > DRAM

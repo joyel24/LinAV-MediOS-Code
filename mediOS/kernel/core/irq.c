@@ -82,8 +82,8 @@ __IRAM_CODE void irq_globalHandler(struct pt_regs * regs)
 
         if(((~inw(INTC_IRQ_STATUS(irq))) & mask) && (inw(INTC_IRQ_ENABLE(irq)) & mask))
         {              
-            irq_table[i].nb_irq++;
             irq_ack(irq);
+            irq_table[i].nb_irq++;
             if(irq_table[i].action)
                 irq_table[i].action(irq,regs);
             break;
