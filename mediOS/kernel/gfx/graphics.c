@@ -312,7 +312,7 @@ void gfx_openGraphics(void)
 
 void gfx_closeGraphics(void)
 {
-
+    con_screenSwitch();
 }
 
 void gfx_setPlane(int vplane)

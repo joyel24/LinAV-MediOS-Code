@@ -393,7 +393,7 @@ void load_med(char * file_name)
     run_med(0,NULL);
     
     printk("back from app\n"); 
-              
+    free_user();          
     free(sdram_start);
     printk("sdram freed %x\n",sdram_start); 
     free(sections_name);

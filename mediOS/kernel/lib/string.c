@@ -14,7 +14,7 @@
 #include <sys_def/string.h>
 
 #ifdef BUILD_LIB
-#include <api.h>
+#include <sys_def/malloc.h>
 #else
 #include <kernel/malloc.h>
 #endif

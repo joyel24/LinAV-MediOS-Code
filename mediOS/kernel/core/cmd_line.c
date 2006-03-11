@@ -286,9 +286,9 @@ void do_help(unsigned char ** params)
 
 void do_mem (unsigned char ** params)
 {
-    long nAllocatedBytes, nFreeBytes, nMaxFree, nAllocCount, nFreeCount;
-    mem_stat (&nAllocatedBytes, &nFreeBytes, &nMaxFree, &nAllocCount, &nFreeCount);
-    printk("Free memory: %i KB - Alloc: %i KB\n", nFreeBytes >> 10 , nAllocatedBytes >> 10);
+    unsigned int nAlloc_u, nAlloc_k,nFree,MaxFree;
+    mem_stat (&nAlloc_u, &nAlloc_k,&nFree,&MaxFree);
+    printk("Free memory: %x - Alloc: user: %x kernel: %x\n", nFree , nAlloc_u, nAlloc_k);
 }
 
 void do_run (unsigned char ** params)

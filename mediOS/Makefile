@@ -3,13 +3,14 @@ include Makefile.conf
 ASFLAGS  += -I../include
 GCCFLAGS += -I../include
 
-LDFLAGS =  -L/usr/local/cross-tools/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lfloat -lgcc
+#LDFLAGS =  -L/usr/local/cross-tools/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lfloat -lgcc
+LDFLAGS =  -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lgcc
 #LDFLAGS = -L/home/christophe/gcc-3.3.x/toolchain_arm_nofpu/arm-linux/lib/ -lgcc
 
 SUBDIRS = kernel
 KERNEL_OBJS = kernel/build/*.o kernel/target/arch_$(TARGET_DEVICE)/*.o
 
-all: medios lib
+all: lib_medios medios
 
 force: clean all
 
@@ -22,7 +23,7 @@ tools/bin2wav/bin2wav:
 incdir:
 	@make -C include/kernel/target --no-print-directory incdir
 
-lib:
+lib_medios:
 	@echo '-----   building libMedios'
 	@make -C kernel --no-print-directory lib_medios
 	@echo '-----   building libMedios done'
@@ -68,6 +69,7 @@ clean:  clean-subdirs base_clean clean_aoboy clean_doom
 	@echo '-----   cleaning MAIN'
 	@rm -f *.o *.bak *~
 	@rm -f include/*~ include/kernel/*~ include/sys_def/*~  include/gui/*~ include/kernel/target/*~
+	@rm -f lib/*
 
 clean_aoboy:
 	@make -C apps/avboy --no-print-directory clean

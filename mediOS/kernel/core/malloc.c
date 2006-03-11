@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/core/mallo.c
 *
 *   MediOS project
@@ -19,184 +19,129 @@
 #include <kernel/malloc.h>
 #include <kernel/kernel.h>
 
-#define MemSize     int 
+#define MemSize     int
 #define SizeQuant   4
-
-void bufdump(void *buf);
 
 /* Queue links */
 struct qlinks {
-    struct bfhead *flink;	      /* Forward link */
-    struct bfhead *blink;	      /* Backward link */
+    struct bhead *nxt;        /* Forward link */
+    struct bhead *prev;       /* Backward link */
 };
 
 /* Header in allocated and free buffers */
 struct bhead {
-    bufsize prevfree;		      /* Relative link back to previous
-					 free buffer in memory or 0 if
-					 previous buffer is allocated.	*/
-    bufsize bsize;		      /* Buffer size: positive if free,
-					 negative if allocated. */
-};
-#define BH(p)	((struct bhead *) (p))
-
-/*  Header in directly allocated buffers (by acqfcn) */
-struct bdhead {
-    bufsize tsize;		      /* Total size, including overhead */
-    struct bhead bh;		      /* Common header */
-};
-#define BDH(p)	((struct bdhead *) (p))
-
-/* Header in free buffers */
-struct bfhead {
-    struct bhead bh;		      /* Common allocated/free header */
-    struct qlinks ql;		      /* Links on free list */
-};
-#define BFH(p)	((struct bfhead *) (p))
-
-static struct bfhead freelist = {     /* List of free buffers */
-    {0, 0},
-    {&freelist, &freelist}
+    int size;
+    int user_space;
+    struct qlinks blist;
+    struct qlinks free_list;
 };
 
-static bufsize totalloc = 0;	      /* Total space currently allocated */
-static long numget = 0, numrel = 0;   /* Number of bget() and brel() calls */
+#define BH(p)   ((struct bhead *) (p))
 
+struct bhead *  pool_start;
+struct bhead *  first_free;
 
-/*  Minimum allocation quantum: */
-#define QLSize	(sizeof(struct qlinks))
-#define SizeQ	((SizeQuant > QLSize) ? SizeQuant : QLSize)
+unsigned int totalloc = 0;
 
-
-/* End sentinel: value placed in bsize field of dummy block delimiting
-   end of pool block.  The most negative number which will  fit  in  a
-   bufsize, defined in a way that the compiler will accept. */
-
-#define ESent	((bufsize) (-(((1L << (sizeof(bufsize) * 8 - 2)) - 1) * 2) - 2))
-
-/*  BGET  --  Allocate a buffer.  */
-void * malloc(bufsize requested_size)
+void * malloc(unsigned int  requested_size)
 {
-    bufsize size = requested_size;
-    struct bfhead *b;
+   return do_malloc(requested_size,0);
+}
+
+/*  malloc  --  Allocate a buffer.  */
+void * do_malloc(unsigned int  requested_size,int user_flag)
+{
+    unsigned int  size = requested_size;
+    struct bhead *b;
     void *buf;
-    if (size < SizeQ) { /* Need at least room for the */
-        size = SizeQ;   /*    queue links.  */
-    }
 
     size = (size + (SizeQuant - 1)) & (~(SizeQuant - 1));
     size += sizeof(struct bhead);     /* Add overhead in allocated buffer to size required. */
 
-    b = freelist.ql.flink;
+    b = first_free;
     /* Scan the free list searching for the first buffer big enough to hold the requested size buffer. */
 
-    while (b != &freelist)
-    {        
-/* Buffer  is big enough to satisfy  the request.  Allocate it
-    to the caller.  We must decide whether the buffer is  large
-    enough  to  split  into  the part given to the caller and a
-    free buffer that remains on the free list, or  whether  the
-    entire  buffer  should  be  removed	from the free list and
-    given to the caller in its entirety.   We  only  split  the
-    buffer if enough room remains for a header plus the minimum
-    quantum of allocation. */
-        if ((bufsize) b->bh.bsize >= size)
+    while (b != NULL)
+    {
+        if (b->size >= size)
         {
-            if ((b->bh.bsize - size) > (SizeQ + (sizeof(struct bhead))))
+            if ((b->size - size) > (SizeQuant + (sizeof(struct bhead))))
             {
-                struct bhead *ba, *bn;
-                ba = BH(((char *) b) + (b->bh.bsize - size));
-                bn = BH(((char *) ba) + size);
-                /* Subtract size from length of free block. */
-                b->bh.bsize -= size;
-                /* Link allocated buffer to the previous free buffer. */
-                ba->prevfree = b->bh.bsize;
-                /* Plug negative size into user buffer. */
-                ba->bsize = -(bufsize) size;
-                /* Mark buffer after this one not preceded by free block. */
-                bn->prevfree = 0;
+                /* buffer big enough to split */
+                struct bhead *b_alloc;
+                b_alloc = BH(((char *) b) + (b->size - size));
+                b->size -= size;
+                b_alloc->size=-size;
+                b_alloc->blist.nxt=b->blist.nxt;
+                if(b_alloc->blist.nxt)
+                    b_alloc->blist.nxt->blist.prev=b_alloc;
+                b->blist.nxt=b_alloc;
+                b_alloc->blist.prev=b;
+                b_alloc->user_space = user_flag;
+
                 totalloc += size;
-                /* Increment number of bget() calls */
-                numget++;
 
-                buf = (void *) ((((char *) ba) + sizeof(struct bhead)));
-
+                buf = (void *) ((((char *) b_alloc) + sizeof(struct bhead)));
                 return buf;
-
             }
             else
             {
-                struct bhead *ba;
-                ba = BH(((char *) b) + b->bh.bsize);
-                /* The buffer isn't big enough to split.  Give  the  whole
-                shebang to the caller and remove it from the free list. */
-                b->ql.blink->ql.flink = b->ql.flink;
-                b->ql.flink->ql.blink = b->ql.blink;
-                totalloc += b->bh.bsize;
-                 /* Increment number of bget() calls */
-                numget++;
-                /* Negate size to mark buffer allocated. */
-                b->bh.bsize = -(b->bh.bsize);
-                /* Zero the back pointer in the next buffer in memory
-                    to indicate that this buffer is allocated. */
-                ba->prevfree = 0;
-                /* Give user buffer starting at queue links. */
-                buf =  (void *) &(b->ql);
+
+                if(b->free_list.prev==NULL)
+                {
+                    first_free=b->free_list.nxt; /* trying to get first free */
+                    first_free->free_list.prev=NULL;
+                }
+                else
+                {
+                    b->free_list.prev->free_list.nxt=b->free_list.nxt; /* remove from free list */
+                    if(b->free_list.nxt)
+                        b->free_list.nxt->free_list.prev = b->free_list.prev;
+                }
+                /*nothing to be done for std linkage*/
+                totalloc += b->size;
+                b->size = -b->size;
+                b->user_space = user_flag;
+
+                buf =  (void *) ((((char *) b) + sizeof(struct bhead)));
                 return buf;
             }
         }
-        /* Link to next buffer */ 
-        b = b->ql.flink;
+        /* Link to next buffer */
+        b = b->free_list.nxt;
     }
     /* no space found */
     return NULL;
 }
 
-/*  BGETZ  --  Allocate a buffer and clear its contents to zero.  We clear
-	       the  entire  contents  of  the buffer to zero, not just the
-	       region requested by the caller. */
-#ifdef HAS_bgetz
-void * bgetz(bufsize size)
+/*  realloc  --  Reallocate a buffer.  This is a minimal implementation,
+           simply in terms of brel()  and  bget().   It  could  be
+           enhanced to allow the buffer to grow into adjacent free
+           blocks and to avoid moving data unnecessarily.  */
+
+void * user_realloc(void *buf,unsigned int requested_size)
 {
-    char *buf = (char *) bget(size);
-    if (buf != NULL)
-    {
-        struct bhead *b;
-        bufsize rsize;
-        b = BH(buf - sizeof(struct bhead));
-        rsize = -(b->bsize);
-        if (rsize == 0)
-        {
-            struct bdhead *bd;
-            bd = BDH(buf - sizeof(struct bdhead));
-            rsize = bd->tsize - sizeof(struct bdhead);
-        }
-        else
-        {
-            rsize -= sizeof(struct bhead);
-        }
-        memset(buf, 0, (MemSize) rsize);
-    }
-    return ((void *) buf);
+   return do_realloc(buf,requested_size,1);
 }
-#endif
-/*  BGETR  --  Reallocate a buffer.  This is a minimal implementation,
-	       simply in terms of brel()  and  bget().	 It  could  be
-	       enhanced to allow the buffer to grow into adjacent free
-	       blocks and to avoid moving data unnecessarily.  */
-void *realloc(void *buf, bufsize size)
+
+void * realloc(void *buf,unsigned int requested_size)
+{
+   return do_realloc(buf,requested_size,0);
+}
+
+void * do_realloc(void *buf,unsigned int size,int user_flag)
 {
     void *nbuf;
-    bufsize osize; /* Old size of buffer */
+    unsigned int osize; /* Old size of buffer */
     struct bhead *b;
-    if ((nbuf = malloc(size)) == NULL) /* Acquire new buffer */
+    if ((nbuf = do_malloc(size,user_flag)) == NULL) /* Acquire new buffer */
         return NULL;
 
     if (buf == NULL)
         return nbuf;
 
     b = BH(((char *) buf) - sizeof(struct bhead));
-    osize = -b->bsize;
+    osize = -b->size;
     osize -= sizeof(struct bhead);
     /* Copy the data */
     memcpy((char *) nbuf, (char *) buf,(MemSize) ((size < osize) ? size : osize));
@@ -204,224 +149,259 @@ void *realloc(void *buf, bufsize size)
     return nbuf;
 }
 
-/*  BREL  --  Release a buffer.  */
+#define MERGE_BLOCK(A,B) {               \
+    A->blist.nxt = B->blist.nxt;         \
+    if(A->blist.nxt)                     \
+        A->blist.nxt->blist.prev = A ;   \
+    A->size += B->size;                  \
+}
+
+/* this macro is not checking if we insert on top as it should always
+insert AFTER START block */
+
+#define INSERT_FREE_W_START(A,START) {    \
+    struct bhead * __ptr=START;            \
+    while(__ptr->free_list.nxt && __ptr->size < A->size) \
+        __ptr=__ptr->free_list.nxt;        \
+    if(__ptr->size >= A->size)             \
+    {                                      \
+        A->free_list.nxt=__ptr;            \
+        A->free_list.prev=__ptr->free_list.prev; \
+        __ptr->free_list.prev=A;           \
+        A->free_list.prev->free_list.nxt=A;\
+    }                                      \
+    else                                   \
+    {                                      \
+        __ptr->free_list.nxt = A;          \
+        A->free_list.prev = __ptr;         \
+        A->free_list.nxt = NULL;           \
+    }                 \
+}
+
+#define INSERT_FREE(A) {               \
+    if(!first_free)                    \
+    {                                  \
+        first_free = A;                \
+        A->free_list.prev=NULL;        \
+        A->free_list.nxt=NULL;         \
+    }                                  \
+    else                               \
+    {                                  \
+        if(A->size <= first_free->size) \
+        {                                \
+            A->free_list.nxt = first_free;\
+            first_free->free_list.prev=A; \
+            A->free_list.prev=NULL;       \
+            first_free=A;                 \
+        }                                \
+        else                            \
+        {                              \
+            INSERT_FREE_W_START(A,first_free); \
+        }                              \
+    }                                  \
+}
+
+#define MERGE_FREE(A,B) {    \
+    A->free_list.prev = B->free_list.prev; \
+    if(A->free_list.prev)                  \
+        A->free_list.prev->free_list.nxt = A; \
+    else                                   \
+        first_free=A;                      \
+    A->free_list.nxt = B->free_list.nxt; \
+    if(A->free_list.nxt)                  \
+        A->free_list.nxt->free_list.prev = A; \
+}
+
+#define REMOVE_FREE(A) {       \
+    if(A==first_free)           \
+    {                           \
+        first_free=A->free_list.nxt; \
+        if(first_free)                 \
+            first_free->free_list.prev=NULL;     \
+    }                          \
+    else                       \
+    {                           \
+        A->free_list.prev->free_list.nxt = A->free_list.nxt; \
+        if(A->free_list.nxt)        \
+            A->free_list.nxt->free_list.prev = A->free_list.prev ; \
+    }                          \
+}
+
+/*  free  --  Release a buffer.  */
 void free(void *buf)
 {
-    struct bfhead *b, *bn;
-    b = BFH(((char *) buf) - sizeof(struct bhead));
-    /* Increment number of brel() calls */
-    numrel++;
-
+    struct bhead * b = BH(((char *) buf) - sizeof(struct bhead));
+    struct bhead * b_prev;
+    struct bhead * b_nxt;
     /* Buffer size must be negative, indicating that the buffer is allocated. */
-    if (b->bh.bsize >= 0) 
-        bn = NULL;
-        
-    /*Back pointer in next buffer must be zero, indicating the same thing: */
-    totalloc += b->bh.bsize;
-    
+    if (b->size >= 0)
+        return;
+
+    b->size = - b->size;
+
+    totalloc -= b->size;
+
     /* If the back link is nonzero, the previous buffer is free.  */
-    if (b->bh.prevfree != 0)
+    if (b->blist.prev && b->blist.prev->size>=0)
     {
-        /* The previous buffer is free.  Consolidate this buffer  with	it
-            by  adding  the  length  of	this  buffer  to the previous free
-            buffer.  Note that we subtract the size  in	the  buffer  being
-            released,  since  it's  negative to indicate that the buffer is
-            allocated. */
-        register bufsize size = b->bh.bsize;
+        /* The previous buffer is free. Consolidate this buffer  with it*/
+        b_prev=b->blist.prev;        
+        b_nxt=b->blist.nxt;
         
-        /* Make the previous buffer the one we're working on. */
-        b = BFH(((char *) b) - b->bh.prevfree);
-        b->bh.bsize -= size;
+        if(b_nxt && b_nxt->size>=0)
+        {
+            /* merge the 3 blocks */
+            //printk("merge 3\n");
+            MERGE_BLOCK(b_prev,b);
+            MERGE_BLOCK(b_prev,b_nxt);
+#if 0            
+            /* link to next free */
+            if(b_nxt->free_list.nxt && b_nxt->free_list.nxt->size > b_prev->size)
+            {
+                REMOVE_FREE(b_prev);
+                REMOVE_FREE(b_nxt);
+                b_nxt=b_nxt->free_list.nxt;
+                INSERT_FREE_W_START(b_prev,b_nxt);
+            }
+            else
+                REMOVE_FREE(b_nxt);
+#else
+            REMOVE_FREE(b_prev);
+            REMOVE_FREE(b_nxt);
+            INSERT_FREE(b_prev);
+#endif     
+                    
+        }
+        else
+        {
+            /* only merge 2 blocks */
+            //printk("merge 2: prev - cur\n");
+            MERGE_BLOCK(b_prev,b);
+#if 0
+            if(b_nxt && b_nxt->size>b_prev->size)
+            {
+                REMOVE_FREE(b_prev);
+                INSERT_FREE_W_START(b_prev,b_nxt);
+            }
+#else
+            REMOVE_FREE(b_prev);
+            INSERT_FREE(b_prev);
+#endif
+        }
     }
     else
     {
-        /* The previous buffer isn't allocated.  Insert this buffer
+        /* The previous buffer is allocated.  Insert this buffer
             on the free list as an isolated free block. */
-        b->ql.flink = &freelist;
-        b->ql.blink = freelist.ql.blink;
-        freelist.ql.blink = b;
-        b->ql.blink->ql.flink = b;
-        b->bh.bsize = -b->bh.bsize;
+        
+        b_nxt=b->blist.nxt;
+        
+        /*is nxt block empty */
+        if(b_nxt && b_nxt->size>=0)
+        {
+            /* merge the 2 blocks */
+            //printk("merge 2: cur - nxt\n");
+            MERGE_BLOCK(b,b_nxt);
+#if 0
+            if(b_nxt->free_list.nxt && b_nxt->free_list.nxt->size < b->size)
+            {
+                REMOVE_FREE(b_nxt);
+                b_nxt=b_nxt->free_list.nxt;
+                INSERT_FREE_W_START(b,b_nxt);
+            }
+            else
+                MERGE_FREE(b,b_nxt);
+#else
+            REMOVE_FREE(b_nxt);
+            INSERT_FREE(b);
+#endif
+
+        }
+        else
+        {
+            //printk("No merge\n");
+            INSERT_FREE(b);
+        }
     }
-    
-    /* Now we look at the next buffer in memory, located by advancing from
-       the  start  of  this  buffer  by its size, to see if that buffer is
-       free.  If it is, we combine  this  buffer  with	the  next  one	in
-       memory, dechaining the second buffer from the free list. */
+}
 
-    bn =  BFH(((char *) b) + b->bh.bsize);
-
-    if (bn->bh.bsize > 0)
+void free_user(void)
+{
+    struct bhead *b = pool_start;
+    unsigned int tot_free=0;
+    int nb=0;
+    while(b!=NULL)
     {
-        /* The buffer is free.	Remove it from the free list and add
-            its size to that of our buffer. */
-            
-        bn->ql.blink->ql.flink = bn->ql.flink;
-        bn->ql.flink->ql.blink = bn->ql.blink;
-        b->bh.bsize += bn->bh.bsize;
-    
-        /* Finally,  advance  to   the	buffer	that   follows	the  newly
-            consolidated free block.  We must set its  backpointer  to  the
-            head  of  the  consolidated free block.  We know the next block
-            must be an allocated block because the process of recombination
-            guarantees  that  two  free	blocks will never be contiguous in
-            memory.  */    
-        bn = BFH(((char *) b) + b->bh.bsize);
+        if(b->size<0 && b->user_space)
+        {
+            printk("%d: Freeing @%x, size=%x\n",nb,b,-b->size);
+            nb++;
+            tot_free-=b->size;
+            free((void *) ((((char *) b) + sizeof(struct bhead))));
+        }
+        b=b->blist.nxt;
     }
-
-    /* The next buffer is allocated.  Set the backpointer in it  to  point
-       to this buffer; the previous free buffer in memory. */
-    bn->bh.prevfree = b->bh.bsize;
+    printk("Have free %d user buffer tot size =%x\n",nb,tot_free);
 }
 
 /*  BPOOL  --  Add a region of memory to the buffer pool.  */
-void mem_addPool(void *buf,bufsize len)
+void mem_addPool(void *buf,unsigned int len)
 {
-    struct bfhead *b = BFH(buf);
-    struct bhead *bn;
-    len &= ~(SizeQuant - 1);
+    struct bhead *b = BH(buf);
 
-    /* Since the block is initially occupied by a single free  buffer,
-       it  had	better	not  be  (much) larger than the largest buffer
-       whose size we can store in bhead.bsize. */
+    first_free = b;
+    pool_start = b;
 
-    /* Clear  the  backpointer at  the start of the block to indicate that
-       there  is  no  free  block  prior  to  this   one.    That   blocks
-       recombination when the first block in memory is released. */
-
-    b->bh.prevfree = 0;
-
-    /* Chain the new block to the free list. */
-    b->ql.flink = &freelist;
-    b->ql.blink = freelist.ql.blink;
-    freelist.ql.blink = b;
-    b->ql.blink->ql.flink = b;
-
-
-
-    /* Create a dummy allocated buffer at the end of the pool.	This dummy
-       buffer is seen when a buffer at the end of the pool is released and
-       blocks  recombination  of  the last buffer with the dummy buffer at
-       the end.  The length in the dummy buffer  is  set  to  the  largest
-       negative  number  to  denote  the  end  of  the pool for diagnostic
-       routines (this specific value is  not  counted  on  by  the  actual
-       allocation and release functions). */
-    len -= sizeof(struct bhead);
-    b->bh.bsize = (bufsize) len;
-    bn = BH(((char *) b) + len);
-    bn->prevfree = (bufsize) len;
-
-    /* Definition of ESent assumes two's complement! */
-    bn->bsize = ESent;
+    b->size=len;
+    b->user_space=0;
+    b->blist.nxt=b->blist.prev=NULL;
+    b->free_list.nxt=b->free_list.prev=NULL;
 }
 
-/*  BSTATS  --	Return buffer allocation free space statistics.  */
-void mem_stat(bufsize *curalloc, bufsize *totfree, bufsize *maxfree,long * nget, long *nrel)
+void mem_stat(unsigned int *curalloc_user, unsigned int *curalloc_kernel,
+            unsigned int *totfree, unsigned int *maxfree)
 {
-    struct bfhead *b = freelist.ql.flink;
-    *nget = numget;
-    *nrel = numrel;
-    *curalloc = totalloc;
+    struct bhead *b = pool_start;
+    int nb=0;
     *totfree = 0;
+    *curalloc_user = 0;
+    *curalloc_kernel = 0;
     *maxfree = -1;
-    while (b != &freelist)
-    {	
-        *totfree += b->bh.bsize;
-        if (b->bh.bsize > *maxfree)
-            *maxfree = b->bh.bsize;
-        /* Link to next buffer */
-        b = b->ql.flink;
-    }
-}
-
-
-/*  mem_stat  --	Dump a buffer pool.  The buffer headers are always listed.
-		If DUMPALLOC is nonzero, the contents of allocated buffers
-		are  dumped.   If  DUMPFREE  is  nonzero,  free blocks are
-		dumped as well.  If FreeWipe  checking	is  enabled,  free
-		blocks	which  have  been clobbered will always be dumped. */
-void mem_dump(void *buf,int dumpalloc,int dumpfree)
-{
-    struct bfhead *b = BFH(buf);
-    while (b->bh.bsize != ESent)
+    while (b != NULL)
     {
-        bufsize bs = b->bh.bsize;
-        if (bs < 0)
+        printk("%d: buffer @ %x %s/%s, size = %x\n",nb,b,b->size>=0?"free":"alloc",
+            b->user_space?"user":"kernel",b->size>=0?b->size:-b->size);
+        nb++;
+        if(b->size>=0)
         {
-            bs = -bs;
-            printk("Allocated buffer: size %6ld bytes.\n", (long) bs);
-            if (dumpalloc)
-                bufdump((void *) (((char *) b) + sizeof(struct bhead)));
+            *totfree+= b->size;
+             if (b->size > *maxfree)
+                *maxfree = b->size;
         }
         else
         {
-            char *lerr = "";
-            if ((b->ql.blink->ql.flink != b) || (b->ql.flink->ql.blink != b))
-                lerr = "  (Bad free list links)";
-            printk("Free block:       size %6ld bytes.%s\n",(long) bs, lerr);
-            if (dumpfree)
-                bufdump((void *) (((char *) b) + sizeof(struct bhead)));
+            if(b->user_space)
+                *curalloc_user-= b->size;
+            else
+                *curalloc_kernel-= b->size;
         }
-        b = BFH(((char *) b) + bs);
-    }
-}
 
-/*  BUFDUMP  --  Dump the data in a buffer.  This is called with the  user
-		 data pointer, and backs up to the buffer header.  It will
-		 dump either a free block or an allocated one.	*/
-void bufdump(void *buf)
-{
-    struct bfhead *b;
-    unsigned char *bdump;
-    bufsize bdlen;
-    
-    b = BFH(((char *) buf) - sizeof(struct bhead));
-
-    if (b->bh.bsize < 0)
-    {
-        bdump = (unsigned char *) buf;
-        bdlen = (-b->bh.bsize) - sizeof(struct bhead);
+        b = b->blist.nxt;
     }
-    else
-    {
-        bdump = (unsigned char *) (((char *) b) + sizeof(struct bfhead));
-        bdlen = b->bh.bsize - sizeof(struct bfhead);
-    }
-
-    while (bdlen > 0)
-    {
-        int i, dupes = 0;
-        bufsize l = bdlen;
-        char bhex[50], bascii[20];
-        if (l > 16)
-            l = 16;
-    
-        for (i = 0; i < l; i++)
-        {
-            sprintf(bhex + i * 3, "%02X ", bdump[i]);
-            bascii[i] = isprint(bdump[i]) ? bdump[i] : ' ';
-        }
+    printk("Buff start: %x first_free: %x nb alloc: %x tot=%x free=%x alloc user=%x kernel=%x\n",
+        pool_start,first_free,nb,totalloc,*totfree,*curalloc_user,*curalloc_kernel);
         
-        bascii[i] = 0;
-        printk("%-48s   %s\n", bhex, bascii);
-        bdump += l;
-        bdlen -= l;
-    
-        while ((bdlen > 16) && (memcmp((char *) (bdump - 16),(char *) bdump, 16) == 0))
-        {
-            dupes++;
-            bdump += 16;
-            bdlen -= 16;
-        }
-    
-        if (dupes > 1)
-            printk("     (%d lines [%d bytes] identical to above line skipped)\n",dupes, dupes * 16);
-        else
-            if(dupes == 1)
-            {
-                bdump -= 16;
-                bdlen += 16;
-            }
-    }
+    mem_freeList();
 }
 
+void mem_freeList(void)
+{
+    struct bhead *b = first_free;
+    int nb=0;
+    printk("Free list:\n");
+    while (b != NULL)
+    {
+        printk("%d: buffer @ %x (%s) size = %x\n",nb++,b,b->size>=0?"free":"alloc",b->size>=0?b->size:-b->size);
+        b = b->free_list.nxt;
+    }
+}
