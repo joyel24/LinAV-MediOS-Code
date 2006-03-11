@@ -14,18 +14,14 @@
 #define __AVLO_H_
 
 /*
-
-
-
-void drawProgress(int offset,int length,int mode);
-void drawBox(void);*/
+Common functions
+*/
 
 void chkOFF(int key);
 void drawMenu(int nb);
 void drawBox(int txt_width,int txt_height,int * start_x,int * start_y);
 void waitKey(void);
 void waitKeyReleased(int has_time_out);
-void err(int i);
 void affUSB();
 void drawBat();
 void moveCursor(int direction);
@@ -34,5 +30,17 @@ void printErr(int key);
 int fastLoadCJBM(char * filename);
 int loadFile(char * fileN,char* buffer,int prog);
 void init_colors(void);
+void doFault(int faultNum);
+
+/* arch spécifique */
+void printIniLevel(int level);
+void HD_init_string(void);
+void readingConfString(void);
+void USBEnableString(void);
+void printFault(int faultNum);
+void shutDownString(void);
+void drawProgress(int offset,int length,int mode);
+void USB_connDisp(void);
+void USB_connHide(void);
 
 #endif

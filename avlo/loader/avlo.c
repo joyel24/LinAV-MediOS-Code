@@ -32,6 +32,7 @@
 
 #include <avlo.h>
 #include <avlo_cfg.h>
+#include <target/arch/default_cfg.h>
 
 #define MAX_OFF_PRESS    500
 #define MAX_REPEAT       6000
@@ -39,89 +40,37 @@
 
 #define CUSTOM_COLOR_START  230
 
-#define COLOR_TSP      COLOR_BLACK
-#define COLOR_TXT      ptr_cfg->color_txt_index
-#define COLOR_BOX      ptr_cfg->color_box_index
-#define COLOR_SEL      ptr_cfg->color_sel_index
-#define COLOR_LOAD     ptr_cfg->color_load_index
-#define COLOR_WAIT     ptr_cfg->color_wait_index
-#define COLOR_MSG_BOX_0 ptr_cfg->color_msg_box_0_index
-#define COLOR_MSG_BOX_1 ptr_cfg->color_msg_box_1_index
-#define COLOR_PWR_CHARGE  ptr_cfg->color_pwr_charge_index
-#define COLOR_PWR_L0      ptr_cfg->color_pwr_l0_index
-#define COLOR_PWR_L1      ptr_cfg->color_pwr_l1_index
-#define COLOR_PWR_L2      ptr_cfg->color_pwr_l2_index
-#define COLOR_PWR_L3      ptr_cfg->color_pwr_l3_index
-#define COLOR_PWR_FRAME_DC_ON   ptr_cfg->color_pwr_frame_dc_on_index
-#define COLOR_PWR_FRAME_DC_OFF  ptr_cfg->color_pwr_frame_dc_off_index
-
-// #define ENTRY_X      117
-// #define ENTRY_Y      54
-// #define STATUS_X     2
-// #define STATUS_Y     228
-// #define BAR_X        10
-// #define BAR_Y        200
-// #define BAR_W        100
-// #define BAR_H        5
-// #define USB_X        290
-// #define USB_Y        228
-// #define BAT_X        293
-// #define BAT_Y        2
-
-#define ENTRY_X      ptr_cfg->menu_x
-#define ENTRY_Y      ptr_cfg->menu_y
-#define STATUS_X     ptr_cfg->status_x
-#define STATUS_Y     ptr_cfg->status_y
-#define BAR_X        ptr_cfg->bar_x
-#define BAR_Y        ptr_cfg->bar_y
-#define BAR_W        ptr_cfg->bar_w
-#define BAR_H        ptr_cfg->bar_h
-#define USB_X        ptr_cfg->usb_x
-#define USB_Y        ptr_cfg->usb_y
-#define BAT_X        ptr_cfg->bat_x
-#define BAT_Y        ptr_cfg->bat_y
-
-#define BTM_TXT      "V4.2 | image: "
+#include <avlo_colors.h>
 
 #define NO_TIME_OUT    0
 #define WITH_TIME_OUT  1
 
 #define BAT_LOOP_SIZE 10000
 
-#define GET_BAT_LEVEL (tsc2003getVal(CMD_BAT0|INTERNAL_ON))
-
-void (*binCaller)(char * param)=(void (*)(char *))0x03000000;
+void (*binCaller)(char * param)=(void (*)(char *))SDRAM_START;
 
 struct config_image cfg[MAX_CFG];
 struct config_gene cfgG;
 
-char * errorMsg[]={
-"Error initializing HD",                  /*err(0)*/
-"Error: should not come back from OS",    /*err(1)*/
-"Error opening file avlo.cfg",            /*err(2)*/
-"Bad config file (avlo.cfg)",             /*err(3)*/
-};
+
 
 int usbstate,usbenable=0,cleanUSBMsg=0;
 int chkdefault,cnt=0,cursorPos=0,delayCnt;
 int errNoDefault=0,cntNoDefault=0,stateNoDefault=0;
 int nbOff=0;
-int * wdt = (int*)0x30a1a;
+int * wdt = (int*)WDT_WAKE_BIT;
 int maxRepeat;
 char tmp_txt[100];
 
-extern char bg_img[320*4*240];
+extern char bg_img[SCREEN_REAL_WIDTH*4*SCREEN_HEIGHT];
 extern struct graphicsBuffer * buffers;
 
 struct avlo_cfg * ptr_cfg;
-
-
 
 void start_avlo(void)
 {
     int ret,nbCfg,key,redraw;
     int i,dd;
-    int x,y,h,w;
     int bat_loop=0;
     int pass_key_release=0;
            
@@ -135,58 +84,45 @@ void start_avlo(void)
 #endif
     ini_font();
     setPlane(BMAP1);
-    setState(BMAP1,OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 |OSD_BITMAP_8BIT|OSD_BITMAP_0TRANS);
-
+   // setState(BMAP1,OSD_BITMAP_RAMCLUT |  OSD_BITMAP_ZX2   | OSD_BITMAP_ZY1   |OSD_BITMAP_8BIT|OSD_BITMAP_0TRANS);
+    
 #ifdef HAVE_IMG   
     showPlane(VID1);
 #endif
     showPlane(BMAP1);
-
+    
 loopErr:
     ptr_cfg = &default_cfg;
     usbenable=0;cleanUSBMsg=0;cnt=0;cursorPos=0;errNoDefault=0;cntNoDefault=0;stateNoDefault=0;nbOff=0;
     clearScreen(COLOR_TSP);
-    setFont(STD8X13);
-    printf("A\n");
-    putS(COLOR_TXT,COLOR_TSP,0,0,"A");
+    setFont(TXT_FONT);
     
-    getStringS("HD Init",&w,&h);                        
-    drawBox(w,2*h,&x,&y);
-    putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"HD Init");
+    printIniLevel(0);
     
+    HD_init_string();
     init_disk();
 
-    printf("AV\n");
-    setFont(STD8X13);
-    putS(COLOR_TXT,COLOR_TSP,0,0,"AV");
+    printIniLevel(1);
 
-loop:
     ptr_cfg = &default_cfg;
-    getStringS("Reading config",&w,&h);                        
-    drawBox(w,2*h,&x,&y);
-    putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"Reading config");
     
+    readingConfString();
+        
     if((ret=file_open("/avlo.cfg"))<0)
     {
-        err(2);
+        doFault(0);
         goto loopErr;        
     }
 
-    printf("AVL\n");
-    setFont(STD8X13);
-    putS(COLOR_TXT,COLOR_TSP,0,0,"AVL");
-
+    printIniLevel(2);
 
     if((nbCfg=do_parse(cfg,&cfgG))<0)
     {
-        printf("Error getting config info\n");
-        err(3);
+        doFault(1);
         goto loopErr;
     }
 
     file_close();
-
-
     
     chkdefault=(!cfgG.defBin[0]==0);
 
@@ -202,11 +138,12 @@ loop:
 
     printf("Gal opt:\n-default=%s (=>%s),\n-repeat=%d,\n-time out=%d\n-bg img=%s\n",cfgG.defBin,
         chkdefault?"has default":"no default",maxRepeat,delayCnt,cfgG.bg_img[0]!=0?cfgG.bg_img:"NO IMG");
+#ifdef LOAD_BG
 #ifndef HAVE_IMG
     if(cfgG.bg_img[0] != 0)
     {
         int fd_img = fopen(cfgG.bg_img,O_RDONLY);
-        int size = 320*240*4+sizeof(struct avlo_cfg);
+        int size = SCREEN_REAL_WIDTH*4*SCREEN_HEIGHT+sizeof(struct avlo_cfg);
         if(fd_img<0)
             printf("[WARNING] File not found: %s\n",cfgG.bg_img);
         else
@@ -216,7 +153,7 @@ loop:
             {
                 showPlane(VID1);
                 /* changing cfg ptr */
-                ptr_cfg = (struct avlo_cfg*)(buffers[VID1].offset+320*240*4);
+                ptr_cfg = (struct avlo_cfg*)(buffers[VID1].offset+SCREEN_REAL_WIDTH*SCREEN_HEIGHT*4);
                 init_colors();
             }
             else
@@ -229,9 +166,8 @@ loop:
         printf("[WARNING] No img defined\n");
     }
 #endif
-    printf("AVLO\n");
-    setFont(STD8X13);
-    putS(COLOR_TXT,COLOR_TSP,0,0,"AVLO");
+#endif
+    printIniLevel(2);
 
     usbstate=-1;
     
@@ -280,7 +216,7 @@ loop:
                 }
             }
 
-            if (((key&BTMASK_ON)||(key&BTMASK_RIGHT)) && !usbenable)
+            if (((key&BTMASK_ON)||(key&BTMASK_RIGHT)||(key&BTMASK_OK)) && !usbenable)
             {
                 // let's find out the file extension
                 char * ext=strrchr(cfg[cursorPos].image,'.')+1;
@@ -291,13 +227,14 @@ loop:
                                 //&& loadCJBM(cfg[cursorPos].image,cfgG.key))
                                 && fastLoadCJBM(cfg[cursorPos].image))
                     launch=1;
-                else if (loadFile(cfg[cursorPos].image,(char*)0x03000000,1))
+                else if (loadFile(cfg[cursorPos].image,(char*)SDRAM_START,1))
                     launch=1;
 
                 if(launch)
                 {
                     printf("File loaded, now launching\n");
                     printf("append=%s\n",cfg[cursorPos].append);
+                    ata_stop_HD();
                     if(cfg[cursorPos].append[0])
                     {
                         snprintf(tmp_txt,100,"AV_Pinit=/bin/init_cust myinit=%s",cfg[cursorPos].append);
@@ -328,15 +265,9 @@ loop:
                 else
                 {
                     if(usbstate)
-                    {                        
-                        getStringS("USB Enable, PRESS F3 to resume",&w,&h);
-                        
-                        printf("enable usb\n");
+                    {                 
                         usbenable=1;
-                        //fillRect(COLOR_BOX,60, 100, 200, 40);  
-                        drawBox(w,2*h,&x,&y);
-                        putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"USB Enable, PRESS F3 to resume");
-
+                        USBEnableString();
                         usb_enable();
                         waitKeyReleased(NO_TIME_OUT);  
                         for(dd=0;dd<1000;dd++) /* nothing */;  
@@ -366,18 +297,25 @@ void drawBat(void)
     if(!POWER_CONNECTED)
     {
         power = GET_BAT_LEVEL;
-        if(power < 1320)
-            color = COLOR_PWR_L0;
-        else if(power < 1400)
-            color = COLOR_PWR_L1;
-        else if(power < 1480)
-            color = COLOR_PWR_L2;
-        else
+        if(GET_BAT_LEVEL==-1)
+        {
+            level = 0;
             color = COLOR_PWR_L3;
-
-        if(power > 1200)
-            level = (int)(power - 1300) / 15;
-            
+        }
+        else
+        {
+            if(power < 1320)
+                color = COLOR_PWR_L0;
+            else if(power < 1400)
+                color = COLOR_PWR_L1;
+            else if(power < 1480)
+                color = COLOR_PWR_L2;
+            else
+                color = COLOR_PWR_L3;
+    
+            if(power > 1200)
+                level = (int)(power - 1300) / 15;
+        }    
         if(level > 20)
             level = 20;
         frame_color = COLOR_PWR_FRAME_DC_OFF;
@@ -411,8 +349,8 @@ void drawBat(void)
 
 void drawBox(int txt_width,int txt_height,int * start_x,int * start_y)
 {
-    *start_x = (320-(txt_width+8))/2;
-    *start_y = (240-(txt_height+8))/2;
+    *start_x = (LCD_WIDTH-(txt_width+8))/2;
+    *start_y = (LCD_HEIGHT-(txt_height+8))/2;
     drawRect(COLOR_MSG_BOX_0,*start_x,*start_y,txt_width+8,txt_height+8);
     drawRect(COLOR_MSG_BOX_1,*start_x+1,*start_y+1,txt_width+6,txt_height+6);
     fillRect(COLOR_BOX,*start_x+2,*start_y+2,txt_width+4,txt_height+4);
@@ -420,12 +358,14 @@ void drawBox(int txt_width,int txt_height,int * start_x,int * start_y)
     *start_y += 4;
 }
 
-void (*decode)(char * src,char * dst)=(void (*)(char * src,char * dst))0x03F00470;
+void (*decode)(char * src,char * dst)=(void (*)(char * src,char * dst))AJZ_DECODE_ADDR;
 
 int fastLoadCJBM(char * filename)
 {
     unsigned char * cptr;
     int x,y,h,w;
+    if(decode)
+    {
     getStringS("File Loaded, decompressing...",&w,&h);
     if (!loadFile(filename,(char*)0x03800000,1))
     {
@@ -433,92 +373,62 @@ int fastLoadCJBM(char * filename)
     }
     printf("File loaded, now decompressing\n");
     //fillRect(COLOR_BOX,60, 100, 230, 40);
-    setFont(STD6X9);
+    setFont(TXT_FONT);
     getStringS("File Loaded, decompressing...",&w,&h);
-    drawBox(w,2*h,&x,&y);
-    putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"File Loaded, decompressing...");
+    drawBox(w,h,&x,&y);
+    putS(COLOR_TXT,COLOR_BOX,x,y,"File Loaded, decompressing...");
     cptr=(unsigned char *)0x03F00860+0x10;
     *cptr=0;
     decode((char*)0x03800000,(char*)0x03000000);
     printf("decompress done\n");
-
+    }
+    else
+        printf("No decode function\n");
     return 1;
 }
 
 void moveCursor(int direction)
 {
-    int h,w;
+    int h,w,offset;
     // unhighlight current
-    setFont(STD6X9);
-    putS(COLOR_TXT,COLOR_TSP,ENTRY_X, ENTRY_Y + cursorPos*9,cfg[cursorPos].label);
+    setFont(TXT_FONT);
     getStringS(cfg[cursorPos].label,&w,&h);
+    offset = h;
     w--;
     h--;
-    drawLine(COLOR_TSP,ENTRY_X-1,ENTRY_Y+1+ cursorPos*9,ENTRY_X-1,ENTRY_Y+h-1+ cursorPos*9);
-    drawLine(COLOR_TSP,ENTRY_X+w+1,ENTRY_Y+1+ cursorPos*9,ENTRY_X+w+1,ENTRY_Y+h-1+ cursorPos*9);
-    drawLine(COLOR_TSP,ENTRY_X-2,ENTRY_Y+2+ cursorPos*9,ENTRY_X-2,ENTRY_Y+h-2+ cursorPos*9);
-    drawLine(COLOR_TSP,ENTRY_X+w+2,ENTRY_Y+2+ cursorPos*9,ENTRY_X+w+2,ENTRY_Y+h-2+ cursorPos*9);
+    putS(COLOR_TXT,COLOR_TSP,ENTRY_X, ENTRY_Y + cursorPos*offset,cfg[cursorPos].label);    
+    drawLine(COLOR_TSP,ENTRY_X-1,ENTRY_Y+1+ cursorPos*offset,ENTRY_X-1,ENTRY_Y+h-1+ cursorPos*offset);
+    drawLine(COLOR_TSP,ENTRY_X+w+1,ENTRY_Y+1+ cursorPos*offset,ENTRY_X+w+1,ENTRY_Y+h-1+ cursorPos*offset);
+    drawLine(COLOR_TSP,ENTRY_X-2,ENTRY_Y+2+ cursorPos*offset,ENTRY_X-2,ENTRY_Y+h-2+ cursorPos*offset);
+    drawLine(COLOR_TSP,ENTRY_X+w+2,ENTRY_Y+2+ cursorPos*offset,ENTRY_X+w+2,ENTRY_Y+h-2+ cursorPos*offset);
     // move to nxt
     cursorPos+=direction;
     // highlight nxt
-    putS(COLOR_TXT,COLOR_SEL,ENTRY_X, ENTRY_Y + cursorPos*9,cfg[cursorPos].label);
+    putS(COLOR_TXT,COLOR_SEL,ENTRY_X, ENTRY_Y + cursorPos*offset,cfg[cursorPos].label);
     getStringS(cfg[cursorPos].label,&w,&h);
     w--;
     h--;
-    drawLine(COLOR_SEL,ENTRY_X-1,ENTRY_Y+1+ cursorPos*9,ENTRY_X-1,ENTRY_Y+h-1+ cursorPos*9);
-    drawLine(COLOR_SEL,ENTRY_X+w+1,ENTRY_Y+1+ cursorPos*9,ENTRY_X+w+1,ENTRY_Y+h-1+ cursorPos*9);
-    drawLine(COLOR_SEL,ENTRY_X-2,ENTRY_Y+2+ cursorPos*9,ENTRY_X-2,ENTRY_Y+h-2+ cursorPos*9);
-    drawLine(COLOR_SEL,ENTRY_X+w+2,ENTRY_Y+2+ cursorPos*9,ENTRY_X+w+2,ENTRY_Y+h-2+ cursorPos*9);
+    drawLine(COLOR_SEL,ENTRY_X-1,ENTRY_Y+1+ cursorPos*offset,ENTRY_X-1,ENTRY_Y+h-1+ cursorPos*offset);
+    drawLine(COLOR_SEL,ENTRY_X+w+1,ENTRY_Y+1+ cursorPos*offset,ENTRY_X+w+1,ENTRY_Y+h-1+ cursorPos*offset);
+    drawLine(COLOR_SEL,ENTRY_X-2,ENTRY_Y+2+ cursorPos*offset,ENTRY_X-2,ENTRY_Y+h-2+ cursorPos*offset);
+    drawLine(COLOR_SEL,ENTRY_X+w+2,ENTRY_Y+2+ cursorPos*offset,ENTRY_X+w+2,ENTRY_Y+h-2+ cursorPos*offset);
     // change bottom status
     fillRect(COLOR_TSP,STATUS_X, STATUS_Y, 200, 10);
     snprintf(tmp_txt,100,"%s%s",BTM_TXT,cfg[cursorPos].image);
     putS(COLOR_TXT,COLOR_TSP,STATUS_X, STATUS_Y,tmp_txt);
 }
 
-void err(int i)
-{
-    int key=0;
-    int x,y,h,w;
-    
-    printf("error, let's loop\n");
 
-    //fillRect(COLOR_BOX,60, 100, 230, 40);
-    setFont(STD6X9);    
-    getStringS("USB is enable, you can access the HD",&w,&h);
-    drawBox(w,3*h,&x,&y);
-    putS(COLOR_TXT,COLOR_BOX,x,y,errorMsg[i]);
-    putS(COLOR_TXT,COLOR_BOX,x,y+h,"USB is enable, you can access the HD");
-    putS(COLOR_TXT,COLOR_BOX,x,y+2*h,"Press a key to retry");
-    usb_enable();
-    usbenable=1;
-    while(1)
-    {
-        key=read_btn();
-        if(key&BTMASK_ANY)
-        {
-            if(key&BTMASK_OFF)
-                chkOFF(key);
-            else
-                break;
-        }
-    }
-}
 
 void chkOFF(int key)
 {
     int i;
-    int x,y,h,w;
     if (key&BTMASK_OFF)
     {
         nbOff++;
         if(nbOff>MAX_OFF_PRESS)
         {
-            //fillRect(COLOR_BOX,60, 100, 200, 40);
-            setFont(STD6X9);    
-            getStringS("Shutting down NOW !!",&w,&h);
-            drawBox(w,2*h,&x,&y);
-            putS(COLOR_TXT,COLOR_BOX,x,y+h/2,"Shutting down NOW !!");
-            printf("Shutting down NOW !!\n");
+            shutDownString();
             if(usbenable)
             {
                 usb_disable();
@@ -577,12 +487,31 @@ void affUSB()
         usbstate=usbIsConnected();
         if(usbstate)
         {
-            setFont(STD6X9);
-            putS(COLOR_TXT,0x0,USB_X,USB_Y,"USB");
+           USB_connDisp();
         }
         else
         {
-            fillRect(COLOR_TSP,USB_X,USB_Y, 20, 10);
+            USB_connHide();
+        }
+    }
+}
+
+void doFault(int faultNum)
+{
+    int key;
+    printFault(faultNum);
+    usb_enable();
+    usbenable=1;
+    printf("error, let's loop\n");
+    while(1)
+    {
+        key=read_btn();
+        if(key&BTMASK_ANY)
+        {
+            if(key&BTMASK_OFF)
+                chkOFF(key);
+            else
+                break;
         }
     }
 }
@@ -607,13 +536,14 @@ int processDefault(int key,int nbCfg)
                 if(ext[0]=='a' && ext[1]=='j' && ext[2]=='z' && ext[3]=='\0'                        
                                 && fastLoadCJBM(cfg[pos].image))
                     launch=1;
-                else if (loadFile(cfg[pos].image,(char*)0x03000000,1))
+                else if (loadFile(cfg[pos].image,(char*)SDRAM_START,1))
                     launch=1;
 
                 if(launch)
                 {
                     printf("File loaded, now launching\n");
                     printf("append=%s\n",cfg[pos].append);
+                    ata_stop_HD();
                     if(cfg[pos].append[0])
                     {
                         snprintf(tmp_txt,100,"AV_Pinit=/bin/init_cust myinit=%s",cfg[pos].append);
@@ -625,25 +555,7 @@ int processDefault(int key,int nbCfg)
                 }
                 else
                     printf("error loading %s\n",cfg[pos].image);
-/*            
-                if(loadFile(cfg[pos].image,(char*)0x03000000,1))
-                {
-                    printf("append=%s\n",cfg[pos].append);
-                    if(cfg[pos].append[0])
-                    {
-                        snprintf(tmp_txt,100,"AV_Pinit=/bin/init_cust myinit=%s",cfg[pos].append);
-                        binCaller(tmp_txt);
-                    }
-                    else
-                        binCaller(NULL);
-                    err(1);
-                    return -1;
-                }
-                else
-                    printf("error loading %s\n",cfg[cursorPos].image);
-*/
             }
-
             errNoDefault=1;
             chkdefault=0;
             cnt=0;
@@ -658,14 +570,6 @@ int processDefault(int key,int nbCfg)
         }
     }
     return 0;
-}
-
-void drawProgress(int offset,int length,int mode)
-{
-    if(mode)
-        fillRect(COLOR_LOAD,BAR_X+(BAR_W*offset)/length, BAR_Y, 1 , BAR_H);
-    else
-        fillRect(COLOR_LOAD,BAR_X,BAR_Y, (BAR_W*offset)/length+1 , BAR_H);
 }
 
 void printErr(int key)
@@ -701,22 +605,26 @@ void drawMenu(int nbCfg)
 {
     int pos;
     int bg_color;
-    int w,h;
+    int w,h,offset;
 
     // clean AVLO txt */
     clearScreen(COLOR_TSP);
 
-    if(cleanUSBMsg)
+    /*if(cleanUSBMsg)
     {
         fillRect(COLOR_TSP,60, 100, 200, 40);
         cleanUSBMsg=0;
-    }
+    }*/
 
     fillRect(COLOR_TSP,ENTRY_X, ENTRY_Y, 100-7, 100-7);
 
     drawRect(COLOR_MSG_BOX_0,BAR_X-2,BAR_Y-2,BAR_W+4,BAR_H+4);
     drawRect(COLOR_MSG_BOX_1,BAR_X-1,BAR_Y-1,BAR_W+2,BAR_H+2);
     fillRect(COLOR_TSP,BAR_X, BAR_Y, BAR_W, BAR_H);
+    
+    setFont(TXT_FONT);
+    getStringS("M",&w,&h);
+    offset=h;
 
     for(pos=0;pos<nbCfg+1;pos++)
     {
@@ -729,18 +637,18 @@ void drawMenu(int nbCfg)
             bg_color = COLOR_TSP;
         }
 
-        setFont(STD6X9);
-        putS(COLOR_TXT,bg_color,ENTRY_X, ENTRY_Y + pos*9,cfg[pos].label);
+        setFont(TXT_FONT);
+        putS(COLOR_TXT,bg_color,ENTRY_X, ENTRY_Y + pos*offset,cfg[pos].label);
 
         if(pos==cursorPos)
         {
             getStringS(cfg[cursorPos].label,&w,&h);
             w--;
             h--;
-            drawLine(COLOR_SEL,ENTRY_X-1,ENTRY_Y+1+ cursorPos*9,ENTRY_X-1,ENTRY_Y+h-1+ cursorPos*9);
-            drawLine(COLOR_SEL,ENTRY_X+w+1,ENTRY_Y+1+ cursorPos*9,ENTRY_X+w+1,ENTRY_Y+h-1+ cursorPos*9);
-            drawLine(COLOR_SEL,ENTRY_X-2,ENTRY_Y+2+ cursorPos*9,ENTRY_X-2,ENTRY_Y+h-2+ cursorPos*9);
-            drawLine(COLOR_SEL,ENTRY_X+w+2,ENTRY_Y+2+ cursorPos*9,ENTRY_X+w+2,ENTRY_Y+h-2+ cursorPos*9);
+            drawLine(COLOR_SEL,ENTRY_X-1,ENTRY_Y+1+ cursorPos*offset,ENTRY_X-1,ENTRY_Y+h-1+ cursorPos*offset);
+            drawLine(COLOR_SEL,ENTRY_X+w+1,ENTRY_Y+1+ cursorPos*offset,ENTRY_X+w+1,ENTRY_Y+h-1+ cursorPos*offset);
+            drawLine(COLOR_SEL,ENTRY_X-2,ENTRY_Y+2+ cursorPos*offset,ENTRY_X-2,ENTRY_Y+h-2+ cursorPos*offset);
+            drawLine(COLOR_SEL,ENTRY_X+w+2,ENTRY_Y+2+ cursorPos*offset,ENTRY_X+w+2,ENTRY_Y+h-2+ cursorPos*offset);
             fillRect(COLOR_TSP,STATUS_X, STATUS_Y, 200, 10);
             snprintf(tmp_txt,100,"%s%s",BTM_TXT,cfg[pos].image);
             putS(COLOR_TXT,COLOR_TSP,STATUS_X, STATUS_Y,tmp_txt);

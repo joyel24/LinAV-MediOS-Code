@@ -4,7 +4,7 @@ include ../../Makefile.conf
 ASFLAGS  += -I../../include
 GCCFLAGS += -I../../include
 
-FONT_LIST = 6x9 8x13
+FONT_LIST = 6x9 8x13 
 
 OBJS = $(FONT_LIST:%=%.o)
 

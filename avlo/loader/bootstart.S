@@ -1,3 +1,4 @@
+.include "../include/target/arch/asm_def.h"
 
 .text
 
@@ -15,7 +16,7 @@ entry_code:
     .space 0x20, 0
 
 move_code:
-    ldr r0, __sdram_start_ptr  
+    ldr r0, =ramStart
     ldr r1, __start_kernel_ptr
     ldr r2, __end_kernel_ptr
     sub r2, r2, r1
@@ -35,5 +36,4 @@ __bss_start_ptr:       .word _bss_start
 __bss_end_ptr:         .word _bss_end
 __start_kernel_ptr:    .word _start_kernel
 __end_kernel_ptr:      .word _end_kernel
-__sdram_start_ptr:     .word 0x03000000
 __code_start_ptr:      .word start_avlo

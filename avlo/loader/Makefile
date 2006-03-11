@@ -24,11 +24,11 @@ endif
 
 all:$(TARGET)
 
-SUBDIRS = ../lib-src
+SUBDIRS = target ../lib-src
 
 # Rule to make executable
 $(TARGET) : subdirs $(OBJS)
-	$(LD) -N -T../$(TARGET_DEVICE)_AvLo.lds -o $(TARGET).elf $(OBJS) $(LDFLAGS)
+	$(LD) -N -T../$(TARGET_DEVICE)_AvLo.lds -o $(TARGET).elf $(OBJS) target/arch/*.o $(LDFLAGS)
 	$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).bin
 	@$(RM) -f $(TARGET).elf
 	@$(MV) -f $(TARGET).bin $(BUILD_DIR)

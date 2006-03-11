@@ -1,5 +1,5 @@
 /*
-*   lib/target/arch_AV3XX/ata.c
+*   lib/target/arch_AV1XX/ata.c
 *
 *   AvLo - linav project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -23,6 +23,7 @@ void arch_ata_reset_HD(void)
     printf("HD reset\n");
     cpld_set_port_2(CPLD_HD_RESET);
     cpld_clear_port_2(CPLD_HD_RESET);
+
 }
 
 void arch_ata_powerUp_HD(void)

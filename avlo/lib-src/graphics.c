@@ -20,7 +20,9 @@
 
 #include <graphics.h>
 #include <osd.h>
-
+#include <hardware.h>
+#include <cpld.h>
+#include <gio.h>
 #include <gui_pal.h>
 #include <colordef.h>
 #include <font.h>
@@ -42,8 +44,7 @@ extern struct graphics_operations g32ops;
 
 struct graphicsBuffer BITMAP_1 = {
     offset             : 0,
-    state              : OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 |
-                    OSD_BITMAP_8BIT | COLOR_TRSP << OSD_BITMAP_A_SHIFT,
+    state              : OSD_BMAP_CFG,
     enable             : 0,
     width              : SCREEN_WIDTH,
     real_width         : SCREEN_REAL_WIDTH,
@@ -80,9 +81,8 @@ extern FONT_ID font_table[NBFONT];
 int     current_font=0;
 int     current_plane=0;
 
-
 #define restoreComp(COMP,BUFF)   {  osdSetComponentOffset      (COMP, BUFF.offset); \
-                                    osdSetComponentSize        (COMP, 2*BUFF.width, BUFF.height); \
+                                    osdSetComponentSize        (COMP, 2*BUFF.real_width, BUFF.height); \
                                     osdSetComponentPosition    (COMP, BUFF.x, BUFF.y); \
                                     osdSetComponentSourceWidth (COMP, ((BUFF.width*BUFF.bitsPerPixel)/32)/8); \
                                     if(BUFF.enable) \
@@ -112,6 +112,8 @@ void ini_graphics(unsigned int vid1_address)
     buffers[1]=&VIDEO_1;
 
     osdInit();
+    
+    lcd_ON();
 
     /* reset everything */
     osdSetComponentConfig(OSD_VIDEO1,  0);
@@ -142,7 +144,7 @@ void iniComponent(int vplane,struct graphicsBuffer * buff,unsigned int offset)
         offset+=(32-diff);
     buff->offset=offset;
     osdSetComponentOffset(buffers_comp[vplane],offset);
-    osdSetComponentSize(buffers_comp[vplane], 2*buff->width, buff->height);
+    osdSetComponentSize(buffers_comp[vplane], 2*buff->real_width, buff->height);
     osdSetComponentPosition(buffers_comp[vplane],buff->x, buff->y);
     osdSetComponentSourceWidth(buffers_comp[vplane], ((buff->width*buff->bitsPerPixel)/32)/8);
     if(buff->bitsPerPixel==8)
@@ -423,6 +425,7 @@ void scrollWindowHoriz(unsigned int bgColor, int x, int y,int width, int height,
 
 void setFont(int font_nb)
 {
+    //printf("setting font to %x (old=%x)\n",font_nb,current_font);
     current_font=font_nb;
 }
 

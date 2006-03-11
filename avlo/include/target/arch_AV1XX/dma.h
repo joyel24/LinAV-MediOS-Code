@@ -1,7 +1,7 @@
 /*
-*   include/hardware.h
+*   include/target/arch_AV3XX/dma.h
 *
-*   AvLo - linav project
+*   AvLo - MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -10,15 +10,12 @@
 * KIND, either express of implied.
 */
 
-#ifndef __HARDWARE_H
-#define __HARDWARE_H
+#ifndef __DMA_ARCH_H
+#define __DMA_ARCH_H
 
-#include <io.h>
-#include <cpld.h>
+#define DMA_SDRAM          0x5
+#define DMA_ATA            0x1
 
-#define AV3XX_TYPE 1
-#define AV1XX_TYPE 2
+#define DMA_ATA_ADDRESS    0x10400000
 
-#include <target/arch/arch_def.h>
-
-#endif  /* __HARDWARE_H */
+#endif

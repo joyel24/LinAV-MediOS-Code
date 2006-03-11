@@ -33,8 +33,11 @@ int cpld_port_array[4] = {
 void init_cpld(void)
 {
     int version;
+    
+    arch_cpld_pre_init();
 
     cpld_do_select();
+    
     outw(cpld_port_state[CPLD1],CPLD_PORT1);
     outw(cpld_port_state[CPLD2],CPLD_PORT2);
     outw(cpld_port_state[CPLD3],CPLD_PORT3);

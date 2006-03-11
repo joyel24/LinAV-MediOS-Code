@@ -1,5 +1,5 @@
 /*
-*   include/hardware.h
+*   lib/target/arch_AV1XX/cpld.c
 *
 *   AvLo - linav project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,15 +10,16 @@
 * KIND, either express of implied.
 */
 
-#ifndef __HARDWARE_H
-#define __HARDWARE_H
+#include <stddef.h>
 
 #include <io.h>
+#include <hardware.h>
 #include <cpld.h>
 
-#define AV3XX_TYPE 1
-#define AV1XX_TYPE 2
+int arch_cpld_get_version(void){
+    return (cpld_read(CPLD2) & 0x000F) | ((cpld_read(CPLD3) & 0x0007)<<4);
+}
 
-#include <target/arch/arch_def.h>
-
-#endif  /* __HARDWARE_H */
+void arch_cpld_pre_init(void) {
+    outw(0x1,CPLD_PORT3);
+}

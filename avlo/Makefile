@@ -1,8 +1,9 @@
-ARCH_NAME=AV3XX
+include Makefile.conf
 
 all:
-	@$(MAKE) -C include/target/ incdir_$(ARCH_NAME)
-	@$(MAKE) -C lib-src/target/ incdir_$(ARCH_NAME)
+	@$(MAKE) -C include/target/ incdir_$(TARGET_DEVICE)
+	@$(MAKE) -C lib-src/target/ incdir_$(TARGET_DEVICE)
+	@$(MAKE) -C loader/target/ incdir_$(TARGET_DEVICE)
 	@$(MAKE) -C loader/ all
         
 clean:

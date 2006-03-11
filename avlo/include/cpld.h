@@ -41,5 +41,6 @@ extern void init_cpld(void);
 extern int cpld_get_version(void);
 
 int arch_cpld_get_version(void);
+void arch_cpld_pre_init(void);
 
 #endif

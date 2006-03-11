@@ -1,7 +1,7 @@
 /*
-*   include/hardware.h
+*   include/target/arch_AV1XX/irqs.h
 *
-*   AvLo - linav project
+*   AvLO - MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -10,15 +10,15 @@
 * KIND, either express of implied.
 */
 
-#ifndef __HARDWARE_H
-#define __HARDWARE_H
 
-#include <io.h>
-#include <cpld.h>
+#ifndef __IRQS_ARCH_H
+#define __IRQS_ARCH_H
 
-#define AV3XX_TYPE 1
-#define AV1XX_TYPE 2
+#define NR_IRQS              32
 
-#include <target/arch/arch_def.h>
+#define IRQ_IDE              15  // ide
 
-#endif  /* __HARDWARE_H */
+#define IRQ_BTN_ON           18  // GIO0
+
+
+#endif

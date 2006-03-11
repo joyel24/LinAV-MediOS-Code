@@ -4,6 +4,8 @@
 
 #include "../include/colordef.h"
 #include "../include/avlo_cfg.h"
+#include "../include/target/arch/arch_def.h"
+#include "../include/target/arch/default_cfg.h"
 
 #include "parse_cfg.h"
 
@@ -103,7 +105,7 @@ int main(int argc, char* argv[]) {
     FILE * infile;
     FILE * outfile; 
 
-    w=320;h=240;
+    w=SCREEN_REAL_WIDTH;h=SCREEN_HEIGHT;
     
     char * ptr = (char*) &cfg;
     
@@ -141,6 +143,9 @@ int main(int argc, char* argv[]) {
     memcpy(&cfg,&default_cfg,sizeof(struct avlo_cfg));
     do_parse(&cfg);
     file_close();
+    
+    printf("Expecting img size: (w=%d,h=%d) struct size=%d => file size=%d\n",w,h,
+        sizeof(struct avlo_cfg),w*h*4+sizeof(struct avlo_cfg));
     
     for(i=0;i<h && !stop;i++)
     {

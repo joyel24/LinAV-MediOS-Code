@@ -16,6 +16,8 @@
 #include <graphics_struct.h>
 
 #define getOffset(x,y,buffer,type) ((type*)(x*((buffer->bitsPerPixel)>>3)+y*buffer->width*((buffer->bitsPerPixel)>>3)+buffer->offset))
+#define getOffset_big(x,y,buffer,type) ((type*)((x*((buffer->bitsPerPixel)>>3)+y*buffer->width*((buffer->bitsPerPixel)>>3))*2+buffer->offset))
+
 
 struct graphicsFont {
     char **  table;

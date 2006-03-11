@@ -1,7 +1,7 @@
 /*
-*   include/target/arch_AV3XX/arch_def.h
+*   include/target/arch_AV1XX/arch_def.h
 *
-*   AvLo - linav project
+*   AvLo - MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -10,21 +10,21 @@
 * KIND, either express of implied.
 */
 
-#ifndef __AV3XX_DEF_H
-#define __AV3XX_DEF_H
+#ifndef __AV1XX_DEF_H
+#define __AV1XX_DEF_H
 
-#define DEV_TYPE      AV3XX_TYPE
 
-#define SDRAM_START   0x03000000
-#define SDRAM_END     0x04000000
+#define DEV_TYPE      AV1XX_TYPE
+
+#define SDRAM_START   0x00900000
+#define SDRAM_END     0x01900000
 
 #define MALLOC_START  ((((unsigned int)&_end_kernel) & 0xFFFFF000)+0x1000)
 #define MALLOC_SIZE   (SDRAM_END-MALLOC_START)
 
 #define CONFIG_ARM_CLK 54000000
 
-#define AJZ_DECODE_ADDR 0x03F00470
-
+#define AJZ_DECODE_ADDR NULL
 
 /* uarts */
 
@@ -32,7 +32,7 @@
 #define UART1_BASE                        0x00030380
 
 /* DEBUG */
-#define DEBUG_UART              UART_0
+#define DEBUG_UART              UART_1
 
 //#define USE_DEBUG_ON_SCREEN     1
 
@@ -101,7 +101,7 @@
 #define WDT_WAKE_BIT 0x30a1a
 
 /* ide interface */
-#define IDE_BASE                          0x02400000
+#define IDE_BASE                          0x02500000
 
 #define IDE_DATA                          (IDE_BASE+0x000)
 #define IDE_ERROR                         (IDE_BASE+0x080)
@@ -120,7 +120,7 @@
 
 /* CPLD     */
 
-#define CPLD_BASE                         0x02600000
+#define CPLD_BASE                         0x05100000
 
 #define CPLD_PORT0                        (CPLD_BASE+0x000)
 #define CPLD_PORT1                        (CPLD_BASE+0x100)
@@ -145,29 +145,34 @@
 #define GIO_ENABLE_IRQ                    (GIO_BASE+0x10)  // GIO 0-7
 
 /* video */
+#define PREVIEW_BASE                       0x30780
+#define NTSC_PAL_BASE                      0x30800
 
-#define VIDEO_BASE                        0x30800
-#define LCD_BACK_LIGHT                    0x02600200
+#define SCREEN_WIDTH                      672
+#define SCREEN_REAL_WIDTH                 336
+#define SCREEN_HEIGHT                     234
+#define SCREEN_ORIGIN_X                   0x1e
+#define SCREEN_ORIGIN_Y                   0x0
 
-#define SCREEN_WIDTH                      320
-#define SCREEN_REAL_WIDTH                 320
-#define SCREEN_HEIGHT                     240
-#define SCREEN_ORIGIN_X                   20
-#define SCREEN_ORIGIN_Y                   18
+#define LCD_WIDTH                         165
+#define LCD_HEIGHT                        117
 
 #define MAX_COL                           78
 #define MAX_LINE                          38
 
-#define LCD_WIDTH                         320
-#define LCD_HEIGHT                        240
+#define BG_IMG_ADDR                       0x01500000
 
-#define BG_IMG_ADDR                       0x03b00000
+#define BTM_TXT      ""
+#define TXT_FONT STD8X13
+#define BOX_FONT STD8X13
 
-#define LOAD_BG
 /* osd */
 #define OSD_BASE                          0x30680
 
-#define OSD_BMAP_CFG  OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 | OSD_BITMAP_8BIT | OSD_BITMAP_0TRANS
+#define OSD_BMAP_CFG  OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX2 | OSD_BITMAP_ZY1 | OSD_BITMAP_8BIT | OSD_BITMAP_0TRANS
+
+//#define LOAD_BG
+
 /* video in/out */
 #define VIDEO_IO_BASE                     0x30780
 
@@ -181,10 +186,6 @@
     gio_setr(GIO_LCD_BACKLIGHT); \
 }
 
-#define BTM_TXT      "V4.2 | image: "
-#define TXT_FONT STD6X9
-#define BOX_FONT STD8X13
-
 /** USB state **/
 
 #define USB_STATE                         0x30a24
@@ -192,14 +193,15 @@
 #define FWIsConnected()                  ((cpld_read(CPLD3) & 0x8)==0)
 #define FW_enable()                       cpld_select(CPLD_FW_EXT,0x1)
 #define FW_disable()                      cpld_select(CPLD_FW_EXT,0x0)
-#define usb_enable()                     cpld_set_port_1(CPLD_USB);
-#define usb_disable()                    cpld_clear_port_1(CPLD_USB);
+#define usb_enable()                      cpld_set_port_1(CPLD_USB);
+#define usb_disable()                     cpld_clear_port_1(CPLD_USB);
 
 /** power state **/
 
 #define POWER_STATE                       0x30a24
 #define POWER_CONNECTED                   ((inw(POWER_STATE) >> 0x5)&0x1)
-#define GET_BAT_LEVEL                     (tsc2003getVal(CMD_BAT0|INTERNAL_ON))
+
+#define GET_BAT_LEVEL                     -1
 
 /** I2C **/
 
@@ -207,20 +209,11 @@
 
 /** BUTTONS **/
 
-#define BUTTON_BASE                       0x02600680
+#define BUTTON_BASE                       0x05100680
 
 #define BUTTON_PORT0          (BUTTON_BASE)
 #define BUTTON_PORT1          (BUTTON_BASE+0x80)
 #define BUTTON_PORT2          (BUTTON_BASE+0x100)
 
-#define READ_BUTTONS(VAL)                {       \
-    VAL =  inw(BUTTON_PORT0)&0x3;            \
-    VAL|=((inw(BUTTON_PORT1)&0x7)<<2);           \
-    VAL|=((inw(BUTTON_PORT2)&0x7)<<5);           \
-    /* ON, OFF keys */                           \
-    if(gio_is_set(GIO_ON_BTN))  VAL |= (0x1<<8); \
-    if(gio_is_set(GIO_OFF_BTN)) VAL |= (0x1<<9); \
-    VAL = (~VAL)&0x3FF;                          \
-}
 
 #endif  /* __HARDWARE_H */

@@ -120,8 +120,8 @@ void osdSetComponentOffset (int component, int address)
 {
 	int val;
 	int offset = address - SDRAM_START;
-
-	offset = offset >> 5;
+        
+        offset = offset >> 5;
 	outw(offset,osdLookupOffsetLO[component]);
 
 	offset = offset >> 16;

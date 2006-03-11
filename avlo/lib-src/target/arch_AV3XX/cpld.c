@@ -20,3 +20,6 @@ int arch_cpld_get_version(void){
     return (cpld_read(CPLD2) & 0x000F) | ((cpld_read(CPLD3) & 0x0007)<<4);
 }
 
+void arch_cpld_pre_init(void) {
+
+}
