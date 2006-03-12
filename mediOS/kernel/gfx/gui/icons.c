@@ -266,7 +266,7 @@ struct icon_elem * getIcon(char * name)
 
 void iniIcon(void)
 {
-    addIcon("linavLogo",(unsigned char*)linav_logo, 65, 10);
+    addIcon("mediosLogo",(unsigned char*)medios_logo, 51, 10);
     addIcon("usbIcon",(unsigned char*)usb_icon, 15, 6);
     addIcon("fwExtIcon",(unsigned char*)fw_ext_icon, 15, 6);
     addIcon("cfIcon",(unsigned char*)cf_icon, 15, 6);

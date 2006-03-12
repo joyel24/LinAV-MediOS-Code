@@ -152,8 +152,9 @@ void kernel_start (void)
 #endif
     do_bkpt();
     
-    //gui_start();
-    
+#ifdef AV3XX    
+    gui_start();
+#endif
     /* should we launch HALT */
     
     while(1);

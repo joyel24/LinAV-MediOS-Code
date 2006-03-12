@@ -101,6 +101,11 @@ void mainMenu_doAction(void * data)
     if(cfg_data->type==TYPE_INTERNAL)
     {
         printk("launching int app: %s\n",cfg_data->link);
+        if(strcmp(cfg_data->link,"browser"))
+        {
+            printk("Error ukn int app : %s\n",cfg_data->link);
+            return;
+        }
         if(!browseData)
             return;
         viewNewDir(browseData,NULL);
@@ -185,7 +190,7 @@ BITMAP * mainMenu_mkItemIcon(void * data)
 void mainMenu_start(void)
 {
     start_menu(&menu_cfg);
-    menu_EvtHandler(EVT_REDRAW);
+    gui_sendEvt(EVT_REDRAW);
 }
 
 void mainMenu_loop(void)
@@ -202,6 +207,7 @@ void mainMenu_loop(void)
     {
         if((evt=evt_getStatus(evt_hand))<0)
             printk("Bad evt (error:%d)\n",-evt);
+        statusLine_EvtHandler(evt);
         menu_EvtHandler(evt);
     }
 }
@@ -223,7 +229,7 @@ int mainMenu_ini(void)
     gfx_getStringSize("M", &w, &h);
     menu_cfg.root=rootMenu;
     menu_cfg.dx=5;
-    menu_cfg.dy=0;
+    menu_cfg.dy=h+11;
 
     printk("[ini_menu] menu loaded\n");
     

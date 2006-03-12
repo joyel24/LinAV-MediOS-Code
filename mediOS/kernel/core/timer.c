@@ -31,12 +31,14 @@ unsigned long tick __IRAM_DATA;
 
 struct tmr_s * tmr_head __IRAM_DATA;
 
+
 __IRAM_CODE void tmr_intAction(int irq,struct pt_regs * regs)
 {
     struct tmr_s * ptr=tmr_head;
-
+    
+    
     tick++;
-
+    
     /* HW check */
     BTN_CHK;
     
@@ -57,6 +59,8 @@ __IRAM_CODE void tmr_intAction(int irq,struct pt_regs * regs)
 #endif
 
     ATA_PWR_OFF_TASK;
+    
+    
     
     while(ptr!=NULL)
     {
@@ -125,7 +129,7 @@ void tmr_init(void)
     TMR_SET_MODE(TMR_MODE_STOP,TMR3);
 
     arch_tmr_init();
-
+    
     printk("[init] timer\n");
 }
 

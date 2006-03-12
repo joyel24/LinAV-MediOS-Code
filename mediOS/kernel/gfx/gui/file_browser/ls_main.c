@@ -51,16 +51,16 @@ struct browser_data realData = {
     nb_disp_entry   : 14,
 #endif
 #ifdef AV3XX
-    nb_disp_entry   : 20,
+    nb_disp_entry   : 22,
 #endif
 
     x_start         : 0,
-    y_start         : 18,
+    y_start         : 0,
     
     font            : STD6X9,
     
     width           : LCD_WIDTH,
-    height          : LCD_HEIGHT-38,
+    height          : LCD_HEIGHT-28,
     entry_height    : 10,
     
     draw_bottom_status : draw_bottom_status,

@@ -23,6 +23,7 @@
 #include <kernel/errors.h>
 
 struct evt_pipes evt_pipe_tab[NB_EVT_PIPES];
+struct tmr_s evt_timer;
 
 int evt_getHandler(unsigned int mask)
 {
@@ -73,11 +74,12 @@ void evt_send(struct evt_t * evt)
 
 MED_RET_T evt_getFullStatus(int num_evt_pipe, struct evt_t * evt)
 {
-    evt->evt=0;
-    evt->evt_class=0;
-    evt->data=0;
+    //printk("evt chk: handler=%d evt @ %x\n",num_evt_pipe,evt);
     if(num_evt_pipe >= 0 && num_evt_pipe < NB_EVT_PIPES && evt != NULL)
     {
+        evt->evt=0;
+        evt->evt_class=0;
+        evt->data=0;
         if(evt_pipe_tab[num_evt_pipe].used!=1)
             return -MED_ENBUSY;
         pipeRead(&(evt_pipe_tab[num_evt_pipe].evt_pipe), evt, sizeof(struct evt_t));
@@ -91,7 +93,7 @@ int evt_getStatus(int num_evt_pipe)
 {
     struct evt_t evt;
     int ret_val;
-    ret_val = evt_getFullStatus( num_evt_pipe,&evt);
+    ret_val = evt_getFullStatus(num_evt_pipe,&evt);
     if(ret_val!=MED_OK)
         return ret_val;
     return evt.evt;
@@ -110,6 +112,16 @@ int evt_purgeHandler(int num_evt_pipe)
     return MED_OK;
 }
 
+#if 1
+struct evt_t evt;
+void evt_timer_action(void)
+{
+    evt_send(&evt);
+    evt_timer.expires = tick + EVT_DELAY; /* 1s timer */
+    tmr_start(&evt_timer);
+}
+#endif
+
 void evt_init(void)
 {
     int i;
@@ -119,10 +131,13 @@ void evt_init(void)
         evt_pipe_tab[i].used=0;
     }
     
-    /*setup_timer(&evt_timer,"EVT");
+    evt.evt = EVT_TIMER;
+    evt.evt_class=TMR_CLASS;
+    
+    tmr_setup(&evt_timer,"EVT");
     evt_timer.action = evt_timer_action;
     evt_timer.expires = tick + EVT_DELAY;
-    start_timer(&evt_timer);*/
+    tmr_start(&evt_timer);
 
     printk("[init] evt\n");
 }

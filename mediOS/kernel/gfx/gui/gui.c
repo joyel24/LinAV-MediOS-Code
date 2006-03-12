@@ -30,9 +30,10 @@ void gui_start(void)
     iniBrowser();
     gfx_openGraphics();
     
-    mainMenu_ini();
-    
+    mainMenu_ini();    
     mainMenu_start();
+    
+    statusBar_ini();
     
     mainMenu_loop();
     

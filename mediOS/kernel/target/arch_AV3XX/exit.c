@@ -29,6 +29,10 @@ void arch_HaltMsg(void)
 {
     int h,w;
     char * msg = "Halting device";
+    
+    
+    gfx_openGraphics();
+    
     gfx_clearScreen(COLOR_WHITE);
     
     gfx_fontSet(STD8X13);

@@ -41,4 +41,8 @@
 void gui_start(void);
 void gui_sendEvt(int evt_num);
 
+/* status line */
+void statusBar_ini(void);
+void statusLine_EvtHandler(int evt);
+
 #endif
