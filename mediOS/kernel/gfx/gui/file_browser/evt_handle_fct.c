@@ -11,11 +11,17 @@
 */
 
 #include <sys_def/stddef.h>
-
-#include <kernel/graphics.h>
-#include <evt.h>
-#include <kernel/evt.h>
 #include <sys_def/colordef.h>
+#include <sys_def/string.h>
+
+#include <kernel/kernel.h>
+#include <kernel/graphics.h>
+#include <kernel/evt.h>
+
+#include <kernel/med.h>
+
+#include <evt.h>
+#include <file_type.h>
 
 #include <gui/file_browser.h>
 #include <gui/scrollbar.h>
@@ -32,6 +38,8 @@ void browserEvt(struct browser_data * bdata)
     char evt=0;
     gfx_getStringSize("M", &w, &h);
 
+    evt_purgeHandler(evt_handler);
+    
     while(!stop)
     {
         evt = evt_getStatus(evt_handler);
@@ -40,10 +48,12 @@ void browserEvt(struct browser_data * bdata)
             
         switch(evt)
         {
-            case BTN_ON:                
-                chgSelect(bdata,bdata->pos+bdata->nselect);
-                if(bdata->mode)
-                    stop=1;
+            case BTN_OFF:
+                stop=1;
+                break;
+            case BTN_ON:
+                if(bdata->mode==MODE_SELECT)
+                    chgSelect(bdata,bdata->pos+bdata->nselect);
                 break;
             case BTN_UP:
                 bdata->nselect--;
@@ -157,10 +167,26 @@ void browserEvt(struct browser_data * bdata)
                         }
                         break;
                     case TYPE_FILE:
-                        /*sprintf(path,"%s%s",bdata->path,bdata->list[bdata->pos+bdata->nselect].name);*/
-                        /*handle_type_other(path);                        */
-                        //printk("launching %s\n",path);
+                    {
+                        int type;
+                        char path[PATHLEN];
+                        sprintf(path,"%s%s",bdata->path,bdata->list[bdata->pos+bdata->nselect].name);
+                        printk("launching %s\n",path);
+                        type=get_file_type(path);
+                        if(type!=BIN_TYPE)
+                            printk("Bad type : %d\n",type);
+                        else
+                        {
+                            load_med(path);
+                            evt_purgeHandler(evt_handler);
+                            if(!viewNewDir(bdata,NULL))
+                            {
+                                stop=1;
+                                break;
+                            }
+                        }
                         break;
+                    }
                 }
                 break;
             case BTN_LEFT:
@@ -194,9 +220,9 @@ void browserEvt(struct browser_data * bdata)
                         }
                         break;
                     case TYPE_FILE:
-												chgSelect(bdata,bdata->pos+bdata->nselect);
-												if(bdata->mode)
-														stop=1;
+                        chgSelect(bdata,bdata->pos+bdata->nselect);
+                        if(bdata->mode==MODE_NOSELECT)
+                            stop=1;
                         break;
                 }
                 break;

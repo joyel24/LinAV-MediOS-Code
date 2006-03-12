@@ -14,11 +14,11 @@
 #ifndef __MAIN_MENU_H
 #define __MAIN_MENU_H
 
+#include <gui/gui.h>
 #include <gui/menu.h>
 #include <gui/icons.h>
 
-#define TYPE_STD    0
-#define TYPE_BACK   1
+
 
 struct cfg_menu {
     char name[MAX_TOKEN];
@@ -30,29 +30,29 @@ struct cfg_menu {
     struct cfg_menu * nxt;
 };
 
-int                 ini_menu       (void);
-int                 loadMenu       (char * filename);
-int                 do_parse       (struct cfg_menu ** cfg,char * filename);
-void                cfgCleanMenu   (struct cfg_menu * cfg);
-void                addItem        (struct cfg_menu ** cfg);
-int                 insertItem     (struct menu_item * item);
-void                cleanMenu      (struct menu_item * root);
-struct menu_item *  findParent     (struct menu_item * ptr, char * name);
-struct menu_item *  newItem        (struct cfg_menu * data);
-void                printMenu      (void);
-void                mk_submenu_str (void * data,char * str);
-void                mk_item_str    (void * data,char * str);
-BITMAP *            mk_sub_icon    (void * data);
-BITMAP *            mk_item_icon   (void * data);
-void                do_right       (void * data);
-void                do_on          (void * data);
-void                do_off         (void * data);
-void                do_F1          (void * data);
-void                do_F2          (void * data);
-void                do_F3          (void * data);
-void                enableMenu     (void);
-void                disableMenu    (void);
-int                 menuStatus     (void);
-
+void               mainMenu_doOff(void * data);
+void               mainMenu_doOn(void * data);
+void               mainMenu_doAction(void * data);
+void               mainMenu_doF1(void * data);
+void               mainMenu_doF2(void * data);
+void               mainMenu_doF3(void * data);
+void               mainMenu_mkSubmenuStr(void * data,char * str);
+void               mainMenu_mkItemStr(void * data,char * str);
+BITMAP *           mainMenu_mkSubIcon(void * data);
+BITMAP *           mainMenu_mkItemIcon(void * data);
+int                mainMenu_ini(void);
+void               mainMenu_clean(struct menu_item * root);
+struct menu_item * mainMenu_newItem(struct cfg_menu * data);
+struct menu_item * mainMenu_findParent(struct menu_item * ptr, char * name);
+int                mainMenu_insertItem(struct menu_item * item);
+void               mainMenu_addItem(struct cfg_menu ** cfg);
+void               mainMenu_cleanCfg(struct cfg_menu * cfg);
+int                mainMenu_parse(struct cfg_menu ** cfg,char * filename);
+int                mainMenu_doAddBackEntry(char * name,struct menu_item * up,struct menu_item *cur);
+int                mainMenu_load(char * filename);
+void               mainMenu_print(void);
+void               mainMenu_dispose(void);
+void               mainMenu_start(void);
+void               mainMenu_loop(void);
 #endif
 

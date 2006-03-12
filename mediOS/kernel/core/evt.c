@@ -97,6 +97,19 @@ int evt_getStatus(int num_evt_pipe)
     return evt.evt;
 }
 
+int evt_purgeHandler(int num_evt_pipe)
+{
+    if(num_evt_pipe >= 0 && num_evt_pipe < NB_EVT_PIPES)
+    {
+        if(evt_pipe_tab[num_evt_pipe].used!=1)
+            return -MED_ENBUSY;
+        evt_pipe_tab[num_evt_pipe].evt_pipe.nIN=evt_pipe_tab[num_evt_pipe].evt_pipe.nOUT=0;    
+    }
+    else
+        return -MED_EINVAL;    
+    return MED_OK;
+}
+
 void evt_init(void)
 {
     int i;

@@ -16,7 +16,7 @@
 
 #include <kernel/graphics.h>
 #include <evt.h>
-#include <gui/common_def.h>
+#include <gui/gui.h>
 #include <gui/menu.h>
 
 #define MAXPOS       10
@@ -162,6 +162,8 @@ void start_menu(struct menu_data * client_menu)
 {    
     current_menu=client_menu;
     
+    gfx_fontSet(current_menu->font);
+    
     if(current_menu->useOwnDisp)
     {
         gfx_planeSetSize(BMAP2,current_menu->width,current_menu->height,8);
@@ -181,7 +183,7 @@ void stop_menu(void)
         gfx_planeHide(BMAP2);
 }
 
-void menuEvtHandler(int evt)
+void menu_EvtHandler(int evt)
 {
     if(current_menu->isTxtMenu)
         normMenu_handler(evt);
@@ -264,7 +266,7 @@ void normMenu_handler(int evt)
             }
             else // launch plugin
             {
-                current_menu->right_action(pselect->data);
+                current_menu->do_action(pselect->data);
             }
             break;
         case BTN_LEFT:
@@ -571,7 +573,7 @@ void iconMenu_handler(int evt)
             }
             else // launch plugin
             {
-                current_menu->right_action(pselect->data);
+                current_menu->do_action(pselect->data);
             }            
             break;
         case BTN_F1:

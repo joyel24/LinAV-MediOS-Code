@@ -49,6 +49,8 @@
 
 #include <kernel/graphics.h>
 
+#include <gui/gui.h>
+
 void print_boot_info(void)
 {
     printk("SP: %08x\n",get_sp());
@@ -139,10 +141,10 @@ void kernel_start (void)
 
     printk("[init] END\n");
 
-/* evt & btn test */
 #if 0
    tst_fct();    
 #endif
+
 #ifdef BUILD_LIB
     do_bkpt();
     app_main();
@@ -150,10 +152,9 @@ void kernel_start (void)
 #endif
     do_bkpt();
     
-    //load_med("/doom.med");
-    load_med("/othello.med");
-
-    printk("Back from med\n");
-
+    //gui_start();
+    
+    /* should we launch HALT */
+    
     while(1);
 }

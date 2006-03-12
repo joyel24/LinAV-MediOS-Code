@@ -13,7 +13,7 @@
 #ifndef __GUI_FILE_BROWSER_H
 #define __GUI_FILE_BROWSER_H
 
-#include <gui/common_def.h>
+#include <gui/gui.h>
 
 struct dir_entry {
     char * name;
@@ -47,6 +47,7 @@ struct browser_data {
     int entry_height;
     
     int mode;
+    int font;
     
     struct dir_entry * list;
     int                listused;
@@ -103,9 +104,11 @@ void draw_bottom_status  (struct browser_data *bdata);
 void draw_file_size      (struct dir_entry * entry);
 void clear_status(struct browser_data *bdata);
 
-char *  browse     (char * path,int mode);
-void ini_file_browser  (void);
+//char *  browse     (char * path,int mode);
+//void ini_file_browser  (void);
 
+void browser_disposeBrowse(struct browser_data * bdata);
+struct browser_data * browser_NewBrowse(void);
 
 
 #endif

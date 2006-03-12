@@ -16,6 +16,8 @@
 #include <kernel/dir.h>
 #include <kernel/kernel.h>
 
+
+#include <gui/gui.h>
 #include <gui/parse_cfg.h>
 
 int file;
@@ -60,7 +62,10 @@ int nxt_token(char * buff)
 /* processing empty lines and comments */
     while (1) {
 	while ((ch = next_char()), ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
+        {
 	    if (ch == '\n' || ch == '\r') cfg_line_num++;
+            if (feof(file)) return 0;
+        }
 	if (feof(file)) return 0;
 	if (ch != '#') break;
 	while ((ch = next_char()), (ch != '\n' && ch != '\r'))

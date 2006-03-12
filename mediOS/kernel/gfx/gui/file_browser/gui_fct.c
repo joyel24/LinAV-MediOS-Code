@@ -11,10 +11,11 @@
 */
 
 #include <sys_def/string.h>
-#include <kernel/kernel.h>
-
-#include <kernel/graphics.h>
 #include <sys_def/colordef.h>
+
+#include <kernel/kernel.h>
+#include <kernel/graphics.h>
+#include <kernel/evt.h>
 
 #include <gui/icons.h>
 #include <gui/file_browser.h>
@@ -39,11 +40,19 @@ struct scroll_bar browser_scroll = {
     orientation  : VERTICAL
 };
 
+int evt_handler;
+
 void iniBrowser(void)
 {   
     gui_ls_upBitmap=&getIcon("upBitmap")->bmap_data;
     gui_ls_dwBitmap=&getIcon("dwBitmap")->bmap_data;
     gui_ls_dirBitmap=&getIcon("dirBitmap")->bmap_data;
+    
+    if((evt_handler=evt_getHandler(ALL_CLASS))<0)
+    {
+        printk("Can't get evt handler (error:%d)\n",-evt_handler);
+        evt_handler=-1;        
+    }
     gui_ls_mp3Bitmap=&getIcon("mp3Bitmap")->bmap_data;
     gui_ls_textBitmap=&getIcon("textBitmap")->bmap_data;
     gui_ls_imageBitmap=&getIcon("imageBitmap")->bmap_data;
@@ -72,7 +81,7 @@ int viewNewDir(struct browser_data *bdata,char *name)
         return 0;
     }
 
-    
+    gfx_fontSet(bdata->font);
     
     gfx_fillRect(COLOR_WHITE,bdata->x_start,bdata->y_start,bdata->width,bdata->height);
 
@@ -154,7 +163,6 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
                     gfx_drawBitmap(gui_ls_textBitmap, X+2, Y);
                     break;
                 case BIN_TYPE:
-                case SCRIPT_TYPE:
                 case UKN_TYPE:
                 default:
                     gfx_fillRect(COLOR_WHITE, X+2, Y, 8, 8); /* no icon */

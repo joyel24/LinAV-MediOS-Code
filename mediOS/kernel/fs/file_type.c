@@ -15,16 +15,10 @@
 
 #include <file_type.h>
 
-int is_grv_type(char *extension)
+int is_med_type(char *extension)
 {
     strlwr(extension);
-    return strcmp(extension, ".grv") == 0;
-}
-
-int is_script_type(char *extension)
-{
-    strlwr(extension);
-    return strcmp(extension, ".sh") == 0;
+    return strcmp(extension, ".med") == 0;
 }
 
 int is_image_type(char *extension)
@@ -71,10 +65,8 @@ int get_file_type(char * filename)
     
     if(ext == 0)
         return BIN_TYPE;
-    else if(is_grv_type(ext))
+    else if(is_med_type(ext))
         return BIN_TYPE;
-    else if(is_script_type(ext))
-        return SCRIPT_TYPE;
     else if(is_image_type(ext))
         return IMG_TYPE;
     else if(is_mp3_type(ext))

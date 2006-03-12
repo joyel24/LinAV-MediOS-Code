@@ -1,5 +1,5 @@
 /*
-* include/gui/common_def.h
+* include/gui/gui.h
 *
 *   AMOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,18 +10,16 @@
 * KIND, either express of implied.
 */
 
-#ifndef __GUI_COMMON_DEF_H
-#define __GUI_COMMON_DEF_H
+#ifndef __GUI_GUI_H
+#define __GUI_GUI_H
 
 
-#define TYPE_STD    0
-#define TYPE_BACK   1
+#define TYPE_STD      0
+#define TYPE_BACK     1
+#define TYPE_DIR      2
+#define TYPE_FILE     3
 
-
-#define TYPE_DIR    2
-#define TYPE_FILE   3
-
-#define TYPE_INT_PLUG 4
+#define TYPE_INTERNAL 4
 
 #define LEFT_SCROLL  0
 #define RIGHT_SCROLL 1
@@ -34,5 +32,13 @@
 
 #define MODE_COPY   0
 #define MODE_MOVE   1
+
+#define MAX_TOKEN 250
+
+#define MODE_SELECT   0
+#define MODE_NOSELECT 1
+
+void gui_start(void);
+void gui_sendEvt(int evt_num);
 
 #endif

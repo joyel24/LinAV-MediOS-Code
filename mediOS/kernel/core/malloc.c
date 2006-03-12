@@ -358,6 +358,15 @@ void mem_addPool(void *buf,unsigned int len)
     b->free_list.nxt=b->free_list.prev=NULL;
 }
 
+void mem_printStat(void)
+{
+    unsigned int curalloc_user,curalloc_kernel,totfree, maxfree;
+    mem_stat(&curalloc_user,&curalloc_kernel,&totfree,&maxfree);
+    printk("Free: %x | alloc USER: %x, kernel: %x | biggest free block: %x\n",
+        totfree,curalloc_user,curalloc_kernel,maxfree);
+}
+
+
 void mem_stat(unsigned int *curalloc_user, unsigned int *curalloc_kernel,
             unsigned int *totfree, unsigned int *maxfree)
 {

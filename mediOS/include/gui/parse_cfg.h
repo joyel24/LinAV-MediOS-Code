@@ -15,7 +15,7 @@
 
 #include <sys_def/file.h>
 
-#define MAX_TOKEN 250
+
 
 /* reading */
 int  next_char(void);

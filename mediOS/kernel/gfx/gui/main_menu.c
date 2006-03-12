@@ -12,16 +12,22 @@
 */
 
 #include <sys_def/string.h>
+#include <sys_def/colordef.h>
+#include <sys_def/font.h>
+
 #include <kernel/kernel.h>
 #include <kernel/malloc.h>
-#include <sys_def/colordef.h>
 #include <kernel/graphics.h>
+#include <kernel/med.h>
+#include <kernel/evt.h>
+
 #include <evt.h>
 
 #include <gui/parse_cfg.h>
 #include <gui/menu.h>
 #include <gui/main_menu.h>
-
+#include <gui/file_browser.h>
+#include <gui/gui.h>
 
 char item_buff[MAX_TOKEN+1];
 char value_buff[MAX_TOKEN+1];
@@ -33,6 +39,8 @@ struct menu_item * rootMenu=NULL;
 
 struct cfg_menu * current_item=NULL;
 
+
+
 struct menu_data menu_cfg = {
     useOwnDisp     : 0,
     x:0,y:0,width:320,height:240,
@@ -40,17 +48,18 @@ struct menu_data menu_cfg = {
     bg_color       : COLOR_WHITE,
     select_color   : COLOR_BLUE,
     sub_color      : COLOR_RED,
+    font           : STD6X9,
     root           : NULL,
-    right_action   : do_right,
-    on_action      : do_on,
-    off_action     : do_off,
-    f1_action      : do_F1,
-    f2_action      : do_F2,
-    f3_action      : do_F3,
-    item_str       : mk_item_str,
-    submenu_str    : mk_submenu_str,
-    getSubIcon     : mk_sub_icon,
-    getItemIcon    : mk_item_icon,
+    do_action      : mainMenu_doAction,
+    on_action      : mainMenu_doOn,
+    off_action     : mainMenu_doOff,
+    f1_action      : mainMenu_doF1,
+    f2_action      : mainMenu_doF2,
+    f3_action      : mainMenu_doF3,
+    item_str       : mainMenu_mkItemStr,
+    submenu_str    : mainMenu_mkSubmenuStr,
+    getSubIcon     : mainMenu_mkSubIcon,
+    getItemIcon    : mainMenu_mkItemIcon,
     isTxtMenu      : 0,
     border_color   : COLOR_BLACK,
     has_border     : 0,
@@ -70,71 +79,65 @@ struct icon_elem * plugin_icon=NULL;
 
 #define MENU_FILE_NAME "/menu.cfg"
 
-void do_off(void * data)
+int evt_hand;
+struct browser_data * browseData;
+
+void mainMenu_doOff(void * data)
 {
-    //menuEvtHandler(EVT_MENU_UP_LVL); /* send a evt to do an up lvl */
+    gui_sendEvt(EVT_MENU_UP_LVL); /* send a evt to do an up lvl */
 }
 
-void do_on(void * data)
+void mainMenu_doOn(void * data)
 {
     /* nothing to do */
 }
 
-void do_right(void * data)
+void mainMenu_doAction(void * data)
 {
     struct cfg_menu * cfg_data = (struct cfg_menu *)data;
-    if(cfg_data->link[0]!=0)
+    
+    printk("type= %d\n",cfg_data->type);
+    
+    if(cfg_data->type==TYPE_INTERNAL)
     {
-        if(cfg_data->param[0]!=0)
-        {
-            //loadPlugin(cfg_data->link,cfg_data->param);     
-        }
-        else
-        {
-            //loadPlugin(cfg_data->link,NULL);
-        }
+        printk("launching int app: %s\n",cfg_data->link);
+        if(!browseData)
+            return;
+        viewNewDir(browseData,NULL);
+        
+        browserEvt(browseData);
+        
+        evt_purgeHandler(evt_hand);
+        mainMenu_start(); 
     }
+    else
+    {
+        printk("launching ext app: %s\n",cfg_data->link);        
+        load_med(cfg_data->link);
+        evt_purgeHandler(evt_hand);
+        mainMenu_start();        
+    }
+    
+    
 }
 
-void do_F1(void * data)
+void mainMenu_doF1(void * data)
 {
 
 }
 
-void do_F2(void * data)
+void mainMenu_doF2(void * data)
 {
-    //SettingsScreen();
+    // Settings ?
 }
 
-void do_F3(void * data) // switch to usb
+void mainMenu_doF3(void * data) // switch to usb
 {
-    /*int pid,status; 
+    /*
     
     if(getUSB() || getFwExt())
     {    
-        pid = vfork();
-        
-        if (pid == 0)
-        {
-            
-            execl("/mnt/avwm/apps/enableUSB","/mnt/avwm/apps/enableUSB",(char *)0);
-            
-            printk( "exec failed!\n");
-            _exit(1);        
-        }
-        else
-        {
-            if (pid > 0)
-            {
-                close_graphics();            
-                waitpid(pid, &status, 0);
-                ini_graphics();      
-            }
-            else
-            {
-                printk( "vfork failed %d\n", pid);
-            }
-        }
+     
     }
     else
     {
@@ -142,16 +145,16 @@ void do_F3(void * data) // switch to usb
     }*/
 }
 
-void mk_submenu_str(void * data,char * str)
+void mainMenu_mkSubmenuStr(void * data,char * str)
 {
     struct cfg_menu * cfg_data = (struct cfg_menu *)data;
-    if(cfg_data->type == TYPE_STD && menu_cfg.isTxtMenu)
+    if((cfg_data->type == TYPE_STD || cfg_data->type == TYPE_INTERNAL) && menu_cfg.isTxtMenu)
         sprintf(str,"> %s",cfg_data->name);
     else
         sprintf(str,"%s",cfg_data->name);
 }
 
-void mk_item_str(void * data,char * str)
+void mainMenu_mkItemStr(void * data,char * str)
 {
     struct cfg_menu * cfg_data = (struct cfg_menu *)data;
     if(menu_cfg.isTxtMenu)
@@ -160,17 +163,17 @@ void mk_item_str(void * data,char * str)
         sprintf(str,"%s",cfg_data->name);
 }
 
-BITMAP *mk_sub_icon(void * data)
+BITMAP * mainMenu_mkSubIcon(void * data)
 {
     struct cfg_menu * cfg_data = (struct cfg_menu *)data;
-    if(cfg_data->type == TYPE_STD) /* std sub menu */
+    if(cfg_data->type & TYPE_STD || cfg_data->type == TYPE_INTERNAL) /* std sub menu */
         return &sub_icon->bmap_data;
     else
         return &back_icon->bmap_data;
     
 }
 
-BITMAP * mk_item_icon(void * data)
+BITMAP * mainMenu_mkItemIcon(void * data)
 {
     struct cfg_menu * cfg_data = (struct cfg_menu *)data;
     if(cfg_data->icon)
@@ -179,68 +182,86 @@ BITMAP * mk_item_icon(void * data)
         return &plugin_icon->bmap_data;
 }
 
-void main_menuEvtHandler(int evt)
+void mainMenu_start(void)
 {
-    #if 0
-    if(evt==EVT_REDRAW)
-    {
-        /* making sure that menu is on */ 
-        start_menu(&menu_cfg);
-    }
-    #endif
-    menuEvtHandler(evt);
+    start_menu(&menu_cfg);
+    menu_EvtHandler(EVT_REDRAW);
 }
 
-int ini_menu(void)
+void mainMenu_loop(void)
 {
-    int i,h,w;
+    int evt;
+    
+    if(evt_hand<0)
+    {
+        printk("Bad evt Handler\n");
+        return;
+    }
+        
+    while(1)
+    {
+        if((evt=evt_getStatus(evt_hand))<0)
+            printk("Bad evt (error:%d)\n",-evt);
+        menu_EvtHandler(evt);
+    }
+}
+
+int mainMenu_ini(void)
+{
+    int h,w;
     
     gfx_clearScreen(COLOR_BLACK);
     
     gfx_putS(COLOR_WHITE,COLOR_BLACK,5,110,"[ini_menu] reading menu file");
     rootMenu = NULL;
-    if(loadMenu(MENU_FILE_NAME)<0)
+    if(mainMenu_load(MENU_FILE_NAME)<0)
     {
         gfx_putS(COLOR_RED,COLOR_BLACK,5,120,"[ini_menu] Error reading menu => stoping");
-        for(i=0;i<10000;i++) /* nothing */
         return 0;
     }
     
     gfx_getStringSize("M", &w, &h);
     menu_cfg.root=rootMenu;
     menu_cfg.dx=5;
-    menu_cfg.dy=0;//+MENU_SHADOW;
+    menu_cfg.dy=0;
 
     printk("[ini_menu] menu loaded\n");
     
+    gfx_putS(COLOR_WHITE,COLOR_BLACK,5,120,"[ini_menu] reading icons");
        
     /* loading icons */
     sub_icon=loadIcon("sub_icon.ico");
     back_icon=loadIcon("back_icon.ico");
     plugin_icon=loadIcon("plugin_icon.ico");
     
-    gfx_putS(COLOR_WHITE,COLOR_BLACK,5,120,"[ini_menu] reading icons");
+    if((evt_hand=evt_getHandler(ALL_CLASS))<0)
+    {
+        printk("Can't get evt handler (error:%d)\n",-evt_hand);
+        evt_hand=-1;        
+    }
     
-    start_menu(&menu_cfg);
-    menuEvtHandler(EVT_REDRAW);
+    browseData=browser_NewBrowse();
     
+    browseData->mode=MODE_NOSELECT;
+    
+    gfx_putS(COLOR_WHITE,COLOR_BLACK,5,120,"[ini_menu] finished");
         
     return 1;
 }
 
-void cleanMenu(struct menu_item * root)
+void mainMenu_clean(struct menu_item * root)
 {
     struct menu_item * ptr;
     while(root!=NULL)
     {
-        cleanMenu(root->sub);
+        mainMenu_clean(root->sub);
         ptr=root->nxt;
         free(root);
         root=ptr;
     }
 }
 
-struct menu_item * newItem(struct cfg_menu * data)
+struct menu_item * mainMenu_newItem(struct cfg_menu * data)
 {
     struct menu_item * ptr=(struct menu_item *) malloc(sizeof(struct menu_item));
     if(ptr)
@@ -256,7 +277,7 @@ struct menu_item * newItem(struct cfg_menu * data)
     return ptr;
 }
 
-struct menu_item * findParent(struct menu_item * ptr, char * name)
+struct menu_item * mainMenu_findParent(struct menu_item * ptr, char * name)
 {
     struct menu_item * ptr2;
     struct cfg_menu * cfg_data;
@@ -265,7 +286,7 @@ struct menu_item * findParent(struct menu_item * ptr, char * name)
         cfg_data=(struct cfg_menu *)ptr->data;
         if(!strcmp(cfg_data->name,name))
             return ptr;
-        if((ptr2=findParent(ptr->sub,name))!=NULL)
+        if((ptr2=mainMenu_findParent(ptr->sub,name))!=NULL)
             return ptr2;
         ptr=ptr->nxt;
     }
@@ -273,7 +294,7 @@ struct menu_item * findParent(struct menu_item * ptr, char * name)
     
 }
 
-int insertItem(struct menu_item * item)
+int mainMenu_insertItem(struct menu_item * item)
 {
     struct menu_item * ptr;
     struct cfg_menu * cfg_data;
@@ -298,7 +319,7 @@ int insertItem(struct menu_item * item)
         }
         else
         {
-            if((ptr=findParent(rootMenu,cfg_data->parent))!=NULL)
+            if((ptr=mainMenu_findParent(rootMenu,cfg_data->parent))!=NULL)
             {
                 if(ptr->sub)
                     ptr->sub->prev=item;
@@ -316,7 +337,7 @@ int insertItem(struct menu_item * item)
     return 0;
 }
 
-void addItem(struct cfg_menu ** cfg)
+void mainMenu_addItem(struct cfg_menu ** cfg)
 {
     struct cfg_menu * ptr =(struct cfg_menu *) malloc(sizeof(struct cfg_menu));
     if(current_item == NULL)
@@ -329,11 +350,12 @@ void addItem(struct cfg_menu ** cfg)
     current_item->parent[0]=0;
     current_item->param[0]=0;
     current_item->type=TYPE_STD;
+    current_item->nxt=NULL;
     current_item->icon=NULL;
     current_item->nxt=NULL;
 }
 
-void cfgCleanMenu(struct cfg_menu * cfg)
+void mainMenu_cleanCfg(struct cfg_menu * cfg)
 {
     struct cfg_menu * ptr;
     while(cfg!=NULL)
@@ -344,7 +366,7 @@ void cfgCleanMenu(struct cfg_menu * cfg)
     }
 }
 
-int do_parse(struct cfg_menu ** cfg,char * filename)
+int mainMenu_parse(struct cfg_menu ** cfg,char * filename)
 {
     char *item=item_buff;
     char *value=value_buff;
@@ -356,7 +378,7 @@ int do_parse(struct cfg_menu ** cfg,char * filename)
         if (!nxt_cfg(item,value)) break;
         if(!strcmp(item,"name"))
         {
-            addItem(cfg);
+            mainMenu_addItem(cfg);
             strcpy(current_item->name,value);
         }
         else if(!strcmp(item,"parent"))
@@ -401,8 +423,23 @@ int do_parse(struct cfg_menu ** cfg,char * filename)
             }
             else
             {
-                printk("icon:|%s|\n",value);
                 current_item->icon=loadIcon(value);
+            }
+        }
+        else if(!strcmp(item,"opt"))
+        {
+            if(current_item==NULL)
+            {
+                printk("'opt' param before name\n");
+            }
+            else
+            {
+                if(!strcmp(value,"is_internal"))
+                {
+                    current_item->type=TYPE_INTERNAL;
+                }
+                else
+                    printk("Ukn opt for %s: %s\n",current_item->name,value);
             }
         }
         else
@@ -412,7 +449,7 @@ int do_parse(struct cfg_menu ** cfg,char * filename)
     return 0;
 }
 
-int doAddBackEntry(char * name,struct menu_item * up,struct menu_item *cur)
+int mainMenu_doAddBackEntry(char * name,struct menu_item * up,struct menu_item *cur)
 {
         struct menu_item * ptr;
         struct menu_item * start=cur;
@@ -426,7 +463,7 @@ int doAddBackEntry(char * name,struct menu_item * up,struct menu_item *cur)
                 printk("can't malloc back item\n");
                 return 0;
             }
-            ptr=newItem(data);
+            ptr=mainMenu_newItem(data);
             if(!ptr)
             {
                 printk("can't malloc back item\n");
@@ -450,30 +487,39 @@ int doAddBackEntry(char * name,struct menu_item * up,struct menu_item *cur)
     
     for(ptr=start;ptr!=NULL;ptr=ptr->nxt)
     {
-        if(!doAddBackEntry(((struct cfg_menu *)ptr->data)->name,ptr,ptr->sub))
+        if(!mainMenu_doAddBackEntry(((struct cfg_menu *)ptr->data)->name,ptr,ptr->sub))
             return 0;
     }
 
     return 1;
 }
 
-int loadMenu(char * filename)
+void mainMenu_dispose(void)
+{
+    mainMenu_cleanCfg(cfgMenu);
+    cfgMenu=NULL;
+    mainMenu_clean(rootMenu);
+    rootMenu=NULL;
+}
+
+int mainMenu_load(char * filename)
 {
     struct cfg_menu * data;
     struct menu_item * new_item;
         printk("Reading: %s\n",filename);
-    cfgCleanMenu(cfgMenu);
+    mainMenu_cleanCfg(cfgMenu);
     cfgMenu=NULL;
-    cleanMenu(rootMenu);
+    mainMenu_clean(rootMenu);
     rootMenu=NULL;
-    if(do_parse(&cfgMenu,filename)<0)
+    if(mainMenu_parse(&cfgMenu,filename)<0)
         return -1;
     data=cfgMenu;
+    printk("parsing finished, building tree\n");
     while(data!=NULL)
     {
-        if(!(new_item=newItem(data)))
+        if(!(new_item=mainMenu_newItem(data)))
             return -1;
-        if(insertItem(new_item)<0)
+        if(mainMenu_insertItem(new_item)<0)
         {
             /*cfgCleanMenu(cfgMenu); !!!!!!!!!!!!! do clean when everything is working
             cleanMenu(rootMenu);*/
@@ -483,12 +529,11 @@ int loadMenu(char * filename)
         data=data->nxt;
     }
     
-    doAddBackEntry(NULL,NULL,rootMenu);
-    
+    mainMenu_doAddBackEntry(NULL,NULL,rootMenu);
     return 0;
 }
 
-void printMenu(void)
+void mainMenu_print(void)
 {
     struct cfg_menu * ptr=cfgMenu;
     printk("cfg:\n");

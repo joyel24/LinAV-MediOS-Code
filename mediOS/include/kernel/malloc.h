@@ -26,6 +26,7 @@ void free_user     (void);
 
 void mem_stat      (unsigned int *curalloc_user, unsigned int *curalloc_kernel,
             unsigned int *totfree,unsigned int *maxfree);
+void mem_printStat(void);
 void mem_freeList  (void);
 #endif
 

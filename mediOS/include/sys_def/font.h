@@ -1,5 +1,5 @@
 /* 
-*   include/kernel/font.h
+*   include/sys_def/font.h
 *
 *   AMOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,8 +10,8 @@
 * KIND, either express of implied.
 */
 
-#ifndef __FONT_H
-#define __FONT_H
+#ifndef __SYS_FONT_H
+#define __SYS_FONT_H
 
 #define STD4X6               0X0000
 #define STD4X8               0X0001

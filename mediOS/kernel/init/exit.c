@@ -21,6 +21,8 @@ void halt_device(void)
 {
     powering_off=1;
     printk("[exit] device halt\n");
+
+    arch_HaltMsg();
     
     ata_stopHD(ATA_FORCE_STOP); /* we need to call halt_hd later to unmount all partitions */
 

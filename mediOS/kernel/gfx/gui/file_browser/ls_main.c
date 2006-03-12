@@ -9,15 +9,21 @@
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
 */
-#include <kernel/kernel.h>
-#include <sys_def/string.h>
 
+#include <sys_def/string.h>
+#include <sys_def/colordef.h>
+#include <sys_def/font.h>
+
+
+#include <kernel/kernel.h>
+#include <kernel/malloc.h>
 #include <kernel/lcd.h>
 #include <kernel/graphics.h>
 #include <kernel/evt.h>
 
-#include <sys_def/colordef.h>
+
 #include <gui/file_browser.h>
+
 #include <file_type.h>
 
 #define LCD_WIDTH SCREEN_REAL_WIDTH
@@ -51,6 +57,8 @@ struct browser_data realData = {
     x_start         : 0,
     y_start         : 18,
     
+    font            : STD6X9,
+    
     width           : LCD_WIDTH,
     height          : LCD_HEIGHT-38,
     entry_height    : 10,
@@ -59,9 +67,6 @@ struct browser_data realData = {
     draw_file_size     : draw_file_size,
     clear_status       : clear_status
 };
-
-struct browser_data * bdata;
-int evt_handler;
 
 void printList(struct browser_data * bdata,int val)
 {
@@ -73,33 +78,19 @@ void printList(struct browser_data * bdata,int val)
     printk("---------------------------- %d\n",val);
 }
 
-void ini_file_browser(void)
+struct browser_data * browser_NewBrowse(void)
 {
-    bdata = &realData;
-    evt_handler = evt_getHandler(ALL_CLASS);
-    iniBrowser();
+    struct browser_data * ptr = (struct browser_data *)malloc(sizeof(struct browser_data));
+    if(!ptr)
+        return NULL;
+    memcpy(ptr,&realData,sizeof(struct browser_data));
+    return ptr;
 }
 
-char res[PATHLEN];
-
-char * browse(char * path,int mode)
-{    
-    int pos=0;
-      
-    if(!viewNewDir(bdata,path))
-        return NULL;
-    
-    bdata->mode = mode;
-        
-    browserEvt(bdata);
-    
-    if(bdata->mode)
-    {    
-        sprintf(res,"%s/%s",bdata->path,nxtSelect(bdata,&pos)->name);
-        return res;
-    }
-    
-    return NULL;
+void browser_disposeBrowse(struct browser_data * bdata)
+{
+    cleanList(bdata);
+    free(bdata);
 }
 
 int x=LCD_WIDTH;

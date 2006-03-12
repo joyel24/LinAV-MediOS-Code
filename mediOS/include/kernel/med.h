@@ -15,6 +15,7 @@
 #define __MED_H
 
 #include <kernel/kernel.h>
+#include <sys_def/types.h>
 
 #define ELF32_R_SYM(i)	  ((i)>>8)
 #define ELF32_R_TYPE(i)   ((unsigned char)(i))

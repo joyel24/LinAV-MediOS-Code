@@ -521,7 +521,7 @@ void iniCursorPos()
             break;
 
         case BTN_OFF:
-            exit();
+            exit(0);
             break;
 
         case BTN_ON:

@@ -387,9 +387,7 @@ void load_med(char * file_name)
     
     printk("calling app (entry %x)\n", run_med);      
     DEBUG_MED("calling app (entry %x)\n", run_med);      
-    
-    do_bkpt();
-    
+        
     run_med(0,NULL);
     
     printk("back from app\n"); 

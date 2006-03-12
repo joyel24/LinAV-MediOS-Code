@@ -37,7 +37,8 @@ struct menu_data {
         int border_color;
         char * title;
         int has_border;
-        void (*right_action) (void * data);
+        int font;
+        void (*do_action) (void * data);
         void (*on_action)    (void * data);
         void (*off_action)   (void * data);
         void (*f1_action)   (void * data);
@@ -52,7 +53,7 @@ struct menu_data {
 void stop_menu(void);
 void start_menu(struct menu_data * client_menu);
 
-void menuEvtHandler   (int evt);
+void menu_EvtHandler   (int evt);
 void normMenu_handler (int evt);
 void iconMenu_handler (int evt);
 

@@ -26,3 +26,8 @@ void arch_reload_firmware(void){
   firmware_start();
 }
 
+void arch_HaltMsg(void)
+{
+
+}
+

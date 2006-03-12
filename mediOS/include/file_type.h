@@ -15,7 +15,6 @@
 #define __GUI_FILE_TYPE_H
 
 #define BIN_TYPE          0
-#define SCRIPT_TYPE       1
 #define IMG_TYPE          2
 #define MP3_TYPE          3
 #define TXT_TYPE          4

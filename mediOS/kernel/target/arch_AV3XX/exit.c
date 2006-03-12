@@ -16,7 +16,25 @@
 #include <kernel/hardware.h>
 #include <kernel/exit.h>
 
+#include <kernel/graphics.h>
+#include <kernel/lcd.h>
+#include <sys_def/font.h>
+#include <sys_def/colordef.h>
+
 void arch_reload_firmware(void){
   halt_device();
 }
 
+void arch_HaltMsg(void)
+{
+    int h,w;
+    char * msg = "Halting device";
+    gfx_clearScreen(COLOR_WHITE);
+    
+    gfx_fontSet(STD8X13);
+    
+    gfx_getStringSize(msg,&w,&h);
+    
+    
+    gfx_putS(COLOR_RED,COLOR_WHITE,(SCREEN_WIDTH-w)/2,(SCREEN_HEIGHT-h)/2,msg);
+}

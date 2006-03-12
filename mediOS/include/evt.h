@@ -47,17 +47,19 @@ struct evt_t {
 #define        BTN_FM_NEXT       0x0016
 #define        BTN_FM_PLAY       0x0018
 
-#define        EVT_TIMER     0x0020
-#define        EVT_PWR       0x0021
-#define        EVT_USB       0x0022
-#define        EVT_FW_EXT    0x0023
+#define        EVT_TIMER         0x0020
+#define        EVT_PWR           0x0021
+#define        EVT_USB           0x0022
+#define        EVT_FW_EXT        0x0023
 
-#define        EVT_REDRAW    0x0050
+#define        EVT_REDRAW        0x0050
+#define        EVT_MENU_UP_LVL   0x0051
 
 /* EVT class */
 #define        ALL_CLASS         0xFFFFFFFF
 #define        BTN_CLASS         0x1
 #define        CONNECT_CLASS     0x2
+#define        GUI_CLASS         0x4
 
 /*
 
