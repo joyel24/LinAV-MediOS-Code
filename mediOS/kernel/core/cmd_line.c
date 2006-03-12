@@ -85,7 +85,7 @@ struct cmd_line_s cmd_tab[] = {
     },
     {
         cmd        : "reload",
-        help_str   : "Reloads the firmwae",
+        help_str   : "Reloads the firmware",
         cmd_action : do_reload,
         nb_args    : 0
     },
