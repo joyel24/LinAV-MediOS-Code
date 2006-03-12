@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/core/cmd_line.c
 *
 *   MediOS project
@@ -23,6 +23,8 @@
 #include <kernel/malloc.h>
 
 #include <kernel/cmd_line.h>
+
+#include <kernel/exit.h>
 
 /*******************************************************/
 #if 1
@@ -58,12 +60,6 @@ struct cmd_line_s cmd_tab[] = {
         nb_args    : 1
     },
     {
-        cmd        : "restart",
-        help_str   : "restarts device",
-        cmd_action : do_restart,
-        nb_args    : 0
-    },    
-    {
         cmd        : "handlerInfo",
         help_str   : "Prints IRQ, timer, HW chk handler",
         cmd_action : print_handler_info,
@@ -79,6 +75,18 @@ struct cmd_line_s cmd_tab[] = {
         cmd        : "reg",
         help_str   : "Print current regs value",
         cmd_action : do_reg_print,
+        nb_args    : 0
+    },
+    {
+        cmd        : "halt",
+        help_str   : "Halts the device",
+        cmd_action : do_halt,
+        nb_args    : 0
+    },
+    {
+        cmd        : "reload",
+        help_str   : "Reloads the firmwae",
+        cmd_action : do_reload,
         nb_args    : 0
     },
     /* this has to be the last entry */
@@ -160,7 +168,7 @@ __IRAM_CODE void cmd_line_INT(int irq_num,struct pt_regs * regs)
                     {
                         cur_pos--;
                         cur_cmd[cur_pos]='\0';
-                        printk("\ngrv> %s",cur_cmd);
+                        printk("\nmediOS> %s",cur_cmd);
                     }
                     break;
                 default:
@@ -186,7 +194,7 @@ __IRAM_CODE void process_cmd(struct pt_regs * regs)
     
     if(cur_pos==1)
     {
-        printk("\ngrv> ");
+        printk("\nmediOS> ");
     }
     else
     {
@@ -204,7 +212,7 @@ __IRAM_CODE void process_cmd(struct pt_regs * regs)
                 printk("Unknown command: %s\nType help to have the list of command\n",cur_cmd);
                 cur_cmd[0]='\0';
                 cur_pos=0;
-                printk("grv> ");
+                printk("mediOS> ");
                 return;
             }                    
         }
@@ -217,7 +225,7 @@ __IRAM_CODE void process_cmd(struct pt_regs * regs)
                 printk("Unknown command: %s\nType help to have the list of command\n",cur_cmd);
                 cur_cmd[0]='\0';
                 cur_pos=0;
-                printk("grv> ");
+                printk("mediOS> ");
                 return;
             }
             
@@ -247,7 +255,7 @@ __IRAM_CODE void process_cmd(struct pt_regs * regs)
             printk("%s need more args:\n%s\n",cmd_line->cmd,cmd_line->help_str);
         
         /* put back the prompt */
-        printk("grv> ");
+        printk("mediOS> ");
     }
             
     /* Ready to get a new cmd */
@@ -296,11 +304,14 @@ void do_run (unsigned char ** params)
     load_bflat (params[0]);
 }
 
-void do_restart (unsigned char ** params)
+void do_halt (unsigned char ** params)
 {
-    int (*restart_restart)(void);
-    restart_restart = 0;
-    restart_restart ();
+    halt_device();
+}
+
+void do_reload (unsigned char ** params)
+{
+    reload_firmware();
 }
 
 void print_handler_info (unsigned char ** params)
@@ -321,10 +332,10 @@ void do_reg_print (unsigned char ** params)
          {
             j=0;
             printk("\n");
-         }         
+         }
     }
     printk("\n");
-    
+
     printk("sp_SVC=0x%08x lr_SVC=0x%08x pc=0x%08x\n",cur_regs->uregs[13],cur_regs->uregs[14],cur_regs->uregs[15]);
     printk("cpsr=0x%08x old_ro==0x%08x\n",cur_regs->uregs[16],cur_regs->uregs[17]);
 }

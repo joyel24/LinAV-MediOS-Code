@@ -48,7 +48,7 @@
 
 
 #define GIO_SPDIF     0xff
-#define GIO_VID_OUT   0xff
+#define GIO_VID_OUT   0x12
 
 #define GIO_IR        0xff
 

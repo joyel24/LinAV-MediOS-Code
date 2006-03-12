@@ -16,6 +16,7 @@
 #include <kernel/uart.h>
 #include <kernel/kernel.h>
 #include <kernel/pipes.h>
+#include <kernel/gio.h>
 
 struct pipe UART_PIPES[2];
 
@@ -74,6 +75,8 @@ void uart_restoreIrqHandler(int uartNum)
 
 void uart_init(void)
 {
+
+    GIO_DIRECTION(GIO_VID_OUT,GIO_IN); // switch video out to uart in
 
     UART_0_Pipe=&UART_PIPES[0];
     UART_1_Pipe=&UART_PIPES[1];
