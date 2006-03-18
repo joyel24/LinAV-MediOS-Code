@@ -23,7 +23,7 @@ tools/bin2wav/bin2wav:
 incdir:
 	@make -C include/kernel/target --no-print-directory incdir
 
-lib_medios:
+lib_medios: incdir mk_api_file
 	@echo '-----   building libMedios'
 	@make -C kernel --no-print-directory lib_medios
 	@echo '-----   building libMedios done'
@@ -37,7 +37,7 @@ medios.bin: incdir mk_api_file subdirs
 
 aoboy: base_clean aoboy.bin aoboy.wav
 
-aoboy.bin:
+aoboy.bin: incdir mk_api_file
 	@make -C kernel/ --no-print-directory kernel_lib
 	@make -C apps/avboy --no-print-directory stdalone
 	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o aoboy.elf $(KERNEL_OBJS) apps/avboy/build/*.o $(LDFLAGS) -Map medios.map
@@ -45,7 +45,7 @@ aoboy.bin:
 
 doom: base_clean doom.bin doom.wav
 
-doom.bin:
+doom.bin: incdir mk_api_file
 	@make -C kernel/ --no-print-directory kernel_lib
 	@make -C apps/doom --no-print-directory stdalone
 	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o doom.elf $(KERNEL_OBJS) apps/doom/build/*.o $(LDFLAGS) -Map medios.map
@@ -53,7 +53,7 @@ doom.bin:
 
 snes9x: snes9x.bin snes9x.wav
 
-snes9x.bin:
+snes9x.bin: incdir mk_api_file
 	@make -C kernel/ --no-print-directory kernel_lib
 	@make -C apps/snes9x --no-print-directory stdalone
 	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o snes9x.elf \
