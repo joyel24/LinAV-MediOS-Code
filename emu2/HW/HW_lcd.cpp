@@ -107,14 +107,17 @@ HW_lcd::HW_lcd(HW_mem * mem2,HW_OSD * osd)
 
 void HW_lcd::setPalette(int palette[256][3],int size)
 {
-    int r,g,b,i;
+    int r,g,b,i,Y,Cb,Cr;
     XColor c;
     
     for(i=0; i<size; i++)
     {
-        r = palette[i][0];
-        g = palette[i][1];
-        b = palette[i][2];
+        Y = palette[i][0];
+        Cb = palette[i][1];
+        Cr = palette[i][2];
+        r=(int)(Y+1.402*(Cr-128));
+        g=(int)(Y-0.34414*(Cb-128)-0.71414*(Cr-128));
+        b=(int)(Y+1.772*(Cb-128));
         setPalette(r,g,b,i);
     }
 }

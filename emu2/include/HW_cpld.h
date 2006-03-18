@@ -53,7 +53,7 @@ class HW_cpld:public HW_access {
         
         
         int do_cmd_btn(int btn);
-        
+        void cpld_print_state(void);
         int btn_var[0xb];
         
         HW_ON_OFF * ON_btn;
@@ -65,8 +65,10 @@ class HW_cpld:public HW_access {
 #endif
         int cpld_ata_mode;
         int cpld_module_type;
-        
+        int cpld0_val;
+        int cpld1_val; 
         int cpld2_val; 
+        int cpld3_val;
         
         int fw_connected; 
         int hdd_on;

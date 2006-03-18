@@ -20,9 +20,13 @@
 class HW_null : public HW_access {
     public:
         HW_null(uint32_t start,uint32_t end,char * name);
+        HW_null(uint32_t start,uint32_t end,char * name,int debug_aff);
                 
         uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);
+        
+    private:
+        int debug_aff;
 };
 
 #endif // __HW_MEM_H

@@ -121,6 +121,7 @@
 } 
 
 #define GPIO_ON_NUM   0x00
+#define GPIO_SPDIF_UART1_TX      0x01
 #define GPIO_MAS_EOD  0x04
 #define GPIO_MAS_Di   0x08
 #define GPIO_MAS_PW   0x10
@@ -130,6 +131,9 @@
 
 #define GPIO_I2C_SDA  0x13
 #define GPIO_I2C_SCL  0x12
+
+#define GPIO_LCD                 0x17
+#define GPIO_VID_OUT_UART1_RX    0x1D
 
 /********************** I2C     ****************************************/
 

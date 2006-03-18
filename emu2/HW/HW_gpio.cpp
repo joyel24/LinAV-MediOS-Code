@@ -14,6 +14,10 @@
 
 #include <HW_gpio.h>
 
+#include <gio_lcd.h>
+#include <gio_vid_uart1RX.h>
+#include <gio_spdif_uart1TX.h>
+
 char * gpio_str[] = GPIO_STR;
 
 
@@ -34,8 +38,11 @@ HW_gpio::HW_gpio(void):HW_access(GPIO_START,GPIO_END,"GPIO")
        
     for(int i=0;i<32;i++)
         port_list[i]=new gpio_port(i);
-    
-}
+        
+    register_port(new GIO_LCD());
+    register_port(new GIO_VID_UART1_RX());
+    register_port(new GIO_SPDIF_UART1_TX());
+ }
 
 uint32_t gpio_mask[]={  0X00000001, 0X00000002,0X00000004,0X00000008,
             0X00000010, 0X00000020,0X00000040,0X00000080,
@@ -84,6 +91,11 @@ void gpio_port::clear_gpio(void)
 void gpio_port::gpio_dir_chg(int dir)
 {
     DEBUG_HW(GPIO_HW_DEBUG,"GPIO%x: %s => dir chg to %s\n",gpio_num,name,dir?"input":"output");
+}
+
+void HW_gpio::register_port(gpio_port * port)
+{
+    register_port(port->gpio_num,port);
 }
 
 void HW_gpio::register_port(int num,gpio_port * port)

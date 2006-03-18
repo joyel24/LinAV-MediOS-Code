@@ -39,6 +39,7 @@ class HW_gpio : public HW_access {
         void write(uint32_t addr,uint32_t val,int size);
         
         void register_port(int num,gpio_port * port);
+        void register_port(gpio_port * port);
         
         int DIR_0,DIR_1,INV_0,INV_1;
         int BITSET_0,BITSET_1,BITCLR_0,BITCLR_1;

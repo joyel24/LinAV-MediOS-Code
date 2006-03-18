@@ -268,7 +268,8 @@ void i2c_master::i2c_state_has_changed(void)
                         }
                         else
                         {
-                            DEBUG_HW(I2C2_HW_DEBUG," no devcice found\n");
+                            //DEBUG_HW(I2C2_HW_DEBUG," no devcice found\n");
+                            printf("I2C - addr = 0x%02x | %s not found",address,(address&0x1)?"READ":"WRITE");
                             
                         }
                         clock = 0;

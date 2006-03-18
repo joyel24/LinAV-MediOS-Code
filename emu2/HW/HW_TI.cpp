@@ -85,7 +85,10 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld,
     add_item(new HW_null(CCD_START,CCD_END,"CCD"));
     add_item(new HW_null(PREVIEW_START,PREVIEW_END,"Preview"));
     add_item(new HW_null(PAL_NTSC_ENC_START,PAL_NTSC_ENC_END,"NTSC_PAL Encoder"));
-    
+#ifdef HAS_30A1A
+    add_item(new HW_null(0x30a1a,0x30a1a+0x2,"Internal WDT",0));
+#endif
+
     new i2c_master(gpio);
     
     

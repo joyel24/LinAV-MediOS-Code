@@ -50,7 +50,10 @@ HW_cpld::HW_cpld(void):HW_access(CPLD_START,CPLD_END,"CPLD")
     
     cpld_ata_mode = 0x0 ; /* only HD/CF is concidered => we use HD */
     cpld_module_type = 0xF; /* no modules */
+    cpld0_val = 0;
+    cpld1_val = 0;
     cpld2_val = 0;
+    cpld3_val = 0;
     fw_connected = 1;
     hdd_on =0;
     bck_light = 0;
@@ -94,8 +97,8 @@ uint32_t HW_cpld::read(uint32_t addr,int size)
             DEBUG_HW(CPLD_HW_DEBUG,"CPLD0 - read, size %x: module connected : %x\n",size,ret_val);
             break;
         case CPLD_START+CPLD_PORT_OFFSET+0x100:
-            DEBUG_HW(CPLD_HW_DEBUG,"CPLD1 - read, size %x: %x (USB %s)\n",size,cpld2_val,cpld2_val&0x1?"enable":"disable");
-            ret_val = cpld2_val;
+            DEBUG_HW(CPLD_HW_DEBUG,"CPLD1 - read, size %x: %x (USB %s)\n",size,cpld1_val,cpld1_val&0x1?"enable":"disable");
+            ret_val = cpld1_val;
             break;
         case CPLD_START+CPLD_PORT_OFFSET+0x200:
             ret_val = 0x10;
@@ -156,19 +159,22 @@ void HW_cpld::write(uint32_t addr,uint32_t val,int size)
         case CPLD_START+CPLD_PORT_OFFSET+0x0:
             DEBUG_HW(CPLD_HW_DEBUG,"CPLD0 - write ata mode, size %x: %x\n",size,val);
             cpld_ata_mode = val;
+            cpld0_val = val;
             break;
         case CPLD_START+CPLD_PORT_OFFSET+0x100:
             DEBUG_HW(CPLD_HW_DEBUG,"CPLD1 - write, size %x: %x (USB %s)\n",size,val,val&0x1?"enable":"disable");
-            cpld2_val = val;
+            cpld1_val = val;
             break;
         case CPLD_START+CPLD_PORT_OFFSET+0x200:
             DEBUG_HW(CPLD_HW_DEBUG,"CPLD2 - write, size %x: %x (bck light %s) (ide reset %s)\n",size,val,
                 (val&0x4)?"ON":"OFF",(val&0x1)?"ON":"OFF");
+            cpld2_val = val;
             bck_light = val&0x4;
             ide_reset = val&0x1;
             break;
         case CPLD_START+CPLD_PORT_OFFSET+0x300:
             DEBUG_HW(CPLD_HW_DEBUG,"CPLD3 - write, size %x: %x (HD is %s)\n",size,val,(val&0x8)?"ON":"OFF");
+            cpld3_val = val;
             hdd_on = val&0x8;
             hw_30a24->HDD_power = hdd_on?1:0;
             break;
@@ -189,5 +195,9 @@ void HW_cpld::setModule(int module)
     this->cpld_module_type=module;
 }
 
+void HW_cpld::cpld_print_state(void)
+{
+    printf("CPLD: write state:\n-0:%04x\n-1:%04x\n-2:%04x\n-3:%04x\n",cpld0_val,cpld1_val,cpld2_val,cpld3_val);
+}
 
 
