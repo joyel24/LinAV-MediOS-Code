@@ -146,10 +146,10 @@ __IRAM_CODE void btn_processPress(int val)
                             case BTN_OFF:
                                 con_clear();
                                 break;
-                            case BTMASK_UP:
+                            case BTN_UP:
                                 con_screenScroll(-1);
                                 break;
-                            case BTMASK_DOWN:
+                            case BTN_DOWN:
                                 con_screenScroll(1);
                                 break;
                         }
