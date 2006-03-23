@@ -125,10 +125,37 @@ __IRAM_CODE void btn_processPress(int val)
                         lcd_launchTimer(); /* postpone the lcd timer */
                     halt_launchTimer(); /* postpone the poweroff timer */
 #endif
-                    evt.evt=btn+1;
-                    evt.evt_class=BTN_CLASS;
-                    evt.data=(void*)mx_press[btn];
-                    evt_send(&evt);
+
+                    if(!con_screenIsVisible())
+                    {
+                      if (val&BTMASK_F1 && btn+1==BTN_ON) con_screenSwitch();
+                      
+                      // post the event
+                      evt.evt=btn+1;
+                      evt.evt_class=BTN_CLASS;
+                      evt.data=(void*)mx_press[btn];
+                      evt_send(&evt);
+                    }
+                    else
+                    {
+                        switch(btn+1)
+                        {
+                            case BTN_ON:
+                                con_screenSwitch();
+                                break;
+                            case BTN_OFF:
+                                con_clear();
+                                break;
+                            case BTMASK_UP:
+                                con_screenScroll(-1);
+                                break;
+                            case BTMASK_DOWN:
+                                con_screenScroll(1);
+                                break;
+                        }
+                    }
+
+
                     //printk("BTN %d pressed\n",btn);
 #ifdef HAVE_FM_REMOTE
                 }
@@ -138,26 +165,6 @@ __IRAM_CODE void btn_processPress(int val)
                     printk("** HOLD **\n");
                 }
 #endif
-
-                // console buttons handling
-                if (val&BTMASK_F1)
-                {
-                    switch(btn+1)
-                    {
-                        case BTN_ON:
-                            con_screenSwitch();
-                            break;
-                        case BTN_OFF:
-                            con_clear();
-                            break;
-                        case BTMASK_UP:
-                            if(con_screenIsVisible()) con_screenScroll(-1);
-                            break;
-                        case BTMASK_DOWN:
-                            if(con_screenIsVisible()) con_screenScroll(1);
-                            break;
-                    }
-                }
             }
             else
                 nb_pressed[btn]--;
