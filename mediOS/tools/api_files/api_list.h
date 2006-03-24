@@ -74,6 +74,8 @@ int            # fremove    # const char* pathname
 int            # frename    # const char* path, const char* newname
 int            # ftruncate  # int fd, off_t length
 int            # filesize   # int fd
+int            # fgetc      # int fd
+
 #k_inc#kernel/dir.h
 #api_inc#sys_def/dir.h
 DIR*           # opendir    # const char* name
