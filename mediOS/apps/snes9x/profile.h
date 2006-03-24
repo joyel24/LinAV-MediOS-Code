@@ -32,6 +32,7 @@ extern "C" {
 void prof(int id);
 int prof_curid();
 void prof_print();
+void prof_dsp_print();
 
 #ifdef __cplusplus
 }

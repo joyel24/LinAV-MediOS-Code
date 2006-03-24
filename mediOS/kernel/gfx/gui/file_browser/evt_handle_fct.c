@@ -38,6 +38,9 @@ void browserEvt(struct browser_data * bdata)
     char evt=0;
     gfx_getStringSize("M", &w, &h);
 
+    // VP using configuration from bdata
+    h = bdata->entry_height;
+
     evt_purgeHandler(evt_handler);
     
     while(!stop)
@@ -81,7 +84,7 @@ void browserEvt(struct browser_data * bdata)
                     else // not going up, scrolling
                     {
                         gfx_scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
-                                    bdata->width-10, (h+1)*bdata->nb_disp_entry, h+1,0);
+					     bdata->width-10, (h)*(bdata->nb_disp_entry), h,0);
                         printAName(bdata,bdata->pos+bdata->nselect+1,bdata->nselect+1,1,0);
                         printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);
                     }
@@ -132,7 +135,7 @@ void browserEvt(struct browser_data * bdata)
                         else // not going down, scrolling
                         {
                             gfx_scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
-                                    bdata->width-10, (h+1)*bdata->nb_disp_entry, h+1,1);
+						 bdata->width-10, (h)*(bdata->nb_disp_entry-1), h,1);
                             printAName(bdata,bdata->pos+bdata->nselect-1,bdata->nselect-1,1,0);
                             printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);
                         }

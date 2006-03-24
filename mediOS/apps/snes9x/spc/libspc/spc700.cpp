@@ -1,4 +1,8 @@
 #include <sys_def/section_types.h>
+
+// size optimization
+#define SOPT
+
 /*
  * Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
  *
@@ -75,6 +79,7 @@ extern uint8 W2;
 
 END_EXTERN_C
 
+#define OP0 (*(IAPU.PC))
 #define OP1 (*(IAPU.PC + 1))
 #define OP2 (*(IAPU.PC + 2))
 
@@ -161,7 +166,7 @@ APUSetZN8 ((uint8) Work16);
 #define CMP(a,b)\
 Int16 = (short) (a) - (short) (b);\
 IAPU._Carry = Int16 >= 0;\
-APUSetZN8 ((uint8) Int16);
+APUSetZN8 (/*(uint8)*/ Int16&0xff);
 
 #define ASL(b)\
     IAPU._Carry = ((b) & 0x80) != 0; \
@@ -266,6 +271,24 @@ __IRAM_CODE void Apu00 ()
     IAPU.PC++;
 }
 
+#ifdef SOPT
+#define Apu11 Apu01
+#define Apu21 Apu01
+#define Apu31 Apu01
+#define Apu41 Apu01
+#define Apu51 Apu01
+#define Apu61 Apu01
+#define Apu71 Apu01
+#define Apu81 Apu01
+#define Apu91 Apu01
+#define ApuA1 Apu01
+#define ApuB1 Apu01
+#define ApuC1 Apu01
+#define ApuD1 Apu01
+#define ApuE1 Apu01
+#define ApuF1 Apu01
+__IRAM_CODE void Apu01 () { TCALL ((OP0>>4)) }
+#else
 __IRAM_CODE void Apu01 () { TCALL (0) }
 
 void Apu11 () { TCALL (1) }
@@ -297,6 +320,7 @@ void ApuD1 () { TCALL (13) }
 void ApuE1 () { TCALL (14) }
 
 void ApuF1 () { TCALL (15) }
+#endif
 
 __IRAM_CODE void Apu3F () // CALL absolute
 {
@@ -316,6 +340,19 @@ void Apu4F () // PCALL $XX
 S9xAPUSetByteZ (S9xAPUGetByteZ (OP1 ) | (1 << (b)), OP1); \
 IAPU.PC += 2
 
+#ifdef SOPT
+#define Apu22 Apu02
+#define Apu42 Apu02
+#define Apu62 Apu02
+#define Apu82 Apu02
+#define ApuA2 Apu02
+#define ApuC2 Apu02
+#define ApuE2 Apu02
+__IRAM_CODE void Apu02 ()
+{
+  SET ((OP0>>5));
+}
+#else
 void Apu02 ()
 {
     SET (0);
@@ -355,11 +392,25 @@ void ApuE2 ()
 {
     SET (7);
 }
+#endif
 
 #define CLR(b) \
 S9xAPUSetByteZ (S9xAPUGetByteZ (OP1) & ~(1 << (b)), OP1); \
 IAPU.PC += 2;
 
+#ifdef SOPT
+#define Apu32 Apu12
+#define Apu52 Apu12
+#define Apu72 Apu12
+#define Apu92 Apu12
+#define ApuB2 Apu12
+#define ApuD2 Apu12
+#define ApuF2 Apu12
+__IRAM_CODE void Apu12 ()
+{
+  CLR ((OP0>>5));
+}
+#else
 void Apu12 ()
 {
     CLR (0);
@@ -399,6 +450,7 @@ __IRAM_CODE void ApuF2 ()
 {
     CLR (7);
 }
+#endif
 
 #define BBS(b) \
 Work8 = OP1; \
@@ -411,6 +463,19 @@ if (S9xAPUGetByteZ (Work8) & (1 << (b))) \
 else \
     IAPU.PC += 3
 
+#ifdef SOPT
+#define Apu23 Apu03
+#define Apu43 Apu03
+#define Apu63 Apu03
+#define Apu83 Apu03
+#define ApuA3 Apu03
+#define ApuC3 Apu03
+#define ApuE3 Apu03
+__IRAM_CODE void Apu03 ()
+{
+  BBS (OP0>>5);
+}
+#else
 void Apu03 ()
 {
     BBS (0);
@@ -450,6 +515,7 @@ __IRAM_CODE void ApuE3 ()
 {
     BBS (7);
 }
+#endif
 
 #define BBC(b) \
 Work8 = OP1; \
@@ -462,6 +528,19 @@ if (!(S9xAPUGetByteZ (Work8) & (1 << (b)))) \
 else \
     IAPU.PC += 3
 
+#ifdef SOPT
+#define Apu33 Apu13
+#define Apu53 Apu13
+#define Apu73 Apu13
+#define Apu93 Apu13
+#define ApuB3 Apu13
+#define ApuD3 Apu13
+#define ApuF3 Apu13
+__IRAM_CODE void Apu13 ()
+{
+  BBC ((OP0>>5));
+}
+#else
 void Apu13 ()
 {
     BBC (0);
@@ -501,7 +580,121 @@ __IRAM_CODE void ApuF3 ()
 {
     BBC (7);
 }
+#endif
 
+__IRAM_CODE static uint8 gop(int mode, uint8 * opb)
+{
+  switch(mode) {
+  case 4:
+    *opb = S9xAPUGetByteZ (OP1);
+    IAPU.PC += 2;
+    break;
+  case 5:
+    Absolute ();
+    *opb = S9xAPUGetByte (IAPU.Address);
+    IAPU.PC += 3;
+    break;
+  case 6:
+    *opb = S9xAPUGetByteZ (APURegisters.X);
+    IAPU.PC++;
+    break;
+  case 7:
+    IndexedXIndirect ();
+    *opb = S9xAPUGetByte (IAPU.Address);
+    IAPU.PC += 2;
+    break;
+  case 8:
+    *opb = OP1;
+    IAPU.PC += 2;
+    break;
+  case 9:
+    *opb = S9xAPUGetByteZ (OP1);
+    return S9xAPUGetByteZ (OP2);
+  case 0x14:
+    *opb = S9xAPUGetByteZ (OP1 + APURegisters.X);
+    IAPU.PC += 2;
+    break;
+  case 0x15:
+    AbsoluteX ();
+    *opb = S9xAPUGetByte (IAPU.Address);
+    IAPU.PC += 3;
+    break;
+  case 0x16:
+    AbsoluteY ();
+    *opb = S9xAPUGetByte (IAPU.Address);
+    IAPU.PC += 3;
+    break;
+  case 0x17:
+    IndirectIndexedY ();
+    *opb = S9xAPUGetByte (IAPU.Address);
+    IAPU.PC += 2;
+    break;
+  case 0x18:
+    *opb = OP1;
+    return S9xAPUGetByteZ (OP2);
+    //default:
+  case 0x19:
+    *opb = S9xAPUGetByteZ (APURegisters.YA.B.Y);
+    IAPU.PC++;
+    return S9xAPUGetByteZ (APURegisters.X);
+//   default:
+//     printf("!!!\n");
+  }
+  return APURegisters.YA.B.A;
+}
+
+__IRAM_CODE static void sop(int mode, int8 Work8)
+{
+  switch(mode) {
+  case 4:
+  case 5:
+  case 6:
+  case 7:
+  case 8:
+  case 0x14:
+  case 0x15:
+  case 0x16:
+  case 0x17:
+    APURegisters.YA.B.A = Work8;
+    break;
+  case 9:
+    S9xAPUSetByteZ (Work8, OP2);
+    IAPU.PC += 3;
+    break;
+  case 0x18:
+    S9xAPUSetByteZ (Work8, OP2);
+    IAPU.PC += 3;
+    break;
+  case 0x19:
+    S9xAPUSetByteZ (Work8, APURegisters.X);
+    break;
+//   default:
+//     printf("???\n");
+  }
+  APUSetZN8 (Work8);
+}
+
+#ifdef SOPT
+#define Apu05 Apu04
+#define Apu06 Apu04
+#define Apu07 Apu04
+#define Apu08 Apu04
+#define Apu09 Apu04
+#define Apu14 Apu04
+#define Apu15 Apu04
+#define Apu16 Apu04
+#define Apu17 Apu04
+#define Apu18 Apu04
+#define Apu19 Apu04
+__IRAM_CODE void Apu04 ()
+{
+// OR
+  uint8 a, b;
+  int mode = OP0;
+  a = gop(mode, &b);
+  sop(mode, a|b);
+}
+#else
 void Apu04 ()
 {
 // OR A,dp
@@ -607,6 +800,7 @@ void Apu19 ()
     S9xAPUSetByteZ (Work8, APURegisters.X);
     IAPU.PC++;
 }
+#endif
 
 void Apu0A ()
 {
@@ -1084,6 +1278,28 @@ __IRAM_CODE void ApuDA ()
     IAPU.PC += 2;
 }
 
+#ifdef SOPT
+#define Apu65 Apu64
+#define Apu66 Apu64
+#define Apu67 Apu64
+#define Apu68 Apu64
+#define Apu69 Apu64
+#define Apu74 Apu64
+#define Apu75 Apu64
+#define Apu76 Apu64
+#define Apu77 Apu64
+#define Apu78 Apu64
+#define Apu79 Apu64
+__IRAM_CODE void Apu64 ()
+{
+  uint8 a, b;
+  int mode = OP0&0x1f;
+  a = gop(mode, &b);
+  CMP(a, b);
+  if (mode == 0x9 || mode == 0x18)
+    IAPU.PC += 3;
+}
+#else
 void Apu64 ()
 {
 // CMP A,dp
@@ -1187,6 +1403,7 @@ void Apu79 ()
     CMP (W1, Work8);
     IAPU.PC++;
 }
+#endif
 
 void Apu1E ()
 {
@@ -1277,6 +1494,26 @@ void ApuE0 ()
     IAPU.PC++;
 }
 
+#ifdef SOPT
+#define Apu25 Apu24
+#define Apu26 Apu24
+#define Apu27 Apu24
+#define Apu28 Apu24
+#define Apu29 Apu24
+#define Apu34 Apu24
+#define Apu35 Apu24
+#define Apu36 Apu24
+#define Apu37 Apu24
+#define Apu38 Apu24
+#define Apu39 Apu24
+__IRAM_CODE void Apu24 ()
+{
+  uint8 a, b;
+  int mode = OP0&0x1f;
+  a = gop(mode, &b);
+  sop(mode, a&b);
+}
+#else
 __IRAM_CODE void Apu24 ()
 {
 // AND A,dp
@@ -1382,6 +1619,7 @@ void Apu39 ()
     S9xAPUSetByteZ (Work8, APURegisters.X);
     IAPU.PC++;
 }
+#endif
 
 void Apu2B ()
 {
@@ -1614,6 +1852,26 @@ void Apu9C ()
     IAPU.PC++;
 }
 
+#ifdef SOPT
+#define Apu45 Apu44
+#define Apu46 Apu44
+#define Apu47 Apu44
+#define Apu48 Apu44
+#define Apu49 Apu44
+#define Apu54 Apu44
+#define Apu55 Apu44
+#define Apu56 Apu44
+#define Apu57 Apu44
+#define Apu58 Apu44
+#define Apu59 Apu44
+__IRAM_CODE void Apu44 ()
+{
+  uint8 a, b;
+  int mode = OP0&0x1f;
+  a = gop(mode, &b);
+  sop(mode, a^b);
+}
+#else
 void Apu44 ()
 {
 // EOR A,dp
@@ -1719,6 +1977,7 @@ void Apu59 ()
     S9xAPUSetByteZ (Work8, APURegisters.X);
     IAPU.PC++;
 }
+#endif
 
 __IRAM_CODE void Apu4B ()
 {
@@ -1885,6 +2144,27 @@ void Apu7F ()
 }
 
 // HERE
+#ifdef SOPT
+#define Apu85 Apu84
+#define Apu86 Apu84
+#define Apu87 Apu84
+#define Apu88 Apu84
+#define Apu89 Apu84
+#define Apu94 Apu84
+#define Apu95 Apu84
+#define Apu96 Apu84
+#define Apu97 Apu84
+#define Apu98 Apu84
+#define Apu99 Apu84
+__IRAM_CODE void Apu84 ()
+{
+  uint8 a, b;
+  int mode = OP0&0x1f;
+  a = gop(mode, &b);
+  ADC(a, b);
+  sop(mode, a);
+}
+#else
 void Apu84 ()
 {
 // ADC A,dp
@@ -1991,6 +2271,7 @@ void Apu99 ()
     S9xAPUSetByteZ (W1, APURegisters.X);
     IAPU.PC++;
 }
+#endif
 
 __IRAM_CODE void Apu8D ()
 {
@@ -2038,6 +2319,27 @@ void Apu9F ()
     IAPU.PC++;
 }
 
+#ifdef SOPT
+#define ApuA5 ApuA4
+#define ApuA6 ApuA4
+#define ApuA7 ApuA4
+#define ApuA8 ApuA4
+#define ApuA9 ApuA4
+#define ApuB4 ApuA4
+#define ApuB5 ApuA4
+#define ApuB6 ApuA4
+#define ApuB7 ApuA4
+#define ApuB8 ApuA4
+#define ApuB9 ApuA4
+__IRAM_CODE void ApuA4 ()
+{
+  uint8 a, b;
+  int mode = OP0&0x1f;
+  a = gop(mode, &b);
+  SBC(a, b);
+  sop(mode, a);
+}
+#else
 void ApuA4 ()
 {
 // SBC A, dp
@@ -2144,6 +2446,7 @@ void ApuB9 ()
     S9xAPUSetByteZ (W1, APURegisters.X);
     IAPU.PC++;
 }
+#endif
 
 void ApuAF ()
 {

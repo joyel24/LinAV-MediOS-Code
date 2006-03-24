@@ -57,7 +57,7 @@ MED_RET_T load_dsp_program_hdd (const char* pszFilename)
 {
 	printk ("Loading dsp program from hdd into sdram...\n");
 	unsigned char * pDSPCode = 0;
-	int fDSPCode = fopen (pszFilename, O_RDONLY);
+	int fDSPCode = open (pszFilename, O_RDONLY);
 	int nSize;
 	if (fDSPCode < 0)
 	{
@@ -68,9 +68,9 @@ MED_RET_T load_dsp_program_hdd (const char* pszFilename)
 	{
 		nSize = filesize (fDSPCode);
 		pDSPCode = malloc (nSize);
-		int nReaded = fread (fDSPCode, pDSPCode, nSize);
+		int nReaded = read (fDSPCode, pDSPCode, nSize);
 		printk ("Program loaded into sdram (%d bytes)\n", nReaded);
-		fclose (fDSPCode);
+		close (fDSPCode);
 	}
 
 	load_dsp_program_mem (pDSPCode, nSize);
@@ -117,7 +117,7 @@ MED_RET_T load_dsp_program_mem (void* pDSPCode, int nSize)
 			continue;
 		}
 
-		unsigned long nVirtAddress = psec->s_vaddr_lo;
+		unsigned long nVirtAddress = psec->s_vaddr_lo/* + (((int)psec->s_page) << 16)*/;
 		unsigned long nSectSize    = psec->s_size_lo;
 
 		if (!nVirtAddress)
@@ -127,7 +127,10 @@ MED_RET_T load_dsp_program_mem (void* pDSPCode, int nSize)
 			continue;
 		}
 
-		printk ("Loading section %s (addr: 0x%.4X, size: 0x%.4X words)...\n",
+/* 		if (!strcmp(sec_name, ".text") || !strcmp(sec_name, ".switch")) */
+/* 		  nVirtAddress += 0x10000; */
+
+		printk ("Loading section %s (addr: 0x%.8X, size: 0x%.4X words)...\n",
 			sec_name,
 			nVirtAddress,
 			nSectSize);
@@ -146,11 +149,11 @@ MED_RET_T load_dsp_program_mem (void* pDSPCode, int nSize)
 //		else
 		{
 			unsigned long fileOffset=psec->s_scnptr_lo | psec->s_scnptr_hi<<16;
-      unsigned char* pSrcCode = (unsigned char*)(pDSPCode + fileOffset);
-      for (j=0;j<psec->s_size_lo*2;j+=2)
-      {
-        outw (pSrcCode[j] | pSrcCode[j+1]<<8 , 0x00040000 + nVirtAddress*2 + j);
-			}
+			unsigned char* pSrcCode = (unsigned char*)(pDSPCode + fileOffset);
+			for (j=0;j<psec->s_size_lo*2;j+=2)
+			  {
+			    outw (pSrcCode[j] | pSrcCode[j+1]<<8 , 0x00040000 + nVirtAddress*2 + j);
+			  }
 		}
 	}
 

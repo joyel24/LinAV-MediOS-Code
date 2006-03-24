@@ -56,13 +56,13 @@ void init_file(void)
         openfiles[fd].busy=false;
 }
 
-int fcreat(const char *pathname, mode_t mode)
+int creat(const char *pathname, mode_t mode)
 {
     (void)mode;
-    return fopen(pathname, O_WRONLY|O_CREAT|O_TRUNC);
+    return open(pathname, O_WRONLY|O_CREAT|O_TRUNC);
 }
 
-int fopen(const char* pathname, int flags)
+int open(const char* pathname, int flags)
 {
     DIR* dir;
     struct dirent* entry;
@@ -184,7 +184,7 @@ int fopen(const char* pathname, int flags)
     return fd;
 }
 
-int fclose(int fd)
+int close(int fd)
 {
     struct filedesc* file = &openfiles[fd];
     int rc = 0;
@@ -230,7 +230,7 @@ int fsync(int fd)
 
         /* truncate? */
         if (file->trunc) {
-            rc = ftruncate(fd, file->size);
+            rc = truncate(fd, file->size);
             if (rc < 0)
                 return rc * 10 - 4;
         }
@@ -243,11 +243,11 @@ int fsync(int fd)
     return 0;
 }
 
-int fremove(const char* name)
+int remove(const char* name)
 {
     int rc;
     struct filedesc* file;
-    int fd = fopen(name, O_WRONLY);
+    int fd = open(name, O_WRONLY);
     if ( fd < 0 )
         return fd * 10 - 1;
 
@@ -260,14 +260,14 @@ int fremove(const char* name)
 
     file->size = 0;
 
-    rc = fclose(fd);
+    rc = close(fd);
     if (rc<0)
         return rc * 10 - 4;
 
     return 0;
 }
 
-int frename(const char* path, const char* newpath)
+int rename(const char* path, const char* newpath)
 {
     int rc, fd;
     DIR* dir;
@@ -278,15 +278,15 @@ int frename(const char* path, const char* newpath)
 
     /* verify new path does not already exist */
     /* If it is a directory, errno == EISDIR if the name exists */
-    fd = fopen(newpath, O_RDONLY);
+    fd = open(newpath, O_RDONLY);
 #warning original code was also checking || errno == EISDIR
     if ( fd >= 0 ) {
-        fclose(fd);
+        close(fd);
         return -1;
     }
-    fclose(fd);
+    close(fd);
 
-    fd = fopen(path, O_RDONLY);
+    fd = open(path, O_RDONLY);
     if ( fd < 0 ) {
         return fd * 10 - 2;
     }
@@ -325,7 +325,7 @@ int frename(const char* path, const char* newpath)
         return rc * 10 - 6;
     }
 
-    rc = fclose(fd);
+    rc = close(fd);
     if (rc<0) {
         return rc * 10 - 7;
     }
@@ -338,7 +338,7 @@ int frename(const char* path, const char* newpath)
     return 0;
 }
 
-int ftruncate(int fd, off_t size)
+int truncate(int fd, off_t size)
 {
     int rc, sector;
     struct filedesc* file = &openfiles[fd];
@@ -531,7 +531,7 @@ static int readwrite(int fd, void* buf, int count, bool write)
     return nread;
 }
 
-ssize_t fwrite(int fd, const void* buf, size_t count)
+ssize_t write(int fd, const void* buf, size_t count)
 {
     if (!openfiles[fd].write) {
         return -1;
@@ -539,24 +539,24 @@ ssize_t fwrite(int fd, const void* buf, size_t count)
     return readwrite(fd, (void *)buf, count, true);
 }
 
-ssize_t fread(int fd, void* buf, size_t count)
+ssize_t read(int fd, void* buf, size_t count)
 {
     return readwrite(fd, buf, count, false);
 }
 
-off_t ftell(int fd)
-{
-    struct filedesc* file = &openfiles[fd];
-    if ( !file->busy ) {
-        return -1;
-    }
-    return file->fileoffset;
-}
+/* off_t ftell(int fd) */
+/* { */
+/*     struct filedesc* file = &openfiles[fd]; */
+/*     if ( !file->busy ) { */
+/*         return -1; */
+/*     } */
+/*     return file->fileoffset; */
+/* } */
 
-off_t fseek(int fd, off_t offset, int whence)
-{
-  return lseek(fd, offset, whence);
-}
+/* off_t fseek(int fd, off_t offset, int whence) */
+/* { */
+/*   return lseek(fd, offset, whence); */
+/* } */
 
 off_t lseek(int fd, off_t offset, int whence)
 {
@@ -589,6 +589,10 @@ off_t lseek(int fd, off_t offset, int whence)
         default:
             return -2;
     }
+
+    if (pos == file->fileoffset) // optimize the case where we just want current file position
+        goto done;
+
     if ((pos < 0) || (pos > file->size)) {
         return -3;
     }
@@ -630,6 +634,7 @@ off_t lseek(int fd, off_t offset, int whence)
 
     file->fileoffset = pos;
 
+ done:
     return pos;
 }
 
@@ -647,18 +652,18 @@ int filesize(int fd)
 #ifndef EOF
 # define EOF (-1)
 #endif
-int fgetc(int fd)
-{
-  char res;
-  int n = fread(fd, &res, 1);
-  if (n<=0) return EOF;
-  return res;
-}
+/* int fgetc(int fd) */
+/* { */
+/*   char res; */
+/*   int n = read(fd, &res, 1); */
+/*   if (n<=0) return EOF; */
+/*   return res; */
+/* } */
 
-int __fgetc_unlocked(int fd)
-{
-  char res;
-  int n = fread(fd, &res, 1);
-  if (n<=0) return EOF;
-  return res;
-}
+/* int __fgetc_unlocked(int fd) */
+/* { */
+/*   char res; */
+/*   int n = read(fd, &res, 1); */
+/*   if (n<=0) return EOF; */
+/*   return res; */
+/* } */

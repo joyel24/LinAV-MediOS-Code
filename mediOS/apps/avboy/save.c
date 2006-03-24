@@ -186,7 +186,7 @@ void loadstate(int fd)
 
   lseek(fd, 0, SEEK_SET);
   
-	fread(fd,buf, 4096);
+	read(fd,buf, 4096);
 
 	for (j = 0; header[j][0]; j++)
 	{
@@ -222,13 +222,13 @@ void loadstate(int fd)
 	else memcpy(snd.wave, ram.hi+0x30, 16); /* patch data from older files */
 
 	lseek(fd, (iramblock << 12), SEEK_SET);
-	fread(fd,ram.ibank, 4096*irl);
+	read(fd,ram.ibank, 4096*irl);
 	
 	lseek(fd, (vramblock << 12), SEEK_SET);
-	fread(fd,lcd_vbank, 4096*vrl);
+	read(fd,lcd_vbank, 4096*vrl);
 	
 	lseek(fd, (sramblock << 12), SEEK_SET);
-	fread(fd,ram.sbank, 4096*srl);
+	read(fd,ram.sbank, 4096*srl);
      //   free(buf);
         vram_dirty();
         pal_dirty();
@@ -287,16 +287,16 @@ void savestate(int fd)
   /* calculate base offset for output file */
   /* (we'll seek relative to that from now on) */
 	lseek(fd, 0, SEEK_SET);
-	fwrite(fd,buf, 4096);
+	write(fd,buf, 4096);
 	
 	lseek(fd, (iramblock << 12), SEEK_SET);
-	fwrite(fd,ram.ibank, 4096*irl);
+	write(fd,ram.ibank, 4096*irl);
 	
 	lseek(fd, (vramblock << 12), SEEK_SET);
-	fwrite(fd,lcd_vbank, 4096*vrl);
+	write(fd,lcd_vbank, 4096*vrl);
 	
 	lseek(fd, (sramblock << 12), SEEK_SET);
-	fwrite(fd,ram.sbank, 4096*srl);
+	write(fd,ram.sbank, 4096*srl);
      //   free(buf);
 }
 

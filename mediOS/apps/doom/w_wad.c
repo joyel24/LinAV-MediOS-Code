@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.7  2006/03/03 18:35:09  sfxgligli
+// added alloca()
+//
 // Revision 1.6  2006/02/08 18:49:52  oxygen77
 // small bugfix from previous CI on Makfiles / build process
 //
@@ -179,7 +182,7 @@ void W_AddFile (char *filename)
       //  printf("reloadname = %s\n",reloadname);
     }
 
-    if ( (handle = fopen (filename,O_RDONLY)) <0)
+    if ( (handle = open (filename,O_RDONLY)) <0)
     {
 	printf (" couldn't open %s\n",filename);
 	return;
@@ -200,7 +203,7 @@ void W_AddFile (char *filename)
     else
     {
 	// WAD file
-	fread (handle,&header, sizeof(header));
+	read (handle,&header, sizeof(header));
 	if (strncmp(header.identification,"IWAD",4))
 	{
 	    // Homebrew levels?
@@ -217,7 +220,7 @@ void W_AddFile (char *filename)
 	length = header.numlumps*sizeof(filelump_t);
 	fileinfo = malloc(length);
 	lseek (handle, header.infotableofs, SEEK_SET);
-	fread (handle, fileinfo, length);
+	read (handle, fileinfo, length);
 	numlumps += header.numlumps;
     }
 
@@ -244,7 +247,7 @@ void W_AddFile (char *filename)
     free(fileinfo);
 
     if (reloadname)
-	fclose (handle);
+	close (handle);
 }
 
 
@@ -268,16 +271,16 @@ void W_Reload (void)
     if (!reloadname)
 	return;
 
-    if ( (handle = fopen (reloadname,O_RDONLY)) <0)
+    if ( (handle = open (reloadname,O_RDONLY)) <0)
 	I_Error ("W_Reload: couldn't open %s",reloadname);
 
-    fread (handle,&header, sizeof(header));
+    read (handle,&header, sizeof(header));
     lumpcount = LONG(header.numlumps);
     header.infotableofs = LONG(header.infotableofs);
     length = lumpcount*sizeof(filelump_t);
     fileinfo = malloc (length);
     lseek (handle, header.infotableofs, SEEK_SET);
-    fread (handle,fileinfo, length);
+    read (handle,fileinfo, length);
 
     // Fill in lumpinfo
     lump_p = &lumpinfo[reloadlump];
@@ -295,7 +298,7 @@ void W_Reload (void)
 
     free(fileinfo);
 
-    fclose (handle);
+    close (handle);
 }
 
 
@@ -479,21 +482,21 @@ W_ReadLump
     if (l->handle == -1)
     {
 	// reloadable file, so use open / read / close
-	if ( (handle = fopen (reloadname,O_RDONLY))<0)
+	if ( (handle = open (reloadname,O_RDONLY))<0)
 	    I_Error ("W_ReadLump: couldn't open %s",reloadname);
     }
     else
 	handle = l->handle;
 
     lseek (handle, l->position, SEEK_SET);
-    c = fread (handle,dest, l->size);
+    c = read (handle,dest, l->size);
 
     if (c < l->size)
 	I_Error ("W_ReadLump: only read %i of %i on lump %i",
 		 c,l->size,lump);
 
     if (l->handle == -1)
-	fclose (handle);
+	close (handle);
 		
     // ??? I_EndRead ();
 }
@@ -588,7 +591,7 @@ void W_Profile (void)
     }
     profilecount++;
 
-    f = fopen ("waddump.txt",O_RDONLY);
+    f = open ("waddump.txt",O_RDONLY);
     name[8] = 0;
 
     for (i=0 ; i<numlumps ; i++)
@@ -609,7 +612,7 @@ void W_Profile (void)
 
 	fprintf (f,"\n");
     }
-    fclose (f);
+    close (f);
 }
 
 

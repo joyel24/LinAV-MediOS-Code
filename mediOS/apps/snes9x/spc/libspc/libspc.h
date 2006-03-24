@@ -60,7 +60,7 @@ int SPC_init(SPC_Config *cfg);
 void SPC_close(void);
 int SPC_set_state(SPC_Config *cfg);
 int SPC_load(const char *fname, SPC_ID666 * id);
-void SPC_update(unsigned char *buf);
+int SPC_update(unsigned char *buf);
 int SPC_get_id666 (const char *filename, SPC_ID666 * id);
 int SPC_write_id666(SPC_ID666 *id, const char *filename);
 

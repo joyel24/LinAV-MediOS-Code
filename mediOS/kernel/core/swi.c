@@ -49,6 +49,7 @@ unsigned int swi_handler (
             return (unsigned int)badFctName;            
         }
         else
-            printk("Unknown SWI %x\n",nCmd);
+	  // VP removed that for now because I'm flooded by some unknown swi (related to dsp probably)
+	  ;//printk("Unknown SWI %x\n",nCmd);
         return 0;
 }

@@ -112,8 +112,8 @@ extern int NoiseFreq [32];
 
 // F is channel's current frequency and M is the 16-bit modulation waveform
 // from the previous channel multiplied by the current envelope volume level.
-#define PITCH_MOD(F,M) ((F) * ((((M) & 0x7fffff) >> 16) + 1) >> 7)
-//#define PITCH_MOD(F,M) ((F) * ((((M) & 0x7fffff) >> 14) + 1) >> 8)
+//#define PITCH_MOD(F,M) ((F) * ((((M) & 0x7fffff) >> 16) + 1) >> 7)
+#define PITCH_MOD(F,M) ((F) * ((((M) & 0x7fffff) >> 14) + 1) >> 8)
 
 #define LAST_SAMPLE 0xffffff
 #define JUST_PLAYED_LAST_SAMPLE(c) ((c)->sample_pointer >= LAST_SAMPLE)
@@ -135,13 +135,13 @@ inline void BCOLOR(int r, int g, int b)
 }
 
 
-STATIC inline uint8 *S9xGetSampleAddress (int sample_number)
+__IRAM_CODE STATIC inline uint8 *S9xGetSampleAddress (int sample_number)
 {
     uint32 addr = (((APU.DSP[APU_DIR] << 8) + (sample_number << 2)) & 0xffff);
     return (IAPU.RAM + addr);
 }
 
-void S9xAPUSetEndOfSample (int i, Channel *ch)
+__IRAM_CODE void S9xAPUSetEndOfSample (int i, Channel *ch)
 {
     ch->state = SOUND_SILENT;
     ch->mode = MODE_NONE;
@@ -154,7 +154,7 @@ void S9xAPUSetEndOfSample (int i, Channel *ch)
 END_OF_FUNCTION (S9xAPUSetEndOfSample)
 #endif
 
-void S9xAPUSetEndX (int ch)
+__IRAM_CODE void S9xAPUSetEndX (int ch)
 {
     APU.DSP [APU_ENDX] |= 1 << ch;
 }
@@ -162,7 +162,7 @@ void S9xAPUSetEndX (int ch)
 END_OF_FUNCTION (S9xAPUSetEndX)
 #endif
 
-void S9xSetEnvRate (Channel *ch, unsigned long rate, int direction, int target)
+__IRAM_CODE void S9xSetEnvRate (Channel *ch, unsigned long rate, int direction, int target)
 {
     ch->envx_target = target;
 
@@ -174,7 +174,7 @@ void S9xSetEnvRate (Channel *ch, unsigned long rate, int direction, int target)
     else
 	ch->direction = direction;
 
-    static int steps [] =
+    __IRAM_DATA static int steps [] =
     {
 //	0, 64, 1238, 1238, 256, 1, 64, 109, 64, 1238
 	0, 64, 619, 619, 128, 1, 64, 55, 64, 619
@@ -206,6 +206,11 @@ END_OF_FUNCTION(S9xSetEnvelopeRate);
 
 void S9xSetSoundVolume (int channel, short volume_left, short volume_right)
 {
+//   volume_left &= 0xff; // VP bug test, to be removed absolutely
+//   volume_right &= 0xff;
+//   volume_left /= 2; // VP test
+//   volume_right /= 2;
+
     Channel *ch = &SoundData.channels[channel];
     if (!so.stereo)
 	volume_left = (ABS(volume_right) + ABS(volume_left)) / 2;
@@ -863,11 +868,12 @@ __IRAM_CODE void MixStereo (int sample_count)
 
 	    if (pitch_mod & (1 << (J + 1)))
 		wave [I / 2] = ch->sample * ch->envx;
-
-	    MixBuffer [I  ] += VL;
-	    MixBuffer [I+1] += VR;
-	    ch->echo_buf_ptr [I  ] += VL;
-	    ch->echo_buf_ptr [I+1] += VR;
+	    else {
+	      MixBuffer [I  ] += VL;
+	      MixBuffer [I+1] += VR;
+	      ch->echo_buf_ptr [I  ] += VL;
+	      ch->echo_buf_ptr [I+1] += VR;
+	    }
         }
 stereo_exit: ;
     }

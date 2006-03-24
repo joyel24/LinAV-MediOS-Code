@@ -75,7 +75,7 @@ MED_RET_T load_bflat (const char * fname)
     int (*run_flat)(int argc,char**argv);
     
     
-    fd_bflat = fopen(fname,O_RDONLY);
+    fd_bflat = open(fname,O_RDONLY);
     
     if(fd_bflat<0)
     {
@@ -83,10 +83,10 @@ MED_RET_T load_bflat (const char * fname)
         return -MED_ENOENT;
     }
     
-    if((ret=fread(fd_bflat,(void*)&header,sizeof(struct bflat_header)))<sizeof(struct bflat_header))
+    if((ret=read(fd_bflat,(void*)&header,sizeof(struct bflat_header)))<sizeof(struct bflat_header))
     {
         printk("[load_bflat] Can't read completly the header (read %d)\n",ret);
-        fclose(fd_bflat);
+        close(fd_bflat);
         return -MED_EIO;
     }
     
@@ -94,7 +94,7 @@ MED_RET_T load_bflat (const char * fname)
     {
         header.magic[4]=0;
         printk("[load_bflat] Wrong magic (%s)\n",header.magic);
-        fclose(fd_bflat);
+        close(fd_bflat);
         return -MED_ERROR;
     }
         
@@ -127,7 +127,7 @@ MED_RET_T load_bflat (const char * fname)
     {
         printk("[load_bflat] can't alloc enough mem space (%08x needed)\n",
             text_len+data_len+extra_len+NB_LIB*sizeof(unsigned long));
-        fclose(fd_bflat);
+        close(fd_bflat);
         return -MED_ENOMEM;
     }
     
@@ -140,25 +140,25 @@ MED_RET_T load_bflat (const char * fname)
     
     lseek(fd_bflat, 0, SEEK_SET);
     
-    ret = fread(fd_bflat,(void*)text_pos,text_len);
+    ret = read(fd_bflat,(void*)text_pos,text_len);
     
     if(ret<text_len)
     {
         printk("[load_bflat] can't read text section (ret=%d)\n",ret);
         free((void*)text_pos);
-        fclose(fd_bflat);
+        close(fd_bflat);
         return -MED_EIO;
     }
     
     lseek(fd_bflat, header.data_start, SEEK_SET);
     
-    ret = fread(fd_bflat,(void*)data_pos,data_len+header.reloc_count*sizeof(unsigned long));
+    ret = read(fd_bflat,(void*)data_pos,data_len+header.reloc_count*sizeof(unsigned long));
     
     if(ret<(data_len+header.reloc_count*sizeof(unsigned long)))
     {
         printk("[load_bflat] can't read data+remoc section (ret=%d)\n",ret);
         free((void*)text_pos);
-        fclose(fd_bflat);
+        close(fd_bflat);
         return -MED_EIO;
     }
     

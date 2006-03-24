@@ -133,7 +133,7 @@ static byte *loadfile(int f, int *len)
         buf=(char *)malloc(64*1024);
 	for(;;)
 	{
-		c = fread(f, buf, 64*1024); //sizeof buf);
+		c = read(f, buf, 64*1024); //sizeof buf);
 		if (c <= 0) break;
 		l += c;
 		d = realloc(d, l);
@@ -181,10 +181,10 @@ int rom_load()
 	int len = 0, rlen;
 
 
-	f = fopen(romfile, O_RDONLY);
+	f = open(romfile, O_RDONLY);
 	if (f<0) {
        //  debug("Retry!");
-       //  f = fopen(romfile, O_RDONLY);
+       //  f = open(romfile, O_RDONLY);
        //  if (f<0) DIE("cannot open rom file: %s\n", romfile);
          DIE("cannot open rom file: %s\n", romfile);
       }
@@ -230,7 +230,7 @@ int rom_load()
 	hw.cgb = ((c == 0x80) || (c == 0xc0)) && !forcedmg;
 	hw.gba = (hw.cgb && gbamode);
 
-	if (strcmp(romfile, "-")) fclose(f);
+	if (strcmp(romfile, "-")) close(f);
       printf("Rom_load ok!\n");
 
 	return 0;
@@ -245,14 +245,14 @@ int sram_load()
 	/* Consider sram loaded at this point, even if file doesn't exist */
 	ram.loaded = 1;
 
-	f = fopen(sramfile, O_RDONLY);
+	f = open(sramfile, O_RDONLY);
 	if (!f)  {
           printf("Retry...");
-          f = fopen(sramfile, O_RDONLY);
+          f = open(sramfile, O_RDONLY);
 	  if (!f) return -1;
 	}
-	fread(f,ram.sbank, 8192);
-	fclose(f);
+	read(f,ram.sbank, 8192);
+	close(f);
 	
 	return 0;
 }
@@ -266,14 +266,14 @@ int sram_save()
 	if (!mbc.batt || !sramfile || !ram.loaded || !mbc.ramsize)
 		return -1;
 
-	f = fopen(sramfile, O_WRONLY|O_CREAT|O_TRUNC);
+	f = open(sramfile, O_WRONLY|O_CREAT|O_TRUNC);
 	if (!f) {
           printf("Retry...");
-          f = fopen(sramfile, O_WRONLY|O_CREAT|O_TRUNC);
+          f = open(sramfile, O_WRONLY|O_CREAT|O_TRUNC);
 	  if (!f) return -1;
 	}
-	fwrite(f, ram.sbank, 8192);
-	fclose(f);
+	write(f, ram.sbank, 8192);
+	close(f);
 
 	return 0;
 }
@@ -289,10 +289,10 @@ void state_save(int n)
 	name = malloc(strlen(saveprefix) + 5);
 	sprintf(name, "%s.%03d", saveprefix, n);
 
-	if ((f = fopen(name, O_WRONLY|O_CREAT|O_TRUNC)))
+	if ((f = open(name, O_WRONLY|O_CREAT|O_TRUNC)))
 	{
 		savestate(f);
-		fclose(f);
+		close(f);
 	}
 	free(name);
 }
@@ -308,10 +308,10 @@ void state_load(int n)
 	name = malloc(strlen(saveprefix) + 5);
 	sprintf(name, "%s.%03d", saveprefix, n);
 
-	if ((f = fopen(name, O_RDONLY)))
+	if ((f = open(name, O_RDONLY)))
 	{
 		loadstate(f);
-		fclose(f);
+		close(f);
 		vram_dirty();
 		pal_dirty();
 		sound_dirty();
@@ -324,18 +324,18 @@ void rtc_save()
 {
 	int f;
 	if (!rtc.batt) return;
-	if (!(f = fopen(rtcfile, O_WRONLY|O_CREAT|O_TRUNC))) return;
+	if (!(f = open(rtcfile, O_WRONLY|O_CREAT|O_TRUNC))) return;
 	rtc_save_internal(f);
-	fclose(f);
+	close(f);
 }
 
 void rtc_load()
 {
 	int f;
 	if (!rtc.batt) return;
-	if (!(f = fopen(rtcfile, O_RDONLY))) return;
+	if (!(f = open(rtcfile, O_RDONLY))) return;
 	rtc_load_internal(f);
-	fclose(f);
+	close(f);
 }
 
 

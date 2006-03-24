@@ -16,6 +16,10 @@
 //
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	Switches, buttons. Two-state animation. Exits.
@@ -424,7 +428,7 @@ P_UseSpecialLine
 	
       case 50:
 	// Close Door
-	if (EV_DoDoor(line,close))
+	if (EV_DoDoor(line,closeD))
 	    P_ChangeSwitchTexture(line,0);
 	break;
 	
@@ -454,7 +458,7 @@ P_UseSpecialLine
 	
       case 103:
 	// Open Door
-	if (EV_DoDoor(line,open))
+	if (EV_DoDoor(line,openD))
 	    P_ChangeSwitchTexture(line,0);
 	break;
 	
@@ -513,7 +517,7 @@ P_UseSpecialLine
 	// BUTTONS
       case 42:
 	// Close Door
-	if (EV_DoDoor(line,close))
+	if (EV_DoDoor(line,closeD))
 	    P_ChangeSwitchTexture(line,1);
 	break;
 	
@@ -537,7 +541,7 @@ P_UseSpecialLine
 	
       case 61:
 	// Open Door
-	if (EV_DoDoor(line,open))
+	if (EV_DoDoor(line,openD))
 	    P_ChangeSwitchTexture(line,1);
 	break;
 	

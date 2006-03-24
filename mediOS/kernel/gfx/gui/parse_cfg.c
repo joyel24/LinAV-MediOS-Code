@@ -39,7 +39,7 @@ int next_char(void)
 
     if (!back)
     {
-        if(fread(file,buff,1)!=1)
+        if(read(file,buff,1)!=1)
             feof_reached=1;
         //printk("read: %c\n",buff[0]);
         return buff[0];
@@ -156,7 +156,7 @@ int nxt_cfg(char *item,char *value)
 
 int openFile(char * filename,int mode)
 {    
-    if ((file = fopen(filename,mode))<0)
+    if ((file = open(filename,mode))<0)
     {
         printk("error reading config file %s (%d)\n",filename,mode);
         return -1;
@@ -168,7 +168,7 @@ int openFile(char * filename,int mode)
 
 void closeFile(void)
 {
-    fclose(file);
+    close(file);
 }
 
 
@@ -184,29 +184,29 @@ int write_cfg(char * item,char * value)
     else
         fmt="%s=%s\n";
     snprintk(str,MAX_TOKEN,fmt,item,value);    
-    fwrite(file, str, strlen(str));    */
-    fwrite(file, item, strlen(item));
-    fwrite(file, "=", 1);
+    write(file, str, strlen(str));    */
+    write(file, item, strlen(item));
+    write(file, "=", 1);
     if(has_cote)
-        fwrite(file, "\"", 1);
-    fwrite(file, item, strlen(value));  
+        write(file, "\"", 1);
+    write(file, item, strlen(value));  
     if(has_cote)
-        fwrite(file, "\"", 1);
-    fwrite(file, "\n", 1);
+        write(file, "\"", 1);
+    write(file, "\n", 1);
     return 1;
 }
 
 int write_comment(char * cmt)
 {
-    fwrite(file, "#", 1);
-    fwrite(file, cmt, strlen(cmt));
-    fwrite(file, "\n", 1);
+    write(file, "#", 1);
+    write(file, cmt, strlen(cmt));
+    write(file, "\n", 1);
     return 1;
 }
 
 int add_line(void)
 {
-    fwrite(file, "\n", 1);    
+    write(file, "\n", 1);    
     return 1;
 }
 

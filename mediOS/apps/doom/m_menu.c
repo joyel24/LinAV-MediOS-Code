@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.2  2006/01/03 20:57:57  sfxgligli
+// - Doom: weapon change, fixed backward move bug, HUD resize optimisation
+// - Medios: added firmware reload function, implemented exit() user function
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -517,15 +521,15 @@ void M_ReadSaveStrings(void)
     {
 	sprintf(name,SAVEGAMENAME"%d.dsg",i);
 
-	handle = fopen (name, O_RDONLY); //gli
+	handle = open (name, O_RDONLY); //gli
 	if (handle <0)
 	{
 	    strcpy(&savegamestrings[i][0],EMPTYSTRING);
 	    LoadMenu[i].status = 0;
 	    continue;
 	}
-	count = fread (handle,&savegamestrings[i], SAVESTRINGSIZE);
-	fclose (handle);
+	count = read (handle,&savegamestrings[i], SAVESTRINGSIZE);
+	close (handle);
 	LoadMenu[i].status = 1;
     }
 }

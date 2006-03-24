@@ -279,10 +279,10 @@ static bool do_file(char *path/*, char *desc*/, bool is_load) {
 
   /* load/save state */
   if (is_load) {
-    fd = fopen(path, O_RDONLY );
+    fd = open(path, O_RDONLY );
     if(!fd) {
       printf("Retry...\n"); 
-      fd = fopen(path, O_RDONLY );
+      fd = open(path, O_RDONLY );
       if(!fd) return false;
       else printf("File opened!\n");
     }
@@ -293,10 +293,10 @@ static bool do_file(char *path/*, char *desc*/, bool is_load) {
     printf("Loaded state from \"%s\"\n", path);
 
   } else {
-    fd = fopen(path, O_WRONLY | O_CREAT );
+    fd = open(path, O_WRONLY | O_CREAT );
     if(!fd) {
       printf("Retry...\n"); 
-      fd = fopen(path, O_WRONLY | O_CREAT ); 
+      fd = open(path, O_WRONLY | O_CREAT ); 
       if(!fd) return false;
       else printf("File opened!\n");
     }
@@ -345,7 +345,7 @@ static void slot_info(char *info_buf, size_t info_bufsiz, size_t slot_id) {
   build_slot_path(buf, 256, slot_id);
 
   /* attempt to open slot */
-  if ((fd = fopen(buf, O_RDONLY)) >= 0) {
+  if ((fd = open(buf, O_RDONLY)) >= 0) {
     snprintf(info_buf, info_bufsiz, "%2d. State Saved", slot_id + 1);
     fclose(fd);
   } else {

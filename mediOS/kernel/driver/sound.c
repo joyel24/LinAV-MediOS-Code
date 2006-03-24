@@ -357,7 +357,7 @@ void init_sound (void)
     
 #if 1    
     int mp3ptr=0;
-    int fd = fopen("/out.wav",O_RDONLY);
+    int fd = open("/out.wav",O_RDONLY);
     if(fd<0)
         printk("Error loading file\n");
     else
@@ -368,12 +368,12 @@ void init_sound (void)
         /*
         while(cnt>0)
         {
-            cnt = fread(fd,mp3Buff+size,1024);
+            cnt = read(fd,mp3Buff+size,1024);
             size += cnt;            
         }*/
-        size = fread(fd,mp3Buff,size);
+        size = read(fd,mp3Buff,size);
         printk("Read from file: %x\n",size);
-        fclose(fd);
+        close(fd);
         //int size=0x46500;
         char * data_buff = mp3Buff;
         int data;

@@ -16,6 +16,9 @@
 //
 //
 // $Log$
+// Revision 1.3  2006/02/06 22:45:48  oxygen77
+// make doom work with new api, we lack of exit() now
+//
 // Revision 1.2  2006/01/03 20:57:57  sfxgligli
 // - Doom: weapon change, fixed backward move bug, HUD resize optimisation
 // - Medios: added firmware reload function, implemented exit() user function
@@ -121,13 +124,13 @@ M_WriteFile
     int       handle;
     int		count;
 
-    handle = fcreat ( name, O_WRONLY);
+    handle = creat ( name, O_WRONLY);
 
     if (handle < 0)
 	return false;
 
-    count = fwrite (handle,source, length);
-    fclose (handle);
+    count = write (handle,source, length);
+    close (handle);
 
     if (count < length)
 	return false;
@@ -148,15 +151,15 @@ M_ReadFile
     int count, length;
     byte	*buf;
 
-    handle = fopen (name, O_RDONLY);
+    handle = open (name, O_RDONLY);
     if (handle < 0)
 	I_Error ("Couldn't read file %s", name);
-    lseek(handle, 0, SEEK_END);
-    length = ftell(handle);
+    length = lseek(handle, 0, SEEK_END);
+    //length = ftell(handle);
     lseek(handle, 0, SEEK_SET);
     buf = Z_Malloc (length, PU_STATIC, NULL);
-    count = fread (handle, buf, length);
-    fclose (handle);
+    count = read (handle, buf, length);
+    close (handle);
 
     if (count < length)
 	I_Error ("Couldn't read file %s", name);
@@ -291,7 +294,7 @@ void M_SaveDefaults (void)
     int		v;
     int   f;
 
-    f = fcreat (defaultfile, O_WRONLY);
+    f = creat (defaultfile, O_WRONLY);
     if (f<0)
 	return; // can't write the file, but don't complain
 
@@ -308,7 +311,7 @@ void M_SaveDefaults (void)
 	}
     }
 
-    fclose (f);
+    close (f);
 }
 
 
@@ -344,7 +347,7 @@ void M_LoadDefaults (void)
 	defaultfile = basedefault;
 /* TODO
     // read the file in, overriding any set defaults
-    f = fopen (defaultfile, O_RDONLY);
+    f = open (defaultfile, O_RDONLY);
     if (f>=0)
     {
 	while (!feof(f))
@@ -378,7 +381,7 @@ void M_LoadDefaults (void)
 	    }
 	}
 
-	fclose (f);
+	close (f);
     }
 */
 }

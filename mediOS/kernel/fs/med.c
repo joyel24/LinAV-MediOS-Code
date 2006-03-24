@@ -103,7 +103,7 @@ void load_med(char * file_name)
     
     unsigned int diff;
         
-    fd = fopen(file_name,O_RDONLY);
+    fd = open(file_name,O_RDONLY);
     if(fd<0)
     {
         printk("[load_med] Can't open file %s\n",file_name);
@@ -111,7 +111,7 @@ void load_med(char * file_name)
     }
     
     /* reading elf header */
-    if((ret=fread(fd,(void*)&header,sizeof(elf_hdr)))<sizeof(elf_hdr))
+    if((ret=read(fd,(void*)&header,sizeof(elf_hdr)))<sizeof(elf_hdr))
     {
         printk("[load_med] Can't read completly the header (read %d)\n",ret);
         goto exit_point;
@@ -136,7 +136,7 @@ void load_med(char * file_name)
     for(i=0;i<header.e_shnum;i++)
     {
         lseek (fd,header.e_shoff+i*header.e_shentsize,SEEK_SET);
-        fread(fd,(void*)&section,sizeof(section_hdr));
+        read(fd,(void*)&section,sizeof(section_hdr));
         /* init from section header*/
         section_list[i].name = (char*)section.sh_name;
         section_list[i].vaddr = section.sh_addr;
@@ -167,7 +167,7 @@ void load_med(char * file_name)
         printk("Error can't malloc an array of char of %d elements for sections' names\n",section_list[header.e_shstrndx].size);
         goto exit_point1;
     }    
-    res=fread(fd,(void*)sections_name,sizeof(char)*section_list[header.e_shstrndx].size);
+    res=read(fd,(void*)sections_name,sizeof(char)*section_list[header.e_shstrndx].size);
     
     /* parsing section list according to name */
     
@@ -290,7 +290,7 @@ void load_med(char * file_name)
         {
             /* loading section from disk */
             lseek (fd,section_list[i].offset,SEEK_SET);
-            res = fread(fd,(void*)section_list[i].addr,section_list[i].size);
+            res = read(fd,(void*)section_list[i].addr,section_list[i].size);
             printk("[%d] %s load at 0x%x, read %x/%x\n",i,section_list[i].name,section_list[i].addr,res,section_list[i].size);
         }           
         
@@ -310,7 +310,7 @@ void load_med(char * file_name)
             for(j=0;j<section_list[i].rel->nb_ent;j++)
             {
                 lseek(fd,section_list[i].rel->offset+j*sizeof(rel_entry),SEEK_SET);
-                fread(fd,(void*)&rel_data,sizeof(rel_entry));
+                read(fd,(void*)&rel_data,sizeof(rel_entry));
                 /* only considering type 2 rel */
                 if(ELF32_R_TYPE(rel_data.r_info) == 0x2)
                 {
@@ -377,7 +377,7 @@ void load_med(char * file_name)
     else
         printk("entry point in section: %d\n",k);
            
-    fclose(fd);
+    close(fd);
          
     printk("sdram  %x (@%x)\n",sdram_start,&sdram_start); 
     printk("sections_name  %x(@%x)\n",sections_name,&sections_name);
@@ -410,6 +410,6 @@ exit_point1:
     free(section_list);
     printk("sections_name freed\n");
 exit_point:
-    fclose(fd);
+    close(fd);
     
 }

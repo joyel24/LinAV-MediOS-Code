@@ -67,6 +67,23 @@ void tst_fct(void)
 
 void kernel_start (void)
 {
+#if 0
+  {
+    int * p = (int *) MALLOC_START;
+    int * end = (int *) MALLOC_START + MALLOC_SIZE - 32;
+    while (p<end) {
+      *p++ = 0xdeadbeef;
+      *p++ = 0xdeadbeef;
+      *p++ = 0xdeadbeef;
+      *p++ = 0xdeadbeef;
+      *p++ = 0xdeadbeef;
+      *p++ = 0xdeadbeef;
+      *p++ = 0xdeadbeef;
+      *p++ = 0xdeadbeef;
+    }
+  }
+#endif
+
     /* malloc of max space in SDRAM */
     mem_addPool((void*)MALLOC_START,MALLOC_SIZE);
 

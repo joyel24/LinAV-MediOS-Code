@@ -1,3 +1,8 @@
+// are we emulating the SPC cpu on the dsp ?
+#define USE_DSP
+
+//#define TRACE_COMPARE
+
 extern "C" {
 #include <sys_def/section_types.h>
 #include "sys_def/file.h"
@@ -7,6 +12,9 @@ extern "C" {
 //#include <stdio.h>
 
 int printf(const char * fmt, ...);
+
+#include "dspshared.h"
+
 }
 
 #include "snes9x.h"
@@ -23,7 +31,22 @@ unsigned char BackupAPURAM[65536];
 unsigned char BackupAPUExtraRAM[64];
 unsigned char BackupDSPRAM[128];
 
+extern int Echo [24000];
+
+
 int samples_per_mix;
+
+#ifdef TRACE_COMPARE
+# define TRACE_SZ (16*1024)
+struct {
+  unsigned short X, A, Y, PC, SP;
+} dsp_trace[TRACE_SZ], arm_trace[TRACE_SZ];
+int dsp_trace_pos=0, arm_trace_pos=0;
+int dsp_trace_oldpos=0, arm_trace_oldpos=0;
+
+extern "C" int btn_readState();
+extern "C" void EXIT();
+#endif
 
 
 // The callback
@@ -114,7 +137,7 @@ int SPC_set_state(SPC_Config *cfg)
     Settings.InterpolatedSound = (cfg->is_interpolation) ? TRUE : FALSE;
     Settings.SoundEnvelopeHeightReading = TRUE;
     Settings.DisableSoundEcho = (cfg->is_echo) ? FALSE : TRUE;
-    //   Settings.EnableExtraNoise = TRUE;
+    Settings.EnableExtraNoise = TRUE;
 
     // SPC mixer information
     samples_per_mix = cfg->sampling_rate / RATE * cfg->channels;
@@ -178,9 +201,25 @@ unsigned int cpu_stats[256];
 unsigned int cpu_stats2[256];
 #endif
 
+__IRAM_CODE uint16_t SPC_dequeue_dsp()
+{
+  while (dsp_com->spc_dsp_fifo_read == dsp_com->spc_dsp_fifo_write);
+  uint16_t res = dsp_com->spc_dsp_fifo[dsp_com->spc_dsp_fifo_read];
+  dsp_com->spc_dsp_fifo_read = (dsp_com->spc_dsp_fifo_read+1)&(SPC_DSP_FIFO_SIZE-1);
+  return res;
+}
+
+__IRAM_CODE int SPC_dequeue_noblock_dsp()
+{
+  if (dsp_com->spc_dsp_fifo_read == dsp_com->spc_dsp_fifo_write) return -1;
+  uint16_t res = dsp_com->spc_dsp_fifo[dsp_com->spc_dsp_fifo_read];
+  dsp_com->spc_dsp_fifo_read = (dsp_com->spc_dsp_fifo_read+1)&(SPC_DSP_FIFO_SIZE-1);
+  return res;
+}
+
 /* get samples
    ---------------------------------------------------------------- */
-__IRAM_CODE void SPC_update(unsigned char *buf)
+__IRAM_CODE int SPC_update(unsigned char *buf)
 {
   // APU_LOOP
   int c, ic, oc;
@@ -188,6 +227,7 @@ __IRAM_CODE void SPC_update(unsigned char *buf)
   BCOLOR(255, 0, 0);
 
   prof(PROF_CPU);
+#if !defined(USE_DSP) || defined(TRACE_COMPARE)
   /* VP : rewrote this loop, it was completely wrong in original
      spcxmms-0.2.1 */
   for (c = 0; c < 2048000 / RATE; ) {
@@ -200,6 +240,17 @@ __IRAM_CODE void SPC_update(unsigned char *buf)
 	cpu_stats2[*IAPU.PC]++;
 #endif
       cycles = S9xAPUCycleLengths [*IAPU.PC];
+
+#ifdef TRACE_COMPARE
+      S9xAPUPackStatus();
+      arm_trace[arm_trace_pos].PC = IAPU.PC-IAPU.RAM; // PC
+      arm_trace[arm_trace_pos].A = APURegisters.YA.B.A; // W
+      arm_trace[arm_trace_pos].Y = APURegisters.YA.B.Y; // W
+      arm_trace[arm_trace_pos].X = APURegisters.X; // X
+      arm_trace[arm_trace_pos].SP = (APURegisters.P<<8) | APURegisters.S; // S & P
+      arm_trace_pos = (arm_trace_pos+1)&(TRACE_SZ-1);
+#endif
+
       (*S9xApuOpcodes[*IAPU.PC]) ();
       //APU_EXECUTE1();
 
@@ -221,12 +272,107 @@ __IRAM_CODE void SPC_update(unsigned char *buf)
     }
 
   }
+#endif
+#if defined(USE_DSP) || defined(TRACE_COMPARE)
+# define SZ sizeof(dsp_com->spc_dsp_fifo)/sizeof(dsp_com->spc_dsp_fifo[0])
+  int retry = 0;
+ retry:
+  for ( ; ; ) {
+    int reg, val;
+    //# define SPC_dequeue_noblock_dsp SPC_dequeue_dsp
+#ifdef TRACE_COMPARE
+  // no nice wait
+# define SPC_dequeue_noblock_dsp SPC_dequeue_dsp
+#endif
+    val = SPC_dequeue_noblock_dsp();
+    while (val == 0x8200) {
+#ifdef TRACE_COMPARE
+      dsp_trace[dsp_trace_pos].PC = SPC_dequeue_dsp(); // PC
+      dsp_trace[dsp_trace_pos].A = SPC_dequeue_dsp(); // A
+      dsp_trace[dsp_trace_pos].Y = SPC_dequeue_dsp(); // Y
+      dsp_trace[dsp_trace_pos].X = SPC_dequeue_dsp(); // X
+      dsp_trace[dsp_trace_pos].SP = SPC_dequeue_dsp(); // S & P
+      dsp_trace_pos = (dsp_trace_pos+1)&(TRACE_SZ-1);
+#else
+      SPC_dequeue_dsp(); // PC
+      SPC_dequeue_dsp(); // A
+      SPC_dequeue_dsp(); // Y
+      SPC_dequeue_dsp(); // X
+      SPC_dequeue_dsp(); // S & P
+#endif
+      val = SPC_dequeue_noblock_dsp();
+    }
+    
+    if (val == 0x8300) {
+      // sample block
+      int i;
+      for (i=0; i<samples_per_mix; i++)
+	( (uint16 *) buf )[i] = SPC_dequeue_dsp();
+      return 1;
+    }
+
+    if (val < 0) {
+      if (retry++ < 10)
+	goto retry;
+      /*break; //*/return 0;
+    }
+    if (val == 0x8100) break; // end of frame
+    reg = val>>8;
+    val &= 0xff;
+#ifndef TRACE_COMPARE
+    IAPU.RAM [0xf2] = reg;
+    S9xSetAPUDSP(val);
+#endif
+  }
+#endif
+
+#ifdef TRACE_COMPARE
+  static int found;
+  if (found) return;
+  while (arm_trace_oldpos != arm_trace_pos && arm_trace_oldpos != dsp_trace_pos) {
+    if (memcmp(arm_trace+arm_trace_oldpos, dsp_trace+arm_trace_oldpos, sizeof(arm_trace[0]))) {
+      int i = (arm_trace_oldpos-256)&(TRACE_SZ-1);
+      while (i != arm_trace_oldpos) {
+	i = (i+1)&(TRACE_SZ-1);
+	printf("%4x %3x %3x %2x %4x - %4x %3x %3x %2x %4x  %2x%2x%2x\n",       
+	       dsp_trace[i].PC,
+	       dsp_trace[i].A,
+	       dsp_trace[i].Y,
+	       dsp_trace[i].X,
+	       dsp_trace[i].SP,
+	       arm_trace[i].PC,
+	       arm_trace[i].A,
+	       arm_trace[i].Y,
+	       arm_trace[i].X,
+	       arm_trace[i].SP,
+	       IAPU.RAM[arm_trace[i].PC], IAPU.RAM[arm_trace[i].PC+1], IAPU.RAM[IAPU.RAM[arm_trace[i].PC+2]]
+	       );
+
+      }
+      while (!(btn_readState() & 4));
+      EXIT();
+      found = 1;
+      return;
+    }
+    arm_trace_oldpos = (arm_trace_oldpos+1)&(TRACE_SZ-1);
+  }
+#endif
 
   prof(PROF_APU);
   BCOLOR(255, 255, 0);
   S9xMixSamples ((unsigned char *)buf, samples_per_mix);
   BCOLOR(0, 0, 0);
 
+  return 1;
+}
+
+void spc_display_trace()
+{
+//   int i;
+//   for (i=0; i<sizeof(tracebuf)/sizeof(tracebuf[0]); i++)
+//     printf("%x %x (%x %x) (%x %x) (%x %x)\n", dsp_com->spc_trace[i], tracebuf[i], IAPU.RAM[dsp_com->spc_trace[i]], IAPU.RAM[tracebuf[i]]
+// 	   , dsp_com->spc_tracedp[i], tracebufdp[i]
+// 	   , dsp_com->spc_traceA[i], tracebufA[i]);
 }
 
 /* Restore SPC state
@@ -275,23 +421,31 @@ static void RestoreSPC()
     S9xFixSoundAfterSnapshotLoad ();
 
     S9xSetFrequencyModulationEnable (APU.DSP[APU_PMON]);
-    S9xSetMasterVolume (APU.DSP[APU_MVOL_LEFT], APU.DSP[APU_MVOL_RIGHT]);
-    S9xSetEchoVolume (APU.DSP[APU_EVOL_LEFT], APU.DSP[APU_EVOL_RIGHT]);
+    // VP added (signed char) conversions here and per channels
+    S9xSetMasterVolume ((signed char) APU.DSP[APU_MVOL_LEFT], (signed char) APU.DSP[APU_MVOL_RIGHT]);
+    S9xSetEchoVolume ((signed char) APU.DSP[APU_EVOL_LEFT], (signed char) APU.DSP[APU_EVOL_RIGHT]);
+
+    // VP added this
+    S9xSetEchoFeedback ((signed char) APU.DSP[APU_EFB]);
+    
 
     uint8 mask = 1;
     int type;
     for (i = 0; i < 8; i++, mask <<= 1) {
-        Channel *ch = &SoundData.channels[i];
-      
+      //Channel *ch = &SoundData.channels[i];
+
+        // VP added this
+        S9xSetFilterCoefficient (i, (signed char) APU.DSP[APU_C0+i<<4]);
+
         S9xFixEnvelope (i,
                         APU.DSP[APU_GAIN + (i << 4)],
                         APU.DSP[APU_ADSR1 + (i << 4)],
                         APU.DSP[APU_ADSR2 + (i << 4)]);
-	APU.DSP[APU_VOL_LEFT + (i << 4)] /= 2;
-	APU.DSP[APU_VOL_RIGHT + (i << 4)] /= 2;
+ 	APU.DSP[APU_VOL_LEFT + (i << 4)] /= 2;
+ 	APU.DSP[APU_VOL_RIGHT + (i << 4)] /= 2;
         S9xSetSoundVolume (i,
-                           APU.DSP[APU_VOL_LEFT + (i << 4)],
-                           APU.DSP[APU_VOL_RIGHT + (i << 4)]);
+                           (signed char) APU.DSP[APU_VOL_LEFT + (i << 4)],
+                           (signed char) APU.DSP[APU_VOL_RIGHT + (i << 4)]);
         S9xSetSoundFrequency (i, ((APU.DSP[APU_P_LOW + (i << 4)]
                                    + (APU.DSP[APU_P_HIGH + (i << 4)] << 8))
                                   & FREQUENCY_MASK) * 8);
@@ -315,20 +469,52 @@ static void RestoreSPC()
     }
     IAPU.RAM[0xf2]=temp;
 #endif
+
+#ifdef USE_DSP
+    {
+      dsp_com->spc_PC = BackupAPURegisters.PC;
+      dsp_com->spc_A = BackupAPURegisters.YA.B.A;
+      dsp_com->spc_X = BackupAPURegisters.X;
+      dsp_com->spc_Y = BackupAPURegisters.YA.B.Y;
+      dsp_com->spc_P = BackupAPURegisters.P;
+      dsp_com->spc_S = BackupAPURegisters.S;
+      write_dsp32(&dsp_com->spc_ram_addr, ((uint32_t) BackupAPURAM) - SDRAM_OFFSET);
+      write_dsp32(&dsp_com->spc_xtraram_addr, ((uint32_t) BackupAPUExtraRAM) - SDRAM_OFFSET);
+      write_dsp32(&dsp_com->spc_dsp_addr, ((uint32_t) BackupDSPRAM) - SDRAM_OFFSET);
+      write_dsp32(&dsp_com->spc_echo_addr, ((uint32_t) Echo) - SDRAM_OFFSET);
+
+      write_dsp32(&dsp_com->spc_err_rate, so.err_rate);
+
+      dsp_com->spc_running = 1;
+      printf("SPC RAMS %x %x\n", ((uint32_t) BackupAPURAM) - SDRAM_OFFSET, ((uint32_t) BackupAPUExtraRAM) - SDRAM_OFFSET);
+    }
+#endif
+
 }
 
 inline int my_fread(void * buffer, int a, int b, int  fd)
 {
-  int res = fread(fd, buffer, a*b);
+  int res = read(fd, buffer, a*b);
   //printf("READING %d bytes %d\n", b, res);
   return res / a;
 }
 inline int my_fwrite(void * buffer, int a, int b, int  fd)
 {
-  return fwrite(fd, buffer, a*b);
+  return write(fd, buffer, a*b);
 }
 
 #define fseek lseek
+
+#ifndef EOF
+# define EOF (-1)
+#endif
+int fgetc(int fd)
+{
+  char res;
+  int n = read(fd, &res, 1);
+  if (n<=0) return EOF;
+  return res;
+}
 
 static int read_id666 (int fp, SPC_ID666 * id)
 {
@@ -343,14 +529,14 @@ static int read_id666 (int fp, SPC_ID666 * id)
     return -1;
   }
 
-  pos = ftell(fp);
+  pos = lseek(fp, 0, SEEK_CUR);
   
-  fseek(fp, 0x23, SEEK_SET);
+  lseek(fp, 0x23, SEEK_SET);
   if (fgetc(fp) == 27) {
     goto error;
   }
 
-  fseek(fp, 0x2E, SEEK_SET);
+  lseek(fp, 0x2E, SEEK_SET);
   my_fread(id->songname, 1, 32, fp);
   id->songname[33] = '\0';
 
@@ -408,7 +594,7 @@ int SPC_load (const char *fname, SPC_ID666 * id)
     memset(id, 0, sizeof(*id));
   }
 
-  fp = fopen (fname, O_RDONLY/*"r"*/);
+  fp = open (fname, O_RDONLY/*"r"*/);
   if (fp < 0) {
     printf("Could not open '%s' for reading\n", fname);
     return FALSE;
@@ -435,7 +621,7 @@ int SPC_load (const char *fname, SPC_ID666 * id)
   my_fread(temp, 1, 64, fp);
   my_fread(BackupAPUExtraRAM, 1, 64, fp);
 
-  fclose(fp);
+  close(fp);
 
   RestoreSPC();
 
@@ -454,14 +640,14 @@ int SPC_get_id666 (const char *filename, SPC_ID666 * id)
     id = &dummyid;
   }
 
-  fp = fopen(filename, O_RDONLY);
+  fp = open(filename, O_RDONLY);
   if (fp < 0) {
     return FALSE;
   }
 
   err = read_id666(fp, id);
 
-  fclose(fp);
+  close(fp);
 
   return err ? FALSE : TRUE;
 }
@@ -475,21 +661,21 @@ int SPC_write_id666 (SPC_ID666 *id, const char *filename)
   if (id == NULL)
     return FALSE;
 
-  fp = fopen (filename, O_RDONLY);
+  fp = open (filename, O_RDONLY);
   if (fp < 0)
     return FALSE;
 
-  fseek(fp, 0, SEEK_END);
-  spc_size = ftell(fp);
+  spc_size = fseek(fp, 0, SEEK_END);
+  //spc_size = lseek(fp, 0, SEEK_CUR));
 
   spc_buf = (unsigned char *)malloc(spc_size);
   if (spc_buf == NULL) {
-      fclose (fp);
+      close (fp);
       return FALSE;
   }
 
   my_fread(spc_buf, 1, spc_size, fp);
-  fclose(fp);
+  close(fp);
 
   if (*(spc_buf + 0x23) == 27)
     {
@@ -521,14 +707,14 @@ int SPC_write_id666 (SPC_ID666 *id, const char *filename)
       break;
   }
   
-  fp = fopen(filename, O_WRONLY);
+  fp = open(filename, O_WRONLY);
   if (fp < 0) {
       free(spc_buf);
       return FALSE;
   }
 
   my_fwrite(spc_buf, 1, spc_size, fp);
-  fclose(fp);
+  close(fp);
 
   return TRUE;
 }

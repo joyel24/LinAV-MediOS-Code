@@ -1,3 +1,4 @@
+#include <sys_def/section_types.h>
 /*
  * Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
  *
@@ -466,10 +467,13 @@ void S9xResetAPU ()
     S9xSetEchoEnable (0);
 }
 
+__IRAM_DATA int setdsp; // VP TO REMOVE
 void S9xSetAPUDSP (uint8 byte)
 {
     uint8 reg = IAPU.RAM [0xf2];
     int i;
+
+    setdsp++; // VP TO REMOVE
 
     switch (reg)
     {
@@ -1150,7 +1154,8 @@ uint8 S9xGetAPUDSP ()
     case APU_ENVX + 0x50:
     case APU_ENVX + 0x60:
     case APU_ENVX + 0x70:
-	return ((uint8) S9xGetEnvelopeHeight (reg >> 4));
+      //break; // VP TRACE DEBUG TEMPORARY !!!
+      return ((uint8) S9xGetEnvelopeHeight (reg >> 4));
 
     case APU_ENDX:
 	APU.DSP [APU_ENDX] = 0;

@@ -40,6 +40,7 @@ void aic23Init(){
 
   // 10001 --> 44.1 Khz
   // 01100 --> 32   Khz
+  //aic23WriteReg(8,1 + (23<<1)); //sample rate control: 32khz & oversampling & USB mode
   aic23WriteReg(8,1 + (0xc<<1)); //sample rate control: 32khz & oversampling & USB mode
   //aic23WriteReg(8,0x23); //sample rate control: 44khz & oversampling & USB mode
 
@@ -75,12 +76,15 @@ void initCodec(){
 
   aic23SetOutputVolume(127,AIC23_CHANNEL_LEFT);
   aic23SetOutputVolume(127,AIC23_CHANNEL_RIGHT);
+/*   aic23SetOutputVolume(121,AIC23_CHANNEL_LEFT); */
+/*   aic23SetOutputVolume(121,AIC23_CHANNEL_RIGHT); */
 }
 
 void initDSP()
 {
   unsigned char *dspcode;
   int len;
+  int wait;
 
 /*   initCodec(); */
 
@@ -96,14 +100,58 @@ void initDSP()
 
   printf("initDSP() dspcode=%0.8X len=%d\n",dspcode,len);
 
+  {
+    char buf[] = "1234567890abcdef";
+    memcpy(0xc10000 + 32*0x10000, buf, sizeof(buf));
+
+    uint16_t * refctl = (uint16_t *) 0x309a8;
+    *refctl = (*refctl & 0x03ff) | 0x8000;
+
+/*     uint16_t * imgdspdest = (uint16_t *) 0x30a34; */
+/*     *imgdspdest = 5; */
+  }
+
   *DSP_COM=0;
   load_dsp_program_mem(dspcode,len);
 
   dsp_run();
 
-  while(!(*DSP_COM)); // wait for the dsp to finish init
+  wait = 0;
+  while(!(*DSP_COM)) {
+     // wait for the dsp to finish init
+    if (wait == 100000) {
+      int i;
+      for (i=0; i<10; i++) 
+	printf("%c\n", ((char *)(0x00C10000 + 32*0x10000))[i]);
+    }
+    wait++;
+  }
 
   dsp_com = (dsp_com_t *) DSP_RAM(*DSP_COM);
+
+  {
+    char * p;
+    int i, j;
+    char test[] = "world";
+
+    for (j=0; j<8; j++) {
+      printf("%c%c\n", DSP_RAM(dsp_com->hello)[j], DSP_RAM(dsp_com->hello)[j]>>8);
+    }
+    for (i=0; i<10; i++) 
+      printf("%c\n", ((char *)(0x00C10000 + 32*0x10000))[i]);
+
+    while (!(btn_readState() & 4));
+
+/*     for (p=(char *)0x900000; p<((char *)0x900000) + 16*1024*1024; p++) { */
+/*       for (j=0; j<sizeof(test)-1; j++) */
+/* 	if (test[j] != p[j*2]) */
+/* 	  break; */
+/*       if (j == sizeof(test)-1) { */
+/* 	printf("FOUND AT %x (%d) !!!!!\n", p, p - ((char *)0xc10000)); */
+/* 	//break; */
+/*       } */
+/*     } */
+  }
 
   initCodec();
 

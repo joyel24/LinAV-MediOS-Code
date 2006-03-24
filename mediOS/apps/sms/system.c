@@ -12,7 +12,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program; if not, fwrite to the Free Software
+    along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
@@ -108,24 +108,24 @@ void system_save_state(int fd)
 {
     printf("sys save state\n");
     /* Save VDP context */
-    fwrite(fd,&vdp, sizeof(t_vdp));
-    fwrite(fd,vdp_vram,sizeof(vdp_vram));
+    write(fd,&vdp, sizeof(t_vdp));
+    write(fd,vdp_vram,sizeof(vdp_vram));
 
     /* Save SMS context */
-    fwrite(fd,&sms, sizeof(t_sms));
-    fwrite(fd,sms_ram,sizeof(sms_ram));
-    fwrite(fd,sms_dummy,sizeof(sms_dummy));
-    fwrite(fd,sms_sram,sizeof(sms_sram));
+    write(fd,&sms, sizeof(t_sms));
+    write(fd,sms_ram,sizeof(sms_ram));
+    write(fd,sms_dummy,sizeof(sms_dummy));
+    write(fd,sms_sram,sizeof(sms_sram));
 
     /* Save Z80 context */
-    fwrite(fd,Z80_Context, sizeof(Z80_Regs));
-    fwrite(fd,&after_EI, sizeof(int));
+    write(fd,Z80_Context, sizeof(Z80_Regs));
+    write(fd,&after_EI, sizeof(int));
 
     /* Save YM2413 registers */
-    fwrite(fd,&ym2413.reg[0], 0x40);
+    write(fd,&ym2413.reg[0], 0x40);
 
     /* Save SN76489 context */
-//    fwrite(fd,&sn[0], sizeof(t_SN76496));
+//    write(fd,&sn[0], sizeof(t_SN76496));
 }
 
 
@@ -139,24 +139,24 @@ void system_load_state(int fd)
     system_reset();
 
     /* Load VDP context */
-    fread(fd,&vdp, sizeof(t_vdp));
-    fread(fd,vdp_vram,sizeof(vdp_vram));
+    read(fd,&vdp, sizeof(t_vdp));
+    read(fd,vdp_vram,sizeof(vdp_vram));
 
     /* Load SMS context */
-    fread(fd,&sms, sizeof(t_sms));
-    fread(fd,sms_ram,sizeof(sms_ram));
-    fread(fd,sms_dummy,sizeof(sms_dummy));
-    fread(fd,sms_sram,sizeof(sms_sram));
+    read(fd,&sms, sizeof(t_sms));
+    read(fd,sms_ram,sizeof(sms_ram));
+    read(fd,sms_dummy,sizeof(sms_dummy));
+    read(fd,sms_sram,sizeof(sms_sram));
 
     /* Load Z80 context */
-    fread(fd,Z80_Context, sizeof(Z80_Regs));
-    fread(fd,&after_EI, sizeof(int));
+    read(fd,Z80_Context, sizeof(Z80_Regs));
+    read(fd,&after_EI, sizeof(int));
 
     /* Load YM2413 registers */
-    fread(fd,reg, 0x40);
+    read(fd,reg, 0x40);
 
     /* Load SN76489 context */
-//    fread(fd,&sn[0], sizeof(t_SN76496));
+//    read(fd,&sn[0], sizeof(t_SN76496));
 
     /* Restore callbacks */
     z80_set_irq_callback(sms_irq_callback);

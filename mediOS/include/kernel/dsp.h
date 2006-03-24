@@ -53,9 +53,19 @@ typedef struct _COFF_SCNHDR
 	unsigned short s_scnptr_hi;   /* file ptr to raw data for section */
 	unsigned long  s_relptr;   /* file ptr to relocation           */
 	unsigned long  s_lnnoptr;  /* file ptr to line numbers         */
+#if 1
 	unsigned short s_nreloc;   /* number of relocation entries     */
 	unsigned short s_nlnno;    /* number of line number entries    */
+	unsigned short s_flags;    /* flags                            */
+        char           s_resv1;    /* reserved */
+        char           s_page;     /* page number */
+#else
+	unsigned long  s_nreloc;   /* number of relocation entries     */
+	unsigned long  s_nlnno;    /* number of line number entries    */
 	unsigned long  s_flags;    /* flags                            */
+        short           s_resv1;    /* reserved */
+        short           s_page;     /* page number */
+#endif
 //0x0020 STYP_TEXT If set, indicates that this section contains only executable code. 
 //0x0040 STYP_DATA If set, indicates that this section contains only initialized data. 
 //0x0080 STYP_BSS If set, indicates that this section defines uninitialized data, and has no data stored in the coff file for it. 

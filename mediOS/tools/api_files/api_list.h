@@ -62,17 +62,16 @@ unsigned int # float_divdi3  # unsigned int a, unsigned int b
 
 #k_inc#kernel/file.h
 #api_inc#sys_def/types.h
-int            # fopen      # const char* pathname, int flags
-int            # fclose     # int fd
+int            # open      # const char* pathname, int flags
+int            # close     # int fd
 int            # fsync      # int fd
-ssize_t        # fread      # int fd, void *buf, size_t count
+ssize_t        # read      # int fd, void *buf, size_t count
 off_t          # lseek      # int fildes, off_t offset, int whence
-off_t          # ftell      # int fd
-int            # fcreat     # const char *pathname, mode_t mode
-ssize_t        # fwrite     # int fd, const void *buf, size_t count
-int            # fremove    # const char* pathname
-int            # frename    # const char* path, const char* newname
-int            # ftruncate  # int fd, off_t length
+int            # creat     # const char *pathname, mode_t mode
+ssize_t        # write     # int fd, const void *buf, size_t count
+int            # remove    # const char* pathname
+int            # rename    # const char* path, const char* newname
+int            # truncate  # int fd, off_t length
 int            # filesize   # int fd
 int            # fgetc      # int fd
 

@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.2  2006/01/24 21:51:39  cjnr11
+// AV support (but with some bugs). Start the Archos FW then Doom
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -608,7 +611,7 @@ void D_QuitNetGame (void)
     int             i, j;
 	
     if (debugfile)
-	fclose (debugfile);
+	close (debugfile);
 		
     if (!netgame || !usergame || consoleplayer == -1 || demoplayback)
 	return;

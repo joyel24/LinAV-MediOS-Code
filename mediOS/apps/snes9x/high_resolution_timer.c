@@ -5,6 +5,8 @@
 
 #include "profile.h"
 
+#include "dspshared.h"
+
 #define uint64_t uint32_t
 
 extern unsigned long tick __IRAM_DATA; // defined in kernel/core/timer.c
@@ -55,14 +57,36 @@ void prof(int id)
 
 void prof_print()
 {
+#ifdef PROFILE
   int i;
   uint64_t total = 0;
   for (i=0; i<=max_id; i++)
     total += counts[i];
-  free_cpu = (counts[PROF_MISC] + counts[PROF_FFT] + counts[PROF_FFT2] + counts[PROF_DISP])*1024/total;
+  //free_cpu = (counts[PROF_MISC] + counts[PROF_FFT] + counts[PROF_FFT2] + counts[PROF_DISP])*1024/total;
   for (i=0; i<=max_id; i++) {
     //printf("%10s: %10d %5d\n", names[i], counts[i], (int)(counts[i]*1000/total));
     counts[i] = 0;
   }
   //printf("\n");
+#endif
+}
+
+void prof_dsp_print()
+{
+#ifdef PROFILE
+  int i;
+  uint32_t total = 0;
+  for (i=0; i<8; i++)
+    total += dsp_com->prof[i];
+  free_cpu = (dsp_com->prof[5])*1024/total;
+  for (i=0; i<8; i++) {
+    printf("%2d: %10d %5d\n", i, dsp_com->prof[i], (int)(dsp_com->prof[i]*1000/total));
+    dsp_com->prof[i] = 0;
+  }
+#ifdef PROFILE_OPCODES
+  for (i=8; i<256+8; i++)
+    dsp_com->prof[i] = 0;
+#endif
+  printf("\n");
+#endif
 }

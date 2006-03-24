@@ -129,19 +129,19 @@ cart.rom=malloc(MAX_ROM_SIZE);
 bool loadRom(char *romname){
   int f,cnt;
 
-  f=fopen(romname,O_RDONLY);
+  f=open(romname,O_RDONLY);
   if (f<0) return false;
   
-  fseek(f,filesize(f)%SMS_BANK_SIZE,SEEK_SET); // skip header if there is one
+  lseek(f,filesize(f)%SMS_BANK_SIZE,SEEK_SET); // skip header if there is one
 
-  cnt=fread(f,cart.rom,MAX_ROM_SIZE);
+  cnt=read(f,cart.rom,MAX_ROM_SIZE);
 
   cart.pages=cnt/SMS_BANK_SIZE;
   cart.type=TYPE_SMS;
 
   if (strstr(romname,".GG") || strstr(romname,".gg")) cart.type=TYPE_GG;
 
-  fclose(f);
+  close(f);
 
   printf("rom loaded, %d pages\n",cart.pages);
   return cnt>0;

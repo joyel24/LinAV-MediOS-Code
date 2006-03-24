@@ -46,7 +46,7 @@ struct icon_elem * loadIcon(char * filename)
     sprintf(tmpF,"%s/%s",ICON_DIR,filename);
     
     /* open the icon file */    
-    infile = fopen(tmpF, O_RDONLY);
+    infile = open(tmpF, O_RDONLY);
     if(infile<0)
     {
         printk("[loadIcon] can't open file '%s' (%s) for reading!\n", tmpF,filename);
@@ -54,7 +54,7 @@ struct icon_elem * loadIcon(char * filename)
     }
     
     /* check if it has the correct ident. string */    
-    if(fread(infile,buff,5)!=5)
+    if(read(infile,buff,5)!=5)
     {
         printk("[loadIcon] bad ident (length)\n"); 
         goto err1;
@@ -70,7 +70,7 @@ struct icon_elem * loadIcon(char * filename)
     }
 
     /* read strlen & create string*/
-    if(fread(infile,buff,1)<=0)    
+    if(read(infile,buff,1)<=0)    
     {
         printk("[loadIcon] end of file reached - Step2\n"); 
         goto err1;
@@ -95,7 +95,7 @@ struct icon_elem * loadIcon(char * filename)
         }
         name[i]=buff[0];
     }*/
-    if(fread(infile,name,len)<len)
+    if(read(infile,name,len)<len)
     {
         printk("[loadIcon] end of file reached - reading name\n"); 
         goto err2;
@@ -126,14 +126,14 @@ struct icon_elem * loadIcon(char * filename)
     ptr->name=name;
     
     /* read width and height */
-    if(fread(infile,buff,1)<=0)
+    if(read(infile,buff,1)<=0)
     {
         printk("[loadIcon] end of file reached - Step4\n"); 
         goto err3;
     }
     ptr->bmap_data.width=(int)buff[0];
     
-    if(fread(infile,buff,1)<=0)
+    if(read(infile,buff,1)<=0)
     {
         printk("[loadIcon] end of file reached - Step5\n"); 
         goto err3;
@@ -165,7 +165,7 @@ struct icon_elem * loadIcon(char * filename)
     
     for(i=0;i<ptr->bmap_data.height;i++)
     {
-        if(fread(infile,ptr->data+ptr->bmap_data.width*i,ptr->bmap_data.width)<ptr->bmap_data.width)
+        if(read(infile,ptr->data+ptr->bmap_data.width*i,ptr->bmap_data.width)<ptr->bmap_data.width)
         {
             printk("[loadIcon] end of file reached - Step6\n"); 
             goto err4;
@@ -189,7 +189,7 @@ struct icon_elem * loadIcon(char * filename)
     
 out:
     /* close file */
-    fclose(infile);
+    close(infile);
     free(tmpF);
     
     return ptr;
@@ -201,7 +201,7 @@ err3:
 err2:
     free(name);        
 err1:
-    fclose(infile);
+    close(infile);
     free(tmpF);
     return NULL;
 }

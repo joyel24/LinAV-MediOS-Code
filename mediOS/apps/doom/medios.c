@@ -4,9 +4,9 @@ int access(char *file, int mode)
 {
 	int test_fp;
 
-	test_fp = fopen(file, O_RDONLY);
+	test_fp = open(file, O_RDONLY);
 	if ( test_fp >= 0 ) {
-		fclose(test_fp);
+		close(test_fp);
 		return(0);
 	}
 	return(-1);

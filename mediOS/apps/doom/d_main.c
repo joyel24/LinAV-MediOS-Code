@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.3  2006/02/06 22:45:48  oxygen77
+// make doom work with new api, we lack of exit() now
+//
 // Revision 1.2  2006/01/24 21:51:39  cjnr11
 // AV support (but with some bugs). Start the Archos FW then Doom
 //
@@ -364,7 +367,7 @@ void D_DoomLoop (void)
 	char    filename[20];
 	sprintf (filename,"debug%i.txt",consoleplayer);
 	printf ("debug output to: %s\n",filename);
-	debugfile = fopen (filename,O_WRONLY); //gli
+	debugfile = open (filename,O_WRONLY); //gli
     }
 	
     I_InitGraphics ();
@@ -731,7 +734,7 @@ void FindResponseFile (void)
 	    char    *firstargv;
 			
 	    // READ THE RESPONSE FILE INTO MEMORY
-	    handle = fopen (&myargv[i][1],O_RDONLY); //gli
+	    handle = open (&myargv[i][1],O_RDONLY); //gli
 	    if (!handle)
 	    {
 		printf ("\nNo such response file!");
@@ -739,12 +742,12 @@ void FindResponseFile (void)
 		//exit(1);
 	    }
 	    printf("Found response file %s!\n",&myargv[i][1]);
-	    lseek (handle,0,SEEK_END);
-	    size = ftell(handle);
+	    size = lseek (handle,0,SEEK_END);
+	    //size = ftell(handle);
 	    lseek (handle,0,SEEK_SET);
 	    file = malloc (size);
-	    fread (handle,file,size); //gli
-	    fclose (handle);
+	    read (handle,file,size); //gli
+	    close (handle);
 			
 	    // KEEP ALL CMDLINE ARGS FOLLOWING @RESPONSEFILE ARG
 	    for (index = 0,k = i+1; k < myargc; k++)

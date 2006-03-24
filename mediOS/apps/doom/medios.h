@@ -8,7 +8,7 @@
 #include <kernel/file.h>
 #include <kernel/dir.h>
 #include <kernel/malloc.h>
-#define printf printk
+//#define printf printk
 #include <kernel/buttons.h>
 #include <kernel/timer.h>
 #include <kernel/delay.h>
