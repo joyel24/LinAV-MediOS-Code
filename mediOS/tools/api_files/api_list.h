@@ -73,7 +73,6 @@ int            # remove    # const char* pathname
 int            # rename    # const char* path, const char* newname
 int            # truncate  # int fd, off_t length
 int            # filesize   # int fd
-int            # fgetc      # int fd
 
 #k_inc#kernel/dir.h
 #api_inc#sys_def/dir.h
