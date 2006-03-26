@@ -84,13 +84,13 @@ static void do_opt2_menu(void);
 static void munge_name(char *buf, size_t bufsiz);
 
 /* directory ROM save slots belong in */
-#define STATE_DIR "/avboy/states"
+#define STATE_DIR "/aoboy/states"
 
 #define MENU_CANCEL (-1)
 static int do_menu(char *title, char **items, size_t num_items, int sel_item);
 
 /* main menu items */
-#define MAIN_MENU_TITLE "AVBoy"
+#define MAIN_MENU_TITLE "AOBoy"
 typedef enum {
   MM_ITEM_BACK,
   MM_ITEM_LOAD,
@@ -106,7 +106,7 @@ static const char *main_menu[] = {
   "Load State...",
   "Save State...",
   "Options...",
-  "Quit AVBoy"
+  "Quit AOBoy"
 };
 
 typedef enum {
@@ -739,11 +739,11 @@ void browser(char * rom) {
 items = malloc(MAX_PATH*6);
 list = malloc(MAX_PATH);
 
-romd=opendir("/avboy/roms");
-if(romd) printf("Dir /avboy/roms/ opened!\n");
+romd=opendir("/aoboy/roms");
+if(romd) printf("Dir /aoboy/roms/ opened!\n");
 else {
-  mkdir("/avboy/roms",0);
-  if(romd) printf("Dir /avboy/roms/ created and opened!\n");
+  mkdir("/aoboy/roms",0);
+  if(romd) printf("Dir /aoboy/roms/ created and opened!\n");
   else printf("Dir error!\n");
 }
 
@@ -827,7 +827,7 @@ while(!done) {
   }
 
   rom[0]='\0';
-  strcat(rom,"/AVBOY/ROMS/");
+  strcat(rom,"/AOBOY/ROMS/");
   strcat(rom,list[curr_item+pos]);
   strcat(rom,"\0");
   closedir(romd);

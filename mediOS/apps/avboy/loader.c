@@ -101,7 +101,7 @@ static char *rtcfile;
 static char *saveprefix;
 
 static char *savename;
-static char *savedir = "/avboy/states";
+static char *savedir = "/aoboy/states";
 
 static int saveslot;
 
