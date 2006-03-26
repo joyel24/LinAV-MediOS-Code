@@ -307,7 +307,7 @@ static bool do_file(char *path/*, char *desc*/, bool is_load) {
   }
 
   /* close file descriptor */
-  fclose(fd);
+  close(fd);
 
   /* return true (for success) */
   return true;
@@ -347,7 +347,7 @@ static void slot_info(char *info_buf, size_t info_bufsiz, size_t slot_id) {
   /* attempt to open slot */
   if ((fd = open(buf, O_RDONLY)) >= 0) {
     snprintf(info_buf, info_bufsiz, "%2d. State Saved", slot_id + 1);
-    fclose(fd);
+    close(fd);
   } else {
     /* if we couldn't open the file, then the slot is empty */
     snprintf(info_buf, info_bufsiz, "%2d. Empty", slot_id + 1);
