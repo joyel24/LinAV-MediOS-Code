@@ -164,7 +164,7 @@ void kernel_start (void)
 
 #ifdef BUILD_LIB
     do_bkpt();
-    app_main();
+    app_main(1,"STDALONE");
     reload_firmware();
 #endif
     do_bkpt();
