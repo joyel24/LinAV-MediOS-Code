@@ -7,7 +7,7 @@ ASFLAGS  += -I./include -I../../include -I.
 GCCFLAGS += -I./include -I../../include -I. 
 
 
-TARGET = avboy
+TARGET = aoboy
 
 SRC = $(wildcard *.c)
 SRC2 = $(wildcard *.S)

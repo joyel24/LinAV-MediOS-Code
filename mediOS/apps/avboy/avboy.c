@@ -91,7 +91,7 @@ struct pcm pcm;
 #ifdef USE_MEDIOS_BROWSER
 extern int gui_pal[256][3];
 #endif
-int app_main(int argc,char* argv)
+int app_main(int argc,char** argv)
 {
     char * rom;		
 /*
@@ -111,8 +111,14 @@ int app_main(int argc,char* argv)
 		gfx_openGraphics();
 		clearScreen(COLOR_WHITE);
 		gfx_fontSet(STD6X9);
-		ini_file_browser();
-		rom=browse("/",1);
+		if(argc<2) {
+                   ini_file_browser();
+		   rom=browse("/",1);
+		}
+                else {
+                  rom = (char *)malloc(MAX_PATH);
+                  strcpy(rom,argv[1]);
+                }
 		if (rom=='0')
 		{
 			cleanup();
@@ -126,10 +132,10 @@ int app_main(int argc,char* argv)
 		gfx_fillRect(0x00,0,0,160,144);
 		
 		gfx_fontSet(10);   
-    
+
     vid_init();
     pcm_init();
-    
+
     //rom = (char *)malloc(MAX_PATH);
     printf("Rom name : %s\n",rom);
     
@@ -155,8 +161,12 @@ int app_main(int argc,char* argv)
     
     rom = (char *)malloc(MAX_PATH);
     
-    browser(rom);
+    printf("argc = %d, argv = %x\n",argc,argv);
 
+    if(argc<2) browser(rom);
+    else strcpy(rom,argv[1]);
+    
+    //browser(rom);
     printf("Rom name : %s (%x,%x)\n",rom,rom,rom+MAX_PATH);
 
     loader_init(rom);
