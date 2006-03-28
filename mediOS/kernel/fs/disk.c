@@ -100,10 +100,12 @@ int disk_mount(int drive)
     return 0;
 }
 
-int disk_umount(int drive,bool flush)
+MED_RET_T disk_umount(int drive,bool flush)
 {
+    if(fileAreOpen())
+        return -MED_ENBUSY;
     fat_unmount(drive,flush);
-    return 1;
+    return MED_OK;
 }
 
 

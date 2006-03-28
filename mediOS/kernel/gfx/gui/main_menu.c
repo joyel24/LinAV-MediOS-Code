@@ -20,6 +20,11 @@
 #include <kernel/graphics.h>
 #include <kernel/med.h>
 #include <kernel/evt.h>
+#include <kernel/delay.h>
+#include <kernel/disk.h>
+#include <kernel/errors.h>
+#include <kernel/usb_fw.h>
+#include <kernel/lcd.h>
 
 #include <evt.h>
 
@@ -137,18 +142,56 @@ void mainMenu_doF2(void * data)
     // Settings ?
 }
 
+int usbMode=0;
+
 void mainMenu_doF3(void * data) // switch to usb
 {
-    /*
+    int h,w;
+    int evt;
+    char * msg1 = "In USB mode (F3 to exit)";
     
-    if(getUSB() || getFwExt())
-    {    
-     
+    if(usbMode)
+    {
+        // in usb mode => disable usb
+        printk( "Warning should not be here\n");
+#warning need some processing to see what to do here
     }
     else
     {
-        printk( "Warning can't go usb as usb cable absent\n");
-    }*/
+        // not in usb mode => enable usb if cable present
+    
+        if(usb_isConnected() || FW_isConnected())
+        {    
+            if(disk_umount(HD_DRIVE,1)!=MED_OK)
+            {
+                printk("File still open, can't umount\n");
+                return;
+            }
+            gfx_clearScreen(COLOR_WHITE);    
+            gfx_fontSet(STD8X13);
+            gfx_getStringSize(msg1,&w,&h);
+            gfx_putS(COLOR_RED,COLOR_WHITE,(SCREEN_WIDTH-w)/2,(SCREEN_HEIGHT-h)/2,msg1);
+            enableUsbFw();
+            mdelay(10);
+            evt_purgeHandler(evt_hand);
+            while(1)
+            {
+                if((evt=evt_getStatus(evt_hand))<0)
+                    printk("Bad evt (error:%d)\n",-evt);
+                if(evt==BTN_F3)
+                    break;
+            }
+            disableUsbFw();
+            //mdelay(5);
+            disk_init();
+            evt_purgeHandler(evt_hand);
+            mainMenu_start();        
+        }
+        else
+        {
+            printk( "Warning can't go usb as usb cable is absent\n");
+        }
+    }
 }
 
 void mainMenu_mkSubmenuStr(void * data,char * str)
@@ -216,6 +259,8 @@ void mainMenu_loop(void)
 int mainMenu_ini(void)
 {
     int h,w;
+    
+    usbMode = 0;
     
     gfx_clearScreen(COLOR_BLACK);
     

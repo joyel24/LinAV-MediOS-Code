@@ -46,6 +46,8 @@ extern int kfw_state;
     }                                    \
 }
 
+void enableUsbFw(void);
+void disableUsbFw(void);
 int usb_isConnected(void);
 int FW_isConnected(void);
 

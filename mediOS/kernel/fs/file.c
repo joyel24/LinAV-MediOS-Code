@@ -49,6 +49,15 @@ static struct filedesc openfiles[MAX_OPEN_FILES];
 
 static int flush_cache(int fd);
 
+int fileAreOpen(void)
+{
+    int fd;
+    for ( fd=0; fd<MAX_OPEN_FILES; fd++ )
+        if(openfiles[fd].busy)
+            return 1;
+    return 0;
+}
+
 void init_file(void)
 {
     int fd;
