@@ -79,6 +79,7 @@ typedef struct __section_t {
     struct __section_t *   rel;
 } section_t;
 
-void load_med(char * file_name);
+int med_load(char * file_name);
+int med_loadParam(int argc,char**argv);
 
 #endif

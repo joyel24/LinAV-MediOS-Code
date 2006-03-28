@@ -21,6 +21,7 @@
 #include <kernel/malloc.h>
 
 #include <kernel/med.h>
+#include <kernel/errors.h>
 
 #define CORE_START   ((char*)&_iram_end+0x10)
 
@@ -78,9 +79,16 @@ int test_section(char * name,char ** name_list)
     return res;
 }
 
-void load_med(char * file_name)
+int med_load(char * file_name)
+{
+    return med_loadParam(1,&file_name);
+}
+
+int med_loadParam(int argc,char**argv)
 {
     int fd,ret,i,j,k,res,res2,res1;
+    
+    int ret_val;
     
     int (*run_med)(int argc,char**argv);
     
@@ -102,18 +110,24 @@ void load_med(char * file_name)
     int first_iram=-1;
     
     unsigned int diff;
+    
+    if(argc<1)
+    {
         
-    fd = open(file_name,O_RDONLY);
+        return -MED_EINVAL;
+    }   
+    fd = open(argv[0],O_RDONLY);
     if(fd<0)
     {
-        printk("[load_med] Can't open file %s\n",file_name);
-        return ;
+        printk("[load_med] Can't open file %s\n",argv[0]);
+        return -MED_EINVAL;
     }
     
     /* reading elf header */
     if((ret=read(fd,(void*)&header,sizeof(elf_hdr)))<sizeof(elf_hdr))
     {
         printk("[load_med] Can't read completly the header (read %d)\n",ret);
+        ret_val = -MED_EINVAL;
         goto exit_point;
     }
     
@@ -122,6 +136,7 @@ void load_med(char * file_name)
     {
         header.e_ident[4]=0;
         printk("[load_med] Wrong magic (%s)\n",header.e_ident);
+        ret_val = -MED_EINVAL;
         goto exit_point;
     }
     /* reading all section headers from file*/
@@ -129,6 +144,7 @@ void load_med(char * file_name)
     if(!section_list)
     {
         printk("Error can't malloc an array of section header of %d elements\n",header.e_shnum);
+        ret_val = -MED_ENOMEM;
         goto exit_point;
     }
            
@@ -165,6 +181,7 @@ void load_med(char * file_name)
     if(!sections_name)
     {
         printk("Error can't malloc an array of char of %d elements for sections' names\n",section_list[header.e_shstrndx].size);
+        ret_val = -MED_ENOMEM;
         goto exit_point1;
     }    
     res=read(fd,(void*)sections_name,sizeof(char)*section_list[header.e_shstrndx].size);
@@ -237,6 +254,7 @@ void load_med(char * file_name)
     if((0x7000-(unsigned int)CORE_START)<iram_size)
     {        
         printk("Can't get a buffer for IRAM: avail %x need %x\n",(0x7000-(unsigned int)CORE_START),iram_size);
+        ret_val = -MED_ENOMEM;
         goto exit_point2;
     }
     
@@ -248,6 +266,7 @@ void load_med(char * file_name)
     if(!sdram_start)
     {
         printk("Can't get a buffer in SDRAM size: %x\n",sdram_size);
+        ret_val = -MED_ENOMEM;
         goto exit_point2;
     }
     else
@@ -372,6 +391,7 @@ void load_med(char * file_name)
     if(entry==-1)
     {
         printk("can't find setion of entry point: 0x%x\n",header.e_entry);
+        ret_val=-MED_EINVAL; 
         goto exit_point3;
     }
     else
@@ -387,8 +407,8 @@ void load_med(char * file_name)
     
     printk("calling app (entry %x)\n", run_med);      
     DEBUG_MED("calling app (entry %x)\n", run_med);      
-        
-    run_med(0,NULL);
+    
+    ret_val=run_med(argc,argv);
     
     printk("back from app\n"); 
     free_user();          
@@ -398,9 +418,9 @@ void load_med(char * file_name)
     printk("sections_name freed %x\n",sections_name);
     free(section_list);
     printk("section_list freed %x\n",section_list);
-    return;
+    return ret_val;
     
-exit_point3:    
+exit_point3:       
     free(sdram_start);
     printk("sdram freed\n"); 
 exit_point2:    
@@ -411,5 +431,6 @@ exit_point1:
     printk("sections_name freed\n");
 exit_point:
     close(fd);
+    return ret_val;
     
 }

@@ -15,6 +15,7 @@
 #include <sys_def/string.h>
 
 #include <kernel/kernel.h>
+#include <kernel/malloc.h>
 #include <kernel/graphics.h>
 #include <kernel/evt.h>
 
@@ -28,6 +29,8 @@
 
 extern struct scroll_bar browser_scroll;
 extern int evt_handler;
+
+#define AO_BOY_BIN "/aoboy.med"
 
 void browserEvt(struct browser_data * bdata)
 {
@@ -173,20 +176,38 @@ void browserEvt(struct browser_data * bdata)
                     {
                         int type;
                         char path[PATHLEN];
-                        sprintf(path,"%s%s",bdata->path,bdata->list[bdata->pos+bdata->nselect].name);
+                        if(bdata->path[0]=='/' && bdata->path[1]=='\0')
+                            sprintf(path,"/%s",bdata->list[bdata->pos+bdata->nselect].name);
+                        else
+                            sprintf(path,"%s/%s",bdata->path,bdata->list[bdata->pos+bdata->nselect].name);
                         printk("launching %s\n",path);
                         type=get_file_type(path);
-                        if(type!=BIN_TYPE)
-                            printk("Bad type : %d\n",type);
-                        else
+                        switch(type)
                         {
-                            load_med(path);
-                            evt_purgeHandler(evt_handler);
-                            if(!viewNewDir(bdata,NULL))
-                            {
-                                stop=1;
+                            case MED_TYPE:
+                                med_load(path);
+                                evt_purgeHandler(evt_handler);
+                                if(!viewNewDir(bdata,NULL))
+                                {
+                                    stop=1;
+                                }
                                 break;
-                            }
+                            case GB_TYPE:
+                                {
+                                    char ** argv=(char**)malloc(2*sizeof(char**));
+                                    argv[0]=AO_BOY_BIN;
+                                    argv[1]=path;
+                                    med_loadParam(2,argv);
+                                    free(argv);
+                                    evt_purgeHandler(evt_handler);
+                                    if(!viewNewDir(bdata,NULL))
+                                    {
+                                        stop=1;
+                                    }
+                                }
+                            default:
+                                printk("Bad type : %d\n",type);
+                                break;
                         }
                         break;
                     }

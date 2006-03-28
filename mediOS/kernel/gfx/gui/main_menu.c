@@ -118,7 +118,7 @@ void mainMenu_doAction(void * data)
     else
     {
         printk("launching ext app: %s\n",cfg_data->link);        
-        load_med(cfg_data->link);
+        med_load(cfg_data->link);
         evt_purgeHandler(evt_hand);
         mainMenu_start();        
     }

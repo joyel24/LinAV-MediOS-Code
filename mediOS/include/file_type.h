@@ -15,13 +15,14 @@
 #define __GUI_FILE_TYPE_H
 
 #define BIN_TYPE          0
+#define MED_TYPE          1
 #define IMG_TYPE          2
 #define MP3_TYPE          3
 #define TXT_TYPE          4
-#define UKN_TYPE          5
+#define GB_TYPE           6
+#define UKN_TYPE          0xFF
 
 int  get_file_type        (char * filename);
-void handle_type_other    (char *filename);
 
 #endif
 

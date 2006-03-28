@@ -100,6 +100,8 @@ int app_main(int argc,char** argv)
 		 Cj tell me if you want to do it this way and also let me know if it works for you?
 */
 
+    int i;
+    for(i=0;i<argc;i++) printf("%d:%s\n",i,argv[i]);
 
 #ifdef USE_MEDIOS_BROWSER
 	while(1)
@@ -116,6 +118,7 @@ int app_main(int argc,char** argv)
 		   rom=browse("/",1);
 		}
                 else {
+                    printf("using param\n");
                   rom = (char *)malloc(MAX_PATH);
                   strcpy(rom,argv[1]);
                 }

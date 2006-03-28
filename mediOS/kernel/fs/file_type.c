@@ -21,6 +21,12 @@ int is_med_type(char *extension)
     return strcmp(extension, ".med") == 0;
 }
 
+int is_gb_type(char *extension)
+{
+    strlwr(extension);
+    return strcmp(extension, ".gb") == 0;
+}
+
 int is_image_type(char *extension)
 {
     strlwr(extension);
@@ -66,13 +72,15 @@ int get_file_type(char * filename)
     if(ext == 0)
         return BIN_TYPE;
     else if(is_med_type(ext))
-        return BIN_TYPE;
+        return MED_TYPE;
     else if(is_image_type(ext))
         return IMG_TYPE;
     else if(is_mp3_type(ext))
         return MP3_TYPE;
     else if(is_text_type(ext))
         return TXT_TYPE;
+    else if(is_gb_type(ext))
+        return GB_TYPE;
     else
         return UKN_TYPE;
 }
