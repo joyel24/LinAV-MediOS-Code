@@ -45,7 +45,14 @@ char screen_VID2[SCREEN_WIDTH*SCREEN_HEIGHT*4+40];
 extern struct graphics_operations g8ops;
 extern struct graphics_operations g32ops;
 
-struct graphicsBuffer BITMAP_1 = {
+struct graphicsBuffer BITMAP_1;
+struct graphicsBuffer BITMAP_2;
+struct graphicsBuffer VIDEO_1;
+struct graphicsBuffer VIDEO_2;
+struct graphicsBuffer CURSOR_1;
+struct graphicsBuffer CURSOR_2;
+
+struct graphicsBuffer BITMAP_1_ini = {
     offset             : 0,
     state              : OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 |
                     OSD_BITMAP_8BIT | COLOR_TRSP << OSD_BITMAP_A_SHIFT,
@@ -58,7 +65,7 @@ struct graphicsBuffer BITMAP_1 = {
     bitsPerPixel       : 8,
 };
 
-struct graphicsBuffer BITMAP_2 = {
+struct graphicsBuffer BITMAP_2_ini = {
     offset             : 0,
     state              : OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 |
                     OSD_BITMAP_8BIT | OSD_BITMAP_0TRANS | COLOR_TRSP << OSD_BITMAP_A_SHIFT,
@@ -71,7 +78,7 @@ struct graphicsBuffer BITMAP_2 = {
     bitsPerPixel       : 8,
 };
 
-struct graphicsBuffer VIDEO_1 = {
+struct graphicsBuffer VIDEO_1_ini = {
     offset             : 0,
     state              : 0,
     enable             : 0,
@@ -83,7 +90,7 @@ struct graphicsBuffer VIDEO_1 = {
     bitsPerPixel       : 32,
 };
 
-struct graphicsBuffer VIDEO_2 = {
+struct graphicsBuffer VIDEO_2_ini = {
     offset             : 0,
     state              : 0,
     enable             : 0,
@@ -95,7 +102,7 @@ struct graphicsBuffer VIDEO_2 = {
     bitsPerPixel       : 32,
 };
 
-struct graphicsBuffer CURSOR_1 = {
+struct graphicsBuffer CURSOR_1_ini = {
     offset             : 0,
     state              : 0 ,
     width              : 0,
@@ -106,7 +113,7 @@ struct graphicsBuffer CURSOR_1 = {
     bitsPerPixel       : 0,
 };
 
-struct graphicsBuffer CURSOR_2 = {
+struct graphicsBuffer CURSOR_2_ini = {
     offset             : 0,
     state              : 0 ,
     width              : 0,
@@ -136,6 +143,16 @@ int     current_font=0;
 int     current_plane=0;
 
 
+void init_buffer_data(void)
+{
+    memcpy(&BITMAP_1,&BITMAP_1_ini,sizeof(struct graphicsBuffer));
+    memcpy(&BITMAP_2,&BITMAP_2_ini,sizeof(struct graphicsBuffer));
+    memcpy(&VIDEO_1,&VIDEO_1_ini,sizeof(struct graphicsBuffer));
+    memcpy(&VIDEO_2,&VIDEO_2_ini,sizeof(struct graphicsBuffer));
+    memcpy(&CURSOR_1,&CURSOR_1_ini,sizeof(struct graphicsBuffer));
+    memcpy(&CURSOR_2,&CURSOR_2_ini,sizeof(struct graphicsBuffer));
+}
+
 void gfx_init(void)
 {
     buffers[0]=&BITMAP_1;
@@ -144,7 +161,9 @@ void gfx_init(void)
     buffers[3]=&VIDEO_2;
     buffers[4]=&CURSOR_1;
     buffers[5]=&CURSOR_2;
-
+    
+    init_buffer_data();
+    
     osd_init();
 
     /* reset everything */
@@ -162,7 +181,7 @@ void gfx_init(void)
 
 void gfx_initComponent(int vplane,struct graphicsBuffer * buff,unsigned int offset)
 {    
-    int diff=offset % 32;
+    int diff=offset % 32;    
     if(diff)
         offset+=(32-diff);
     buff->offset=offset;
@@ -295,9 +314,19 @@ void gfx_openGraphics(void)
 {
     // hide the console since we're going to use the screen
     if(con_screenIsVisible()) con_screenSwitch();
-
+    printk("INI gfx\n");
+    
     /* hidding bmap1 */
+    
+    init_buffer_data();
+    
+    osd_setComponentConfig(OSD_VIDEO1,  0);
+    osd_setComponentConfig(OSD_VIDEO2,  0);
     osd_setComponentConfig(OSD_BITMAP1, 0);
+    osd_setComponentConfig(OSD_BITMAP2, 0);
+    osd_setComponentConfig(OSD_CURSOR1, 0);
+    osd_setComponentConfig(OSD_CURSOR2, 0);
+    
     /*setting up planes */
     gfx_initComponent(BMAP1,&BITMAP_1,(unsigned int)&screen_BMAP1);
     gfx_initComponent(BMAP2,&BITMAP_2,(unsigned int)&screen_BMAP2);
@@ -307,8 +336,11 @@ void gfx_openGraphics(void)
     current_font=0;
     buffers[BMAP1]->enable=1;
     osd_setComponentConfig(OSD_BITMAP1,buffers[BMAP1]->state|OSD_COMPONENT_ENABLE);
+    osd_setEntirePalette(gui_pal,256);
     //printk("BMAP1 @%x\n",buffers[BMAP1]->offset);
 }
+
+
 
 void gfx_closeGraphics(void)
 {

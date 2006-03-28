@@ -186,6 +186,7 @@ void browserEvt(struct browser_data * bdata)
                         {
                             case MED_TYPE:
                                 med_load(path);
+                                gfx_openGraphics();
                                 evt_purgeHandler(evt_handler);
                                 if(!viewNewDir(bdata,NULL))
                                 {
@@ -198,6 +199,7 @@ void browserEvt(struct browser_data * bdata)
                                     argv[0]=AO_BOY_BIN;
                                     argv[1]=path;
                                     med_loadParam(2,argv);
+                                    gfx_openGraphics();
                                     free(argv);
                                     evt_purgeHandler(evt_handler);
                                     if(!viewNewDir(bdata,NULL))

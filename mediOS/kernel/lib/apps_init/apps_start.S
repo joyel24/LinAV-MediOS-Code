@@ -10,7 +10,6 @@
 
 .global _start
 _start:
-    bkpt
     str     lr, [sp,#-4]!    
     sub     sp, sp, #72
     stmia   sp, {r0 - r12}			@ save r0 - r12

@@ -118,8 +118,7 @@ int app_main(int argc,char** argv)
 		   rom=browse("/",1);
 		}
                 else {
-                    printf("using param\n");
-                  rom = (char *)malloc(MAX_PATH);
+                  en fait cvs arom = (char *)malloc(MAX_PATH);
                   strcpy(rom,argv[1]);
                 }
 		if (rom=='0')
