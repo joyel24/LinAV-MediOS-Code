@@ -158,8 +158,7 @@ void mainMenu_doF3(void * data) // switch to usb
     }
     else
     {
-        // not in usb mode => enable usb if cable present
-    
+        // not in usb mode => enable usb if cable present        
         if(usb_isConnected() || FW_isConnected())
         {    
             if(disk_umount(HD_DRIVE,1)!=MED_OK)
@@ -172,6 +171,7 @@ void mainMenu_doF3(void * data) // switch to usb
             gfx_getStringSize(msg1,&w,&h);
             gfx_putS(COLOR_RED,COLOR_WHITE,(SCREEN_WIDTH-w)/2,(SCREEN_HEIGHT-h)/2,msg1);
             enableUsbFw();
+            usbMode=1;
             mdelay(10);
             evt_purgeHandler(evt_hand);
             while(1)
@@ -182,6 +182,7 @@ void mainMenu_doF3(void * data) // switch to usb
                     break;
             }
             disableUsbFw();
+            usbMode=0;
             //mdelay(5);
             disk_init();
             evt_purgeHandler(evt_hand);
