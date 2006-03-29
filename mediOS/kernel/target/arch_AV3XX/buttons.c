@@ -44,7 +44,7 @@ int trad_tab[] = {
     0xA,0xB,0xE,0xF
 };
 
-int arch_btn_readState(void){
+int arch_btn_readHardware(void){
     int dir,fn,bt,on_off_fast=0;
     int val;
 

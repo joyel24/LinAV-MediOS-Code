@@ -28,22 +28,24 @@
 #define NB_BUTTONS                  0x10
 
 #include <kernel/target/arch/buttons.h>
-extern int old_state;
+
 void btn_processPress(int val);
 void btn_init(void);
 
 int btn_readState(void);
-int arch_btn_readState(void);
+int arch_btn_readHardware(void);
 
 extern int nb_off_press;
 extern int nb_pressed[NB_BUTTONS];
 extern int press_step[NB_BUTTONS];
 extern int mx_press[NB_BUTTONS];
 extern int need_clean;
+extern int btn_state;
+
 #define BTN_CHK    {                     \
-    int __val,__val2;                    \
-    __val=btn_readState();               \
-    if(__val&BTMASK_OFF)                 \
+    int __val;                           \
+    btn_state=arch_btn_readHardware();   \
+    if(btn_state&BTMASK_OFF)             \
     {                                    \
         nb_off_press++;                  \
         if(nb_off_press>MAX_OFF)         \
@@ -54,13 +56,13 @@ extern int need_clean;
     }                                    \
     else                                 \
         nb_off_press = 0;                \
-    if(__val!=0x0)                       \
+    if(btn_state!=0x0)                   \
     {                                    \
-        INTERNAL_TMR_CHK(__val2);        \
-        if(__val2)                       \
+        INTERNAL_TMR_CHK(__val);         \
+        if(__val)                        \
         {                                \
             need_clean=1;                \
-            btn_processPress(__val);     \
+            btn_processPress(btn_state); \
         }                                \
     }                                    \
     else if(need_clean)                  \

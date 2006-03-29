@@ -28,6 +28,7 @@
 
 #include <kernel/console.h>
 
+__IRAM_DATA int btn_state;
 __IRAM_DATA int mx_press[NB_BUTTONS];
 __IRAM_DATA struct btn_repeatParam default_repeatParam = {
     DEFAULT_INIT_DELAY,
@@ -56,7 +57,7 @@ int need_clean;
 
 __IRAM_CODE int btn_readState(void)
 {
-    return arch_btn_readState();
+    return btn_state;
 }
 
 __IRAM_CODE void btn_processPress(int val)
@@ -181,7 +182,7 @@ void btn_init(void)
     nb_off_press=0;
     nb_debug_switch=0;
     need_clean=0;
-    
+    btn_state=0;
 
 
     for(btn=0;btn<NB_BUTTONS;btn++)
