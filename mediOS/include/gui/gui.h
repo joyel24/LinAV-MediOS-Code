@@ -37,6 +37,7 @@
 
 #define MODE_SELECT   0
 #define MODE_NOSELECT 1
+#define MODE_STRING   2
 
 void gui_start(void);
 void gui_sendEvt(int evt_num);

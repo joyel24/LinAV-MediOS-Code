@@ -18,6 +18,7 @@
 #include <kernel/malloc.h>
 #include <kernel/graphics.h>
 #include <kernel/evt.h>
+#include <kernel/errors.h>
 
 #include <kernel/med.h>
 
@@ -32,12 +33,13 @@ extern int evt_handler;
 
 #define AO_BOY_BIN "/aoboy.med"
 
-void browserEvt(struct browser_data * bdata)
+MED_RET_T browserEvt(struct browser_data * bdata)
 {
     int w = 0;
     int h = 10;
     
     int stop=0;;
+    int ret=-MED_ERROR;
     char evt=0;
     gfx_getStringSize("M", &w, &h);
 
@@ -60,6 +62,11 @@ void browserEvt(struct browser_data * bdata)
             case BTN_ON:
                 if(bdata->mode==MODE_SELECT)
                     chgSelect(bdata,bdata->pos+bdata->nselect);
+                if(bdata->mode==MODE_STRING && bdata->list[bdata->pos+bdata->nselect].type==TYPE_FILE)
+                {
+                    stop=1;
+                    ret=MED_OK;
+                }
                 break;
             case BTN_UP:
                 bdata->nselect--;
@@ -152,7 +159,9 @@ void browserEvt(struct browser_data * bdata)
                     }
                 }
                 break;
-    
+#ifdef GMINI4XX
+            case BTN_1:
+#endif    
             case BTN_RIGHT:
                 switch(bdata->list[bdata->pos+bdata->nselect].type)
                 {
@@ -174,47 +183,59 @@ void browserEvt(struct browser_data * bdata)
                         break;
                     case TYPE_FILE:
                     {
-                        int type;
-                        char path[PATHLEN];
-                        if(bdata->path[0]=='/' && bdata->path[1]=='\0')
-                            sprintf(path,"/%s",bdata->list[bdata->pos+bdata->nselect].name);
-                        else
-                            sprintf(path,"%s/%s",bdata->path,bdata->list[bdata->pos+bdata->nselect].name);
-                        printk("launching %s\n",path);
-                        type=get_file_type(path);
-                        switch(type)
+                        if(bdata->mode==MODE_STRING)
                         {
-                            case MED_TYPE:
-                                med_load(path);
-                                gfx_openGraphics();
-                                evt_purgeHandler(evt_handler);
-                                if(!viewNewDir(bdata,NULL))
-                                {
-                                    stop=1;
-                                }
-                                break;
-                            case GB_TYPE:
-                                {
-                                    char ** argv=(char**)malloc(2*sizeof(char**));
-                                    argv[0]=AO_BOY_BIN;
-                                    argv[1]=path;
-                                    med_loadParam(2,argv);
+                            stop=1;
+                            ret=MED_OK;
+                        }
+                        else
+                        {
+                            int type;
+                            char path[PATHLEN];
+                            if(bdata->path[0]=='/' && bdata->path[1]=='\0')
+                                sprintf(path,"/%s",bdata->list[bdata->pos+bdata->nselect].name);
+                            else
+                                sprintf(path,"%s/%s",bdata->path,bdata->list[bdata->pos+bdata->nselect].name);
+                                                       
+                            printk("launching %s\n",path);
+                            type=get_file_type(path);
+                            switch(type)
+                            {
+                                case MED_TYPE:
+                                    med_load(path);
                                     gfx_openGraphics();
-                                    free(argv);
                                     evt_purgeHandler(evt_handler);
                                     if(!viewNewDir(bdata,NULL))
                                     {
                                         stop=1;
                                     }
-                                }
-                            default:
-                                printk("Bad type : %d\n",type);
-                                break;
+                                    break;
+                                case GB_TYPE:
+                                    {
+                                        char ** argv=(char**)malloc(2*sizeof(char**));
+                                        argv[0]=AO_BOY_BIN;
+                                        argv[1]=path;
+                                        med_loadParam(2,argv);
+                                        gfx_openGraphics();
+                                        free(argv);
+                                        evt_purgeHandler(evt_handler);
+                                        if(!viewNewDir(bdata,NULL))
+                                        {
+                                            stop=1;
+                                        }
+                                    }
+                                default:
+                                    printk("Bad type : %d\n",type);
+                                    break;
+                            }
                         }
                         break;
                     }
                 }
                 break;
+#ifdef GMINI4XX  
+            case BTN_2:
+#endif
             case BTN_LEFT:
                 if(upDir(bdata))
                 {              
@@ -225,44 +246,7 @@ void browserEvt(struct browser_data * bdata)
                     }
                 }
                 break;
-#ifdef GMINI4XX
-            case BTN_1:
-                switch(bdata->list[bdata->pos+bdata->nselect].type)
-                {
-                    case TYPE_BACK:
-                        upDir(bdata);
-                        if(!viewNewDir(bdata,NULL))
-                        {
-                            stop=1;
-                            break;
-                        }
-                        break;
-                    case TYPE_DIR:
-                        inDir(bdata,bdata->list[bdata->pos+bdata->nselect].name);
-                        if(!viewNewDir(bdata,NULL))
-                        {
-                            stop=1;
-                            break;
-                        }
-                        break;
-                    case TYPE_FILE:
-                        chgSelect(bdata,bdata->pos+bdata->nselect);
-                        if(bdata->mode==MODE_NOSELECT)
-                            stop=1;
-                        break;
-                }
-                break;
-            case BTN_2:
-                if(upDir(bdata))
-                {              
-                    if(!viewNewDir(bdata,NULL))
-                    {
-                        stop=1;
-                        break;
-                    }
-                }
-                break;
-#endif
         }
     }
+    return ret;
 }

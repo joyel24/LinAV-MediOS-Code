@@ -113,9 +113,8 @@ void mainMenu_doAction(void * data)
         }
         if(!browseData)
             return;
-        viewNewDir(browseData,NULL);
-        
-        browserEvt(browseData);
+            
+        browser_browse(browseData,NULL,NULL);
         
         evt_purgeHandler(evt_hand);
         mainMenu_start(); 

@@ -16,6 +16,7 @@
 #include <kernel/kernel.h>
 #include <kernel/graphics.h>
 #include <kernel/evt.h>
+#include <kernel/errors.h>
 
 #include <gui/icons.h>
 #include <gui/file_browser.h>
@@ -95,6 +96,41 @@ int viewNewDir(struct browser_data *bdata,char *name)
     redrawBrowser(bdata);
     
     return 1;
+}
+
+int browser_browse(struct browser_data *bdata,char * path,char * res)
+{
+    if(viewNewDir(bdata,path))
+    {        
+        if(browserEvt(bdata)==MED_OK)
+        {
+            if(bdata->mode==MODE_STRING && res)
+            {
+                if(bdata->path[0]=='/' && bdata->path[1]=='\0')
+                    sprintf(res,"/%s",bdata->list[bdata->pos+bdata->nselect].name);
+                else
+                    sprintf(res,"%s/%s",bdata->path,bdata->list[bdata->pos+bdata->nselect].name);
+            }
+            return MED_OK;
+        }
+        else
+        {
+            return -MED_ERROR;
+        }
+    }
+    return -MED_ERROR;
+}
+
+int browser_simpleBrowse(char * path,char * res)
+{
+    int ret_val;
+    struct browser_data * browseData=browser_NewBrowse();
+    if(!browseData)
+        return -MED_ENOMEM;
+    browseData->mode=MODE_STRING;
+    ret_val=browser_browse(browseData,path,res);
+    browser_disposeBrowse(browseData);
+    return ret_val;
 }
 
 void redrawBrowser(struct browser_data *bdata)

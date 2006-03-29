@@ -57,6 +57,7 @@ struct browser_data {
     void (*draw_file_size)      (struct dir_entry * entry);
     void (*clear_status)        (struct browser_data *bdata);
     
+    char * retPath;
     
 };
 
@@ -65,7 +66,11 @@ struct browser_data {
 //#define    UP_ARROW     0
 //#define    DOWN_ARROW   1
 
+int browser_simpleBrowse(char * path,char * res);
+int browser_browse(struct browser_data *bdata,char * path,char * res);
 
+void browser_disposeBrowse(struct browser_data * bdata);
+struct browser_data * browser_NewBrowse(void);
 
 /*****    ls_fct    *****/
 int  qSortEntry  (const void * a1,const void * a2);
@@ -82,7 +87,7 @@ int inDir(struct browser_data * bdata,char * name);
 int isRoot(struct browser_data * bdata);
 
 /*****    evt_handle_fct    *****/
-void  browserEvt         (struct browser_data * bdata);
+int  browserEvt         (struct browser_data * bdata);
 
 /*****    gui_fct    *****/
 void iniBrowser         (void);
@@ -107,8 +112,7 @@ void clear_status(struct browser_data *bdata);
 //char *  browse     (char * path,int mode);
 //void ini_file_browser  (void);
 
-void browser_disposeBrowse(struct browser_data * bdata);
-struct browser_data * browser_NewBrowse(void);
+
 
 
 #endif
