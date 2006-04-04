@@ -24,19 +24,22 @@ ifeq ($(HAVE_DVR),1)
 	GCCFLAGS += -DHAVE_DVR
 endif
 
-
 ifeq ($(HAVE_FM_REMOTE),1)
 	GCCFLAGS += -DHAVE_FM_REMOTE
 endif
 
-ifeq ($(HAVE_SOUND),1)
-	GCCFLAGS += -DHAVE_SOUND
+ifeq ($(HAVE_MAS_SOUND),1)
+	GCCFLAGS += -DHAVE_MAS_SOUND
+endif
+
+ifeq ($(HAVE_AIC23_SOUND),1)
+	GCCFLAGS += -DHAVE_AIC23_SOUND
 endif
 
 ifeq ($(CHK_USB_FW),1)
 	GCCFLAGS += -DCHK_USB_FW
 endif
-
+                                          
 ifeq ($(HAVE_CMD_LINE),1)
 	GCCFLAGS += -DHAVE_CMD_LINE
 endif

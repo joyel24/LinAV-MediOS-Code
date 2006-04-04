@@ -13,8 +13,12 @@ ifeq ($(HAVE_FM_REMOTE),1)
 	OBJS += fm_remote.o
 endif
 
-ifeq ($(HAVE_SOUND),1)
+ifeq ($(HAVE_MAS_SOUND),1)
 	OBJS += sound.o mas.o
+endif
+
+ifeq ($(HAVE_AIC23_SOUND),1)
+	OBJS += aic23.o
 endif
 
 ifeq ($(HAVE_DVR),1)

@@ -36,7 +36,7 @@ __IRAM_DATA struct irq_data_s irq_table[] = {
         name    : "UART1 intr",
         nb_irq  : 0
     },
-#ifdef HAVE_SOUND
+#ifdef HAVE_MAS_SOUND
     {
         irq     : IRQ_MAS_DATA,
         action  : dsp_interrupt,

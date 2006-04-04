@@ -29,6 +29,7 @@
 #include <kernel/irq.h>
 #include <kernel/timer.h>
 #include <kernel/ti_wdt.h>
+#include <kernel/aic23.h>
 
 #include <kernel/uart.h>
 #include <kernel/cpld.h>
@@ -58,11 +59,9 @@ void print_boot_info(void)
     tmr_print();
 }
 
-extern void dbgscr_init(void);
-
 void tst_fct(void)
 {
-    
+
 }
 
 void kernel_start (void)
@@ -148,8 +147,12 @@ void kernel_start (void)
     printk("[init] INT enabled\n");
     __sti();
 
-#ifdef HAVE_SOUND
+#ifdef HAVE_MAS_SOUND
     init_sound();
+#endif
+
+#ifdef HAVE_AIC23_SOUND
+    aic23_init();
 #endif
 
     printk("[init] ------------ all drivers\n");
@@ -159,7 +162,7 @@ void kernel_start (void)
     printk("[init] END\n");
 
 #if 0
-   tst_fct();    
+   tst_fct();
 #endif
 
 #ifdef BUILD_LIB
@@ -168,8 +171,8 @@ void kernel_start (void)
     reload_firmware();
 #endif
     do_bkpt();
-    
-#ifdef AV3XX    
+
+#ifdef AV3XX
     gui_start();
 #endif
     /* should we launch HALT */
