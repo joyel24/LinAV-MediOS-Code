@@ -12,6 +12,8 @@
 @.align 5
 .global trap_undef
 trap_undef:
+    ldr sp,=trap_stack
+    add sp,sp,#0x100
     stmfd  sp!,{lr}
     ldr    lr, __trap_undef_ptr
     bx     lr
@@ -65,6 +67,8 @@ __trap_swi_ptr:  .word swi_handler
 @.align	5
 .global trap_prefetch
 trap_prefetch:
+    ldr sp,=trap_stack
+    add sp,sp,#0x100
     stmfd  sp!,{lr}
     ldr    lr, __trap_prefetch_ptr
     bx     lr
@@ -76,6 +80,8 @@ __trap_prefetch_ptr:  .word do_trap_prefetch
 @.align	5
 .global trap_data
 trap_data:
+    ldr sp,=trap_stack
+    add sp,sp,#0x100
     stmfd  sp!,{lr}
     ldr    lr, __trap_data_ptr
     bx     lr
@@ -87,6 +93,8 @@ __trap_data_ptr:  .word do_trap_data
 @.align	5
 .global trap_addrexcptn
 trap_addrexcptn:
+    ldr sp,=trap_stack
+    add sp,sp,#0x100
     stmfd  sp!,{lr}
     ldr    lr, __trap_addrexcptn_ptr
     bx     lr

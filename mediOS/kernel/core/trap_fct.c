@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/core/trap_fct.c
 *
 *   MediOS project
@@ -11,6 +11,8 @@
 */
 
 #include <kernel/kernel.h>
+
+char trap_stack[256];
 
 void do_trap_undef(void)
 {
