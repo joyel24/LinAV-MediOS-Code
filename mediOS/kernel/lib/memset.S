@@ -35,7 +35,7 @@
  */
 
 .global memset
-memsetx:
+memset:
 	ands	r3, r0, #3		@ 1 unaligned?
 	bne	1b			@ 1
 /*
