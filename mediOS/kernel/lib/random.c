@@ -54,7 +54,7 @@
  *
  */
 
-#include <stdlib.h>
+//#include <stdlib.h>
 
 #define N             (624)                /* length of state vector */
 #define M             (397)                /* a period parameter */

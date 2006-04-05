@@ -21,4 +21,5 @@ memchr:
 	bpl	1b
 2:	movne	r0, #0
 	subeq	r0, r0, #1
-	mov     pc,lr
+	bx	lr
+;; 	mov     pc,lr

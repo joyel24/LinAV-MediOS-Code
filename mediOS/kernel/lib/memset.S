@@ -35,7 +35,7 @@
  */
 
 .global memset
-memset:
+memsetx:
 	ands	r3, r0, #3		@ 1 unaligned?
 	bne	1b			@ 1
 /*
@@ -84,4 +84,5 @@ memset:
 	strneb	r1, [r0], #1
 	tst	r2, #1
 	strneb	r1, [r0], #1
-	mov     pc,lr
+	bx	lr
+;; 	mov pc, lr

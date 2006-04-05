@@ -22,4 +22,6 @@ strchr:
     teq       r2, #0
     moveq     r0, #0
     subne     r0, r0, #1
-    mov       pc,lr
+	bx	lr
+;; 	mov pc, lr
+

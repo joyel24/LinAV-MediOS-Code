@@ -24,10 +24,12 @@ udelay:
     mov    r2, r2, lsr #11
     mul    r0, r1, r2
     movs   r0, r0, lsr #6
-    moveq  pc,lr
+	bxeq	lr
+;; 	moveq pc, lr
 udelay_l:
     subs   r0, r0, #1
     bhi    udelay_l
-    mov    pc,lr
+	bx	lr
+;; 	mov pc, lr
     
 loops_val: .word 12384

@@ -55,10 +55,10 @@ void dsp_run ()
 
 MED_RET_T load_dsp_program_hdd (const char* pszFilename)
 {
-	printk ("Loading dsp program from hdd into sdram...\n");
 	unsigned char * pDSPCode = 0;
 	int fDSPCode = open (pszFilename, O_RDONLY);
 	int nSize;
+	printk ("Loading dsp program from hdd into sdram...\n");
 	if (fDSPCode < 0)
 	{
 		printk ("Program not loaded.\n");
@@ -66,9 +66,10 @@ MED_RET_T load_dsp_program_hdd (const char* pszFilename)
 	}
 	else
 	{
+		int nReaded;
 		nSize = filesize (fDSPCode);
 		pDSPCode = malloc (nSize);
-		int nReaded = read (fDSPCode, pDSPCode, nSize);
+		nReaded = read (fDSPCode, pDSPCode, nSize);
 		printk ("Program loaded into sdram (%d bytes)\n", nReaded);
 		close (fDSPCode);
 	}

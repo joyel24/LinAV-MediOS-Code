@@ -49,6 +49,18 @@ int printf(__const char * fmt, ...)
     return res;
 }
 
+int vprintf(__const char * fmt, va_list args)
+{
+  int res;
+    res = vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, args);
+    uart_outString("USER:",DEBUG_UART);
+    uart_outString(debugmembuf,DEBUG_UART);
+
+    con_write("USER:");
+    con_write(debugmembuf);
+    return res;
+}
+
 void print_nonhexa(char * str)
 {
     int i;

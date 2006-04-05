@@ -47,7 +47,8 @@ kmemcpyslow:
 	bne kmemcpyslow
 	ldmia sp!, {r4, r5}
 kmemcpyexit:
-	mov pc, lr
+	bx	lr
+;; 	mov pc, lr
 
 @ 4 byte/cycle
 kmemcpyfast:
@@ -60,7 +61,8 @@ kmemcpyfastloop:
 	subs r2, r2, #4
 	bne kmemcpyfastloop
 	ldmia sp!, {r4, r5}
-	mov pc, lr
+	bx	lr
+;; 	mov pc, lr
 
 @ 32 byte/cycle
 kmemcpyveryfast:
@@ -72,7 +74,8 @@ kmemcpyveryfastloop:
 	bne kmemcpyveryfastloop
 	ldmia sp!, {r3, r6, r7, r8, r9, r10}
 	ldmia sp!, {r4, r5}
-	mov pc, lr
+	bx	lr
+;;	mov pc, lr
 .else
 		mov	ip,sp
 		stmfd	sp!,{r4-r9,fp,ip,lr,pc}
