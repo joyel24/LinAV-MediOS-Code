@@ -10,6 +10,7 @@ SECTIONS
 {  
     .text :
     {   
+        *(.text.init.arch)
         *(.text.init)             
         *(.text)        
         *(.gnu.linkonce.t.*)        
@@ -26,8 +27,8 @@ SECTIONS
     .data :    
     {
         *(.data)
-				*(.got)
-				*(.got.*)
+        *(.got)
+        *(.got.*)
         _real_iram_start = .;
     } > DRAM
     

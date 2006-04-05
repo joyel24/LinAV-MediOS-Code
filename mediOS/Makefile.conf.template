@@ -1,4 +1,4 @@
-GCCFLAGS = -Wall -mlong-calls  -nostdlib -fno-builtin  -mcpu=arm7tdmi -O2
+GCCFLAGS = -Wall  -nostdlib -fno-builtin  -mcpu=arm7tdmi -O2
 #-Os -mlong-calls 
 
 #GCCFLAGS +=   -fomit-frame-pointer -fno-strict-aliasing

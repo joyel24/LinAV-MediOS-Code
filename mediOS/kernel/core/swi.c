@@ -14,11 +14,6 @@
 #include <kernel/swi.h>
 #include <sys_def/string.h>
 
-void hello_fct(void)
-{
-    printk("hello from kernel\n");
-}
-
 #include "api_fct_list.h"
 
 void badFctName(void)

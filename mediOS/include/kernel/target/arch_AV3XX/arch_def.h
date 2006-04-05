@@ -12,8 +12,8 @@
 
 #include <sys_def/arch.h>
 
-#define SDRAM_START   0x03000000
-#define SDRAM_END     0x04000000
+#define SDRAM_START   0x00900000
+#define SDRAM_END     0x01900000
 
 #define MALLOC_START  ((((unsigned int)&_end_kernel) & 0xFFFFF000)+0x1000)
 #define MALLOC_SIZE   (SDRAM_END-MALLOC_START)

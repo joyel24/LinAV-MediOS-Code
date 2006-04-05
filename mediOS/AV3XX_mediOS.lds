@@ -2,7 +2,7 @@ ENTRY(entry_code)
 
 MEMORY
 {
-   DRAM : ORIGIN = 0x03000000,    LENGTH = 0x01000000
+   DRAM : ORIGIN = 0x00900000,    LENGTH = 0x01000000
    IRAM : ORIGIN = 0x00000004,    LENGTH = 0x00007800-0x4
 }
 
@@ -10,6 +10,7 @@ SECTIONS
 {  
     .text :
     {   
+        *(.text.init.arch)
         *(.text.init)             
         *(.text)        
         *(.glue_7t)
@@ -25,8 +26,8 @@ SECTIONS
     .data :    
     {
         *(.data)
-				*(.got)
-				*(.got.*)
+        *(.got)
+        *(.got.*)
         _real_iram_start = .;
     } > DRAM
     
