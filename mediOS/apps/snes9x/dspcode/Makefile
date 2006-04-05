@@ -41,7 +41,7 @@ LIBS =		"$(WINETIPATH)/C5400/cgtools/lib/rts.lib" \
 		"$(WINETIPATH)/C5400/dsplib/54xdsp.lib"
 
 
-OBJ =		snes9x_dsp.obj vectors.obj portaccess.obj spc700.obj globals.obj apu.obj mmu.obj soundux.obj
+OBJ =		snes9x_dsp.obj vectors.obj portaccess.obj spc700.obj globals.obj apu.obj mmu.obj soundux.obj dsp.obj
 #OBJ =		dummy.obj snes9x_dsp.obj vectors.obj
 #OBJ =		snes9x_dsp.obj sn76496.obj vectors.obj
 

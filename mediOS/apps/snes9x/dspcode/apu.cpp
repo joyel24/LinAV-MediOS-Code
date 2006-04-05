@@ -489,7 +489,22 @@ void S9xSetAPUDSP (uint8 byte)
 //     }
 //     queue_dsp((reg<<8) | byte);
 
-#if 1
+#if 0
+    // using libopenspc
+    switch (reg)
+    {
+    case APU_C0:
+    case APU_C1:
+    case APU_C2:
+    case APU_C3:
+    case APU_C4:
+    case APU_C5:
+    case APU_C6:
+    case APU_C7:
+	S9xSetFilterCoefficient (reg >> 4, (signed char) byte);
+	break;
+    }
+#else
     switch (reg)
     {
     case APU_FLG:
@@ -748,7 +763,7 @@ void S9xSetAPUDSP (uint8 byte)
 	    S9xTraceSoundDSP ("[%d] %d freq low: %d\n",
 			      ICPU.Scanline, reg>>4, byte);
 #endif
-	S9xSetSoundHertz (reg >> 4, ((uint32)(byte + (APU.DSP [reg + 1] << 8)) & FREQUENCY_MASK) * 8L);
+	S9xSetSoundHertz (reg >> 4, ((uint32)(byte + (APU.DSP [reg + 1] << 8)) & FREQUENCY_MASK)/* * 8L*/);
 	break;
 
     case APU_P_HIGH + 0x00:
@@ -765,7 +780,7 @@ void S9xSetAPUDSP (uint8 byte)
 			      ICPU.Scanline, reg>>4, byte);
 #endif
 	    S9xSetSoundHertz (reg >> 4, 
-			      ((uint32)((byte << 8) + APU.DSP [reg - 1]) & FREQUENCY_MASK) * 8L);
+			      ((uint32)((byte << 8) + APU.DSP [reg - 1]) & FREQUENCY_MASK)/* * 8L*/);
 	break;
 
     case APU_SRCN + 0x00:
@@ -1184,6 +1199,7 @@ uint8 S9xGetAPUDSP ()
 //     case APU_OUTX + 0x70:
 //       return (byte);
 
+#if 1
     case APU_ENVX + 0x00:
     case APU_ENVX + 0x10:
     case APU_ENVX + 0x20:
@@ -1195,6 +1211,7 @@ uint8 S9xGetAPUDSP ()
       // FIXME !!
       //break; //return 0; 
       return (S9xGetEnvelopeHeight (reg >> 4)) & 0xff;
+#endif
 
     case APU_ENDX:
 	APU.DSP [APU_ENDX] = 0;

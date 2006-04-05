@@ -197,7 +197,8 @@ long EchoBuffer [SOUND_BUFFER_SIZE] = {0};
 long MixBuffer [SOUND_BUFFER_SIZE] = {0};
 int FilterTaps [8] = {0};
 short Z = 0;
-short Loop [16] = {0};
+//short Loop [16] = {0};
+short Loop[2][SOUND_BUFFER_SIZE+8];
 #endif
 
 // uint16 SignExtend [2] = {

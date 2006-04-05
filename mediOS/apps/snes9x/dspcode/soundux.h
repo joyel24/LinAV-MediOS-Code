@@ -112,9 +112,7 @@ typedef struct {
     unsigned long sustain_rate;
     unsigned long release_rate;
     unsigned long sustain_level;
-    signed short sample;
-    signed short decoded [16];
-    signed short previous [2];
+    signed short decoded [16+3];
     signed short *block;
     uint16 sample_number;
     short last_block;
@@ -124,8 +122,7 @@ typedef struct {
     long *echo_buf_ptr;
     int mode;
     int32 envxx;
-    signed short next_sample;
-    int32 interpolate;
+    //int32 interpolate;
     short latch_noise;
 } Channel;
 

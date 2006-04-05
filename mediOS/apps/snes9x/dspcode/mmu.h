@@ -9,6 +9,7 @@ u16 mmu_getbyte(u16 addr);
 u16 * mmu_getbyteptr(u16 addr);
 void mmu_getbytes(u16 addr, int size, short * buffer);
 void mmu_setbyte(u16 addr, u16 value);
+void mmu_setbytes(u16 addr, int size, const short * buffer);
 
 void queue_dsp(u16 value);
 
