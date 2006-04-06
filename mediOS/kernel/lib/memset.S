@@ -60,7 +60,8 @@ memset:
 	stmgeia	r0!, {r1, r3, ip, lr}
 	stmgeia	r0!, {r1, r3, ip, lr}
 	bgt	2b
-	ldmeqfd sp!, {pc}	@ Now <64 bytes to go.
+	beq	6f			@ VP
+;; 	ldmeqfd sp!, {pc}		@ Now <64 bytes to go.
 /*
  * No need to correct the count; we're only testing bits from now on
  */
@@ -86,3 +87,7 @@ memset:
 	strneb	r1, [r0], #1
 	bx	lr
 ;; 	mov pc, lr
+
+	@ VP fix for thumb interworking, maybe not optimal
+6:	ldr	lr, [sp], #4
+	bx	lr
