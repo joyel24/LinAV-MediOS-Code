@@ -406,7 +406,9 @@ int med_loadParam(int argc,char**argv)
     run_med = (int (*)(int ,char**))entry;
     
     printk("calling app (entry %x)\n", run_med);      
-    DEBUG_MED("calling app (entry %x)\n", run_med);      
+    DEBUG_MED("calling app (entry %x)\n", run_med); 
+             
+    do_bkpt();
     
     ret_val=run_med(argc,argv);
     

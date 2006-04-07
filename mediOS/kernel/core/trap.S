@@ -46,11 +46,11 @@ trap_swi:
    ldr r5, __trap_swi_ptr
    mov lr, pc
    bx  r5
-;;    mov pc, r5
+ @   mov pc, r5
    @bl kcswi_handler
    ldmia sp!, {r5, lr}
-   bx  r5
-;;   mov pc, r5       @// return to user code...
+@   bx  r5
+   mov pc, r5       @// return to user code...
 
 
 @--------------------------------------------------------------
@@ -114,7 +114,7 @@ trap_irq:
     @ now branch to the relevent MODE handling routine
     @
     mrs    r13, spsr            @ switch to correct mode
-    bic    r13, r13, #0x3f      @ preserve F bits (VP do not preserve T bit !)
+    bic    r13, r13, #0x3f      @ preserve F bits (VP do not preserve T bit ! => 3F)
     orr    r13, r13, #0x13      @ 0x1F for SYS_32,   0x13 for SVC_32
     orr    r13, r13, #0x80
     msr    spsr_c, r13          @ switch to correct mode
