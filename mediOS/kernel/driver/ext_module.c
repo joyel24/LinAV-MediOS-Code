@@ -1,7 +1,7 @@
 /* 
-*   kernel/ext_module.c
+*   kernel/driver/ext_module.c
 *
-*   AMOS project
+*   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.

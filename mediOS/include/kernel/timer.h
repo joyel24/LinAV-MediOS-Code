@@ -1,7 +1,7 @@
 /*
-*   include/timer.h
+*   include/kernel/timer.h
 *
-*   AMOS project
+*   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 */

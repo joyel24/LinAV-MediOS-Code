@@ -1,7 +1,7 @@
 /* 
 *   kernel/lib/strchr.S
 *
-*   AMOS project
+*   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 *   Code from uClinux
