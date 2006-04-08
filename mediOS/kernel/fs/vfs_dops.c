@@ -122,7 +122,7 @@ struct dirent * readdir(DIR * fd)
 {
     struct dirent * entry;
     
-    if(!fd->opened)
+    if(!fd->opened || !fd->children)
         return NULL;   
              
     entry= &fd->theent;  

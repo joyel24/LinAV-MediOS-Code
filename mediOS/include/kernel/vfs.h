@@ -15,7 +15,7 @@
 #define __VFS_H
 
 
-#define DEBUG_VFS
+//#define DEBUG_VFS
 
 #ifdef DEBUG_VFS
 #define VFS_PRINT(s...)   printk(s)
