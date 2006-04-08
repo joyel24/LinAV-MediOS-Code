@@ -21,4 +21,8 @@ typedef int MED_RET_T;
 #define MED_EINVAL           8 /* bad arg error */
 #define MED_EBADDATA         9 /* bad data */
 #define MED_EMOBJ           10 /* No more obj available */
+#define MED_ENOTFOUND       11 /* object not found */
+#define MED_ENOTDIR         12 /* Dir does not exist */
+#define MED_ECACHE          13 /* Error during cache access */
+
 #endif

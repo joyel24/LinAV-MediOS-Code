@@ -24,10 +24,9 @@
 #include <kernel/disk.h>
 #include <kernel/timer.h>
 #include <kernel/fat.h>
-#include <kernel/file.h>
-#include <kernel/dir.h>
 #include <kernel/kernel.h>
 #include <kernel/bat_power.h>
+#include <kernel/vfs.h>
 
 
 /* Partition table entry layout:
@@ -60,26 +59,29 @@ extern int hd_sleep_state;
 
 void disk_init(void)
 {
-    int nb_mounted=0;
+    struct partition_info* pinfo;
     
     ata_init();
 
-    /* init   the file/dir struct */
-    init_file();
-    init_dir();
-    
     fat_init(); /* reset all mounted partitions */
     
-    nb_mounted+=disk_mount(HD_DRIVE);
-/*    if(cfIsConnected())
-        nb_mounted+=disk_mount(CF_DRIVE);
-*/
+    pinfo = disk_setup(HD_DRIVE);
     
-    printk("[init disk] %d disk mounted\n",nb_mounted);
+    if (pinfo == NULL)
+    {
+        printk("Error in disk setup\n");
+        return ;
+    }
+        
+    vfs_init(HD_DRIVE,pinfo[0].start);
+   
+    printk("[init disk] done\n");
 }
 
 int disk_mount(int drive)
 {
+#warning need mount for USB mode
+    #if 0
     struct partition_info* pinfo;
     int i;
     
@@ -96,16 +98,21 @@ int disk_mount(int drive)
     printk("No partition found, trying to mount sector 0.\n");
     if (!fat_mount(drive,drive, 0))
         return 1;
-
+    #endif
     return 0;
 }
 
 MED_RET_T disk_umount(int drive,bool flush)
 {
+#warning need unmount for USB mode
+    #if 0
+
     if(fileAreOpen())
         return -MED_ENBUSY;
     fat_unmount(drive,flush);
     return MED_OK;
+    #endif
+    return -MED_ENBUSY;
 }
 
 

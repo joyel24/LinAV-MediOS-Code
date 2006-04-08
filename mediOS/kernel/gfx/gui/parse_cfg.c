@@ -12,8 +12,7 @@
 
 #include <sys_def/string.h>
 
-#include <kernel/file.h>
-#include <kernel/dir.h>
+#include <kernel/stdfs.h>
 #include <kernel/kernel.h>
 
 

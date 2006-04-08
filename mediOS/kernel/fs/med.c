@@ -16,7 +16,7 @@
 
 #include <kernel/kernel.h>
 #include <kernel/io.h>
-#include <kernel/file.h>
+#include <kernel/stdfs.h>
 
 #include <kernel/malloc.h>
 

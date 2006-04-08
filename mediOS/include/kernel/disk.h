@@ -17,7 +17,6 @@
 #ifndef __DISK_H
 #define __DISK_H
 
-#include <kernel/errors.h>
 #include <sys_def/types.h>
 
 #define HD_DRIVE      0
@@ -46,7 +45,7 @@ struct hd_info_s {
 void disk_init(void);
 
 int disk_mount(int drive);
-MED_RET_T disk_umount(int drive,bool flush);
+int disk_umount(int drive,bool flush);
 
 struct partition_info * disk_setup(int drive);
 

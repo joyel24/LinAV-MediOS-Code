@@ -4,8 +4,7 @@ extern "C" {
 #include <sys_def/timer.h>
 #include <stdlib.h>
   //#include <stdio.h>
-#include <sys_def/file.h>
-#include <kernel/file.h>
+#include <kernel/stdfs.h>
 #include <kernel/buttons.h>
 #include <kernel/ata.h>
 

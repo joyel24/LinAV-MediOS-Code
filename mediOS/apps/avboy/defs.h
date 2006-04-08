@@ -22,8 +22,7 @@
 
 #ifdef BUILD_STDALONE
 #include <kernel/graphics.h>
-#include <kernel/file.h>
-#include <kernel/dir.h>
+#include <kernel/stdfs.h>
 #include <kernel/malloc.h>
 
 #include <kernel/buttons.h>

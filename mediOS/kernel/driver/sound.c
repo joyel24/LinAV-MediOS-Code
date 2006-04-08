@@ -306,7 +306,7 @@ void mixer_ctl(unsigned int cmd, int dir, void * arg)
 
 /********************* OSS init               ***************************/
 
-#include <kernel/file.h>
+#include <kernel/stdfs.h>
 
 void init_sound (void)
 {

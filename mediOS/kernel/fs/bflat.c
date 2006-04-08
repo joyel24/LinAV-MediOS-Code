@@ -14,7 +14,7 @@
 #include <sys_def/string.h>
 
 #include <kernel/kernel.h>
-#include <kernel/file.h>
+#include <kernel/stdfs.h>
 
 #include <kernel/malloc.h>
 

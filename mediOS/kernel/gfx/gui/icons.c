@@ -11,8 +11,7 @@
 */
 #include <kernel/kernel.h>
 #include <sys_def/string.h>
-#include <kernel/file.h>
-#include <kernel/dir.h>
+#include <kernel/stdfs.h>
 #include <kernel/malloc.h>
 #include <kernel/graphics.h>
 #include <gui/icons.h>

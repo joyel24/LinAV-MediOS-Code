@@ -13,7 +13,7 @@
 #ifndef __GUI_PARSE_CFG_H
 #define __GUI_PARSE_CFG_H
 
-#include <sys_def/file.h>
+#include <sys_def/stdfs.h>
 
 
 

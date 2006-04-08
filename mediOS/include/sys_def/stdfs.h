@@ -1,24 +1,30 @@
-/* 
-*   include/fat.h
+/*
+*   include/sys_def/stdfs.h
 *
-*   AMOS project
+*   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
 * See the file COPYING in the source tree root for full license agreement.
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
-*
-* Part of this code is from Rockbox project
-* Copyright (C) 2002 by Björn Stenberg
-*
 */
 
-#ifndef __SYS_DIR_H_
-#define __SYS_DIR_H_
+#ifndef __SYS_DEF_STDFS_H
+#define __SYS_DEF_STDFS_H
 
-#include <sys_def/types.h>
-#include <sys_def/file.h>
+#define MAX_PATH 260
+
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
+
+#define O_RDONLY 0
+#define O_WRONLY 1
+#define O_RDWR   2
+#define O_CREAT 4
+#define O_APPEND 8
+#define O_TRUNC  0x10
 
 #define ATTR_READ_ONLY   0x01
 #define ATTR_HIDDEN      0x02
@@ -28,25 +34,19 @@
 #define ATTR_ARCHIVE     0x20
 #define ATTR_VOLUME      0x40 /* this is a volume, not a real directory */
 
+typedef enum {
+    VFS_TYPE_FILE  = 0x1,
+    VFS_TYPE_DIR   = 0x2,
+} vfs_node_type;
+
 struct dirent {
-    unsigned char d_name[MAX_PATH];
+    unsigned char  * d_name;
+    int type;
     int attribute;
     int size;
-    int startcluster;
-    unsigned short wrtdate; /*  Last write date */ 
-    unsigned short wrttime; /*  Last write time */
+//    int storage_location;
 };
 
-#include <kernel/fat.h>
-
-typedef struct {
-    bool busy;
-    int startcluster;
-    struct fat_dir fatdir;
-    struct fat_dir parent_dir;
-    struct dirent theent;
-    int volumecounter; /* running counter for faked volume entries */
-} DIR;
-
+#include <kernel/vfs_node.h>
 
 #endif

@@ -5,8 +5,7 @@
 
 extern "C" {
 #include <sys_def/section_types.h>
-#include "sys_def/file.h"
-#include "kernel/file.h"
+#include "kernel/stdfs.h"
 
 #include "profile.h"
 //#include <stdio.h>

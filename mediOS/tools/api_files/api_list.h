@@ -60,28 +60,24 @@ long         # float_divsi3  # long a, long b
 long         # float_udivsi3 # long a, long b
 unsigned int # float_divdi3  # unsigned int a, unsigned int b
 
-#k_inc#kernel/file.h
-#api_inc#sys_def/types.h
+#k_inc#kernel/stdfs.h
+#api_inc#sys_def/stdfs.h
 int            # open      # const char* pathname, int flags
-int            # close     # int fd
-int            # fsync      # int fd
-ssize_t        # read      # int fd, void *buf, size_t count
-off_t          # lseek      # int fildes, off_t offset, int whence
-int            # creat     # const char *pathname, mode_t mode
-ssize_t        # write     # int fd, const void *buf, size_t count
-int            # remove    # const char* pathname
-int            # rename    # const char* path, const char* newname
-int            # truncate  # int fd, off_t length
-int            # filesize   # int fd
+int            # close     # int fdesc
+int            # fsync     # int fdesc
+int            # read      # int fdesc, void *buf, int count
+int            # lseek     # int fdesc, int offset, int whence
+int            # write     # int fdesc, const void *buf, int count
+int            # truncate  # int fdesc, int length
+int            # filesize  # int fdesc
+int            # ftell     # int fdesc
 
-#k_inc#kernel/dir.h
-#api_inc#sys_def/dir.h
+#k_inc#kernel/stdfs.h
+#api_inc#sys_def/stdfs.h
 DIR*           # opendir    # const char* name
 int            # closedir   # DIR* dir
-int            # mkdir      # const char* name, int mode
-int            # rmdir      # const char* name
 struct dirent* # readdir    # DIR* dir
-
+int            # mkdir      # const char *name, int mode
 #k_inc#kernel/graphics.h
 #api_inc#sys_def/graphics.h
 void   # gfx_openGraphics          # void

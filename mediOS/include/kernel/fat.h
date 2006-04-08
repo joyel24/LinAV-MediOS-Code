@@ -1,7 +1,7 @@
-/* 
-*   include/fat.h
+/*
+*   include/kernel/fat.h
 *
-*   AMOS project
+*   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -17,8 +17,11 @@
 #ifndef __FAT_H
 #define __FAT_H
 
-#include <sys_def/types.h>
-#include <kernel/ata.h> /* for volume definitions */
+#include <kernel/errors.h>
+#include <kernel/vfs_node.h>
+
+#define BLOCK_SIZE 512
+#define MAX_OPEN 10
 
 struct fat_direntry
 {
@@ -43,62 +46,58 @@ struct fat_direntry
 #define FAT_ATTR_ARCHIVE     0x20
 #define FAT_ATTR_VOLUME      0x40 /* this is a volume, not a real directory */
 
-struct fat_file
-{
-    int firstcluster;    /* first cluster in file */
-    int lastcluster;     /* cluster of last access */
-    int lastsector;      /* sector of last access */
-    int clusternum;      /* current clusternum */
-    int sectornum;       /* sector number in this cluster */
-    unsigned int direntry;   /* short dir entry index from start of dir */
-    unsigned int direntries; /* number of dir entries used by this file */
-    int dircluster;      /* first cluster of dir */
-    bool eof;
-    int volume;          /* file resides on which volume */
+struct fat_entry {
+/* entry counter for folders */
+    int entryN;
+    int entryCount;
+/* entry num in parent folder */
+    int dirEntryNum;
+/*nb entries needed in parent folder */
+    int nbDirEntries;
+/* folder / file data */    
+    struct bpb* fat_bpb;
+    unsigned int lastcluster;
+    unsigned int lastsector;
+    unsigned int clusternum;
+    unsigned int sectornum;
+    unsigned int firstcluster;
+
+    unsigned int size;
+    int attr;
+
+    struct fat_direntry dir_entry;
+    int eof;
+    struct file_cache * cache;
+    int cache_num;
 };
 
-struct fat_dir
-{
-    unsigned int entry;
-    unsigned int entrycount;
-    int sector;
-    struct fat_file file;
-    unsigned char sectorcache[3][SECTOR_SIZE];
+struct file_cache {
+    char data[BLOCK_SIZE];
+    int cacheOffset;
+    int used;
 };
 
+void fat_init(void);
 
-extern void fat_init(void);
-extern int fat_mount(int volume,int drive,int startsector);
-extern int fat_unmount(int volume, bool flush);
-extern void fat_size(int volume,unsigned int* size, unsigned int* free); // public for info
-extern void fat_recalc_free(int volume); // public for debug info screen
-extern int fat_create_dir(const char* name,
-                          struct fat_dir* newdir,
-                          struct fat_dir* dir);
-extern int fat_startsector(int volume); // public for config sector
-extern int fat_open(int volume,
-                    int cluster,
-                    struct fat_file* ent,
-                    const struct fat_dir* dir);
-extern int fat_create_file(const char* name,
-                           struct fat_file* ent,
-                           struct fat_dir* dir);
-extern int fat_readwrite(struct fat_file *ent, int sectorcount, 
-                         void* buf, bool write );
-extern int fat_closewrite(struct fat_file *ent, int size, int attr);
-extern int fat_seek(struct fat_file *ent, unsigned int sector );
-extern int fat_remove(struct fat_file *ent);
-extern int fat_truncate(const struct fat_file *ent);
-extern int fat_rename(struct fat_file* file, 
-                      struct fat_dir* dir,
-                      const unsigned char* newname,
-                      int size, int attr);
+/* device related */
+int fat_mount(int drive,unsigned int startsector,struct vfs_node ** mounted_root);
+int fat_unmount(int volume, int flush);
+MED_RET_T fat_freeDirEntries(struct vfs_node * opened_file);
+MED_RET_T fat_fileRemove(struct vfs_node * opened_file);
 
-extern int fat_opendir(int volume,
-                       struct fat_dir *ent, unsigned int currdir,
-                       const struct fat_dir *parent_dir);
-extern int fat_getnext(struct fat_dir *ent, struct fat_direntry *entry);
-extern int fat_get_cluster_size(int volume);
-extern bool fat_ismounted(int volume);
+/*vfs related */
+MED_RET_T fat_loadDir(struct vfs_node * parent_node);
 
+/* file related*/
+MED_RET_T    fat_fileTruncate(struct vfs_node * opened_file, unsigned int size);
+MED_RET_T    fat_fileSeek(struct vfs_node * opened_file,unsigned int pos);
+MED_RET_T    fat_fileFlushCache(struct vfs_node * opened_file);
+MED_RET_T    fat_fileOpen(struct vfs_node * opened_file);
+MED_RET_T    fat_fileClose(struct vfs_node * opened_file);
+MED_RET_T    fat_fileSync(struct vfs_node * opened_file);
+MED_RET_T    fat_createFile(const char* name,struct vfs_node* file,struct vfs_node* dir);
+unsigned int fat_fileSize(struct vfs_node * opened_file);
+int fat_fileWrite(struct vfs_node * opened_file, void* buf, unsigned int count);
+int fat_fileRead(struct vfs_node * opened_file, void* buf, unsigned int count);
+int fat_attribute(struct vfs_node * opened_file);
 #endif
