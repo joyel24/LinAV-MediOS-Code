@@ -52,6 +52,9 @@
 
 #include <gui/gui.h>
 
+#include <kernel/stdfs.h>
+#include <kernel/vfs.h>
+
 void print_boot_info(void)
 {
     printk("SP: %08x\n",get_sp());
@@ -61,7 +64,42 @@ void print_boot_info(void)
 
 void tst_fct(void)
 {
-
+    /*int fd,fd2;
+    fd=open("/avlo.cfg",O_RDONLY);
+    if(fd<0)
+    {
+        printk("error opening avlo.cfg\n");
+        return;
+    }
+    vfs_nodePrintOpenList();
+    if(vfs_hasOpenNode())
+        printk("Has open files\n");
+    else
+            printk("no open file\n");
+    fd2=open("/menu.cfg",O_RDONLY);
+    if(fd2<0)
+    {
+        printk("error opening menu.cfg\n");
+        return;
+    } 
+    vfs_nodePrintOpenList();
+    if(vfs_hasOpenNode())
+        printk("Has open files\n");
+    else
+            printk("no open file\n");   
+    close(fd);
+    vfs_nodePrintOpenList();
+    if(vfs_hasOpenNode())
+        printk("Has open files\n");
+    else
+        printk("no open file\n");
+    close(fd2);
+    vfs_nodePrintOpenList();
+    if(vfs_hasOpenNode())
+        printk("Has open files\n");
+    else
+        printk("no open file\n");    
+            */
 }
 
 void kernel_start (void)

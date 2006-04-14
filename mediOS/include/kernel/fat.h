@@ -54,7 +54,7 @@ struct fat_entry {
     int dirEntryNum;
 /*nb entries needed in parent folder */
     int nbDirEntries;
-/* folder / file data */    
+/* folder / file data */
     struct bpb* fat_bpb;
     unsigned int lastcluster;
     unsigned int lastsector;
@@ -80,8 +80,8 @@ struct file_cache {
 void fat_init(void);
 
 /* device related */
-int fat_mount(int drive,unsigned int startsector,struct vfs_node ** mounted_root);
-int fat_unmount(int volume, int flush);
+MED_RET_T fat_mount(int drive,unsigned int startsector,struct vfs_node ** mounted_root);
+MED_RET_T fat_unmount(struct vfs_node * root, int flush);
 MED_RET_T fat_freeDirEntries(struct vfs_node * opened_file);
 MED_RET_T fat_fileRemove(struct vfs_node * opened_file);
 

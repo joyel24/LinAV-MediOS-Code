@@ -100,9 +100,9 @@ void mainMenu_doOn(void * data)
 void mainMenu_doAction(void * data)
 {
     struct cfg_menu * cfg_data = (struct cfg_menu *)data;
-    
+
     printk("type= %d\n",cfg_data->type);
-    
+
     if(cfg_data->type==TYPE_INTERNAL)
     {
         printk("launching int app: %s\n",cfg_data->link);
@@ -113,22 +113,22 @@ void mainMenu_doAction(void * data)
         }
         if(!browseData)
             return;
-            
+
         browser_browse(browseData,NULL,NULL);
-        
+
         evt_purgeHandler(evt_hand);
-        mainMenu_start(); 
+        mainMenu_start();
     }
     else
     {
-        printk("launching ext app: %s\n",cfg_data->link);        
+        printk("launching ext app: %s\n",cfg_data->link);
         med_load(cfg_data->link);
         gfx_openGraphics();
         evt_purgeHandler(evt_hand);
-        mainMenu_start();        
+        mainMenu_start();
     }
-    
-    
+
+
 }
 
 void mainMenu_doF1(void * data)
@@ -148,7 +148,7 @@ void mainMenu_doF3(void * data) // switch to usb
     int h,w;
     int evt;
     char * msg1 = "In USB mode (F3 to exit)";
-    
+
     if(usbMode)
     {
         // in usb mode => disable usb
@@ -157,15 +157,15 @@ void mainMenu_doF3(void * data) // switch to usb
     }
     else
     {
-        // not in usb mode => enable usb if cable present        
+        // not in usb mode => enable usb if cable present
         if(usb_isConnected() || FW_isConnected())
-        {    
+        {
             if(disk_umount(HD_DRIVE,1)!=MED_OK)
             {
                 printk("File still open, can't umount\n");
                 return;
             }
-            gfx_clearScreen(COLOR_WHITE);    
+            gfx_clearScreen(COLOR_WHITE);
             gfx_fontSet(STD8X13);
             gfx_getStringSize(msg1,&w,&h);
             gfx_putS(COLOR_RED,COLOR_WHITE,(SCREEN_WIDTH-w)/2,(SCREEN_HEIGHT-h)/2,msg1);
@@ -184,8 +184,9 @@ void mainMenu_doF3(void * data) // switch to usb
             usbMode=0;
             //mdelay(5);
             disk_init();
+#warning we should also reload menu.cfg or other menu related files
             evt_purgeHandler(evt_hand);
-            mainMenu_start();        
+            mainMenu_start();
         }
         else
         {
@@ -219,7 +220,7 @@ BITMAP * mainMenu_mkSubIcon(void * data)
         return &sub_icon->bmap_data;
     else
         return &back_icon->bmap_data;
-    
+
 }
 
 BITMAP * mainMenu_mkItemIcon(void * data)
@@ -240,13 +241,13 @@ void mainMenu_start(void)
 void mainMenu_loop(void)
 {
     int evt;
-    
+
     if(evt_hand<0)
     {
         printk("Bad evt Handler\n");
         return;
     }
-        
+
     while(1)
     {
         if((evt=evt_getStatus(evt_hand))<0)
@@ -259,11 +260,11 @@ void mainMenu_loop(void)
 int mainMenu_ini(void)
 {
     int h,w;
-    
+
     usbMode = 0;
-    
+
     gfx_clearScreen(COLOR_BLACK);
-    
+
     gfx_putS(COLOR_WHITE,COLOR_BLACK,5,110,"[ini_menu] reading menu file");
     rootMenu = NULL;
     if(mainMenu_load(MENU_FILE_NAME)<0)
@@ -271,33 +272,33 @@ int mainMenu_ini(void)
         gfx_putS(COLOR_RED,COLOR_BLACK,5,120,"[ini_menu] Error reading menu => stoping");
         return 0;
     }
-    
+
     gfx_getStringSize("M", &w, &h);
     menu_cfg.root=rootMenu;
     menu_cfg.dx=5;
     menu_cfg.dy=h+11;
 
     printk("[ini_menu] menu loaded\n");
-    
+
     gfx_putS(COLOR_WHITE,COLOR_BLACK,5,120,"[ini_menu] reading icons");
-       
+
     /* loading icons */
     sub_icon=loadIcon("sub_icon.ico");
     back_icon=loadIcon("back_icon.ico");
     plugin_icon=loadIcon("plugin_icon.ico");
-    
+
     if((evt_hand=evt_getHandler(ALL_CLASS))<0)
     {
         printk("Can't get evt handler (error:%d)\n",-evt_hand);
-        evt_hand=-1;        
+        evt_hand=-1;
     }
-    
+
     browseData=browser_NewBrowse();
-    
+
     browseData->mode=MODE_NOSELECT;
-    
+
     gfx_putS(COLOR_WHITE,COLOR_BLACK,5,120,"[ini_menu] finished");
-        
+
     return 1;
 }
 
@@ -343,7 +344,7 @@ struct menu_item * mainMenu_findParent(struct menu_item * ptr, char * name)
         ptr=ptr->nxt;
     }
     return NULL;
-    
+
 }
 
 int mainMenu_insertItem(struct menu_item * item)
@@ -353,7 +354,7 @@ int mainMenu_insertItem(struct menu_item * item)
     cfg_data=(struct cfg_menu *)item->data;
     if(rootMenu==NULL)
     {
-        if(cfg_data->parent[0] != 0) 
+        if(cfg_data->parent[0] != 0)
         {
             printk("no sub defined and data is not in root => error\n");
             return -1; // no sub defined and data is not in root => error
@@ -443,7 +444,7 @@ int mainMenu_parse(struct cfg_menu ** cfg,char * filename)
             {
                 strcpy(current_item->parent,value);
             }
-    
+
         }
         else if(!strcmp(item,"link"))
         {
@@ -506,9 +507,9 @@ int mainMenu_doAddBackEntry(char * name,struct menu_item * up,struct menu_item *
         struct menu_item * ptr;
         struct menu_item * start=cur;
         struct cfg_menu * data;
-        
+
         if(up && name)
-        {  
+        {
             data=(struct cfg_menu *) malloc(sizeof(struct cfg_menu));
             if(!data)
             {
@@ -527,7 +528,7 @@ int mainMenu_doAddBackEntry(char * name,struct menu_item * up,struct menu_item *
                 sprintf(data->name,"%s",name);
             data->type=TYPE_BACK;
             if(cur)
-                cur->prev=ptr;            
+                cur->prev=ptr;
             ptr->nxt=cur;
             cur->up->sub=ptr;
             ptr->up=cur->up;
@@ -536,7 +537,7 @@ int mainMenu_doAddBackEntry(char * name,struct menu_item * up,struct menu_item *
             else
                 ptr->sub=rootMenu;
     }
-    
+
     for(ptr=start;ptr!=NULL;ptr=ptr->nxt)
     {
         if(!mainMenu_doAddBackEntry(((struct cfg_menu *)ptr->data)->name,ptr,ptr->sub))
@@ -580,7 +581,7 @@ int mainMenu_load(char * filename)
         }
         data=data->nxt;
     }
-    
+
     mainMenu_doAddBackEntry(NULL,NULL,rootMenu);
     return 0;
 }

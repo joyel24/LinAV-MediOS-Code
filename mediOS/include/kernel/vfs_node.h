@@ -37,7 +37,7 @@ typedef struct vfs_node DIR;
 
 struct vfs_node {
     /* fs instance of the node */
-    
+
     /* node location on the disk */
     unsigned int storage_location;
     /* name of the file in the vfs structure */
@@ -45,23 +45,23 @@ struct vfs_node {
 
     /* type of the node: file / dir */
     vfs_node_type type;
-    
+
     /* number of ref on the node */
     int ref_cnt;
     int dir_loaded;
-    
+
     /* file/dir opened*/
     int dirty;
     int opened;
-    
+
     /* file specific */
     unsigned int position;
     int flags;
-    
+
     /* dir specific */
     struct vfs_node * curNode;
     struct dirent theent;
-    
+
     /*can be used by the fs */
     void * custom_data;
 
@@ -70,6 +70,8 @@ struct vfs_node {
 
     /* dirty node of the fs linkage */
     struct vfs_node *prev_dirty,*next_dirty;
+    /* open node of the fs linkage */
+    struct vfs_node *prev_open,*next_open;
 };
 
 void vfs_nodePrintTree(struct vfs_node *node,int level);
@@ -81,10 +83,12 @@ MED_RET_T vfs_nodeLookup(struct  vfs_pathname * path,
                     struct vfs_node * start_node,
                     struct vfs_node ** result_node,
                     struct  vfs_pathname * result_remaining_path);
-                    
+
 MED_RET_T vfs_nodeUnRef(struct vfs_node * node);
 MED_RET_T vfs_nodeRef(struct vfs_node * node);
 MED_RET_T vfs_rmNodeFromTree(struct vfs_node * node);
 MED_RET_T vfs_nodeSetDirty(struct vfs_node * node);
 MED_RET_T vfs_nodeClearDirty(struct vfs_node * node);
+
+
 #endif

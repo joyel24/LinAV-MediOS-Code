@@ -14,14 +14,17 @@
 *
 */
 #include <sys_def/string.h>
-#include <kernel/stdfs.h>
 
 #include <kernel/kernel.h>
+#include <kernel/stdfs.h>
+#include <kernel/list.h>
 
 #include <kernel/fat.h>
 #include <kernel/vfs_node.h>
 
+
 extern struct vfs_node * root_node;
+extern struct vfs_node * opened_node;
 
 DIR * opendir(char * pathname)
 {
@@ -100,6 +103,8 @@ DIR * opendir(char * pathname)
     fd->opened = 1;
     vfs_nodeRef(fd);
 
+    LIST_ADD_TAIL_NAMED(opened_node,fd,prev_open,next_open);
+    
     return fd;
 }
 
@@ -115,6 +120,8 @@ MED_RET_T closedir(DIR * fd)
 
     fd->opened = 0;
     vfs_nodeUnRef(fd);
+    LIST_DELETE_NAMED(opened_node,fd,prev_open,next_open);
+    
     return MED_OK;
 }
 

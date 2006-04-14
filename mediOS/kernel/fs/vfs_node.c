@@ -24,12 +24,15 @@
 
 extern struct vfs_node * root_node;
 
+extern struct vfs_node * dirty_list;
+extern struct vfs_node * opened_node;
+
 void vfs_nodePrintTree(struct vfs_node *node,int level)
 {
     struct vfs_node * ptr;
-    
+
     struct fat_entry * ptr_fat;
-    
+
     int nb_children;
     LIST_FOREACH_NAMED(node->children,ptr,nb_children,
                 siblings_prev,siblings_next)
@@ -44,7 +47,7 @@ void vfs_nodePrintTree(struct vfs_node *node,int level)
         }
 
         ptr_fat=(struct fat_entry *)ptr->custom_data;
-        
+
         printk("   (%d-%d)\n",ptr->ref_cnt,ptr_fat->dirEntryNum);
 
         if(ptr->type==VFS_TYPE_DIR)
@@ -102,7 +105,7 @@ MED_RET_T vfs_nodeLookup(struct  vfs_pathname * path,
     *result_node = NULL;
     memcpy(result_remaining_path,path,sizeof(*path));
     current_node = start_node;
-    
+
     while(1)
     {
         struct  vfs_pathname current_component,remaining_path;
@@ -241,7 +244,7 @@ MED_RET_T vfs_rmNodeFromTree(struct vfs_node * node)
         printk("Error: can't delete node: %s\n",node->name.str);
         return -MED_EINVAL;
     }
-    
+
     if(node->parent)
     {
         struct vfs_node * parent = node->parent;
@@ -259,25 +262,23 @@ MED_RET_T vfs_rmNodeFromTree(struct vfs_node * node)
 
 MED_RET_T vfs_nodeSetDirty(struct vfs_node * node)
 {
-#warning node setDirty should add the node to dirty list
+    if(node->dirty)
+        return MED_OK;
     node->dirty=1;
+    LIST_ADD_TAIL_NAMED(dirty_list,node,prev_dirty,next_dirty);
     return MED_OK;
 }
 
 MED_RET_T vfs_nodeClearDirty(struct vfs_node * node)
 {
-#warning node setDirty should remove the node to dirty list
+    if(!node->dirty)
+        return MED_OK;
     node->dirty=0;
+    LIST_DELETE_NAMED(dirty_list,node,prev_dirty,next_dirty);
     return MED_OK;
 }
 
 #if 0
-MED_RET_T vfs_nodeSetDirty(struct vfs_node * node)
-{
-#warning node setDirty to be done, do wa need a force flag on function and a global one ?
-    return MED_OK;
-}
-
 
 
 

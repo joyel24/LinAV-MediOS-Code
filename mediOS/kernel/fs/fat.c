@@ -33,6 +33,9 @@
 struct file_cache cache_list[MAX_OPEN];
 unsigned char readdir_buf [3][SECTOR_SIZE];
 
+extern char fat_cache_sectors[FAT_CACHE_SIZE][SECTOR_SIZE];
+extern struct fat_cache_entry fat_cache[FAT_CACHE_SIZE];
+
 int fat_mount(int drive,unsigned int startsector,struct vfs_node ** mounted_root)
 {
     MED_RET_T ret_val;
@@ -94,21 +97,21 @@ alloc_bpb_err:
     return ret_val;
 }
 
-int fat_unmount(int volume, int flush)
+MED_RET_T fat_unmount(struct vfs_node * root, int flush)
 {
-#warning need unmount
-    #if 0
-    int rc;
-    struct bpb* fat_bpb = &fat_bpbs[volume];
+
+    MED_RET_T ret_val;
+    struct fat_entry * root_entry = (struct fat_entry *)root->custom_data;
+    struct bpb* fat_bpb = root_entry->fat_bpb;
+
 
     if(flush)
     {
-        rc = flush_fat(fat_bpb); /* the clean way, while still alive */
+        ret_val = fat_flushFat(fat_bpb); /* the clean way, while still alive */
     }
     else
     {   /* volume is not accessible any more, e.g. MMC removed */
         int i;
-        //mutex_lock(&cache_mutex);
         for(i = 0;i < FAT_CACHE_SIZE;i++)
         {
             struct fat_cache_entry *fce = &fat_cache[i];
@@ -118,13 +121,10 @@ int fat_unmount(int volume, int flush)
                 fce->dirty = false;
             }
         }
-        //mutex_unlock(&cache_mutex);
-        rc = 0;
+
+        ret_val = MED_OK;
     }
-    fat_bpb->mounted = false;
-    return rc;
-    #endif
-    return 1;
+    return ret_val;
 }
 
 int fat_writeLongName(struct fat_entry * file,unsigned int firstentry,unsigned int numentries,
@@ -750,7 +750,7 @@ MED_RET_T fat_readdir(struct fat_entry * dir,struct fat_direntry * entry)
     int sectoridx=0;
 
     dir->entryCount=0;
-    
+
     while(!done)
     {
         if ( !(dir->entryN % DIR_ENTRIES_PER_SECTOR) )
@@ -800,7 +800,7 @@ MED_RET_T fat_readdir(struct fat_entry * dir,struct fat_direntry * entry)
             }
 
             dir->entryCount++;
-            
+
             /* longname entry? */
             if ( ( buf[entrypos + FATDIR_ATTR] &
                    FAT_ATTR_LONG_NAME_MASK ) == FAT_ATTR_LONG_NAME )
@@ -994,7 +994,7 @@ MED_RET_T fat_fileSeek(struct vfs_node * opened_file,unsigned int pos)
     sectoroffset = pos % SECTOR_SIZE;
     VFS_PRINT("[fat_fileSeek] dest=%x old_pos=%x - dest_sect=%x old_sect=%x - sect_off %x (sect_size=%x)\n",
         pos,opened_file->position,newsector,oldsector,sectoroffset,SECTOR_SIZE);
-    
+
     if ((newsector != oldsector) || ((entry->cache->cacheOffset==-1) && sectoroffset))
     {
         if(newsector != oldsector)
@@ -1075,11 +1075,11 @@ MED_RET_T fat_fileOpen(struct vfs_node * opened_file)
         entry->cache=&cache_list[i];
         entry->cache_num=i;
         cache_list[i].used=1;
-        entry->cache->cacheOffset=-1;     
-        
+        entry->cache->cacheOffset=-1;
+
         entry->firstcluster=entry->lastcluster=opened_file->storage_location ;
         entry->lastsector = entry->clusternum = entry->sectornum = entry->eof = 0;
-           
+
     }
     else
         VFS_PRINT("Openning a dir -> nothing to do\n");
@@ -1151,7 +1151,7 @@ int fat_fileReadWrite(struct vfs_node * opened_file, void* buf, int count, bool 
             entry->cache->cacheOffset += count;
             if(entry->cache->cacheOffset >= SECTOR_SIZE)
                 entry->cache->cacheOffset = -1;
-            
+
         }
         else
         {
@@ -1304,7 +1304,7 @@ MED_RET_T fat_freeDirEntries(struct vfs_node * opened_file)
     MED_RET_T ret_val;
 
     VFS_PRINT("[free_direntries] start\n");
-    
+
     /* create a temporary file handle for the dir holding this file */
     ret_val = fat_seek( dirEnt, sector );
     if (ret_val != MED_OK)

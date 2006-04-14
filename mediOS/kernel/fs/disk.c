@@ -52,7 +52,7 @@ static struct partition_info part[8]; /* space for 4 partitions on 2 drives */
 static struct hd_info_s disk_info[2];
 
 char * fatStr[]={"zero", "FAT12", "FAT16<32MB", "ExtMSDOS", "FAT16>32MB", "FAT32<2048GB", "FAT32-LBA",
-					"FAT16>32MB-LBA", "ExtMSDOS-LBA"};
+                    "FAT16>32MB-LBA", "ExtMSDOS-LBA"};
 int fatId[]={0x00, 0x01, 0x04, 0x05, 0x06, 0x0B, 0x0C, 0x0E, 0x0F};
 
 extern int hd_sleep_state;
@@ -60,59 +60,51 @@ extern int hd_sleep_state;
 void disk_init(void)
 {
     struct partition_info* pinfo;
-    
+
     ata_init();
 
     fat_init(); /* reset all mounted partitions */
-    
+
     pinfo = disk_setup(HD_DRIVE);
-    
+
     if (pinfo == NULL)
     {
         printk("Error in disk setup\n");
         return ;
     }
-        
+
     vfs_init(HD_DRIVE,pinfo[0].start);
-   
+
+    if(disk_mount(HD_DRIVE)!=MED_OK)
+        printk("Error doing disk init\n");
+
     printk("[init disk] done\n");
 }
 
-int disk_mount(int drive)
+MED_RET_T disk_mount(int drive)
 {
-#warning need mount for USB mode
-    #if 0
     struct partition_info* pinfo;
-    int i;
-    
+
     pinfo = disk_setup(drive);
     if (pinfo == NULL)
-        return 0;
-    
-    for (i=0; i<4; i++)
     {
-        if (!fat_mount(drive,drive,pinfo[i].start))
-            return 1;
+        printk("Error in disk setup\n");
+        return -MED_EIO;
     }
-    
-    printk("No partition found, trying to mount sector 0.\n");
-    if (!fat_mount(drive,drive, 0))
-        return 1;
-    #endif
-    return 0;
+
+    vfs_init(drive,pinfo[0].start);
+    return MED_OK;
 }
 
 MED_RET_T disk_umount(int drive,bool flush)
 {
-#warning need unmount for USB mode
-    #if 0
-
-    if(fileAreOpen())
+    if(vfs_hasOpenNode())
+    {
+        printk("Can't umount => there is opened files\n");
         return -MED_ENBUSY;
-    fat_unmount(drive,flush);
+    }
+    vfs_Destructor();
     return MED_OK;
-    #endif
-    return -MED_ENBUSY;
 }
 
 
@@ -120,25 +112,25 @@ struct partition_info * disk_setup(int drive)
 {
     int i,j;
     unsigned char * sector=(unsigned char *)malloc(sizeof(unsigned char)*SECTOR_SIZE);
-    /* For each drive, start at a different position, in order not to destroy 
-       the first entry of drive 0. 
+    /* For each drive, start at a different position, in order not to destroy
+       the first entry of drive 0.
        That one is needed to calculate config sector position. */
     struct partition_info* pinfo = &part[drive*4];
     if ((int)drive >= sizeof(part)/sizeof(*part)/4)
         return NULL; /* out of space in table */
-    
+
     if(!sector)
         return NULL;
     /* identify disk */
     disk_identify(drive,&disk_info[drive]);
     printk("[init IDE-CF] reading drive %d\n     %s\n     %s|%s\n     %d sectors per ata request\n",
                 drive,disk_info[drive].model,
-                disk_info[drive].firmware,disk_info[drive].serial,disk_info[drive].multi_sector); 
-                   
+                disk_info[drive].firmware,disk_info[drive].serial,disk_info[drive].multi_sector);
+
     /* Read MBR */
     if(ata_rwData(drive,0,sector,1,ATA_DO_READ,ATA_WITH_DMA)<0) /* read 1 sector at LBA 0 */
         return NULL;
-    
+
     /* check that the boot sector is initialized */
     if ( (sector[510] != 0x55) ||
          (sector[511] != 0xaa)) {
@@ -160,11 +152,11 @@ struct partition_info * disk_setup(int drive)
                 strcpy(pinfo[i].strType,fatStr[j]);
         else
                 printk("Error: partition type not supported: %x\n",pinfo[i].type);
-               
+
         printk("Part%d: start=%08x, size=%08x, type:%s (%02x)\n",i,
                 pinfo[i].start,pinfo[i].size,
                 pinfo[i].strType,pinfo[i].type);
-                
+
         /* extended? */
         if ( pinfo[i].type == 5 ) {
             /* not handled yet */
@@ -176,10 +168,10 @@ struct partition_info * disk_setup(int drive)
 
 void disk_identify(int drive, struct hd_info_s * hd_info)
 {
-    unsigned char * buffer=(unsigned char *)malloc(sizeof(unsigned char)*SECTOR_SIZE);    
-    
+    unsigned char * buffer=(unsigned char *)malloc(sizeof(unsigned char)*SECTOR_SIZE);
+
     if(buffer && !ata_rwData(drive,0,buffer,1,ATA_DO_IDENT,ATA_WITH_DMA))
-    {    
+    {
         strncpy(hd_info->serial, &buffer[20], 20);
         dd_swapChar(hd_info->serial,20);
         dd_findEnd(hd_info->serial,20);
@@ -199,12 +191,12 @@ void disk_identify(int drive, struct hd_info_s * hd_info)
         hd_info->size=0;
     }
     free(buffer);
-}  
+}
 
 /* !!!!! ata_stopHD should use the correct mode => ATA_FORCE_STOP or ATA_DELAY_STOP
 void disk_haltHD(void)
 {
-    disk_umount(HD_DRIVE,FLUSH); 
+    disk_umount(HD_DRIVE,FLUSH);
     hd_sleep_state=1;
     ata_stopHD();
 }
@@ -214,7 +206,7 @@ void disk_printPartInfo(struct partition_info * partition_list)
 {
     int i;
     for(i=0;i<4;i++)
-	printk("Partition %d: start=%x, size=%x, type:%s (%x)\n",i,
+    printk("Partition %d: start=%x, size=%x, type:%s (%x)\n",i,
                 partition_list[i].start,partition_list[i].size,
                 partition_list[i].strType,partition_list[i].type);
 }
@@ -245,7 +237,7 @@ void dd_findEnd(char * txt,int size)
             txt[j-i]=0;
             break;
          }
-         txt[j-i]=txt[j];    
+         txt[j-i]=txt[j];
     }
     if(txt[j-i]!=0)
         txt[j-i]=0;

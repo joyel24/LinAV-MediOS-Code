@@ -23,7 +23,15 @@
 #define VFS_PRINT(s...)
 #endif
 
+struct vfs_node;
+
 MED_RET_T vfs_init(int device,unsigned int startsector);
 void vfs_rootPrint(void);
+
+MED_RET_T vfs_Destructor(void);
+MED_RET_T vfs_clearNodeTree(struct vfs_node * root);
+
+void vfs_PrintOpenList(void);
+int vfs_hasOpenNode(void);
 
 #endif
