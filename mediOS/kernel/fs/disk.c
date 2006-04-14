@@ -65,16 +65,6 @@ void disk_init(void)
 
     fat_init(); /* reset all mounted partitions */
 
-    pinfo = disk_setup(HD_DRIVE);
-
-    if (pinfo == NULL)
-    {
-        printk("Error in disk setup\n");
-        return ;
-    }
-
-    vfs_init(HD_DRIVE,pinfo[0].start);
-
     if(disk_mount(HD_DRIVE)!=MED_OK)
         printk("Error doing disk init\n");
 
