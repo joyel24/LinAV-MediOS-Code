@@ -42,7 +42,7 @@
 
 //#define HAS_VID0
 #define HAS_LCD
-#define HAS_UART_XWIN
+//#define HAS_UART_XWIN
 
 /************************************************************ initial state */
 
@@ -139,6 +139,10 @@
 
 #define GPIO_I2C_SDA  0x08
 #define GPIO_I2C_SCL  0x09
+
+#define GPIO_LCD                 0xff
+#define GPIO_VID_OUT_UART1_RX    0xff
+#define GPIO_SPDIF_UART1_TX      0xff
 
 /********************** I2C     ****************************************/
 
