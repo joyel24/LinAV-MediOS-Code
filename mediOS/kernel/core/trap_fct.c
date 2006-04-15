@@ -12,7 +12,7 @@
 
 #include <kernel/kernel.h>
 
-char trap_stack[256];
+char trap_stack[1024];
 
 void do_trap_undef(void)
 {

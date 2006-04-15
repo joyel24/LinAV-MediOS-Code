@@ -122,18 +122,34 @@ static void con_drawScroll(int start,int end,int delta){
 void con_screenUpdate(){
   int pos;
   int prevPos;
+  int topPos;
+  int prevTopPos;
   int y;
 
   if (!con_screenVisible) return;
 
   if(con_screenEnd!=con_lastUpdateScreenEnd){ // need update?
-    y=con_lastUpdateEndY;
     pos=con_lastUpdateScreenEnd;
 
     if(con_screenEnd>con_lastUpdateScreenEnd){ // moved up or down?
+      // find the buffer position corresponding to the screen top after the scroll
+      y=con_lastUpdateEndY;
+      topPos=con_screenEnd;
+      do{
+        prevTopPos=topPos;
+        topPos=con_nextLineEnd(topPos,true);
+        y-=CON_FONT->height;
+      }while(y>=0 && topPos<prevTopPos);
+
+      // if there's more than 1 screen to scroll, just scroll enough to redraw the screen
+      if (pos<topPos){
+        pos=topPos;
+      }
+
+      y=con_lastUpdateEndY;
 
       // if the prev line has not ended, redraw it
-      while(con_screenEnd==con_bufferEnd && pos>con_bufferStart && CON_RING_BUFFER(pos)!='\n'){
+      if(con_screenEnd==con_bufferEnd && pos>con_bufferStart && CON_RING_BUFFER(pos)!='\n'){
         pos=con_nextLineEnd(pos,true);
         y-=CON_FONT->height;
       }
@@ -154,10 +170,9 @@ void con_screenUpdate(){
 
       con_lastUpdateEndY=y;
     }else{
-      int topPos=pos;
-      int prevTopPos;
-
-      // find the buffer position corresponding to the screen top
+      // find the buffer position corresponding to the current screen top
+      y=con_lastUpdateEndY;
+      topPos=con_lastUpdateScreenEnd;
       do{
         prevTopPos=topPos;
         topPos=con_nextLineEnd(topPos,true);

@@ -124,13 +124,15 @@ __IRAM_CODE void cmd_line_INT(int irq_num,struct pt_regs * regs)
         if(c=='\n' || c=='\r')               /* end of line => add \0 to end the line */
         {
             cur_cmd[cur_pos++]='\0';
+            printk("\n"); /* local echo */
             process_cmd(regs);
             continue;
         }
-        
+
         if(c>=0x20 && c<0xFF && c!=0x7F)
         {
                 cur_cmd[cur_pos++]=c;               /* we have a char => add it in the cmd string */
+                printk("%c",c); /* local echo */
         }
         else
         {                                       /* special chars */
