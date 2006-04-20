@@ -202,6 +202,11 @@ void ata_stopHDEnd(void)
     printk("[ide sleep] end\n");    
 }
 
+void ata_sofReset(void)
+{
+    outb(0xa,IDE_CONTROL);
+}
+
 int ata_waitForXfer(void)
 {
     int i,val;

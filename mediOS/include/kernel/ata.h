@@ -72,6 +72,7 @@ void ata_powerDownHD      (void);
 void ata_stopHD           (int mode);  /* mode should be: ATA_FORCE_STOP or ATA_DELAY_STOP */
 void ata_stopHDEnd        (void);
 int  ata_sleep            (void);
+void ata_sofReset         (void);
 
 void ata_selectHD         (void);
 void ata_selectCF         (void);

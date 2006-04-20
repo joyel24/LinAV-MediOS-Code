@@ -11,18 +11,25 @@
 */
 
 #include <sys_def/stddef.h>
-
-#include <kernel/io.h>
-#include <kernel/hardware.h>
-#include <kernel/exit.h>
-
-#include <kernel/graphics.h>
-#include <kernel/lcd.h>
 #include <sys_def/font.h>
 #include <sys_def/colordef.h>
 
-void arch_reload_firmware(void){
-  halt_device();
+#include <kernel/kernel.h>
+#include <kernel/io.h>
+#include <kernel/ata.h>
+#include <kernel/hardware.h>
+#include <kernel/exit.h>
+#include <kernel/graphics.h>
+#include <kernel/lcd.h>
+
+void reset_device(void);
+
+void arch_reload_firmware(void)
+{
+    printk("about to reboot\n");
+    ata_sofReset();
+    ata_stopHD(ATA_FORCE_STOP); /* we need to call halt_hd later to unmount all partitions */
+    reset_device();
 }
 
 void arch_HaltMsg(void)
