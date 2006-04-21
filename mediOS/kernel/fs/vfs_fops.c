@@ -35,6 +35,9 @@ int open(const char * name,int flags)
 
     FILE * fd;
 
+    if(!root_node)
+        return -MED_ENOENT;
+    
     path.length = strlen(name);
     if(path.length>0)
         path.str=name;

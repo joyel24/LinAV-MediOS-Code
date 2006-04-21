@@ -270,7 +270,7 @@ int mainMenu_ini(void)
     if(mainMenu_load(MENU_FILE_NAME)<0)
     {
         gfx_putS(COLOR_RED,COLOR_BLACK,5,120,"[ini_menu] Error reading menu => stoping");
-        return 0;
+        return -1;
     }
 
     gfx_getStringSize("M", &w, &h);
@@ -299,7 +299,7 @@ int mainMenu_ini(void)
 
     gfx_putS(COLOR_WHITE,COLOR_BLACK,5,120,"[ini_menu] finished");
 
-    return 1;
+    return 0;
 }
 
 void mainMenu_clean(struct menu_item * root)
@@ -424,7 +424,8 @@ int mainMenu_parse(struct cfg_menu ** cfg,char * filename)
     char *item=item_buff;
     char *value=value_buff;
 
-    openFile(filename,CFG_READ);
+    if(openFile(filename,CFG_READ)<0)
+        return -1;
 
     while (1)
     {

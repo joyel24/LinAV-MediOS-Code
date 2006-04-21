@@ -97,6 +97,8 @@ MED_RET_T vfs_nodeLookup(struct  vfs_pathname * path,
     struct vfs_node * current_node;
     int ret_val;
 
+    if(!start_node) return -MED_ENOENT;
+    
     /* some sanity check */
     if(path->length <= 0)  return -MED_ENOENT;
 

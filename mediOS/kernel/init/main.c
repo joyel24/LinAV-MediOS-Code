@@ -64,14 +64,14 @@ void print_boot_info(void)
 
 void tst_fct(void)
 {
-    /*int fd,fd2;
+    int fd,fd2;
     fd=open("/avlo.cfg",O_RDONLY);
     if(fd<0)
     {
         printk("error opening avlo.cfg\n");
         return;
     }
-    vfs_nodePrintOpenList();
+   
     if(vfs_hasOpenNode())
         printk("Has open files\n");
     else
@@ -82,24 +82,24 @@ void tst_fct(void)
         printk("error opening menu.cfg\n");
         return;
     } 
-    vfs_nodePrintOpenList();
+    
     if(vfs_hasOpenNode())
         printk("Has open files\n");
     else
             printk("no open file\n");   
     close(fd);
-    vfs_nodePrintOpenList();
+    
     if(vfs_hasOpenNode())
         printk("Has open files\n");
     else
         printk("no open file\n");
     close(fd2);
-    vfs_nodePrintOpenList();
+    
     if(vfs_hasOpenNode())
         printk("Has open files\n");
     else
         printk("no open file\n");    
-            */
+            
 }
 
 void kernel_start (void)

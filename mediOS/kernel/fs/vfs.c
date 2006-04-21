@@ -30,7 +30,14 @@ struct vfs_node * root_node;
 struct vfs_node * dirty_list;
 struct vfs_node * opened_node;
 
-MED_RET_T vfs_init(int device,unsigned int startsector)
+void vfs_init(void)
+{
+    root_node=NULL;
+    opened_node=NULL;
+    dirty_list=NULL;    
+}
+
+MED_RET_T vfs_mount(int device,unsigned int startsector)
 {
     int ret_val;
 

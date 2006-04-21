@@ -30,7 +30,8 @@ void gui_start(void)
     iniBrowser();
     gfx_openGraphics();
     
-    mainMenu_ini();    
+    if(mainMenu_ini()<0)
+        while(1) /*nothing*/;
     mainMenu_start();
     
     statusBar_ini();

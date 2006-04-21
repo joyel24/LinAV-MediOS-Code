@@ -25,7 +25,8 @@
 
 struct vfs_node;
 
-MED_RET_T vfs_init(int device,unsigned int startsector);
+MED_RET_T vfs_mount(int device,unsigned int startsector);
+void vfs_init(void);
 void vfs_rootPrint(void);
 
 MED_RET_T vfs_Destructor(void);

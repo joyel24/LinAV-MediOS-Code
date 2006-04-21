@@ -59,13 +59,11 @@ extern int hd_sleep_state;
 
 void disk_init(void)
 {
-    struct partition_info* pinfo;
-
     ata_init();
-
+    vfs_init();
     fat_init(); /* reset all mounted partitions */
 
-    if(disk_mount(HD_DRIVE)!=MED_OK)
+    if(disk_mount(CF_DRIVE)!=MED_OK)
         printk("Error doing disk init\n");
 
     printk("[init disk] done\n");
@@ -82,7 +80,7 @@ MED_RET_T disk_mount(int drive)
         return -MED_EIO;
     }
 
-    vfs_init(drive,pinfo[0].start);
+    vfs_mount(drive,pinfo[0].start);
     return MED_OK;
 }
 
