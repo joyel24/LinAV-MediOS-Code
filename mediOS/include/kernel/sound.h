@@ -14,9 +14,6 @@
 #define __SOUND_K_H
 
 
-#include <kernel/irq.h>
-#include <kernel/mas.h>
-
 /********************* Sound buffer           ***************************/
 
 #define FREE_SPACE_IN_BUFF(BUFF)                           \
@@ -51,29 +48,12 @@ typedef struct _sound_api_param
 	int count;
 } sound_api_param;
 
-extern int sound_buff_write(sound_buffer_s * sound_buffer, int (*reader_fct)(char * data,int count,void* param),
-            int count,void * param);
-
-
-/********************* DSP                    ***************************/
-/* dev functions */
-void    dsp_interrupt     (int irq,struct pt_regs * regs);
-void    dsp_ctl           (unsigned int cmd, void * arg);
-
-/* mp3 functions */
-
-int ini_mas_for_mp3(void);
-
-/* line in functions */
-
-void mas_line_in_on(void);
-void mas_line_in_off(void);
 
 /********************* MIXER                  ***************************/
 void mixer_ctl(unsigned int cmd, int dir, void * arg);
 
 /********************* OSS init               ***************************/
-void init_sound(void);
+void sound_init(void);
 
 #endif
 

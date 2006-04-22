@@ -63,7 +63,7 @@ void disk_init(void)
     vfs_init();
     fat_init(); /* reset all mounted partitions */
 
-    if(disk_mount(CF_DRIVE)!=MED_OK)
+    if(disk_mount(HD_DRIVE)!=MED_OK)
         printk("Error doing disk init\n");
 
     printk("[init disk] done\n");

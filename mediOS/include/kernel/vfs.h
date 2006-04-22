@@ -30,7 +30,7 @@ void vfs_init(void);
 void vfs_rootPrint(void);
 
 MED_RET_T vfs_Destructor(void);
-MED_RET_T vfs_clearNodeTree(struct vfs_node * root);
+MED_RET_T vfs_clearNodeTree(struct vfs_node * root,int force);
 
 void vfs_PrintOpenList(void);
 int vfs_hasOpenNode(void);

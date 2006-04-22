@@ -65,7 +65,7 @@ MED_RET_T vfs_Destructor(void)
 
     if(root_node->children)
     {
-        ret_val=vfs_clearNodeTree(root_node);
+        ret_val=vfs_clearNodeTree(root_node,1);
         if(ret_val != MED_OK)
             return ret_val;
     }
@@ -83,7 +83,7 @@ MED_RET_T vfs_Destructor(void)
     return MED_OK;
 }
 
-MED_RET_T vfs_clearNodeTree(struct vfs_node * root)
+MED_RET_T vfs_clearNodeTree(struct vfs_node * root,int force)
 {
     struct vfs_node * ptr,*ptr2;
     int ret_val;
@@ -94,14 +94,28 @@ MED_RET_T vfs_clearNodeTree(struct vfs_node * root)
         {
             if(ptr==NULL)
                 ptr=root->children;
+            if(ptr->opened && !force)
+            {
+                printk("[vfs_clearNodeTree] can't remove %s as it is still opened\n",ptr->name.str);
+                return -MED_EBUSY;
+            }
+            
+            if(ptr->dirty)
+            {
+#warning what is a dirty folder?
+#warning what to do with not opened & dirty files
+                printk("[vfs_clearNodeTree] we have a problem: %s mark as dirty but not opened\n",ptr->name.str);
+                return -MED_ERROR;
+            }
+            
             if(ptr->type == VFS_TYPE_DIR)
             {
-                ret_val=vfs_clearNodeTree(ptr);
+                ret_val=vfs_clearNodeTree(ptr,force);
                 if(ret_val!=MED_OK)
                     return ret_val;
             }
+            
             ptr2=ptr->siblings_next;
-            #warning need to check dirty flag / open flag too
             free(ptr);
             ptr=ptr2;
         }

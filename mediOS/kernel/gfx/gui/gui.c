@@ -31,7 +31,7 @@ void gui_start(void)
     gfx_openGraphics();
     
     if(mainMenu_ini()<0)
-        while(1) /*nothing*/;
+        return;
     mainMenu_start();
     
     statusBar_ini();

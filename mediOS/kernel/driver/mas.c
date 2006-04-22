@@ -9,16 +9,104 @@
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
 */
+#include <sys_def/stddef.h>
+#include <sys_def/section_types.h>
 
 #include <kernel/io.h>
 #include <kernel/hardware.h>
 #include <kernel/i2c.h>
 #include <kernel/gio.h>
+#include <kernel/irq.h>
 #include <kernel/delay.h>
 
 #include <kernel/kernel.h>
+#include <kernel/sound.h>
 
 #include <kernel/mas.h>
+
+#define MAS_DELAY        {int ___i; for(___i=0;___i<20;___i++);}
+
+/********************* DSP                    ***************************/
+
+__IRAM_DATA long g_nPaused = 0;     // 1 if in Pause mode
+
+__IRAM_DATA sound_buffer_s * current_buffer;
+
+
+#define GIO_SEND_MAS_DELAY {int ___i; for(___i=0;___i<30;___i++);}
+
+#define SEND_TO_MAS(BUFFER,SIZE)                              \
+ ({                                                           \
+    int  __i;                                                 \
+    int __data;                                               \
+    char * data_buff=BUFFER->data+BUFFER->read;                                   \
+    for(__i=0;__i<SIZE;__i++)                                 \
+    {                                                         \
+        if(inw(GIO_BITSET0) & (0x1<<GIO_MAS_EOD))             \
+            break;  /* EOD set => exit */                     \
+        __data=(data_buff[__i] << 8) & 0xFF00;                \
+        if(__data!=0)                                         \
+            outw(__data,GIO_BITSET0);                         \
+        __data ^= 0xFF00;                                     \
+        if(__data!=0)                                         \
+            outw(__data,GIO_BITCLEAR0);                       \
+        /* try to latch data (raise PR) */                    \
+        outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);               \
+        /* wait for RTR to be set */                          \
+        while(!(inw(GIO_BITSET1) & (0x1<<(GIO_MAS_RTR-16))))  \
+            /*nothing*/;                                      \
+        /* clear latch (lower raise PR) */                    \
+        outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);             \
+		GIO_SEND_MAS_DELAY                            \
+    }                                                         \
+    __i;                                                      \
+  })
+
+__IRAM_CODE void dsp_interrupt(int irq,struct pt_regs * regs)
+{
+    int toSend;
+    int send;
+    if(current_buffer!=NULL)
+    {
+        irq_disable(IRQ_MAS_DATA);
+        //printk("INT r:%d,w:%d\n",current_buffer->read,current_buffer->write);
+
+        if(current_buffer->read==current_buffer->write) /* nothing in buffer */
+        {
+            printk("read == write => no more data to play\n");
+            return;
+        }
+
+        //printk("INT2 r:%d,w:%d\n",current_buffer->read,current_buffer->write);
+
+        if(current_buffer->read>current_buffer->write)   /* write before read => count only size till the end of buffer*/
+            toSend=current_buffer->size-current_buffer->read;
+        else                                             /* we have less than size-read in buffer */
+            toSend=current_buffer->write-current_buffer->read;
+
+        send=SEND_TO_MAS(current_buffer,toSend);
+
+        current_buffer->read+=send;
+
+        //printk("send: %d/%d r:%d,w:%d\n",send,toSend,current_buffer->read,current_buffer->write);
+
+
+        if(current_buffer->read >= current_buffer->size)  /* we reached end of buffer => go back to start */
+        {
+           // printk("loop -> read\n");
+            current_buffer->read=0;
+            dsp_interrupt(IRQ_MAS_DATA,NULL);             /* retry to send data */
+        }
+        irq_enable(IRQ_MAS_DATA);
+    }
+    else
+    {
+        irq_disable(IRQ_MAS_DATA);
+    }
+}
+
+
+/********************* mas i2c                  ***************************/
 
 int in_16_val(void)
 {
@@ -48,6 +136,21 @@ int in_32_val(void)
 #define IN_32_VAL                  in_32_val()
 
 /********************* init mas                    ***************************/
+
+void mas_init(void)
+{
+    struct mas_version version;
+    printk("[init] av3xx sound driver: ");
+    mas_gio_init();
+    printk("M");
+    mas_reset();
+    printk("A");
+    mas_read_version(&version);
+    printk("S%x:%d:%c%d ",version.major_number,version.derivate,version.char_order_version,version.digit_order_version);
+    irq_disable(IRQ_MAS_DATA);
+    printk("\n");
+}
+
 int mas_reset(void)
 {
     GIO_CLEAR(GIO_MAS_PWR);  // stop the MAS
@@ -75,27 +178,94 @@ int mas_gio_init(void)
 }
 
 /********************* app functions                ***************************/
-int mas_app_select(int app)
+
+int mas_IniMp3(void)
 {
-	return mas_set_D0(MAS_APP_SELECT,app);
+    mas_codecWrite(MAS_REG_AUDIO_CONF,MAS_INPUT_AD | MAS_L_AD_CONVERTER | MAS_R_AD_CONVERTER | MAS_DA_CONVERTER
+                        | 0xf  << 4 // mic gain
+                        | 0xf << 8  // adc gain right
+                        | 0xf <<12  // adc gain left
+                        );
+    mas_codecWrite(MAS_REG_INPUT_MODE,MAS_CONFIG_INPUT_MONO);
+    mas_codecWrite(MAS_REG_MIX_ADC_SCALE,0x00 << 8);
+    mas_codecWrite(MAS_REG_MIX_DSP_SCALE,0x40 << 8);
+    mas_codecWrite(MAS_REG_DA_OUTPUT_MODE,0x0);
+    mas_codecCtrlConf(MAS_SET,MAS_BALANCE,50);
+    mas_codecCtrlConf(MAS_SET,MAS_VOLUME,/*70*/80);
+
+    MAS_DELAY
+
+    printk("[MAS] stop all app\n");
+    if(!mas_stopApps())
+        return -1;
+
+    mas_setD0(MAS_INTERFACE_CONTROL,0x04);
+    mas_setClkSpeed(0x4800);
+    mas_setD0(MAS_MAIN_IO_CONTROL,0x125);
+
+    MAS_DELAY
+
+    printk("mas_start_mp3_app\n");
+    if(!mas_startMp3App())
+        return -1;
+
+    printk("MAS configured for mp3 playing, waiting for start\n");
+
+    return 0;
 }
 
-int mas_app_running(int app)
+int mas_stopApps(void)
 {
-	unsigned int val=mas_get_D0(MAS_APP_SELECT);	
-	if(val<0)
-		return -1;
-	return (val & app);
+    int i;
+    mas_appSelect(MASS_APP_NONE);
+    while(1)
+    {
+        i=mas_appIsRunning(MASS_APP_ANY);
+        if(i<0)
+        {
+            printk("error getting app status (trying to stop)\n");
+            return 0;
+        }
+        if(i==0)
+            break;
+    }
+    return 1;
 }
 
-int mas_set_clk_speed(int spd)
+int mas_startMp3App(void)
 {
-	return mas_set_D0(MAS_OSC_FREQ,spd);
+    int i;
+    mas_appSelect(MASS_APP_MPEG3_DEC | MASS_APP_MPEG2_DEC);
+    while(1)
+    {
+        i=mas_getD0(MAS_APP_SELECT);
+        if((i & MASS_APP_MPEG3_DEC) && (i & MASS_APP_MPEG2_DEC))
+            break;
+    }
+    return 1;
 }
 
-int mas_get_frame_count(void)
+int mas_appSelect(int app)
 {
-	return (mas_get_D0(MAS_MPEG_FRAME_COUNT)&0xFFFFF);
+    return mas_setD0(MAS_APP_SELECT,app);
+}
+
+int mas_appIsRunning(int app)
+{
+    unsigned int val=mas_getD0(MAS_APP_SELECT);	
+    if(val<0)
+        return -1;
+    return (val & app);
+}
+
+int mas_setClkSpeed(int spd)
+{
+	return mas_setD0(MAS_OSC_FREQ,spd);
+}
+
+int mas_getFrameCount(void)
+{
+	return (mas_getD0(MAS_MPEG_FRAME_COUNT)&0xFFFFF);
 }
 
 /********************* PIO read/write               ***************************/
@@ -194,12 +364,12 @@ int mas_run(void)
     return 0;
 }
 
-int mas_set_D0(int addr,int val)
+int mas_setD0(int addr,int val)
 {
 	return mas_write_Di_register(MAS_REGISTER_D0,addr,&val,1);
 }
 
-int mas_get_D0(int addr)
+int mas_getD0(int addr)
 {
 	unsigned int ret;
 	if( mas_read_Di_register(MAS_REGISTER_D0,addr,&ret,1)<0)
@@ -361,18 +531,40 @@ int mas_read_version(struct mas_version * ptr)
 
 /********************* Codec function       ***************************/
 
+void mas_lineInOn(void)
+{
+    mas_codecWrite(MAS_REG_AUDIO_CONF, MAS_L_AD_CONVERTER | MAS_R_AD_CONVERTER | MAS_DA_CONVERTER
+                        | 0x0  << 4 // mic gain
+                        | 0xf << 8  // adc gain right
+                        | 0xf <<12  // adc gain left
+                        );
+    mas_codecWrite(MAS_REG_INPUT_MODE,MAS_CONFIG_INPUT_STEREO);
+    mas_codecWrite(MAS_REG_MIX_ADC_SCALE,0x40 << 8);
+    mas_codecWrite(MAS_REG_MIX_DSP_SCALE,0x00 << 8);
+    mas_codecWrite(MAS_REG_DA_OUTPUT_MODE,0x0);
+    mas_codecCtrlConf(MAS_SET,MAS_BALANCE,50);
+    mas_codecCtrlConf(MAS_SET,MAS_VOLUME,70);
+}
+
+void mas_lineInOff(void)
+{
+    mas_codecWrite(MAS_REG_MIX_ADC_SCALE,0x00 << 8);
+    mas_codecCtrlConf(MAS_SET,MAS_VOLUME,0x0);
+}
+
+
 int reg_addr[]={
-	MAS_REG_VOLUME,
-	MAS_REG_BASS,
-	MAS_REG_TREBLE,
-	MAS_REG_LOUDNESS,
-	MAS_REG_BALANCE,
-	MAS_REG_AUDIO_CONF,
-	MAS_REG_AUDIO_CONF,
-	MAS_REG_AUDIO_CONF
+    MAS_REG_VOLUME,
+    MAS_REG_BASS,
+    MAS_REG_TREBLE,
+    MAS_REG_LOUDNESS,
+    MAS_REG_BALANCE,
+    MAS_REG_AUDIO_CONF,
+    MAS_REG_AUDIO_CONF,
+    MAS_REG_AUDIO_CONF
 };
 
-int mas_control_config(int action,int control,int val)
+int mas_codecCtrlConf(int action,int control,int val)
 {
 	int ret=0;
 	switch (action)
@@ -383,9 +575,9 @@ int mas_control_config(int action,int control,int val)
 			ret=convertVal(val,control,action);
 			if(ret<0)
 				return ret;
-			return mas_control_write(control,ret);
+			return mas_codecCtrlWrite(control,ret);
 		case MAS_GET:
-			ret=mas_control_read(control);
+			ret=mas_codecCtrlRead(control);
 			if(ret<0)
 				return -1;
 			return convertVal(ret,control,action);
@@ -395,13 +587,13 @@ int mas_control_config(int action,int control,int val)
 	return -1;
 }
 
-int mas_control_write(int control,int val)
+int mas_codecCtrlWrite(int control,int val)
 {
 	int tmpVal;
 	switch(control)
 	{
 		case MAS_LOUDNESS:
-			if((tmpVal=mas_read_codec(control))<0)
+			if((tmpVal=mas_codecRead(control))<0)
 				return -1;
 			val=(val<<8) | (tmpVal & 0x00FF);
 			break;
@@ -412,27 +604,27 @@ int mas_control_write(int control,int val)
 			val<<=8;
 			break;
 		case MAS_MICRO_GAIN:
-			if((tmpVal=mas_read_codec(control))<0)
+			if((tmpVal=mas_codecRead(control))<0)
 				return -1;
 			val=((val&0xF)<<12)  | (tmpVal & 0x0FFF);
 			break;
 		case MAS_ADC_L_GAIN:
-			if((tmpVal=mas_read_codec(control))<0)
+			if((tmpVal=mas_codecRead(control))<0)
 				return -1;
 			val=((val&0xF)<<8)  | (tmpVal & 0xF0FF);
 			break;
 		case MAS_ADC_R_GAIN:
-			if((tmpVal=mas_read_codec(control))<0)
+			if((tmpVal=mas_codecRead(control))<0)
 				return -1;
 			val=((val&0xF)<<4)  | (tmpVal & 0xFF0F);
 			break;
 		default:
 			return -1;
 	}	
-	return mas_write_codec(reg_addr[control],val);
+	return mas_codecWrite(reg_addr[control],val);
 }
 
-int mas_control_read(int control)
+int mas_codecCtrlRead(int control)
 {
 	int ret;
 	switch(control)
@@ -442,22 +634,22 @@ int mas_control_read(int control)
 		case MAS_TREBLE:		
 		case MAS_BALANCE:
 		case MAS_LOUDNESS:
-			if((ret=mas_read_codec(reg_addr[control]))<0)
+			if((ret=mas_codecRead(reg_addr[control]))<0)
 				return -1;
 			ret=(ret>>8)&0xFF;
 			break;
 		case MAS_MICRO_GAIN:
-			if((ret=mas_read_codec(reg_addr[control]))<0)
+			if((ret=mas_codecRead(reg_addr[control]))<0)
 				return -1;
 			ret=(ret>>12)&0xF;
 			break;
 		case MAS_ADC_L_GAIN:
-			if((ret=mas_read_codec(reg_addr[control]))<0)
+			if((ret=mas_codecRead(reg_addr[control]))<0)
 				return -1;
 			ret=(ret>>8)&0xF;
 			break;
 		case MAS_ADC_R_GAIN:
-			if((ret=mas_read_codec(reg_addr[control]))<0)
+			if((ret=mas_codecRead(reg_addr[control]))<0)
 				return -1;
 			ret=(ret>>4)&0xF;
 			break;
@@ -533,7 +725,7 @@ int convertVal(int val,int control,int action)
 
 /********************* Codec i2c read/write ***************************/
 
-int mas_read_codec(int reg)
+int mas_codecRead(int reg)
 {
 	int ret=0;	
 	i2c_start();
@@ -552,7 +744,7 @@ int mas_read_codec(int reg)
 	return ret;
 }
 
-int mas_write_codec(int reg,int val)
+int mas_codecWrite(int reg,int val)
 {
 	i2c_start();
 	OUT_WRITE_DEVICE
@@ -707,4 +899,85 @@ int mas_test_PCM(void)
     
     return 0;
 }
+#endif
+
+// code from sound_init
+    //ini_mas_for_mp3();
+#if 0   
+    mas_write_codec(MAS_REG_AUDIO_CONF,MAS_INPUT_AD | MAS_L_AD_CONVERTER | MAS_R_AD_CONVERTER | MAS_DA_CONVERTER
+                                | 0xf  << 4 // mic gain
+                                | 0xf << 8  // adc gain right
+                                | 0xf <<12  // adc gain left
+                                );
+    mas_write_codec(MAS_REG_INPUT_MODE,MAS_CONFIG_INPUT_MONO);
+    mas_write_codec(MAS_REG_MIX_ADC_SCALE,0x00 << 8);
+    mas_write_codec(MAS_REG_MIX_DSP_SCALE,0x40 << 8);
+    mas_write_codec(MAS_REG_DA_OUTPUT_MODE,0x0);
+    mas_control_config(MAS_SET,MAS_BALANCE,50);
+    mas_control_config(MAS_SET,MAS_VOLUME,70);
+    
+    mas_stop_mp3_app();
+    
+    mas_set_D0(MAS_INTERFACE_CONTROL,0x04);
+    mas_set_clk_speed(0x4800);
+    mas_set_D0(MAS_MAIN_IO_CONTROL,0x125);
+    
+    mas_test_PCM();
+    
+#if 1    
+    int mp3ptr=0;
+    int fd = open("/out.wav",O_RDONLY);
+    if(fd<0)
+        printk("Error loading file\n");
+    else
+    {
+        char * mp3Buff = malloc(1024*1024*7);
+        int cnt=1;
+        int size=filesize(fd);
+        /*
+        while(cnt>0)
+        {
+            cnt = read(fd,mp3Buff+size,1024);
+            size += cnt;            
+        }*/
+        size = read(fd,mp3Buff,size);
+        printk("Read from file: %x\n",size);
+        close(fd);
+        //int size=0x46500;
+        char * data_buff = mp3Buff;
+        int data;
+        if(size>0)
+        {
+            while(1)
+            {
+                if(inw(GIO_BITSET0) & (0x1<<GIO_MAS_EOD))
+                    continue;
+                
+                data = (data_buff[0] & 0xFF) | ((data_buff[1] & 0xFF)<<8);
+                
+                data++;
+                
+                outw(0xFF00,GIO_BITCLEAR0);
+                outw(((data & 0xFF)<<8),GIO_BITSET0);
+                /* try to latch data (raise PR) */
+                outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);
+                outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);
+                outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);
+                
+                outw(0xFF00,GIO_BITCLEAR0);
+                outw((data & 0xFF00),GIO_BITSET0);
+                outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);
+                
+                data_buff+=2;
+                if ((data_buff-mp3Buff)>=size) {data_buff=mp3Buff; printk("loop\n"); break;}
+                
+                outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);
+            }
+        }
+        //cnt = mas_pio_write(mp3Buff + mp3ptr, 2000);
+        //printk("%d ",cnt); 
+        //mp3ptr+=cnt;
+        //if (mp3ptr>=65000){mp3ptr=0; printk("loop ");}
+        }
+#endif
 #endif

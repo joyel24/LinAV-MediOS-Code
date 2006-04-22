@@ -18,7 +18,7 @@
 #include <kernel/kernel.h>
 
 /* irq driven driver includes */
-#include <kernel/sound.h>
+#include <kernel/mas.h>
 #include <kernel/timer.h>
 #include <kernel/uart.h>
 #include <kernel/ata.h>

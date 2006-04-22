@@ -185,13 +185,8 @@ void kernel_start (void)
     printk("[init] INT enabled\n");
     __sti();
 
-#ifdef HAVE_MAS_SOUND
-    init_sound();
-#endif
+    sound_init();
 
-#ifdef HAVE_AIC23_SOUND
-    aic23_init();
-#endif
 
     printk("[init] ------------ all drivers\n");
 

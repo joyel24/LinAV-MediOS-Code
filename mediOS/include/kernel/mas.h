@@ -13,7 +13,13 @@
 #ifndef __MAS_H
 #define __MAS_H
 
+#include <kernel/irq.h>
+
+/********************* DSP                         ***************************/
+void dsp_interrupt(int irq,struct pt_regs * regs);
+
 /********************* init mas                    ***************************/
+void mas_init(void);
 int mas_reset(void);
 int mas_gio_init(void);
 
@@ -75,24 +81,35 @@ int mas_write_direct_config(int reg,int val);
 #define MASS_APP_NONE              0x000
 
 struct mas_version {
-	int major_number;
-	int derivate;
-	char char_order_version;
-	int digit_order_version;
+    int major_number;
+    int derivate;
+    char char_order_version;
+    int digit_order_version;
 };
 
-int mas_app_select(int app);
-int mas_app_running(int app);
-int mas_set_clk_speed(int spd);
-int mas_get_frame_count(void);
+/********************* DSP                    ***************************/
+/* dev functions */
+void    dsp_interrupt     (int irq,struct pt_regs * regs);
+void    dsp_ctl           (unsigned int cmd, void * arg);
+
+/******************** Mp3 related high level ******************************/
+int mas_IniMp3(void);
+int mas_stopApps(void);
+int mas_startMp3App(void);
+
+/******************** Mp3 related low level ******************************/
+int mas_appSelect(int app);
+int mas_appIsRunning(int app);
+int mas_setClkSpeed(int spd);
+int mas_getFrameCount(void);
 
 /********************* Register i2c read/write ***************************/
 int mas_read_register(int reg);
 int mas_write_register(int reg,int val);
 int mas_freeze(void);
 int mas_run(void);
-int mas_set_D0(int addr,int val);
-int mas_get_D0(int addr);
+int mas_setD0(int addr,int val);
+int mas_getD0(int addr);
 
 int mas_read_Di_register(int i,int addr,void * buf,int size); // !!! 20 bit values stored as 32 bit
 int mas_shortRead_Di_register(int i,int addr,void * buf,int size); // no problem here, 16 bit values used
@@ -154,14 +171,17 @@ int mas_read_version(struct mas_version * ptr);
 #define MAS_GET                   0x01
 #endif
 
-int mas_control_config(int action,int control,int val);
+void mas_lineInOn(void);
+void mas_lineInOff(void);
+
+int mas_codecCtrlConf(int action,int control,int val);
 int convertVal(int val,int control,int action);
-int mas_control_write(int control,int val);
-int mas_control_read(int control);
+int mas_codecCtrlWrite(int control,int val);
+int mas_codecCtrlRead(int control);
 
 /********************* Codec i2c read/write ***************************/
-int mas_read_codec(int reg);
-int mas_write_codec(int reg,int val);
+int mas_codecRead(int reg);
+int mas_codecWrite(int reg,int val);
 
 /********************* PCM decoding        ***************************/
 extern char ** wav_chunks;

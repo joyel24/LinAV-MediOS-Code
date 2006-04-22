@@ -120,12 +120,12 @@
 
 int  aic23_readReg(int address);
 void aic23_writeReg(int address,int value);
-bool aic23_setSampleRate(int rate);
+int aic23_setSampleRate(int rate);
 void aic23_setOutputVolume(int volume,int channel);
 void aic23_setInputVolume(int volume,int channel);
-void aic23_enableOutput(bool enable);
-void aic23_enableInput(bool enable);
-void aic23_configureInput(int source,bool micboost);
+void aic23_enableOutput(int enable);
+void aic23_enableInput(int enable);
+void aic23_configureInput(int source,int micboost);
 void aic23_shutdown();
 void aic23_init();
 
