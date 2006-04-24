@@ -1,19 +1,19 @@
 include ../../../Makefile.conf
 
-ASFLAGS  += -I../../../include
-GCCFLAGS += -I../../../include
+SUBDIRS = core driver gfx init
+#fs
 
-SRC = $(wildcard *.c)
-SRC2 = $(wildcard *.S)
-OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
-
-all: $(OBJS)
+all: builddir subdirs 
 
 force: clean all        
 
+clean:  clean-subdirs
+	@echo '-----   cleaining kernel'
+	@rm -f *.o build/*.o
+
+builddir:
+	@mkdir -p build
+       
 kernel_lib: all
-
-clean:  
-	@rm -f *.o *.bak *~ $(TARGET)
-
+        
 include ../../../default.rule
