@@ -20,7 +20,7 @@ kernel_entry:
     mov r1, #0
     str r1, [r0]
 /* move iram code */
-    ldr r0, __real_iram_start_ptr    
+    ldr r0, __real_iram_start_ptr
     ldr r1, __iram_start_ptr
     ldr r2, __iram_end_ptr
     sub r2, r2, r1
@@ -29,6 +29,16 @@ mv_iram_loop:
     str     r3, [r1],#4
     subs    r2, r2, #4
     bne     mv_iram_loop
+/* move sdend code */
+    @ after the prev loop, R0 contains the real iram end address, which is also the real sdend start
+    ldr r1, __sdend_start_ptr
+    ldr r2, __sdend_end_ptr
+    sub r2, r2, r1
+mv_sdend_loop:
+    ldr     r3, [r0],#4
+    str     r3, [r1],#4
+    subs    r2, r2, #4
+    bne     mv_sdend_loop
 /* enable fiq for wdt */
     mrs      r0, cpsr
     bic      r0, r0, #0x40
@@ -50,10 +60,12 @@ clr_bss_loop:
 /* loop endlessly */
 infinite_loop:
     b infinite_loop
-    
+
 __kernel_start_ptr:    .word kernel_start
 __real_iram_start_ptr: .word _real_iram_start
 __iram_start_ptr:      .word _iram_start
 __iram_end_ptr:        .word _iram_end
+__sdend_start_ptr:     .word _sdend_start
+__sdend_end_ptr:       .word _sdend_end
 __bss_start_ptr:       .word _bss_start
 __bss_end_ptr:         .word _bss_end

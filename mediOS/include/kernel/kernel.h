@@ -31,7 +31,8 @@ extern unsigned long tick;
 extern unsigned int _end_kernel;
 extern unsigned int _iram_start;
 extern unsigned int _iram_end;
-
+extern unsigned int _sdend_start;
+extern unsigned int _sdend_end;
 
 
 #define HZ 100

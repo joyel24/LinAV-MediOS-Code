@@ -33,5 +33,18 @@ entry_code:
     ldr r1,=0x0101
     strh r1,[r5]
 
+    /* copy everything to the sdram start */
+    msr cpsr_c, #0xDF @ Disable IRQ+FIQ and set SYS mode
+    ldr r0, =0xc10000
+    ldr r1, =0x900000
+    ldr r2, __end_kernel_ptr
+    sub r2, r2, r1
+    mv_sdram_loop:
+      ldmia r0!,{r4,r5,r6,r7,r8,r9,r10,r11}
+      stmia r1!,{r4,r5,r6,r7,r8,r9,r10,r11}
+      subs r2, r2, #32
+      bhi mv_sdram_loop
+
     b kernel_entry
-    
+
+__end_kernel_ptr:         .word _end_kernel

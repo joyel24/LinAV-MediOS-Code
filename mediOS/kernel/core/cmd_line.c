@@ -355,7 +355,7 @@ void do_memory_dump (unsigned char ** params)
       printk ("%08X:  ", (unsigned long)pMemory);
       for (j=0;j<16;j++)
          printk ("%02X ", pMemory[j]);
-      printk ("  |  ");
+      printk (" |  ");
       for (j=0;j<16;j++)
       {
          unsigned char c = pMemory[j];

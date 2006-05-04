@@ -7,46 +7,54 @@ MEMORY
 }
 
 SECTIONS
-{  
+{
     .text :
-    {   
+    {
         *(.text.init.arch)
-        *(.text.init)             
-        *(.text)        
+        *(.text.init)
+        *(.text)
         *(.glue_7t)
-        *(.glue_7)        
+        *(.glue_7)
     } > DRAM
-    
+
     .rodata :
     {
         *(.rodata)
         *(.rodata.str1.4)
     } > DRAM
-  
-    .data :    
+
+    .data :
     {
         *(.data)
         *(.got)
         *(.got.*)
         _real_iram_start = .;
     } > DRAM
-    
+
     .iram 0x04 : AT ( _real_iram_start )
-    {    
+    {
         _iram_start = .;
         *(.vectors)
         *(.core)
         *(.cored)
         _iram_end = .;
     } > IRAM
-    
-    .bss (NOLOAD) : AT ( _real_iram_start )
+
+    .sdend ADDR(.text)+0x01000000-0x400 : AT ( _real_iram_start + SIZEOF(.iram) )
+    {
+        _sdend_start = .;
+        *(.fwuncomp_code)
+        *(.fwuncomp_data)
+        _sdend_end = .;
+    } > DRAM
+
+    .bss _real_iram_start (NOLOAD) : AT ( _real_iram_start )
     {
         _bss_start = .;
         *(.bss)
         _bss_end = ALIGN(0x04);
     } > DRAM
-    
+
     .common :
     {
         *(.common)
