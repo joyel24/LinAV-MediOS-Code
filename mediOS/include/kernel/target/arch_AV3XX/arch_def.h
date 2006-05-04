@@ -16,7 +16,7 @@
 #define SDRAM_END     0x01900000
 
 #define MALLOC_START  ((((unsigned int)&_end_kernel) & 0xFFFFF000)+0x1000)
-#define MALLOC_SIZE   (SDRAM_END-MALLOC_START)
+#define MALLOC_SIZE   (((unsigned int)&_sdend_start)-MALLOC_START)
 
 #define CONFIG_ARM_CLK 54000000
 
