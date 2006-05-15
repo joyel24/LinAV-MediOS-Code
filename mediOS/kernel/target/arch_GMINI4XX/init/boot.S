@@ -52,7 +52,6 @@ entry_code:
     add r2,r2,r5
     ldr r5, __sdend_start_ptr
     sub r2,r2,r5
-    ldr r2, =0xc10000
 
     sub r2, r2, r1
     mv_sdram_loop:
