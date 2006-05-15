@@ -11,35 +11,37 @@
 */
 
 #include <kernel/kernel.h>
+#include <kernel/hardware.h>
+#include <kernel/uart.h>
 
 char trap_stack[1024];
 
 void do_trap_undef(void)
 {
-    printk("[INT] UNDEF !!\n");
+    uart_outString("[INT] UNDEF !!\n",DEBUG_UART);
 }
 
 void do_trap_swi(void)
 {
-    printk("[INT] SWI !!\n");
+    uart_outString("[INT] SWI !!\n",DEBUG_UART);
 }
 
 void do_trap_prefetch(void)
 {
-    printk("[INT] PREFETCH !!\n");
+    uart_outString("[INT] PREFETCH !!\n",DEBUG_UART);
 }
 
 void do_trap_data(void)
 {
-    printk("[INT] DATA !!\n");
+    uart_outString("[INT] DATA !!\n",DEBUG_UART);
 }
 
 void do_trap_addrexcptn(void)
 {
-    printk("[INT] ADDREXCPTN => should not happen let's loop !!\n");
+    uart_outString("[INT] ADDREXCPTN => should not happen let's loop !!\n",DEBUG_UART);
 }
 
 void print_wdt(void)
 {
-    printk("[INT] WDT HALTING !!\n");
+    uart_outString("[INT] WDT HALTING !!\n",DEBUG_UART);
 }
