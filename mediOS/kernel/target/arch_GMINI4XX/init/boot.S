@@ -34,17 +34,44 @@ entry_code:
     strh r1,[r5]
 
     /* copy everything to the sdram start */
-    msr cpsr_c, #0xDF @ Disable IRQ+FIQ and set SYS mode
-    ldr r0, =0xc10000
-    ldr r1, =0x900000
-    ldr r2, __end_kernel_ptr
+    msr cpsr_c, #0xDF /* Disable IRQ+FIQ and set SYS mode */
+
+    mov r3,#0x20
+    ldr r4,=0x30500
+
+    mov r0, #0xc10000
+    mov r1, #0x900000
+
+    /* don't copy the .bss part */
+    ldr r2, __real_iram_start_ptr
+    ldr r5, __iram_end_ptr
+    add r2,r2,r5
+    ldr r5, __iram_start_ptr
+    sub r2,r2,r5
+    ldr r5, __sdend_end_ptr
+    add r2,r2,r5
+    ldr r5, __sdend_start_ptr
+    sub r2,r2,r5
+    ldr r2, =0xc10000
+
     sub r2, r2, r1
     mv_sdram_loop:
-      ldmia r0!,{r4,r5,r6,r7,r8,r9,r10,r11}
-      stmia r1!,{r4,r5,r6,r7,r8,r9,r10,r11}
-      subs r2, r2, #32
-      bhi mv_sdram_loop
+        /* handle watchdog */
+        tst r2,#0x10000 /* change watchdog bit state each 64KB */
+        streqh r3,[r4,#0x92]
+        strneh r3,[r4,#0x8c]
+        /* copy data (256b at a time = sdram line size) */
+        ldmia r0!,{r5,r6,r7,r8,r9,r10,r11,r12}
+        stmia r1!,{r5,r6,r7,r8,r9,r10,r11,r12}
+        subs r2, r2, #32
+        bhi mv_sdram_loop
 
     b kernel_entry
 
-__end_kernel_ptr:         .word _end_kernel
+__real_iram_start_ptr: .word _real_iram_start
+__iram_start_ptr:      .word _iram_start
+__iram_end_ptr:        .word _iram_end
+__sdend_start_ptr:     .word _sdend_start
+__sdend_end_ptr:       .word _sdend_end
+
+.pool

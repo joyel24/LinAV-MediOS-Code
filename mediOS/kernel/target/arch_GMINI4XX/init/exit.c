@@ -31,8 +31,6 @@ typedef struct{
     int checksum;
 } firmware_header;
 
-__attribute__((section(".fwuncomp_data"))) void (*firmware_start)(void) = (void (*)(void)) SDRAM_START;
-
 // code taken from descramble.c from the Rockbox project
 __attribute__((section(".fwuncomp_code"))) void firmware_decompress(unsigned char * inbuf,unsigned char * outbuf, int length){
     int i;
@@ -65,9 +63,13 @@ __attribute__((section(".fwuncomp_code"))) void firmware_decompress(unsigned cha
 }
 
 __attribute__((section(".fwuncomp_code"))) void arch_reload_firmware(void){
+    void (*firmware_start)(void) = (void (*)(void)) SDRAM_START;
     firmware_header header=*(firmware_header*)0x120000;
     unsigned char * fwdata=(unsigned char *)0x120010;
     unsigned short * fwfb=(unsigned short *)0x18d1500; //official firmware bitmap plane address
+
+    // disable interrupts
+    cli();
 
     // show something on the screen (black screen for now)
     gfx_planeHide(BMAP1);
@@ -83,9 +85,6 @@ __attribute__((section(".fwuncomp_code"))) void arch_reload_firmware(void){
 
     gfx_clearScreen(COLOR_ROM_BLACK);
     gfx_planeShow(BMAP1);
-
-    // disable interrupts
-    cli();
 
     // uncompressing firmware
     firmware_decompress(fwdata,(unsigned char *)SDRAM_START,header.packedsize);
