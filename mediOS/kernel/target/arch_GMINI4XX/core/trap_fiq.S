@@ -3,7 +3,7 @@
 @.align	5
 .global trap_fiq
 
-trap_fiq: @called every 500ns
+trap_fiq: @called every 1ms
 
   ldr     r9, =0x30500
 
@@ -25,7 +25,7 @@ trap_fiq: @called every 500ns
   ldr     r10, [r8]
   add     r10, r10, #1
   str     r10, [r8]       @inc off counter
-  ldr     r10,=20000      @10 seconds
+  ldr     r10,=10000      @10 seconds
   ldr     r8, [r8]
   cmp     r8, r10         @off was pressed enough time?
   bls     no_shutdown
@@ -45,14 +45,13 @@ off_not_pressed:
 no_shutdown:
   ldr     r8, =.wdtCounter
   ldr     r10, [r8]
-  tst     r10, #2         @every 2 ticks (1ms), change gio bit 5 state (watchdog bit)
+  tst     r10, #1         @every tick (1ms), change gio bit 5 state (watchdog bit)
+  add     r10, r10, #1    @inc wdt counter
+  str     r10, [r8]
   moveq   r10, #0x20
   streqh  r10, [r9,#0x92] @DM270_GIO_OFFSET_BITCLR0
   movne   r10, #0x20
   strneh  r10, [r9,#0x8c] @DM270_GIO_OFFSET_BITSET0
-  ldr     r10, [r8]
-  add     r10, r10, #1
-  str     r10, [r8]       @inc wdt counter
 
 trap_fiq_end:
   subs    pc, lr, #4
