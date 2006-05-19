@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/core/kdelay.c
 *
 *   MediOS project
@@ -11,8 +11,11 @@
 */
 
 #include <kernel/delay.h>
+#include <kernel/timer.h>
 
 void mdelay(unsigned long msecs)
 {
-    while (msecs--) udelay(1000);
+    unsigned int end=tmr_getMicroTick()+msecs*100;
+
+    while (tmr_getMicroTick()<end) /*nothing*/;
 }

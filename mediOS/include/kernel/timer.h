@@ -34,7 +34,9 @@ void tmr_init(void);
 void tmr_print(void);
 
 unsigned int tmr_getTick(void);
+unsigned int tmr_getMicroTick(void);
 
 void arch_tmr_init(void);
+unsigned int tmr_arch_getMicroTick(void);
 
 #endif

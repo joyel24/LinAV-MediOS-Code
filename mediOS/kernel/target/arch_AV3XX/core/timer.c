@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/target/arch_AV3XX/timer.c
 *
 *   MediOS project
@@ -41,3 +41,6 @@ void arch_tmr_init(void)
     irq_enable(IRQ_TMR_0);
 }
 
+inline unsigned int arch_tmr_getMicroTick(void){
+    return tmr_getTick()*1000+TMR_GET_CNT(TMR0)/(CONFIG_ARM_CLK/1000000);
+}

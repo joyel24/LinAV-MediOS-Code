@@ -79,6 +79,11 @@ unsigned int tmr_getTick(void)
     return tick;
 }
 
+unsigned int tmr_getMicroTick(void)
+{
+    return arch_tmr_getMicroTick();
+}
+
 void tmr_setup(struct tmr_s * tmr_data,char * name)
 {
     tmr_data->expires=0;

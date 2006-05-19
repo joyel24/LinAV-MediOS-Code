@@ -29,7 +29,7 @@ void arch_tmr_init(void)
     TMR_SET_SEL(TMR_SEL_EXT,TMR0);
 
     /* prescale  */
-    
+
     TMR_SET_SCAL(9, TMR0);
 
     /* div  */
@@ -43,13 +43,13 @@ void arch_tmr_init(void)
 
     /*
     * Timer 3 is used for the watchdog
-    * Sends FIQ at 2khz
+    * Sends FIQ at 1khz
     */
 
     TMR_SET_SEL(TMR_SEL_ARM,TMR3);
 
     /* prescale  */
-    TMR_SET_SCAL(0, TMR3);
+    TMR_SET_SCAL(1, TMR3);
 
     /* div  */
     TMR_SET_DIV(50624, TMR3);
@@ -59,3 +59,6 @@ void arch_tmr_init(void)
 
 }
 
+inline unsigned int arch_tmr_getMicroTick(void){
+    return tmr_getTick()*1000+TMR_GET_CNT(TMR0)/(CONFIG_EXT_CLK/1000000);
+}
