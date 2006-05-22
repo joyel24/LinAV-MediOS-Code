@@ -164,6 +164,8 @@ void osd_setComponentConfig (int component, int config)
 
 void osd_restorePlane(int component, unsigned int address, int x, int y, int w, int h, int bpp, int state,int enable)
 {
+    int enbit=(enable)?OSD_COMPONENT_ENABLE:0;
+
     osd_setComponentOffset (component,address);
 
     outw(2*w,OSD_COMP_W(component));
@@ -174,19 +176,16 @@ void osd_restorePlane(int component, unsigned int address, int x, int y, int w, 
 
     outw((((w*bpp)/32)/8),OSD_COMP_BUFF_W(component));
 
-    if(enable)
+    switch(component)
     {
-        switch(component)
-        {
-            case OSD_VIDEO1:
-                outw((inl(OSD_VID0_1_CONF) & 0xFF00) | (state|OSD_COMPONENT_ENABLE),OSD_VID0_1_CONF);
-                break;
-            case OSD_VIDEO2:
-                outw((inl(OSD_VID0_1_CONF) & 0xFF) | ((state|OSD_COMPONENT_ENABLE)<<8),OSD_VID0_1_CONF);
-                break;
-            default:
-                outw((state|OSD_COMPONENT_ENABLE),OSD_COMP_CONF(component));
-        }
+        case OSD_VIDEO1:
+            outw((inl(OSD_VID0_1_CONF) & 0xFF00) | (state|enbit),OSD_VID0_1_CONF);
+            break;
+        case OSD_VIDEO2:
+            outw((inl(OSD_VID0_1_CONF) & 0xFF) | ((state|enbit)<<8),OSD_VID0_1_CONF);
+            break;
+        default:
+            outw((state|enbit),OSD_COMP_CONF(component));
     }
 }
 

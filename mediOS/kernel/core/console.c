@@ -27,6 +27,8 @@
 
 #define CON_RING_BUFFER(pos) (con_buffer[(pos)%CON_BUFFER_SIZE])
 
+#define CON_LAST_LINE_Y() ((con_numLines-1)*CON_FONT->height+CON_MARGIN_Y)
+
 needFont(CON_FONT);
 
 extern struct graphics_operations g8ops;
@@ -142,21 +144,21 @@ void con_screenUpdate(){
       }while(y>=0 && topPos<prevTopPos);
 
       // if there's more than 1 screen to scroll, just scroll enough to redraw the screen
-      if (pos<topPos){
+      if (con_lastUpdateEndY>=CON_LAST_LINE_Y() && pos<topPos){
         pos=topPos;
       }
 
       y=con_lastUpdateEndY;
 
       // if the prev line has not ended, redraw it
-      if(con_screenEnd==con_bufferEnd && pos>con_bufferStart && CON_RING_BUFFER(pos)!='\n'){
+      if(con_screenEnd==con_bufferEnd && pos>=con_bufferStart && CON_RING_BUFFER(pos)!='\n'){
         pos=con_nextLineEnd(pos,true);
         y-=CON_FONT->height;
       }
 
       do{
         // go to next line, scroll if we're at the bottom of the screen
-        if(y>=((con_numLines-1)*CON_FONT->height+CON_MARGIN_Y)){
+        if(y>=CON_LAST_LINE_Y()){
           con_drawScroll(CON_FONT->height+CON_MARGIN_Y,y+CON_FONT->height,-CON_FONT->height);
         }else{
           y+=CON_FONT->height;
@@ -220,7 +222,7 @@ void con_screenScroll(int lines){
  int i;
 
  // don't scroll if we don't have more than 1 screen of text
- if (con_lastUpdateEndY<((con_numLines-1)*CON_FONT->height+CON_MARGIN_Y)) return;
+ if (con_lastUpdateEndY<CON_LAST_LINE_Y()) return;
 
  for(i=0;i<abs(lines);++i){
    con_screenEnd=con_nextLineEnd(con_screenEnd,lines<0);

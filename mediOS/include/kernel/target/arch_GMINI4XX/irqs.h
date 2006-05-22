@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/kernel/target/arch_G4XX/irqs.h
 *
 *   MediOS project
@@ -21,5 +21,9 @@
 
 #define IRQ_MAS_DATA         22  // GIO4
 #define IRQ_IR               24  // GIO6
+
+#define IRQ_DSP              11
+
+#define IRQ_OSD              7
 
 #endif

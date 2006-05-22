@@ -72,6 +72,8 @@ __attribute__((section(".fwuncomp_code"))) void arch_reload_firmware(void){
     cli();
 
     // show something on the screen (black screen for now)
+    gfx_openGraphics();
+
     gfx_planeHide(BMAP1);
     gfx_planeHide(BMAP2);
     gfx_planeHide(VID1);

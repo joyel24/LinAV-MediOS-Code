@@ -84,6 +84,18 @@ __IRAM_DATA struct irq_data_s irq_table[] = {
     },
 #endif
     {
+        irq     : IRQ_OSD,
+        action  : NULL,
+        name    : "OSD VSync",
+        nb_irq  : 0
+    },
+    {
+        irq     : IRQ_DSP,
+        action  : NULL,
+        name    : "DSP intr",
+        nb_irq  : 0
+    },
+    {
         irq     : -1,
         action  : NULL,
         name    : NULL,

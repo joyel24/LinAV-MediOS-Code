@@ -99,13 +99,4 @@ void  gfx_setPalletteRGB       (int r, int g, int b, int index);
 void  gfx_fontSet              (int font_nb);
 int   gfx_fontGet              (void);
 
-/* Error scr */
-#ifdef HAVE_DEBUG_ON_SCREEN
-void gfx_dbgscrClear(int color);
-void gfx_dbgscrPutS(FONT_ID font,unsigned int color, unsigned int bg_color, int x, int y, unsigned char *s);
-void gfx_dbgscrPutC(FONT_ID font,unsigned int color, unsigned int bg_color, int x, int y, unsigned char c);
-void gfx_dbgscrScroll(unsigned int bg_color,int x,int y,int height,int UP);
-void gfx_dbgscrSwitch(void);
-#endif
-
 #endif
