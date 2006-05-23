@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/fs/bflat.c
 *
 *   MediOS project
@@ -45,8 +45,6 @@
         *__p++ = val>>16;                                       \
         *__p++ = val>>24;                                       \
     })
-
-#define max(a,b)  (a<b?b:a)
 
 #define NB_LIB    1
 

@@ -46,14 +46,6 @@ unsigned short swap16 (unsigned short source)
 #endif /* !USE_LITTLE_ENDIAN */
 }
 
-/**************************************************************************/
-/* support functions */
-/**************************************************************************/
-
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-
-/**************************************************************************/
-
 SNSS_RETURN_CODE SNSS_ReadBlockHeader (SnssBlockHeader *header, SNSS_FILE *snssFile)
 {
    unsigned char *headerBytes;//[12];
@@ -807,6 +799,9 @@ SNSS_WriteBlock (SNSS_FILE *snssFile, SNSS_BLOCK_TYPE blockType)
 
 /*
 ** $Log$
+** Revision 1.1  2006/05/22 23:18:55  sfxgligli
+** Adding aoNES (port of LittleJohnGP by yoyo)
+**
 ** Revision 1.5  2000/07/09 15:37:21  matt
 ** all block read/write calls now pass through a common handler
 **

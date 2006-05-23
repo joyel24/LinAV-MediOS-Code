@@ -1402,7 +1402,6 @@ uint32 nes6502_getcycles(bool reset_flag)
    cpu.s_reg = S; \
 }
 
-#define  MIN(a,b)    (((a) < (b)) ? (a) : (b))
 #define OPCODES_BY_FREQUENCY
 
 #ifndef OPCODES_BY_FREQUENCY
@@ -3706,6 +3705,9 @@ void nes6502_pending_irq(void)
 
 /*
 ** $Log$
+** Revision 1.1  2006/05/22 23:18:57  sfxgligli
+** Adding aoNES (port of LittleJohnGP by yoyo)
+**
 ** Revision 1.6  2003/03/24 14:50:51  Rick
 ** merged flag optimizations from nesterJppc;
 ** made ram, stack, mem_page, read_func & write_func local;

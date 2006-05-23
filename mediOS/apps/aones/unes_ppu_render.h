@@ -2,14 +2,6 @@ static uint32 spr_written[240*(256+16) / 32];
 #define SPR_WRITTEN(ptr) (spr_written[(ptr) / 32] & (1 << (ptr & 31)))
 #define SET_SPR_WRITTEN(ptr) spr_written[(ptr) / 32] |= (1 << (ptr & 31))
 
-
-__IRAM_CODE inline uint32 MIN(uint32 a,uint32 b)
-{
-	if (a>=b) return b;
-	else return a;
-}
-
-
 INLINE void ppu_renderBGLine(uint8 *buffer)
 {
    uint8 *buf_ptr, *tile_ptr, *attrib_ptr;
@@ -511,7 +503,7 @@ INLINE void ppu_renderBGLine0(uint8 *buffer)
 {
    uint8 *buf_ptr, *tile_ptr;
    uint32 refresh_vaddr;
-   int x_tile, y_tile;      
+   int x_tile, y_tile;
 
    uint32 bg_offset;   
    uint8 tile_index;   
