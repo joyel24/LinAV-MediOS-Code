@@ -150,3 +150,16 @@ void irq_print(void)
             irq_enabled(irq_table[i].irq)?"enable":"disable");
     }
 }
+
+int irq_globalEnabled(){
+  int val;
+
+  asm volatile(
+      "mrs %0,cpsr \n"
+      "and %0,%0,#0x80 \n"
+      "mov %0,%0,lsr #7 \n"
+      "eor %0,%0,#1 \n"
+  :"=r" (val));
+
+  return val;
+}

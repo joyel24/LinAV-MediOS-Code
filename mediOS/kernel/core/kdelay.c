@@ -12,10 +12,15 @@
 
 #include <kernel/delay.h>
 #include <kernel/timer.h>
+#include <kernel/irq.h>
 
 void mdelay(unsigned long msecs)
 {
-    unsigned int end=tmr_getMicroTick()+msecs*100;
+    if(irq_globalEnabled()){
+        unsigned int end=tmr_getMicroTick()+msecs*100;
 
-    while (tmr_getMicroTick()<end) /*nothing*/;
+        while (tmr_getMicroTick()<end) /*nothing*/;
+    }else{ // irqs are disabled, so no tick timer, use udelay() as a fallback
+        while (msecs--) udelay(1000);
+    }
 }

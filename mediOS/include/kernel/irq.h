@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/kernel/irq.h
 *
 *   MediOS project
@@ -212,6 +212,7 @@ extern void irq_disable(int irq);
 extern void irq_enable(int irq);
 extern void irq_print(void);
 extern void irq_setHandler(int irq_num,void(*fct)(int,struct pt_regs *));
+int irq_globalEnabled();
 
 void arch_irq_init(void);
 
