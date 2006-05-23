@@ -24,14 +24,11 @@
 
 #include <kernel/mas.h>
 
+__IRAM_DATA long soundPaused = 0;     // 1 if in Pause mode
+
+__IRAM_DATA sound_buffer_s * soundBuffer;
+
 #define MAS_DELAY        {int ___i; for(___i=0;___i<20;___i++);}
-
-/********************* DSP                    ***************************/
-
-__IRAM_DATA long g_nPaused = 0;     // 1 if in Pause mode
-
-__IRAM_DATA sound_buffer_s * current_buffer;
-
 
 #define GIO_SEND_MAS_DELAY {int ___i; for(___i=0;___i<30;___i++);}
 
@@ -39,7 +36,7 @@ __IRAM_DATA sound_buffer_s * current_buffer;
  ({                                                           \
     int  __i;                                                 \
     int __data;                                               \
-    char * data_buff=BUFFER->data+BUFFER->read;                                   \
+    char * data_buff=BUFFER->data+BUFFER->bytes_played;       \
     for(__i=0;__i<SIZE;__i++)                                 \
     {                                                         \
         if(inw(GIO_BITSET0) & (0x1<<GIO_MAS_EOD))             \
@@ -57,54 +54,182 @@ __IRAM_DATA sound_buffer_s * current_buffer;
             /*nothing*/;                                      \
         /* clear latch (lower raise PR) */                    \
         outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);             \
-		GIO_SEND_MAS_DELAY                            \
+		GIO_SEND_MAS_DELAY\
     }                                                         \
     __i;                                                      \
   })
 
-__IRAM_CODE void dsp_interrupt(int irq,struct pt_regs * regs)
+/************************* Test ********************************/
+
+#include <kernel/malloc.h>
+#include <kernel/stdfs.h>
+#include <kernel/irq.h>
+#include <sys_def/stddef.h>
+
+#define MP3_BUFF_SIZE 3*1024*1024
+
+int fd=0;
+
+int fileReader(char * data,int count,void* param)
 {
-    int toSend;
-    int send;
-    if(current_buffer!=NULL)
-    {
-        irq_disable(IRQ_MAS_DATA);
-        //printk("INT r:%d,w:%d\n",current_buffer->read,current_buffer->write);
-
-        if(current_buffer->read==current_buffer->write) /* nothing in buffer */
-        {
-            printk("read == write => no more data to play\n");
-            return;
-        }
-
-        //printk("INT2 r:%d,w:%d\n",current_buffer->read,current_buffer->write);
-
-        if(current_buffer->read>current_buffer->write)   /* write before read => count only size till the end of buffer*/
-            toSend=current_buffer->size-current_buffer->read;
-        else                                             /* we have less than size-read in buffer */
-            toSend=current_buffer->write-current_buffer->read;
-
-        send=SEND_TO_MAS(current_buffer,toSend);
-
-        current_buffer->read+=send;
-
-        //printk("send: %d/%d r:%d,w:%d\n",send,toSend,current_buffer->read,current_buffer->write);
-
-
-        if(current_buffer->read >= current_buffer->size)  /* we reached end of buffer => go back to start */
-        {
-           // printk("loop -> read\n");
-            current_buffer->read=0;
-            dsp_interrupt(IRQ_MAS_DATA,NULL);             /* retry to send data */
-        }
-        irq_enable(IRQ_MAS_DATA);
-    }
-    else
-    {
-        irq_disable(IRQ_MAS_DATA);
-    }
+    return read((int)param,data,count);
 }
 
+void playMp3(char * fileName)
+{
+    sound_buffer_s * buff = (sound_buffer_s *)malloc(sizeof(sound_buffer_s));
+    int freeSpace=0;
+    int nbRead,toSend,send;
+    buff->data = (char*)malloc(sizeof(char)*MP3_BUFF_SIZE);
+    buff->size=MP3_BUFF_SIZE;
+    
+    buff->bytes_played=buff->loop_counter=buff->loops_played=0;
+    struct _SOUND_BUFFER* next_buffer;
+
+    
+    fd=open(fileName,O_RDONLY);
+    if(fd<0)
+    {
+        printk("error opening file %s, error num=%d\n",fileName,-fd);
+        return;
+    }
+    
+    sound_ctl(SOUND_INI_MP3,NULL);
+    sound_ctl(SOUND_SETCURR_MP3_BUFFER,buff);
+    
+    soundPaused = 0;
+    
+    nbRead=read(fd,buff->data,MP3_BUFF_SIZE);
+    printk("first read:%d\n",nbRead);
+
+       
+    dsp_interrupt(IRQ_MAS_DATA,NULL);
+    
+    while(1)
+    {
+        
+    }
+    
+}
+
+
+/********************* DSP                    ***************************/
+
+
+
+
+
+
+__IRAM_CODE void dsp_interrupt(int irq,struct pt_regs * regs)
+{
+   	int bytes_sent, to_send;
+
+	if (!soundBuffer)
+	{
+//		disable_irq(IRQ_MAS_DATA);
+		return;
+	}
+
+	if (!soundPaused)
+	{
+//		printk ("WR\n");
+
+		to_send = soundBuffer->size - soundBuffer->bytes_played;
+		bytes_sent = SEND_TO_MAS (soundBuffer, to_send);
+		soundBuffer->bytes_played += bytes_sent;
+
+		if (soundBuffer->bytes_played >= soundBuffer->size)
+		{
+			soundBuffer->loops_played ++;
+
+			if (soundBuffer->loops_played >= soundBuffer->loop_counter)
+			{
+				soundBuffer = soundBuffer->next_buffer;
+				soundBuffer->loops_played = 0;
+			}
+
+			if (soundBuffer)
+				soundBuffer->bytes_played = 0;
+
+//			printk ("SW\n");
+			dsp_interrupt(IRQ_MAS_DATA,NULL);
+		}
+	}
+}
+
+__IRAM_CODE void sound_ctl(unsigned int cmd, void * arg)
+{
+    int * val;
+    struct av_peak * av_p;
+    
+    switch(cmd)
+    {
+        case SOUND_INI_MP3:
+            mas_IniMp3();
+            soundPaused = 1;
+            irq_enable(IRQ_MAS_DATA);
+            break;
+
+        case SOUND_SETCURR_MP3_BUFFER:
+            soundBuffer = (sound_buffer_s *)arg;
+            break;
+
+        case SOUND_GETCURR_MP3_BUFFER:
+            break;
+
+        case SOUND_ADD_MP3_BUFFER:
+            break;
+
+        case SOUND_REMOVE_MP3_BUFFER:
+            break;
+
+        case SOUND_START_MP3:
+            soundPaused = 0;
+            irq_enable(IRQ_MAS_DATA);
+            __cli ();
+            dsp_interrupt(IRQ_MAS_DATA,NULL);
+            __sti ();
+            break;
+
+        case SOUND_STOP_MP3:
+            soundPaused = 1;
+            irq_disable(IRQ_MAS_DATA);
+            break;
+
+        case SOUND_PAUSE_MP3:
+            soundPaused = 1;
+            break;
+
+        case SOUND_FRAME_CNT:
+            val=(int*)arg;
+            *val=mas_getFrameCount();
+            break;
+
+        case SOUND_IN_PEAK:
+            av_p=(struct av_peak *)arg;
+            av_p->left=(mas_codecRead(MAS_REG_INPEAK_LEFT)*100)/0x7FFF;
+            av_p->right=(mas_codecRead(MAS_REG_INPEAK_RIGHT)*100)/0x7FFF;
+            break;
+
+        case SOUND_OUT_PEAK:
+            av_p=(struct av_peak *)arg;
+            av_p->left=(mas_codecRead(MAS_REG_OUTPEAK_LEFT)*100)/0x7FFF;
+            av_p->right=(mas_codecRead(MAS_REG_OUTPEAK_RIGHT)*100)/0x7FFF;
+            break;
+
+        case SOUND_IN_PEAK_REAL:
+            av_p=(struct av_peak *)arg;
+            av_p->left=mas_codecRead(MAS_REG_INPEAK_LEFT);
+            av_p->right=mas_codecRead(MAS_REG_INPEAK_RIGHT);
+            break;
+
+        case SOUND_OUT_PEAK_REAL:
+            av_p=(struct av_peak *)arg;
+            av_p->left=mas_codecRead(MAS_REG_OUTPEAK_LEFT);
+            av_p->right=mas_codecRead(MAS_REG_OUTPEAK_RIGHT);
+            break;
+    }
+}
 
 /********************* mas i2c                  ***************************/
 
@@ -149,6 +274,9 @@ void mas_init(void)
     printk("S%x:%d:%c%d ",version.major_number,version.derivate,version.char_order_version,version.digit_order_version);
     irq_disable(IRQ_MAS_DATA);
     printk("\n");
+    
+   // mas_i2sInit();
+    
 }
 
 int mas_reset(void)
@@ -192,7 +320,7 @@ int mas_IniMp3(void)
     mas_codecWrite(MAS_REG_DA_OUTPUT_MODE,0x0);
     mas_codecCtrlConf(MAS_SET,MAS_BALANCE,50);
     mas_codecCtrlConf(MAS_SET,MAS_VOLUME,/*70*/80);
-
+    
     MAS_DELAY
 
     printk("[MAS] stop all app\n");
@@ -901,20 +1029,99 @@ int mas_test_PCM(void)
 }
 #endif
 
+#include "mas_code/mas_pcm_struct.h"
+#include "mas_code/dsp_d0_800_463.h"
+#include "mas_code/dsp_d0_7f8_1.h"
+
+struct mas_pcm_struct * chunk_list[2] = {
+    &D0_800_463,
+    &D0_7f8_1
+};
+
+int mas_stop_data[8][2] = {
+    { 0x3B,0x00318 },
+    { 0x43,0x00300 },
+    { 0x4B,0x00000 },
+    { 0x53,0x00318 },
+    { 0x6B,0x00000 },
+    { 0xBB,0x00318 },
+    { 0xC3,0x00300 },
+    { 0x06,0x00000 }
+};
+
+#define WAVE_PERIOD ((volatile unsigned short *)0x40100)
+#define DEBUG_MSG_STATE ((volatile unsigned short *)0x40102)
+#define DEBUG_MSG_TEXT  ((short *)0x40104)
+
+#include <kernel/dsp.h>
+
+void mas_i2sInit(void)
+{
+    int i,val,val2;
+    
+    mas_stopApps();
+    
+    mas_setD0(MAS_INTERFACE_CONTROL,0x04);
+    mas_setClkSpeed(0x4800);
+    mas_setD0(MAS_MAIN_IO_CONTROL,0x125);
+    
+    printk("\t\tStop & init MAS mem\n");    
+    
+    mas_freeze();
+    for(i=0;i<8;i++)
+    {
+        //val2 = mas_read_register(mas_stop_data[i][0]);
+        mas_write_register(mas_stop_data[i][0],mas_stop_data[i][1]);
+        //val = mas_read_register(mas_stop_data[i][0]);
+        //printk("READ back reg : %x=%x was %x, should be %x\n",mas_stop_data[i][0],val,val2,mas_stop_data[i][1]);
+    }
+        
+    printk("\t\tDownloading\n");
+    
+    mas_write_Di_register(chunk_list[0]->reg,chunk_list[0]->addr,(void *)chunk_list[0]->buffer,chunk_list[0]->length);
+        
+    printk("\t\tRun code\n");
+    
+    mas_write_register(0x6B,0xC0000);
+    mas_run();
+    
+    //mas_write_Di_register(chunk_list[1]->reg,chunk_list[1]->addr,(void *)chunk_list[1]->buffer,chunk_list[1]->length);
+        
+    mas_setD0(0x7f8,0x00008300);
+    /* dsp code here */
+    
+    load_dsp_program_hdd("/test.out");
+    *WAVE_PERIOD=64;
+    *DEBUG_MSG_STATE=0; 
+    dsp_run();  
+    
+    mas_codecWrite(0x1,0x386);    
+    mas_setD0(0x347,0x0);
+    mas_setD0(0x348,0x4e5e);
+    mas_setD0(0x346,0x1a1);
+    
+    mas_codecWrite(MAS_REG_AUDIO_CONF,0x7);
+    mas_codecWrite(MAS_REG_INPUT_MODE,0x0);
+    mas_codecWrite(MAS_REG_MIX_ADC_SCALE,0x0);
+    mas_codecWrite(MAS_REG_MIX_DSP_SCALE,0x4000);
+    mas_codecWrite(MAS_REG_DA_OUTPUT_MODE,0x0);
+    
+}
+
 // code from sound_init
     //ini_mas_for_mp3();
 #if 0   
-    mas_write_codec(MAS_REG_AUDIO_CONF,MAS_INPUT_AD | MAS_L_AD_CONVERTER | MAS_R_AD_CONVERTER | MAS_DA_CONVERTER
+    mas_codecWrite(MAS_REG_AUDIO_CONF,MAS_INPUT_AD | MAS_L_AD_CONVERTER | MAS_R_AD_CONVERTER | MAS_DA_CONVERTER
                                 | 0xf  << 4 // mic gain
                                 | 0xf << 8  // adc gain right
                                 | 0xf <<12  // adc gain left
                                 );
-    mas_write_codec(MAS_REG_INPUT_MODE,MAS_CONFIG_INPUT_MONO);
-    mas_write_codec(MAS_REG_MIX_ADC_SCALE,0x00 << 8);
-    mas_write_codec(MAS_REG_MIX_DSP_SCALE,0x40 << 8);
-    mas_write_codec(MAS_REG_DA_OUTPUT_MODE,0x0);
-    mas_control_config(MAS_SET,MAS_BALANCE,50);
-    mas_control_config(MAS_SET,MAS_VOLUME,70);
+    mas_codecWrite(MAS_REG_INPUT_MODE,MAS_CONFIG_INPUT_MONO);
+    mas_codecWrite(MAS_REG_MIX_ADC_SCALE,0x00 << 8);
+    mas_codecWrite(MAS_REG_MIX_DSP_SCALE,0x40 << 8);
+    mas_codecWrite(MAS_REG_DA_OUTPUT_MODE,0x0);
+    mas_codecCtrlConf(MAS_SET,MAS_BALANCE,50);
+    mas_codecCtrlConf(MAS_SET,MAS_VOLUME,70);
     
     mas_stop_mp3_app();
     

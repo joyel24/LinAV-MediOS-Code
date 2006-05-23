@@ -69,33 +69,24 @@ void __clf(void)
     __pv_clf();
 }
 
-
-__IRAM_CODE void irq_globalHandler(struct pt_regs * regs)
-{
-    int i,irq;
-    unsigned int mask;
-    
-    for(i=0;irq_table[i].irq!=-1;i++)
-    {
-        irq = irq_table[i].irq;
-        mask = 0x1 << INTC_IRQ_SHIFT(irq);
-
-        if(((~inw(INTC_IRQ_STATUS(irq))) & mask) && (inw(INTC_IRQ_ENABLE(irq)) & mask))
-        {              
-            irq_ack(irq);
-            irq_table[i].nb_irq++;
-            if(irq_table[i].action)
-                irq_table[i].action(irq,regs);
-            break;
-        }
-    }
-}
+extern int irq_tbl_ptr;
 
 void irq_init(void)
 {
-
+    int i = 0;
     arch_irq_init();
 
+    irq_setRaw(0x0);
+    fiq_setRaw(0x0);
+    
+    while(irq_table[i].irq!=-1)
+    {
+        irq_setHandler(irq_table[i].irq,irq_table[i].action);
+        i++;
+    }
+        
+    int_setEabase(irq_tbl_ptr,0x2);
+    
     printk("[init] irq\n");
 }
 
@@ -114,6 +105,15 @@ void irq_enable(int irq)
     }
 }
 
+void irq_setHandler(int irq_num,void(*fct)(int,struct pt_regs *))
+{
+    struct irq_bloc_s * ptr=(struct irq_bloc_s *)irq_tbl_ptr;
+    ptr[irq_num+1].irq=irq_num;
+    ptr[irq_num+1].mask=1<<INTC_IRQ_SHIFT(irq_num);
+    ptr[irq_num+1].reg=INTC_IRQ_STATUS(irq_num);
+    ptr[irq_num+1].fct=(int)fct;
+}
+
 void irq_changeHandler(int irq_num,void(*fct)(int irq,struct pt_regs * regs))
 {
     int i=0;
@@ -125,10 +125,11 @@ void irq_changeHandler(int irq_num,void(*fct)(int irq,struct pt_regs * regs))
         if(irq_state(irq_num))
         {
             irq_disable(irq_num);
-            is_enable =1;
+            is_enable = 1;
         }
         printk("IRQ handler for %s (%d) changed\n",irq_table[i].name,irq_num);
         irq_table[i].action = fct;
+        irq_setHandler(irq_num,fct);
         if(is_enable)
             irq_enable(irq_num);
     }
@@ -144,9 +145,8 @@ void irq_print(void)
     printk("IRQ handler list:\n");
     for(i=0;irq_table[i].irq!=-1;i++)
     {
-        printk("%d: irq:%d %s, %s (%d irqs)\n",
+        printk("%d: irq:%d %s, %s\n",
             i,irq_table[i].irq,irq_table[i].name!=NULL?irq_table[i].name:"UNDEF",
-            irq_enabled(irq_table[i].irq)?"enable":"disable",
-            irq_table[i].nb_irq);
+            irq_enabled(irq_table[i].irq)?"enable":"disable");
     }
 }

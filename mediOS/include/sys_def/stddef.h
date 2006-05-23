@@ -17,7 +17,13 @@
 
 #define NULL ((void*)0)
 
-#define abs(x) ((x)>0?(x):-(x))
+#define abs ABS
+#define min MIN
+#define max MAX
+
+#define ABS(x)           ((x)>0?(x):-(x))
+#define MIN(a, b)        (((a)<(b))?(a):(b))
+#define MAX(a, b)        (((a)<(b))?(b):(a))
 
 void exit(int retcode);
 

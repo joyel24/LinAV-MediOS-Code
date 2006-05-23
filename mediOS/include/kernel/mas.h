@@ -15,8 +15,54 @@
 
 #include <kernel/irq.h>
 
-/********************* DSP                         ***************************/
+/********************* SOUND player                 ***************************/
+
+#define FREE_SPACE_IN_BUFF(BUFF)                           \
+    ({                                                     \
+            int __free_space=BUFF->read-BUFF->write;         \
+            if(__free_space<=0)                            \
+                __free_space+=BUFF->size;                   \
+            __free_space;                                  \
+    })
+
+struct av_peak {
+    int left;
+    int right;
+};
+
+typedef struct _SOUND_BUFFER
+{
+    unsigned char* data;
+    unsigned long  size;
+   /* unsigned long  read;
+    unsigned long  write;*/
+    unsigned long  bytes_played;
+    unsigned long  loop_counter;
+    unsigned long  loops_played;
+    struct _SOUND_BUFFER* next_buffer;
+} sound_buffer_s;
+
 void dsp_interrupt(int irq,struct pt_regs * regs);
+int sound_buff_write(sound_buffer_s * sound_buffer, int (*reader_fct)(char * data,int count,void* param),
+            int count,void * param);
+
+void mas_i2sInit(void);
+
+/* sound API */
+#define SOUND_INI_MP3             0x0001
+#define SOUND_START_MP3           0x0002
+#define SOUND_STOP_MP3            0x0003
+#define SOUND_PAUSE_MP3           0x0004
+#define SOUND_FRAME_CNT           0x0005
+#define SOUND_IN_PEAK             0x0006
+#define SOUND_OUT_PEAK            0x0007
+#define SOUND_IN_PEAK_REAL        0x0008
+#define SOUND_OUT_PEAK_REAL       0x0009
+#define SOUND_SETCURR_MP3_BUFFER  0x000A
+#define SOUND_GETCURR_MP3_BUFFER  0x000B
+#define SOUND_ADD_MP3_BUFFER      0x000C
+#define SOUND_REMOVE_MP3_BUFFER   0x000D
+void sound_ctl(unsigned int cmd, void * arg);
 
 /********************* init mas                    ***************************/
 void mas_init(void);
@@ -89,7 +135,6 @@ struct mas_version {
 
 /********************* DSP                    ***************************/
 /* dev functions */
-void    dsp_interrupt     (int irq,struct pt_regs * regs);
 void    dsp_ctl           (unsigned int cmd, void * arg);
 
 /******************** Mp3 related high level ******************************/

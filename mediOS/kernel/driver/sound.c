@@ -22,7 +22,7 @@
 
 /********************* MIXER                 ***************************/
 
-void mixer_ctl(unsigned int cmd, int dir, void * arg)
+void sound_mixerCtl(unsigned int cmd, int dir, void * arg)
 {
     /*int * val=(int*)arg;
     int tmp;

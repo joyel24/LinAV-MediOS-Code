@@ -199,7 +199,6 @@ void ata_stopHDEnd(void)
     tmr_stop(&hd_timer);
     hd_sleep_state=1;
     ata_stopping = 0;
-    printk("[ide sleep] end\n");    
 }
 
 void ata_sofReset(void)

@@ -42,20 +42,27 @@
 #define INTC_IRQ1_STATUS                  (INTC_BASE + 0x000a)
 #define INTC_IRQ2_STATUS                  (INTC_BASE + 0x000c)
 
+#define INTC_FIQ0_ENTRY                   (INTC_BASE + 0x0010)
+#define INTC_FIQ1_ENTRY                   (INTC_BASE + 0x0012)
+#define INTC_IRQ0_ENTRY                   (INTC_BASE + 0x0018)
+#define INTC_IRQ1_ENTRY                   (INTC_BASE + 0x001A)
+
 #define INTC_FISEL0                       (INTC_BASE + 0x0020)
 #define INTC_FISEL1                       (INTC_BASE + 0x0022)
 #define INTC_FISEL2                       (INTC_BASE + 0x0024)
-#define INTC_IRQ0_ENABLE                  (INTC_BASE + 0x0028)
-#define INTC_IRQ1_ENABLE                  (INTC_BASE + 0x002a)
-#define INTC_IRQ2_ENABLE                  (INTC_BASE + 0x002c)
+#define INTC_INT0_ENABLE                  (INTC_BASE + 0x0028)
+#define INTC_INT1_ENABLE                  (INTC_BASE + 0x002a)
+#define INTC_INT2_ENABLE                  (INTC_BASE + 0x002c)
 
-#define INTC_INTIDR                       (INTC_BASE + 0x00FF) // does not seem to exist
 #define INTC_INTRAW                       (INTC_BASE + 0x0030)
 
+#define INTC_EABASE0                      (INTC_BASE + 0x0038)
+#define INTC_EABASE1                      (INTC_BASE + 0x003A)
+
 #define INTC_IRQ_STATUS(val)              ((val < 16) ? INTC_IRQ0_STATUS : ((val<32) ? INTC_IRQ1_STATUS : INTC_IRQ2_STATUS))
-#define INTC_IRQ_ENABLE(val)              ((val < 16) ? INTC_IRQ0_ENABLE : ((val<32) ? INTC_IRQ1_ENABLE : INTC_IRQ2_ENABLE))
+#define INTC_IRQ_ENABLE(val)              ((val < 16) ? INTC_INT0_ENABLE : ((val<32) ? INTC_INT1_ENABLE : INTC_INT2_ENABLE))
 #define INTC_FIQ_STATUS(val)              ((val < 16) ? INTC_FIQ0_STATUS : ((val<32) ? INTC_FIQ1_STATUS : INTC_FIQ2_STATUS))
-#define INTC_FIQ_ENABLE(val)              ((val < 16) ? INTC_FIQ0_ENABLE : ((val<32) ? INTC_FIQ1_ENABLE : INTC_FIQ2_ENABLE))
+#define INTC_FIQ_ENABLE(val)              ((val < 16) ? INTC_INT0_ENABLE : ((val<32) ? INTC_INT1_ENABLE : INTC_INT2_ENABLE))
 #define INTC_SHIFT(val)                   (val & 0x0f)
 #define INTC_FIQ_SHIFT(val)               INTC_SHIFT(val)
 #define INTC_IRQ_SHIFT(val)               INTC_SHIFT(val)

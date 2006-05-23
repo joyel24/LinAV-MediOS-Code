@@ -179,11 +179,28 @@ void __clf(void);
 
 #define     irq_state(IRQ)     ((IRQ>=0 && IRQ<NR_IRQS)?irq_enabled(IRQ)!=0:0)
 
+#define     fiq_setRaw(val)   {int __val=inw(INTC_INTRAW);outw((__val&0x2)|(val>0?1:0),INTC_INTRAW);}
+#define     irq_setRaw(val)   {int __val=inw(INTC_INTRAW);outw((__val&0x1)|(val>0?2:0),INTC_INTRAW);}
+#define     fiq_getRaw        ({ int __val=inw(INTC_INTRAW)&0x1;__val;})
+#define     irq_getRaw        ({ int __val=(inw(INTC_INTRAW)>>1)&0x1;__val;})
+
+#define     int_setEabase(val,size) ({outw((val&0xFFF8)|(size&0x3),INTC_EABASE0);outw((val>>16)&0x1FFF,INTC_EABASE1);})
+#define     int_getEabase     ({int __val=(inw(INTC_EABASE0)&0xFFF8)|((inw(INTC_EABASE1)&0x1FFF)<<16);__val;})
+
+#define     fiq_getEntry      ({int __val=inw(INTC_FIQ0_ENTRY)|(inw(INTC_FIQ1_ENTRY)<<16);__val;})
+#define     irq_getEntry      ({int __val=inw(INTC_IRQ0_ENTRY)|(inw(INTC_IRQ1_ENTRY)<<16);__val;})
+
 struct irq_data_s {
     int irq;
     void (*action)(int irqnr,struct pt_regs * regs);
     char * name;
-    unsigned int nb_irq;
+};
+
+struct irq_bloc_s {
+    int irq;
+    int mask;
+    int reg;
+    int fct;
 };
 
 extern void irq_init(void);
@@ -194,6 +211,8 @@ extern void irq_changeHandler(int irq_num,void(*fct)(int irq,struct pt_regs * re
 extern void irq_disable(int irq);
 extern void irq_enable(int irq);
 extern void irq_print(void);
+extern void irq_setHandler(int irq_num,void(*fct)(int,struct pt_regs *));
+
 void arch_irq_init(void);
 
 

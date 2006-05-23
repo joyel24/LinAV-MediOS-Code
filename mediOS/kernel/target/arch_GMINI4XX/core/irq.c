@@ -28,78 +28,57 @@ __IRAM_DATA struct irq_data_s irq_table[] = {
         irq     : IRQ_UART0,
         action  : uart_intAction,
         name    : "UART0 intr",
-        nb_irq  : 0
     },
     {
         irq     : IRQ_UART1,
         action  : uart_intAction,
         name    : "UART1 intr",
-        nb_irq  : 0
     },
 #ifdef HAVE_MAS_SOUND
     {
         irq     : IRQ_MAS_DATA,
         action  : dsp_interrupt,
         name    : "MAS",
-        nb_irq  : 0
     },
 #endif
     {
         irq     : IRQ_TMR_0,
         action  : tmr_intAction,
         name    : "Tick_timer",
-        nb_irq  : 0
     },
     {
         irq     : IRQ_TMR_1,
         action  : NULL,
         name    : "timer1",
-        nb_irq  : 0
     },
     {
         irq     : IRQ_TMR_2,
         action  : NULL,
         name    : "timer2",
-        nb_irq  : 0
     },
     {
         irq     : IRQ_TMR_3,
         action  : NULL,
         name    : "timer3",
-        nb_irq  : 0
     },    
     {
         irq     : IRQ_IDE,
         action  : ide_intAction,
         name    : "IDE intr",
-        nb_irq  : 0
-    },
-    {
-        irq     : IRQ_OSD,
-        action  : NULL,
-        name    : "OSD VSync",
-        nb_irq  : 0
-    },
-    {
-        irq     : IRQ_DSP,
-        action  : NULL,
-        name    : "DSP intr",
-        nb_irq  : 0
     },
     {
         irq     : -1,
         action  : NULL,
         name    : NULL,
-        nb_irq  : 0
     }
 };
 
 void arch_irq_init(void)
 {
     /* disable all irqs (except timer 3 one)*/
-    outw(0x0008, INTC_IRQ0_ENABLE);
-    outw(0x0000, INTC_IRQ1_ENABLE);
-    outw(0x0000, INTC_IRQ2_ENABLE);
+    outw(0x0008, INTC_INT0_ENABLE);
+    outw(0x0000, INTC_INT1_ENABLE);
+    outw(0x0000, INTC_INT2_ENABLE);
 
     /* Set all to IRQ mode (except timer 3 one)*/
     outw(0x0008, INTC_FISEL0);

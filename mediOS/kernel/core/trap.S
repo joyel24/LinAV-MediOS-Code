@@ -99,7 +99,8 @@ trap_addrexcptn_loop:
 @.align 5
 __trap_addrexcptn_ptr:  .word do_trap_addrexcptn
 
-@.align	8
+.include "../../include/kernel/target/arch/trap_irq.inc"
+
 .global trap_irq
 trap_irq:
     @
@@ -113,22 +114,54 @@ trap_irq:
     @
     @ now branch to the relevent MODE handling routine
     @
-    mrs    r13, spsr            @ switch to correct mode
+    mrs    r13, cpsr            @ switch to correct mode
     bic    r13, r13, #0x3f      @ preserve F bits (VP do not preserve T bit ! => 3F)
     orr    r13, r13, #0x13      @ 0x1F for SYS_32,   0x13 for SVC_32
     orr    r13, r13, #0x80
-    msr    spsr_c, r13          @ switch to correct mode
-
-    @and    lr, lr, #15
-    ldr    lr, [pc]
-    movs   pc, lr                @ Changes mode and branches
-__trap_irq_ptr:  .word __irq_trap
+    msr    cpsr_c, r13          @ switch to correct mode
+    @
+    @ now real irq handler
+    @
+    sub     sp, sp, #72
+    stmia   sp, {r0 - r12}			@ save r0 - r12
+    ldr     r7, .LCsirq
+    add     r5, sp, #72
+    ldmia   r7, {r7 - r9}
+    add     r4, sp, #52
+    mov     r6, lr
+    stmia   r4, {r5, r6, r7, r8, r9}	@ save sp_SVC, lr_SVC, pc, cpsr, old_ro
+__irq_loop:
+    ldr    R2, =irq_entry
+    ldrh   R3, [R2,#2]
+    ldrh   R2, [R2]
+    orr    R4, R2, R3, LSL #16
+    @ R2 points on the bloc  
+    @ read whole bloc
+    ldmia  R4, {R0-R3}
+    cmp    R3, #0
+    beq    __exit_irq_loop   @ if handler = 0 => no handler
+    @ now ack the INT
+    strh   R1, [R2]   
+    mov    R1, SP            @ get reg stucture
+    adr    LR, __irq_loop
+    mov    PC, R3            @ branch to handler 
+__exit_irq_loop:
+    ldr     r0, [sp, #64]    @ irqs are already disabled
+    msr     spsr, r0
+    ldmia   sp, {r0 - pc}^   @ load r0 - pc, cpsr
 
 @.align 5
 .LCsirq:	 .word __temp_irq
 
 .global __temp_irq
-__temp_irq:	.word	0				@ saved lr_irq
-		.word	0				@ saved spsr_irq
-		.word	-1				@ old_r0
+__temp_irq: .word	0  @ saved lr_irq
+            .word	0  @ saved spsr_irq
+            .word	-1 @ old_r0
 
+               
+.align  8
+irq_fct_table:  
+.space (nb_irq+1)*16 
+.align
+.global irq_tbl_ptr
+irq_tbl_ptr: .word irq_fct_table
