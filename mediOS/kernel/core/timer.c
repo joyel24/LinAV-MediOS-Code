@@ -92,6 +92,8 @@ void tmr_setup(struct tmr_s * tmr_data,char * name)
 
     tmr_data->nxt=tmr_head;
     tmr_data->prev=NULL;
+    if(tmr_head)
+        tmr_head->prev=tmr_data;
     tmr_head=tmr_data;
 
 }

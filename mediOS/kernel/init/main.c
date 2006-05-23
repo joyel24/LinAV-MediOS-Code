@@ -163,7 +163,7 @@ void kernel_start (void)
     evt_init();
 #endif
     btn_init();
-#ifdef HAVE_BAT_POWER
+#ifdef CHK_BAT_POWER
     init_power();
 #endif
 

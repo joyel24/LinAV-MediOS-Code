@@ -346,6 +346,7 @@ void init_power(void)
     lcd_launchTimer();
     hd_launchTimer();
 
-    kpwrState=POWER_CONNECTED;    
+    kpwrState=POWER_CONNECTED; 
+       
     printk("[init] power : Bat level: %x, DC %s connected\n",GET_BAT_LEVEL,kpwrState==0?"not":"is");
 }
