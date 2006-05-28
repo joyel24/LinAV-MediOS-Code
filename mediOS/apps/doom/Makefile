@@ -2,7 +2,8 @@ include ../../Makefile.conf
 
 ASFLAGS  += -I../../include -I. -Icpu
 
-GCCFLAGS += -I../../include -I. -O3
+GCCFLAGS += -I../../include -I. -O3 \
+	-fno-common # doom requires all variables to be zero initialized, this does it by placing them into .bss
 
 
 TARGET = doom

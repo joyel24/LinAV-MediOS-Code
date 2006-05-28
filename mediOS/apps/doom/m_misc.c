@@ -16,6 +16,9 @@
 //
 //
 // $Log$
+// Revision 1.4  2006/03/24 21:21:48  vincentp
+// commit new version of spc playe r and modification name of functions fread , fopen to their more standard names read, open etc ...
+//
 // Revision 1.3  2006/02/06 22:45:48  oxygen77
 // make doom work with new api, we lack of exit() now
 //
@@ -124,7 +127,7 @@ M_WriteFile
     int       handle;
     int		count;
 
-    handle = creat ( name, O_WRONLY);
+    handle = open ( name, O_WRONLY);
 
     if (handle < 0)
 	return false;
@@ -294,7 +297,7 @@ void M_SaveDefaults (void)
     int		v;
     int   f;
 
-    f = creat (defaultfile, O_WRONLY);
+    f = open (defaultfile, O_WRONLY);
     if (f<0)
 	return; // can't write the file, but don't complain
 

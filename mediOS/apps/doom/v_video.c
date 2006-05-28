@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	Gamma correction LUT stuff.
@@ -41,9 +45,9 @@ rcsid[] = "$Id$";
 
 
 // Each screen is [SCREENWIDTH*SCREENHEIGHT]; 
-byte*				screens[5];	
- 
-int				dirtybox[4]; 
+__IRAM_DATA byte*				screens[5];
+
+__IRAM_DATA int				dirtybox[4];
 
 
 
@@ -139,6 +143,7 @@ int	usegamma;
 //
 // V_MarkRect 
 // 
+__IRAM_CODE
 void
 V_MarkRect
 ( int		x,
@@ -154,6 +159,7 @@ V_MarkRect
 //
 // V_CopyRect 
 // 
+__IRAM_CODE 
 void
 V_CopyRect
 ( int		srcx,
@@ -163,7 +169,7 @@ V_CopyRect
   int		height,
   int		destx,
   int		desty,
-  int		destscrn ) 
+  int		destscrn )
 { 
     byte*	src;
     byte*	dest; 
@@ -200,29 +206,30 @@ V_CopyRect
 // V_DrawPatch
 // Masks a column based masked pic to the screen. 
 //
+__IRAM_CODE
 void
 V_DrawPatch
 ( int		x,
   int		y,
   int		scrn,
-  patch_t*	patch ) 
-{ 
-
+  patch_t*	patch )
+{
     int		count;
-    int		col; 
+    int		col;
     column_t*	column; 
     byte*	desttop;
     byte*	dest;
     byte*	source; 
     int		w; 
-	 
+
     y -= SHORT(patch->topoffset); 
-    x -= SHORT(patch->leftoffset); 
-#ifdef RANGECHECK 
+    x -= SHORT(patch->leftoffset);
+
+#ifdef RANGECHECK
     if (x<0
 	||x+SHORT(patch->width) >SCREENWIDTH
 	|| y<0
-	|| y+SHORT(patch->height)>SCREENHEIGHT 
+	|| y+SHORT(patch->height)>SCREENHEIGHT
 	|| (unsigned)scrn>4)
     {
       fprintf( stderr, "Patch at %d,%d exceeds LFB\n", x,y );
@@ -230,10 +237,10 @@ V_DrawPatch
       fprintf( stderr, "V_DrawPatch: bad patch (ignored)\n");
       return;
     }
-#endif 
- 
+#endif
+
     if (!scrn)
-	V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height)); 
+	V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0; 
     desttop = screens[scrn]+y*SCREENWIDTH+x; 
@@ -242,16 +249,19 @@ V_DrawPatch
 
     for ( ; col<w ; x++, col++, desttop++)
     { 
-	column = (column_t *)((byte *)patch + LONG(patch->columnofs[col])); 
+	column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
  
 	// step through the posts in a column 
 	while (column->topdelta != 0xff ) 
 	{ 
 	    source = (byte *)column + 3; 
 	    dest = desttop + column->topdelta*SCREENWIDTH; 
-	    count = column->length; 
-			 
-	    while (count--) 
+	    count = column->length;
+
+            //gli: fix for too big title screens
+	    if (count>SCREENHEIGHT) count=SCREENHEIGHT;
+
+	    while (count--)
 	    { 
 		*dest = *source++; 
 		dest += SCREENWIDTH; 
@@ -273,18 +283,17 @@ V_DrawPatchFlipped
   int		y,
   int		scrn,
   patch_t*	patch ) 
-{ 
-
+{
     int		count;
     int		col; 
-    column_t*	column; 
+    column_t*	column;
     byte*	desttop;
     byte*	dest;
     byte*	source; 
     int		w; 
 	 
     y -= SHORT(patch->topoffset); 
-    x -= SHORT(patch->leftoffset); 
+    x -= SHORT(patch->leftoffset);
 #ifdef RANGECHECK 
     if (x<0
 	||x+SHORT(patch->width) >SCREENWIDTH
@@ -401,6 +410,7 @@ V_DrawPatchDirect
 // V_DrawBlock
 // Draw a linear block of pixels into the view buffer.
 //
+__IRAM_CODE
 void
 V_DrawBlock
 ( int		x,
@@ -449,7 +459,7 @@ V_GetBlock
   int		width,
   int		height,
   byte*		dest ) 
-{ 
+{
     byte*	src; 
 	 
 #ifdef RANGECHECK 

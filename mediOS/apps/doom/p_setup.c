@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	Do all the WAD I/O, get map description,
@@ -25,8 +29,6 @@
 static const char
 rcsid[] = "$Id$";
 
-
-#include <math.h>
 
 #include "z_zone.h"
 

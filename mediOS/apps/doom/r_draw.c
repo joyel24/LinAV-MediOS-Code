@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	The actual span/column drawing functions.
@@ -183,7 +187,7 @@ __IRAM_CODE void R_DrawColumn (void)
 	
 	frac += fracstep4; 
 
-	dest[SCREENWIDTH*4] = colormap[source[frac>>25]]; 
+	dest[SCREENWIDTH*4] = colormap[source[frac>>25]];
 	dest[SCREENWIDTH*5] = colormap[source[(frac+fracstep)>>25]]; 
 	dest[SCREENWIDTH*6] = colormap[source[(frac+fracstep2)>>25]]; 
 	dest[SCREENWIDTH*7] = colormap[source[(frac+fracstep3)>>25]]; 

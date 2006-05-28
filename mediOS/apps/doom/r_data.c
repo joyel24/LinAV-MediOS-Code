@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.5  2006/03/03 18:35:09  sfxgligli
+// added alloca()
+//
 // Revision 1.4  2006/02/08 18:49:52  oxygen77
 // small bugfix from previous CI on Makfiles / build process
 //
@@ -92,9 +95,9 @@ typedef __attribute__ ((packed)) struct
     boolean		__attribute__((packed)) masked;
     short		__attribute__((packed)) width;
     short		__attribute__((packed)) height;
-    void		__attribute__((packed)) **columndirectory;	// OBSOLETE
+    char 		__attribute__((packed)) pad[4];
     short		__attribute__((packed)) patchcount;
-    mappatch_t	patches[1];
+    mappatch_t	        __attribute__((packed)) patches[1];
 } __attribute__((packed)) maptexture_t;
 
 
@@ -131,38 +134,38 @@ typedef struct
 
 
 
-int		firstflat;
-int		lastflat;
-int		numflats;
+__IRAM_DATA int		firstflat;
+__IRAM_DATA int		lastflat;
+__IRAM_DATA int		numflats;
 
-int		firstpatch;
-int		lastpatch;
-int		numpatches;
+__IRAM_DATA int		firstpatch;
+__IRAM_DATA int		lastpatch;
+__IRAM_DATA int		numpatches;
 
-int		firstspritelump;
-int		lastspritelump;
-int		numspritelumps;
+__IRAM_DATA int		firstspritelump;
+__IRAM_DATA int		lastspritelump;
+__IRAM_DATA int		numspritelumps;
 
-int		numtextures;
-texture_t**	textures;
+__IRAM_DATA int		numtextures;
+__IRAM_DATA texture_t**	textures;
 
 
-int*			texturewidthmask;
+__IRAM_DATA int*			texturewidthmask;
 // needed for texture pegging
-fixed_t*		textureheight;		
-int*			texturecompositesize;
-short**			texturecolumnlump;
-unsigned short**	texturecolumnofs;
-byte**			texturecomposite;
+__IRAM_DATA fixed_t*		textureheight;
+__IRAM_DATA int*			texturecompositesize;
+__IRAM_DATA short**			texturecolumnlump;
+__IRAM_DATA unsigned short**	texturecolumnofs;
+__IRAM_DATA byte**			texturecomposite;
 
 // for global animation
-int*		flattranslation;
-int*		texturetranslation;
+__IRAM_DATA int*		flattranslation;
+__IRAM_DATA int*		texturetranslation;
 
 // needed for pre rendering
-fixed_t*	spritewidth;	
-fixed_t*	spriteoffset;
-fixed_t*	spritetopoffset;
+__IRAM_DATA fixed_t*	spritewidth;
+__IRAM_DATA fixed_t*	spriteoffset;
+__IRAM_DATA fixed_t*	spritetopoffset;
 
 lighttable_t	*colormaps;
 
@@ -443,27 +446,21 @@ void R_InitTextures (void)
 
     int*		directory;
     
-    int			temp1;
-    int			temp2;
-    int			temp3;
-
-
-//    printf("in init textures\n");
-    
     // Load the patch names from pnames.lmp.
     name[8] = 0;
     names = W_CacheLumpName ("PNAMES", PU_STATIC);
-    nummappatches = LONG ( *((int *)names) );
+    nummappatches = (names[3]<<24)|(names[2]<<16)|(names[1]<<8)|names[0];
     name_p = names+4;
     patchlookup = malloc (nummappatches*sizeof(*patchlookup));
- //   printf("St0\n");
+
     for (i=0 ; i<nummappatches ; i++)
     {
+	memset(name,0,9);
 	strncpy (name,name_p+i*8, 8);
 	patchlookup[i] = W_CheckNumForName (name);
     }
     Z_Free (names);
-  //  printf("St1\n");
+
     // Load the map texture definitions from textures.lmp.
     // The data is contained in one or two lumps,
     //  TEXTURE1 for shareware, plus TEXTURE2 for commercial.
@@ -471,7 +468,7 @@ void R_InitTextures (void)
     numtextures1 = LONG(*maptex);
     maxoff = W_LumpLength (W_GetNumForName ("TEXTURE1"));
     directory = maptex+1;
-//	printf("St2\n");
+
     if (W_CheckNumForName ("TEXTURE2") != -1)
     {
 	maptex2 = W_CacheLumpName ("TEXTURE2", PU_STATIC);
@@ -485,7 +482,6 @@ void R_InitTextures (void)
 	maxoff2 = 0;
     }
     numtextures = numtextures1 + numtextures2;
-//	printf("St3\n");
     textures = Z_Malloc (numtextures*4, PU_STATIC, 0);
     texturecolumnlump = Z_Malloc (numtextures*4, PU_STATIC, 0);
     texturecolumnofs = Z_Malloc (numtextures*4, PU_STATIC, 0);
@@ -495,20 +491,7 @@ void R_InitTextures (void)
     textureheight = Z_Malloc (numtextures*4, PU_STATIC, 0);
 
     totalwidth = 0;
- //   printf("St4\n");
-    //	Really complex printing shit...
-    temp1 = W_GetNumForName ("S_START");  // P_???????
-    temp2 = W_GetNumForName ("S_END") - 1;
-    temp3 = ((temp2-temp1+63)/64) + ((numtextures+63)/64);
-  //  printf("St5\n");
- /*   printf("[");
-    for (i = 0; i < temp3; i++)
-	printf(" ");
-    printf("         ]");
-    for (i = 0; i < temp3; i++)
-	printf("\x8");
-    printf("\x8\x8\x8\x8\x8\x8\x8\x8\x8\x8");*/
-	
+
     for (i=0 ; i<numtextures ; i++, directory++)
     {
 	if (!(i&63))
@@ -538,23 +521,9 @@ void R_InitTextures (void)
 	texture->height = SHORT(mtexture->height);
 	texture->patchcount = SHORT(mtexture->patchcount);
 
-	/* memcpy() generates a BUS error on Solaris with optimization on */
-//#if 0
-//	memcpy (texture->name, mtexture->name, sizeof(texture->name));
-/*#else
-	{ char *src; char *dst;
-	  src = (char *)mtexture->name;
-	  dst = (char *)texture->name;
-	  for (j=0; j<sizeof(texture->name); ++j )
-	    *dst++ = *src++;
-	}
-#endif*/
-      {
-        int j;
+	memset(texture->name,0,8);
         for(j=0;j<sizeof(texture->name);j++)
           texture->name[j]=mtexture->name[j];
-      }
-
 
       	mpatch = mtexture->patches;
 	patch = texture->patches;
@@ -588,14 +557,14 @@ void R_InitTextures (void)
     Z_Free (maptex1);
     if (maptex2)
 	Z_Free (maptex2);
-    
-    // Precalculate whatever possible.	
+
+    // Precalculate whatever possible.
     for (i=0 ; i<numtextures ; i++)
 	R_GenerateLookup (i);
-    
+
     // Create translation table for global animation.
     texturetranslation = Z_Malloc ((numtextures+1)*4, PU_STATIC, 0);
-    
+
     for (i=0 ; i<numtextures ; i++)
 	texturetranslation[i] = i;
 }

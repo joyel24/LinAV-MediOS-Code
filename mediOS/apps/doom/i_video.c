@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.9  2006/02/06 22:45:48  oxygen77
+// make doom work with new api, we lack of exit() now
+//
 // Revision 1.8  2006/02/03 21:52:50  oxygen77
 // one last change to doom
 //
@@ -67,8 +70,8 @@ rcsid[] = "$Id$";
 char button_to_key[2][NB_BUTTONS]=
   // ingame
  {{KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
-  KEY_F11,KEY_RSHIFT,KEY_RALT,
-  KEY_RCTRL,'1',
+  KEY_F11,'1',KEY_RSHIFT,
+  KEY_RCTRL,KEY_RALT,
   ' ',KEY_ESCAPE},
   // menus
   {KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
@@ -246,18 +249,22 @@ void I_UpdateNoBlit (void)
 //
 
 int prevt=0;
+int frame=0;
 
 void I_FinishUpdate (void)
 {
-/*
-  char s[20];
   int t;
-  t=GET_TIMER_CNT(TMR1);
-  sprintf(s,"%6d %6d\n",t-prevt,35840/(t-prevt));
-  prevt=t;
 
-  uartOutString(s,0);
-*/
+  frame++;
+
+  t=tmr_getTick();
+  if ((t-prevt)>=100){
+    printf("%d fps\n",frame);
+    frame=0;
+    prevt=t;
+  }
+
+
 #ifdef GMINI4XX
   if(menuactive || (gamestate!=GS_LEVEL)){ // not playing?
     // full screen resize
@@ -308,6 +315,7 @@ void I_SetPalette (byte* palette)
 void I_InitGraphics(void)
 {
   gfx_openGraphics();
+  gfx_clearScreen(COLOR_BLACK);
 
   offset1=malloc(SCREENWIDTH*SCREENHEIGHT);
   offset2=malloc(SCREENWIDTH*SCREENHEIGHT+256);
@@ -329,6 +337,7 @@ void I_InitGraphics(void)
 
 void I_ShutdownGraphics(void)
 {
+  gfx_closeGraphics();
 }
 
 void I_StartFrame (void)

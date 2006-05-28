@@ -4,31 +4,32 @@
 #include <stdarg.h>
 
 #ifdef BUILD_STDALONE
-#include <kernel/graphics.h>
-#include <kernel/stdfs.h>
-#include <kernel/malloc.h>
-//#define printf printk
-#include <kernel/buttons.h>
-#include <kernel/timer.h>
-#include <kernel/delay.h>
+    #include <kernel/graphics.h>
+    #include <kernel/stdfs.h>
+    #include <kernel/malloc.h>
+    #include <kernel/buttons.h>
+    #include <kernel/timer.h>
+    #include <kernel/delay.h>
+    #include <kernel/osd.h>
+    #include <kernel/uart.h>
+    #include <kernel/exit.h>
 #else
-#include <api.h>
+    #include <api.h>
 #endif
+
+#include <buttons.h>
+#include <kernel/io.h>
+
+#include <sys_def/section_types.h>
 
 #include <sys_def/ctype.h>
 #include <sys_def/string.h>
-
-
-//#include <kernel/osd.h>
-#include <buttons.h>
-#include <kernel/io.h>
-#include <sys_def/timer.h>
 #include <sys_def/alloca.h>
-#include <sys_def/section_types.h>
-//#include <kernel/uart.h>
-
-//#define __IRAM_CODE
-//#define __IRAM_DATA
+#include <sys_def/timer.h>
+#include <sys_def/font.h>
+#include <sys_def/colordef.h>
+#include <gui/file_browser.h>
+#include <gui/icons.h>
 
 #define stderr -1
 #define stdout -2
@@ -44,6 +45,15 @@
 #define REALSCREENWIDTH 320
 #define REALSCREENHEIGHT 200
 #endif
+/*
+#undef __IRAM_CODE
+#define __IRAM_CODE
+#undef __IRAM_DATA
+#define __IRAM_DATA
+*/
+extern void app_exit();
+
+extern int gui_pal[256][3];
 
 // buttons
 

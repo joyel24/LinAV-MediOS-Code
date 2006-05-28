@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.4  2006/01/24 21:51:39  cjnr11
+// AV support (but with some bugs). Start the Archos FW then Doom
+//
 // Revision 1.3  2006/01/23 17:21:08  sfxgligli
 // - mediOS: Gmini400 new buttons
 // - gDoom: added strafe & speed buttons, cleaned up things that shouldn't have been commited
@@ -131,9 +134,6 @@ void Z_Init (void)
 // Z_Free
 //
 
-#ifdef GMINI4XX
-__IRAM_CODE
-#endif
 void Z_Free (void* ptr)
 {
     memblock_t*		block;
@@ -195,9 +195,6 @@ void Z_Free (void* ptr)
 #define MINFRAGMENT		64
 
 
-#ifdef GMINI4XX
-__IRAM_CODE
-#endif
 void*
 Z_Malloc
 ( int		size,
@@ -211,7 +208,7 @@ Z_Malloc
     memblock_t*	base;
 
     size = (size + 3) & ~3;
-    
+
     // scan through the block list,
     // looking for the first free block
     // of sufficient size,
@@ -219,14 +216,14 @@ Z_Malloc
 
     // account for size of block header
     size += sizeof(memblock_t);
-    
+
     // if there is a free block behind the rover,
     //  back up over them
     base = mainzone->rover;
-    
+
     if (!base->prev->user)
 	base = base->prev;
-	
+        
     rover = base;
     start = base->prev;
 	

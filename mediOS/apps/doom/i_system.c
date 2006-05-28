@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.3  2006/02/06 22:45:48  oxygen77
+// make doom work with new api, we lack of exit() now
+//
 // Revision 1.2  2006/01/19 08:51:51  sfxgligli
 // cleanup & name standardisation in wdt/irq/timers/uart/cpld/gio
 //
@@ -49,7 +52,7 @@ rcsid[] = "$Id$";
 
 
 
-int	mb_used = 6;
+int	mb_used = 8;
 
 
 int I_strncasecmp(char *str1, char *str2, int len)
@@ -89,8 +92,11 @@ int  I_GetHeapSize (void)
 
 byte* I_ZoneBase (int*	size)
 {
+    byte * z;
     *size = mb_used*1024*1024;
-    return (byte *) malloc (*size);
+    z=malloc (*size);
+    memset(z,0,*size);
+    return z;
 }
 
 
@@ -141,9 +147,8 @@ void I_Quit (void)
     I_ShutdownMusic();
     M_SaveDefaults ();
     I_ShutdownGraphics();
-    #warning need exit
-   // exit(0);
-   
+
+    app_exit();
 }
 
 void I_WaitVBL(int count)
@@ -193,6 +198,6 @@ void I_Error (char *error, ...)
 
     D_QuitNetGame ();
     I_ShutdownGraphics();
- #warning need exit   
-   // exit(-1);
+
+    app_exit();
 }
