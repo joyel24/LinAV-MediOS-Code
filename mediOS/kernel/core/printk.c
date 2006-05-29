@@ -13,6 +13,7 @@
 #include <stdarg.h>
 #include <sys_def/string.h>
 #include <sys_def/ctype.h>
+#include <sys_def/colordef.h>
 
 #include <kernel/uart.h>
 #include <kernel/hardware.h>
@@ -31,7 +32,7 @@ void printk(char *fmt, ...)
     va_end(ap);
     uart_outString(debugmembuf,DEBUG_UART);
 
-    con_write(debugmembuf);
+    con_write(debugmembuf,COLOR_ROM_GREEN);
 }
 
 int printf(__const char * fmt, ...)
@@ -41,11 +42,9 @@ int printf(__const char * fmt, ...)
     va_start(ap, fmt);
     res = vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
     va_end(ap);
-    uart_outString("USER:",DEBUG_UART);
     uart_outString(debugmembuf,DEBUG_UART);
 
-    con_write("USER:");
-    con_write(debugmembuf);
+    con_write(debugmembuf,COLOR_ROM_WHITE);
     return res;
 }
 
@@ -53,11 +52,9 @@ int vprintf(__const char * fmt, va_list args)
 {
   int res;
     res = vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, args);
-    uart_outString("USER:",DEBUG_UART);
     uart_outString(debugmembuf,DEBUG_UART);
 
-    con_write("USER:");
-    con_write(debugmembuf);
+    con_write(debugmembuf,COLOR_ROM_WHITE);
     return res;
 }
 

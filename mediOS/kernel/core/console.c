@@ -26,6 +26,7 @@
 #include <sys_def/colordef.h>
 
 #define CON_RING_BUFFER(pos) (con_buffer[(pos)%CON_BUFFER_SIZE])
+#define CON_RING_COLORBUFFER(pos) (con_colorBuffer[(pos)%CON_BUFFER_SIZE])
 
 #define CON_LAST_LINE_Y() ((con_numLines-1)*CON_FONT->height+CON_MARGIN_Y)
 
@@ -49,6 +50,7 @@ struct graphicsBuffer con_gfxStruct = {
 };
 
 char con_buffer[CON_BUFFER_SIZE];
+char con_colorBuffer[CON_BUFFER_SIZE];
 
 int con_bufferStart;
 int con_bufferEnd;
@@ -101,7 +103,7 @@ static void con_drawLine(int start,int end, int y){
   for(i=start;i<=end;++i){
     if(start<con_bufferStart || CON_RING_BUFFER(i)=='\n') continue;
 
-    g8ops.drawChar(CON_FONT,CON_FGCOLOR,CON_BGCOLOR,x,y,CON_RING_BUFFER(i),&con_gfxStruct);
+    g8ops.drawChar(CON_FONT,CON_RING_COLORBUFFER(i),CON_BGCOLOR,x,y,CON_RING_BUFFER(i),&con_gfxStruct);
     x+=CON_FONT->width;
   }
 
@@ -242,7 +244,7 @@ void con_clear(){
   g8ops.fillRect(CON_BGCOLOR,0,0,SCREEN_WIDTH,SCREEN_HEIGHT,&con_gfxStruct);
 }
 
-void con_write(char * text){
+void con_write(char * text, char color){
   int len;
   int free;
   char * p;
@@ -253,6 +255,7 @@ void con_write(char * text){
   while(*p){
     con_bufferEnd++;
     CON_RING_BUFFER(con_bufferEnd)=*p;
+    CON_RING_COLORBUFFER(con_bufferEnd)=color;
     p++;
     len++;
   };

@@ -23,14 +23,7 @@
 
 #define CON_FONT std4x6
 
-
 #define CON_BGCOLOR COLOR_ROM_BLACK
-#define CON_FGCOLOR COLOR_ROM_WHITE
-
-/*
-#define CON_BGCOLOR COLOR_BLACK
-#define CON_FGCOLOR COLOR_WHITE
-*/
 
 #define CON_MARGIN_X 2
 #define CON_MARGIN_Y 2
@@ -40,7 +33,7 @@ void con_screenUpdate();
 void con_screenSwitch(void);
 bool con_screenIsVisible(void);
 void con_screenScroll(int lines);
-void con_write(char * text);
+void con_write(char * text, char color);
 void con_init(void);
 
 #endif /*__CONSOLE_H_*/
