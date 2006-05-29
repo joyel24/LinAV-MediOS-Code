@@ -30,6 +30,8 @@
 
 //#define USE_DMA
 
+int ata_sectorBuffer[SECTOR_SIZE];
+
 int av_cmd_array[]= {
     IDE_CMD_READ_SECTORS,
     IDE_CMD_WRITE_SECTORS
@@ -59,6 +61,10 @@ extern struct tmr_s hd_timer;
 int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_dma)
 {
     int i,j;
+    void * buffer=data;
+    
+    /* use a temporary buffer for unaligned read or writes */
+    if (((unsigned long)data)&0x03) buffer=ata_sectorBuffer;
 
     /* select the right drive */    
     ATA_SELECT_DRIVE(drive);
@@ -119,13 +125,13 @@ int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_
             if(cmd == ATA_DO_READ || cmd == ATA_DO_IDENT)
             {
                 DMA_SET_SRC(DMA_ATA_ADDRESS);
-                DMA_SET_DEST((CALC_BASE(data))+i*SECTOR_SIZE);
+                DMA_SET_DEST((CALC_BASE(buffer)));
                 DMA_SET_SIZE(SECTOR_SIZE);
                 DMA_SET_DEV(DMA_ATA,DMA_SDRAM)
             }
             else
             {
-                DMA_SET_SRC((CALC_BASE(data))+i*SECTOR_SIZE);
+                DMA_SET_SRC((CALC_BASE(buffer)));
                 DMA_SET_DEST(DMA_ATA_ADDRESS);
                 DMA_SET_SIZE(SECTOR_SIZE);
                 DMA_SET_DEV(DMA_SDRAM,DMA_ATA)
@@ -141,16 +147,27 @@ int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_
             {
                 for(j=0;j<SECTOR_SIZE;j+=2)
                 {
-                    outw(inw(IDE_DATA),data+j+i*SECTOR_SIZE);
+                    outw(inw(IDE_DATA),buffer+j);
                 }
             }
             else
             {
                 for(j=0;j<SECTOR_SIZE;j+=2)
                 {
-                    outw(inw(data+j+i*SECTOR_SIZE),IDE_DATA);
+                    outw(inw(buffer+j),IDE_DATA);
                 }
             }
+        }
+
+        if (((unsigned long)data)&0x03)
+        {
+            /* copy temp data to the actual buffer if unaligned */
+            memcpy(data+i*SECTOR_SIZE,buffer,SECTOR_SIZE);
+        }
+        else
+        {
+            /* else increment buffer pos */
+            buffer+=SECTOR_SIZE;
         }
     }
 
