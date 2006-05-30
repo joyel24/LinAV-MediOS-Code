@@ -12,11 +12,14 @@
 #include <kernel/usb_fw.h>
 #include <kernel/kernel.h>
 #include <kernel/evt.h>
+#include <kernel/timer.h>
 
 int kusb_state,kfw_state;
 
 int kusb_fw_status=0;
 int k_usb_fw=0; /* variable to know what is used for connection 1: usb, 2:fw*/
+
+struct tmr_s usbFw_tmr;
 
 int usbFwEnabled(void)
 {
@@ -88,12 +91,42 @@ int FW_isConnected(void)
     return kFWIsConnected();
 }
 
+void usbFw_cableChk(void)
+{
+    if(kusbIsConnected()!=kusb_state)
+    {
+        struct evt_t _evt;
+        kusb_state=kusbIsConnected();
+        printk("[USB FW] usb %s\n",kusb_state==1?"connected":"disconnected");
+        _evt.evt=EVT_USB;
+        _evt.evt_class = CONNECT_CLASS;
+        _evt.data=kusb_state;
+        evt_send(&_evt);
+    }
+    if(kFWIsConnected()!=kfw_state)
+    {
+        struct evt_t _evt;
+        kfw_state=kFWIsConnected();
+        printk("[USB FW] FW %s\n",kfw_state==1?"connected":"disconnected");
+        _evt.evt=EVT_FW_EXT;
+        _evt.evt_class = CONNECT_CLASS;
+        _evt.data=kfw_state;
+        evt_send(&_evt);
+    }
+}
 
 void init_usb_fw(void)
 {
     kusb_state=kusbIsConnected();
     kfw_state=kFWIsConnected();
     kusb_fw_status=0;
-        
-    printk("[init] usb FW (usb %s - FW %s)\n",kusb_state==1?"connected":"disconnected",kfw_state==1?"connected":"disconnected");
+
+    tmr_setup(&usbFw_tmr,"USB/FW cable chk");
+    usbFw_tmr.action = usbFw_cableChk;
+    usbFw_tmr.freeRun = 1;
+    usbFw_tmr.stdDelay=1*HZ; /* 1s period */
+    tmr_start(&usbFw_tmr);
+    
+    printk("[init] usb FW (usb %s - FW %s)\n",
+        kusb_state==1?"connected":"disconnected",kfw_state==1?"connected":"disconnected");
 }

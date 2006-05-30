@@ -21,6 +21,7 @@
 #include <kernel/fm_remote.h>
 
 #include <kernel/ext_module.h>
+#include <kernel/timer.h>
 
 char * module_name[]= {
 /* 0 */    "Unknown module",
@@ -63,6 +64,7 @@ int known_module[]= {
 int connected_module=0;
 
 struct module_actions *actions_array[NB_EXT_MODULES];
+struct tmr_s extModule_tmr;
 
 void process_ext_mod_chg(int res)
 {
@@ -143,6 +145,13 @@ int get_module(void)
     return (res&0xff);
 }
 
+void extModule_Chk(void)
+{
+    int __res=get_module();
+    if(known_module[__res] && __res!=connected_module)
+        process_ext_mod_chg(__res);
+}
+
 void init_ext_module(void)
 {
     /* initial state */
@@ -163,6 +172,11 @@ void init_ext_module(void)
     else
         connected_module=AV_MODULE_NONE;
 
+    tmr_setup(&extModule_tmr,"Ext. Module Chk");
+    extModule_tmr.action = extModule_Chk;
+    extModule_tmr.freeRun = 1;
+    extModule_tmr.stdDelay=1*HZ; /* 1s period */
+    tmr_start(&extModule_tmr);
         
     printk("[init] external module (connected: %s)\n",module_name[connected_module]); 
 }

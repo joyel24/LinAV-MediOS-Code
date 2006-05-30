@@ -26,7 +26,7 @@
 #include <kernel/evt.h>
 
 #include <kernel/fm_remote.h>
-
+#include <kernel/timer.h>
 
 
 #define INI_TXT       "--mediOS--"
@@ -81,6 +81,8 @@ int key_evt_array[NB_KEY][2] = {
     { BTN_ON       , 0x02 }  /* PRESS */
 };
 
+struct tmr_s fmRemote_tmr;
+
 void fm_remote_INT(int irq_num,struct pt_regs * reg)
 {
     char c;
@@ -92,8 +94,12 @@ void fm_remote_INT(int irq_num,struct pt_regs * reg)
             switch(c)
             {
                 case 0xf8:
-                    FM_connected=0;
+                    FM_connected=0;                    
                     nbPingSend=0;
+                    if(fmRemote_tmr.trigger==1)
+                    {
+                        tmr_stop(&fmRemote_tmr);
+                    }
                     break;
                 case 'V':
                     cmd=3;
@@ -162,6 +168,7 @@ void fm_remote_INT(int irq_num,struct pt_regs * reg)
                     nbPingSend=0;
                     inHold=0;
                     FM_do_ini_call();
+                    tmr_start(&fmRemote_tmr);
                     printk("[FM Remote] connected\n");
                     break;
                  default:
@@ -588,6 +595,23 @@ void FM_send_data(char cmd,char * data,int size)
         uart_out(data[i]&0xFF,UART_1);
 }
 
+void fmRemote_chk(void)
+{
+        nbPingSend++;
+        if(nbPingSend>MAX_PING)
+        {
+            FM_connected=0;
+            nbPingSend=0;
+            inHold=0;
+            if(fmRemote_tmr.trigger==1)
+            {
+                tmr_stop(&fmRemote_tmr);
+            }
+            printk("[FM Remote] disconnected\n");
+        }
+        uart_out('v',UART_1);
+}
+
 void init_fm_remote(void)
 {
     char c;
@@ -614,10 +638,15 @@ void init_fm_remote(void)
     contrast=0x00;
 
     irq_changeHandler(IRQ_UART1,fm_remote_INT);
-    /* launch the INT handler once */
+    /* clear uart1 buffer in */
     while(uart_in(&c,UART_1)) /*nothing*/;
-    //fm_remote_INT(IRQ_UART1);
-    /* everything is ok */
+    
+    /* launch fm remote tmr */
+    tmr_setup(&fmRemote_tmr,"FM remote remove chk");
+    fmRemote_tmr.action = fmRemote_chk;
+    fmRemote_tmr.freeRun = 1;
+    fmRemote_tmr.stdDelay=HZ>>2; /* 0.5s period */
+    
     printk("[init] fm remote\n");
 }
 

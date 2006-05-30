@@ -100,20 +100,7 @@ extern int FM_connected;
 extern int nbPingSend;
 extern int inHold;
 
-#define FM_REMOTE_CHK {               \
-    if(FM_connected)                  \
-    {                                 \
-        nbPingSend++;                 \
-        if(nbPingSend>MAX_PING)       \
-        {                             \
-            FM_connected=0;           \
-            nbPingSend=0;             \
-            inHold=0;                 \
-            printk("[FM Remote] disconnected\n"); \
-        }                             \
-        uart_out('v',UART_1);          \
-    }                                 \
-}
+void fmRemote_chk(void);
 
 
 /**************************************** end timer functions */

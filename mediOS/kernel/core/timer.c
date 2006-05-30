@@ -35,40 +35,25 @@ struct tmr_s * tmr_head __IRAM_DATA;
 __IRAM_CODE void tmr_intAction(int irq,struct pt_regs * regs)
 {
     struct tmr_s * ptr=tmr_head;
-    
-    
+        
     tick++;
-    
-    /* HW check */
-    BTN_CHK;
-    
-#ifdef CHK_BAT_POWER 
-    BAT_POWER_CHK;
-#endif
-
-#ifdef CHK_USB_FW
-    USB_FW_CHK;
-#endif
-
-#ifdef HAVE_EXT_MODULE
-    EXT_MODULE_CHK;    
-#endif 
-  
-#ifdef HAVE_FM_REMOTE
-    FM_REMOTE_CHK;    
-#endif
-
-    ATA_PWR_OFF_TASK;
-    
-    
     
     while(ptr!=NULL)
     {
         if(ptr->trigger && ptr->expires<=tick)
         {
-            ptr->trigger=0;
+            if(!ptr->freeRun)
+                ptr->trigger=0;
+                
             if(ptr->action)
                 ptr->action();
+                
+            if(ptr->freeRun && ptr->trigger)
+            {
+                ptr->expires=ptr->stdDelay+tick;
+                if(!(ptr->expires>tick))
+                    ptr->trigger=0;
+            }                
         }
         ptr=ptr->nxt;
     }    
@@ -89,7 +74,9 @@ void tmr_setup(struct tmr_s * tmr_data,char * name)
     tmr_data->expires=0;
     tmr_data->trigger=0;
     tmr_data->name=name;
-
+    tmr_data->freeRun=0;
+    tmr_data->stdDelay=0;
+    
     tmr_data->nxt=tmr_head;
     tmr_data->prev=NULL;
     if(tmr_head)
@@ -107,7 +94,7 @@ void tmr_remove(struct tmr_s * tmr_data)
         tmr_data->prev->nxt=tmr_data->nxt;
 
     if(tmr_data->nxt)
-            tmr_data->nxt->prev=tmr_data->prev;
+        tmr_data->nxt->prev=tmr_data->prev;
 }
 
 void tmr_stop(struct tmr_s * tmr_data)
@@ -117,6 +104,11 @@ void tmr_stop(struct tmr_s * tmr_data)
 
 void tmr_start(struct tmr_s * tmr_data)
 {
+    if(tmr_data->freeRun)
+    {
+        tmr_data->expires=tmr_data->stdDelay+tick;
+    }    
+        
     if(tmr_data->expires>tick)
         tmr_data->trigger=1;
     else
@@ -148,7 +140,8 @@ void tmr_print(void)
     printk("Timer list: (cur tick:%d)\n",tick);
     while(ptr!=NULL)
     {
-        printk("%d: %s, expire:%d\n",tmrnr,ptr->name!=NULL?ptr->name:"UNDEF",ptr->expires);
+        printk("%d: %s, expire:%d trigger=%d,freeRun=%d\n",
+            tmrnr,ptr->name!=NULL?ptr->name:"UNDEF",ptr->expires,ptr->trigger,ptr->freeRun);
         tmrnr++;
         ptr=ptr->nxt;
     }

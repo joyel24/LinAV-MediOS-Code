@@ -16,23 +16,6 @@
 #include <kernel/hardware.h>
 #include <kernel/irq.h>
 
-extern int ata_stopping;
-
-#define ATA_PWR_OFF_TASK {     \
-    int __status;              \
-    if(ata_stopping)           \
-    {                          \
-        ata_stopping++;        \
-        __status=ata_status();   \
-        if(((__status & IDE_STATUS_BSY)==0 && (__status & IDE_STATUS_RDY)!=0) || ata_stopping > 1000) \
-        {                      \
-            if(ata_stopping > 1000) printk("ata_stopping timout\n"); \
-            ata_stopHDEnd();   \
-            ata_stopping = 0;  \
-        }                      \
-    }                          \
-}
-
 #define IDE_CMD_READ_SECTORS              0x20
 #define IDE_CMD_WRITE_SECTORS             0x30
 #define IDE_CMD_IDENTIFY                  0xec
@@ -86,6 +69,8 @@ void arch_ata_selectHD    (void);
 void arch_ata_selectCF    (void);
 void arch_ata_init        (void);
 void arch_ide_intAction   (int irq,struct pt_regs * regs);
+
+void ata_stopTmrFct       (void);
 
 void ide_intAction        (int irq,struct pt_regs * regs);
 

@@ -28,6 +28,8 @@
 #include <kernel/irqs.h>
 #include <kernel/irq.h>
 
+#include <kernel/timer.h>
+
 //#define USE_DMA
 
 int ata_sectorBuffer[SECTOR_SIZE];
@@ -40,6 +42,9 @@ int av_cmd_array[]= {
 extern int hd_sleep_state;
 
 extern struct tmr_s hd_timer;
+
+int ata_stopping = 0;
+struct tmr_s ataStop_tmr;
 
 #define CALC_BASE(ADDR)     (((unsigned int)(ADDR))-SDRAM_START)
 
@@ -183,8 +188,6 @@ int ata_sleep(void)
     return 0;
 }
 
-int ata_stopping = 0;
-
 void ata_stopHD(int mode)
 {
     printk("[ide sleep] beg\n");
@@ -206,6 +209,7 @@ void ata_stopHD(int mode)
     else
     {
         ata_stopping = 1;
+        tmr_start(&ataStop_tmr);
     }
     
 }
@@ -216,7 +220,7 @@ void ata_stopHDEnd(void)
     tmr_stop(&hd_timer);
     hd_sleep_state=1;
     ata_stopping = 0;
-     printk("[ide sleep] end\n");
+    printk("[ide sleep] end\n");
 }
 
 void ata_sofReset(void)
@@ -278,10 +282,37 @@ void ata_selectCF(void)
     arch_ata_selectCF();
 }
 
+void ata_stopTmrFct(void)
+{
+    int __status;
+    
+    if(!ata_stopping)
+        tmr_stop(&ataStop_tmr);
+    
+    if(ata_stopping)
+    {
+        ata_stopping++;
+        __status=ata_status();
+        if(((__status & IDE_STATUS_BSY)==0 && (__status & IDE_STATUS_RDY)!=0) || ata_stopping > 1000)
+        {
+            if(ata_stopping > 1000) printk("ata_stopping timout\n");
+            ata_stopHDEnd();
+            ata_stopping = 0;
+            tmr_stop(&ataStop_tmr);
+        }
+    }
+}
+
 void ata_init(void)
 {
     ata_stopping = 0;
-    arch_ata_init();
+    
+    tmr_setup(&ataStop_tmr,"ata Stop");
+    ataStop_tmr.action   = ata_stopTmrFct;
+    ataStop_tmr.freeRun  = 1;
+    ataStop_tmr.stdDelay = 1; /* 1 tick delay */
+        
+    arch_ata_init();    
 }
 
 void ide_intAction(int irq,struct pt_regs * regs)

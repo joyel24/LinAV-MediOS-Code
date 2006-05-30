@@ -40,6 +40,8 @@ int hd_timer_used[2]={1,1};
 int hd_sleep_state=0;
 struct tmr_s hd_timer;
 
+struct tmr_s pwrCableChk_tmr;
+
 void lcd_setBrightness(int val)
 {
     lcd_bright = val;
@@ -211,15 +213,15 @@ void halt_timer_action(void)
 void lcd_keyPress(void)
 {
     int num=getCurrentTimer();
-    if(lcd_timer_used[num])
-    {
+    /*if(lcd_timer_used[num])
+    {*/
         lcd_on();
 #ifdef HAVE_FM_REMOTE
         if(FM_is_connected())
             FM_lightsON();
 #endif
         lcd_launchTimer();        
-    }
+    //}
 }
 
 void hd_launchTimer(void)
@@ -276,7 +278,8 @@ void chgTimer(void)
     lcd_launchTimer();
     hd_launchTimer();
 
-    printk("DC changed => changing timers (LCD:%d,HALT:%d,HD:%d)\n",
+    printk("DC changed (tick=%d)=> changing timers (LCD:%d,HALT:%d,HD:%d)\n",
+            tick,
             lcd_timer_used[num],
             halt_timer_used[num],
             hd_timer_used[num]);
@@ -300,7 +303,7 @@ void process_DC_change(void)
     chgTimer();
     evt.evt = EVT_PWR;
     evt.evt_class = CONNECT_CLASS;
-    evt.data = (int)kpwrState;
+    evt.data = (void*)kpwrState;
     evt_send(&evt);
     printk("DC connector %s\n",kpwrState==1?"plugged":"unplugged");
 }
@@ -315,6 +318,13 @@ int batLevel(void)
     return GET_BAT_LEVEL;
 }
 
+void pw_cableChk(void)
+{
+    if(POWER_CONNECTED!=kpwrState)
+        process_DC_change();
+}
+
+
 void init_power(void)
 {
     tmr_setup(&lcdOnOff_timer,"lcdOnOff");
@@ -323,6 +333,12 @@ void init_power(void)
     halt_timer.action = halt_timer_action;
     tmr_setup(&hd_timer,"HD");
     hd_timer.action = hd_timer_fct;
+    
+    tmr_setup(&pwrCableChk_tmr,"Power Cable chk");
+    pwrCableChk_tmr.action = pw_cableChk;
+    pwrCableChk_tmr.freeRun = 1;
+    pwrCableChk_tmr.stdDelay=1*HZ; /* 1s period */
+    tmr_start(&pwrCableChk_tmr);
     
     lcd_state=1;
     lcd_bright=10;
@@ -347,6 +363,6 @@ void init_power(void)
     hd_launchTimer();
 
     kpwrState=POWER_CONNECTED; 
-       
+    
     printk("[init] power : Bat level: %x, DC %s connected\n",GET_BAT_LEVEL,kpwrState==0?"not":"is");
 }

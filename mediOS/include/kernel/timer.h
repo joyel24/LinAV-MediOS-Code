@@ -16,10 +16,12 @@
 
 struct tmr_s {
     unsigned long expires;
+    unsigned long stdDelay;
     void (*action)(void);
     struct tmr_s * nxt;
     struct tmr_s * prev;
     int trigger;
+    int freeRun;
     char * name;
 };
 

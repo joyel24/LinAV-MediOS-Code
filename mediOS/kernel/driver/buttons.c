@@ -28,6 +28,10 @@
 
 #include <kernel/console.h>
 
+#include <kernel/timer.h>
+
+struct tmr_s btnChk_tmr;
+
 __IRAM_DATA int btn_state;
 __IRAM_DATA int mx_press[NB_BUTTONS];
 __IRAM_DATA struct btn_repeatParam default_repeatParam = {
@@ -60,11 +64,48 @@ __IRAM_CODE int btn_readState(void)
     return btn_state;
 }
 
+__IRAM_CODE void btn_chkPress(void)
+{    
+    btn_state=arch_btn_readHardware();
+    if(btn_state&BTMASK_OFF)
+    {
+        nb_off_press++;
+        if(nb_off_press>MAX_OFF)
+        {
+            printk("[OFF button] => halt\n");
+            halt_device();
+        }
+    }
+    else
+        nb_off_press = 0;
+        
+    if(btn_state!=0x0)
+    {
+        if(lcd_get_state()==0)
+        {
+            lcd_keyPress();
+            halt_launchTimer();
+        }
+        else
+        {
+            lcd_launchTimer();
+            need_clean=1;
+            btn_processPress(btn_state);
+            halt_launchTimer();
+        }
+    }
+    else if(need_clean)                  \
+    {                                    \
+        need_clean=0;                    \
+        memset(nb_pressed,0x0,sizeof(int)*NB_BUTTONS);\
+        memset(press_step,0x0,sizeof(int)*NB_BUTTONS);\
+    }                                     \
+}
+
 __IRAM_CODE void btn_processPress(int val)
-{
+{    
     int btn;
     struct evt_t evt;
-
     for(btn=0;btn<NB_BUTTONS;btn++)
     {
         if(BTN_NOT_PRESSED(val,btn)) /* the btn is NOT pressed */
@@ -194,6 +235,13 @@ void btn_init(void)
     /* set GIO for ON/OFF to input */
     GIO_DIRECTION(GIO_ON_BTN,GIO_IN);
     GIO_DIRECTION(GIO_OFF_BTN,GIO_IN);
-            
+    
+          
+    tmr_setup(&btnChk_tmr,"btn chk");
+    btnChk_tmr.action = btn_chkPress;
+    btnChk_tmr.freeRun = 1;
+    btnChk_tmr.stdDelay=1; /* 1 tick */
+    tmr_start(&btnChk_tmr);
+      
     printk("[init] buttons\n");
 }

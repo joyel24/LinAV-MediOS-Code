@@ -42,37 +42,6 @@ extern int mx_press[NB_BUTTONS];
 extern int need_clean;
 extern int btn_state;
 
-#define BTN_CHK    {                     \
-    int __val;                           \
-    btn_state=arch_btn_readHardware();   \
-    if(btn_state&BTMASK_OFF)             \
-    {                                    \
-        nb_off_press++;                  \
-        if(nb_off_press>MAX_OFF)         \
-        {                                \
-            printk("[OFF button] => halt\n"); \
-            halt_device();               \
-        }                                \
-    }                                    \
-    else                                 \
-        nb_off_press = 0;                \
-    if(btn_state!=0x0)                   \
-    {                                    \
-        INTERNAL_TMR_CHK(__val);         \
-        if(__val)                        \
-        {                                \
-            need_clean=1;                \
-            btn_processPress(btn_state); \
-        }                                \
-    }                                    \
-    else if(need_clean)                  \
-    {                                    \
-        need_clean=0;                    \
-        memset(nb_pressed,0x0,sizeof(int)*NB_BUTTONS);\
-        memset(press_step,0x0,sizeof(int)*NB_BUTTONS);\
-    }                                     \
-}
-
 struct btn_repeatParam {
     int init_delay;
     int second_delay;
