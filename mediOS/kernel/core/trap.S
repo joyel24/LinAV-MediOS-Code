@@ -116,20 +116,33 @@ trap_irq:
     @
     mrs    r13, cpsr            @ switch to correct mode
     bic    r13, r13, #0x3f      @ preserve F bits (VP do not preserve T bit ! => 3F)
-    orr    r13, r13, #0x13      @ 0x1F for SYS_32,   0x13 for SVC_32
+    orr    r13, r13, #0x1f      @ 0x1F for SYS_32,   0x13 for SVC_32
     orr    r13, r13, #0x80
     msr    cpsr_c, r13          @ switch to correct mode
+    
+    
+    
     @
     @ now real irq handler
     @
-    sub     sp, sp, #72
+    sub     sp, sp, #68
     stmia   sp, {r0 - r12}			@ save r0 - r12
     ldr     r7, .LCsirq
-    add     r5, sp, #72
-    ldmia   r7, {r7 - r9}
+    add     r5, sp, #68
+    ldmia   r7, {r7,r8}
     add     r4, sp, #52
     mov     r6, lr
-    stmia   r4, {r5, r6, r7, r8, r9}	@ save sp_SVC, lr_SVC, pc, cpsr, old_ro
+    stmia   r4, {r5, r6, r7, r8}	@ save sp_SVC, lr_SVC, pc, cpsr
+    mov     r0, sp
+    add     sp, sp, #68
+    mrs     r1, cpsr
+    bic     r1, r1, #0x3f      @ preserve F bits (VP do not preserve T bit ! => 3F)
+    orr     r1, r1, #0x13      @ 0x1F for SYS_32,   0x13 for SVC_32
+    orr     r1, r1, #0x80
+    msr     cpsr_c, r1          @ switch to correct mode
+    mov     sp, r0
+    ldr     r7, .LCsirq
+    str     sp, [r7]
 __irq_loop:
     ldr    R2, =irq_entry
     ldrh   R3, [R2,#2]
@@ -146,6 +159,8 @@ __irq_loop:
     adr    LR, __irq_loop
     mov    PC, R3            @ branch to handler 
 __exit_irq_loop:
+    ldr     r7, .LCsirq
+    ldr     sp, [r7]
     ldr     r0, [sp, #64]    @ irqs are already disabled
     msr     spsr, r0
     ldmia   sp, {r0 - pc}^   @ load r0 - pc, cpsr

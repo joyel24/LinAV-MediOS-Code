@@ -10,10 +10,10 @@
 kernel_entry:
 /* initialize the stacks and disable irq+fiq */
     MSR CPSR_c, #0xD3 @0x80 | 0x40 | 0x13 = 0xD3 [SVC mode, used in SWI and ]
-    mov r0, #0x00008000
+    mov r0, #0x0000000
     mov sp, r0
     MSR CPSR_c, #0xDF @0x80 | 0x40 | 0x1F = 0xDF [SYS mode]
-    ldr r0, =0x00007F00
+    ldr r0, =0x00008000
     mov sp, r0
 /* init lock var for power off */
     ldr r0, =powering_off
