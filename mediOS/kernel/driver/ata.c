@@ -230,7 +230,7 @@ void ata_sofReset(void)
 
 int ata_waitForXfer(void)
 {
-    int i,val,t;
+    int val,t;
     t=tmr_getTick();
     do
     {
@@ -246,7 +246,7 @@ int ata_waitForXfer(void)
 
 int ata_waitForReady(void)
 {
-    int i,val,t;
+    int val,t;
     t=tmr_getTick();
     do
     {
