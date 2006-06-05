@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/kernel/target/arch_GMINI4XX/lcd.h
 *
 *   MediOS project
@@ -18,7 +18,7 @@
 #define SCREEN_WIDTH                      224
 #define SCREEN_REAL_WIDTH                 220
 #define SCREEN_HEIGHT                     176
-#define SCREEN_ORIGIN_X                   8
+#define SCREEN_ORIGIN_X                   110
 #define SCREEN_ORIGIN_Y                   8
 
 #define MAX_COL                           53

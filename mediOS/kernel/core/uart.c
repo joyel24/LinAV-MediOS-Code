@@ -20,15 +20,15 @@
 
 struct pipe UART_PIPES[2];
 
-__IRAM_DATA struct pipe * UART_0_Pipe;
-__IRAM_DATA struct pipe * UART_1_Pipe;
+struct pipe * UART_0_Pipe;
+struct pipe * UART_1_Pipe;
 
-__IRAM_DATA unsigned int uart_addr[2]={
+unsigned int uart_addr[2]={
     UART0_BASE,
     UART1_BASE
 };
 
-__IRAM_CODE void uart_intAction(int irq,struct pt_regs * regs)
+void uart_intAction(int irq,struct pt_regs * regs)
 {
     char c;
     int uart = irq - IRQ_UART0;

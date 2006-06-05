@@ -26,17 +26,10 @@
 
 #include <kernel/exit.h>
 
-/*******************************************************/
-#if 1
-#undef __IRAM_CODE
-#define __IRAM_CODE
-#undef __IRAM_DATA
-#define __IRAM_DATA
-#endif
-/*******************************************************/
-
 #define MAX_CMD_LEN     100
 #define MAX_ARGS        10
+
+#define MEDIOS_PROMPT "mediOS> "
 
 struct pt_regs * cur_regs;
 
@@ -67,9 +60,9 @@ struct cmd_line_s cmd_tab[] = {
     },
     {
         cmd        : "dump",
-        help_str   : "Dumps memory from given address",
+        help_str   : "Dumps memory from given address, usage: dump address size",
         cmd_action : do_memory_dump,
-        nb_args    : 1
+        nb_args    : 2
     },
     {
         cmd        : "reg",
@@ -88,6 +81,18 @@ struct cmd_line_s cmd_tab[] = {
         help_str   : "Reloads the firmware",
         cmd_action : do_reload,
         nb_args    : 0
+    },
+    {
+        cmd        : "in",
+        help_str   : "Reads a value from memory, usage: in address size",
+        cmd_action : do_in,
+        nb_args    : 2
+    },
+    {
+        cmd        : "out",
+        help_str   : "Writes a value to memory, usage: out address size value",
+        cmd_action : do_out,
+        nb_args    : 3
     },
     /* this has to be the last entry */
     {
@@ -109,16 +114,16 @@ struct cmd_line_s cmd_tab[] = {
             __w;                                                                           \
         })
         
-__IRAM_DATA unsigned char * cur_cmd;
-__IRAM_DATA int cur_pos;
+unsigned char * cur_cmd;
+int cur_pos;
 
-__IRAM_DATA unsigned char ** arg_list;
+unsigned char ** arg_list;
 
-__IRAM_CODE void cmd_line_INT(int irq_num,struct pt_regs * regs)
+void cmd_line_INT(int irq_num,struct pt_regs * regs)
 {
     unsigned char c;
     int uart = irq_num - IRQ_UART0;
-    
+
     while(uart_in(&c,uart))
     {
         if(c=='\n' || c=='\r')               /* end of line => add \0 to end the line */
@@ -170,39 +175,39 @@ __IRAM_CODE void cmd_line_INT(int irq_num,struct pt_regs * regs)
                     {
                         cur_pos--;
                         cur_cmd[cur_pos]='\0';
-                        printk("\nmediOS> %s",cur_cmd);
+                        printk("\n"MEDIOS_PROMPT"%s",cur_cmd);
                     }
                     break;
                 default:
                     break;                    
             }
         }
-        
+
         if(cur_pos>MAX_CMD_LEN)            /* can't add more chars => reset everything */
         {
             cur_cmd[0]='\0';
             cur_pos=0;
-        }        
+        }
     }
 }
 
-__IRAM_CODE void process_cmd(struct pt_regs * regs)
+void process_cmd(struct pt_regs * regs)
 {        
     int nb_args=0;    
     struct cmd_line_s * cmd_line;
     unsigned  char * ptr;
     
     cur_regs = regs;
-    
+
     if(cur_pos==1)
     {
-        printk("\nmediOS> ");
+        printk("\n"MEDIOS_PROMPT);
     }
     else
     {
         /* processing the cmd */
         RM_HEAD_SPC(cur_cmd);
-        
+
         /* let's find the cmd name */                
         ptr=FIND_NXT_TOKEN(cur_cmd);
         
@@ -214,7 +219,7 @@ __IRAM_CODE void process_cmd(struct pt_regs * regs)
                 printk("Unknown command: %s\nType help to have the list of command\n",cur_cmd);
                 cur_cmd[0]='\0';
                 cur_pos=0;
-                printk("mediOS> ");
+                printk(MEDIOS_PROMPT);
                 return;
             }                    
         }
@@ -227,7 +232,7 @@ __IRAM_CODE void process_cmd(struct pt_regs * regs)
                 printk("Unknown command: %s\nType help to have the list of command\n",cur_cmd);
                 cur_cmd[0]='\0';
                 cur_pos=0;
-                printk("mediOS> ");
+                printk(MEDIOS_PROMPT);
                 return;
             }
             
@@ -257,7 +262,7 @@ __IRAM_CODE void process_cmd(struct pt_regs * regs)
             printk("%s need more args:\n%s\n",cmd_line->cmd,cmd_line->help_str);
         
         /* put back the prompt */
-        printk("mediOS> ");
+        printk(MEDIOS_PROMPT);
     }
             
     /* Ready to get a new cmd */
@@ -344,28 +349,65 @@ void do_reg_print (unsigned char ** params)
 
 void do_memory_dump (unsigned char ** params)
 {
-   int nAddress = atoi (params[0]);
-   printk("Memory dump from %i:\n", nAddress);
+    int Address = atoi (params[0]);
+    int Size = atoi (params[1]);
 
-   unsigned char* pMemory = (unsigned char*)nAddress;
+    printk("Memory dump from %i (0x%0.8x), %d bytes:\n", Address, Address, Size);
 
-   int i, j;
-   for (i=0;i<16;i++)
-   {
-      printk ("%08X:  ", (unsigned long)pMemory);
-      for (j=0;j<16;j++)
-         printk ("%02X ", pMemory[j]);
-      printk (" |  ");
-      for (j=0;j<16;j++)
-      {
-         unsigned char c = pMemory[j];
-         if (c < 32)
-            c = '?';
-         if (c >= 128)
-            c = '?';
-         printk ("%c", c);
-      }
-      pMemory += 16;
-      printk ("\n");
-   }
+    unsigned char* Memory = (unsigned char*)Address;
+
+    print_data(Memory,Size);
+}
+
+void do_in (unsigned char ** params)
+{
+    int Address = atoi (params[0]);
+    int Size = atoi (params[1]);
+    int Value=0;
+
+    switch (Size){
+        case 1:
+            Value=inb(Address);
+            printk("0x%0.8x=%d (0x%0.2x)\n",Address,Value,Value);
+            return;
+        case 2:
+            Value=inw(Address);
+            printk("0x%0.8x=%d (0x%0.4x)\n",Address,Value,Value);
+            return;
+        case 4:
+            Value=inl(Address);
+            printk("0x%0.8x=%d (0x%0.8x)\n",Address,Value,Value);
+            return;
+        default:
+            printk("Size should be 1, 2 or 4\n");
+            return;
+    }
+}
+
+void do_out (unsigned char ** params)
+{
+    int Address = atoi (params[0]);
+    int Size = atoi (params[1]);
+    int Value = atoi (params[2]);
+
+    switch (Size){
+        case 1:
+            outb(Value,Address);
+            Value=inb(Address);
+            printk("0x%0.8x=%d (0x%0.2x)\n",Address,Value,Value);
+            return;
+        case 2:
+            outw(Value,Address);
+            Value=inw(Address);
+            printk("0x%0.8x=%d (0x%0.4x)\n",Address,Value,Value);
+            return;
+        case 4:
+            outl(Value,Address);
+            Value=inl(Address);
+            printk("0x%0.8x=%d (0x%0.8x)\n",Address,Value,Value);
+            return;
+        default:
+            printk("Size should be 1, 2 or 4\n");
+            return;
+    }
 }

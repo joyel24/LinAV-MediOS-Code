@@ -230,25 +230,33 @@ void ata_sofReset(void)
 
 int ata_waitForXfer(void)
 {
-    int i,val;
-    for(i=0;i<WAIT_XFER_TIMEOUT;i++)
+    int i,val,t;
+    t=tmr_getTick();
+    do
     {
         val=inb(IDE_CONTROL);
         if((val & IDE_STATUS_BSY)==0 && (val & IDE_STATUS_DRQ)!=0)
             return 0;
+        mdelay(1);
     }
+    while((tmr_getTick()-t)<WAIT_XFER_TIMEOUT);
+
     return -1; /* if we are here => we have a timeout */
 }
 
 int ata_waitForReady(void)
 {
-    int i,val;
-    for(i=0;i<WAIT_READY_TIMEOUT;i++)
+    int i,val,t;
+    t=tmr_getTick();
+    do
     {
         val=inb(IDE_CONTROL);
         if((val & IDE_STATUS_BSY)==0 && (val & IDE_STATUS_RDY)!=0)
             return 0;
+        mdelay(1);
     }
+    while((tmr_getTick()-t)<WAIT_READY_TIMEOUT);
+
     return -1; /* if we are here => we have a timeout */
 }
 

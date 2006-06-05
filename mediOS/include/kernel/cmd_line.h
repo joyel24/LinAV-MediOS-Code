@@ -32,6 +32,8 @@ void do_reload (unsigned char ** params);
 void print_handler_info (unsigned char ** params);
 void do_memory_dump (unsigned char ** params);
 void do_reg_print (unsigned char ** params);
+void do_in (unsigned char ** params);
+void do_out (unsigned char ** params);
 
 void init_cmd_line(void);
 

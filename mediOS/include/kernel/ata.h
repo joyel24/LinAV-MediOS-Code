@@ -36,11 +36,11 @@
 #define ATA_WITH_DMA                             1
 #define ATA_NO_DMA                               0
 
-#define WAIT_XFER_TIMEOUT                    0x800000
-#define WAIT_READY_TIMEOUT                   0x800000
+#define WAIT_XFER_TIMEOUT                 1000 //10 seconds
+#define WAIT_READY_TIMEOUT                1000 //10 seconds
 
-#define ATA_FORCE_STOP                   0  /* power off is not split in 2 parts + timer */
-#define ATA_DELAY_STOP                   1  /* power off wait loop is executed in background */
+#define ATA_FORCE_STOP                    0  /* power off is not split in 2 parts + timer */
+#define ATA_DELAY_STOP                    1  /* power off wait loop is executed in background */
 
 #define SECTOR_SIZE      512
 

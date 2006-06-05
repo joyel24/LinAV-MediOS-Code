@@ -117,7 +117,7 @@ static void con_drawScroll(int start,int end,int delta){
     memcpy(&con_gfxBuffer[(start+delta)*SCREEN_WIDTH],&con_gfxBuffer[start*SCREEN_WIDTH],(end-start)*SCREEN_WIDTH);
   }else{
     int i;
-    for (i=end-delta;i>=start;--i){
+    for (i=end;i>=start;--i){
       memcpy(&con_gfxBuffer[(i+delta)*SCREEN_WIDTH],&con_gfxBuffer[i*SCREEN_WIDTH],SCREEN_WIDTH);
     }
   }
@@ -189,7 +189,7 @@ void con_screenUpdate(){
         prevTopPos=topPos;
         topPos=con_nextLineEnd(topPos,true);
 
-        con_drawScroll(CON_MARGIN_Y,con_lastUpdateEndY+CON_FONT->height,CON_FONT->height);
+        con_drawScroll(CON_MARGIN_Y,con_lastUpdateEndY-1,CON_FONT->height);
         con_drawLine(topPos+1,prevTopPos,CON_MARGIN_Y);
       }while(pos>con_screenEnd && topPos<prevTopPos);
     }

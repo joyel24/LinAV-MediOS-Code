@@ -32,19 +32,20 @@
 
 struct tmr_s btnChk_tmr;
 
+__IRAM_DATA int nb_off_press;
 __IRAM_DATA int btn_state;
-__IRAM_DATA int mx_press[NB_BUTTONS];
-__IRAM_DATA struct btn_repeatParam default_repeatParam = {
+
+int mx_press[NB_BUTTONS];
+struct btn_repeatParam default_repeatParam = {
     DEFAULT_INIT_DELAY,
     DEFAULT_SECOND_DELAY,
     DEFAULT_MIN_DELAY,
     DEFAULT_DEC_VALUE
 };
-__IRAM_DATA struct btn_repeatParam * current_repeatParam;
-__IRAM_DATA int nb_pressed[NB_BUTTONS];
-__IRAM_DATA int press_step[NB_BUTTONS];
-__IRAM_DATA int nb_off_press;
-__IRAM_DATA int nb_debug_switch;
+struct btn_repeatParam * current_repeatParam;
+int nb_pressed[NB_BUTTONS];
+int press_step[NB_BUTTONS];
+
 
 
 
@@ -102,7 +103,7 @@ __IRAM_CODE void btn_chkPress(void)
     }                                     \
 }
 
-__IRAM_CODE void btn_processPress(int val)
+void btn_processPress(int val)
 {    
     int btn;
     struct evt_t evt;
@@ -221,7 +222,6 @@ void btn_init(void)
     current_repeatParam = & default_repeatParam;
 
     nb_off_press=0;
-    nb_debug_switch=0;
     need_clean=0;
     btn_state=0;
 
