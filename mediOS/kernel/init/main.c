@@ -62,44 +62,24 @@ void print_boot_info(void)
     tmr_print();
 }
 
+extern int endOfList;
+
 void tst_fct(void)
 {
-    int fd,fd2;
-    fd=open("/avlo.cfg",O_RDONLY);
-    if(fd<0)
+    char * fileName="/test.mp3";
+    sound_initMp3();
+    
+    if(!addPlaylist(fileName))
     {
-        printk("error opening avlo.cfg\n");
-        return;
+        printk("error adding %s to playList\n",fileName);
     }
-   
-    if(vfs_hasOpenNode())
-        printk("Has open files\n");
-    else
-            printk("no open file\n");
-    fd2=open("/menu.cfg",O_RDONLY);
-    if(fd2<0)
+
+    while(!endOfList)
     {
-        printk("error opening menu.cfg\n");
-        return;
-    } 
-    
-    if(vfs_hasOpenNode())
-        printk("Has open files\n");
-    else
-            printk("no open file\n");   
-    close(fd);
-    
-    if(vfs_hasOpenNode())
-        printk("Has open files\n");
-    else
-        printk("no open file\n");
-    close(fd2);
-    
-    if(vfs_hasOpenNode())
-        printk("Has open files\n");
-    else
-        printk("no open file\n");    
-            
+        sound_readMore();
+    }
+
+    sound_freeMp3();
 }
 
 void kernel_start (void)

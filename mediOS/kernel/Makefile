@@ -3,7 +3,7 @@ include ../Makefile.conf
 ASFLAGS  += -I../include
 GCCFLAGS += -I../include
 
-SUBDIRS = init core lib driver gfx fs target
+SUBDIRS = init core lib driver gfx fs snd target
 
 all: builddir subdirs
 

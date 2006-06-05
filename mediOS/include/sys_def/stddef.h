@@ -25,6 +25,9 @@
 #define MIN(a, b)        (((a)<(b))?(a):(b))
 #define MAX(a, b)        (((a)<(b))?(b):(a))
 
+#undef offsetof
+#define offsetof(TYPE, MEMBER) ((int) &((TYPE *)0)->MEMBER)
+
 void exit(int retcode);
 
 #endif

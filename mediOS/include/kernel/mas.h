@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/kernel/mas.h
 *
 *   MediOS project
@@ -14,7 +14,7 @@
 #define __MAS_H
 
 #include <kernel/irq.h>
-
+#include <kernel/sound.h>
 /********************* SOUND player                 ***************************/
 
 #define FREE_SPACE_IN_BUFF(BUFF)                           \
@@ -30,17 +30,7 @@ struct av_peak {
     int right;
 };
 
-typedef struct _SOUND_BUFFER
-{
-    unsigned char* data;
-    unsigned long  size;
-   /* unsigned long  read;
-    unsigned long  write;*/
-    unsigned long  bytes_played;
-    unsigned long  loop_counter;
-    unsigned long  loops_played;
-    struct _SOUND_BUFFER* next_buffer;
-} sound_buffer_s;
+
 
 void dsp_interrupt(int irq,struct pt_regs * regs);
 int sound_buff_write(sound_buffer_s * sound_buffer, int (*reader_fct)(char * data,int count,void* param),
@@ -138,7 +128,9 @@ struct mas_version {
 void    dsp_ctl           (unsigned int cmd, void * arg);
 
 /******************** Mp3 related high level ******************************/
-int mas_IniMp3(void);
+int mas_IniMp3(sound_buffer_s * ptr);
+void mas_startMp3(void);
+void mas_stopMp3(void);
 int mas_stopApps(void);
 int mas_startMp3App(void);
 
