@@ -237,7 +237,6 @@ int ata_waitForXfer(void)
         val=inb(IDE_CONTROL);
         if((val & IDE_STATUS_BSY)==0 && (val & IDE_STATUS_DRQ)!=0)
             return 0;
-        mdelay(1);
     }
     while((tmr_getTick()-t)<WAIT_XFER_TIMEOUT);
 
@@ -253,7 +252,6 @@ int ata_waitForReady(void)
         val=inb(IDE_CONTROL);
         if((val & IDE_STATUS_BSY)==0 && (val & IDE_STATUS_RDY)!=0)
             return 0;
-        mdelay(1);
     }
     while((tmr_getTick()-t)<WAIT_READY_TIMEOUT);
 

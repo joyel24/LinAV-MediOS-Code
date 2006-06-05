@@ -344,7 +344,7 @@ void gfx_openGraphics(void)
 
 void gfx_closeGraphics(void)
 {
-    con_screenSwitch();
+    if(!con_screenIsVisible()) con_screenSwitch();
 }
 
 void gfx_setPlane(int vplane)
