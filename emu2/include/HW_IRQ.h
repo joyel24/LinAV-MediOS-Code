@@ -1,4 +1,4 @@
-/* 
+/*
 *   HW_IRQ.h
 *
 *   AV3XX emulator
@@ -25,21 +25,24 @@
 class HW_IRQ : public HW_access {
     public:
         HW_IRQ();
-                
+
         uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);
-        
+
         bool have_int_IRQ;
         bool have_int_FIQ;
-        
+
         int do_IRQ_cmd(int type,int num);
         void do_IRQ_FIQ(int type,int num);
-        
+
     private:
-        int status[NUM_OF_IRQ];
-        int entry[NUM_OF_IRQ];
-        int enable[NUM_OF_IRQ];
-        
+        int status[NB_OF_REG];
+        int entry[NB_OF_REG];
+        int enable[NB_OF_REG];
+        int eabase;
+        int prio[NB_IRQ];
+        int bloc_size;
+        void calcEntry(void);
 };
 
 #endif // __HW_IRQ_H

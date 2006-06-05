@@ -28,17 +28,23 @@
 #define FLASH_START       0x100000
 #define FLASH_END         0x180000
 #define FLASH_LOAD_OFFSET 0x000000
-
-#define SDRAM_START       0x03000000
-#define SDRAM_END         0x04000000
+#if 1
+#define SDRAM_START       0x00900000
+#define SDRAM_END         0x01900000
 #define SDRAM_LOAD_OFFSET 0x00000000
+#else
+#define SDRAM_START       0x03000000
+#define SDRAM_END         0x014000000
+#define SDRAM_LOAD_OFFSET 0x00000000
+#endif
 
 
 /************************************************************ initial state */
 
 #define START_ADDR        SDRAM_START
-#define STACK_INIT        (IRAM_END - 0x4) 
-#define RESET_INIT_VAL    0xEA03FFFE     
+//#define START_ADDR        FLASH_START
+#define STACK_INIT        (IRAM_END - 0x4)
+#define RESET_INIT_VAL    0xEA03FFFE
 #define INIT_MODE         M_SVC
 
 //#define HAS_VID0
@@ -87,9 +93,16 @@
 #define BASE_STATUS   (IRQ_START+0x0)
 #define BASE_ENTRY    (IRQ_START+0x8)
 #define BASE_ENABLE   (IRQ_START+0x20)
+#define BASE_EABASE   (IRQ_START+0x30)
+#define BASE_INTPRIO  (IRQ_START+0x40)
 
-#define NUM_OF_IRQ 4
-#define REG_NUM(irq) (irq<16?0:1)
+#define NB_INT        28
+
+#define NB_FIQ        2
+#define NB_IRQ        2
+
+#define NB_OF_REG     NB_FIQ+NB_IRQ
+#define REG_NUM(irq)  (irq<16?0:1)
 #define REAL_NUM(irq) (irq<16?irq:irq-16) //get the irq line number in the reg
 
 /********************** GPIO     ****************************************/
@@ -118,7 +131,7 @@
                     \
   "MAS_PWR", "UKN", "I2C_CLK", "I2C_DA", "UKN", "CPLD_MOD_SENSE", "CPLD_SIGNAL", "BCK_LIGHT", \
   "UKN", "UKN", "UKN", "UKN", "OFF", "VIDEO/UART1_TX", "MAS_RTR", "MAS_PR"  \
-} 
+}
 
 #define GPIO_ON_NUM   0x00
 #define GPIO_SPDIF_UART1_TX      0x01
@@ -157,6 +170,8 @@
 #define CLOCK_START   TI_REG_START+0x880
 #define CLOCK_END     TI_REG_START+0x890
 
+#define  MEM_CFG_START TI_REG_START+0x920
+#define  MEM_CFG_STOP TI_REG_START+0x960
 
 /********************** ECR      ****************************************/
 #define ECR_START   TI_REG_START+0x900

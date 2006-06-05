@@ -15,7 +15,7 @@
 
 #include <HW_uart.h>
 
-HW_uart::HW_uart(uint32_t start,uint32_t end,char * name):HW_access(start,end,name)
+HW_uart::HW_uart(int num,char * name):HW_access(UART_START(num),UART_END(num),name)
 {
     tx=0;
     ty=0;
@@ -24,21 +24,16 @@ HW_uart::HW_uart(uint32_t start,uint32_t end,char * name):HW_access(start,end,na
     if_r=0;
     if_w=0;
 
-	  skip=0;
+    skip=0;
 
     char fname[]="uartN";
-    switch(start)
+    if(num!=0 && num!=1)
     {
-        case UART0_START:
-            uartNum=0;
-            break;
-        case UART1_START:
-            uartNum=1;
-            break;
-        default:
-            printf("UART base address is wrong : 0x%08x\n",start);
-            return;
+        printf("UART num is wrong : %d\n",num);
+        return;
     }
+    
+    uartNum=num;
     
     fname[4]=0x30+uartNum;
     fd = fopen(fname, "w");
@@ -140,9 +135,9 @@ uint32_t HW_uart::read(uint32_t addr,int size)
             	  return 0;
         case 0xc:
             if (if_r<if_w)
-            	  return 0x0407;
+            	  return 0x0C07;
             else
-            	  return 0x0403;
+            	  return 0x0C03;
         default:        
             DEBUG_HW(UART_HW_DEBUG,"%s read @0x%08x, size %x\n",name,addr,size);
             break;

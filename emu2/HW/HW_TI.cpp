@@ -30,6 +30,7 @@
 #include <HW_ata.h>
 #include <HW_TI_ver.h>
 #include <HW_ECR.h>
+#include <HW_MemCfg.h>
 #include <HW_OSD.h>
 #include <HW_IRQ.h>
 #include <HW_access.h>
@@ -47,10 +48,10 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld,
     
     add_item(osd);
     
-    uart_list[0]=new HW_uart(0x30300,0x30310,"UART0");
+    uart_list[0]=new HW_uart(0,"UART0");
     add_item(uart_list[0]);
 
-    uart_list[1]=new HW_uart(0x30380,0x30390,"UART1");
+    uart_list[1]=new HW_uart(1,"UART1");
     add_item(uart_list[1]);
 
     add_item(new HW_clock());
@@ -80,6 +81,8 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld,
     add_item(new HW_TI_ver());
     add_item(new HW_ECR());
 
+    add_item(new HW_MemCfg());
+    
     //add_item(new HW_null(0x30700,0x30800,"UKN-0x30700"));
     
     add_item(new HW_null(CCD_START,CCD_END,"CCD"));

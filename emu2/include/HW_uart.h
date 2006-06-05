@@ -28,9 +28,12 @@
 #define TERM_HEIGHT 50
 #define MARGIN 3
 
+#define UART_START(NUM) (NUM==0?UART0_START:NUM==1?UART1_START:0x0)
+#define UART_END(NUM) (NUM==0?UART0_END:NUM==1?UART1_END:0x0)
+
 class HW_uart : public HW_access {
     public:
-        HW_uart(uint32_t start,uint32_t end,char * name);
+        HW_uart(int num,char * name);
         ~HW_uart();
                 
         uint32_t read(uint32_t addr,int size);

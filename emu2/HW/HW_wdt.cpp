@@ -19,7 +19,7 @@
 
 
 
-HW_wdt::HW_wdt(HW_IRQ * HW_irq):HW_access(WDT_START,WDT_END,"wdt")
+HW_wdt::HW_wdt(HW_IRQ * HW_irq):HW_access(MEM_CFG_START,MEM_CFG_START,"mem_cfg")
 {
    
     
