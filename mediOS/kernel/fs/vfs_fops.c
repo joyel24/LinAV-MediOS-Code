@@ -138,6 +138,7 @@ int open(const char * name,int flags)
     /* ok file is opened */
     fd->opened=1;
     fd->position = 0;
+    fd->dirty=0;    
     fd->flags = flags;
 
     /* setup struct */

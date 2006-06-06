@@ -56,6 +56,7 @@ struct fat_entry {
     int nbDirEntries;
 /* folder / file data */
     struct bpb* fat_bpb;
+    
     unsigned int lastcluster;
     unsigned int lastsector;
     unsigned int clusternum;
@@ -69,6 +70,9 @@ struct fat_entry {
     int eof;
     struct file_cache * cache;
     int cache_num;
+    
+    /* vfs link */
+    struct vfs_node * node;
 };
 
 struct file_cache {

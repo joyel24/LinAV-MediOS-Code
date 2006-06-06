@@ -82,7 +82,7 @@ int fat_mount(int drive,unsigned int startsector,struct vfs_node ** mounted_root
     memset(dir_entry,0,sizeof(struct fat_entry));
     dir_entry->firstcluster = dir_entry->lastcluster = root_node->storage_location;
     dir_entry->fat_bpb=fat_bpb;
-
+    dir_entry->node = root_node;
     root_node->custom_data=(void*)dir_entry;
 
     *mounted_root=root_node;
@@ -446,6 +446,7 @@ MED_RET_T fat_addDirEntry(struct vfs_node * dir_node,struct vfs_node * file_node
             } while (dir_entry->sectornum < (int)fat_bpb->bpb_secperclus);
         }
     }
+    
     return MED_OK;
 }
 
@@ -907,7 +908,7 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
 
         new_node->custom_data = (void*)new_entry;
         entry = &new_entry->dir_entry;
-
+        new_entry->node=new_node;
 
         ret_val= fat_readdir(current_dir,entry);
 
@@ -1071,15 +1072,18 @@ MED_RET_T fat_fileOpen(struct vfs_node * opened_file)
             if(!cache_list[i].used)
                 break;
         if(i==MAX_OPEN)
+        {
+            VFS_PRINT("Can't allocate cache\n");
             return -MED_ENOENT;
+        }
         entry->cache=&cache_list[i];
         entry->cache_num=i;
         cache_list[i].used=1;
         entry->cache->cacheOffset=-1;
 
         entry->firstcluster=entry->lastcluster=opened_file->storage_location ;
+        VFS_PRINT("openning at storage_loc=%x\n",opened_file->storage_location);
         entry->lastsector = entry->clusternum = entry->sectornum = entry->eof = 0;
-
     }
     else
         VFS_PRINT("Openning a dir -> nothing to do\n");
@@ -1116,9 +1120,10 @@ MED_RET_T fat_createFile(const char* name,
 
     memset(new_file,0x0,sizeof(struct fat_entry));
     file->custom_data=new_file;
+    new_file->node=file;
     new_file->fat_bpb=((struct fat_entry*)dir->custom_data)->fat_bpb;
     ret_val = fat_addDirEntry(dir, file, name, false, false);
-
+    
     return ret_val;
 }
 

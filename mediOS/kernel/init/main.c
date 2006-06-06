@@ -66,7 +66,7 @@ extern int endOfList;
 
 void tst_fct(void)
 {
-    char * fileName="/test.mp3";
+    /*char * fileName="/test.mp3";
     sound_initMp3();
     
     if(!addPlaylist(fileName))
@@ -79,27 +79,31 @@ void tst_fct(void)
         sound_readMore();
     }
 
-    sound_freeMp3();
+    sound_freeMp3();*/
+    
+    int i;
+    char tmp_buf[256];
+    char tmp_buf2[256];
+    int fd = open("/test.out",O_CREAT|O_RDWR);
+    int nb=write(fd,tmp_buf,256);
+    printk("wrote, %d\n",nb);
+    close(fd);
+    
+    fd=open("/test.out",O_RDONLY);
+    nb=read(fd,tmp_buf2,256);
+    printk("read, %d\n",nb);
+    close(fd);
+    
+    for(i=0;i<256;i++)
+        if(tmp_buf[i]!=tmp_buf2[i])
+        {
+            printk("error at %d\n",i);
+            break;
+        }
 }
 
 void kernel_start (void)
 {
-#if 0
-  {
-    int * p = (int *) MALLOC_START;
-    int * end = (int *) MALLOC_START + MALLOC_SIZE - 32;
-    while (p<end) {
-      *p++ = 0xdeadbeef;
-      *p++ = 0xdeadbeef;
-      *p++ = 0xdeadbeef;
-      *p++ = 0xdeadbeef;
-      *p++ = 0xdeadbeef;
-      *p++ = 0xdeadbeef;
-      *p++ = 0xdeadbeef;
-      *p++ = 0xdeadbeef;
-    }
-  }
-#endif
 
     /* malloc of max space in SDRAM */
     mem_addPool((void*)MALLOC_START,MALLOC_SIZE);

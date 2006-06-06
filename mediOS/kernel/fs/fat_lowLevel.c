@@ -796,6 +796,7 @@ int fat_nextWriteCluster(struct fat_entry * entry,int oldcluster,int* newsector)
             {
                 VFS_PRINT("We have a new file !!\n");
                 entry->firstcluster = cluster;
+                entry->node->storage_location = cluster;
             }
 
             fat_updateFatEntry(fat_bpb, cluster, FAT_EOF_MARK);
