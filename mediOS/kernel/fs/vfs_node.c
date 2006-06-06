@@ -67,10 +67,10 @@ MED_RET_T vfs_nodeInitChild(struct vfs_node * parent,
     /*allocate space for the name*/
     if(name && name->length>0)
     {
-        node->name.str = (char*)malloc(name->length);
+        node->name.str = (char*)malloc(name->length+1);
         if(!node->name.str)
             return -MED_ENOMEM;
-        memcpy(node->name.str,name->str,name->length);
+        memcpy(node->name.str,name->str,name->length+1);
         node->name.length=name->length;
     }
     else
