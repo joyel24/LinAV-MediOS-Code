@@ -66,12 +66,13 @@ struct tmr_s ataStop_tmr;
 int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_dma)
 {
     int i,j;
+    bool unaligned=((unsigned long)data)&0x03;
     void * buffer=data;
-    
-    /* use a temporary buffer for unaligned read or writes */
-    if (((unsigned long)data)&0x03) buffer=ata_sectorBuffer;
 
-    /* select the right drive */    
+    /* use a temporary buffer for unaligned read or writes */
+    if (unaligned) buffer=ata_sectorBuffer;
+
+    /* select the right drive */
     ATA_SELECT_DRIVE(drive);
 
     /* wait drive ready */
@@ -110,6 +111,12 @@ int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_
 
     for(i=0;i<count;i++)
     {
+        if (unaligned)
+        {
+            /* copy data to the temp buffer if unaligned and we're writing*/
+            if(cmd == ATA_DO_WRITE) memcpy(buffer,data+i*SECTOR_SIZE,SECTOR_SIZE);
+        }
+
         if(ata_waitForXfer()<0)
             return 0;
 
@@ -164,10 +171,10 @@ int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_
             }
         }
 
-        if (((unsigned long)data)&0x03)
+        if (unaligned)
         {
-            /* copy temp data to the actual buffer if unaligned */
-            memcpy(data+i*SECTOR_SIZE,buffer,SECTOR_SIZE);
+            /* copy temp data to the actual buffer if unaligned and we're reading*/
+            if(cmd == ATA_DO_READ || cmd == ATA_DO_IDENT) memcpy(data+i*SECTOR_SIZE,buffer,SECTOR_SIZE);
         }
         else
         {
