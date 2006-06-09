@@ -7,11 +7,21 @@ GCCFLAGS += -I../include
 TARGET=libav.a
 DEST=../build/lib
 
-SRC1 = $(wildcard *.c)
-OBJS1 = $(SRC1:%.c=%.o)
-SRC2 = $(wildcard *.s)
-OBJS2 = $(SRC2:%.s=%.o)
-OBJS=$(OBJS1) $(OBJS2)
+
+OBJS = ata.o ctype.o disk.o file.o graphics_32.o graphics.o string.o uart.o cpld.o dir.o fat.o i2c.o
+OBJS += printk.o vsprintf.o delay.o memchr.o memcpy.o memset.o memzero.o strchr.o strrchr.o
+
+ifeq ("$(TARGET_DEVICE)","AV3XX")
+OBJS += osd_DSC25.o graphics_8_DSC25.o tsc2003.o
+endif
+
+ifeq ("$(TARGET_DEVICE)","AV1XX")
+OBJS += osd_DSC25.o graphics_8_DSC25.o
+endif
+
+ifeq ("$(TARGET_DEVICE)","JBMM")
+OBJS += osd_DSC21.o graphics_8_DSC21.o
+endif
 
 SUBDIRS = fonts/ target/
 
@@ -22,9 +32,9 @@ $(TARGET): subdirs $(OBJS)
 	$(RANLIB) $(TARGET)
 	$(MV) $(TARGET) $(DEST)
 
-clean: clean-subdirs   
+clean: clean-subdirs 
 	@rm -f *.o *.O *.bak *~ $(BUILD_DIR)/lib-src/$(TARGET)
-        
+    
 include ../default.rule
 
 # End of Makefile

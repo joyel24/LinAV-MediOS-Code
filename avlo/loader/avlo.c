@@ -14,6 +14,7 @@
 #include <ata.h>
 #include <fat.h>
 #include <fs_io.h>
+#include <gio.h>
 #include <disk.h>
 #include <irq.h>
 #include <kernel.h>
@@ -22,6 +23,7 @@
 #include <buttons.h>
 #include <font.h>
 #include <osd.h>
+#include <uart.h>
 
 #include <colordef.h>
 
@@ -67,6 +69,15 @@ extern struct graphicsBuffer * buffers;
 
 struct avlo_cfg * ptr_cfg;
 
+void printOSD(void)
+{
+
+    int i;
+    for(i=0x30680;i<0x30700;i+=2)
+        printf("@%x = %x\n",i,inw(i));
+
+}
+
 void start_avlo(void)
 {
     int ret,nbCfg,key,redraw;
@@ -75,14 +86,15 @@ void start_avlo(void)
     int pass_key_release=0;
            
     printf("In main AVLO\n");
+        
     init_cpld();
-    
+        
 #ifdef HAVE_IMG
     ini_graphics((unsigned int)bg_img);
 #else
     ini_graphics(0);
 #endif
-    ini_font();
+    //ini_font();
     setPlane(BMAP1);
    // setState(BMAP1,OSD_BITMAP_RAMCLUT |  OSD_BITMAP_ZX2   | OSD_BITMAP_ZY1   |OSD_BITMAP_8BIT|OSD_BITMAP_0TRANS);
     
@@ -90,6 +102,13 @@ void start_avlo(void)
     showPlane(VID1);
 #endif
     showPlane(BMAP1);
+ 
+    //printOSD();
+    /*for(i=0;i<16;i++)
+        for(dd=0;dd<16;dd++)
+            fillRect(i*16+dd,dd*7,i*7,7,7);
+    
+    while(1) ;*/
     
 loopErr:
     ptr_cfg = &default_cfg;
@@ -609,7 +628,7 @@ void drawMenu(int nbCfg)
 
     // clean AVLO txt */
     clearScreen(COLOR_TSP);
-
+    
     /*if(cleanUSBMsg)
     {
         fillRect(COLOR_TSP,60, 100, 200, 40);

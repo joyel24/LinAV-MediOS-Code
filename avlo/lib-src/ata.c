@@ -55,7 +55,8 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
 
     /*select the right drive*/
 
-    //printf("[ata_process_cmd]: mode:%d lba=0x%x count=%d buffer=%08x\n",ata_cmd->xfer_dir,ata_cmd->lba,ata_cmd->count,ata_cmd->data);
+   /* printf("[ata_process_cmd]: mode:%d lba=0x%x count=%d buffer=%08x\n",
+        ata_cmd->xfer_dir,ata_cmd->lba,ata_cmd->count,ata_cmd->data);*/
 
     SELECT_DRIVE(ata_cmd->drive);
 
@@ -84,7 +85,7 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
             break;
     }
 
-    outb(av_cmd_array[ata_cmd->xfer_dir],IDE_COMMAND);
+    //outb(av_cmd_array[ata_cmd->xfer_dir],IDE_COMMAND);
 
     if(((unsigned int)(ata_cmd->data) < SDRAM_START) && ata_cmd->use_dma==ATA_WITH_DMA)
     {
@@ -92,7 +93,7 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
         ata_cmd->use_dma=ATA_NO_DMA;
     }
 
-    //ata_cmd->use_dma=ATA_NO_DMA;
+    ata_cmd->use_dma=ATA_NO_DMA;
 
     for(i=0;i<ata_cmd->count;i++)
     {
@@ -265,6 +266,7 @@ int ata_waitForReady(void)
         if((val & IDE_STATUS_BSY)==0 && (val & IDE_STATUS_RDY)!=0)
             return 0;
     }
+    
     return -1; /* if we are here => we have a timeout */
 }
 

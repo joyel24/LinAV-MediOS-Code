@@ -23,7 +23,7 @@ unsigned int uartAdrr[2]={
 void uartOut(unsigned char data,int uartNum)
 {
     while(!(inw(uartAdrr[uartNum]+UART_SR)&0x400)) /* Nothing */; /* using transmission buffer level */
-    outw(data,uartAdrr[uartNum]+UART_DTRR);
+    outb(data,uartAdrr[uartNum]+UART_DTRR);
 }
 
 void uartOutString(unsigned char * data,int uartNum)

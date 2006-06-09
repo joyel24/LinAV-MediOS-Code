@@ -15,7 +15,7 @@
 #include <string.h>
 
 #include <graphics.h>
-
+void         graphics8_clearScreen       (unsigned int color, struct graphicsBuffer * buff);
 void         graphics8_DrawPixel         (unsigned int color, int x, int y, struct graphicsBuffer * buff);
 unsigned int graphics8_ReadPixel         (int x, int y, struct graphicsBuffer * buff);
 void         graphics8_DrawRect          (unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
@@ -36,6 +36,7 @@ void         graphics8_DrawString    (struct graphicsFont * font, unsigned int c
                                             unsigned char * s, struct graphicsBuffer * buff);
 
 struct graphics_operations g8ops =  {
+        clearScreen       : graphics8_clearScreen,
 	drawPixel         : graphics8_DrawPixel,
 	readPixel         : graphics8_ReadPixel,
 	drawRect          : graphics8_DrawRect,
@@ -49,6 +50,11 @@ struct graphics_operations g8ops =  {
         drawHLine         : graphics8_DrawHLine,
         drawVLine         : graphics8_DrawVLine
 };
+
+void graphics8_clearScreen(unsigned int color, struct graphicsBuffer * buff)
+{
+    fillRect(color,0,0,buff->width,buff->height);
+}
 
 void graphics8_DrawPixel(unsigned int color, int x, int y, struct graphicsBuffer * buff)
 {

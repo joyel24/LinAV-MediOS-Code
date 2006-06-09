@@ -1,5 +1,5 @@
 /*
-*   include/hardware.h
+*   lib/target/arch_AV3XX/osd.c
 *
 *   AvLo - linav project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,16 +10,20 @@
 * KIND, either express of implied.
 */
 
-#ifndef __HARDWARE_H
-#define __HARDWARE_H
+#include <stddef.h>
 
 #include <io.h>
-#include <cpld.h>
+#include <hardware.h>
+#include <kernel.h>
+#include <osd.h>
 
-#define AV3XX_TYPE 1
-#define AV1XX_TYPE 2
-#define JBMM_TYPE  3
-
-#include <target/arch/arch_def.h>
-
-#endif  /* __HARDWARE_H */
+void arch_init_osd(void)
+{
+    osdSetMainConfig(0x1);
+    osdSetMainShift(0x8F, 0x15);
+    
+    outw(0x2182,PREVIEW_BASE); /* preview engine enable/diasble */
+    outw(0x0400,PREVIEW_BASE+0x2);    
+    
+    //outw(0x14,0x30612);
+}

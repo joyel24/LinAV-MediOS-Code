@@ -10,6 +10,10 @@ incdir_AV1XX:
 	@rm -f arch
 	@ln -s arch_AV1XX arch
 
+incdir_JBMM:
+	@rm -f arch
+	@ln -s arch_JBMM arch
+        
 force: clean all        
 
 clean:

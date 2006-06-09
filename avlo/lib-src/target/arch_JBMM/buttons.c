@@ -1,5 +1,5 @@
 /*
-*   include/hardware.h
+*   lib/target/arch_AV3XX/buttons.c
 *
 *   AvLo - linav project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,16 +10,23 @@
 * KIND, either express of implied.
 */
 
-#ifndef __HARDWARE_H
-#define __HARDWARE_H
+#include <stddef.h>
 
 #include <io.h>
-#include <cpld.h>
+#include <gio.h>
+#include <hardware.h>
 
-#define AV3XX_TYPE 1
-#define AV1XX_TYPE 2
-#define JBMM_TYPE  3
+int read_btn(void){
+    int val;
 
-#include <target/arch/arch_def.h>
+    val =  inw(BUTTON_PORT0)&0xF;
+    val|=((inw(BUTTON_PORT1)&0xF)<<4);
 
-#endif  /* __HARDWARE_H */
+    /* ON, OFF keys */
+    if(gio_is_set(GIO_ON_BTN))  val |= (0x1<<8);
+    if(gio_is_set(GIO_OFF_BTN)) val |= (0x1<<9);
+    val = (~val)&0x3FF;
+
+    return val;
+}
+

@@ -56,7 +56,7 @@ struct graphicsBuffer BITMAP_1 = {
 
 struct graphicsBuffer VIDEO_1 = {
     offset             : 0,
-    state              : 0,
+    state              : 0xF0,
     enable             : 0,
     width              : SCREEN_WIDTH,
     real_width         : SCREEN_REAL_WIDTH,
@@ -80,15 +80,6 @@ extern FONT_ID font_table[NBFONT];
 
 int     current_font=0;
 int     current_plane=0;
-
-#define restoreComp(COMP,BUFF)   {  osdSetComponentOffset      (COMP, BUFF.offset); \
-                                    osdSetComponentSize        (COMP, 2*BUFF.real_width, BUFF.height); \
-                                    osdSetComponentPosition    (COMP, BUFF.x, BUFF.y); \
-                                    osdSetComponentSourceWidth (COMP, ((BUFF.width*BUFF.bitsPerPixel)/32)/8); \
-                                    if(BUFF.enable) \
-                                        osdSetComponentConfig  (COMP, BUFF.state|OSD_COMPONENT_ENABLE); \
-                                 }
-
 
 #define restoreComponent(VPLANE,BUFF) osdRestorePlane(buffers_comp[VPLANE],BUFF->offset, \
                 BUFF->x, BUFF->y,                                                        \
@@ -126,6 +117,7 @@ void ini_graphics(unsigned int vid1_address)
     setPalette(gui_pal,256);
 
     ini_font();
+    
     iniComponent(BMAP1,&BITMAP_1,(unsigned int)&screen_BMAP1);
     if(vid1_address!=0)
         iniComponent(VID1,&VIDEO_1,vid1_address);
@@ -261,13 +253,13 @@ int getPlane(void)
 void hidePlane(int vplane)
 {
     buffers[vplane]->enable=0;
-        osdSetComponentConfig(buffers_comp[vplane],0);
+    osdSetComponentConfig(buffers_comp[vplane],0);
 }
 
 void showPlane(int vplane)
 {
     buffers[vplane]->enable=1;
-        osdSetComponentConfig(buffers_comp[vplane],buffers[vplane]->state|OSD_COMPONENT_ENABLE);
+    osdSetComponentConfig(buffers_comp[vplane],buffers[vplane]->state|OSD_COMPONENT_ENABLE(buffers_comp[vplane]));
 }
 
 int isShown(int vplane)
@@ -320,9 +312,7 @@ void getPos(int vplane,int * x,int * y)
 
 void clearScreen(unsigned int color)
 {
-        buffers[current_plane]->gops->fillRect(color,0,0,
-                                buffers[current_plane]->width,
-                                buffers[current_plane]->height,
+        buffers[current_plane]->gops->clearScreen(color,
                                 buffers[current_plane]);
 }
 
@@ -372,9 +362,9 @@ void putS(unsigned int color, unsigned int bg_color, int x, int y, unsigned char
 void getStringS(unsigned char *str, int *w, int *h)
 {
     *w=0;
-        while(*str++)
-          *w += font_table[current_font]->width;
-        *h=font_table[current_font]->height;
+    while(*str++)
+        *w += font_table[current_font]->width;
+    *h=font_table[current_font]->height;
 }
 
 void putC(unsigned int color, unsigned int bg_color, int x, int y, unsigned char s)

@@ -187,13 +187,13 @@ void osdRestorePlane(int component, unsigned int address, int x, int y, int w, i
         switch(component)
         {
             case OSD_VIDEO1:
-                outw((inl(OSD_VID0_1_CONF) & 0xFF00) | (state|OSD_COMPONENT_ENABLE),OSD_VID0_1_CONF);
+                outw((inl(OSD_VID0_1_CONF) & 0xFF00) | (state|OSD_COMPONENT_ENABLE(component)),OSD_VID0_1_CONF);
                 break;
             case OSD_VIDEO2:
-                outw((inl(OSD_VID0_1_CONF) & 0xFF) | ((state|OSD_COMPONENT_ENABLE)<<8),OSD_VID0_1_CONF);
+                outw((inl(OSD_VID0_1_CONF) & 0xFF) | ((state|OSD_COMPONENT_ENABLE(component))<<8),OSD_VID0_1_CONF);
                 break;
             default:
-                outw((state|OSD_COMPONENT_ENABLE),OSD_COMP_CONF(component));
+                outw((state|OSD_COMPONENT_ENABLE(component)),OSD_COMP_CONF(component));
         }
     }
 }
