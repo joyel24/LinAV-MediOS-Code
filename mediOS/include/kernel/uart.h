@@ -34,6 +34,9 @@ int  uart_in         (unsigned char * data,int uartNum);
 void uart_out        (unsigned char data,int uartNum);
 void uart_outString  (unsigned char * data,int uartNum);
 
-void uart_init      (void);
+void uart_init       (void);
+
+void uart_need       (int uart_num);
+void arch_uartNeed   (int uart_num);
 
 #endif

@@ -198,6 +198,11 @@ int ata_sleep(void)
 void ata_stopHD(int mode)
 {
     printk("[ide sleep] beg\n");
+    if(hd_sleep_state)
+    {
+        printk("[ide sleep] HD already stopped => nothing to do\n");
+        return;
+    }
     ata_selectHD();
     ata_sleep();
     if(mode == ATA_FORCE_STOP)

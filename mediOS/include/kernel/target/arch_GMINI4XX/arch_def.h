@@ -30,6 +30,7 @@
 
 /* DEBUG */
 #define DEBUG_UART                        UART_0
+#define CMD_LINE_UART                     UART_0
 
 /* Interrupts */
 

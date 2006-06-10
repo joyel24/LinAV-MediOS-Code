@@ -273,6 +273,7 @@ void process_cmd(struct pt_regs * regs)
 
 void init_cmd_line(void)
 {
+    char c;
     cur_pos=0;
     
     arg_list = (unsigned char**)malloc(sizeof(unsigned char*)*MAX_ARGS);
@@ -280,8 +281,12 @@ void init_cmd_line(void)
     
     cur_cmd[0]='\0';
 
-    irq_changeHandler(IRQ_UART0,cmd_line_INT);
-
+    uart_need(CMD_LINE_UART);
+    
+    irq_changeHandler(CMD_LINE_UART==UART_0?IRQ_UART0:IRQ_UART1,cmd_line_INT);
+        /* clear uart1 buffer in */
+    while(uart_in(&c,UART_1)) /*nothing*/;
+    
     if(!arg_list)
     {
         printk("[init] cmd line, can't allocate memory for args\n");

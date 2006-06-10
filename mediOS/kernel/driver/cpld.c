@@ -15,6 +15,8 @@
 #include <kernel/hardware.h>
 #include <kernel/cpld.h>
 
+#define T_OUT_CPLD_SELECT 10000
+
 int cpld_portState[4]=
 {
     CPLD_PORT0_INIT,
@@ -83,7 +85,7 @@ void cpld_select(int bit_num,int direction)
 
 void cpld_doSelect(void)
 {
-    int res,res2;
+    int res,res2,cnt;
     printk("changing cpld select : %d\n",cpld_portState[CPLD0]);
     outw(cpld_portState[CPLD0],CPLD_PORT0);
     outw(cpld_portState[CPLD0],CPLD_PORT0);
@@ -91,9 +93,16 @@ void cpld_doSelect(void)
     outw(cpld_portState[CPLD0],CPLD_PORT0);
     outw(cpld_portState[CPLD0],CPLD_PORT0);
 
+    //cnt=0;
     res=inw(cpld_portArray[CPLD0]);
-    while((res2=inw(cpld_portArray[CPLD0]))!=res) /* wait for the value to become stable */
+    while((res2=inw(cpld_portArray[CPLD0]))!=res)//||cnt>T_OUT_CPLD_SELECT) /* wait for the value to become stable */
+    {
+        //cnt++;
         res=res2;
+    }
+    
+    /*if(cnt>T_OUT_CPLD_SELECT)
+        printk("[CPLD] Error in doSelect: timout (%x,%x)\n",res,res2);*/
 }
 
 int cpld_getVersion(void){

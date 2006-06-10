@@ -35,7 +35,7 @@ void halt_device(void)
     udelay(100);
     printk("[exit] ready to halt\n");
     clf();
-    outw(0,0x30a1a);
+    //outw(0,0x30a1a);
     while(1) /* nothing */;
 }
 

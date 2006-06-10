@@ -28,8 +28,8 @@
 #define UART1_BASE                        0x00030380
 
 /* DEBUG */
-#define DEBUG_UART              UART_0
-#define CMD_LINE_UART           UART_0
+#define DEBUG_UART              UART_1
+#define CMD_LINE_UART           UART_1
 
 /* Interrupts */
 
@@ -80,7 +80,7 @@
 #define WDT_EXTRST_ARM_RESET              0x0001
 
 /* ide interface */
-#define IDE_BASE                          0x02400000
+#define IDE_BASE                          0x02500000
 
 #define IDE_DATA                          (IDE_BASE+0x000)
 #define IDE_ERROR                         (IDE_BASE+0x080)
@@ -99,7 +99,7 @@
 
 /* CPLD		*/
 
-#define CPLD_BASE                         0x02600000
+#define CPLD_BASE                         0x05100000
 
 #define CPLD_PORT0                        (CPLD_BASE+0x000)
 #define CPLD_PORT1                        (CPLD_BASE+0x100)
@@ -126,16 +126,15 @@
 
 /** BUTTONS **/
 
-#define BUTTON_BASE                       0x02600680
+#define BUTTON_BASE                       0x05100680
 
 #define BUTTON_PORT0          (BUTTON_BASE)
 #define BUTTON_PORT1          (BUTTON_BASE+0x80)
 #define BUTTON_PORT2          (BUTTON_BASE+0x100)
 
 #define READ_BUTTONS(VAL)                {       \
-    VAL =  inw(BUTTON_PORT0)&0x3;            \
-    VAL|=((inw(BUTTON_PORT1)&0x7)<<2);           \
-    VAL|=((inw(BUTTON_PORT2)&0x7)<<5);           \
+    VAL =  inw(BUTTON_PORT0)&0xF;            \
+    VAL|=((inw(BUTTON_PORT1)&0xF)<<4);           \
     /* ON, OFF keys */                           \
     if(gio_is_set(GIO_ON_BTN))  VAL |= (0x1<<8); \
     if(gio_is_set(GIO_OFF_BTN)) VAL |= (0x1<<9); \

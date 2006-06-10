@@ -73,11 +73,19 @@ void uart_restoreIrqHandler(int uartNum)
     irq_changeHandler(uartNum == 0?IRQ_UART0:IRQ_UART1,uart_intAction);
 }
 
+void uart_need(int uart_num)
+{
+    arch_uartNeed(uart_num);
+}
+
 void uart_init(void)
 {
-
-    GIO_DIRECTION(GIO_VID_OUT,GIO_IN); // switch video out to uart in
-
+    int i;
+    for(i=0;i<7;i++)
+        printk("%d:%x\n",i,inw(uart_addr[1]+i*2));
+    
+    uart_need(DEBUG_UART);
+        
     UART_0_Pipe=&UART_PIPES[0];
     UART_1_Pipe=&UART_PIPES[1];
 
@@ -87,5 +95,7 @@ void uart_init(void)
     irq_enable(IRQ_UART0);
     irq_enable(IRQ_UART1);
 
+    
+    
     printk("[init] uart\n");
 }
