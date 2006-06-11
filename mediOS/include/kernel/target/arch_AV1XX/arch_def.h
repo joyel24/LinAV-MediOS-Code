@@ -113,8 +113,6 @@
 /* osd */
 #define OSD_BASE                          0x30680
 
-
-
 /* video in/out */
 #define VIDEO_IO_BASE                     0x30780
 

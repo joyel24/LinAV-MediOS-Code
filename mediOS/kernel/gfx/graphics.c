@@ -54,8 +54,7 @@ struct graphicsBuffer CURSOR_2;
 
 struct graphicsBuffer BITMAP_1_ini = {
     offset             : 0,
-    state              : OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 |
-                    OSD_BITMAP_8BIT | COLOR_TRSP << OSD_BITMAP_A_SHIFT,
+    state              : OSD_BMAP_1_CFG,
     enable             : 0,
     width              : SCREEN_WIDTH,
     real_width         : SCREEN_REAL_WIDTH,
@@ -67,8 +66,7 @@ struct graphicsBuffer BITMAP_1_ini = {
 
 struct graphicsBuffer BITMAP_2_ini = {
     offset             : 0,
-    state              : OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 |
-                    OSD_BITMAP_8BIT | OSD_BITMAP_0TRANS | COLOR_TRSP << OSD_BITMAP_A_SHIFT,
+    state              : OSD_BMAP_2_CFG,
     enable             : 0,
     width              : SCREEN_WIDTH,
     real_width         : SCREEN_REAL_WIDTH,
@@ -80,7 +78,7 @@ struct graphicsBuffer BITMAP_2_ini = {
 
 struct graphicsBuffer VIDEO_1_ini = {
     offset             : 0,
-    state              : 0,
+    state              : OSD_VID_1_CFG,
     enable             : 0,
     width              : SCREEN_WIDTH,
     real_width         : SCREEN_REAL_WIDTH,
@@ -92,7 +90,7 @@ struct graphicsBuffer VIDEO_1_ini = {
 
 struct graphicsBuffer VIDEO_2_ini = {
     offset             : 0,
-    state              : 0,
+    state              : OSD_VID_2_CFG,
     enable             : 0,
     width              : SCREEN_WIDTH,
     real_width         : SCREEN_REAL_WIDTH,
@@ -104,7 +102,7 @@ struct graphicsBuffer VIDEO_2_ini = {
 
 struct graphicsBuffer CURSOR_1_ini = {
     offset             : 0,
-    state              : 0 ,
+    state              : OSD_CUR_1_CFG,
     width              : 0,
     real_width         : 0,
     height             : 0,
@@ -115,7 +113,7 @@ struct graphicsBuffer CURSOR_1_ini = {
 
 struct graphicsBuffer CURSOR_2_ini = {
     offset             : 0,
-    state              : 0 ,
+    state              : OSD_CUR_2_CFG,
     width              : 0,
     real_width         : 0,
     height             : 0,

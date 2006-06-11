@@ -19,16 +19,12 @@
 #include <kernel/usb_fw.h>
 
 #include <gui/icons.h>
+#include <gui/gui.h>
 
 #include <sys_def/colordef.h>
 #include <sys_def/string.h>
 
 #include <evt.h>
-
-
-#define BG_COLOR  COLOR_LIGHT_BLUE
-#define TXT_COLOR COLOR_DARK_GREY
-#define TIME_COLOR COLOR_BLACK
 
 #define FORMAT_MMDDYYYY    0
 #define FORMAT_DDMMYYYY    1
@@ -65,6 +61,10 @@ int time_format=FORMAT_24;
 #define DATE1(DD,MM)   (date_format==FORMAT_DDMMYYYY?DD:MM)
 #define DATE2(DD,MM)   (date_format==FORMAT_DDMMYYYY?MM:DD)
 
+extern struct statusBar_data barData;
+
+int clk_w=0,clk_h=0;
+
 /* draw the current time */
 void drawTime(void)
 {
@@ -73,12 +73,18 @@ void drawTime(void)
     
     if(rtc_getTime(&date_time)==MED_OK)
     {   
-        sprintf(timeSt,"%02d:%02d%s %02d/%02d/%04d",HOUR(date_time.tm_hour),date_time.tm_min,AMPM_ADD(date_time.tm_hour),
-                                                         DATE1(date_time.tm_mday,date_time.tm_mon),
-                                                         DATE2(date_time.tm_mday,date_time.tm_mon),
-                                                         date_time.tm_year);
-        gfx_fillRect(BG_COLOR,135,3,106,10);
-        gfx_putS(TIME_COLOR,BG_COLOR,135,3,timeSt);
+        if(barData.has_date)
+            sprintf(timeSt,"%02d:%02d%s %02d/%02d/%04d",HOUR(date_time.tm_hour),date_time.tm_min,
+                    AMPM_ADD(date_time.tm_hour),
+                    DATE1(date_time.tm_mday,date_time.tm_mon),
+                    DATE2(date_time.tm_mday,date_time.tm_mon),
+                    date_time.tm_year);
+        else
+            sprintf(timeSt,"%02d:%02d%s",HOUR(date_time.tm_hour),date_time.tm_min,
+                    AMPM_ADD(date_time.tm_hour));
+        gfx_fillRect(barData.bg_color,barData.clk_x,barData.clk_y,clk_w,clk_h);
+        gfx_getStringSize(timeSt,&clk_w,&clk_h);
+        gfx_putS(barData.clk_color,barData.bg_color,barData.clk_x,barData.clk_y,timeSt);
     }
 
 }
@@ -126,10 +132,10 @@ void drawBat(void)
         color = COLOR_GREEN;
     }
 
-    gfx_drawRect(COLOR_BLACK,293,2,22,10);
-    gfx_fillRect(COLOR_BLACK,315,4,3,6);
-    gfx_fillRect(BG_COLOR,294,3,20,8);
-    gfx_fillRect(color,294,3,level,8);
+    gfx_drawRect(COLOR_BLACK,barData.bat_x,barData.bat_y,22,10);
+    gfx_fillRect(COLOR_BLACK,barData.bat_x+22,barData.bat_y+2,3,6);
+    gfx_fillRect(barData.bg_color,barData.bat_x+1,barData.bat_y+1,20,8);
+    gfx_fillRect(color,barData.bat_x+1,barData.bat_y+1,level,8);
 #if 0    
     if(fmIsConnected()) /* show bat status on FM remote */
     {
@@ -156,32 +162,32 @@ void drawStatus(void)
     }
     
     if(fwExtState)
-        gfx_drawBitmap(st_fwExtIcon, 242, 4);
+        gfx_drawBitmap(st_fwExtIcon, barData.module_x, barData.module_y);
     /*else
-        fillRect(BG_COLOR,242,4,15,6);*/
+        fillRect(barData.bg_color,242,4,15,6);*/
         
     if(cfState)
-        gfx_drawBitmap(st_cfIcon, 242, 4);
+        gfx_drawBitmap(st_cfIcon, barData.module_x, barData.module_y);
     /*else
-        fillRect(BG_COLOR,242,4,15,6);*/
+        fillRect(barData.bg_color,242,4,15,6);*/
     if(!cfState && !fwExtState)
-        gfx_fillRect(BG_COLOR,242,4,15,6);
+        gfx_fillRect(barData.bg_color,barData.module_x,barData.module_y,15,6);
     
         
     if(usbState)
-        gfx_drawBitmap(st_usbIcon, 260, 4);
+        gfx_drawBitmap(st_usbIcon, barData.pwr_x, barData.pwr_y);
     else
-        gfx_fillRect(BG_COLOR,260,4,15,6);
+        gfx_fillRect(barData.bg_color,barData.pwr_x,barData.pwr_y,15,6);
 
     if(pwrState)
-        gfx_drawBitmap(st_powerIcon, 278, 4);
+        gfx_drawBitmap(st_powerIcon, barData.usb_x, barData.usb_y);
     else
-        gfx_fillRect(BG_COLOR,278,4,15,6);
+        gfx_fillRect(barData.bg_color,barData.usb_x,barData.usb_y,15,6);
 }
 
 void drawLogo(void)
 {
-    gfx_drawBitmap(st_mediosLogo, 2, 2);
+    gfx_drawBitmap(st_mediosLogo, barData.logo_x, barData.logo_y);
 }
 
 void drawGui(void)
@@ -194,16 +200,16 @@ void drawGui(void)
     gfx_getStringSize("M", &w, &h);
 
     /* blue background */
-    gfx_fillRect(BG_COLOR,0,0,320,h+6);
+    gfx_fillRect(barData.bg_color,barData.x,barData.y,barData.w,h+6);
 
     /* nice little shadow */
-    gfx_drawLine(COLOR_BLACK,0,h+5,319,h+5);
-    gfx_drawLine(COLOR_DARK_GREY,0,h+6,319,h+6);
-    gfx_drawLine(COLOR_LIGHT_GREY,0,h+7,319,h+7);
+    gfx_drawLine(COLOR_BLACK,barData.x,barData.y+h+5,barData.w-1,h+5);
+    gfx_drawLine(COLOR_DARK_GREY,barData.x+0,barData.y+h+6,barData.w-1,h+6);
+    gfx_drawLine(COLOR_LIGHT_GREY,barData.x+0,barData.y+h+7,barData.w-1,h+7);
 
     /* show version */
     sprintf(medios_ver,"%d.%d",VER_MAJOR,VER_MINOR);
-    gfx_putS(TXT_COLOR,BG_COLOR,60,3,medios_ver);
+    gfx_putS(barData.ver_color,barData.bg_color,barData.ver_x,barData.ver_y,medios_ver);
 
     /* and time, and battery */
     drawTime();

@@ -48,20 +48,14 @@ int arch_btn_readHardware(void){
     int dir,fn,bt,on_off_fast=0;
     int val;
 
-    dir = (~inw(BUTTON_PORT0))&0x3;
-    fn  = (~inw(BUTTON_PORT1))&0x7;
-    bt  = (~inw(BUTTON_PORT2))&0x7;
+    int port_1 = (~inw(BUTTON_PORT0))&0xF;
+    int port_2 = (~inw(BUTTON_PORT1))&0xF;
+
+    dir = ((port_2 >> 3)&0x1) | (port_1 & 0xc) | ((port_1&0x1)<<1);
+    fn = port_2 & 0x7;
+    bt  = (port_1>>2)&0x1;
     
-    dir = trad_tab[dir|(fn&0x3)<<2];    
-    fn  = (fn&0x4)|(bt&0x3);
-    bt  = (bt>>2)&0x1;
-
-    if(bt && dir)
-    {
-       bt = 0;
-       on_off_fast=0x4;
-    }
-
+    dir = trad_tab[dir];
 
     /* ON/OFF keys */
     if(!GIO_IS_SET(GIO_ON_BTN))  on_off_fast |= (0x1);

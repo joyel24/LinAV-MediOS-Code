@@ -53,6 +53,9 @@ struct browser_data realData = {
 #ifdef AV3XX
     nb_disp_entry   : 22,
 #endif
+#ifdef AV1XX
+    nb_disp_entry   : 11,
+#endif
 
     x_start         : 0,
     y_start         : 0,

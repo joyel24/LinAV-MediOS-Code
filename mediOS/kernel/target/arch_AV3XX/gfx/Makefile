@@ -3,7 +3,7 @@ include ../../../../Makefile.conf
 ASFLAGS  += -I../../../../include
 GCCFLAGS += -I../../../../include
 
-#SUBDIRS = gui
+SUBDIRS = gui
 
 SRC = $(wildcard *.c)
 SRC2 = $(wildcard *.S)

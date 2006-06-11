@@ -38,7 +38,7 @@ char * con_gfxBuffer;
 
 struct graphicsBuffer con_gfxStruct = {
     offset             : 0,
-    state              : OSD_BITMAP_ZX1 | OSD_BITMAP_8BIT | COLOR_TRSP << OSD_BITMAP_A_SHIFT,
+    state              : OSD_CON_BMAP_CFG,
     enable             : 0,
     width              : SCREEN_WIDTH,
     real_width         : SCREEN_REAL_WIDTH,

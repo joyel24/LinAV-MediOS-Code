@@ -152,9 +152,9 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
     int             color=COLOR_BLACK;
     int             select_color=COLOR_BLUE;
     char *          cp;
-#ifdef GMINI4XX
-    char						trimmed_filename[34];
-    int							i;
+#if defined(GMINI4XX) || defined(AV1XX)
+    char            trimmed_filename[34];
+    int             i;
 #endif
     int             type;
     int             H=bdata->entry_height;
@@ -221,7 +221,7 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
         else
             select_color= COLOR_WHITE;
     }
-#ifdef GMINI4XX
+#if defined(GMINI4XX) || defined(AV1XX)
     for(i=0;i<=32;i++)
     {
     	trimmed_filename[i]=dEntry->name[i];

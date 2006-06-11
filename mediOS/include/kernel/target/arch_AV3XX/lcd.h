@@ -13,6 +13,7 @@
 #ifndef __ARCH_LCD_H
 #define __ARCH_LCD_H
 
+#include <kernel/osd.h>
 #include <kernel/cpld.h>
 #include <kernel/gio.h>
 
@@ -26,6 +27,17 @@
 
 #define MAX_COL                           78
 #define MAX_LINE                          38
+
+#define OSD_BMAP_1_CFG      OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 \
+                | OSD_BITMAP_8BIT | COLOR_TRSP << OSD_BITMAP_A_SHIFT
+#define OSD_BMAP_2_CFG      OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 \
+                | OSD_BITMAP_8BIT | OSD_BITMAP_0TRANS | COLOR_TRSP << OSD_BITMAP_A_SHIFT
+#define OSD_VID_1_CFG       0
+#define OSD_VID_2_CFG       0
+#define OSD_CUR_1_CFG       0
+#define OSD_CUR_2_CFG       0
+
+#define OSD_CON_BMAP_CFG    OSD_BITMAP_ZX1 | OSD_BITMAP_8BIT | COLOR_TRSP << OSD_BITMAP_A_SHIFT
 
 #define lcd_ON() { \
     CPLD_SET_PORT2(CPLD_LCD); \

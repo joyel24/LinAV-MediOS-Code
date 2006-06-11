@@ -189,7 +189,7 @@ void kernel_start (void)
 #endif
     do_bkpt();
 
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV1XX)
     gui_start();
 #endif
     /* should we launch HALT */

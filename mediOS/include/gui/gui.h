@@ -13,7 +13,6 @@
 #ifndef __GUI_GUI_H
 #define __GUI_GUI_H
 
-
 #define TYPE_STD      0
 #define TYPE_BACK     1
 #define TYPE_DIR      2
@@ -45,5 +44,19 @@ void gui_sendEvt(int evt_num);
 /* status line */
 void statusBar_ini(void);
 void statusLine_EvtHandler(int evt);
+
+struct statusBar_data {
+    int x,y;
+    int w;
+    int bg_color;
+    int bat_x,bat_y;
+    int clk_x,clk_y,clk_color;
+    int has_date;
+    int logo_x,logo_y;
+    int ver_x,ver_y,ver_color;   
+    int module_x,module_y;
+    int pwr_x,pwr_y;
+    int usb_x,usb_y;
+};
 
 #endif

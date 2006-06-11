@@ -915,6 +915,7 @@ int mas_test_PCM(void)
 }
 #endif
 
+#if 0
 #include "mas_code/mas_pcm_struct.h"
 #include "mas_code/dsp_d0_800_463.h"
 #include "mas_code/dsp_d0_7f8_1.h"
@@ -993,7 +994,7 @@ void mas_i2sInit(void)
     mas_codecWrite(MAS_REG_DA_OUTPUT_MODE,0x0);
 
 }
-
+#endif
 // code from sound_init
     //ini_mas_for_mp3();
 #if 0

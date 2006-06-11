@@ -11,16 +11,15 @@
 */
 
 #include <kernel/graphics.h>
-
 #include <kernel/evt.h>
+#include <kernel/lcd.h>
+
 #include <sys_def/colordef.h>
 #include <sys_def/font.h>
 #include <sys_def/string.h>
+
 #include <gui/msgBox.h>
 #include <gui/icons.h>
-
-#define SCREEN_WIDTH  320
-#define SCREEN_HEIGHT 240
 
 BITMAP * MsgBox_ExclamationBitmap;
 BITMAP * MsgBox_QuestionBitmap;
@@ -168,7 +167,7 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
     gfx_planeSetSize(BMAP2,width,MSGBOX_HEIGHT,8);
 
     // center box
-    posX = SCREEN_WIDTH-width;
+    posX = SCREEN_REAL_WIDTH-width;
     posY = (SCREEN_HEIGHT/2)-(MSGBOX_HEIGHT/2);
 
     gfx_planeSetPos(BMAP2,0x14+posX,0x13+posY);

@@ -44,32 +44,7 @@ struct menu_item * rootMenu=NULL;
 
 struct cfg_menu * current_item=NULL;
 
-
-
-struct menu_data menu_cfg = {
-    useOwnDisp     : 0,
-    x:0,y:0,width:320,height:240,
-    txt_color      : COLOR_BLACK,
-    bg_color       : COLOR_WHITE,
-    select_color   : COLOR_BLUE,
-    sub_color      : COLOR_RED,
-    font           : STD6X9,
-    root           : NULL,
-    do_action      : mainMenu_doAction,
-    on_action      : mainMenu_doOn,
-    off_action     : mainMenu_doOff,
-    f1_action      : mainMenu_doF1,
-    f2_action      : mainMenu_doF2,
-    f3_action      : mainMenu_doF3,
-    item_str       : mainMenu_mkItemStr,
-    submenu_str    : mainMenu_mkSubmenuStr,
-    getSubIcon     : mainMenu_mkSubIcon,
-    getItemIcon    : mainMenu_mkItemIcon,
-    isTxtMenu      : 0,
-    border_color   : COLOR_BLACK,
-    has_border     : 0,
-    title          : NULL,
-};
+extern struct menu_data menu_cfg;
 
 extern int cfg_line_num;
 
@@ -168,7 +143,7 @@ void mainMenu_doF3(void * data) // switch to usb
             gfx_clearScreen(COLOR_WHITE);
             gfx_fontSet(STD8X13);
             gfx_getStringSize(msg1,&w,&h);
-            gfx_putS(COLOR_RED,COLOR_WHITE,(SCREEN_WIDTH-w)/2,(SCREEN_HEIGHT-h)/2,msg1);
+            gfx_putS(COLOR_RED,COLOR_WHITE,(SCREEN_REAL_WIDTH-w)/2,(SCREEN_HEIGHT-h)/2,msg1);
             enableUsbFw();
             usbMode=1;
             mdelay(10);
@@ -260,27 +235,26 @@ void mainMenu_loop(void)
 int mainMenu_ini(void)
 {
     int h,w;
-
+    
     usbMode = 0;
-
+    
+    gfx_getStringSize("M", &w, &h);
     gfx_clearScreen(COLOR_BLACK);
-
-    gfx_putS(COLOR_WHITE,COLOR_BLACK,5,110,"[ini_menu] reading menu file");
+    gfx_putS(COLOR_WHITE,COLOR_BLACK,2,2,"[ini_menu] reading menu file");
     rootMenu = NULL;
     if(mainMenu_load(MENU_FILE_NAME)<0)
     {
-        gfx_putS(COLOR_RED,COLOR_BLACK,5,120,"[ini_menu] Error reading menu => stoping");
+        gfx_putS(COLOR_RED,COLOR_BLACK,2,2+h+2,"[ini_menu] Error reading menu => stoping");
         return -1;
     }
 
-    gfx_getStringSize("M", &w, &h);
+    
     menu_cfg.root=rootMenu;
     menu_cfg.dx=5;
     menu_cfg.dy=h+11;
 
     printk("[ini_menu] menu loaded\n");
-
-    gfx_putS(COLOR_WHITE,COLOR_BLACK,5,120,"[ini_menu] reading icons");
+    gfx_putS(COLOR_WHITE,COLOR_BLACK,2,2+h+2,"[ini_menu] reading icons");
 
     /* loading icons */
     sub_icon=loadIcon("sub_icon.ico");
@@ -297,7 +271,7 @@ int mainMenu_ini(void)
 
     browseData->mode=MODE_NOSELECT;
 
-    gfx_putS(COLOR_WHITE,COLOR_BLACK,5,120,"[ini_menu] finished");
+    gfx_putS(COLOR_WHITE,COLOR_BLACK,2,2+h+2+2,"[ini_menu] finished");
 
     return 0;
 }
