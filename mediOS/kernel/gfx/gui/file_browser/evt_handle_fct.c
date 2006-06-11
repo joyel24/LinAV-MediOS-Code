@@ -69,93 +69,98 @@ MED_RET_T browserEvt(struct browser_data * bdata)
                 }
                 break;
             case BTN_UP:
-                bdata->nselect--;
-    
-                if(bdata->nselect<0)
+                if(bdata->listused) // is there items in the list?
                 {
-                    bdata->nselect=0;
-                    bdata->pos--;
-                    if(bdata->pos<0) // we are at the beg => do wrapping
+                    bdata->nselect--;
+
+                    if(bdata->nselect<0)
                     {
-                        bdata->pos=bdata->listused-bdata->nb_disp_entry;//-1;
-                        if(bdata->pos<0)
+                        bdata->nselect=0;
+                        bdata->pos--;
+                        if(bdata->pos<0) // we are at the beg => do wrapping
                         {
-                            bdata->pos=0;
-                            printAName(bdata,0,0,0,0);
-                            bdata->nselect=bdata->listused-1;
-                            printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,0,1);
+                            bdata->pos=bdata->listused-bdata->nb_disp_entry;//-1;
+                            if(bdata->pos<0)
+                            {
+                                bdata->pos=0;
+                                printAName(bdata,0,0,0,0);
+                                bdata->nselect=bdata->listused-1;
+                                printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,0,1);
+                            }
+                            else
+                            {
+                                bdata->nselect=bdata->listused-bdata->pos-1;
+                                printAllName(bdata);
+                            }
                         }
-                        else
+                        else // not going up, scrolling
                         {
-                            bdata->nselect=bdata->listused-bdata->pos-1;
-                            printAllName(bdata);
+                            gfx_scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
+    					     bdata->width-10, (h)*(bdata->nb_disp_entry), h,0);
+                            printAName(bdata,bdata->pos+bdata->nselect+1,bdata->nselect+1,1,0);
+                            printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);
                         }
+
+                        draw_scrollBar(&browser_scroll, bdata->listused, bdata->pos,bdata->nb_disp_entry+bdata->pos);
                     }
-                    else // not going up, scrolling
+                    else // just going up
                     {
-                        gfx_scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
-					     bdata->width-10, (h)*(bdata->nb_disp_entry), h,0);
-                        printAName(bdata,bdata->pos+bdata->nselect+1,bdata->nselect+1,1,0);
-                        printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);
+                        printAName(bdata,bdata->pos+bdata->nselect+1,bdata->nselect+1,0,0);
+                        printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,0,1);
                     }
-    
-                    draw_scrollBar(&browser_scroll, bdata->listused, bdata->pos,bdata->nb_disp_entry+bdata->pos);
                 }
-                else // just going up
-                {
-                    printAName(bdata,bdata->pos+bdata->nselect+1,bdata->nselect+1,0,0);
-                    printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,0,1);
-                }
-    
                 break;
     
             case BTN_DOWN:
-                bdata->nselect++;
-    
-                if(bdata->nselect+bdata->pos>=bdata->listused)       // jump to beginning
+                if(bdata->listused) // is there items in the list?
                 {
-                    if(bdata->listused<=bdata->nb_disp_entry)
-                    {
-                        printAName(bdata,bdata->pos+bdata->nselect-1,bdata->nselect-1,0,0);
-                        bdata->pos=0;
-                        bdata->nselect=0;
-                        printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,0,1);
-                    }
-                    else
-                    {
-                        bdata->pos=0;
-                        bdata->nselect=0;
-                        printAllName(bdata);
-                    }
+                    bdata->nselect++;
     
-                    draw_scrollBar(&browser_scroll, bdata->listused, bdata->pos,bdata->nb_disp_entry+bdata->pos);
-                }
-                else
-                {
-                    if(bdata->nselect>=bdata->nb_disp_entry)
+                    if(bdata->nselect+bdata->pos>=bdata->listused)       // jump to beginning
                     {
-                        bdata->nselect=bdata->nb_disp_entry-1;
-                        bdata->pos++;
-                        if(bdata->pos+bdata->nb_disp_entry>bdata->listused) // we are at the end => do wrapping
+                        if(bdata->listused<=bdata->nb_disp_entry)
+                        {
+                            printAName(bdata,bdata->pos+bdata->nselect-1,bdata->nselect-1,0,0);
+                            bdata->pos=0;
+                            bdata->nselect=0;
+                            printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,0,1);
+                        }
+                        else
                         {
                             bdata->pos=0;
                             bdata->nselect=0;
                             printAllName(bdata);
                         }
-                        else // not going down, scrolling
-                        {
-                            gfx_scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
-						 bdata->width-10, (h)*(bdata->nb_disp_entry-1), h,1);
-                            printAName(bdata,bdata->pos+bdata->nselect-1,bdata->nselect-1,1,0);
-                            printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);
-                        }
-    
+        
                         draw_scrollBar(&browser_scroll, bdata->listused, bdata->pos,bdata->nb_disp_entry+bdata->pos);
                     }
                     else
                     {
-                        printAName(bdata,bdata->pos+bdata->nselect-1,bdata->nselect-1,0,0);
-                        printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,0,1);
+                        if(bdata->nselect>=bdata->nb_disp_entry)
+                        {
+                            bdata->nselect=bdata->nb_disp_entry-1;
+                            bdata->pos++;
+                            if(bdata->pos+bdata->nb_disp_entry>bdata->listused) // we are at the end => do wrapping
+                            {
+                                bdata->pos=0;
+                                bdata->nselect=0;
+                                printAllName(bdata);
+                            }
+                            else // not going down, scrolling
+                            {
+                                gfx_scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
+    						 bdata->width-10, (h)*(bdata->nb_disp_entry-1), h,1);
+                                printAName(bdata,bdata->pos+bdata->nselect-1,bdata->nselect-1,1,0);
+                                printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);
+                            }
+        
+                            draw_scrollBar(&browser_scroll, bdata->listused, bdata->pos,bdata->nb_disp_entry+bdata->pos);
+                        }
+                        else
+                        {
+                            printAName(bdata,bdata->pos+bdata->nselect-1,bdata->nselect-1,0,0);
+                            printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,0,1);
+                        }
                     }
                 }
                 break;
@@ -163,73 +168,76 @@ MED_RET_T browserEvt(struct browser_data * bdata)
             case BTN_1:
 #endif    
             case BTN_RIGHT:
-                switch(bdata->list[bdata->pos+bdata->nselect].type)
+                if(bdata->listused) // is there items in the list?
                 {
-                    case TYPE_BACK:
-                        upDir(bdata);
-                        if(!viewNewDir(bdata,NULL))
-                        {
-                            stop=1;
-                            break;
-                        }
-                        break;
-                    case TYPE_DIR:
-                        inDir(bdata,bdata->list[bdata->pos+bdata->nselect].name);
-                        if(!viewNewDir(bdata,NULL))
-                        {
-                            stop=1;
-                            break;
-                        }
-                        break;
-                    case TYPE_FILE:
+                    switch(bdata->list[bdata->pos+bdata->nselect].type)
                     {
-                        if(bdata->mode==MODE_STRING)
-                        {
-                            stop=1;
-                            ret=MED_OK;
-                        }
-                        else
-                        {
-                            int type;
-                            char path[PATHLEN];
-                            if(bdata->path[0]=='/' && bdata->path[1]=='\0')
-                                sprintf(path,"/%s",bdata->list[bdata->pos+bdata->nselect].name);
-                            else
-                                sprintf(path,"%s/%s",bdata->path,bdata->list[bdata->pos+bdata->nselect].name);
-                                                       
-                            printk("launching %s\n",path);
-                            type=get_file_type(path);
-                            switch(type)
+                        case TYPE_BACK:
+                            upDir(bdata);
+                            if(!viewNewDir(bdata,NULL))
                             {
-                                case MED_TYPE:
-                                    med_load(path);
-                                    gfx_openGraphics();
-                                    evt_purgeHandler(evt_handler);
-                                    if(!viewNewDir(bdata,NULL))
-                                    {
-                                        stop=1;
-                                    }
-                                    break;
-                                case GB_TYPE:
-                                    {
-                                        char ** argv=(char**)malloc(2*sizeof(char**));
-                                        argv[0]=AO_BOY_BIN;
-                                        argv[1]=path;
-                                        med_loadParam(2,argv);
+                                stop=1;
+                                break;
+                            }
+                            break;
+                        case TYPE_DIR:
+                            inDir(bdata,bdata->list[bdata->pos+bdata->nselect].name);
+                            if(!viewNewDir(bdata,NULL))
+                            {
+                                stop=1;
+                                break;
+                            }
+                            break;
+                        case TYPE_FILE:
+                        {
+                            if(bdata->mode==MODE_STRING)
+                            {
+                                stop=1;
+                                ret=MED_OK;
+                            }
+                            else
+                            {
+                                int type;
+                                char path[PATHLEN];
+                                if(bdata->path[0]=='/' && bdata->path[1]=='\0')
+                                    sprintf(path,"/%s",bdata->list[bdata->pos+bdata->nselect].name);
+                                else
+                                    sprintf(path,"%s/%s",bdata->path,bdata->list[bdata->pos+bdata->nselect].name);
+                                                           
+                                printk("launching %s\n",path);
+                                type=get_file_type(path);
+                                switch(type)
+                                {
+                                    case MED_TYPE:
+                                        med_load(path);
                                         gfx_openGraphics();
-                                        free(argv);
                                         evt_purgeHandler(evt_handler);
                                         if(!viewNewDir(bdata,NULL))
                                         {
                                             stop=1;
                                         }
-                                    }
-                                default:
-                                    printk("Bad type : %d\n",type);
-                                    break;
+                                        break;
+                                    case GB_TYPE:
+                                        {
+                                            char ** argv=(char**)malloc(2*sizeof(char**));
+                                            argv[0]=AO_BOY_BIN;
+                                            argv[1]=path;
+                                            med_loadParam(2,argv);
+                                            gfx_openGraphics();
+                                            free(argv);
+                                            evt_purgeHandler(evt_handler);
+                                            if(!viewNewDir(bdata,NULL))
+                                            {
+                                                stop=1;
+                                            }
+                                        }
+                                    default:
+                                        printk("Bad type : %d\n",type);
+                                        break;
+                                }
                             }
+                            break;
                         }
-                        break;
                     }
                 }
                 break;

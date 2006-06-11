@@ -257,6 +257,8 @@ void printAllName(struct browser_data *bdata)
 
 void printAName(struct browser_data *bdata,int pos, int nselect, int clear, int selected)
 {
+//    if(pos>bdata->listused-1) return;
+
     printName(&bdata->list[pos],nselect,clear,selected,bdata);
 }
 

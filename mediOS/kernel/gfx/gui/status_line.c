@@ -174,13 +174,13 @@ void drawStatus(void)
         gfx_fillRect(barData.bg_color,barData.module_x,barData.module_y,15,6);
     
         
-    if(usbState)
-        gfx_drawBitmap(st_usbIcon, barData.pwr_x, barData.pwr_y);
+    if(pwrState)
+        gfx_drawBitmap(st_powerIcon, barData.pwr_x, barData.pwr_y);
     else
         gfx_fillRect(barData.bg_color,barData.pwr_x,barData.pwr_y,15,6);
 
-    if(pwrState)
-        gfx_drawBitmap(st_powerIcon, barData.usb_x, barData.usb_y);
+    if(usbState)
+        gfx_drawBitmap(st_usbIcon, barData.usb_x, barData.usb_y);
     else
         gfx_fillRect(barData.bg_color,barData.usb_x,barData.usb_y,15,6);
 }

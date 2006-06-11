@@ -24,7 +24,7 @@
 
 struct menu_data menu_cfg = {
     useOwnDisp     : 0,
-    x:0,y:0,width:320,height:240,
+    x:0,y:0,width:220,height:176,
     txt_color      : COLOR_BLACK,
     bg_color       : COLOR_WHITE,
     select_color   : COLOR_BLUE,
@@ -51,21 +51,21 @@ struct statusBar_data barData = {
     x:0,y:0,
     w:SCREEN_REAL_WIDTH,
     bg_color:COLOR_LIGHT_BLUE,
-    bat_x:139,
+    bat_x:159,
     bat_y:2,
-    clk_x:71,
+    clk_x:187,
     clk_y:3,
     clk_color:COLOR_BLACK,
     has_date:0,
     logo_x:0,
     logo_y:2,
     ver_x:52,
-    ver_y:3,  
-    ver_color:COLOR_DARK_BLUE,  
+    ver_y:5,
+    ver_color:COLOR_DARK_BLUE,
     module_x:88,
     module_y:4,
-    pwr_x:106,
+    pwr_x:142,
     pwr_y:4,
-    usb_x:124,
-    usb_y:4    
+    usb_x:123,
+    usb_y:4
 };
