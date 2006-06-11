@@ -10,6 +10,7 @@
 * KIND, either express of implied.
 */
 
+#include <kernel/kernel.h>
 #include <kernel/hardware.h>
 #include <kernel/i2c.h>
 #include <kernel/target/arch/tsc2003.h>
@@ -19,6 +20,7 @@ int tsc2003getVal(char cmdN)
 {
 	unsigned char batVal[2]={0x00,0x00};
 	int i;
+        int res;
 	/*if(i2c_read(TSC_DEVICE, cmdN, cmd, 2)<0)
 	{
 		printk("[I2C - tsc] Error, reading");
@@ -59,7 +61,14 @@ int tsc2003getVal(char cmdN)
 	i2c_notAck();
 	i2c_stop();
 
-	return (((batVal[0] << 4)&0x0FF0) | ((batVal[1]>>4)&0x000F));
+        res = (((batVal[0] << 4)&0x0FF0) | ((batVal[1]>>4)&0x000F));
+        
+        printk("bat = %x",res);
+        
+        res = (res-0x490)/0x44;
+        
+        printk(" => %d\n",res);
+	return res;
 }
 
 

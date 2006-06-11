@@ -37,7 +37,6 @@ void arch_HaltMsg(void)
     int h,w;
     char * msg = "Halting device";
     
-    /*
     gfx_openGraphics();
     
     gfx_clearScreen(COLOR_WHITE);
@@ -47,5 +46,5 @@ void arch_HaltMsg(void)
     gfx_getStringSize(msg,&w,&h);
     
     
-    gfx_putS(COLOR_RED,COLOR_WHITE,(SCREEN_WIDTH-w)/2,(SCREEN_HEIGHT-h)/2,msg);*/
+    gfx_putS(COLOR_RED,COLOR_WHITE,(SCREEN_REAL_WIDTH-w)/2,(SCREEN_HEIGHT-h)/2,msg);
 }

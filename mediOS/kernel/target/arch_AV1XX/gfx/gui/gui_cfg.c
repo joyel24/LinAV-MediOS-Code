@@ -64,8 +64,8 @@ struct statusBar_data barData = {
     ver_color:COLOR_DARK_BLUE,  
     module_x:88,
     module_y:4,
-    pwr_x:106,
+    pwr_x:124,
     pwr_y:4,
-    usb_x:124,
+    usb_x:106,
     usb_y:4    
 };

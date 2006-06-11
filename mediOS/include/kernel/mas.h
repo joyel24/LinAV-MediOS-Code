@@ -54,10 +54,13 @@ void mas_i2sInit(void);
 #define SOUND_REMOVE_MP3_BUFFER   0x000D
 void sound_ctl(unsigned int cmd, void * arg);
 
+
 /********************* init mas                    ***************************/
 void mas_init(void);
 int mas_reset(void);
 int mas_gio_init(void);
+
+int mas_readBat(void);
 
 /********************* Direct config function       ***************************/
 /* register */

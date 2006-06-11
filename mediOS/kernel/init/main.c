@@ -80,26 +80,7 @@ void tst_fct(void)
     }
 
     sound_freeMp3();*/
-    
-    int i;
-    char tmp_buf[100*256];
-    //char tmp_buf2[100*256];
-    int fd = open("/test.out",O_CREAT|O_RDWR);
-    int nb=write(fd,tmp_buf,100*256);
-    printk("wrote, %d\n",nb);
-    close(fd);
-    
-    fd=open("/test.out",O_RDONLY);
-    nb=read(fd,tmp_buf,100*256);
-    printk("read, %d\n",nb);
-    close(fd);
-    /*
-    for(i=0;i<256;i++)
-        if(tmp_buf[i]!=tmp_buf2[i])
-        {
-            printk("error at %d\n",i);
-            break;
-        }*/
+
 }
 
 void kernel_start (void)

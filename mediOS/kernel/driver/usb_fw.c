@@ -100,7 +100,7 @@ void usbFw_cableChk(void)
         printk("[USB FW] usb %s\n",kusb_state==1?"connected":"disconnected");
         _evt.evt=EVT_USB;
         _evt.evt_class = CONNECT_CLASS;
-        _evt.data=kusb_state;
+        _evt.data=(void*)kusb_state;
         evt_send(&_evt);
     }
     if(kFWIsConnected()!=kfw_state)
@@ -110,7 +110,7 @@ void usbFw_cableChk(void)
         printk("[USB FW] FW %s\n",kfw_state==1?"connected":"disconnected");
         _evt.evt=EVT_FW_EXT;
         _evt.evt_class = CONNECT_CLASS;
-        _evt.data=kfw_state;
+        _evt.data=(void*)kfw_state;
         evt_send(&_evt);
     }
 }

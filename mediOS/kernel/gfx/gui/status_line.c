@@ -99,19 +99,20 @@ void drawBat(void)
     if(pwrState == 0)
     {
         power = batLevel();
-        if(power < 1320)
+       
+        if(power < 2)
             color = COLOR_DARK_RED;
-        else if(power < 1400)
+        else if(power < 4)
             color = COLOR_RED;
-        else if(power < 1480)
+        else if(power < 6)
             color = COLOR_ORANGE2;
         else
             color = COLOR_GREEN;
 
-        if(power > 1200)
-            level = (int)(power - 1300) / 15;
-        if(level > 20)
-            level = 20;
+        if(power > 2)
+            level = (int)(power - 1) * 3;
+        if(level > 21)
+            level = 21;
     }
     else if(pwrState == 1)
     {
@@ -122,7 +123,7 @@ void drawBat(void)
         else if(chargeProgress == 2)
             level = 14;
         else
-            level = 20;
+            level = 21;
 
         if(chargeProgress < 3)
             chargeProgress++;
@@ -132,9 +133,9 @@ void drawBat(void)
         color = COLOR_GREEN;
     }
 
-    gfx_drawRect(COLOR_BLACK,barData.bat_x,barData.bat_y,22,10);
-    gfx_fillRect(COLOR_BLACK,barData.bat_x+22,barData.bat_y+2,3,6);
-    gfx_fillRect(barData.bg_color,barData.bat_x+1,barData.bat_y+1,20,8);
+    gfx_drawRect(COLOR_BLACK,barData.bat_x,barData.bat_y,23,10);
+    gfx_fillRect(COLOR_BLACK,barData.bat_x+23,barData.bat_y+2,3,6);
+    gfx_fillRect(barData.bg_color,barData.bat_x+1,barData.bat_y+1,21,8);
     gfx_fillRect(color,barData.bat_x+1,barData.bat_y+1,level,8);
 #if 0    
     if(fmIsConnected()) /* show bat status on FM remote */

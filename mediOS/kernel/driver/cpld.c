@@ -85,7 +85,8 @@ void cpld_select(int bit_num,int direction)
 
 void cpld_doSelect(void)
 {
-    int res,res2,cnt;
+    int res,res2;
+    //int cnt;
     printk("changing cpld select : %d\n",cpld_portState[CPLD0]);
     outw(cpld_portState[CPLD0],CPLD_PORT0);
     outw(cpld_portState[CPLD0],CPLD_PORT0);

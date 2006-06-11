@@ -289,6 +289,30 @@ int mas_pio_read(void * buffer,int maxSize)
 }
 
 /********************* Direct config i2c read/write ***************************/
+int mas_readBat(void)
+{
+    int base_val;
+    int threshold=0xF;
+    
+    base_val=mas_read_direct_config(MAS_DCFR)&0x3FF;
+    while(1)
+    {
+        mas_write_direct_config(MAS_DCFR,base_val|(threshold<<10));
+        mdelay(2);
+        if(mas_read_direct_config(MAS_DCFR)&0x8000)
+            break;
+        threshold--;
+        if(threshold==0)
+            break;
+    }
+    
+    mas_write_direct_config(MAS_DCFR,base_val);
+    //printk("[mas] readBat: %d (base=%x)\n",threshold,base_val);
+    return threshold;
+}
+
+
+/********************* Direct config i2c read/write ***************************/
 
 int mas_read_direct_config(int reg)
 {

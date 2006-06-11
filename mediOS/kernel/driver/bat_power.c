@@ -212,7 +212,7 @@ void halt_timer_action(void)
 
 void lcd_keyPress(void)
 {
-    int num=getCurrentTimer();
+    //int num=getCurrentTimer();
     /*if(lcd_timer_used[num])
     {*/
         lcd_on();

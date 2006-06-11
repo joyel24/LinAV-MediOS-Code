@@ -1,5 +1,5 @@
 /* 
-*   include/kernel/target/arch_AV3XX.bat_power.h
+*   include/kernel/target/arch_AV1XX/bat_power.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -14,6 +14,7 @@
 #define __ARCH_BAT_POWER_H
 
 #include <kernel/io.h>
+#include <kernel/mas.h>
 
 /** power state **/
 
@@ -22,7 +23,7 @@
 
 /** Bat level **/
 
-#define GET_BAT_LEVEL -1
+#define GET_BAT_LEVEL (mas_readBat())
 
 
 #endif

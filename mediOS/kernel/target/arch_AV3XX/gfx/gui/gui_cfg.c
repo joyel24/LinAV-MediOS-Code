@@ -56,7 +56,7 @@ struct statusBar_data barData = {
     clk_x:135,
     clk_y:3,
     clk_color:COLOR_BLACK,
-    has_date:0,
+    has_date:1,
     logo_x:2,
     logo_y:2,
     ver_x:60,
@@ -64,8 +64,8 @@ struct statusBar_data barData = {
     ver_color:COLOR_DARK_GREY,  
     module_x:242,
     module_y:4,
-    pwr_x:260,
+    pwr_x:278,
     pwr_y:4,
-    usb_x:278,
+    usb_x:260,
     usb_y:4    
 };

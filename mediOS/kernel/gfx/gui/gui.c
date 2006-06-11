@@ -24,8 +24,6 @@
 
 void gui_start(void)
 {
-    int evt_hand,evt;
-    
     iniIcon();
     iniBrowser();
     gfx_openGraphics();
