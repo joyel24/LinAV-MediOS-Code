@@ -48,12 +48,11 @@ unsigned short swap16 (unsigned short source)
 
 SNSS_RETURN_CODE SNSS_ReadBlockHeader (SnssBlockHeader *header, SNSS_FILE *snssFile)
 {
-   unsigned char *headerBytes;//[12];
+   unsigned char *headerBytes=malloc(12);
 
-	headerBytes=(unsigned char*)malloc(12);
-   if (read (snssFile->fp,headerBytes, 12) != 1)
+   if (read (snssFile->fp,headerBytes, 12)<=0)
    {
-   	  free(headerBytes);
+      free(headerBytes);
       return SNSS_READ_FAILED;
    }
    strncpy (header->tag, &headerBytes[0], TAG_LENGTH);
@@ -62,6 +61,7 @@ SNSS_RETURN_CODE SNSS_ReadBlockHeader (SnssBlockHeader *header, SNSS_FILE *snssF
    header->blockVersion = swap32 (header->blockVersion);
    header->blockLength = headerBytes[11]<<24|headerBytes[10]<<16|headerBytes[9]<<8|headerBytes[8];//*((unsigned int *) &headerBytes[8]);
    header->blockLength = swap32 (header->blockLength);
+
    free(headerBytes);
    return SNSS_OK;
 }
@@ -70,7 +70,7 @@ SNSS_RETURN_CODE SNSS_ReadBlockHeader (SnssBlockHeader *header, SNSS_FILE *snssF
 
 SNSS_RETURN_CODE SNSS_WriteBlockHeader (SnssBlockHeader *header, SNSS_FILE *snssFile)
 {
-   unsigned char headerBytes[12];
+   unsigned char *headerBytes=malloc(12);
    unsigned int tempInt;
 
    strncpy (&headerBytes[0], header->tag, TAG_LENGTH);
@@ -87,11 +87,13 @@ SNSS_RETURN_CODE SNSS_WriteBlockHeader (SnssBlockHeader *header, SNSS_FILE *snss
    headerBytes[10] = ((unsigned char *) &tempInt)[2];
    headerBytes[11] = ((unsigned char *) &tempInt)[3];
 
-   if (write (snssFile->fp,headerBytes, 12) != 1)
+   if (write (snssFile->fp,headerBytes, 12)<=0)
    {
+      free(headerBytes);
       return SNSS_WRITE_FAILED;
    }
 
+   free(headerBytes);
    return SNSS_OK;
 }
 
@@ -137,7 +139,7 @@ SNSS_GetErrorString (SNSS_RETURN_CODE code)
 
 SNSS_RETURN_CODE SNSS_ReadFileHeader (SNSS_FILE *snssFile)
 {
-   if (read (snssFile->fp, snssFile->headerBlock.tag, 4) != 1)
+   if (read (snssFile->fp, snssFile->headerBlock.tag, 4)<=0)
    {
       return SNSS_READ_FAILED;
    }
@@ -149,7 +151,7 @@ SNSS_RETURN_CODE SNSS_ReadFileHeader (SNSS_FILE *snssFile)
    
    snssFile->headerBlock.tag[4] = '\0';
 
-   if (read (snssFile->fp, &snssFile->headerBlock.numberOfBlocks, sizeof (unsigned int)) != 1)
+   if (read (snssFile->fp, &snssFile->headerBlock.numberOfBlocks, sizeof (unsigned int))<=0)
    {
       return SNSS_READ_FAILED;
    }
@@ -173,7 +175,7 @@ SNSS_RETURN_CODE SNSS_WriteFileHeader (SNSS_FILE *snssFile)
    writeBuffer[6] = ((unsigned char *) &tempInt)[2];
    writeBuffer[7] = ((unsigned char *) &tempInt)[3];
 
-   if (write (snssFile->fp, writeBuffer, 8) != 1)
+   if (write (snssFile->fp, writeBuffer, 8)<=0)
    {
       return SNSS_WRITE_FAILED;
    }
@@ -200,7 +202,7 @@ SNSS_OpenFile (SNSS_FILE **snssFile, const char *filename, SNSS_OPEN_MODE mode)
 
    else
    {
-      (*snssFile)->fp = open (filename, O_RDWR);
+      (*snssFile)->fp = open (filename, O_RDWR | O_CREAT);
       (*snssFile)->headerBlock.numberOfBlocks = 0;
    }
 
@@ -263,7 +265,7 @@ SNSS_GetNextBlockType (SNSS_BLOCK_TYPE *blockType, SNSS_FILE *snssFile)
 
    //pos=ftell(snssFile->fp);
    tagBuffer=(unsigned char*)malloc(TAG_LENGTH+1);
-   if (read (snssFile->fp, tagBuffer, TAG_LENGTH) != 1)
+   if (read (snssFile->fp, tagBuffer, TAG_LENGTH)<=0)
 
    {
 	    free(tagBuffer);
@@ -273,7 +275,7 @@ SNSS_GetNextBlockType (SNSS_BLOCK_TYPE *blockType, SNSS_FILE *snssFile)
 //   	DrawMessage(tagBuffer,0);
 
    /* reset the file pointer to the start of the block */
-   if (lseek (snssFile->fp, -TAG_LENGTH, SEEK_CUR) != 0)
+   if (lseek (snssFile->fp, -TAG_LENGTH, SEEK_CUR)<=0)
    //if (fseek (snssFile->fp, pos, SEEK_SET) != 0)
    {
 	    free(tagBuffer);
@@ -333,20 +335,20 @@ SNSS_RETURN_CODE SNSS_SkipNextBlock (SNSS_FILE *snssFile)
    unsigned int blockLength;
 
    /* skip the block's tag and version */
-   if (lseek (snssFile->fp, TAG_LENGTH + sizeof (unsigned int), SEEK_CUR) != 0)
+   if (lseek (snssFile->fp, TAG_LENGTH + sizeof (unsigned int), SEEK_CUR)<=0)
    {
       return SNSS_READ_FAILED;
    }
 
    /* get the block data length */
-   if (read (snssFile->fp, &blockLength, sizeof (unsigned int)) != 1)
+   if (read (snssFile->fp, &blockLength, sizeof (unsigned int))<=0)
    {
       return SNSS_READ_FAILED;
    }
    blockLength = swap32 (blockLength);
 
    /* skip over the block data */
-   if (lseek (snssFile->fp, blockLength, SEEK_CUR) != 0)
+   if (lseek (snssFile->fp, blockLength, SEEK_CUR)<=0)
    {
       return SNSS_READ_FAILED;
    }
@@ -368,10 +370,10 @@ SNSS_RETURN_CODE SNSS_ReadBaseBlock (SNSS_FILE *snssFile)
    {
       return SNSS_READ_FAILED;
    }
-   
+
    blockBytes=(unsigned char*)malloc(BASE_BLOCK_LENGTH);
 
-   if (read (snssFile->fp, blockBytes, MIN (header.blockLength, BASE_BLOCK_LENGTH)) != 1)
+   if (read (snssFile->fp, blockBytes, MIN (header.blockLength, BASE_BLOCK_LENGTH))<=0)
    {
    	  free(blockBytes);
       return SNSS_READ_FAILED;
@@ -442,7 +444,7 @@ SNSS_RETURN_CODE SNSS_WriteBaseBlock (SNSS_FILE *snssFile)
    blockBytes[0x192F] = snssFile->baseBlock.spriteRamAddress;
    blockBytes[0x1930] = snssFile->baseBlock.tileXOffset;
 
-   if (write (snssFile->fp, blockBytes, BASE_BLOCK_LENGTH) != 1)
+   if (write (snssFile->fp, blockBytes, BASE_BLOCK_LENGTH)<=0)
    {
       free(blockBytes);
       return SNSS_WRITE_FAILED;
@@ -470,7 +472,7 @@ SNSS_RETURN_CODE SNSS_ReadVramBlock (SNSS_FILE *snssFile)
    }
 
    tmp=(unsigned char*)malloc(header.blockLength);
-   if (read (snssFile->fp, tmp/*snssFile->vramBlock.vram*/, header.blockLength) != 1)
+   if (read (snssFile->fp, tmp/*snssFile->vramBlock.vram*/, header.blockLength)<=0)
    {
    	  free(tmp);
       return SNSS_READ_FAILED;
@@ -498,7 +500,7 @@ SNSS_RETURN_CODE SNSS_WriteVramBlock (SNSS_FILE *snssFile)
       return returnCode;
    }
 
-   if (write (snssFile->fp, snssFile->vramBlock.vram, snssFile->vramBlock.vramSize) != 1)
+   if (write (snssFile->fp, snssFile->vramBlock.vram, snssFile->vramBlock.vramSize)<=0)
    {
       return SNSS_WRITE_FAILED;
    }
@@ -523,14 +525,14 @@ SNSS_RETURN_CODE SNSS_ReadSramBlock (SNSS_FILE *snssFile)
       return SNSS_READ_FAILED;
    }
 
-   if (read (snssFile->fp, &snssFile->sramBlock.sramEnabled, 1) != 1)
+   if (read (snssFile->fp, &snssFile->sramBlock.sramEnabled, 1)<=0)
    {
       return SNSS_READ_FAILED;
    }
 
    /* read blockLength - 1 bytes to get all of the SRAM */
    tmp=(unsigned char*)malloc(MIN (header.blockLength - 1, SRAM_8K));
-   if (read (snssFile->fp, tmp/*snssFile->sramBlock.sram*/, MIN (header.blockLength - 1, SRAM_8K)) != 1)
+   if (read (snssFile->fp, tmp/*snssFile->sramBlock.sram*/, MIN (header.blockLength - 1, SRAM_8K))<=0)
    {
    	free(tmp);
       return SNSS_READ_FAILED;
@@ -561,12 +563,12 @@ SNSS_RETURN_CODE SNSS_WriteSramBlock (SNSS_FILE *snssFile)
       return returnCode;
    }
 
-   if (write (snssFile->fp, &snssFile->sramBlock.sramEnabled, 1) != 1)
+   if (write (snssFile->fp, &snssFile->sramBlock.sramEnabled, 1)<=0)
    {
       return SNSS_WRITE_FAILED;
    }
 
-   if (write (snssFile->fp, snssFile->sramBlock.sram, snssFile->sramBlock.sramSize) != 1)
+   if (write (snssFile->fp, snssFile->sramBlock.sram, snssFile->sramBlock.sramSize)<=0)
    {
       return SNSS_WRITE_FAILED;
    }
@@ -597,7 +599,7 @@ SNSS_RETURN_CODE SNSS_ReadMapperBlock (SNSS_FILE *snssFile)
       return SNSS_OUT_OF_MEMORY;
    }
 
-   if (read (snssFile->fp, blockBytes, MIN (0x8 + 0x10 + 0x80, header.blockLength)) != 1)
+   if (read (snssFile->fp, blockBytes, MIN (0x8 + 0x10 + 0x80, header.blockLength))<=0)
    {
       free(blockBytes);
       return SNSS_READ_FAILED;
@@ -658,7 +660,7 @@ SNSS_RETURN_CODE SNSS_WriteMapperBlock (SNSS_FILE *snssFile)
 
    memcpy (&blockBytes[0x18], snssFile->mapperBlock.extraData.mapperData, 0x80);
 
-   if (write (snssFile->fp, blockBytes, MAPPER_BLOCK_LENGTH) != 1)
+   if (write (snssFile->fp, blockBytes, MAPPER_BLOCK_LENGTH)<=0)
    {
       free(blockBytes);
       return SNSS_WRITE_FAILED;
@@ -700,7 +702,7 @@ SNSS_RETURN_CODE SNSS_ReadSoundBlock (SNSS_FILE *snssFile)
       return SNSS_READ_FAILED;
    }
 
-   if (read (snssFile->fp, snssFile->soundBlock.soundRegisters, MIN (header.blockLength, 0x16)) != 1)
+   if (read (snssFile->fp, snssFile->soundBlock.soundRegisters, MIN (header.blockLength, 0x16))<=0)
    {
       return SNSS_READ_FAILED;
    }
@@ -723,7 +725,7 @@ SNSS_RETURN_CODE SNSS_WriteSoundBlock (SNSS_FILE *snssFile)
       return returnCode;
    }
 
-   if (write (snssFile->fp, snssFile->soundBlock.soundRegisters, SOUND_BLOCK_LENGTH) != 1)
+   if (write (snssFile->fp, snssFile->soundBlock.soundRegisters, SOUND_BLOCK_LENGTH)<=0)
    {
       return SNSS_WRITE_FAILED;
    }
@@ -799,6 +801,10 @@ SNSS_WriteBlock (SNSS_FILE *snssFile, SNSS_BLOCK_TYPE blockType)
 
 /*
 ** $Log$
+** Revision 1.2  2006/05/23 20:44:21  sfxgligli
+** - fixes for min & max
+** - re-added dsp & osd irqs
+**
 ** Revision 1.1  2006/05/22 23:18:55  sfxgligli
 ** Adding aoNES (port of LittleJohnGP by yoyo)
 **

@@ -17,10 +17,11 @@ void XlatNESBufferLine (unsigned char *src, unsigned char *dest,uint8 *nesppupal
 	}*/
 }
 
-__IRAM_CODE void XlatNESBufferLineLazy (unsigned char *src, unsigned char *dest,uint8 *nesppupal, uint32 startscanl)
+#ifndef SCREEN_USE_DSP
+__IRAM_CODE
+#endif
+void XlatNESBufferLineLazy (unsigned char *src, unsigned char *dest,uint8 *nesppupal, uint32 startscanl)
 {
-//  return;
-
 # if 0
 
 	int i,j;
@@ -47,7 +48,7 @@ __IRAM_CODE void XlatNESBufferLineLazy (unsigned char *src, unsigned char *dest,
 #else
 
     asm("                                                                    \n\
-    		stmfd sp!,{r0-r12,lr}                                                \n\
+        stmfd sp!,{r0-r12,lr}                                                \n\
                                                                              \n\
         mov r4,#32                                                           \n\
         add r2,r2,#31                                                        \n\

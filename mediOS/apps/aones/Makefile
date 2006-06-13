@@ -1,8 +1,8 @@
 include ../../Makefile.conf
 
-ASFLAGS  += -I../../include -I. -In6502 -Imapper -Iapu
+ASFLAGS  += -I../../include -I. -In6502 -Imapper
 
-GCCFLAGS += -I../../include -I. -In6502 -Imapper -Iapu -O3
+GCCFLAGS += -I../../include -I. -In6502 -Imapper -O3
 
 TARGET = aones
 
@@ -10,7 +10,7 @@ SRC = $(wildcard *.c)
 SRC2 = $(wildcard *.S)
 OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 
-SUBDIRS = n6502 mapper apu
+SUBDIRS = n6502 mapper
 
 LIBS = ../../lib/libmedios.a
 

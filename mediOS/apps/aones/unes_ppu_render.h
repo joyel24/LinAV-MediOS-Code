@@ -757,7 +757,7 @@ __IRAM_CODE void ppu_lazy_renderBGLines(void)
       memset(buffer + 8, 0, (256+16)*(ppuScanline-lazy_bg_start_line));
       return;
    }
-   
+
 /*   	DrawMessage("got something",0);
 	gpwait(0);*/
    

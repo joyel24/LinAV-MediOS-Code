@@ -16,7 +16,7 @@ static void map85_Reset()
 {
 	// Init ExSound
 	//parent_NES->apu->SelectExSound(2);
-	apu_setexchip(2);
+	//exsound apu_setexchip(2);
 
 	// set CPU bank pointers
 	//set_CPU_banks(0,1,num_8k_ROM_banks-2,num_8k_ROM_banks-1);
@@ -74,7 +74,7 @@ static void map85_MemoryWrite(uint32 addr, uint8 data)
 	case 0x9010:
 	case 0x9030:
 		{
-			ex_write(addr, data);
+			//exsound ex_write(addr, data);
 		}
 		break;
 

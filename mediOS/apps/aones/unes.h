@@ -132,7 +132,7 @@ typedef struct {
   	char InterPolateSnd;
   	long audio_buffer_pos;
   	Uint8 enablesound,Sound16bits,SoundStereo;
-  	int buffsize;		
+  	int buffsize;
   		
   	byte *Vbuffer;	
   	byte SaveRAM;
@@ -179,7 +179,8 @@ typedef struct {
 
 /* gli */
   	byte *Vbuffer2;
-    byte *LineOffset;
+    uint16 *LineOffset;
+    uint16 *SndRegs;
 } NesVar;
 
 

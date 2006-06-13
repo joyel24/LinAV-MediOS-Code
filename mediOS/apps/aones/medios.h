@@ -1,7 +1,13 @@
 #ifndef __MEDIOS__
 #define __MEDIOS__
 
-#include <stdarg.h>
+#include "datatypes.h"
+#include "dspshared.h"
+
+#define GMINI_OVERCLOCKING
+
+#define SCREEN_USE_DSP
+#define SCREEN_USE_RESIZE
 
 //#ifdef BUILD_STDALONE
     #include <kernel/graphics.h>
@@ -14,6 +20,7 @@
     #include <kernel/uart.h>
     #include <kernel/exit.h>
     #include <kernel/dsp.h>
+    #include <kernel/aic23.h>
     //#define printf printk
 //#else
 //    #include <api.h>
@@ -40,5 +47,12 @@
 
 #define LJ_ROMSDIR "/"
 #define LJ_SAVESDIR "/"
+
+/*
+#undef __IRAM_CODE
+#define __IRAM_CODE
+#undef __IRAM_DATA
+#define __IRAM_DATA
+*/
 
 #endif

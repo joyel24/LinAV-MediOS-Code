@@ -1,4 +1,9 @@
+#ifndef __DSPSHARED_H
+#define __DSPSHARED_H
+
 // warning : this file is included by both arm and dsp code (thx zig, it's a lot cleaner like this :)
+
+#define SAMPLE_RATE 32000
 
 #define NES_BUFFER_WIDTH 272
 #define NES_WIDTH 256
@@ -28,18 +33,53 @@ typedef unsigned long uint32;
 
 #define DSP_COM DSP_RAM(DSP_CONTROL_OFFSET)
 
+#define SNDQUEUE_LENGTH 256
+#define SNDQUEUE_MASK (SNDQUEUE_LENGTH-1)
+
+typedef struct {
+  uint32 tick;
+  uint16 address;
+  uint16 value;
+} sndItem;
+
 typedef volatile struct {
+  // video buffers addresses ans status
   uint32 inBufAddr;
   uint32 outBufAddr;
   uint16 inBufReady;
   uint16 outBufReady;
 
+  // palette and line offsets
   uint16 pal[32];
   uint16 lineOffset[NES_PAL_HEIGHT];
 
+  // 1 if arm wants apu reset
+  uint16 sndWantApuReset;
+
+  // apu registers writes queue
+  sndItem sndQueue[SNDQUEUE_LENGTH];
+  uint16 sndHead;
+  uint16 sndTail;
+  
+  // apu status
+  uint16 sndStatusReg;
+
+  // apu dmc samples request to arm
+  uint16 sndDmcWantRead;
+  uint16 sndDmcAddress;
+  uint16 sndDmcLength;
+  uint16 sndDmcData[4096];
+
+  // 6502 current cpu cycle
+  uint32 cpuCurCycle;
+
+  // debug messages
   uint16 hasDbgMsg;
   int16 dbgMsg[255];
 } tDspCom;
 
 
 extern tDspCom * dspCom;
+
+#endif /*__DSPSHARED_H*/
+

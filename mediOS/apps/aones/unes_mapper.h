@@ -11,7 +11,6 @@
 #include "datatypes.h"
 #include "snss.h"
 #include "unes.h"
-#include "apu/nes_apu.h"
 
 //int InitMapper();
 

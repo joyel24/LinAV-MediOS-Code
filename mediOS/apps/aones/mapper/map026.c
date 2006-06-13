@@ -16,7 +16,7 @@ static void map26_Reset()
 {
 	// Init ExSound
 	//parent_NES->apu->SelectExSound(1);
-	apu_setexchip(1);
+	//exsound apu_setexchip(1);
 
 
 	// set CPU bank pointers
@@ -146,7 +146,7 @@ static void map26_MemoryWrite(uint32 addr, uint8 data)
 
 	addr = addr & 0xfffc | ((addr & 1) << 1) | ((addr & 2) >> 1);
 	//parent_NES->apu->ExWrite(addr, data);
-	ex_write(addr,data);
+	//exsound ex_write(addr,data);
 }
 
 static void map26_HSync(uint32 scanline)

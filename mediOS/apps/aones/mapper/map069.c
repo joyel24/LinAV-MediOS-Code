@@ -1,7 +1,6 @@
 #include "datatypes.h"
 #include "unes_mapper.h"
 #include "unes.h"
-#include "nes_apu.h"
 #include "unes_ppu.h"
 
 extern int32 num_1k_VROM_banks;
@@ -25,7 +24,7 @@ static void map69_Reset()
 
 	// Init ExSound
 	//parent_NES->apu->SelectExSound(32);
-	apu_setexchip(32);
+	//exsound apu_setexchip(32);
 
 	// set CPU bank pointers
 	//set_CPU_banks(0,1,num_8k_ROM_banks-2,num_8k_ROM_banks-1);
@@ -203,7 +202,7 @@ static void map69_MemoryWrite(uint32 addr, uint8 data)
 	case 0xE000:
 		{
 			//parent_NES->apu->ExWrite(addr, data);
-			ex_write(addr,data);
+			//exsound ex_write(addr,data);
 		}
 		break;
 	}

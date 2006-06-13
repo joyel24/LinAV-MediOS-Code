@@ -42,7 +42,7 @@ static void map24_init(void)
    irq.counter = irq.enabled = 0;
    irq.latch = irq.wait_state = 0;
    
-   apu_setexchip(1); //VRC6
+   //exsound apu_setexchip(1); //VRC6
 }
 
 static void map24_hblank(uint32 scanline) 
@@ -153,7 +153,7 @@ static void map24_write(uint32 address, uint8 value)
       break;
    }
    
-   ex_write(address, value);
+   //exsound ex_write(address, value);
 }
 
 static void map24_getstate(SnssMapperBlock *state)

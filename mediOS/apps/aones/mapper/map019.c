@@ -1,8 +1,6 @@
 #include "datatypes.h"
 #include "unes_mapper.h"
 #include "unes.h"
-#include "nes_apu.h"
-
 
 static uint8 patch;
 
@@ -40,7 +38,7 @@ static void map19_Reset(void)
 
 	// Init ExSound
 	//parent_NES->apu->SelectExSound(16);
-	apu_setexchip(16);
+	//exsound apu_setexchip(16);
 
 	// set CPU bank pointers
 	//set_CPU_banks(0,1,num_8k_ROM_banks-2,num_8k_ROM_banks-1);
@@ -85,7 +83,7 @@ static uint8 map19_MemoryReadLow(uint32 addr)
 		else
 		{
 			//return parent_NES->apu->ExRead(addr);
-			return ex_read(addr);
+			return 0; //exsound ex_read(addr);
 		}
 	}
 	else if((addr & 0xF800) == 0x5000) // addr $5000-$57FF
@@ -119,7 +117,7 @@ static void map19_MemoryWriteLow(uint32 addr, uint8 data)
 				else
 				{
 					//parent_NES->apu->ExWrite(addr, data);
-					ex_write(addr,data);
+					//exsound ex_write(addr,data);
 				}
 			}
 		}
@@ -362,7 +360,7 @@ static void map19_MemoryWrite(uint32 addr, uint8 data)
 				else
 				{
 					//parent_NES->apu->ExWrite(addr, data);
-					ex_write(addr,data);
+					//exsound ex_write(addr,data);
 				}
 			}
 		}

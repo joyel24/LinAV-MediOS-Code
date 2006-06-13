@@ -6,8 +6,6 @@
 extern int32 num_1k_VROM_banks;
 extern int32 num_8k_ROM_banks;
 
-
-
 static uint32 wb[8];
 //	uint8 wram[8*0x2000];
 static uint8 *wram;
@@ -133,7 +131,7 @@ static void MMC5_set_WRAM_bank(uint8 page, uint8 bank)
 		#ifdef __asmcpu__   		
 		switch (page)
 		{
-			case 3:init_sram(wram + bank*0x2000);reload_fast_pc(); break;			
+			case 3:init_sram(wram + bank*0x2000);reload_fast_pc(); break;
 			case 4:set_cpu_bank0(wram + bank*0x2000); break;
 			case 5:set_cpu_bank1(wram + bank*0x2000); break;
 			case 6:set_cpu_bank2(wram + bank*0x2000); break;
@@ -271,10 +269,10 @@ static void MMC5_set_CPU_bank(uint8 page, uint8 bank)
 }
 
 
-static void map5_Reset(void)
+static void map5_Reset()
 {
 	uint32 i;
-	wram_size = 1;
+	wram_size = 0;
 
 	if(mmc_getinfo()->var.crc == 0x2b548d75 || // Bandit Kings of Ancient China (J)
 	        mmc_getinfo()->var.crc == 0xf4cd4998 || // Dai Koukai Jidai (J)
@@ -309,7 +307,7 @@ static void map5_Reset(void)
 
 	// Init ExSound
 	//parent_NES->apu->SelectExSound(8);
-	apu_setexchip(8);
+	//exsound apu_setexchip(8);
 
 	// set CPU bank pointers
 	/*set_CPU_bank4(num_8k_ROM_banks-1);
@@ -341,7 +339,7 @@ static void map5_Reset(void)
 
 	split_control = 0;
 	split_bank = 0;
-	
+
 	ppu_set_Latch_RenderScreen(map5_PPU_Latch_RenderScreen);
 }
 
@@ -414,7 +412,7 @@ static void map5_MemoryWriteLow(uint32 addr, uint8 data)
 			for(i = 0; i < 4; i++)
 			{
 				//set_VRAM_bank(8+i, data & 0x03);
-				mmc_VRAM_bank((uint8)(8+i), data & 0x03);
+				mmc_VRAM_bank(8+i, data & 0x03);
 				data >>= 2;
 			}
 		}
@@ -530,7 +528,7 @@ static void map5_MemoryWriteLow(uint32 addr, uint8 data)
 			if(addr >= 0x5000 && addr <= 0x5015)
 			{
 				//parent_NES->apu->ExWrite(addr, data);
-				ex_write(addr,data);
+				//exsound ex_write(addr,data);
 			}
 			else if(addr >= 0x5C00 && addr <= 0x5FFF)
 			{
@@ -718,7 +716,7 @@ mapintf_t map5_intf =
    NULL,   /*Latch FDFE*/
    map5_PPU_Latch_RenderScreen,   /*Latch renderscreen*/
    NULL,   /*Latch Address*/
-   NULL    /*SetBarcodeValue*/   
+   NULL    /*SetBarcodeValue*/
 };
 
 

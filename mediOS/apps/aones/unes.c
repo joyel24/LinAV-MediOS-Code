@@ -10,33 +10,18 @@
 #include "datatypes.h"
 #include "dspshared.h"
 
-#define UNES_TURBOFSKIP 15
-
-#ifndef __MWERKS__
-
-#else
-#define LJ_ROMSDIR "0:/PALM/Programs/LJP/NES/Roms/" //"gp:\\snes\\ffmq11.zip"
-#define LJ_SAVESDIR "0:/PALM/Programs/LJP/NES/Saves/" //"gp:\\snes\\ffmq11.zip"
-#endif
-
-
-#define MAX_LOST_FRAME 10
-#define MAX_FRAME_SKIPPED 10
-
-
 #define __timermul__ 100
 #define __timerdiv__ 202
 
 #define __skipsynchro__
-
 
 #include "snss.h"
 #include "unes.h"
 #include "unes_ppu.h"
 #include "unes_mapper.h"
 #include "unes_io.h"
-#include "nes_apu.h"
 #include "unes_crc32.h"
+#include "nes_apu.h"
 
 #include "unes_db.h"
 
@@ -64,33 +49,15 @@ extern uint32 mStopEmulation;
 //extern Mapper_Info mapfunc;
 mmc_t *mapper;
 
-
-int ljz_AudioPaused;
-
-static uint16 key_pressed_delay;
-
-
 // Emu stuff
 
-
-byte vbl;
 long romsize;
-char gamename[256];
-int frameskipped;
-int fastforward;
-long framecounter;
 
 int32 lastTick;
 
-bool framecompleted;
-//bool vblank;
-uint32  curscanline;
-uint32  synccycles;
-
-volatile unsigned int framecount;
-
-long beginTime;
-
+__IRAM_DATA bool framecompleted;
+__IRAM_DATA uint32  curscanline;
+__IRAM_DATA uint32  synccycles;
 
 char lj_curVolume;
 nestoy_info ninfo;
@@ -113,7 +80,7 @@ inline uint8 emulate_one_frameNTSC(void);
 void nes_reset(void);
 void CloseAll(void);
 int SaveStateSnss(byte b);
-int LoadStateSnss(byte b,int only_test);
+int LoadStateSnss(byte b);
 void SaveSRAM(void);
 
 void reset_asmcpu(void);
@@ -129,68 +96,6 @@ void emu_resettimer(void) {
     lastTick=tmr_getTick()+Vnes.var.frame_time*100;
 }
 
-void NES_togglesound(void) {
-    char tmp[64];
-
-    ljZ_PauseAudio(1);
-    
-    Vnes.var.enablesound++;
-    if (Vnes.var.enablesound>2) Vnes.var.enablesound=0;
-    
-    if (Vnes.var.enablesound==0) strcpy(tmp,"Sound : OFF");
-    else if (Vnes.var.enablesound==1) strcpy(tmp,"Sound : SIM");
-    else if (Vnes.var.enablesound==2) strcpy(tmp,"Sound : ON");
-
-    //menu_message(tmp);
-
-    //LJP_WAIT(300);
-    emu_resettimer();
-
-    ljZ_PauseAudio(0);
-}
-
-char NES_reset(void) {
-    ljZ_PauseAudio(1);
-
-    //if (menu_confirm("Reset NES ?"))
-        {nes_reset(); /*return 1;*/}
-
-    emu_resettimer();
-    
-    ljZ_PauseAudio(0);
-    
-    return 0;
-}
-
-void NES_quicksave(void) {
-    ljZ_PauseAudio(1);
-    
-    //if (CONFIRM_SAVE)
-        SaveStateSnss(0);;
-    emu_resettimer();
-    //ClearScreen();
-    
-    ljZ_PauseAudio(0);
-}
-
-void NES_quickload(void) {
-    ljZ_PauseAudio(1);
-
-    if (LoadStateSnss(0,1))
-    {
-        //if (CONFIRM_LOAD)
-            LoadStateSnss(0,0);
-        emu_resettimer();
-        //ClearScreen();
-    }
-
-    ljZ_PauseAudio(0);
-}
-
-void ljZ_PauseAudio(Uint8 pause)
-{
-}
-
 char Init_NES(char *RomName)
 {
   int i,j,k;
@@ -200,7 +105,7 @@ char Init_NES(char *RomName)
   memset(Vnes.PPU_patterntables,0,0x8000);
   memset(Vnes.PPU_nametables,0,0x1000);
   memset(Vnes.PPU_palette,0,0x100);
-  
+
   memset(Vnes.CPUMemory,0,65536);  
 
   memset(Vnes.NESSRAM,0,0x10000);
@@ -228,16 +133,16 @@ char Init_NES(char *RomName)
 
   //set vram 
   Vnes.var.vrom=0;
-  
+
   //set low cpu page
   Vnes.CPUPageIndex[0]=Vnes.CPUMemory;
   Vnes.CPUPageIndex[1]=Vnes.CPUMemory+8192;
   Vnes.CPUPageIndex[2]=Vnes.CPUMemory+16384;
   Vnes.CPUPageIndex[3]=Vnes.NESSRAM; //Vnes.CPUMemory+16384+8192;
-  
+
   if (Vnes.trainer) memcpy((uint8*)(&Vnes.CPUPageIndex[3][0x1000]),(uint8*)(Vnes.rom+16),512);
 
-    
+
   //  printf("  * MMC Init...");
 
 
@@ -251,15 +156,9 @@ char Init_NES(char *RomName)
     return 1;  
   }
 
-  ppu_init();        
+  ppu_init();
 
-  Init_Sound();
-  //  printf("ok\n");
-  // Init the CPU
-  
-  
-
-  #ifndef __asmcpu__        
+  #ifndef __asmcpu__
   nes6502_getcontext(&_NEScontext);
   _NEScontext.mem_page[0]=(uint8 *)Vnes.CPUPageIndex[0];
   /*_NEScontext.mem_page[1]=(uint8 *)Vnes.CPUPageIndex[1];
@@ -270,18 +169,17 @@ char Init_NES(char *RomName)
   _NEScontext.mem_page[6]=(uint8 *)Vnes.CPUPageIndex[6];
   _NEScontext.mem_page[7]=(uint8 *)Vnes.CPUPageIndex[7];*/
   _NEScontext.read_handler=_NESread;
-  _NEScontext.write_handler=_NESwrite;        
+  _NEScontext.write_handler=_NESwrite;
   nes6502_setcontext(&_NEScontext);    
   #endif   
     
   Vnes.var.DrawCframe=1;
-  frameskipped=0;
-          
+
   Vnes.var.JoyPad1_BitIndex=0;
   Vnes.var.JoyPad2_BitIndex=0;    
     
   Vnes.var.SaveRAM=Vnes.ROM_Header.rom_ctrl1&2;
-  fastforward=0;        
+
   //  printf("ok\n");
 
   //    if (Vnes.ROM_Header.rom_ctrl1&2)
@@ -314,7 +212,7 @@ char Load_ROM(char *RomName)
 {
   int f;
 
-  printf("%s\n",RomName);
+  printf("Loading rom %s\n",RomName);
 
   f=open(RomName,O_RDONLY);
   if (f<0) {
@@ -380,9 +278,6 @@ char Open_ROM()
     }
   else Vnes.var.nsfmode=0;
 
-
-
-  strcpy(gamename,CurrentROMFile);
 /*  if (Vnes.var.nsfmode) {
 
   }   */
@@ -399,7 +294,7 @@ char Open_ROM()
   Vnes.var.date[1]=0;
   if (!Vnes.var.nsfmode)
   {
-  
+
     Vnes.var.chr_beg=Vnes.rom+16+Vnes.trainer*512+Vnes.ROM_Header.prg_rom_pages_nb*16384;
     Vnes.var.prg_beg=Vnes.rom+16+Vnes.trainer*512;
     Vnes.var.cart_size=(romsize-16-Vnes.trainer*512)/1024;
@@ -439,17 +334,6 @@ char Open_ROM()
 
 //  DrawMessage("Allocating mem",1);    
 
-  Vnes.CPUMemory=(uint8 *)malloc(65536);
-  Vnes.PPU_patterntables=(uint8 *)malloc(0x8000);
-  Vnes.PPU_nametables=(uint8 *)malloc(0x1000);
-  Vnes.PPU_palette=(uint8*)malloc(0x100);
-  
-  Vnes.mapper_extram=(uint8 *)malloc(0x10000);  
-  Vnes.mapper_extramsize=0;
-  Vnes.NESSRAM=(uint8*)malloc(0x10000);
-  
-
-
   if ( (!Vnes.CPUMemory)||(!Vnes.PPU_patterntables)||(!Vnes.PPU_nametables)||(!Vnes.PPU_palette)||
     (!Vnes.mapper_extram)||(!Vnes.NESSRAM))
     {
@@ -459,8 +343,8 @@ char Open_ROM()
 
   // PPU init
   
-  //DrawMessage("ok",1);    
-  
+  //DrawMessage("ok",1);
+
   return(0);
 }
 
@@ -562,11 +446,6 @@ void nes_reset()
   nes6502_reset();
   #endif
 
-  beginTime=tmr_getTick();
-  framecount=0;
-  framecounter=0;
-  key_pressed_delay=0;
-
   Vnes.var.curdeccycle=0;
   Vnes.var.currentcpucycle=0;
 }
@@ -576,13 +455,8 @@ void LaunchEmu()
   long l;
   bool wantQuit;
 
-  framecount=0;
-  framecounter=0;
-
   l=16;
   nes_reset();
-
-  ljZ_PauseAudio(0);
 
   lastTick=tmr_getTick()+Vnes.var.frame_time*100;
 
@@ -610,38 +484,8 @@ long JoyPad1_State()
         if(ExKey & BTMASK_UP) state|=0x10;
         if(ExKey & BTMASK_RIGHT) state|=0x80;
         if(ExKey & BTMASK_DOWN) state|=0x20;
-        if(ExKey & BTMASK_BTN2)
-        {
-            switch (Vnes.var.autofireB)
-            {
-                case 0:state|=2; break;
-                case 1:
-                if ((framecount&31)>15) state|=2;
-                break;
-                case 2:
-                if ((framecount&15)>7) state|=2;
-                break;
-                case 3:
-                if ((framecount&7)>3) state|=2;
-                break;
-            }
-        }
-        if(ExKey & BTMASK_BTN1)
-        {
-            switch (Vnes.var.autofireA)
-            {
-                case 0:state|=1; break;
-                case 1:
-                if ((framecount&31)>15) state|=1;
-                break;
-                case 2:
-                if ((framecount&15)>7) state|=1;
-                break;
-                case 3:
-                if ((framecount&7)>3) state|=1;
-                break;
-            }
-        }
+        if(ExKey & BTMASK_BTN2) state|=2;
+        if(ExKey & BTMASK_BTN1) state|=1;
     }
     if(ExKey & BTMASK_ON) state|=8;
     if(ExKey & BTMASK_F1) state|=4;
@@ -656,43 +500,37 @@ long JoyPad2_State()
   long state;
   if (Vnes.var.padmode!=1) return 0x20000;
   state=0;
-  state|=0x20000;           //1player signature  
+  state|=0x20000;           //1player signature
   return(state);
 }
 
 void GetStateFileName(int num,char *str)
 {
-  char result[256];
-  byte i=0,j=255,k=255;
-/*
-#ifdef __asmcpu__
-  uint32 nesregs[6];
-#endif
-*/
+  char * result=malloc(256);
+  byte i=0,j=255;
+
   i=0;
   j=255;
-  k=-1;
+
   while (CurrentROMFile[i]!=0)
   {
     if (CurrentROMFile[i]=='.') j=i;
-    if (CurrentROMFile[i]=='/') k=i;
-    if (CurrentROMFile[i]=='\\') k=i;
     i++;
   }
-  if (j==255) j=i;  //pas d'extension     
-  memcpy(result,CurrentROMFile+k+1,j+1-k-1);
-  result[j+1-k-1]=0;
-  strcat(result,"ss");
-  sprintf(str,"%s%s%d",LJ_SAVESDIR,result,num);
-  str[0]=lj_curVolume+'0';
+  if (j==255) j=i;  //pas d'extension
+
+  memcpy(result,CurrentROMFile,j+1);
+  result[j+1]=0;
+  sprintf(str,"%sss%d",result,num);
+
+  free(result);
 }
 
 int SaveStateSnss(byte b)
 {
   SNSS_FILE *f;
-  char savename[255];
+  char * savename=malloc(256);
   int i;
-  char chaine[256];
 #ifdef __asmcpu__
   uint32 nesregs[6];
 #endif
@@ -701,25 +539,25 @@ int SaveStateSnss(byte b)
 
   GetStateFileName(b,savename);
 
-  sprintf(chaine,"Saving state to file : %s\n",savename);
-    
   code = SNSS_OpenFile (&f,savename,SNSS_OPEN_WRITE);
   if (code != SNSS_OK)
   {
+    printf ("Error: %s\n", SNSS_GetErrorString (code));
     return 1;
   }
-  
-  printf("Saving\n");
 
-//  DrawMessage("writeheader",0);
-#ifndef __asmcpu__  
-  nes6502_getcontext(&_NEScontext);  
+  printf("Saving state %s\n",savename);
+
+  printf("writeheader\n");
+
+#ifndef __asmcpu__
+  nes6502_getcontext(&_NEScontext);
   f->baseBlock.regA=_NEScontext.a_reg;
   f->baseBlock.regX=_NEScontext.x_reg;
   f->baseBlock.regY=_NEScontext.y_reg;
   f->baseBlock.regFlags=_NEScontext.p_reg;
   f->baseBlock.regStack=_NEScontext.s_reg;
-  f->baseBlock.regPc=_NEScontext.pc_reg;  
+  f->baseBlock.regPc=_NEScontext.pc_reg;
 #else
   get_context(nesregs);
   f->baseBlock.regA=nesregs[0];
@@ -729,48 +567,61 @@ int SaveStateSnss(byte b)
   f->baseBlock.regStack=nesregs[5];
   f->baseBlock.regPc=nesregs[4];
 #endif
-//  DrawMessage("got context",0);
+
+  printf("got context\n");
+
   memcpy(f->baseBlock.cpuRam,Vnes.CPUPageIndex[0],0x800);
-  ppu_savestate(&(f->baseBlock));    
-//  DrawMessage("got ppu",0);
+  ppu_savestate(&(f->baseBlock));
+
+  printf("got ppu\n");
+
   memcpy(f->baseBlock.ppuRam,Vnes.PPU_nametables,0x1000);
   memcpy(f->baseBlock.palette,Vnes.PPU_palette,0x20);
   for (i=0;i<0x20;i++)
     {
       f->baseBlock.palette[i]&=0x3f;
-    }   
+    }
   f->baseBlock.mirrorState[0]=Vnes.var.ppu_mirror0;
   f->baseBlock.mirrorState[1]=Vnes.var.ppu_mirror1;
   f->baseBlock.mirrorState[2]=Vnes.var.ppu_mirror2;
-  f->baseBlock.mirrorState[3]=Vnes.var.ppu_mirror3;      
-//  DrawMessage("writing base block",0);
+  f->baseBlock.mirrorState[3]=Vnes.var.ppu_mirror3;
+
+  printf("write base block\n");
+
   if ((code = SNSS_WriteBlock(f,SNSS_BASR)) != SNSS_OK)
     {
-      //      printf ("Error: %s\n", getSnssErrorString (code));
+      printf ("Error: %s\n", SNSS_GetErrorString (code));
+      free(savename);
       return 1;
     }
-    
-    
+
+
   f->vramBlock.vramSize=Vnes.vramsize;
-  memcpy(f->vramBlock.vram,Vnes.PPU_patterntables,f->vramBlock.vramSize); 
-//   DrawMessage("write vram block",0);
+  memcpy(f->vramBlock.vram,Vnes.PPU_patterntables,f->vramBlock.vramSize);
+
+  printf("write vram block\n");
+
   if ((code = SNSS_WriteBlock(f,SNSS_VRAM)) != SNSS_OK)
     {
+      printf ("Error: %s\n", SNSS_GetErrorString (code));
+      free(savename);
       return 1;
     }
-    
-    
-//   DrawMessage("write sram block",0);  
+
+
   f->sramBlock.sramSize=Vnes.sramsize;
   f->sramBlock.sramEnabled=Vnes.var.sramEnabled;
   memcpy(f->sramBlock.sram,Vnes.NESSRAM ,f->sramBlock.sramSize);
-  //  printf ("writing SRAM block\n");
+
+  printf("write sram block\n");
+
   if ((code = SNSS_WriteBlock(f,SNSS_SRAM)) != SNSS_OK)
     {
-      //      printf ("Error: %s\n", getSnssErrorString (code));
+      printf ("Error: %s\n", SNSS_GetErrorString (code));
+      free(savename);
       return 1;
     }
-    
+
   for (i = 0; i < 4; i ++)
     {
       f->mapperBlock.prgPages[i]=(Vnes.CPUPageIndex[i+4]-Vnes.var.prg_beg) >> 13;
@@ -783,43 +634,48 @@ int SaveStateSnss(byte b)
       else
         f->mapperBlock.chrPages[i]=((Vnes.PPUPageIndex[i]-Vnes.PPU_patterntables) >> 10) | 0x8000;
     }
-  
+
   if (mapper->intf->get_state) mapper->intf->get_state(&(f->mapperBlock));
-//  DrawMessage("writing mapper block",0);  
+
+  printf("write mapper block\n");
 
   if ((code = SNSS_WriteBlock(f,SNSS_MPRD)) != SNSS_OK)
     {
-      //      printf ("Error: %s\n", getSnssErrorString (code));
+      printf ("Error: %s\n", SNSS_GetErrorString (code));
+      free(savename);
       return 1;
     }
+
   memcpy(f->soundBlock.soundRegisters,&Vnes.CPUMemory[0x4000],0x16);
-  SNSSSaveStateSound(&(f->soundBlock));  
-  
-//   DrawMessage("write sound block",0);  
+
+  printf("write sound block\n");
+
   if ((code = SNSS_WriteBlock(f,SNSS_SOUN)) != SNSS_OK)
     {
-      //      printf ("Error: %s\n", getSnssErrorString (code));
+      printf ("Error: %s\n", SNSS_GetErrorString (code));
+      free(savename);
       return 1;
     }
-//  DrawMessage("closing file",0);
+
+  printf("closing file\n");
   /* close the files */
   if ((code=SNSS_CloseFile(&f)) != SNSS_OK)
     {
-      //      printf ("Error: %s\n", getSnssErrorString (code));
+      printf ("Error: %s\n", SNSS_GetErrorString (code));
+      free(savename);
       return 1;
     }
 
 
+  free(savename);
   return 0;
 }
 
-int LoadStateSnss(byte b,int only_test)
+int LoadStateSnss(byte b)
 {
-  apu_t *apu;
   SNSS_FILE *f;
-  char savename[255];
+  char *savename=malloc(256);
   int i,j;
-  char chaine[256];
 #ifdef __asmcpu__
   uint32 nesregs[6];
 #endif
@@ -828,32 +684,22 @@ int LoadStateSnss(byte b,int only_test)
   SNSS_BLOCK_TYPE blockType;
 
   GetStateFileName(b,savename);
-  if (only_test)
-  {
-    int ftest;
-    ftest=open(savename,O_RDONLY);
-    if (ftest>=0)
-    {
-        close(ftest);
-        return 1;
-    }
-    return 0;
-  }
-
 
   code = SNSS_OpenFile (&f,savename,SNSS_OPEN_READ);
 
   if (code!=SNSS_OK)
   {
+      free(savename);
       return 1;
   }
 
-  printf("Loading\n");
+  printf("Loading state %s\n",savename);
 
   /* iterate through each block in the file */
   if (f->headerBlock.numberOfBlocks>255)
     {
       //printf("Load overflow\n");
+      free(savename);
       return 1;
     }
 
@@ -865,13 +711,15 @@ int LoadStateSnss(byte b,int only_test)
 
       if ((code = SNSS_GetNextBlockType(&blockType,f)) != SNSS_OK)
         {
-      //          printf ("Error: %s\n", getSnssErrorString (code));
+          printf ("Error: %s\n", SNSS_GetErrorString (code));
+          free(savename);
           return 1;
         }
 
       if ((code = SNSS_ReadBlock(f,blockType)) != SNSS_OK)
         {
-      //          printf ("Error: %s\n", getSnssErrorString (code));
+          printf ("Error: %s\n", SNSS_GetErrorString (code));
+          free(savename);
           return 1;
         }
 
@@ -894,10 +742,10 @@ int LoadStateSnss(byte b,int only_test)
       nesregs[0]=f->baseBlock.regA;
       nesregs[1]=f->baseBlock.regX;
       nesregs[2]=f->baseBlock.regY;
-      nesregs[3]=f->baseBlock.regFlags;       
+      nesregs[3]=f->baseBlock.regFlags;
       nesregs[4]=f->baseBlock.regPc;
       nesregs[5]=f->baseBlock.regStack;
-      set_context(nesregs);       
+      set_context(nesregs);
 #endif
       memcpy(Vnes.CPUPageIndex[0],f->baseBlock.cpuRam,0x800);     
       ppu_loadstate(&(f->baseBlock));
@@ -951,32 +799,32 @@ int LoadStateSnss(byte b,int only_test)
         {
             // VROM
             Vnes.PPUPageIndex[i] = Vnes.var.chr_beg + ((uint32)(f->mapperBlock.chrPages[i]) << 10);
-            Vnes.PPUPageIndexProtect[i]=1;          
+            Vnes.PPUPageIndexProtect[i]=1;
         }
-      }               
-          if (mapper->intf->set_state) mapper->intf->set_state(&(f->mapperBlock));                              
-                              
+      }
+          if (mapper->intf->set_state) mapper->intf->set_state(&(f->mapperBlock));
+
           #ifdef __asmcpu__
           set_cpu_bank_full(Vnes.CPUPageIndex[4],Vnes.CPUPageIndex[5],Vnes.CPUPageIndex[6],Vnes.CPUPageIndex[7]);
           #else
           nes6502_getcontext(&_NEScontext);
-          nes6502_setcontext(&_NEScontext);    
-          #endif                   
-                             
+          nes6502_setcontext(&_NEScontext);
+          #endif
+
           break;
         case SNSS_CNTR:
       //gpprintf (0,16*7,"reading controllers block\n",-1,-1,13);
           break;
 
         case SNSS_SOUN:
-      //gpprintf (0,16*8,"reading sound block\n",-1,-1,13);          
+      //gpprintf (0,16*8,"reading sound block\n",-1,-1,13);
             //ResetSoundState();
-            apu=apu_getcontext();
           for (i = 0; i < 0x16; i ++)
             {
           if(i == 0x14) continue;
           Vnes.CPUMemory[0x4000+i]=f->soundBlock.soundRegisters[i];
             // write the DMC regs directly
+#if 0
             if((i >= 0x10) && (i <= 0x13))
             {
                 apu->apus.dmc.regs[i - 0x10] = f->soundBlock.soundRegisters[i];
@@ -986,8 +834,11 @@ int LoadStateSnss(byte b,int only_test)
                 apu_write(0x4000 + i, f->soundBlock.soundRegisters[i]);
                 apu_write_cur(0x4000 + i, f->soundBlock.soundRegisters[i]);
             }
-            }                                 
-                        
+#else
+          apu_write(0x4000 + i, f->soundBlock.soundRegisters[i]);
+#endif
+            }
+
           break;
 
         default:
@@ -999,182 +850,90 @@ int LoadStateSnss(byte b,int only_test)
   /* close the files */
   if ((code = SNSS_CloseFile (&f)) != SNSS_OK)
     {
-      //      printf ("Error: %s\n", getSnssErrorString (code));
+      printf ("Error: %s\n", SNSS_GetErrorString (code));
+      free(savename);
       return 1;
     }
-//  gpprintf (0,16*10,"[Load completed]\n",2,-1,13);
-  
+
+  free(savename);
   return 0;
-}
-
-
-Uint8 ProcessKey()
-{
-  int ExKey;
-
-  ExKey=btn_readState();
-
-/*
-  if (ExKey & BTMASK_F2)
-  {
-     NES_reset();
-  }
-*/
-
-  if (ExKey & BTMASK_F2)
-  {
-     NES_quickload();
-  }
-
-  if (ExKey & BTMASK_F3)
-  {
-     NES_quicksave();
-  }
-
-
-  if (ExKey & BTMASK_OFF)
-  {
-     return 1;
-  }
-
-  return 0;
-}
-
-
-int prevTick=0;
-int prevFrame=0;
-
-/*inline */byte FrameCompleted()
-{
-   framecount++;
-
-   if (ProcessKey())
-   {
-       return 1;
-   }
-
-   Vnes.var.DrawCframe=(framecount%2)==0;
-   Vnes.var.DrawCframe=1;
-
-
-   if ((tmr_getTick()-prevTick)>100){
-     printf("%d fps\n",framecount-prevFrame);
-     prevTick=tmr_getTick();
-     prevFrame=framecount;
-   }
-
-   return 0;
 }
 
 __IRAM_CODE inline uint8 emulate_one_frameNTSC(void)
 {
-  byte * tmp;
+    framecompleted=false;
 
-  framecompleted=false;
-  //vblank=true;
+    while (!framecompleted)
+    {
+        curscanline=ppu_currentscanline();
 
-  while (!framecompleted)
-  {
-
-     curscanline=ppu_currentscanline();
-
-
-
-     Vnes.var.currentcpucycle+=Vnes.var.cpucycle;
-     Vnes.var.curdeccycle+=Vnes.var.deccycle;
-     if (Vnes.var.curdeccycle>=65536)
-     {
-    Vnes.var.currentcpucycle++;
-    Vnes.var.curdeccycle-=65536;
-     }
-     if (Vnes.var.currentcpucycle>0)
-     {
-    synccycles=Vnes.var.currentcpucycle;
-    if (curscanline==241) synccycles+=CYCLES_BEFORE_NMI;
-    #ifndef __asmcpu__
-    Vnes.var.currentcpucycle-=nes6502_execute(Vnes.var.currentcpucycle);
-    if (Vnes.var.enablesound)
-      if (sync_dmc_register(synccycles)) nes6502_pending_irq();
-    #else
-
-    Vnes.var.currentcpucycle-=cpu_exec(Vnes.var.currentcpucycle);
-
-    if (Vnes.var.enablesound)
-          if (sync_dmc_register(synccycles)) cpu_pending_irq();
-
-    #endif
-        synccycles=0;
-     }
-
-     if (mapper->intf->HSync) mapper->intf->HSync(curscanline);
-
-//     if (Vnes.var.lazy_mode)
-       ppu_lazy_scanlineNTSC();
-//     else
-//       ppu_scanlineNTSC();
-
-
-     switch (curscanline)
-     {
-    case 240:
-        //framecompleted=true;
-        if(!(Vnes.var.frame_irq_enabled & 0xC0))
+        Vnes.var.currentcpucycle+=Vnes.var.cpucycle;
+        Vnes.var.curdeccycle+=Vnes.var.deccycle;
+        if (Vnes.var.curdeccycle>=65536)
         {
-            #ifndef __asmcpu__
-            nes6502_pending_irq();
-            #else
-            cpu_pending_irq();
-            #endif
+            Vnes.var.currentcpucycle++;
+            Vnes.var.curdeccycle-=65536;
         }
-        break;
-    case 241:
-        //cpu vbl
-        if (mapper->intf->VSync) mapper->intf->VSync();
+        if (Vnes.var.currentcpucycle>0)
+        {
+            synccycles=Vnes.var.currentcpucycle;
+            if (curscanline==241) synccycles+=CYCLES_BEFORE_NMI;
+            #ifndef __asmcpu__
+            Vnes.var.currentcpucycle-=nes6502_execute(Vnes.var.currentcpucycle);
+            #else
+            Vnes.var.currentcpucycle-=cpu_exec(Vnes.var.currentcpucycle);
+            #endif
+            synccycles=0;
+        }
 
+        // for snd sync on dsp
         #ifndef __asmcpu__
-        Vnes.var.currentcpucycle-=nes6502_execute(CYCLES_BEFORE_NMI); //7);
-        if (ppu_vbl()) nes6502_nmi();
+            dsp_write32(&dspCom->cpuCurCycle,nes6502_getcycles(FALSE));
         #else
-        Vnes.var.currentcpucycle-=cpu_exec(CYCLES_BEFORE_NMI); //7);
-        if (ppu_vbl()) cpu_nmi();
+            dsp_write32(&dspCom->cpuCurCycle,*(int*)cpu_getcycles());
         #endif
 
+        if (mapper->intf->HSync) mapper->intf->HSync(curscanline);
 
-#if 1
-        if(Vnes.var.DrawCframe){
-            int i;
+        ppu_lazy_scanlineNTSC();
 
-            tmp=Vnes.var.Vbuffer;
-            Vnes.var.Vbuffer=Vnes.var.Vbuffer2;
-            Vnes.var.Vbuffer2=tmp;
+        switch (curscanline)
+        {
+            case 240:
+                //framecompleted=true;
+                if(!(Vnes.var.frame_irq_enabled & 0xC0))
+                {
+                    #ifndef __asmcpu__
+                    nes6502_pending_irq();
+                    #else
+                    cpu_pending_irq();
+                    #endif
+                }
 
-            while(dspCom->inBufReady); // wait for the DSP to finish the last frame
+                if(Vnes.var.DrawCframe){
+                    emu_handleVideoBuffer();
+                }
 
-            for(i=0;i<32;++i){
-              dspCom->pal[i]=Vnes.PPU_palette[i];
-            }
+                break;
+            case 241:
+                //cpu vbl
+                if (mapper->intf->VSync) mapper->intf->VSync();
 
-            for(i=0;i<240;++i){
-              dspCom->lineOffset[i]=Vnes.var.LineOffset[i];
-            }
-
-            dsp_write32(&dspCom->inBufAddr,(uint32)Vnes.var.Vbuffer2);
-            dspCom->inBufReady=1;
+                #ifndef __asmcpu__
+                Vnes.var.currentcpucycle-=nes6502_execute(CYCLES_BEFORE_NMI); //7);
+                if (ppu_vbl()) nes6502_nmi();
+                #else
+                Vnes.var.currentcpucycle-=cpu_exec(CYCLES_BEFORE_NMI); //7);
+                if (ppu_vbl()) cpu_nmi();
+                #endif
+                break;
+            case 261:
+                framecompleted=true;
+                break;
         }
-#endif
-
-        break;
-    case 261:
-        //vblank=false;
-        framecompleted=true;
-        break;
-
     }
 
-
-  }
-
-  return FrameCompleted();
+    return emu_frameCompleted();
 }
 
 
@@ -1183,7 +942,7 @@ inline uint8 emulate_one_framePAL(void)
   framecompleted=false;
   //vblank=true;  
   while (!framecompleted)
-  {  
+  {
      curscanline=ppu_currentscanline();
 
      Vnes.var.currentcpucycle+=Vnes.var.cpucycle;
@@ -1192,23 +951,19 @@ inline uint8 emulate_one_framePAL(void)
      {
     Vnes.var.currentcpucycle++;
     Vnes.var.curdeccycle-=65536;
-     }   
+     }
      if (Vnes.var.currentcpucycle>0) 
      {      
     synccycles=Vnes.var.currentcpucycle;
     if (curscanline==241) synccycles+=CYCLES_BEFORE_NMI;
     #ifndef __asmcpu__          
     Vnes.var.currentcpucycle-=nes6502_execute(Vnes.var.currentcpucycle);
-    if (Vnes.var.enablesound)
-      if (sync_dmc_register(synccycles)/*&&DPCM_IRQ*/) nes6502_pending_irq();
     #else
     Vnes.var.currentcpucycle-=cpu_exec(Vnes.var.currentcpucycle);
-    if (Vnes.var.enablesound)
-          if (sync_dmc_register(synccycles)/*&&DPCM_IRQ*/) cpu_pending_irq();
-        #endif      
+        #endif
         synccycles=0;
-     }   
-     
+     }
+
      if (mapper->intf->HSync) mapper->intf->HSync(curscanline);                  
      if (Vnes.var.lazy_mode) ppu_lazy_scanlinePAL();
      else ppu_scanlinePAL();
@@ -1249,7 +1004,7 @@ inline uint8 emulate_one_framePAL(void)
     
   }
                       
-  return FrameCompleted();            
+  return emu_frameCompleted();
 }
 
 
@@ -1313,10 +1068,10 @@ void reset_asmcpu(void)
 void Cdebug_opcode(uint32 *nesreg)
 {
 #ifdef __asmcpu__
-    sprintf(chaineDEB,"A=%x X=%x Y=%x S%x P=%x PC=%x r0=%x ADDR=%x\n",
+    sprintf(chaine,"A=%x X=%x Y=%x S%x P=%x PC=%x r0=%x ADDR=%x\n",
         nesreg[0]>>24,nesreg[1],nesreg[2],nesreg[4]>>24,nesreg[5],nesreg[3],nesreg[11],nesreg[7]);
 #endif
 
-    DEBUGS(chaineDEB);
+    DEBUGS(chaine);
 //  gpprintf(16,16,chaineDEB,0,0,0xe0);
 }

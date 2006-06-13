@@ -208,7 +208,7 @@ bool ppu_vramInaccessible(void)
    //ppu_enabled and not in vblank
 }
 
-void ppu_dma(uint8 Value)
+__IRAM_CODE void ppu_dma(uint8 Value)
 {
     //oam_dma(ppuRegs[REG_OAMADDR],Value);
     oam_dma(Value);
@@ -219,7 +219,7 @@ void ppu_dma(uint8 Value)
 
 
 
-uint8 ppu_readreg(uint32 Addr)
+__IRAM_CODE uint8 ppu_readreg(uint32 Addr)
 {
   uint8 value;
   switch (Addr&7)
@@ -273,7 +273,7 @@ uint8 ppu_readreg(uint32 Addr)
         //return value;     
 }
 
-void ppu_writereg(uint32 Addr,uint8 Value)
+__IRAM_CODE void ppu_writereg(uint32 Addr,uint8 Value)
 {
 // writes are always latched
    //ppuLatch = Value;
@@ -384,7 +384,7 @@ void ppu_writereg(uint32 Addr,uint8 Value)
         ppuVAddrLatch = (ppuVAddrLatch & 0xFF00) | ((uint16)Value);
         // v=t
         ppuVAddr = ppuVAddrLatch;        
-        
+
         //map 96        
         if (ppu_Latch_Address) ppu_Latch_Address(ppuVAddr);
       }
@@ -719,7 +719,7 @@ void ppu_cacheOAM0()
    *buf = (colRow | (pattern & 3));
 }*/
 
-__IRAM_CODE void draw_bgtile(uint8 *buf, uint32 pattern, uint32 colRow)
+void draw_bgtile(uint8 *buf, uint32 pattern, uint32 colRow)
 {
 //      return;
    *((long long*)buf)=*((long long*)(patternTOpix+((pattern<<5)|(colRow<<1))));
@@ -830,9 +830,9 @@ __IRAM_CODE void ppu_lazy_renderScanline(uint32 palmode)
     {
         lazy_bg_need_update=1;
         lazy_spr_need_update=1;
-    } 
-    
-    if (patterntables_switched) 
+    }
+
+    if (patterntables_switched)
     {
 
         if ( (Vnes.PPUPageIndex[0]!=lazy_PPUPageIndex[0])
@@ -842,19 +842,19 @@ __IRAM_CODE void ppu_lazy_renderScanline(uint32 palmode)
             ||(Vnes.PPUPageIndex[4]!=lazy_PPUPageIndex[4])
             ||(Vnes.PPUPageIndex[5]!=lazy_PPUPageIndex[5])
             ||(Vnes.PPUPageIndex[6]!=lazy_PPUPageIndex[6])
-            ||(Vnes.PPUPageIndex[7]!=lazy_PPUPageIndex[7])              
+            ||(Vnes.PPUPageIndex[7]!=lazy_PPUPageIndex[7])
            )
         {
             lazy_bg_need_update = 1;
             lazy_spr_need_update = 1;
-        } 
-        else 
+        }
+        else
         {
             patterntables_switched = 0;
         }
     }
-    
-    if (nametables_switched) 
+
+    if (nametables_switched)
     {
         if ( (Vnes.PPUPageIndex[8]!=lazy_PPUPageIndex[8])
             ||(Vnes.PPUPageIndex[9]!=lazy_PPUPageIndex[9])
@@ -867,7 +867,7 @@ __IRAM_CODE void ppu_lazy_renderScanline(uint32 palmode)
         else nametables_switched=0;
     }
 
-    if (lazy_bg_need_update || lazy_spr_need_update) 
+    if (lazy_bg_need_update || lazy_spr_need_update)
     {
         updated=1;
         startline=lazy_bg_start_line;
@@ -882,21 +882,21 @@ __IRAM_CODE void ppu_lazy_renderScanline(uint32 palmode)
         lazy_ppuVAddr = ppuVAddr;
         lazy_ppuVAddrLatch = ppuVAddrLatch;
 //      lazy_ppuTileXOfs = ppuTileXOfs;
-        
+
         lazy_bgnoclip = ppuRegs[REG_CTRL1] & REGF_CTRL1_BGNOCLIP;
 /*  }
-    
-    if (lazy_spr_need_update) 
+
+    if (lazy_spr_need_update)
     {*/
         updated=2;
-        if (lazy_spr_enabled) 
+        if (lazy_spr_enabled)
         {
             ppu_lazy_renderSPRLines();
         }
         lazy_spr_start_line = ppuScanline;
         lazy_spr_need_update = 0;
         lazy_spr_enabled = ppuRegs[REG_CTRL1] & REGF_CTRL1_OBJON;
-        lazy_spr_pattern_table_addr = spr_pattern_table_addr;       
+        lazy_spr_pattern_table_addr = spr_pattern_table_addr;
         memcpy(lazy_oamMemory.memory, oamMemory.memory, 0x100);      
         
         lazy_objnoclip = ppuRegs[REG_CTRL1] & REGF_CTRL1_OBJNOCLIP;
@@ -905,8 +905,7 @@ __IRAM_CODE void ppu_lazy_renderScanline(uint32 palmode)
 
     if (updated)
     {
-
-#if 0
+#ifndef SCREEN_USE_DSP
 
         if (startline>7||(Vnes.var.DrawAllLines))
             XlatNESBufferLineLazy((uint8*)(Vnes.var.Vbuffer + startline*(256+16) + 8+(lazy_ppuTileXOfs)),(uint8*)(lj_curRenderingScreenPtr+startline*256*2),(uint8*)lazy_pal,startline);
@@ -990,7 +989,7 @@ __IRAM_CODE void ppu_endScanline()
    if (ppu_enabled())
    {      
       if((ppuVAddr & 0x7000) == 0x7000) /* is subtile y offset == 7? */ 
-      { 
+      {
         ppuVAddr &= 0x8FFF; /* subtile y offset = 0 */ 
         if((ppuVAddr & 0x03E0) == 0x03A0) /* name_tab line == 29? */ 
         { 
@@ -1045,7 +1044,7 @@ void ppu_scanlineNTSC()
         }           
         else 
         {
-            if(ppu_Latch_RenderScreen) ppu_Latch_RenderScreen(0,0);          
+            if(ppu_Latch_RenderScreen) ppu_Latch_RenderScreen(0,0);
             ppu_cacheOAMa((uint32)Vnes.PPUPageIndex,8);//ppu_cacheOAM();
         }
       }
@@ -1210,7 +1209,7 @@ void ppu_scanlinePAL()
       }
       else ppu_renderScanline0();            
       ppu_endScanline();
-      
+
       if (Vnes.var.DrawCframe) 
       {
         if (Vnes.var.morethan8spr) 
@@ -1278,7 +1277,7 @@ void ppu_lazy_scanlinePAL()
 {
    if (ppuScanline < 240)
    {                         
-      /*lazy stuff*/      
+      /*lazy stuff*/
       if (ppuScanline==0)
       {      
         lazy_bg_start_line = 0;
@@ -1320,7 +1319,7 @@ void ppu_lazy_scanlinePAL()
         }
       }
       /*******/
-      
+
       if ((Vnes.var.DrawCframe) && ( (ppuScanline<232)||(Vnes.var.DrawAllLines)))
       {         
         ppu_lazy_renderScanline(1);
@@ -1375,7 +1374,7 @@ void InitMirroring()
       break;
    case 2://MIRROR_HORIZ:
       ppu_mirror(0, 0, 1, 1);      
-      break;      
+      break;
    case 3://MIRROR_ONE_LOW:
   //    ppu_mirror(0, 0, 0, 0);
       break;

@@ -116,7 +116,7 @@ void mmc_bankvrom(uint8 size, uint32 address, uint32 bank)
       Vnes.PPUPageIndex[(address >> 10)+1] = (byte*)(Vnes.PPUPageIndex[address >> 10] + 0x0400);
       Vnes.PPUPageIndexProtect[address>>10]=1;
       Vnes.PPUPageIndexProtect[(address>>10) + 1]=1;
-/*lazy stuff*/ 
+/*lazy stuff*/
   patterntables_switched = 1;
 /**/  
       return;
@@ -179,6 +179,7 @@ void mmc_bankvromALL8(uint32 bank0,uint32 bank1,uint32 bank2,uint32 bank3,uint32
   VALIDATE_VROM_BANK1(bank5);
   VALIDATE_VROM_BANK1(bank6);
   VALIDATE_VROM_BANK1(bank7);
+
   Vnes.PPUPageIndex[0] = Vnes.var.chr_beg + (bank0 << 10);
   Vnes.PPUPageIndexProtect[0]=1;
   Vnes.PPUPageIndex[1] = Vnes.var.chr_beg + (bank1 << 10);

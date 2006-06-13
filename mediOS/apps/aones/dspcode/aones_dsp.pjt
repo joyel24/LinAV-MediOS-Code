@@ -15,12 +15,13 @@ Source="aones_dsp.c"
 Source="C:\CCStudio_v3.1_EVAL\C5400\cgtools\lib\rts.lib"
 Source="C:\CCStudio_v3.1_EVAL\C5400\csl\lib\csl5409.lib"
 Source="ibdma.c"
+Source="nes_apu.c"
 Source="portaccess.asm"
 Source="vectors.asm"
 Source="lnk.cmd"
 
 ["Compiler" Settings: "Release"]
-Options=-o2 -fr"$(Proj_dir)\Release" -d"CHIP_5409" -d"DSPCODE"
+Options=-os -o2 -fr"$(Proj_dir)\Release" -d"CHIP_5409" -d"DSPCODE" -v549
 
 ["Linker" Settings: "Release"]
 Options=-c -m".\Release\aones_dsp.map" -o".\Release\aones_dsp.out" -w -x

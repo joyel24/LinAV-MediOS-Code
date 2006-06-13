@@ -5,7 +5,7 @@
 extern void cpu_pending_irq(void);
 extern void cpu_irq(void);
 extern void cpu_nmi(void);
-extern int cpu_getcycles(bool dummy); //gli
+extern int cpu_getcycles(void);
 extern int cpu_exec(uint32 total_cycles);
 extern void cpu_burn(uint32 burn_cycles);
 extern void cpu_release(void);

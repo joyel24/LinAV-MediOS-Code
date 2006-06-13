@@ -1,7 +1,6 @@
 #include "datatypes.h"
 #include "unes_mapper.h"
 #include "unes_io.h"
-#include "nes_apu.h"
 #include "unes.h"
 #include "unes_ppu.h"
 
@@ -188,7 +187,7 @@ static void mapNSF_Reset()
 	// Init ExSound
 	chip_type = (mmc_getinfo()->var.prg_beg[0x7B]) & 0x3F;
 	//parent_NES->apu->SelectExSound(chip_type);
-	apu_setexchip(chip_type);
+	//exsound apu_setexchip(chip_type);
 
 	//parent_NES->MemoryWrite(0x4015, 0x1f);	
 
@@ -254,7 +253,7 @@ static void mapNSF_MemoryWriteLow(uint32 addr, uint8 data)
 		mapNSF_BankSwitch(addr & 0xF, data);
 	}
 	//parent_NES->apu->ExWrite(addr, data);
-	ex_write(addr,data);
+	//exsound ex_write(addr,data);
 }
 
 static void mapNSF_MemoryWriteSaveRAM(uint32 addr, uint8 data)
@@ -264,7 +263,7 @@ static void mapNSF_MemoryWriteSaveRAM(uint32 addr, uint8 data)
 		wram1[addr - 0x6000] = data;
 	}
 	//parent_NES->apu->ExWrite(addr, data);
-	ex_write(addr,data);
+	//exsound ex_write(addr,data);
 }
 
 static void mapNSF_MemoryWrite(uint32 addr, uint8 data)
@@ -274,13 +273,13 @@ static void mapNSF_MemoryWrite(uint32 addr, uint8 data)
 		wram2[addr & 0x7FFF] = data;
 	}
 	//parent_NES->apu->ExWrite(addr, data);
-	ex_write(addr,data);
+	//exsound ex_write(addr,data);
 }
 
 static uint8 mapNSF_MemoryReadLow(uint32 addr)
 {
 	//return parent_NES->apu->ExRead(addr);
-	return ex_read(addr);
+	return 0; //exsound ex_read(addr);
 }
 
 /////////////////////////////////////////////////////////////////////

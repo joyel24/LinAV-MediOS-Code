@@ -568,7 +568,7 @@ opB8:	@ CLV
 @@@ 
 @@@ TXS以外はNZを変更する
 @@@
-SECTION_SLOW
+SECTION_FAST
 
 opAA:	@ TAX
 	IMPLIED
@@ -1567,7 +1567,7 @@ opCC:	@ CPY $nnnn
 @@@ Z <= A ∧ M == 0
 @@@ N <= M[7]
 @@@ V <= M[6]
-@@@ 
+@@@
 @@@ NZVC
 @@@ ----
 @@@ ***-
