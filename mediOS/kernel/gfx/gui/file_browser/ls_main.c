@@ -26,9 +26,6 @@
 
 #include <file_type.h>
 
-#define LCD_WIDTH SCREEN_REAL_WIDTH
-#define LCD_HEIGHT SCREEN_HEIGHT
-
 struct browser_data realData = {
     path            : "/",
 
@@ -57,13 +54,18 @@ struct browser_data realData = {
     nb_disp_entry   : 11,
 #endif
 
+#ifdef JBMM
+    nb_disp_entry   : 9,
+#endif
     x_start         : 0,
     y_start         : 0,
     
     font            : STD6X9,
-    
+
     width           : LCD_WIDTH,
     height          : LCD_HEIGHT-28,
+
+
     entry_height    : 10,
     
     draw_bottom_status : draw_bottom_status,
@@ -129,7 +131,7 @@ void draw_bottom_status(struct browser_data *bdata)
     gfx_putS(COLOR_BLUE, COLOR_WHITE,2, LCD_HEIGHT-20,bdata->path);  
     
 
-#ifdef GMINI4XX
+#if defined(GMINI4XX) || defined(AV1XX) || defined(JBMM)
     snprintf(tmp,100,"%d %s, %s",bdata->nbFile,bdata->nbFile>0?"files":"file",tmpS);
 #else
     snprintf(tmp,100,"%d %s, %d %s, %s",bdata->nbFile,bdata->nbFile>0?"files":"file",

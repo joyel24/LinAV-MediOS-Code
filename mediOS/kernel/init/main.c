@@ -90,10 +90,10 @@ void kernel_start (void)
     mem_addPool((void*)MALLOC_START,MALLOC_SIZE);
 
     gfx_init();
-
+#ifdef HAVE_CONSOLE
     con_init();
     con_screenSwitch();
-
+#endif
     /* print banner on uart */
     printk("MediOS %d.%d - kernel loading\n\n",VER_MAJOR,VER_MINOR);
 
@@ -103,27 +103,19 @@ void kernel_start (void)
         (unsigned int)MALLOC_START,
         (unsigned int)MALLOC_SIZE);
 
-    
-        
     /* init the watchdog timer */
     wdt_init();
-
     /* init the irq */
-    irq_init();
-
+    irq_init();  
     /* init the tick timer */
     tmr_init();
-
+    printk("[init] ------------ kernel done\n");
     /* driver init */
-
     uart_init();
-
     cpld_init();
-
 #ifdef HAVE_CMD_LINE
     init_cmd_line();
 #endif
-
 #ifdef HAVE_EVT
     evt_init();
 #endif
@@ -131,10 +123,8 @@ void kernel_start (void)
 #ifdef CHK_BAT_POWER
     init_power();
 #endif
-
     init_rtc();
     init_usb_fw();
-
 #ifdef HAVE_FM_REMOTE
     init_fm_remote();
 #endif
@@ -145,20 +135,14 @@ void kernel_start (void)
     init_dvr_module();
 #endif
     disk_init();
-
-    /* enable the IRQ */
-    printk("[init] INT enabled\n");
-    __sti();
-
     sound_init();
-
-
-    printk("[init] ------------ all drivers\n");
-
+    /* enable the IRQ */
+    printk("[init] about to enable INT\n");
+    __sti();  
+    printk("[init] ------------ drivers done\n");
     print_boot_info();
-
     printk("[init] END\n");
-
+    
 #if 0
    tst_fct();
 #endif
@@ -173,6 +157,6 @@ void kernel_start (void)
     gui_start();
 
     /* should we launch HALT */
-    
+    printk("BACK TO MAIN !!!!\n");
     while(1);
 }

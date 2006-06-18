@@ -33,6 +33,8 @@ void uart_intAction(int irq,struct pt_regs * regs)
     char c;
     int uart = irq - IRQ_UART0;
 
+    printk("[int] uart %d\n",uart);
+    
 //    if(inw(uart_addr[uart]+UART_SR)&0x0004)
     while(inw(uart_addr[uart]+UART_SR)&0x0004)
     {
@@ -80,9 +82,9 @@ void uart_need(int uart_num)
 
 void uart_init(void)
 {
-    int i;
+    /*int i;
     for(i=0;i<7;i++)
-        printk("%d:%x\n",i,inw(uart_addr[1]+i*2));
+        printk("%d:%x\n",i,inw(uart_addr[1]+i*2));*/
     
     uart_need(DEBUG_UART);
         

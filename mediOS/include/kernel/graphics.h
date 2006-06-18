@@ -15,7 +15,15 @@
 
 #include <sys_def/graphics.h>
 
-#define getOffset(x,y,buffer,type) ((type*)(x*((buffer->bitsPerPixel)>>3)+y*buffer->width*((buffer->bitsPerPixel)>>3)+buffer->offset))
+#define getOffset(x,y,buffer,type) ((type*)(           \
+    x*((buffer->bitsPerPixel)>>3)                      \
+    +y*buffer->width*((buffer->bitsPerPixel)>>3)       \
+    +buffer->offset))                                  \
+    
+#define getOffset_big(x,y,buffer,type) ((type*)(       \
+    x*((buffer->bitsPerPixel)>>3)*4                    \
+    +y*buffer->width*((buffer->bitsPerPixel)>>3)*2     \
+    +buffer->offset))
 
 struct graphicsBuffer {
     unsigned int  offset;                 // ->The data
@@ -46,6 +54,7 @@ typedef struct graphicsFont *     FONT_ID;
 
 
 struct graphics_operations {
+void          (*clearScreen)      (unsigned int color, struct graphicsBuffer * buff);
 void          (*drawPixel)        (unsigned int color, int x, int y, struct graphicsBuffer * buff);
 unsigned int  (*readPixel)        (int x, int y, struct graphicsBuffer * buff);
 void          (*drawRect)         (unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff);

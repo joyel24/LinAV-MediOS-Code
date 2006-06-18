@@ -12,12 +12,15 @@
 
 #include <stdarg.h>
 
-#include <sys_def/stddef.h>
+#include <sys_def/string.h>
 
 #include <kernel/io.h>
 #include <kernel/malloc.h>
 #include <kernel/kernel.h>
+
+#ifdef HAVE_CONSOLE
 #include <kernel/console.h>
+#endif
 
 #include <kernel/target/arch/lcd.h>
 
@@ -184,9 +187,10 @@ void gfx_initComponent(int vplane,struct graphicsBuffer * buff,unsigned int offs
         offset+=(32-diff);
     buff->offset=offset;
     osd_setComponentOffset(buffers_comp[vplane],offset);
-    osd_setComponentSize(buffers_comp[vplane], 2*buff->width, buff->height);
+    osd_setComponentSize(buffers_comp[vplane], 2*buff->real_width, buff->height);
     osd_setComponentPosition(buffers_comp[vplane],buff->x, buff->y);
     osd_setComponentSourceWidth(buffers_comp[vplane], ((buff->width*buff->bitsPerPixel)/32)/8);
+    
     if(buff->bitsPerPixel==8)
         buff->gops=&g8ops;
     if(buff->bitsPerPixel==32)
@@ -197,11 +201,11 @@ void gfx_restoreComponent(int vplane,struct graphicsBuffer * buff)
 {
     osd_restorePlane(buffers_comp[vplane],buff->offset,
         buff->x,buff->y,
-        buff->width,buff->height,
+        buff->real_width,buff->height,
         buff->bitsPerPixel, buff->state, buff->enable);
 
     if(buff->enable)
-        osd_setComponentConfig(buffers_comp[vplane],buff->state|OSD_COMPONENT_ENABLE);
+        osd_setComponentConfig(buffers_comp[vplane],buff->state|OSD_COMPONENT_ENABLE(buffers_comp[vplane]));
 }
 
 void gfx_restoreAllComponents(void)
@@ -311,7 +315,9 @@ void gfx_kdrawLine(unsigned int color, int x1, int y1, int x2, int y2,struct gra
 void gfx_openGraphics(void)
 {
     // hide the console since we're going to use the screen
+#ifdef HAVE_CONSOLE
     if(con_screenIsVisible()) con_screenSwitch();
+#endif
     printk("INI gfx\n");
     
     /* hidding bmap1 */
@@ -333,7 +339,7 @@ void gfx_openGraphics(void)
     current_plane=BMAP1;
     current_font=0;
     buffers[BMAP1]->enable=1;
-    osd_setComponentConfig(OSD_BITMAP1,buffers[BMAP1]->state|OSD_COMPONENT_ENABLE);
+    osd_setComponentConfig(OSD_BITMAP1,buffers[BMAP1]->state|OSD_COMPONENT_ENABLE(buffers_comp[BMAP1]));
     osd_setEntirePalette(gui_pal,256);
     //printk("BMAP1 @%x\n",buffers[BMAP1]->offset);
 }
@@ -342,7 +348,9 @@ void gfx_openGraphics(void)
 
 void gfx_closeGraphics(void)
 {
+#ifdef HAVE_CONSOLE
     if(!con_screenIsVisible()) con_screenSwitch();
+#endif
 }
 
 void gfx_setPlane(int vplane)
@@ -358,15 +366,19 @@ int gfx_getPlane(void)
 void gfx_planeHide(int vplane)
 {
     buffers[vplane]->enable=0;
+#ifdef HAVE_CONSOLE
     if(!con_screenIsVisible())
+#endif
         osd_setComponentConfig(buffers_comp[vplane],0);
 }
 
 void gfx_planeShow(int vplane)
 {
     buffers[vplane]->enable=1;
+#ifdef HAVE_CONSOLE
     if(!con_screenIsVisible())
-        osd_setComponentConfig(buffers_comp[vplane],buffers[vplane]->state|OSD_COMPONENT_ENABLE);
+#endif
+        osd_setComponentConfig(buffers_comp[vplane],buffers[vplane]->state|OSD_COMPONENT_ENABLE(buffers_comp[vplane]));
 }
 
 int gfx_planeIsShown(int vplane)
@@ -393,7 +405,9 @@ void gfx_planeSetSize(int vplane,int width,int height,int bitsPerPixel)
         buffers[vplane]->width=width;
     buffers[vplane]->height=height;
     buffers[vplane]->bitsPerPixel=bitsPerPixel;
+#ifdef HAVE_CONSOLE
     if(!con_screenIsVisible())
+#endif
     {
         osd_setComponentSize(buffers_comp[vplane], 2*buffers[vplane]->real_width, height);
         osd_setComponentSourceWidth(buffers_comp[vplane], ((buffers[vplane]->width*bitsPerPixel)/32)/8);
@@ -414,7 +428,9 @@ void gfx_planeSetPos(int vplane,int x,int y)
 {
     buffers[vplane]->x=x;
     buffers[vplane]->y=y;
+#ifdef HAVE_CONSOLE
     if(!con_screenIsVisible())
+#endif
         osd_setComponentPosition(buffers_comp[vplane],x,y);
 }
 
@@ -439,9 +455,7 @@ void gfx_planeSetBufferOffset(int vplane, void * offset)
 
 void gfx_clearScreen(unsigned int color)
 {
-    buffers[current_plane]->gops->fillRect(color,0,0,
-                                buffers[current_plane]->width,
-                                buffers[current_plane]->height,
+    buffers[current_plane]->gops->clearScreen(color,
                                 buffers[current_plane]);
 }
 void gfx_drawPixel(unsigned int color,int x, int y)

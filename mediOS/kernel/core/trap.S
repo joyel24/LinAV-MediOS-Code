@@ -143,7 +143,8 @@ trap_irq:
     mov     sp, r0
     ldr     r7, .LCsirq
     str     sp, [r7]
-__irq_loop:
+
+/*__irq_loop:
     ldr    R2, =irq_entry
     ldrh   R3, [R2,#2]
     ldrh   R2, [R2]
@@ -158,7 +159,50 @@ __irq_loop:
     mov    R1, SP            @ get reg stucture
     adr    LR, __irq_loop
     mov    PC, R3            @ branch to handler 
+__exit_irq_loop:*/
+
+    
+
+__irq_loop:
+.ifdef DSC21
+    ldr    R2, =0x305c0
+    ldrh   R3, [R2]
+    mov    r2, r3, lsr #8
+    and    r2, r2, #0x3F
+    cmp    r2, #0
+    beq    __exit_irq_loop
+    and    r3, r3, #0x1F
+    add    r3, r3, #1
+    ldr    r2, irq_tbl_ptr
+    add    r4, r2, r3, lsl #4
+    ldmia  R4, {R0-R3}
+.else
+.ifdef DSC25
+    ldr    R2, =irq_entry
+    ldrh   R3, [R2,#2]
+    ldrh   R2, [R2]
+    orr    R4, R2, R3, LSL #16
+    ldmia  R4, {R0-R3}
+    cmp    R3, #0
+    beq    __exit_irq_loop   @ if handler = 0 => no handler
+.else
+.err
+.endif
+.endif
+    @ R4 points on the bloc  
+    @ read whole bloc
+
+    @ now ack the INT
+    strh   R1, [R2]   
+    mov    R1, SP            @ get reg stucture
+    adr    LR, __irq_loop
+    mov    PC, R3            @ branch to handler 
+@     mov r1, r2
+@     mov r0, r4
+@     bl   irq_tstprint
 __exit_irq_loop:
+  
+
     ldr     r7, .LCsirq
     ldr     sp, [r7]
     ldr     r0, [sp, #64]    @ irqs are already disabled

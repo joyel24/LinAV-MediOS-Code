@@ -10,7 +10,7 @@
 * KIND, either express of implied.
 */
 
-#include <sys_def/stddef.h>
+#include <sys_def/string.h>
 
 #include <kernel/io.h>
 #include <kernel/hardware.h>
@@ -26,7 +26,9 @@
 
 #include <kernel/buttons.h>
 
+#ifdef HAVE_CONSOLE
 #include <kernel/console.h>
+#endif
 
 #include <kernel/timer.h>
 
@@ -107,6 +109,7 @@ void btn_processPress(int val)
 {    
     int btn;
     struct evt_t evt;
+       
     for(btn=0;btn<NB_BUTTONS;btn++)
     {
         if(BTN_NOT_PRESSED(val,btn)) /* the btn is NOT pressed */
@@ -129,7 +132,9 @@ void btn_processPress(int val)
                     halt_device();                    
                 }
             }*/
-
+            
+            //printk("btn %d pressed\n",btn);
+            
             if(nb_pressed[btn]==0)
             {
 #ifdef HAVE_FM_REMOTE
@@ -169,15 +174,17 @@ void btn_processPress(int val)
                     halt_launchTimer(); /* postpone the poweroff timer */
 #endif
 
+#ifdef HAVE_CONSOLE
                     if(!con_screenIsVisible())
                     {
                       if (val&BTMASK_F1 && btn+1==BTN_ON) con_screenSwitch();
-                      
+#endif                     
                       // post the event
                       evt.evt=btn+1;
                       evt.evt_class=BTN_CLASS;
                       evt.data=(void*)mx_press[btn];
                       evt_send(&evt);
+#ifdef HAVE_CONSOLE
                     }
                     else
                     {
@@ -197,7 +204,7 @@ void btn_processPress(int val)
                                 break;
                         }
                     }
-
+#endif
 
                     //printk("BTN %d pressed\n",btn);
 #ifdef HAVE_FM_REMOTE

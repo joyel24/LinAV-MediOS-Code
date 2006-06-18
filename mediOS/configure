@@ -73,8 +73,10 @@ CONFIGURE_HAVE_AIC23_SOUND=-1
 CONFIGURE_HAVE_CMD_LINE=-1
 CONFIGURE_HAVE_EVT=-1
 CONFIGURE_HAVE_DVR=-1
+CONFIGURE_HAVE_CONSOLE=-1
+CONFIGURE_HAVE_DBUG=-1
 
-# this is the first configuration question, AV3XX or GMINI4XX
+# this is the first configuration question, AV3XX, GMINI4XX, AV1XX or JBMM
 if [ $CONFIGURE_TARGET_DEVICE = -1 ]
 	then
 		USERSELECTION=""
@@ -88,7 +90,8 @@ if [ $CONFIGURE_TARGET_DEVICE = -1 ]
 			echo "1	AV3XX"
 			echo "2	GMINI4XX"
                         echo "3	AV1XX"
-			echo -n "Choose 1, 2 or 3 [1]: "
+                        echo "4	JBMM"
+			echo -n "Choose 1, 2, 3 or 4 [1]: "
 			read -e USERSELECTION
 			if [ "$USERSELECTION" == "" ]; then
 				CONFIGURE_TARGET_DEVICE="AV3XX"
@@ -102,13 +105,18 @@ if [ $CONFIGURE_TARGET_DEVICE = -1 ]
                                 if [ $USERSELECTION == 3 ]; then
 					CONFIGURE_TARGET_DEVICE="AV1XX"
 				fi
+                                if [ $USERSELECTION == 4 ]; then
+					CONFIGURE_TARGET_DEVICE="JBMM"
+				fi
 			fi
 		done
 fi
 
 if [ $CONFIGURE_TARGET_DEVICE == "AV3XX" ]; then
             CONFIGURE_HAVE_MAS_SOUND="1"
-            CONFIGURE_HAVE_AIC23_SOUND="0"     
+            CONFIGURE_HAVE_AIC23_SOUND="0" 
+            CONFIGURE_CHIP_TYPE="DSC25"
+            CONFIGURE_HAVE_DBUG="1"
 fi
 
 if [ $CONFIGURE_TARGET_DEVICE == "GMINI4XX" ]; then
@@ -117,16 +125,30 @@ if [ $CONFIGURE_TARGET_DEVICE == "GMINI4XX" ]; then
             CONFIGURE_HAVE_DVR="0"
             CONFIGURE_HAVE_EXT_MODULE="0"
             CONFIGURE_HAVE_FM_REMOTE="0"
+            CONFIGURE_CHIP_TYPE="DSC25"
 fi
 
 if [ $CONFIGURE_TARGET_DEVICE == "AV1XX" ]; then
             CONFIGURE_HAVE_MAS_SOUND="1"
-            CONFIGURE_HAVE_AIC23_SOUND="0"     
+            CONFIGURE_HAVE_AIC23_SOUND="0" 
+            CONFIGURE_CHIP_TYPE="DSC25"    
+            CONFIGURE_HAVE_DBUG="1"
+fi
+
+if [ $CONFIGURE_TARGET_DEVICE == "JBMM" ]; then
+            CONFIGURE_HAVE_MAS_SOUND="0"
+            CONFIGURE_HAVE_AIC23_SOUND="0"
+            CONFIGURE_CHIP_TYPE="DSC21"
+            CONFIGURE_HAVE_CONSOLE="0"
+            CONFIGURE_HAVE_DBUG="1"
 fi
 
 # this section of the script asks all of the yes or no querys, they are of the following format:
 # CONFIG_QUERY_YN $variable_to_set "question to ask" "default answer"
 # variable_to_set=$?
+
+CONFIG_QUERY_YN $CONFIGURE_HAVE_DBUG "Build with support for emu2?" "n"
+CONFIGURE_HAVE_DBUG=$?
 
 CONFIG_QUERY_YN $CONFIGURE_CHK_BAT_POWER "CHK_BAT_POWER? note: this must be yes atm, it is used to turn off lcd, HD and device" "y"
 CONFIGURE_CHK_BAT_POWER=$?
@@ -152,6 +174,9 @@ CONFIGURE_HAVE_CMD_LINE=$?
 
 CONFIG_QUERY_YN $CONFIGURE_HAVE_EVT "HAVE_EVT?" "y"
 CONFIGURE_HAVE_EVT=$?
+
+CONFIG_QUERY_YN $CONFIGURE_HAVE_CONSOLE "HAVE_CONSOLE?" "y"
+CONFIGURE_HAVE_CONSOLE=$?
 
 CONFIG_QUERY_YN $CONFIGURE_HAVE_DVR "HAVE_DVR? (AV1xx/AV3xx/JBMM only)" "n"
 CONFIGURE_HAVE_DVR=$?
@@ -180,6 +205,9 @@ echo "HAVE_AIC23_SOUND = $CONFIGURE_HAVE_AIC23_SOUND" >> ./Makefile.conf
 echo "HAVE_CMD_LINE = $CONFIGURE_HAVE_CMD_LINE" >> ./Makefile.conf
 echo "HAVE_EVT = $CONFIGURE_HAVE_EVT" >> ./Makefile.conf
 echo "HAVE_DVR = $CONFIGURE_HAVE_DVR" >> ./Makefile.conf
+echo "HAVE_CONSOLE = $CONFIGURE_HAVE_CONSOLE" >> ./Makefile.conf
+echo "CHIP_TYPE = $CONFIGURE_CHIP_TYPE" >> ./Makefile.conf
+echo "HAVE_DBUG = $CONFIGURE_HAVE_DBUG" >> ./Makefile.conf
 
 #append our template to Makefile.conf
 echo "#" >> ./Makefile.conf

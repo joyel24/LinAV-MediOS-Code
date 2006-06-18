@@ -164,7 +164,7 @@ void osd_setComponentConfig (int component, int config)
 
 void osd_restorePlane(int component, unsigned int address, int x, int y, int w, int h, int bpp, int state,int enable)
 {
-    int enbit=(enable)?OSD_COMPONENT_ENABLE:0;
+    int enbit=(enable)?OSD_COMPONENT_ENABLE(component):0;
 
     osd_setComponentOffset (component,address);
 

@@ -26,4 +26,7 @@
 
 #define IRQ_OSD              7
 
+#define IRQ_UART0            12 
+#define IRQ_UART1            13
+
 #endif

@@ -1,14 +1,26 @@
 GCCFLAGS = -Wall  -nostdlib -fno-builtin  -mcpu=arm7tdmi -O2
 #-Os -mlong-calls 
 
+ifeq ("$(TARGET_DEVICE)","JBMM")
+GCCFLAGS += -mlong-calls 
+endif
+
 #GCCFLAGS +=   -fomit-frame-pointer -fno-strict-aliasing
 
 
 ASFLAGS = -mfpu=softfpa
 
 
-GCCFLAGS += -D$(TARGET_DEVICE)
-ASFLAGS  += --defsym $(TARGET_DEVICE)=1
+GCCFLAGS += -D$(TARGET_DEVICE) -D$(CHIP_TYPE)
+ASFLAGS  += --defsym $(TARGET_DEVICE)=1 --defsym $(CHIP_TYPE)=1
+
+ifeq ($(HAVE_CONSOLE),1)
+	GCCFLAGS += -DHAVE_CONSOLE
+endif
+
+ifeq ($(HAVE_DBUG),1)
+	GCCFLAGS += -DHAVE_DBUG
+endif
 
 ifeq ($(CHK_BAT_POWER),1)
 	GCCFLAGS += -DCHK_BAT_POWER

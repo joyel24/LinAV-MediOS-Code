@@ -152,7 +152,7 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
     int             color=COLOR_BLACK;
     int             select_color=COLOR_BLUE;
     char *          cp;
-#if defined(GMINI4XX) || defined(AV1XX)
+#if defined(GMINI4XX) || defined(AV1XX) || defined(JBMM)
     char            trimmed_filename[34];
     int             i;
 #endif
@@ -221,7 +221,7 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
         else
             select_color= COLOR_WHITE;
     }
-#if defined(GMINI4XX) || defined(AV1XX)
+#if defined(GMINI4XX) || defined(AV1XX) || defined(JBMM)
     for(i=0;i<=32;i++)
     {
     	trimmed_filename[i]=dEntry->name[i];

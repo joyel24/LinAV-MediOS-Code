@@ -19,8 +19,10 @@
 #include <kernel/hardware.h>
 
 #include <kernel/lcd.h>
-#include <kernel/console.h>
 
+#ifdef HAVE_CONSOLE    
+#include <kernel/console.h>
+#endif
 //int vsnprintf (char * buf, size_t size, const char * fmt, va_list args);
 static char debugmembuf[255];
 
@@ -31,8 +33,9 @@ void printk(char *fmt, ...)
     vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
     va_end(ap);
     uart_outString(debugmembuf,DEBUG_UART);
-
+#ifdef HAVE_CONSOLE
     con_write(debugmembuf,COLOR_ROM_GREEN);
+#endif
 }
 
 int printf(__const char * fmt, ...)
@@ -43,8 +46,9 @@ int printf(__const char * fmt, ...)
     res = vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
     va_end(ap);
     uart_outString(debugmembuf,DEBUG_UART);
-
+#ifdef HAVE_CONSOLE
     con_write(debugmembuf,COLOR_ROM_WHITE);
+#endif
     return res;
 }
 
@@ -53,8 +57,9 @@ int vprintf(__const char * fmt, va_list args)
   int res;
     res = vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, args);
     uart_outString(debugmembuf,DEBUG_UART);
-
+#ifdef HAVE_CONSOLE
     con_write(debugmembuf,COLOR_ROM_WHITE);
+#endif
     return res;
 }
 

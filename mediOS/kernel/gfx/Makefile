@@ -3,9 +3,15 @@ include ../../Makefile.conf
 ASFLAGS  += -I../../include
 GCCFLAGS += -I../../include
 
-SRC = $(wildcard *.c)
-SRC2 = $(wildcard *.S)
-OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
+OBJS = graphics_32.o graphics.o
+
+ifeq ("$(CHIP_TYPE)","DSC25")
+OBJS += osd_DSC25.o graphics_8_DSC25.o
+else
+ifeq ("$(CHIP_TYPE)","DSC21")
+OBJS += osd_DSC21.o graphics_8_DSC21.o
+endif
+endif
 
 SUBDIRS = fonts gui
 

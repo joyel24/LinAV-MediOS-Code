@@ -53,7 +53,7 @@ int arch_btn_readHardware(void){
 
     dir = ((port_2 >> 3)&0x1) | (port_1 & 0xc) | ((port_1&0x1)<<1);
     fn = port_2 & 0x7;
-    bt  = (port_1>>2)&0x1;
+    bt  = (port_1>>1)&0x1;
     
     dir = trad_tab[dir];
 

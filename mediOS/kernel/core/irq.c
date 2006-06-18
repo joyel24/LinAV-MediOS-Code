@@ -75,18 +75,23 @@ void irq_init(void)
 {
     int i = 0;
     arch_irq_init();
-
-    irq_setRaw(0x0);
-    fiq_setRaw(0x0);
     
     while(irq_table[i].irq!=-1)
     {
         irq_setHandler(irq_table[i].irq,irq_table[i].action);
         i++;
     }
-        
-    int_setEabase(irq_tbl_ptr,0x2);
     
+#ifdef DSC25    
+    irq_setRaw(0x0);
+    fiq_setRaw(0x0);        
+    int_setEabase(irq_tbl_ptr,0x2);
+#elif defined(DSC21)
+    dsc21_setRaw(0,0);
+#else
+#warning UKN CHIP
+    printk("[init] irq FATAL ERROR: ukn chip\n");
+#endif
     printk("[init] irq\n");
 }
 

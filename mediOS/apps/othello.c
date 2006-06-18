@@ -40,6 +40,12 @@ struct position cursor_pos={3,2};
 #define Y_INI      ((240-((CELL_SIZE+1)*NB_CELL)-1)/2)
 #endif
 
+#ifdef AV1XX
+#define CELL_SIZE  13
+#define NB_PIECE_Y 120
+#define Y_INI      ((117-((CELL_SIZE+1)*NB_CELL)-1)/2)
+#endif
+
 #define BG_COLOR     COLOR_BLACK
 #define LINE_COLOR   COLOR_WHITE
 #define SEL_COLOR    COLOR_RED
@@ -545,8 +551,6 @@ void app_main(int argc, char ** argv)
 {
     int evt;
     int evt_handler;
-    
-    printf("\nIn othello\n");
 
     gfx_openGraphics();
    
@@ -580,7 +584,7 @@ void app_main(int argc, char ** argv)
     while(!stop_othello)
     {
 //FIXME: get_evt() never returns on the gmini so until it is fixed this work around is needed.
-#ifdef AV3XX
+#if defined(AV3XX) | defined(AV1XX)
       evt=evt_getStatus(evt_handler); 
       eventHandler(evt);
 #endif

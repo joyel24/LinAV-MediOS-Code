@@ -21,6 +21,9 @@
 #define SCREEN_ORIGIN_X                   110
 #define SCREEN_ORIGIN_Y                   8
 
+#define LCD_WIDTH SCREEN_REAL_WIDTH
+#define LCD_HEIGHT SCREEN_HEIGHT
+
 #define MAX_COL                           53
 #define MAX_LINE                          27
 

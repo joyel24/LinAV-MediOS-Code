@@ -85,7 +85,10 @@ MED_RET_T evt_getFullStatus(int num_evt_pipe, struct evt_t * evt)
         pipeRead(&(evt_pipe_tab[num_evt_pipe].evt_pipe), evt, sizeof(struct evt_t));
     }
     else
+    {
+        printk("Bad handler: %d\n",num_evt_pipe);
         return -MED_EINVAL;    
+    }
     return MED_OK;
 }
 

@@ -103,6 +103,11 @@ int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_
 
     //outb(av_cmd_array[ata_cmd->xfer_dir],IDE_COMMAND);
 
+#ifdef NO_DMA
+    use_dma=ATA_NO_DMA;
+#endif
+
+    
     if(((unsigned int)(data) < SDRAM_START) && use_dma==ATA_WITH_DMA)
     {
         printk("Destination buffer not in SDRAM => no DMA\n");    
@@ -330,7 +335,8 @@ void ata_init(void)
     ataStop_tmr.freeRun  = 1;
     ataStop_tmr.stdDelay = 1; /* 1 tick delay */
         
-    arch_ata_init();    
+    arch_ata_init();
+    printk("[ATA init] done\n");
 }
 
 void ide_intAction(int irq,struct pt_regs * regs)

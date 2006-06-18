@@ -23,11 +23,15 @@
 #define DEFAULT_MIN_DELAY       2
 #define DEFAULT_DEC_VALUE       1
 
+#include <kernel/target/arch/buttons.h>
+
+#ifndef MAX_OFF
 #define MAX_OFF                     200
+#endif
 
 #define NB_BUTTONS                  0x10
 
-#include <kernel/target/arch/buttons.h>
+
 
 void btn_processPress(int val);
 void btn_init(void);

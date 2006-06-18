@@ -184,6 +184,8 @@ void __clf(void);
 #define     fiq_getRaw        ({ int __val=inw(INTC_INTRAW)&0x1;__val;})
 #define     irq_getRaw        ({ int __val=(inw(INTC_INTRAW)>>1)&0x1;__val;})
 
+#define     dsc21_setRaw(v1,v2)   {outw((v1>0?0x2:0x0)|(v2>0?0x1:0x0),INTC_INTRAW);}
+
 #define     int_setEabase(val,size) ({outw((val&0xFFF8)|(size&0x3),INTC_EABASE0);outw((val>>16)&0x1FFF,INTC_EABASE1);})
 #define     int_getEabase     ({int __val=(inw(INTC_EABASE0)&0xFFF8)|((inw(INTC_EABASE1)&0x1FFF)<<16);__val;})
 
