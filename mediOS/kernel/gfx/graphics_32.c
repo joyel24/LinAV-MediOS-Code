@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/gfx/graphics_32.c
 *
 *   MediOS project
@@ -15,6 +15,7 @@
 
 #include <kernel/graphics.h>
 
+void         graphics32_clearScreen       (unsigned int color, struct graphicsBuffer * buff);
 void         graphics32_DrawPixel         (unsigned int color, int x, int y, struct graphicsBuffer * buff);
 unsigned int graphics32_ReadPixel         (int x, int y, struct graphicsBuffer * buff);
 void         graphics32_DrawRect          (unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
@@ -35,6 +36,7 @@ void         graphics32_DrawString    (struct graphicsFont * font, unsigned int 
                                             unsigned char * s, struct graphicsBuffer * buff);
 
 struct graphics_operations g32ops =  {
+    clearScreen       : graphics32_clearScreen,
 	drawPixel         : graphics32_DrawPixel,
 	readPixel         : graphics32_ReadPixel,
 	drawRect          : graphics32_DrawRect,
@@ -45,9 +47,14 @@ struct graphics_operations g32ops =  {
 	drawString        : graphics32_DrawString,
 	scrollWindowVert  : graphics32_ScrollWindowVert,
 	scrollWindowHoriz : graphics32_ScrollWindowHoriz,
-        drawHLine         : graphics32_DrawHLine,
-        drawVLine         : graphics32_DrawVLine
+    drawHLine         : graphics32_DrawHLine,
+    drawVLine         : graphics32_DrawVLine
 };
+
+void graphics32_clearScreen(unsigned int color, struct graphicsBuffer * buff)
+{
+    graphics32_FillRect(color,0,0,buff->width,buff->height,buff);
+}
 
 void graphics32_DrawPixel(unsigned int color, int x, int y, struct graphicsBuffer * buff)
 {

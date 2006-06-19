@@ -162,19 +162,14 @@ void osd_setComponentConfig (int component, int config)
 	}
 }
 
-void osd_restorePlane(int component, unsigned int address, int x, int y, int w, int h, int bpp, int state,int enable)
+void osd_restorePlane(int component, unsigned int address, int x, int y, int w, int h, int bw, int bpp, int state,int enable)
 {
     int enbit=(enable)?OSD_COMPONENT_ENABLE(component):0;
 
     osd_setComponentOffset (component,address);
-
-    outw(2*w,OSD_COMP_W(component));
-    outw(h,OSD_COMP_H(component));
-
-    outw(x,OSD_COMP_X(component));
-    outw(y,OSD_COMP_Y(component));
-
-    outw((((w*bpp)/32)/8),OSD_COMP_BUFF_W(component));
+    osd_setComponentSize (component, 2*w, h);
+    osd_setComponentPosition(component,x,y);
+    osd_setComponentSourceWidth(component,(((bw*bpp)/32)/8));
 
     switch(component)
     {

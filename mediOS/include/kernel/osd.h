@@ -36,7 +36,7 @@ void osd_setComponentSize (int component, int width, int height);
 void osd_setComponentPosition (int component, int x, int y);
 void osd_setComponentSourceWidth (int component, int width);
 void osd_setComponentConfig (int component, int config);
-void osd_restorePlane(int component, unsigned int address, int x, int y, int w, int h, int bpp, int state,int enable);
+void osd_restorePlane(int component, unsigned int address, int x, int y, int w, int h, int bw, int bpp, int state,int enable);
 void osd_init();
 void arch_osd_init(void);
 

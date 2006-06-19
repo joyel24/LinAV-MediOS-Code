@@ -201,7 +201,7 @@ void gfx_restoreComponent(int vplane,struct graphicsBuffer * buff)
 {
     osd_restorePlane(buffers_comp[vplane],buff->offset,
         buff->x,buff->y,
-        buff->real_width,buff->height,
+        buff->real_width,buff->height,buff->width,
         buff->bitsPerPixel, buff->state, buff->enable);
 
     if(buff->enable)
