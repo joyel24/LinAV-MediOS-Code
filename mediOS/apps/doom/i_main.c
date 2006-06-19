@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.4  2006/05/28 17:08:45  sfxgligli
+// aoDoom update (adding browser, PWADs support, optimisations,...)
+//
 // Revision 1.3  2006/02/08 17:45:40  oxygen77
 // big cleanup in makefiles
 //
@@ -114,7 +117,7 @@ void PWADScreen(){
     gfx_clearScreen(COLOR_WHITE);
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,0,       "You chose a PWAD (custom WAD)!");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,9,       "Now choose the corresponding");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,18,      "IWAD file (ie:doom2.wad)");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,18,      "IWAD file (eg:doom2.wad)");
 
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,REALSCREENHEIGHT-10,"Press a key to continue...");
 
@@ -123,7 +126,7 @@ void PWADScreen(){
 };
 
 int app_main(){
-    char * wadname=malloc(255);
+    char * wadname=malloc(MAX_PATH);
 
     myargc = 0;
     myargv = NULL;
@@ -138,8 +141,8 @@ int app_main(){
     iniBrowser();
 
     WelcomeScreen();
-
-    if (browser_simpleBrowse("/",wadname)!=MED_OK) app_exit();
+    
+    if (browser_simpleBrowse("/",wadname)!=MED_OK) app_exit(true);
     strlwr(wadname);
 
     if(!IsPWAD(wadname)){
@@ -147,13 +150,13 @@ int app_main(){
         MyIdentifyVersion(wadname);
         D_AddFile(wadname);
     }else{
-        char * pwadname=malloc(255);
+        char * pwadname=malloc(MAX_PATH);
 
         strcpy(pwadname,wadname);
 
         PWADScreen();
 
-        if (browser_simpleBrowse("/",wadname)!=MED_OK) app_exit();
+        if (browser_simpleBrowse("/",wadname)!=MED_OK) app_exit(true);
         strlwr(wadname);
 
         modifiedgame = true;
@@ -173,8 +176,15 @@ int app_main(){
 }
 
 
-void app_exit(){
+void app_exit(bool error){
     gfx_closeGraphics();
+
+    if (error){
+        printf("\nAbnormal exit, press # or X to continue...\n");
+
+        while(btn_readState()&(BTMASK_BTN1|BTMASK_BTN2));
+        while(!(btn_readState()&(BTMASK_BTN1|BTMASK_BTN2)));
+    }
 
 #ifdef BUILD_STDALONE
     reload_firmware();

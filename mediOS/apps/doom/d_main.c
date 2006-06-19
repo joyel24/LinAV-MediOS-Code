@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.5  2006/05/28 17:08:45  sfxgligli
+// aoDoom update (adding browser, PWADs support, optimisations,...)
+//
 // Revision 1.4  2006/03/24 21:21:48  vincentp
 // commit new version of spc playe r and modification name of functions fread , fopen to their more standard names read, open etc ...
 //
@@ -1012,7 +1015,7 @@ void D_DoomMain (void)
     printf ("M_Init: Init miscellaneous info.\n");
     M_Init ();
 
-    printf ("R_Init: Init DOOM refresh daemon - ");
+    printf ("R_Init: Init DOOM refresh daemon.\n");
     R_Init ();
 
     printf ("\nP_Init: Init Playloop state.\n");

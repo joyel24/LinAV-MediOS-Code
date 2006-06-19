@@ -16,6 +16,9 @@
 //
 //
 // $Log$
+// Revision 1.5  2006/05/28 17:08:45  sfxgligli
+// aoDoom update (adding browser, PWADs support, optimisations,...)
+//
 // Revision 1.4  2006/03/24 21:21:48  vincentp
 // commit new version of spc playe r and modification name of functions fread , fopen to their more standard names read, open etc ...
 //
@@ -127,7 +130,7 @@ M_WriteFile
     int       handle;
     int		count;
 
-    handle = open ( name, O_WRONLY);
+    handle = open ( name, O_WRONLY | O_CREAT);
 
     if (handle < 0)
 	return false;
@@ -157,9 +160,9 @@ M_ReadFile
     handle = open (name, O_RDONLY);
     if (handle < 0)
 	I_Error ("Couldn't read file %s", name);
-    length = lseek(handle, 0, SEEK_END);
-    //length = ftell(handle);
-    lseek(handle, 0, SEEK_SET);
+
+    length=filesize(handle);
+
     buf = Z_Malloc (length, PU_STATIC, NULL);
     count = read (handle, buf, length);
     close (handle);
@@ -297,7 +300,7 @@ void M_SaveDefaults (void)
     int		v;
     int   f;
 
-    f = open (defaultfile, O_WRONLY);
+    f = open (defaultfile, O_WRONLY | O_CREAT);
     if (f<0)
 	return; // can't write the file, but don't complain
 

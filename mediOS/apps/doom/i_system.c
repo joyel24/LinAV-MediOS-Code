@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.4  2006/05/28 17:08:45  sfxgligli
+// aoDoom update (adding browser, PWADs support, optimisations,...)
+//
 // Revision 1.3  2006/02/06 22:45:48  oxygen77
 // make doom work with new api, we lack of exit() now
 //
@@ -148,7 +151,7 @@ void I_Quit (void)
     M_SaveDefaults ();
     I_ShutdownGraphics();
 
-    app_exit();
+    app_exit(false);
 }
 
 void I_WaitVBL(int count)
@@ -199,5 +202,5 @@ void I_Error (char *error, ...)
     D_QuitNetGame ();
     I_ShutdownGraphics();
 
-    app_exit();
+    app_exit(true);
 }

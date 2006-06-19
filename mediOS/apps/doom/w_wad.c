@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.9  2006/05/28 17:08:45  sfxgligli
+// aoDoom update (adding browser, PWADs support, optimisations,...)
+//
 // Revision 1.8  2006/03/24 21:21:49  vincentp
 // commit new version of spc playe r and modification name of functions fread , fopen to their more standard names read, open etc ...
 //
@@ -53,6 +56,8 @@ rcsid[] = "$Id$";
 
 
 #include "medios.h"
+
+#include "doomstat.h"
 
 #include "m_swap.h"
 #include "doomtype.h"
@@ -341,6 +346,21 @@ void W_InitMultipleFiles (char** filenames)
         I_Error ("Couldn't allocate lumpcache");
 
     memset (lumpcache,0, size);
+    
+    //gli: try to guess the correct gamemode
+    if (gamemode==indetermined){
+        printf("Indetermined gamemode, let's try to guess...\n");
+
+        if (W_CheckNumForName("E1M1")!=-1){
+            printf("Switching to retail.\n");
+            gamemode=retail;
+        }
+
+        if (W_CheckNumForName("MAP01")!=-1){
+            printf("Switching to commercial.\n");
+            gamemode=commercial;
+        }
+    }
 }
 
 
