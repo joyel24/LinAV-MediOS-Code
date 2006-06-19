@@ -177,7 +177,12 @@ void btn_processPress(int val)
 #ifdef HAVE_CONSOLE
                     if(!con_screenIsVisible())
                     {
-                      if (val&BTMASK_F1 && btn+1==BTN_ON) con_screenSwitch();
+                      if (val&BTMASK_F1 && btn+1==BTN_ON)
+                      {
+                        con_screenSwitch();
+                        nb_pressed[btn] = mx_press[btn];
+                        return;
+                      }
 #endif                     
                       // post the event
                       evt.evt=btn+1;
