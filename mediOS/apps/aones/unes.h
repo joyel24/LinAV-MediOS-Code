@@ -23,6 +23,12 @@
 #define __debug_op__
 #define __debug_io__*/
 
+#ifndef __asmcpu__
+    #define CPU_GET_CYCLES() (nes6502_getcycles(FALSE))
+#else
+    #define CPU_GET_CYCLES() (*(unsigned int*)cpu_getcycles())
+#endif
+
 
 #include "datatypes.h"
 

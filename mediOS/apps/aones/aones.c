@@ -234,6 +234,27 @@ void emu_init()
     Vnes.mapper_extram=(uint8 *)malloc(0x10000);
     Vnes.mapper_extramsize=0;
     Vnes.NESSRAM=(uint8*)malloc(0x10000);
+
+    Vnes.var.Vbuffer=(uint8 *)malloc(NES_BUFFER_WIDTH*NES_PAL_HEIGHT+64);
+    Vnes.var.Vbuffer=(char*)(((unsigned int)Vnes.var.Vbuffer+32)&0xffffffe0);
+    Vnes.var.Vbuffer2=(uint8 *)malloc(NES_BUFFER_WIDTH*NES_PAL_HEIGHT+64);
+    Vnes.var.Vbuffer2=(char*)(((unsigned int)Vnes.var.Vbuffer2+32)&0xffffffe0);
+
+    memset(Vnes.var.Vbuffer,0,NES_BUFFER_WIDTH*NES_PAL_HEIGHT);
+    memset(Vnes.var.Vbuffer2,0,NES_BUFFER_WIDTH*NES_PAL_HEIGHT);
+    memset(Vnes.var.LineOffset,0,NES_PAL_HEIGHT);
+}
+
+void emu_close()
+{
+    if (Vnes.CPUMemory) free(Vnes.CPUMemory);
+    if (Vnes.PPU_patterntables) free(Vnes.PPU_patterntables);
+    if (Vnes.PPU_nametables) free(Vnes.PPU_nametables);
+    if (Vnes.PPU_palette) free(Vnes.PPU_palette);
+    if (Vnes.mapper_extram) free(Vnes.mapper_extram);
+    if (Vnes.NESSRAM) free(Vnes.NESSRAM);
+    if (Vnes.var.Vbuffer) free(Vnes.var.Vbuffer);
+    if (Vnes.var.Vbuffer2) free(Vnes.var.Vbuffer2);
 }
 
 void emu_setDefaultParams()
@@ -278,15 +299,6 @@ void display_init(){
     gfx_planeHide(VID1);
     gfx_planeHide(VID2);
 
-    Vnes.var.Vbuffer=(uint8 *)malloc(NES_BUFFER_WIDTH*NES_PAL_HEIGHT+64);
-    Vnes.var.Vbuffer=(char*)(((unsigned int)Vnes.var.Vbuffer+32)&0xffffffe0);
-    Vnes.var.Vbuffer2=(uint8 *)malloc(NES_BUFFER_WIDTH*NES_PAL_HEIGHT+64);
-    Vnes.var.Vbuffer2=(char*)(((unsigned int)Vnes.var.Vbuffer2+32)&0xffffffe0);
-
-    memset(Vnes.var.Vbuffer,0,NES_BUFFER_WIDTH*NES_PAL_HEIGHT);
-    memset(Vnes.var.Vbuffer2,0,NES_BUFFER_WIDTH*NES_PAL_HEIGHT);
-    memset(Vnes.var.LineOffset,0,NES_PAL_HEIGHT);
-
     lj_curRenderingScreenPtr=malloc(NES_WIDTH*NES_PAL_HEIGHT*4+64);
     lj_curRenderingScreenPtr=(char*)(((unsigned int)lj_curRenderingScreenPtr+32)&0xffffffe0);
 
@@ -302,11 +314,13 @@ void display_init(){
 void emu_run(){
     emu_setDefaultParams();
 
-    if ((!Load_ROM(CurrentROMFile))&&(!Open_ROM())&&(!Init_NES(CurrentROMFile))){
+    if ((!Load_ROM(CurrentROMFile))&&
+        (!Open_ROM())&&
+        (!Init_NES(CurrentROMFile))){
         LaunchEmu();
-    }else{
-        Close_ROM(0);
     }
+
+    Close_ROM(0);
 };
 
 __IRAM_CODE void emu_handleVideoBuffer(){
@@ -445,6 +459,8 @@ int app_main(){
     dsp_write32(&dspCom->outBufAddr,(uint32)lj_curRenderingScreenPtr);
 
     for(;;){
+        clkc_overclockArm(false);
+
         gfx_planeHide(VID1);
         gfx_setPlane(BMAP1);
         gfx_planeShow(BMAP1);
@@ -458,9 +474,10 @@ int app_main(){
 
         clkc_overclockArm(true);
         emu_run();
+
         // temp
         apu_reset();
-        clkc_overclockArm(false);
+        while(btn_readState());
     }
 
     clkc_overclockArm(false);

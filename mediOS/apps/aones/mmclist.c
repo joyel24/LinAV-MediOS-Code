@@ -111,6 +111,7 @@ extern mapintf_t map119_intf;
 extern mapintf_t map122_intf;
 extern mapintf_t map187_intf;
 extern mapintf_t map255_intf;
+extern mapintf_t mapNSF_intf;
 
 /* implemented mapper interfaces */
 mapintf_t *mappers[] =
@@ -191,7 +192,8 @@ mapintf_t *mappers[] =
    &map119_intf,
    &map122_intf,
    &map187_intf,
-   &map255_intf,   
+   &map255_intf,
+   &mapNSF_intf,
    NULL
 };
 

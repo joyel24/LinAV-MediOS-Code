@@ -14,11 +14,7 @@ void apu_write(uint32 Addr, uint8 Value){
     item->address=Addr;
     item->value=Value;
 
-#ifndef __asmcpu__
-    dsp_write32(&item->tick,nes6502_getcycles(FALSE));
-#else
-    dsp_write32(&item->tick,*(int*)cpu_getcycles());
-#endif
+    dsp_write32(&item->tick,CPU_GET_CYCLES());
 
     dspCom->sndHead=(dspCom->sndHead+1)&SNDQUEUE_MASK;
 };
