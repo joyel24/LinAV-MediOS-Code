@@ -15,6 +15,8 @@
 #define SDRAM_START   0x08000000
 #define SDRAM_END     0x09000000
 
+#define IRAM_SIZE         0x8000;
+
 #define MALLOC_START  ((((unsigned int)&_end_kernel) & 0xFFFFF000)+0x1000)
 #define MALLOC_SIZE   (((unsigned int)&_sdend_start)-MALLOC_START)
 

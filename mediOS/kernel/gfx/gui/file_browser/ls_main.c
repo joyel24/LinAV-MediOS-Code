@@ -47,6 +47,9 @@ struct browser_data realData = {
 #ifdef GMINI4XX
     nb_disp_entry   : 15,
 #endif
+#ifdef GMINI402
+    nb_disp_entry   : 15,
+#endif
 #ifdef AV3XX
     nb_disp_entry   : 22,
 #endif
@@ -131,7 +134,7 @@ void draw_bottom_status(struct browser_data *bdata)
     gfx_putS(COLOR_BLUE, COLOR_WHITE,2, LCD_HEIGHT-20,bdata->path);  
     
 
-#if defined(GMINI4XX) || defined(AV1XX) || defined(JBMM)
+#if defined(GMINI4XX) || defined(AV1XX) || defined(JBMM) || defined(GMINI402)
     snprintf(tmp,100,"%d %s, %s",bdata->nbFile,bdata->nbFile>0?"files":"file",tmpS);
 #else
     snprintf(tmp,100,"%d %s, %d %s, %s",bdata->nbFile,bdata->nbFile>0?"files":"file",

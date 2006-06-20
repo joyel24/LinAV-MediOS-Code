@@ -20,6 +20,9 @@ mk_api_file:
 
 tools/bin2wav/bin2wav:        
 	@make -C tools/bin2wav/ --no-print-directory
+	
+tools/bin2avi/bin2avi:        
+	@make -C tools/bin2avi/ --no-print-directory
 
 incdir:
 	@make -C include/kernel/target --no-print-directory incdir
@@ -29,14 +32,14 @@ lib_medios: incdir mk_api_file
 	@make -C kernel --no-print-directory lib_medios
 	@echo '-----   building libMedios done'
 
-medios: base_clean medios.bin medios.wav
+medios: base_clean medios.bin medios.wav medios.avi
 
 medios.bin: incdir mk_api_file subdirs
 	@echo '-----   building kernel'
 	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o medios.elf $(KERNEL_OBJS) $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary medios.elf medios.bin
 
-aoboy: base_clean aoboy.bin aoboy.wav
+aoboy: base_clean aoboy.bin aoboy.wav aoboy.avi
 
 aoboy.bin: incdir mk_api_file
 	@make -C kernel/ --no-print-directory kernel_lib
@@ -44,7 +47,7 @@ aoboy.bin: incdir mk_api_file
 	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o aoboy.elf $(KERNEL_OBJS) apps/avboy/build/*.o $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary aoboy.elf aoboy.bin
 
-doom: base_clean doom.bin doom.wav
+doom: base_clean doom.bin doom.wav doom.avi
 
 doom.bin: incdir mk_api_file
 	@make -C kernel/ --no-print-directory kernel_lib
@@ -52,7 +55,7 @@ doom.bin: incdir mk_api_file
 	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o doom.elf $(KERNEL_OBJS) apps/doom/build/*.o $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary doom.elf doom.bin
 
-snes9x: snes9x.bin snes9x.wav
+snes9x: snes9x.bin snes9x.wav snes9x.avi
 
 snes9x.bin: incdir mk_api_file
 	@make -C kernel/ --no-print-directory kernel_lib
@@ -62,7 +65,7 @@ snes9x.bin: incdir mk_api_file
 	$(KERNEL_OBJS) apps/snes9x/build/*.o $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary snes9x.elf snes9x.bin
 
-aones: aones.bin aones.wav
+aones: aones.bin aones.wav aones.avi
 
 aones.bin: incdir mk_api_file
 	@make -C kernel/ --no-print-directory kernel_lib
@@ -73,7 +76,7 @@ aones.bin: incdir mk_api_file
 	@$(OBJCOPY) -O binary aones.elf aones.bin
 
 base_clean:
-	@rm -f *.wav *.map *.elf *.bin
+	@rm -f *.wav *.map *.elf *.bin *.avi
 
 clean:  clean-subdirs base_clean clean_aoboy clean_doom clean_snes9x clean_aones
 	@echo '-----   cleaning MAIN'

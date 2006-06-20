@@ -166,7 +166,10 @@ MED_RET_T browserEvt(struct browser_data * bdata)
                 break;
 #ifdef GMINI4XX
             case BTN_1:
-#endif    
+#endif  
+#ifdef GMINI402
+            case BTN_1:
+#endif  
             case BTN_RIGHT:
                 if(bdata->listused) // is there items in the list?
                 {
@@ -242,6 +245,9 @@ MED_RET_T browserEvt(struct browser_data * bdata)
                 }
                 break;
 #ifdef GMINI4XX  
+            case BTN_2:
+#endif
+#ifdef GMINI402  
             case BTN_2:
 #endif
             case BTN_LEFT:

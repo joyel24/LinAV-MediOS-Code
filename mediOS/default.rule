@@ -39,3 +39,13 @@ else
 %.wav:
 	@echo "End"
 endif
+
+ifeq ("$(TARGET_DEVICE)","GMINI402")        
+%.avi: %.bin tools/bin2avi/bin2avi
+	@echo "[$@]"
+	@tools/bin2avi/bin2avi $< tools/bin2avi/402loader.bin.avi $@ 2399744
+	@echo "End"
+else
+%.avi:
+	@echo "End"
+endif

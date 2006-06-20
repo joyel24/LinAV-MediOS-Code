@@ -171,7 +171,11 @@ int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_
             {
                 for(j=0;j<SECTOR_SIZE;j+=2)
                 {
+#ifdef GMINI402
+                    outw(inw(buffer+j),0x50000020);
+#else
                     outw(inw(buffer+j),IDE_DATA);
+#endif
                 }
             }
         }

@@ -55,6 +55,8 @@
 #include <kernel/stdfs.h>
 #include <kernel/vfs.h>
 
+unsigned int _iram_size = IRAM_SIZE;
+
 void print_boot_info(void)
 {
     printk("SP: %08x\n",get_sp());
@@ -63,6 +65,8 @@ void print_boot_info(void)
 }
 
 extern int endOfList;
+
+
 
 void tst_fct(void)
 {
@@ -97,9 +101,10 @@ void kernel_start (void)
     /* print banner on uart */
     printk("MediOS %d.%d - kernel loading\n\n",VER_MAJOR,VER_MINOR);
 
-    printk("Initial SP: %08x, kernel end: %08x, size in IRAM: %d  Malloc start: %08x, size: %d\n",get_sp(),
+    printk("Initial SP: %08x, kernel end: %08x, size in IRAM: %x/%x  Malloc start: %08x, size: %x\n",get_sp(),
         (unsigned int)&_end_kernel,
         (unsigned int)&_iram_end - (unsigned int)&_iram_start,
+        _iram_size,
         (unsigned int)MALLOC_START,
         (unsigned int)MALLOC_SIZE);
 
@@ -152,6 +157,7 @@ void kernel_start (void)
     app_main(1,"STDALONE");
     reload_firmware();
 #endif
+
     do_bkpt();
 
     gui_start();

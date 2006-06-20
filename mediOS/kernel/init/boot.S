@@ -13,7 +13,8 @@ kernel_entry:
     mov r0, #0x0000000
     mov sp, r0
     MSR CPSR_c, #0xDF @0x80 | 0x40 | 0x1F = 0xDF [SYS mode]
-    ldr r0, =0x00008000
+    ldr r0, =_iram_size
+    ldr r0,[r0]
     mov sp, r0
 /* init lock var for power off */
     ldr r0, =powering_off
