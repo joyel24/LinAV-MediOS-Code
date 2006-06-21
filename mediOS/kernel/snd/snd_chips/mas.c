@@ -63,7 +63,7 @@ __IRAM_DATA sound_buffer_s * soundBuffer;
 
 extern int sound_paused;
 
-__IRAM_CODE void dsp_interrupt(int irq,struct pt_regs * regs)
+__IRAM_CODE void mas_dspInterrupt(int irq,struct pt_regs * regs)
 {
     int toSend;
 
@@ -90,7 +90,7 @@ __IRAM_CODE void dsp_interrupt(int irq,struct pt_regs * regs)
     if(soundBuffer->read >= soundBuffer->size)  /* we reached end of buffer => go back to start */
     {
         soundBuffer->read=0;
-        dsp_interrupt(IRQ_MAS_DATA,NULL);             /* retry to send data */
+        mas_dspInterrupt(IRQ_MAS_DATA,NULL);             /* retry to send data */
     }
 }
 
@@ -217,7 +217,7 @@ void mas_startMp3(void)
     if(soundBuffer)
         soundBuffer->playing=1;
     irq_enable(IRQ_MAS_DATA);
-    dsp_interrupt(IRQ_MAS_DATA,NULL);
+    mas_dspInterrupt(IRQ_MAS_DATA,NULL);
 }
 
 void mas_stopMp3(void)

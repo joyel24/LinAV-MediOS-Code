@@ -32,7 +32,7 @@ struct av_peak {
 
 
 
-void dsp_interrupt(int irq,struct pt_regs * regs);
+void mas_dspInterrupt(int irq,struct pt_regs * regs);
 int sound_buff_write(sound_buffer_s * sound_buffer, int (*reader_fct)(char * data,int count,void* param),
             int count,void * param);
 
