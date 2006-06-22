@@ -138,7 +138,7 @@ void mas_init(void)
     irq_disable(IRQ_MAS_DATA);
     printk("\n");
 
-   // mas_i2sInit();
+   //mas_i2sInit();
 
 }
 
@@ -999,10 +999,14 @@ void mas_i2sInit(void)
     //mas_write_Di_register(chunk_list[1]->reg,chunk_list[1]->addr,(void *)chunk_list[1]->buffer,chunk_list[1]->length);
 
     mas_setD0(0x7f8,0x00008300);
+    
+    mas_setD0(0x7f2,0x04);
+    
+    mas_setD0(MAS_MAIN_IO_CONTROL,0x125);
     /* dsp code here */
 
     load_dsp_program_hdd("/test.out");
-    *WAVE_PERIOD=64;
+    *WAVE_PERIOD=10;
     *DEBUG_MSG_STATE=0;
     dsp_run();
 
@@ -1017,6 +1021,8 @@ void mas_i2sInit(void)
     mas_codecWrite(MAS_REG_MIX_DSP_SCALE,0x4000);
     mas_codecWrite(MAS_REG_DA_OUTPUT_MODE,0x0);
 
+
+    
 }
 #endif
 // code from sound_init

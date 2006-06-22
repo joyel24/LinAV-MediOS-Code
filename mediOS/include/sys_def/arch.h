@@ -17,5 +17,7 @@
 
 #define AV3XX_ARCH      0
 #define GMINI4XX_ARCH   1
-
+#define AV1XX_ARCH      2
+#define JBMM_ARCH       3
+#define GMINI402_ARCH   4
 #endif

@@ -29,7 +29,7 @@ struct irq_data_s irq_table[] = {
 #ifdef HAVE_MAS_SOUND
     {
         irq     : IRQ_MAS_DATA,
-        action  : dsp_interrupt,
+        action  : mas_dspInterrupt,
         name    : "MAS",
     },
 #endif

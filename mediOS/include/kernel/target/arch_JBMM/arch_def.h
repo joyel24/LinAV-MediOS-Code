@@ -22,7 +22,7 @@
 
 #define CONFIG_ARM_CLK 54000000
 
-#define CURRENT_ARCH  AV3XX_ARCH
+#define CURRENT_ARCH  JBMM_ARCH
 
 /* uarts */
 

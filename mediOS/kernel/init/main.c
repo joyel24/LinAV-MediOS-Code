@@ -66,24 +66,35 @@ void print_boot_info(void)
 
 extern int endOfList;
 
-
+#define WAVE_PERIOD ((volatile unsigned short *)0x40100)
+#define DEBUG_MSG_STATE ((volatile unsigned short *)0x40102)
+#define DEBUG_MSG_TEXT  ((short *)0x40104)
 
 void tst_fct(void)
 {
-    /*char * fileName="/test.mp3";
-    sound_initMp3();
+    int i,per=50;
+    char str[100];
     
-    if(!addPlaylist(fileName))
-    {
-        printk("error adding %s to playList\n",fileName);
+     do{
+   
+    udelay(1000);
+
+    if(*DEBUG_MSG_STATE){
+      for(i=0;i<100;++i){
+        str[i]=DEBUG_MSG_TEXT[i];
+      }
+      printf("%s\n",str);
+      *DEBUG_MSG_STATE=0;
     }
 
-    while(!endOfList)
-    {
-        sound_readMore();
-    }
-
-    sound_freeMp3();*/
+    per++;
+    
+    if(per>100)
+        per=50;
+    
+    *WAVE_PERIOD = 50;
+    
+  } while(1);
 
 }
 
