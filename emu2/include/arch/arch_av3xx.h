@@ -28,7 +28,7 @@
 #define FLASH_START       0x100000
 #define FLASH_END         0x180000
 #define FLASH_LOAD_OFFSET 0x000000
-#if 1
+#if 0
 #define SDRAM_START       0x00900000
 #define SDRAM_END         0x01900000
 #define SDRAM_LOAD_OFFSET 0x00000000

@@ -80,6 +80,7 @@ extern void (*cur_irq_fct)(void);
 #define IRQ_HW_DEBUG    (0x1<< 18)
 #define CPLDBTN_HW_DEBUG (0x1<< 19)
 #define DVR_HW_DEBUG    (0x1<< 20)
+#define DSP_HW_DEBUG    (0x1<< 21)
 
 #define DEBUG_MODE
 #define DEBUG_MODE_HW

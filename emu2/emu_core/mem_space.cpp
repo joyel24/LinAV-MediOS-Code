@@ -38,7 +38,7 @@ mem_space::mem_space(char * flash,char * sdram):HW_node(0x0,0xFFFFFFFF,16,"AVMEM
     add_item(iram);
     iram->write(RESET_VECTOR,RESET_INIT_VAL,4);
 
-    HW_mem * dsp_mem = new HW_mem(NULL,0x40000,0x50000,"DSP MEM");
+    dsp_mem = new HW_mem(NULL,0x40000,0x50000,"DSP MEM");
     add_item(dsp_mem);
     HW_mem * flash_mem = new HW_mem(flash,FLASH_START,FLASH_END,"FLASH",FLASH_LOAD_OFFSET);
     add_item(flash_mem);

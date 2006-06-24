@@ -1,5 +1,5 @@
-/*
-*   HW_mem.h
+/* 
+*   HW_dsp.h
 *
 *   AV3XX emulator
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,28 +10,21 @@
 * KIND, either express of implied.
 */
 
-#ifndef __HW_MEM_H
-#define __HW_MEM_H
+#ifndef __HW_DSP_H
+#define __HW_DSP_H
 
 #include "emu.h"
 #include "HW_access.h"
 
+#define DSP_START 0x30600
+#define DSP_END 0x30610
 
-class HW_mem : public HW_access {
+class HW_dsp : public HW_access {
     public:
-        HW_mem(char * fname,uint32_t start,uint32_t end,char * name, uint32_t load_offset);
-        HW_mem(char * fname,uint32_t start,uint32_t end,char * name);
-        ~HW_mem();
-
+        HW_dsp(void);
+                
         uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);
-
-        char *  mem;
-        
-    private:
-        
-
-        void init(char * fname,uint32_t start,uint32_t end,uint32_t load_offset);
 };
 
 #endif // __HW_MEM_H

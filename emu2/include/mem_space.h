@@ -30,6 +30,7 @@ class mem_space:public HW_node {
         
         int do_cmd_dump(int argc,char ** argv);
         int do_cmd_add_bk_mem(int argc,char ** argv);
+        int do_cmd_dump_dsp(void);
         
         uint32_t read(uint32_t addr,int size);
         void write(uint32_t addr,uint32_t val,int size);
@@ -43,6 +44,7 @@ class mem_space:public HW_node {
     private:
         bkpt_list * bkpt;
         HW_OSD * hw_OSD;
+        HW_mem * dsp_mem;
     
        
 };

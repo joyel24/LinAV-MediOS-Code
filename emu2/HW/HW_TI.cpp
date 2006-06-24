@@ -33,6 +33,7 @@
 #include <HW_MemCfg.h>
 #include <HW_OSD.h>
 #include <HW_IRQ.h>
+#include <HW_dsp.h>
 #include <HW_access.h>
 
 HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld,
@@ -91,6 +92,8 @@ HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld,
 #ifdef HAS_30A1A
     add_item(new HW_null(0x30a1a,0x30a1a+0x2,"Internal WDT",0));
 #endif
+
+    add_item(new HW_dsp());
 
     new i2c_master(gpio);
     
