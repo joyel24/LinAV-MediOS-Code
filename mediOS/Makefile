@@ -1,7 +1,7 @@
 include Makefile.conf
 
-ASFLAGS  += -I../include
-GCCFLAGS += -I../include
+ASFLAGS  += -I../include -Iinclude
+GCCFLAGS += -I../include -Iinclude
 
 #LDFLAGS =  -L/usr/local/cross-tools/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lfloat -lgcc
 LDFLAGS =  -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lfloat -lm -lgcc
@@ -75,10 +75,17 @@ aones.bin: incdir mk_api_file
 	$(KERNEL_OBJS) apps/aones/build/*.o $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary aones.elf aones.bin
 
+uidemo: uidemo.bin uidemo.wav uidemo.avi
+
+uidemo.bin: incdir mk_api_file apps/uidemo.o
+	@make -C kernel/ --no-print-directory kernel_lib
+	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o uidemo.elf $(KERNEL_OBJS) apps/uidemo.o $(LDFLAGS) -Map medios.map
+	@$(OBJCOPY) -O binary uidemo.elf uidemo.bin
+
 base_clean:
 	@rm -f *.wav *.map *.elf *.bin *.avi
 
-clean:  clean-subdirs base_clean clean_aoboy clean_doom clean_snes9x clean_aones
+clean:  clean-subdirs base_clean clean_aoboy clean_doom clean_snes9x clean_aones clean_uidemo
 	@echo '-----   cleaning MAIN'
 	@rm -f *.o *.bak *~
 	@rm -f include/*~ include/kernel/*~ include/sys_def/*~  include/gui/*~ include/kernel/target/*~
@@ -95,5 +102,9 @@ clean_snes9x:
 
 clean_aones:
 	@make -C apps/aones --no-print-directory clean
+
+clean_uidemo:
+	@rm -f apps/uidemo.o
+
 
 include default.rule

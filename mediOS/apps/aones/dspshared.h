@@ -3,6 +3,8 @@
 
 // warning : this file is included by both arm and dsp code (thx zig, it's a lot cleaner like this :)
 
+//#define DSP_VID_PROFILE 
+
 #define SAMPLE_RATE 32000
 
 #define NES_BUFFER_WIDTH 272

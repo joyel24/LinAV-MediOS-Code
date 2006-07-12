@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.5  2006/06/19 16:36:30  sfxgligli
+// aoDoom update
+//
 // Revision 1.4  2006/05/28 17:08:45  sfxgligli
 // aoDoom update (adding browser, PWADs support, optimisations,...)
 //
@@ -137,7 +140,7 @@ int app_main(){
     gfx_clearScreen(COLOR_WHITE);
     gfx_fontSet(STD6X9);
 
-    iniIcon();
+    icon_init();
     iniBrowser();
 
     WelcomeScreen();

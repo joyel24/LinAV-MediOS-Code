@@ -13,11 +13,10 @@
 #include <sys_def/stddef.h>
 
 #include <kernel/kfont.h>
-#include <kernel/graphics.h>
 
-FONT_ID font_table[NBFONT] ;
+FONT font_table[NBFONT] ;
 
-#define fnt_initFont(name)  extern FONT_ID name; font_table[name->num]=name;
+#define fnt_initFont(name)  extern FONT name; font_table[name->num]=name;
 
 void fnt_init(void)
 {
@@ -79,4 +78,8 @@ void fnt_init(void)
 #ifdef _shadowBold_12x18
     fnt_initFont(shadowBold)
 #endif
+}
+
+FONT fnt_fontFromId(int id){
+    return font_table[id];
 }

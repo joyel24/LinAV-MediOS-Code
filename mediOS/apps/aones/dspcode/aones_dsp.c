@@ -154,7 +154,9 @@ void main(){
 #if 0
 			dspCom->inBufReady=0;
 #else
+#ifdef DSP_VID_PROFILE
 		    interruptARM();
+#endif
 			handleVideoBuffer();
 #endif
 		}

@@ -152,6 +152,7 @@ void dsp_interrupt(int irq,struct pt_regs * regs){
         dspCom->hasDbgMsg=0;
     }
 
+#ifdef DSP_VID_PROFILE
     if(t){
         i++;
         t2+=tmr_getMicroTick()-t;
@@ -167,7 +168,7 @@ void dsp_interrupt(int irq,struct pt_regs * regs){
     if(dspCom->inBufReady){
         t=tmr_getMicroTick();
     }
-
+#endif
 };
 
 
@@ -288,7 +289,7 @@ void emu_setDefaultParams()
 }
 
 void display_init(){
-    int x,y;
+    int x,y,w,h,bpp;
 
     vblankNum=0;
     irq_changeHandler(IRQ_OSD,osd_interrupt);
@@ -304,7 +305,9 @@ void display_init(){
 
 #ifdef SCREEN_USE_RESIZE
     gfx_planeGetPos(VID1,&x,&y);
+    gfx_planeGetSize(VID1,&w,&h,&bpp);
     gfx_planeSetPos(VID1,x-8,y);
+    gfx_planeSetSize(VID1,w+4,h,bpp);
 #else
     gfx_planeSetBufferOffset(VID1,lj_curRenderingScreenPtr);
     gfx_planeSetSize(VID1,NES_WIDTH,NES_PAL_HEIGHT,32);
@@ -441,7 +444,7 @@ int app_main(){
 
     dsp_init();
 
-    iniIcon();
+    icon_init();
     iniBrowser();
 
     gfx_openGraphics();
@@ -481,6 +484,7 @@ int app_main(){
     }
 
     clkc_overclockArm(false);
+    emu_close();
     gfx_closeGraphics();
     snd_close();
 

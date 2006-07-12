@@ -138,8 +138,6 @@ int buffers_comp[NB_BUFFER] = {
     OSD_CURSOR2
 };
 
-extern FONT_ID font_table[NBFONT];
-
 int     current_font=0;
 int     current_plane=0;
 
@@ -485,7 +483,7 @@ void gfx_drawLine(unsigned int color, int x1, int y1, int x2, int y2)
 
 void gfx_putS(unsigned int color, unsigned int bg_color, int x, int y, unsigned char *s)
 {
-    buffers[current_plane]->gops->drawString(font_table[current_font],color,bg_color,
+    buffers[current_plane]->gops->drawString(fnt_fontFromId(current_font),color,bg_color,
                             x,y,s,buffers[current_plane]);
 }
 
@@ -501,15 +499,15 @@ void gfx_getStringSize(unsigned char *str, int *w, int *h)
     {
         *w=0;
         while(*str++)
-            *w += font_table[current_font]->width;
+            *w += fnt_fontFromId(current_font)->width;
     }
     if(h)
-        *h=font_table[current_font]->height;
+        *h=fnt_fontFromId(current_font)->height;
 }
 
 void gfx_putC(unsigned int color, unsigned int bg_color, int x, int y, unsigned char s)
 {
-    buffers[current_plane]->gops->drawChar(font_table[current_font],color,bg_color,
+    buffers[current_plane]->gops->drawChar(fnt_fontFromId(current_font),color,bg_color,
                             x,y,s,buffers[current_plane]);
 }
 

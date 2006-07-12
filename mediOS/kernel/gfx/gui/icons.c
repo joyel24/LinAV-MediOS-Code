@@ -25,7 +25,7 @@ char ident_str[]="AVICO";
 
 struct icon_elem * icon_list_head=NULL;
 
-struct icon_elem * loadIcon(char * filename)
+struct icon_elem * icon_load(char * filename)
 {
     int infile;
     int i;
@@ -39,7 +39,7 @@ struct icon_elem * loadIcon(char * filename)
     tmpF=(char*)malloc(sizeof(char)*(strlen(ICON_DIR)+1+strlen(filename)+1));
     if(!tmpF)
     {
-        printk("[loadIcon] can't create filename string\n");
+        printk("[icon_load] can't create filename string\n");
         return NULL;
     }    
     sprintf(tmpF,"%s/%s",ICON_DIR,filename);
@@ -48,14 +48,14 @@ struct icon_elem * loadIcon(char * filename)
     infile = open(tmpF, O_RDONLY);
     if(infile<0)
     {
-        printk("[loadIcon] can't open file '%s' (%s) for reading!\n", tmpF,filename);
+        printk("[icon_load] can't open file '%s' (%s) for reading!\n", tmpF,filename);
         return NULL;
     }
     
     /* check if it has the correct ident. string */    
     if(read(infile,buff,5)!=5)
     {
-        printk("[loadIcon] bad ident (length)\n"); 
+        printk("[icon_load] bad ident (length)\n"); 
         goto err1;
     }
         
@@ -63,7 +63,7 @@ struct icon_elem * loadIcon(char * filename)
     {
         if(buff[i]!=ident_str[i])
         {
-            printk("[loadIcon] bad ident (string)\n"); 
+            printk("[icon_load] bad ident (string)\n"); 
             goto err1;
         }
     }
@@ -71,14 +71,14 @@ struct icon_elem * loadIcon(char * filename)
     /* read strlen & create string*/
     if(read(infile,buff,1)<=0)    
     {
-        printk("[loadIcon] end of file reached - Step2\n"); 
+        printk("[icon_load] end of file reached - Step2\n"); 
         goto err1;
     }
     len=(int)buff[0];
     name=(char*)malloc(sizeof(char)*(len+1));    
     if(!name)
     {
-        printk("[loadIcon] not enough memory for name in icon structure\n"); 
+        printk("[icon_load] not enough memory for name in icon structure\n"); 
         goto err1;
     }
     
@@ -89,14 +89,14 @@ struct icon_elem * loadIcon(char * filename)
         
         if(read(infile,buff,1)<=0)
         {
-            printk("[loadIcon] end of file reached - Step3\n"); 
+            printk("[icon_load] end of file reached - Step3\n"); 
             goto err2;
         }
         name[i]=buff[0];
     }*/
     if(read(infile,name,len)<len)
     {
-        printk("[loadIcon] end of file reached - reading name\n"); 
+        printk("[icon_load] end of file reached - reading name\n"); 
         goto err2;
     }
     
@@ -108,7 +108,7 @@ struct icon_elem * loadIcon(char * filename)
     {
         if(!strcmp(ptr->name,name))
         {
-            printk("[loadIcon] there is already an icon with that name\n");
+            printk("[icon_load] there is already an icon with that name\n");
             free(name);        
             goto out;
         }
@@ -118,7 +118,7 @@ struct icon_elem * loadIcon(char * filename)
     ptr=(struct icon_elem *)malloc(sizeof(struct icon_elem));
     if(!ptr)
     {
-        printk("[loadIcon] not enough memory for icon structure\n"); 
+        printk("[icon_load] not enough memory for icon structure\n"); 
         goto err2;
     }
     
@@ -127,14 +127,14 @@ struct icon_elem * loadIcon(char * filename)
     /* read width and height */
     if(read(infile,buff,1)<=0)
     {
-        printk("[loadIcon] end of file reached - Step4\n"); 
+        printk("[icon_load] end of file reached - Step4\n"); 
         goto err3;
     }
     ptr->bmap_data.width=(int)buff[0];
     
     if(read(infile,buff,1)<=0)
     {
-        printk("[loadIcon] end of file reached - Step5\n"); 
+        printk("[icon_load] end of file reached - Step5\n"); 
         goto err3;
     }
     ptr->bmap_data.height=(int)buff[0];
@@ -143,20 +143,20 @@ struct icon_elem * loadIcon(char * filename)
     ptr->data=(unsigned char *)malloc(sizeof(unsigned char)*ptr->bmap_data.width*ptr->bmap_data.height);
     if(!ptr->data)
     {
-        printk("[loadIcon] not enough memory for data in icon structure (w=%d,h=%d)\n",ptr->bmap_data.width,ptr->bmap_data.height); 
+        printk("[icon_load] not enough memory for data in icon structure (w=%d,h=%d)\n",ptr->bmap_data.width,ptr->bmap_data.height); 
         goto err3;
     }
     
     len=ptr->bmap_data.width*ptr->bmap_data.height;
     
-    printk("[loadIcon] loading icon %s from %s size (%d,%d)\n",ptr->name,tmpF,ptr->bmap_data.width,ptr->bmap_data.height);
+    printk("[icon_load] loading icon %s from %s size (%d,%d)\n",ptr->name,tmpF,ptr->bmap_data.width,ptr->bmap_data.height);
     
     /* read icon data */
     /*for(i=0;i<ptr->bmap_data.width*ptr->bmap_data.height;i++)
     {
         if(read(infile,buff,1)<=0)
         {
-            printk("[loadIcon] end of file reached - Step6\n"); 
+            printk("[icon_load] end of file reached - Step6\n"); 
             //goto err4;
         }
         ptr->data[i]=buff[0];
@@ -166,14 +166,14 @@ struct icon_elem * loadIcon(char * filename)
     {
         if(read(infile,ptr->data+ptr->bmap_data.width*i,ptr->bmap_data.width)<ptr->bmap_data.width)
         {
-            printk("[loadIcon] end of file reached - Step6\n"); 
+            printk("[icon_load] end of file reached - Step6\n"); 
             goto err4;
         }
     }
     
     /*if(read(infile,ptr->data,len)<len)
     {
-        printk("[loadIcon] end of file reached - reading icon data\n"); 
+        printk("[icon_load] end of file reached - reading icon data\n"); 
         goto err4;
     }*/
     
@@ -205,7 +205,7 @@ err1:
     return NULL;
 }
 
-struct icon_elem * addIcon(char * name,unsigned char * data,int w,int h)
+struct icon_elem * icon_add(char * name,unsigned char * data,int w,int h)
 {
     struct icon_elem * ptr;
     printk("addIcon %s ",name);
@@ -215,7 +215,7 @@ struct icon_elem * addIcon(char * name,unsigned char * data,int w,int h)
     {
         if(!strcmp(ptr->name,name))
         {
-            printk("[loadIcon] there is already an icon with that name\n");
+            printk("[icon_load] there is already an icon with that name\n");
             goto out;
         }
     }
@@ -224,7 +224,7 @@ struct icon_elem * addIcon(char * name,unsigned char * data,int w,int h)
     ptr=(struct icon_elem *)malloc(sizeof(struct icon_elem));
     if(!ptr)
     {
-        printk("[loadIcon] not enough memory for icon structure\n"); 
+        printk("[icon_load] not enough memory for icon structure\n");
         goto err1;
     }
     printk("- allocated ");
@@ -247,7 +247,7 @@ err1:
     return NULL;
 }
 
-struct icon_elem * getIcon(char * name)
+struct icon_elem * icon_get(char * name)
 {
     struct icon_elem * ptr;
     printk("Icon %s asked ",name);
@@ -263,22 +263,22 @@ struct icon_elem * getIcon(char * name)
     return NULL;
 }
 
-void iniIcon(void)
+void icon_init(void)
 {
-    addIcon("mediosLogo",(unsigned char*)medios_logo, 51, 10);
-    addIcon("usbIcon",(unsigned char*)usb_icon, 15, 6);
-    addIcon("fwExtIcon",(unsigned char*)fw_ext_icon, 15, 6);
-    addIcon("cfIcon",(unsigned char*)cf_icon, 15, 6);
-    addIcon("powerIcon",(unsigned char*)power_icon, 13, 6);
-    addIcon("upBitmap",(unsigned char*)upArrow, 9, 9);
-    addIcon("dwBitmap",(unsigned char*)dwArrow, 9, 9);
-    addIcon("dirBitmap",(unsigned char*)dir, 8, 8);
-    addIcon("mp3Bitmap",(unsigned char*)mp3, 8, 8);
-    addIcon("textBitmap",(unsigned char*)text, 8, 8);
-    addIcon("imageBitmap",(unsigned char*)image, 8, 8);
-    addIcon("MsgBoxExclamationBitmap",(unsigned char*)MsgBoxExclamation, 18, 18);
-    addIcon("MsgBoxQuestionBitmap",(unsigned char*)MsgBoxQuestion, 18, 18);
-    addIcon("MsgBoxWarningBitmap",(unsigned char*)MsgBoxWarning, 18, 18);
-    addIcon("MsgBoxInformationBitmap",(unsigned char*)MsgBoxInformation, 18, 18);
-    addIcon("MsgBoxErrorBitmap",(unsigned char*)MsgBoxError, 18, 18);
+    icon_add("mediosLogo",(unsigned char*)medios_logo, 51, 10);
+    icon_add("usbIcon",(unsigned char*)usb_icon, 15, 6);
+    icon_add("fwExtIcon",(unsigned char*)fw_ext_icon, 15, 6);
+    icon_add("cfIcon",(unsigned char*)cf_icon, 15, 6);
+    icon_add("powerIcon",(unsigned char*)power_icon, 13, 6);
+    icon_add("upBitmap",(unsigned char*)upArrow, 9, 9);
+    icon_add("dwBitmap",(unsigned char*)dwArrow, 9, 9);
+    icon_add("dirBitmap",(unsigned char*)dir, 8, 8);
+    icon_add("mp3Bitmap",(unsigned char*)mp3, 8, 8);
+    icon_add("textBitmap",(unsigned char*)text, 8, 8);
+    icon_add("imageBitmap",(unsigned char*)image, 8, 8);
+    icon_add("MsgBoxExclamationBitmap",(unsigned char*)MsgBoxExclamation, 18, 18);
+    icon_add("MsgBoxQuestionBitmap",(unsigned char*)MsgBoxQuestion, 18, 18);
+    icon_add("MsgBoxWarningBitmap",(unsigned char*)MsgBoxWarning, 18, 18);
+    icon_add("MsgBoxInformationBitmap",(unsigned char*)MsgBoxInformation, 18, 18);
+    icon_add("MsgBoxErrorBitmap",(unsigned char*)MsgBoxError, 18, 18);
 }

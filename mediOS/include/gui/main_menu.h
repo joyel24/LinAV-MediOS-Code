@@ -15,7 +15,7 @@
 #define __MAIN_MENU_H
 
 #include <gui/gui.h>
-#include <gui/menu.h>
+#include <gui/menu_old.h>
 #include <gui/icons.h>
 
 

@@ -22,11 +22,11 @@ struct icon_elem {
     struct icon_elem * nxt;
 };
 
-void iniIcon(void);
+void icon_init(void);
 
-struct icon_elem * loadIcon(char * filename);
-struct icon_elem * addIcon(char * name,unsigned char * data,int w,int h);
-struct icon_elem * getIcon(char * name);
+struct icon_elem * icon_load(char * filename);
+struct icon_elem * icon_add(char * name,unsigned char * data,int w,int h);
+struct icon_elem * icon_get(char * name);
 
 /* icon list
 - linavLogo

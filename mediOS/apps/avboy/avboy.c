@@ -109,7 +109,7 @@ int app_main(int argc,char** argv)
 		osd_setEntirePalette(gui_pal,256);
 		gfx_planeSetSize(BMAP1,LCD_WIDTH,LCD_HEIGHT,8);
 		gfx_planeSetPos(BMAP1,X_OFFSET,Y_OFFSET);
-		iniIcon();
+		icon_init();
 		gfx_openGraphics();
 		clearScreen(COLOR_WHITE);
 		gfx_fontSet(STD6X9);

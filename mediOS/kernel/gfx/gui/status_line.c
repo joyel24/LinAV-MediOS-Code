@@ -261,11 +261,11 @@ void statusLine_EvtHandler(int evt)
 void statusBar_ini(void)
 {
     /* get icons */
-    st_fwExtIcon=&getIcon("fwExtIcon")->bmap_data;
-    st_cfIcon=&getIcon("cfIcon")->bmap_data;
-    st_usbIcon=&getIcon("usbIcon")->bmap_data;
-    st_powerIcon=&getIcon("powerIcon")->bmap_data;
-    st_mediosLogo=&getIcon("mediosLogo")->bmap_data;
+    st_fwExtIcon=&icon_get("fwExtIcon")->bmap_data;
+    st_cfIcon=&icon_get("cfIcon")->bmap_data;
+    st_usbIcon=&icon_get("usbIcon")->bmap_data;
+    st_powerIcon=&icon_get("powerIcon")->bmap_data;
+    st_mediosLogo=&icon_get("mediosLogo")->bmap_data;
         
     pwrState=POWER_CONNECTED;
     usbState=kusbIsConnected();

@@ -14,12 +14,14 @@
 #define __KFONT_H
 
 #include <sys_def/font.h>
+#include <kernel/graphics.h>
 
-#define needFont(name)     extern FONT_ID name;
+#define fnt_needFont(name)     extern FONT name;
 
 #define NBFONT        0x16
 
 void fnt_init(void);
+FONT fnt_fontFromId(int id);
 
 typedef enum _E_FONT_TYPE
 {

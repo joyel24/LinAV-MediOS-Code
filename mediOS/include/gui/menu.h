@@ -14,57 +14,73 @@
 #ifndef __MENU_H
 #define __MENU_H
 
-#include <gui/icons.h>
+#include<gui/widget.h>
+#include<gui/widgetlist.h>
 
-struct menu_item {
-    void * data;
-    struct menu_item * nxt;
-    struct menu_item * prev;
-    struct menu_item * sub;
-    struct menu_item * up;
+// forward declaration needed because MENU_ITEM has a MENU member and vice-versa
+typedef struct MENU_STRUCT * MENU;
+
+//*****************************************************************************
+// MENU_ITEM
+//*****************************************************************************
+
+// members of the MENU_ITEM object
+#define MENU_ITEM_MEMBERS              \
+    /* we inherit from WIDGET */       \
+    WIDGET_MEMBERS                     \
+                                       \
+    char * caption;                    \
+    MENU subMenu;
+
+typedef struct {
+    MENU_ITEM_MEMBERS
+} * MENU_ITEM;
+
+MENU_ITEM menuItem_create();
+void menuItem_destroy(MENU_ITEM mi);
+void menuItem_init(MENU_ITEM mi);
+
+//*****************************************************************************
+// MENU
+//*****************************************************************************
+
+// members of the MENU object
+#define MENU_MEMBERS                   \
+    /* we inherit from WIDGET */       \
+    WIDGET_MEMBERS                     \
+                                       \
+    MENU_CLICKEVENT onClick;           \
+    MENU_ITEMADDER addItem;            \
+    MENU_ITEMSCLEARER clearItems;      \
+    MENU_INDEXGETTER indexOf;          \
+    MENU_ITEM * items;                 \
+    int itemCount;                     \
+    bool ownItems;                     \
+    int index;                         \
+    int previousIndex;                 \
+    int topIndex;                      \
+    int visibleCount;                  \
+    bool fastRepaint;                  \
+    WIDGETLIST menuList;               \
+    MENU parentMenu;
+
+
+typedef void(*MENU_CLICKEVENT)(void *,void *);
+typedef void(*MENU_ITEMADDER)(void *,void *);
+typedef void(*MENU_ITEMSCLEARER)(void *);
+typedef int(*MENU_INDEXGETTER)(void *,void *);
+
+struct MENU_STRUCT {
+    MENU_MEMBERS
 };
 
-struct menu_data {
-	struct menu_item * root;
-        int useOwnDisp;
-        int isTxtMenu;
-        int width;int height;int x;int y;
-        int dx;int dy;
-        int txt_color;
-        int bg_color;
-        int select_color;
-        int sub_color;
-        int border_color;
-        char * title;
-        int has_border;
-        int font;
-        void (*do_action) (void * data);
-        void (*on_action)    (void * data);
-        void (*off_action)   (void * data);
-        void (*f1_action)   (void * data);
-        void (*f2_action)   (void * data);
-        void (*f3_action)   (void * data);
-        void (*item_str)     (void * data,char * str);
-        void (*submenu_str)  (void * data,char * str);
-        BITMAP * (*getSubIcon) (void * data);
-        BITMAP * (*getItemIcon) (void * data);
-};
-
-void stop_menu(void);
-void start_menu(struct menu_data * client_menu);
-
-void menu_EvtHandler   (int evt);
-void normMenu_handler (int evt);
-void iconMenu_handler (int evt);
-
-void doPrint          (struct menu_item * ptr,int level);
-
-void dispAName_norm   (struct menu_item * pos, int posY, int clear, int selected);
-void dispAllName_norm (struct menu_item * pos,int nselect);
-int  dispName_norm    (struct menu_item * item,int x,int y,int clear,int selected);
-
-void dispAllName_icon (struct menu_item * pos,int nselect);
-int  dispName_icon    (struct menu_item * item,int i,int j,int clear_txt,int clear_icon,int selected);
+MENU menu_create();
+void menu_destroy(MENU m);
+void menu_init(MENU m);
+bool menu_handleEvent(MENU m,int evt);
+void menu_paint(MENU m);
+void menu_addItem(MENU m, MENU_ITEM item);
+void menu_clearItems(MENU m);
+int menu_indexOf(MENU m, MENU_ITEM item);
 
 #endif
-

@@ -101,11 +101,11 @@ void msgBoxEvtHandler(int evt_hanlder)
 
 void iniMsgBox(void)
 {
-    MsgBox_ExclamationBitmap=&getIcon("MsgBoxExclamationBitmap")->bmap_data;
-    MsgBox_QuestionBitmap=&getIcon("MsgBoxQuestionBitmap")->bmap_data;
-    MsgBox_WarningBitmap=&getIcon("MsgBoxWarningBitmap")->bmap_data;
-    MsgBox_InformationBitmap=&getIcon("MsgBoxInformationBitmap")->bmap_data;
-    MsgBox_ErrorBitmap=&getIcon("MsgBoxErrorBitmap")->bmap_data;
+    MsgBox_ExclamationBitmap=&icon_get("MsgBoxExclamationBitmap")->bmap_data;
+    MsgBox_QuestionBitmap=&icon_get("MsgBoxQuestionBitmap")->bmap_data;
+    MsgBox_WarningBitmap=&icon_get("MsgBoxWarningBitmap")->bmap_data;
+    MsgBox_InformationBitmap=&icon_get("MsgBoxInformationBitmap")->bmap_data;
+    MsgBox_ErrorBitmap=&icon_get("MsgBoxErrorBitmap")->bmap_data;
 }
 
 /* draw the msg box */

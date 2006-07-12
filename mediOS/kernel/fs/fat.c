@@ -16,6 +16,7 @@
 
 #include <sys_def/string.h>
 #include <sys_def/ctype.h>
+#include <sys_def/random.h>
 
 #include <kernel/kernel.h>
 #include <kernel/errors.h>
@@ -361,8 +362,7 @@ MED_RET_T fat_addDirEntry(struct vfs_node * dir_node,struct vfs_node * file_node
                 /* check that our intended shortname doesn't already exist */
                 if (!strncmp(shortname, buf + i * DIR_ENTRY_SIZE, 12)) {
                     /* filename exists already. make a new one */
-                    //snprintf(shortname+8, 4, "%03X", (unsigned)rand() & 0xfff);
-#warning rand needed when duplicated short name
+                    snprintf(shortname+8, 4, "%03X", (unsigned)rand() & 0xfff);
                     printk("Duplicate shortname, changing to %s\n",
                             shortname);
 

@@ -29,7 +29,7 @@
 #include <evt.h>
 
 #include <gui/parse_cfg.h>
-#include <gui/menu.h>
+#include <gui/menu_old.h>
 #include <gui/main_menu.h>
 #include <gui/file_browser.h>
 #include <gui/gui.h>
@@ -257,9 +257,9 @@ int mainMenu_ini(void)
     gfx_putS(COLOR_WHITE,COLOR_BLACK,2,2+h+2,"[ini_menu] reading icons");
 
     /* loading icons */
-    sub_icon=loadIcon("sub_icon.ico");
-    back_icon=loadIcon("back_icon.ico");
-    plugin_icon=loadIcon("plugin_icon.ico");
+    sub_icon=icon_load("sub_icon.ico");
+    back_icon=icon_load("back_icon.ico");
+    plugin_icon=icon_load("plugin_icon.ico");
 
     if((evt_hand=evt_getHandler(ALL_CLASS))<0)
     {
@@ -451,7 +451,7 @@ int mainMenu_parse(struct cfg_menu ** cfg,char * filename)
             }
             else
             {
-                current_item->icon=loadIcon(value);
+                current_item->icon=icon_load(value);
             }
         }
         else if(!strcmp(item,"opt"))

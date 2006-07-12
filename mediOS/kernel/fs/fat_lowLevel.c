@@ -15,6 +15,7 @@
 */
 #include <sys_def/string.h>
 #include <sys_def/ctype.h>
+#include <sys_def/random.h>
 
 #include <kernel/fat.h>
 #include <kernel/ata.h>
@@ -729,8 +730,7 @@ void fat_createDosName(const unsigned char *name, unsigned char *newname)
         newname[j++] = ' ';
 
     /* Extension part */
-#warning need rand here
-    snprintf(newname+8, 4, "%03X", 0);//(unsigned)rand() & 0xfff);
+    snprintf(newname+8, 4, "%03X", (unsigned)rand() & 0xfff);
 }
 
 void fat_parseDirEntry(struct fat_direntry *de, const unsigned char *buf)

@@ -30,7 +30,7 @@
 
 #define CON_LAST_LINE_Y() ((con_numLines-1)*CON_FONT->height+CON_MARGIN_Y)
 
-needFont(CON_FONT);
+fnt_needFont(CON_FONT);
 
 extern struct graphics_operations g8ops;
 

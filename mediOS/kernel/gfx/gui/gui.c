@@ -17,14 +17,14 @@
 
 #include <gui/gui.h>
 
-#include <gui/menu.h>
+#include <gui/menu_old.h>
 #include <gui/main_menu.h>
 #include <gui/icons.h>
 #include <gui/file_browser.h>
 
 void gui_start(void)
 {
-    iniIcon();
+    icon_init();
     iniBrowser();
     gfx_openGraphics();
     

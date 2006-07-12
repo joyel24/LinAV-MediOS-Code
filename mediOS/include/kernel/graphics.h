@@ -50,7 +50,7 @@ struct graphicsFont {
     int      num;
 };
 
-typedef struct graphicsFont *     FONT_ID;
+typedef struct graphicsFont *     FONT;
 
 
 struct graphics_operations {

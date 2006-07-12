@@ -45,18 +45,18 @@ int evt_handler;
 
 void iniBrowser(void)
 {   
-    gui_ls_upBitmap=&getIcon("upBitmap")->bmap_data;
-    gui_ls_dwBitmap=&getIcon("dwBitmap")->bmap_data;
-    gui_ls_dirBitmap=&getIcon("dirBitmap")->bmap_data;
-    
+    gui_ls_upBitmap=&icon_get("upBitmap")->bmap_data;
+    gui_ls_dwBitmap=&icon_get("dwBitmap")->bmap_data;
+    gui_ls_dirBitmap=&icon_get("dirBitmap")->bmap_data;
+
     if((evt_handler=evt_getHandler(ALL_CLASS))<0)
     {
         printk("Can't get evt handler (error:%d)\n",-evt_handler);
-        evt_handler=-1;        
+        evt_handler=-1;
     }
-    gui_ls_mp3Bitmap=&getIcon("mp3Bitmap")->bmap_data;
-    gui_ls_textBitmap=&getIcon("textBitmap")->bmap_data;
-    gui_ls_imageBitmap=&getIcon("imageBitmap")->bmap_data;
+    gui_ls_mp3Bitmap=&icon_get("mp3Bitmap")->bmap_data;
+    gui_ls_textBitmap=&icon_get("textBitmap")->bmap_data;
+    gui_ls_imageBitmap=&icon_get("imageBitmap")->bmap_data;
 }
 
 int viewNewDir(struct browser_data *bdata,char *name)
