@@ -22,10 +22,6 @@
 
 #include <kernel/graphics.h>
 
-// temp (should be arch dependant)
-#define WIDGET_ACTION_BTN BTN_1
-#define WIDGET_BACK_BTN BTN_2
-
 // default parameters
 #define WIDGET_DEFAULT_FORECOLOR COLOR_BLACK
 #define WIDGET_DEFAULT_BACKCOLOR COLOR_WHITE
