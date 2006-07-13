@@ -133,7 +133,7 @@ void    dsp_ctl           (unsigned int cmd, void * arg);
 /******************** Mp3 related high level ******************************/
 int mas_IniMp3(sound_buffer_s * ptr);
 void mas_startMp3(void);
-void mas_stopMp3(void);
+void mas_pauseMp3(void);
 int mas_stopApps(void);
 int mas_startMp3App(void);
 

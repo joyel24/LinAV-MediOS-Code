@@ -78,6 +78,7 @@ void vfs_nodePrintTree(struct vfs_node *node,int level);
 MED_RET_T vfs_nodeInitChild(struct vfs_node * parent,
                 struct  vfs_pathname * name,
                 struct vfs_node * node);
+MED_RET_T vfs_nodeAddChild(struct vfs_node * parent, struct vfs_node * child);
 MED_RET_T vfs_nodeRef(struct vfs_node * node);
 MED_RET_T vfs_nodeLookup(struct  vfs_pathname * path,
                     struct vfs_node * start_node,
@@ -89,6 +90,6 @@ MED_RET_T vfs_nodeRef(struct vfs_node * node);
 MED_RET_T vfs_rmNodeFromTree(struct vfs_node * node);
 MED_RET_T vfs_nodeSetDirty(struct vfs_node * node);
 MED_RET_T vfs_nodeClearDirty(struct vfs_node * node);
-
+MED_RET_T vfs_nodeDestroy(struct vfs_node * node);
 
 #endif

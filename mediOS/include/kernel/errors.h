@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/kernel/errors.h
 *
 *   MediOS project
@@ -24,5 +24,9 @@ typedef int MED_RET_T;
 #define MED_ENOTFOUND       11 /* object not found */
 #define MED_ENOTDIR         12 /* Dir does not exist */
 #define MED_ECACHE          13 /* Error during cache access */
+#define MED_ENOSPACE        14 /* Not enough space on device */
+#define MED_ENOTEMPTY       15 /* Not empty */
+#define MED_EISDIR          16 /* we should not be working on a dir */
+#define MED_EISFILE         17 /* we should not be working on a file */
 
 #endif

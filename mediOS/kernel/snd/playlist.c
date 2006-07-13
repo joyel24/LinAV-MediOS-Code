@@ -122,12 +122,16 @@ int addDir(char * dirName)
     char            *ext;
     int             nb=0;
 
+    char file_path[256];
+    
     dirp = opendir(dirName);
     if(!dirp)
     {
         printk( "[addDir] error, can't open dir %s\n",dirName);
         return 0;
     }
+    
+    printk("Searching MP3 in folder\n");
     
     while ((dp = readdir(dirp)))
     {
@@ -139,8 +143,11 @@ int addDir(char * dirName)
                            && (ext[1]=='m'||ext[1]=='M')
                            && (ext[2]=='p'||ext[2]=='P')
                            &&  ext[3]=='3')
-                if(addPlaylist(dp->d_name))
+            {
+                sprintf(file_path,"/%s/%s",dirName,dp->d_name);
+                if(addPlaylist(file_path))
                     nb++;
+            }
         }
     }
     

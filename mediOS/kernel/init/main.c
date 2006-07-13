@@ -55,6 +55,10 @@
 #include <kernel/stdfs.h>
 #include <kernel/vfs.h>
 
+#warning ADDED FOR TEST PURPOSE
+#include <kernel/vfs_pathname.h>
+
+
 unsigned int _iram_size = IRAM_SIZE;
 
 void print_boot_info(void)
@@ -72,29 +76,11 @@ extern int endOfList;
 
 void tst_fct(void)
 {
-    int i,per=50;
-    char str[100];
+    mvfile("/tata/test.fichier","/test/test2.fes");
     
-     do{
-   
-    udelay(1000);
+    mvdir("/tata","/tutu");
 
-    if(*DEBUG_MSG_STATE){
-      for(i=0;i<100;++i){
-        str[i]=DEBUG_MSG_TEXT[i];
-      }
-      printf("%s\n",str);
-      *DEBUG_MSG_STATE=0;
-    }
-
-    per++;
-    
-    if(per>100)
-        per=50;
-    
-    *WAVE_PERIOD = 50;
-    
-  } while(1);
+    while(1) /*nothing */;
 
 }
 
@@ -122,7 +108,7 @@ void kernel_start (void)
     /* init the watchdog timer */
     wdt_init();
     /* init the irq */
-    irq_init();  
+    irq_init();
     /* init the tick timer */
     tmr_init();
     printk("[init] ------------ kernel done\n");
@@ -154,11 +140,11 @@ void kernel_start (void)
     sound_init();
     /* enable the IRQ */
     printk("[init] about to enable INT\n");
-    __sti();  
+    __sti();
     printk("[init] ------------ drivers done\n");
     print_boot_info();
     printk("[init] END\n");
-    
+
 #if 0
    tst_fct();
 #endif

@@ -19,6 +19,7 @@
 
 #include <kernel/errors.h>
 #include <kernel/vfs_node.h>
+#include <kernel/vfs_pathname.h>
 
 #define BLOCK_SIZE 512
 #define MAX_OPEN 10
@@ -56,7 +57,7 @@ struct fat_entry {
     int nbDirEntries;
 /* folder / file data */
     struct bpb* fat_bpb;
-    
+
     unsigned int lastcluster;
     unsigned int lastsector;
     unsigned int clusternum;
@@ -70,7 +71,7 @@ struct fat_entry {
     int eof;
     struct file_cache * cache;
     int cache_num;
-    
+
     /* vfs link */
     struct vfs_node * node;
 };
@@ -90,18 +91,23 @@ MED_RET_T fat_freeDirEntries(struct vfs_node * opened_file);
 MED_RET_T fat_fileRemove(struct vfs_node * opened_file);
 
 /*vfs related */
-MED_RET_T fat_loadDir(struct vfs_node * parent_node);
-
+MED_RET_T    fat_loadDir         (struct vfs_node * parent_node);
+MED_RET_T    fat_mvFileDir       (struct vfs_node * opened_file,struct vfs_node * dir,struct vfs_pathname * newName);
 /* file related*/
-MED_RET_T    fat_fileTruncate(struct vfs_node * opened_file, unsigned int size);
-MED_RET_T    fat_fileSeek(struct vfs_node * opened_file,unsigned int pos);
-MED_RET_T    fat_fileFlushCache(struct vfs_node * opened_file);
-MED_RET_T    fat_fileOpen(struct vfs_node * opened_file);
-MED_RET_T    fat_fileClose(struct vfs_node * opened_file);
-MED_RET_T    fat_fileSync(struct vfs_node * opened_file);
-MED_RET_T    fat_createFile(const char* name,struct vfs_node* file,struct vfs_node* dir);
-unsigned int fat_fileSize(struct vfs_node * opened_file);
-int fat_fileWrite(struct vfs_node * opened_file, void* buf, unsigned int count);
-int fat_fileRead(struct vfs_node * opened_file, void* buf, unsigned int count);
-int fat_attribute(struct vfs_node * opened_file);
+MED_RET_T    fat_fileTruncate    (struct vfs_node * opened_file, unsigned int size);
+MED_RET_T    fat_fileSeek        (struct vfs_node * opened_file,unsigned int pos);
+MED_RET_T    fat_fileFlushCache  (struct vfs_node * opened_file);
+MED_RET_T    fat_fileOpen        (struct vfs_node * opened_file);
+MED_RET_T    fat_fileClose       (struct vfs_node * opened_file);
+MED_RET_T    fat_fileSync        (struct vfs_node * opened_file);
+MED_RET_T    fat_createFile      (const char* name,struct vfs_node* file,struct vfs_node* dir);
+unsigned int fat_getFileSize     (struct vfs_node * opened_file);
+void         fat_setFileSize     (struct vfs_node * opened_file,unsigned int size);
+int          fat_fileWrite       (struct vfs_node * opened_file, void* buf, unsigned int count);
+int          fat_fileRead        (struct vfs_node * opened_file, void* buf, unsigned int count);
+int          fat_attribute       (struct vfs_node * opened_file);
+
+/* Dir related */
+MED_RET_T    fat_createDir       (struct vfs_pathname * name,DIR * dir);
+
 #endif

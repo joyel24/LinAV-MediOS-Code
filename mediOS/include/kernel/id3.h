@@ -73,7 +73,7 @@ enum {
     ID3_VER_2_4
 };
 
-int mp3info(struct mp3entry *entry, const char *filename, int v1first);
+int mp3info(struct mp3entry *entry, char *filename, int v1first);
 char* id3_get_genre(const struct mp3entry* id3);
 
 #endif

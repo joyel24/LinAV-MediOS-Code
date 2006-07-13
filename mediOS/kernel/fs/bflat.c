@@ -59,7 +59,7 @@
 #define FLAT_PRINT(s...)
 #endif
                    
-MED_RET_T load_bflat (const char * fname)
+MED_RET_T load_bflat (char * fname)
 {
     int fd_bflat;
     int ret,i;

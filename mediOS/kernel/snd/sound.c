@@ -20,11 +20,11 @@
 #include <kernel/aic23.h>
 
 #include <kernel/sound.h>
+#include <kernel/mp3_data.h>
 #include <sys_def/sound.h>
 
 #define SND_BUFF_SIZE 3*1024*1024
 
-int sound_paused;
 sound_buffer_s * buff;
 int file_size;
 int fd=-1;
@@ -33,8 +33,6 @@ int endOfList;
 
 void sound_readMore(void)
 {
-    int nbRead,free_space,size,leftInFile,toRead;
-
     if(fd<0) /* this should only happen for the first file*/
     {
         if(!openFileFromList(curEntryInList()))
@@ -42,20 +40,29 @@ void sound_readMore(void)
             endOfList=1;
             return;
         }
-
     }
 
-    free_space=buff->read-buff->write;
-    if(free_space<=0)
-        free_space+=buff->size;
-    leftInFile=file_size-ftell(fd);
-    if(leftInFile == 0)
+    
+    if(file_size == ftell(fd))
         if(!openFileFromList(nxtEntryInList()))
         {
             endOfList=1;
             return;
         }
+        
+    sound_fillBuffer();
+}
 
+void sound_fillBuffer(void)
+{
+    int nbRead,free_space,size,leftInFile,toRead;
+    
+    leftInFile=file_size-ftell(fd);
+    
+    free_space=buff->read-buff->write;
+    if(free_space<=0)
+        free_space+=buff->size;
+    
     if(leftInFile>free_space)
     {
         if(free_space>(SND_BUFF_SIZE>>1))
@@ -105,7 +112,7 @@ int openFileFromList(struct list_entry * cur_entry)
 {
     if(!cur_entry)
     {
-        printk("no file in list\n");
+        //printk("no file in list\n");
         return 0;
     }
 
@@ -159,8 +166,61 @@ void sound_initPlayer(void)
         buff->size=SND_BUFF_SIZE;
 
         buff->read=buff->write=buff->playing=0;
+        buff->startPlayback=buff->pausePlayback=NULL;
     }
 }
+
+void sound_startMp3(void)
+{
+    printk("calling chip mp3 start\n");
+    if(buff->startPlayback)
+        buff->startPlayback();
+}
+
+void sound_pauseMp3(void)
+{
+    printk("calling chip mp3 pause\n");
+    if(buff->pausePlayback)
+        buff->pausePlayback();
+}
+
+void sound_nxtTrack(void)
+{
+    printk("nxtTck\n");
+    if(!nxtEntryInList())
+    {
+        printk("EO list nothing to do\n");
+        return;
+    }
+    
+    if(!openFileFromList(curEntryInList()))
+    {
+        printk("Can't open file\n");
+        return;
+    }
+    sound_pauseMp3();
+    buff->write = buff->read = 0;
+    sound_fillBuffer();
+}
+
+void sound_prevTrack(void)
+{
+    if(!prevEntryInList())
+    {
+        printk("Head of list => reload snd file\n");
+    }
+    
+    if(!openFileFromList(curEntryInList()))
+    {
+        printk("Can't open file\n");
+        return;
+    }
+    sound_pauseMp3();
+    buff->write = buff->read = 0;
+    sound_fillBuffer();
+}
+
+
 
 /********************* MIXER                 ***************************/
 
@@ -265,6 +325,5 @@ void sound_init(void)
    endOfList=0;
    fd = -1;
    buff=NULL;
-   sound_paused=0;
    printk("[init] sound done\n");
 }

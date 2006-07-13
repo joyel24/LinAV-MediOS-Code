@@ -15,7 +15,7 @@
 #define __PLAY_LIST_H
 
 #include <kernel/id3.h>
-#include <kernel/mp3_data.h>
+
 
 struct list_entry
 {

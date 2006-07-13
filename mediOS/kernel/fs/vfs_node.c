@@ -67,6 +67,7 @@ MED_RET_T vfs_nodeInitChild(struct vfs_node * parent,
     /*allocate space for the name*/
     if(name && name->length>0)
     {
+        VFS_PRINT("[vfs_nodeInitChild] name=|%s|len=%d\n",name->str,name->length);
         node->name.str = (char*)malloc(name->length+1);
         if(!node->name.str)
             return -MED_ENOMEM;
@@ -80,11 +81,19 @@ MED_RET_T vfs_nodeInitChild(struct vfs_node * parent,
     }
 
     node->ref_cnt = 0;
-    node->parent=parent;
+
+    vfs_nodeAddChild(parent,node);
+
+    return MED_OK;
+}
+
+MED_RET_T vfs_nodeAddChild(struct vfs_node * parent, struct vfs_node * child)
+{
+    child->parent=parent;
     if(parent)
     {
         vfs_nodeRef(parent);
-        LIST_ADD_HEAD_NAMED(parent->children,node,siblings_prev,siblings_next);
+        LIST_ADD_HEAD_NAMED(parent->children,child,siblings_prev,siblings_next);
     }
     return MED_OK;
 }
@@ -98,7 +107,7 @@ MED_RET_T vfs_nodeLookup(struct  vfs_pathname * path,
     int ret_val;
 
     if(!start_node) return -MED_ENOENT;
-    
+
     /* some sanity check */
     if(path->length <= 0)  return -MED_ENOENT;
 
@@ -258,7 +267,19 @@ MED_RET_T vfs_rmNodeFromTree(struct vfs_node * node)
         }
         LIST_DELETE_NAMED(parent->children,node,siblings_prev,siblings_next);
     }
-    free(node);
+    vfs_nodeDestroy(node);
+    return MED_OK;
+}
+
+MED_RET_T vfs_nodeDestroy(struct vfs_node * node)
+{
+    if(node)
+    {
+        free(node->name.str);
+        if(node->custom_data)
+            free(node->custom_data);
+        free(node);
+    }
     return MED_OK;
 }
 

@@ -81,15 +81,22 @@ void mainMenu_doAction(void * data)
     if(cfg_data->type==TYPE_INTERNAL)
     {
         printk("launching int app: %s\n",cfg_data->link);
-        if(strcmp(cfg_data->link,"browser"))
+        if(!strcmp(cfg_data->link,"browser"))
+        {
+            if(!browseData)
+                return;
+
+            browser_browse(browseData,NULL,NULL);            
+        }
+        else if(!strcmp(cfg_data->link,"mp3Player"))
+        {
+            mp3PlayerMain();
+        }
+        else
         {
             printk("Error ukn int app : %s\n",cfg_data->link);
             return;
-        }
-        if(!browseData)
-            return;
-
-        browser_browse(browseData,NULL,NULL);
+        }        
 
         evt_purgeHandler(evt_hand);
         mainMenu_start();

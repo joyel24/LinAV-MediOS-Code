@@ -321,7 +321,7 @@ MED_RET_T fat_addDirEntry(struct vfs_node * dir_node,struct vfs_node * file_node
             eof = 1;
 
             memset(buf, 0, sizeof buf);
-            VFS_PRINT("Adding new sector to dir\n");
+            VFS_PRINT("[fat_addDirEntry] Adding new sector to dir\n");
             ret_val = fat_seek(dir_entry, sector);
             if (ret_val!=MED_OK)
         return ret_val;
@@ -344,14 +344,14 @@ MED_RET_T fat_addDirEntry(struct vfs_node * dir_node,struct vfs_node * file_node
             switch (firstbyte) {
             case 0: /* end of dir */
                 entries_found = entries_needed;
-                VFS_PRINT("Found last entry %d\n",
+                VFS_PRINT("[fat_addDirEntry] Found last entry %d\n",
                         sector * DIR_ENTRIES_PER_SECTOR + i);
                 done = 1;
                 break;
 
             case 0xe5: /* free entry */
                 entries_found++;
-                VFS_PRINT("Found free entry %d (%d/%d)\n",
+                VFS_PRINT("[fat_addDirEntry] Found free entry %d (%d/%d)\n",
                         sector * DIR_ENTRIES_PER_SECTOR + i,
                         entries_found, entries_needed);
                 break;
@@ -363,8 +363,7 @@ MED_RET_T fat_addDirEntry(struct vfs_node * dir_node,struct vfs_node * file_node
                 if (!strncmp(shortname, buf + i * DIR_ENTRY_SIZE, 12)) {
                     /* filename exists already. make a new one */
                     snprintf(shortname+8, 4, "%03X", (unsigned)rand() & 0xfff);
-                    printk("Duplicate shortname, changing to %s\n",
-                            shortname);
+                    printk("[fat_addDirEntry] Duplicate shortname, changing to %s\n",shortname);
 
                     /* name has changed, we need to restart search */
                     goto restart;
@@ -386,7 +385,7 @@ MED_RET_T fat_addDirEntry(struct vfs_node * dir_node,struct vfs_node * file_node
     }
 
     sector = firstentry / DIR_ENTRIES_PER_SECTOR;
-    VFS_PRINT("Adding longname to entry %d in sector %d\n",
+    VFS_PRINT("[fat_addDirEntry] Adding longname to entry %d in sector %d\n",
             firstentry, sector);
 
     ret_val = fat_writeLongName(dir_entry, firstentry,
@@ -397,7 +396,7 @@ MED_RET_T fat_addDirEntry(struct vfs_node * dir_node,struct vfs_node * file_node
     /* remember where the shortname dir entry is located */
     file_entry->dirEntryNum = firstentry + entries_needed - 1;
     file_entry->nbDirEntries = entries_needed;
-    VFS_PRINT("Added new dir entry %d, using %d slots.\n",
+    VFS_PRINT("[fat_addDirEntry] Added new dir entry %d, using %d slots.\n",
             file_entry->dirEntryNum, file_entry->nbDirEntries);
 
     /* advance the end-of-dir marker? */
@@ -405,7 +404,7 @@ MED_RET_T fat_addDirEntry(struct vfs_node * dir_node,struct vfs_node * file_node
     {
         unsigned int lastentry = firstentry + entries_needed;
 
-        VFS_PRINT("Updating end-of-dir entry %d\n",lastentry);
+        VFS_PRINT("[fat_addDirEntry] Updating end-of-dir entry %d\n",lastentry);
 
         if (lastentry % DIR_ENTRIES_PER_SECTOR)
         {
@@ -446,7 +445,7 @@ MED_RET_T fat_addDirEntry(struct vfs_node * dir_node,struct vfs_node * file_node
             } while (dir_entry->sectornum < (int)fat_bpb->bpb_secperclus);
         }
     }
-    
+
     return MED_OK;
 }
 
@@ -698,7 +697,7 @@ MED_RET_T fat_seek(struct fat_entry * entry, unsigned int seeksector )
     int cluster = entry->firstcluster;
     int i;
 
-    VFS_PRINT("[FAT SEEK] %x\n",seeksector);
+    VFS_PRINT("[FAT SEEK] %x (first=%x)\n",seeksector,cluster);
 
     if (cluster < 0) /* FAT16 root dir */
         seeksector += fat_bpb->rootdiroffset;
@@ -766,7 +765,7 @@ MED_RET_T fat_readdir(struct fat_entry * dir,struct fat_direntry * entry)
             }
             if (ret_val < 0)
             {
-                printk( "fat_getnext() - Couldn't read dir"
+                printk( "[READ DIR] fat_getnext() - Couldn't read dir"
                         " (error code %d)\n", ret_val);
                 break;
             }
@@ -890,7 +889,7 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
         new_node = (struct vfs_node *)malloc(sizeof(struct vfs_node));
         if(!new_node)
         {
-            printk("Error malloc for new_node\n");
+            printk("[fat_loadDir] Error malloc for new_node\n");
             return -MED_ENOMEM;
         }
 
@@ -899,7 +898,7 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
         new_entry = (struct fat_entry *)malloc(sizeof(struct fat_entry ));
         if(!new_entry)
         {
-            printk("Error malloc for new_entry\n");
+            printk("[fat_loadDir] Error malloc for new_entry\n");
             free(new_node);
             return -MED_ENOMEM;
         }
@@ -914,6 +913,7 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
 
         if(ret_val != MED_OK)
         {
+            printk("[fat_loadDir] Error during readdir\n");
             free(new_entry);
             free(new_node);
             return ret_val;
@@ -954,9 +954,14 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
     return MED_OK;
 }
 
-unsigned int fat_fileSize(struct vfs_node * opened_file)
+unsigned int fat_getFileSize(struct vfs_node * opened_file)
 {
     return ((struct fat_entry*)opened_file->custom_data)->size;
+}
+
+void fat_setFileSize(struct vfs_node * opened_file,unsigned int size)
+{
+    ((struct fat_entry*)opened_file->custom_data)->size=size;
 }
 
 MED_RET_T fat_fileTruncate(struct vfs_node * opened_file, unsigned int size)
@@ -1095,7 +1100,10 @@ MED_RET_T fat_fileClose(struct vfs_node * opened_file)
 {
     if(opened_file->type == VFS_TYPE_FILE)
     {
-        int num=((struct fat_entry*)opened_file->custom_data)->cache_num;
+        struct fat_entry* entry = (struct fat_entry*)opened_file->custom_data;
+        int num=entry->cache_num;
+        entry->cache = NULL;
+        entry->cache_num = -1;
         if(num>=0 && num<MAX_OPEN)
             cache_list[num].used=0;
     }
@@ -1123,7 +1131,7 @@ MED_RET_T fat_createFile(const char* name,
     new_file->node=file;
     new_file->fat_bpb=((struct fat_entry*)dir->custom_data)->fat_bpb;
     ret_val = fat_addDirEntry(dir, file, name, false, false);
-    
+
     return ret_val;
 }
 
@@ -1390,6 +1398,8 @@ MED_RET_T fat_fileRemove(struct vfs_node * opened_file)
     return MED_OK;
 }
 
+
+
 int fat_attribute(struct vfs_node * opened_file)
 {
     struct fat_entry* fileEnt = (struct fat_entry*)opened_file->custom_data;
@@ -1397,126 +1407,265 @@ int fat_attribute(struct vfs_node * opened_file)
 }
 
 
-#if 0
-
-
-
-int fat_create_dir(const char* name,
-                   struct fat_dir* newdir,
-                   struct fat_dir* dir)
+MED_RET_T fat_createDir(struct vfs_pathname *  name,DIR * dir)
 {
-    struct bpb* fat_bpb = &fat_bpbs[dir->file.volume];
+    #warning fat createDir is not safe if an error occurs, what has been created until error point is already
+    #warning on disk, but all struct are removed from mem
+    struct fat_entry* parentDir = (struct fat_entry*)dir->custom_data;
+    struct bpb* fat_bpb = parentDir->fat_bpb;
     unsigned char buf[SECTOR_SIZE];
     int i;
     int sector;
-    int rc;
-    struct fat_file dummyfile;
+    MED_RET_T ret_val;
 
-    //printk("fat_create_dir(\"%s\",%x,%x)\n",name,newdir,dir);
+    struct fat_entry * new_dir;
+    struct vfs_node * new_node;
+    struct vfs_node * dot_node, * dotdot_node;
+    struct fat_entry * dot_dir,*dotdot_dir;
+    struct vfs_pathname dot_name;
 
-    memset(newdir, 0, sizeof(struct fat_dir));
-    memset(&dummyfile, 0, sizeof(struct fat_file));
+    VFS_PRINT("[fat_createDir] start\n");
 
-    /* First, add the entry in the parent directory */
-    rc = add_dir_entry(dir, &newdir->file, name, true, false);
-    if (rc < 0)
-        return rc * 10 - 1;
+    /* create fat struct for new folder */
+    new_dir = (struct fat_entry *)malloc(sizeof(struct fat_entry));
+    if(!new_dir)
+    {
+        printk("[fat_createDir] no mem left to create fat_entry\n");
+        return -MED_ENOMEM;
+    }
+    memset(new_dir, 0, sizeof(struct fat_entry));
+    new_dir->fat_bpb=fat_bpb;    
+    VFS_PRINT("[fat_createDir] new_dir\n");
+
+    /* create new node */
+    new_node = (struct vfs_node*)malloc(sizeof(struct vfs_node));
+    if(!new_dir)
+    {
+        printk("[fat_createDir] no mem left to create node\n");
+        free(new_dir);
+        return -MED_ENOMEM;
+    }
+    memset(new_node,0,sizeof(struct vfs_node));
+    vfs_nodeInitChild(NULL,name,new_node);
+    new_node->custom_data = new_dir;
+    new_dir->node=new_node;
+    VFS_PRINT("[fat_createDir] new_node\n");
+    
+    /* create . (dot) node */
+    dot_node = (struct vfs_node*)malloc(sizeof(struct vfs_node));
+    if(!dot_node)
+    {
+        printk("[fat_createDir] no mem left to create node\n");
+        ret_val = -MED_ENOMEM;
+        goto error_exit;
+    }
+    dot_name.length = 1;
+    dot_name.str=".";
+    vfs_nodeInitChild(new_node,&dot_name,dot_node);
+    dot_dir = (struct fat_entry*)malloc(sizeof(struct fat_entry));
+    memset(dot_dir, 0, sizeof(struct fat_entry));
+    dot_node->custom_data = dot_dir;
+    dot_dir->fat_bpb=fat_bpb;
+    dot_dir->node=dot_node;
+
+    VFS_PRINT("[fat_createDir] dot_node\n");
+    
+    /* create .. (dotdot) node */
+    dotdot_node = (struct vfs_node*)malloc(sizeof(struct vfs_node));
+    if(!dotdot_node)
+    {
+        printk("[fat_createDir] no mem left to create node\n");
+        ret_val = -MED_ENOMEM;
+        free(dot_node);
+        goto error_exit;
+    }
+    dot_name.length = 2;
+    dot_name.str="..";
+    vfs_nodeInitChild(new_node,&dot_name,dotdot_node);
+    dotdot_dir = (struct fat_entry*)malloc(sizeof(struct fat_entry));
+    memset(dotdot_dir, 0, sizeof(struct fat_entry));
+    dotdot_node->custom_data = dotdot_dir;
+    dotdot_dir->fat_bpb=fat_bpb;
+    dotdot_dir->node=dotdot_node;
+    
+    VFS_PRINT("[fat_createDir] all malloc done, node/fat_entry created and init\n");
+
+    /* add the entry in the parent directory */
+    ret_val = fat_addDirEntry(dir,new_node,name->str,1,0);
+    if (ret_val != MED_OK)
+    {
+        printk("[fat_createDir] error adding the new entry\n");
+        goto error_exit2;
+    }
+
+    VFS_PRINT("[fat_createDir] addDirEntry done for new node\n");
 
     /* Allocate a new cluster for the directory */
-    newdir->file.firstcluster = find_free_cluster(fat_bpb, fat_bpb->fsinfo.nextfree);
-    if(newdir->file.firstcluster == 0)
-        return -1;
+    new_node->storage_location = new_dir->firstcluster = new_dir->dir_entry.firstcluster = fat_findFreeCluster(fat_bpb, fat_bpb->fsinfo.nextfree);
+    if(new_dir->firstcluster == 0)
+    {
+        ret_val = -MED_ENOSPACE;
+        printk("[fat_createDir] error no space to create first cluster of folder - fat might be dammaged\n");
+        goto error_exit2;
+    }
 
-    update_fat_entry(fat_bpb, newdir->file.firstcluster, FAT_EOF_MARK);
+    VFS_PRINT("[fat_createDir] first cluster found : %x\n",new_dir->firstcluster);
+
+    fat_updateFatEntry(fat_bpb, new_dir->firstcluster, FAT_EOF_MARK);
+
+    VFS_PRINT("[fat_createDir] fatUpdate done\n");
 
     /* Clear the entire cluster */
     memset(buf, 0, sizeof buf);
-    sector = cluster2sec(fat_bpb, newdir->file.firstcluster);
-    for(i = 0;i < (int)fat_bpb->bpb_secperclus;i++) {
-        rc = transfer(fat_bpb, sector + i, 1, buf, true );
-        if (rc < 0)
-            return rc * 10 - 2;
+    sector = fat_cluster2Sec(fat_bpb, new_dir->firstcluster);
+    for(i = 0;i < (int)fat_bpb->bpb_secperclus;i++)
+    {
+        ret_val = fat_transfer(fat_bpb, sector + i, 1, buf, 1 );
+        if (ret_val < 0)
+        {
+            ret_val = -MED_EIO;
+            printk("[fat_createDir] error while clearing first cluster - fat might be dammaged\n");
+            goto error_exit2;
+        }
     }
+
+    VFS_PRINT("[fat_createDir] first cluster cleared\n");
 
     /* Then add the "." entry */
-    rc = add_dir_entry(newdir, &dummyfile, ".", true, true);
-    if (rc < 0)
-        return rc * 10 - 3;
-    dummyfile.firstcluster = newdir->file.firstcluster;
-    update_short_entry(&dummyfile, 0, FAT_ATTR_DIRECTORY);
+    ret_val = fat_addDirEntry(new_node,dot_node,".",1,1);
+    if (ret_val != MED_OK)
+    {
+        printk("[fat_createDir] error adding dot entry - fat might be dammaged\n");
+        goto error_exit2;
+    }
+    dot_node->storage_location = dot_dir->firstcluster = dot_dir->dir_entry.firstcluster = new_dir->firstcluster;
+
+    VFS_PRINT("[fat_createDir] dot addded (first = %x)\n",dot_dir->firstcluster);
+
+    fat_updateShortEntry(dot_node,0, FAT_ATTR_DIRECTORY);
+
+    VFS_PRINT("[fat_createDir] dot updated\n");
 
     /* and the ".." entry */
-    rc = add_dir_entry(newdir, &dummyfile, "..", true, true);
-    if (rc < 0)
-        return rc * 10 - 4;
+    ret_val = fat_addDirEntry(new_node,dotdot_node,"..",1,1);
+    if (ret_val != MED_OK)
+    {
+        printk("[fat_createDir] error adding dotdot entry - fat might be dammaged\n");
+        goto error_exit2;
+    }
 
     /* The root cluster is cluster 0 in the ".." entry */
-    if(dir->file.firstcluster == fat_bpb->bpb_rootclus)
-        dummyfile.firstcluster = 0;
+    if(parentDir->firstcluster == fat_bpb->bpb_rootclus)
+        dotdot_node->storage_location = dotdot_dir->firstcluster = dotdot_dir->dir_entry.firstcluster =  0;
     else
-        dummyfile.firstcluster = dir->file.firstcluster;
-    update_short_entry(&dummyfile, 0, FAT_ATTR_DIRECTORY);
+        dotdot_node->storage_location = dotdot_dir->firstcluster = dotdot_dir->dir_entry.firstcluster = parentDir->firstcluster;
+
+    VFS_PRINT("[fat_createDir] dotdot addded (first = %x)\n",dotdot_dir->firstcluster);
+    
+    /* now finally adding new fodler to vfs node tree */
+    vfs_nodeAddChild(dir,new_node);
+    fat_updateShortEntry(dotdot_node, 0, FAT_ATTR_DIRECTORY);
+
+    VFS_PRINT("[fat_createDir] dotdot updated\n");
 
     /* Set the firstcluster field in the direntry */
-    update_short_entry(&newdir->file, 0, FAT_ATTR_DIRECTORY);
+    fat_updateShortEntry(new_node, 0, FAT_ATTR_DIRECTORY);
 
-    rc = flush_fat(fat_bpb);
-    if (rc < 0)
-        return rc * 10 - 5;
+    VFS_PRINT("[fat_createDir] new node updated\n");
 
-    return rc;
+    ret_val = fat_flushFat(fat_bpb);
+    if (ret_val != MED_OK)
+    {
+        printk("[fat_createDir] error while fluching fat %d\n",-ret_val);
+        goto error_exit2;
+    }
+
+    VFS_PRINT("[fat_createDir] fat flushed\n");
+
+
+
+    VFS_PRINT("[fat_createDir] end\n");
+
+    return MED_OK;
+error_exit2:
+    vfs_nodeDestroy(dot_node);
+    vfs_nodeDestroy(dotdot_node);
+error_exit:
+    vfs_nodeDestroy(new_node);
+    return ret_val;
 }
 
-
-int fat_rename(struct fat_file* file,
-                struct fat_dir* dir,
-                const unsigned char* newname,
-                int size,
-                int attr)
+MED_RET_T fat_mvFileDir(struct vfs_node * opened_file,struct vfs_node * dir,struct vfs_pathname * newName)
+//int fat_rename(struct fat_file* file,struct fat_dir* dir,const unsigned char* newname,int size,int attr)
 {
-    int rc;
-    struct fat_dir olddir;
-    struct fat_file newfile = *file;
-    struct bpb* fat_bpb = &fat_bpbs[file->volume];
-
-    if (file->volume != dir->file.volume) {
-        printk("No rename across volumes!\n");
-        return -1;
+    MED_RET_T ret_val;    
+    struct vfs_node * new_node;
+    struct fat_entry * new_entry;
+    struct fat_entry * old_entry= (struct fat_entry*)opened_file->custom_data;
+    struct fat_entry* parentDir = (struct fat_entry*)dir->custom_data;
+    struct bpb* fat_bpb = parentDir->fat_bpb;
+    
+    new_node = (struct vfs_node *)malloc(sizeof(struct vfs_node));
+    if(!new_node)
+    {
+        printk("[fat_mvFileDir] no mem left for new node\n");
+        return -MED_ENOMEM;
+    }    
+#warning is the cpy correct, some extra init might be needed
+    memcpy(new_node,opened_file,sizeof(struct vfs_node));
+    new_node->siblings_prev=new_node->siblings_next=NULL;
+    new_node->opened=0;    
+    vfs_nodeInitChild(dir,newName,new_node);
+    new_node->ref_cnt=opened_file->ref_cnt-1;
+    new_entry = (struct fat_entry *)malloc(sizeof(struct fat_entry));
+    if(!new_entry)
+    {
+        printk("[fat_mvFileDir] no mem left for new entry\n");
+        vfs_nodeDestroy(new_node);
+        return -MED_ENOMEM;
     }
-
-
-    if ( !file->dircluster ) {
-        printk("File has no dir cluster!\n");
-        return -2;
-    }
-
-    /* create a temporary file handle */
-    rc = fat_opendir(file->volume, &olddir, file->dircluster, NULL);
-    if (rc < 0)
-        return rc * 10 - 3;
-
+    memset(new_entry,0,sizeof(struct fat_entry));
+    new_node->custom_data = new_entry;
+    new_entry->fat_bpb=fat_bpb;
+    new_entry->node=new_node;
+    new_node->storage_location = new_entry->firstcluster = new_entry->dir_entry.firstcluster = old_entry->firstcluster;
+     
+    
     /* create new name */
-    rc = add_dir_entry(dir, &newfile, newname, false, false);
-    if (rc < 0)
-        return rc * 10 - 4;
-
+    ret_val = fat_addDirEntry(dir,new_node,newName->str,0,0);
+    if (ret_val!=MED_OK)
+    {
+        printk("[fat_mvFileDir] error in fat_addDirEntry : %d\n",-ret_val);
+        vfs_nodeDestroy(new_node);
+        free(new_entry);
+        return ret_val;
+    }
+    
     /* write size and cluster link */
-    rc = update_short_entry(&newfile, size, attr);
-    if (rc < 0)
-        return rc * 10 - 5;
+    ret_val = fat_updateShortEntry(new_node, old_entry->size, old_entry->attr);
+    if (ret_val!=MED_OK)
+    {
+        printk("[fat_mvFileDir] error in fat_updateShortEntry : %d\n",-ret_val);
+        vfs_nodeDestroy(new_node);
+        free(new_entry);
+        return ret_val;
+    }
 
     /* remove old name */
-    rc = free_direntries(file);
-    if (rc < 0)
-        return rc * 10 - 6;
-
-    rc = flush_fat(fat_bpb);
-    if (rc < 0)
-        return rc * 10 - 7;
+    ret_val = fat_freeDirEntries(opened_file);
+    if (ret_val!=MED_OK)
+    {
+        printk("[fat_mvFileDir] error in fat_freeDirEntries : %d (fat might be corrupted)\n",-ret_val);        
+        return ret_val;
+    }
+    
+    ret_val = fat_flushFat(fat_bpb);
+    if (ret_val!=MED_OK)
+    {
+        printk("[fat_mvFileDir] error in flush_fat : %d (fat might be corrupted)\n",-ret_val);        
+        return ret_val;
+    }
 
     return 0;
 }
 
-
-
-#endif

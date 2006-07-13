@@ -41,7 +41,7 @@ unsigned int fat_cluster2Sec(struct bpb* fat_bpb, int cluster)
 
     if (cluster > max_cluster)
     {
-        printk( "cluster2sec() - Bad cluster number (%d)\n", cluster);
+        printk( "cluster2sec() - Bad cluster number (%x/%x)\n", cluster,max_cluster);
         return -1;
     }
 
@@ -818,8 +818,8 @@ int fat_transfer(struct bpb* fat_bpb, unsigned int start, int count, char* buf, 
 {
     int rc;
 
-    /*printk("transfer(s=%x, c=%x, %s)\n",
-        start+ fat_bpb->startsector, count, write?"write":"read");*/
+    VFS_PRINT("transfer(s=%x, c=%x, %s)\n",
+        start+ fat_bpb->startsector, count, write?"write":"read");
     if (write) {
         unsigned int firstallowed;
         if (fat_bpb->is_fat16)

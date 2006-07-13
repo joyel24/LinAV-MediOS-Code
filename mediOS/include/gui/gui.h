@@ -59,4 +59,6 @@ struct statusBar_data {
     int usb_x,usb_y;
 };
 
+void mp3PlayerMain(void);
+
 #endif

@@ -15,7 +15,8 @@
 
 #include <sys_def/stdfs.h>
 
-int       open(const char * name,int flags);
+/* file related */
+int       open(char * name,int flags);
 MED_RET_T close(int fdesc);
 MED_RET_T truncate(int fdesc, unsigned int size);
 int       write(int fdesc, const void* buf, unsigned int count);
@@ -26,18 +27,19 @@ int       filesize(int fdesc);
 MED_RET_T fsync(int fdesc);
 
 /*
-extern int      remove    (const char* pathname);
 extern int      rename    (const char* path, const char* newname);
 */
 
+/* folder related */
 DIR * opendir(char * pathname);
 MED_RET_T closedir(DIR * fd);
 struct dirent * readdir(DIR * fd);
-int mkdir(const char *name, int mode);
 
-/*
-extern int mkdir(const char* name, int mode);
-extern int rmdir(const char* name);
-*/
+/* file/dir ops */
+MED_RET_T mkdir(char *name, int mode);
+MED_RET_T rmdir(char* name);
+MED_RET_T mvdir(char* path, char* newpath);
 
+MED_RET_T rmfile(char* name);
+MED_RET_T mvfile(char* path, char* newpath);
 #endif

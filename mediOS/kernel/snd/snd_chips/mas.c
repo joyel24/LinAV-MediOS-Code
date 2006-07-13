@@ -61,20 +61,19 @@ __IRAM_DATA sound_buffer_s * soundBuffer;
 
 /********************* DSP                    ***************************/
 
-extern int sound_paused;
-
 __IRAM_CODE void mas_dspInterrupt(int irq,struct pt_regs * regs)
 {
     int toSend;
 
     if(!soundBuffer ||
         soundBuffer->read==soundBuffer->write ||
-        sound_paused)
+        soundPaused)
 
     {
         printk("Halt DSP interupt: buff@:%x,pause=%d,rae/write:%x/%x\n",
-            soundBuffer,sound_paused,soundBuffer->read,soundBuffer->write);
+            soundBuffer,soundPaused,soundBuffer->read,soundBuffer->write);
         soundBuffer->playing=0;
+        irq_disable(IRQ_MAS_DATA);
         return;
     }
 
@@ -207,8 +206,14 @@ int mas_IniMp3(sound_buffer_s * ptr)
     soundBuffer = ptr;
 
     ptr->startPlayback=mas_startMp3;
-    
+    ptr->pausePlayback=mas_pauseMp3;
     return 0;
+}
+
+void mas_pauseMp3(void)
+{
+    soundPaused = 1;
+    printk("Mas pause\n");
 }
 
 void mas_startMp3(void)
@@ -216,16 +221,11 @@ void mas_startMp3(void)
     soundPaused = 0;
     if(soundBuffer)
         soundBuffer->playing=1;
+    
+    printk("Mas start\n");
+    
     irq_enable(IRQ_MAS_DATA);
     mas_dspInterrupt(IRQ_MAS_DATA,NULL);
-}
-
-void mas_stopMp3(void)
-{
-    soundPaused = 1;
-    if(soundBuffer)
-        soundBuffer->playing=1;
-    irq_disable(IRQ_MAS_DATA);
 }
 
 int mas_stopApps(void)

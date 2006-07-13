@@ -23,6 +23,7 @@ typedef struct _SOUND_BUFFER
     unsigned long  write;
     int playing;
     void (*startPlayback)(void);
+    void (*pausePlayback)(void);
     /*unsigned long  bytes_played;
     unsigned long  loop_counter;
     unsigned long  loops_played;
@@ -34,7 +35,13 @@ void sound_initPlayer(void);
 void sound_initMp3(void);
 void sound_freeMp3(void);
 
+void sound_pauseMp3(void);
+void sound_startMp3(void);
+void sound_prevTrack(void);
+void sound_nxtTrack(void);
+
 void sound_readMore(void);
+void sound_fillBuffer(void);
 int openFileFromList(struct list_entry * cur_entry);
 
 /********************* MIXER                  ***************************/

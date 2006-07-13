@@ -28,7 +28,7 @@
 extern struct vfs_node * root_node;
 extern struct vfs_node * opened_node;
 
-int open(const char * name,int flags)
+int open(char * name,int flags)
 {
     MED_RET_T ret_val;
     struct vfs_pathname path;
@@ -74,7 +74,7 @@ int open(const char * name,int flags)
             /* it is a dir => can't open dir with fopen !! */
             printk("Trying to open a folder with fopen !!\n");
             printk("Folder name: '%s'\n",name);
-            return -MED_EINVAL;
+            return -MED_EISDIR;
         }
     }
     else
@@ -194,7 +194,7 @@ MED_RET_T fsync(int fdesc)
         if (FILE_TRUNC(fd->flags))
         {
             VFS_PRINT("FCLOSE: We need to truncate file\n");
-            ret_val=fat_fileTruncate(fd,fat_fileSize(fd));
+            ret_val=fat_fileTruncate(fd,fat_getFileSize(fd));
             if (ret_val != MED_OK)
                 return ret_val;
         }
@@ -274,7 +274,7 @@ int lseek(int fdesc, unsigned int offset, int whence)
             break;
 
         case SEEK_END:
-            pos = fat_fileSize(fd) + offset;
+            pos = fat_getFileSize(fd) + offset;
             break;
 
         default:
@@ -287,7 +287,7 @@ int lseek(int fdesc, unsigned int offset, int whence)
     if (pos == fd->position) // optimize the case where we just want current file position
         goto done;
     
-    if ((pos < 0) || (pos > fat_fileSize(fd))) {
+    if ((pos < 0) || (pos > fat_getFileSize(fd))) {
         printk("[lseek] Bad pos:%d\n",pos);
         return -MED_EINVAL;
     }
@@ -317,6 +317,6 @@ int filesize(int fdesc)
 {
     FILE * fd = (FILE *)fdesc;
     CHK_FD(fd);
-    return fat_fileSize(fd);
+    return fat_getFileSize(fd);
 }
 

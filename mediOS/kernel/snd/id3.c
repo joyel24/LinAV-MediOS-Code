@@ -797,7 +797,7 @@ static int getsonglength(int fd, struct mp3entry *entry)
  * about an MP3 file and updates it's entry accordingly.
  *
  */
-int mp3info(struct mp3entry *entry, const char *filename, int v1first)
+int mp3info(struct mp3entry *entry, char *filename, int v1first)
 {
     int fd;
     int v1found = 0;
