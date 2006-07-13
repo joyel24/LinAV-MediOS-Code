@@ -51,6 +51,6 @@ grep "warning: #warning" make.out
 echo ""
 fi
 
-if [ $cError -gt 0 ] || [ $cWarn -gt 0 ] || [ $cDevWarn -gt 0 ] && [ $DEV_WARN -eq 1 ]; then
+if [ $cError -gt 0 ] || [ $cWarn -gt 0 ]; then
 echo "$cError errors, $cWarn warnings, $cDevWarn dev warnings"
 fi
