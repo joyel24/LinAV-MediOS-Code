@@ -21,6 +21,7 @@
 #define MALLOC_SIZE   (((unsigned int)&_sdend_start)-MALLOC_START)
 
 #define CONFIG_ARM_CLK 54000000
+#define CONFIG_EXT_CLK 27000000
 
 #define CURRENT_ARCH  AV3XX_ARCH
 

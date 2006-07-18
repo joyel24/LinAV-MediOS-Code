@@ -18,7 +18,7 @@
 
 void dsp_on ()
 {
-	printk ("DSP on...\n");
+	printk ("[dsp] Enabled...\n");
 	outw (inw(MOD1_REG) & 0x9FFF, MOD1_REG);
 	outw (inw(MOD1_REG) | 0x6000, MOD1_REG);
 	outw (inw(MOD2_REG) & 0xFF1F, MOD2_REG);
@@ -27,7 +27,7 @@ void dsp_on ()
 
 void dsp_off ()
 {
-	printk ("DSP off...\n");
+	printk ("[dsp] Disabled...\n");
 	outw (inw(MOD1_REG) & 0x9FFF, MOD1_REG);
 	outw (inw(MOD2_REG) & 0xFF1F, MOD2_REG);
 }
@@ -41,27 +41,27 @@ void dsp_clear ()
 
 void dsp_reset ()
 {
-	printk ("Resetting DSP...\n");
+	printk ("[dsp] Resetting...\n");
 	outw (inw (HPIBCTL) & (0xFFFFFFFF - 256), HPIBCTL);
 	outw (inw (HPIBCTL) | 256, HPIBCTL);
 }
 
 void dsp_run ()
 {
-	printk ("Sedning INT0 to DSP...\n");
+	printk ("[dsp] Sending INT0...\n");
 	outw (inw (HPIBCTL) & (0xFFFFFFFF - 128), HPIBCTL);
 	outw (inw (HPIBCTL) | 128, HPIBCTL);
 }
 
-MED_RET_T load_dsp_program_hdd (const char* pszFilename)
+MED_RET_T dsp_loadProgramFromHDD (char* pszFilename)
 {
 	unsigned char * pDSPCode = 0;
 	int fDSPCode = open (pszFilename, O_RDONLY);
 	int nSize;
-	printk ("Loading dsp program from hdd into sdram...\n");
+	printk ("[dsp] Loading program from hdd into sdram...\n");
 	if (fDSPCode < 0)
 	{
-		printk ("Program not loaded.\n");
+		printk ("[dsp] Program not loaded.\n");
 		return -MED_ENOENT;
 	}
 	else
@@ -70,26 +70,26 @@ MED_RET_T load_dsp_program_hdd (const char* pszFilename)
 		nSize = filesize (fDSPCode);
 		pDSPCode = malloc (nSize);
 		nReaded = read (fDSPCode, pDSPCode, nSize);
-		printk ("Program loaded into sdram (%d bytes)\n", nReaded);
+		printk ("[dsp] Program loaded into sdram (%d bytes)\n", nReaded);
 		close (fDSPCode);
 	}
 
-	load_dsp_program_mem (pDSPCode, nSize);
+	dsp_loadProgramFromMemory (pDSPCode, nSize);
 
 	free (pDSPCode);
 	return MED_OK;
 }
 
-MED_RET_T load_dsp_program_mem (void* pDSPCode, int nSize)
+MED_RET_T dsp_loadProgramFromMemory (void* pDSPCode, int nSize)
 {
-	printk ("Loading dsp program into dsp...\n");
+	printk ("[dsp] Loading program into dsp...\n");
 
 	dsp_on ();
 	dsp_clear ();
 	dsp_reset ();
 
 	COFF_FILHDR* phdr = (COFF_FILHDR*)pDSPCode;
-	printk ("%i sections found...\r\n", phdr->f_nscns);
+	printk ("[dsp] %i sections found...\r\n", phdr->f_nscns);
 
 	int pos = sizeof(COFF_FILHDR) + phdr->f_opthdr + 2;
 
@@ -113,7 +113,7 @@ MED_RET_T load_dsp_program_mem (void* pDSPCode, int nSize)
 
 		if (!psec->s_size_lo)
 		{
-			printk ("Skipping empty %s section...\n",
+			printk ("[dsp] Skipping empty %s section...\n",
 				sec_name);
 			continue;
 		}
@@ -123,15 +123,12 @@ MED_RET_T load_dsp_program_mem (void* pDSPCode, int nSize)
 
 		if (!nVirtAddress)
 		{
-			printk ("Skipping address 0 %s section...\n",
+			printk ("[dsp] Skipping address 0 %s section...\n",
 				sec_name);
 			continue;
 		}
 
-/* 		if (!strcmp(sec_name, ".text") || !strcmp(sec_name, ".switch")) */
-/* 		  nVirtAddress += 0x10000; */
-
-		printk ("Loading section %s (addr: 0x%.8X, size: 0x%.4X words)...\n",
+		printk ("[dsp] Loading section %s (addr: 0x%.8X, size: 0x%.4X words)...\n",
 			sec_name,
 			nVirtAddress,
 			nSectSize);
@@ -144,10 +141,6 @@ MED_RET_T load_dsp_program_mem (void* pDSPCode, int nSize)
 			}
 		}
 		else
-//		if (!strcmp(sec_name, ".cinit"))
-//		{
-//		}
-//		else
 		{
 			unsigned long fileOffset=psec->s_scnptr_lo | psec->s_scnptr_hi<<16;
 			unsigned char* pSrcCode = (unsigned char*)(pDSPCode + fileOffset);
@@ -158,7 +151,7 @@ MED_RET_T load_dsp_program_mem (void* pDSPCode, int nSize)
 		}
 	}
 
-	printk ("Program loaded into dsp.\n");
+	printk ("[dsp] Program loaded.\n");
 	return MED_OK;
 }
 

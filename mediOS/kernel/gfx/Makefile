@@ -3,15 +3,24 @@ include ../../Makefile.conf
 ASFLAGS  += -I../../include
 GCCFLAGS += -I../../include
 
-OBJS = graphics_32.o graphics.o
+OBJS = graphics_32.o graphics.o resize.o
 
-ifeq ("$(CHIP_TYPE)","DSC25")
-OBJS += osd_DSC25.o graphics_8_DSC25.o
-else
 ifeq ("$(CHIP_TYPE)","DSC21")
 OBJS += osd_DSC21.o graphics_8_DSC21.o
 endif
+
+ifeq ("$(CHIP_TYPE)","DSC25")
+OBJS += osd_DSC25.o graphics_8_DSC25.o
 endif
+
+ifeq ("$(CHIP_TYPE)","DM270")
+OBJS += osd_DSC25.o graphics_8_DSC25.o
+endif
+
+ifeq ("$(CHIP_TYPE)","DM320")
+OBJS += osd_DSC25.o graphics_8_DSC25.o
+endif
+
 
 SUBDIRS = fonts gui
 

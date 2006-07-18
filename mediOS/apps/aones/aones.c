@@ -26,48 +26,17 @@ int frameSkip=0;
 
 
 
-int t=0;
-int t2=0;
-int i=0;
-
 void clkc_overclockArm(bool over){
 #ifdef GMINI_OVERCLOCKING
     if(over){
-        //oc
-        outw(0x8090,0x30880);
-        outw(0x80a0,0x30882);
-        //uart 115200bps, ref= 27Mhz
-        outw(inw(0x30884)|0x0600,0x30884);
-        outw(14,0x30302);
+        clkc_setClockFrequency(CLK_ARM,135000000);
+        clkc_setClockFrequency(CLK_DSP,148500000);
     }else{
-        //oc
-        outw(0x80e1,0x30880);
-        outw(0x8080,0x30882);
-        //uart 115200bps, ref= ARM
-        outw(inw(0x30884)&(~0x0600),0x30884);
-        outw(0x36,0x30302);
+        clkc_setClockFrequency(CLK_ARM,101250000);
+        clkc_setClockFrequency(CLK_DSP,121500000);
     }
 #endif
 };
-
-void ccd_vdInvert(int n){
-    while(n--){
-      outw(inw(0x30702)^0x0004,0x30702);
-    };
-}
-
-void ccd_clkInvert(int n){
-    while(n--){
-      outw(inw(0x30884)^0x2000,0x30884);
-    };
-}
-
-void ccd_vdSim(){
-    ccd_vdInvert(1);
-    ccd_clkInvert(4);
-    ccd_vdInvert(1);
-    ccd_clkInvert(4);
-}
 
 void resize_init(){
     long ip,op;
@@ -75,39 +44,12 @@ void resize_init(){
     op=(long)gfx_planeGetBufferOffset(VID1);
     ip=(long)lj_curRenderingScreenPtr+/*4*/10*NES_WIDTH*4;
 
-    op=(op-SDRAM_START)/32;
-    ip=(ip-SDRAM_START)/32;
-
-    outw(0x2800,0x30702); //MODESET
-    outw(0x0000,0x30704);
-    outw(0x0000,0x30706);
-    outw(0x0000,0x30700);
-
-    outw(0,0x30780); //PVEN
-    while(inw(0x30780));
-
-    outw(0x000e,0x30782); //PVSET1
-
-    outw(ip>>16,0x30784); //RADDRH
-    outw(ip&0xffff,0x30786); //RADDRL
-    outw(op>>16,0x30788); //WADDRH
-    outw(op&0xffff,0x3078a); //WADDRL
-
-    outw(NES_WIDTH*2,0x3078c); //HSTART
-    outw(0,0x30790); //VSTART
-
-    outw(NES_WIDTH*2,0x3078e); //HSIZE
-    outw(18,0x307a0); //HRSZ
-    outw(/*231*/220,0x30792); //VSIZE
-    outw(/*21*/20,0x307a2); //VRSZ
-
-    outw(0xff00,0x307ce); //SETUPY
-    outw(0xff00,0x307d0); //SETUPC
-
-    ccd_vdSim();
-
-    outw(1,0x30780); //PVEN
+    resize_setup(ip,NES_WIDTH*2,NES_WIDTH*2,220,op,224*2,176,RESIZE_CONTINUOUS);
 }
+
+int t=0;
+int t2=0;
+int i=0;
 
 void dsp_interrupt(int irq,struct pt_regs * regs){
 
@@ -135,7 +77,7 @@ void dsp_interrupt(int irq,struct pt_regs * regs){
 
     // frame is completed, launch resizing
     if(dspCom->outBufReady){
-        ccd_vdSim();
+        resize_execute();
         dspCom->outBufReady=0;
     }
 
@@ -184,9 +126,9 @@ void dsp_init(){
 
     *DSP_COM=0;
 #if 1
-    load_dsp_program_mem(dspcode,len);
+    dsp_loadProgramFromMemory(dspcode,len);
 #else
-    load_dsp_program_hdd("/aones_dsp.out");
+    dsp_loadProgramFromHDD("/aones_dsp.out");
 #endif
 
     // setup dma

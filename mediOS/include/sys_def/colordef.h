@@ -20,7 +20,7 @@
 #define COLOR_ROM_BLACK      0xf5
 #define COLOR_ROM_TRSP       0x00
 
-#ifdef DSC25
+#if defined(DSC25) || defined(DM270) || defined(DM320)
     #include <sys_def/colordef_DSC25.h>
 #elif defined(DSC21)
     #include <sys_def/colordef_DSC21.h>

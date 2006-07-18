@@ -112,7 +112,7 @@ void initDSP()
   }
 
   *DSP_COM=0;
-  load_dsp_program_mem(dspcode,len);
+  dsp_loadProgramFromMemory(dspcode,len);
 
   dsp_run();
 

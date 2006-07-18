@@ -58,7 +58,7 @@ bool button_handleEvent(BUTTON b,int evt){
         case BTN_LEFT:
         case BTN_RIGHT:
         case WIDGET_ACTION_BTN:
-            if (b->onClick) b->onClick(b);
+            if (b->onClick!=NULL) b->onClick(b);
             break;
         default:
             handled=false;

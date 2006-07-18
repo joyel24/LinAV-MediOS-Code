@@ -14,7 +14,7 @@
 #include <kernel/uart.h>
 #include <kernel/io.h>
 
-void arch_uartNeed(int uart_num)
+void arch_uart_need(int uart_num)
 {
     if(uart_num==UART_1)
     {
@@ -23,4 +23,9 @@ void arch_uartNeed(int uart_num)
         GIO_SET(GIO_SPDIF);
         GIO_SET(GIO_VID_OUT);
     }
+}
+
+void arch_uart_init()
+{
+
 }

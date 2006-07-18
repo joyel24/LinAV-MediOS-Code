@@ -43,6 +43,7 @@ void trackbar_init(TRACKBAR t){
     t->destroy=(WIDGET_DESTROYER)trackbar_destroy;
     t->handleEvent=(WIDGET_EVENTHANDLER)trackbar_handleEvent;
     t->paint=(WIDGET_PAINTHANDLER)trackbar_paint;
+    t->onChange=NULL;
 
     // properties
     t->value=0;
@@ -55,6 +56,7 @@ void trackbar_init(TRACKBAR t){
 
 bool trackbar_handleEvent(TRACKBAR t,int evt){
     bool handled=true;
+    int ov=t->value;
 
     // let's see if the ancestor handles the event
     if (widget_handleEvent((WIDGET)t,evt)) return true;
@@ -72,6 +74,9 @@ bool trackbar_handleEvent(TRACKBAR t,int evt){
             handled=false;
             break;
     }
+
+    // onChange event
+    if (t->onChange!=NULL && ov!=t->value) t->onChange(t);
 
     return handled;
 }

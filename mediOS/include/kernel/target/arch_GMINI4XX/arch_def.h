@@ -20,7 +20,7 @@
 #define MALLOC_START  ((((unsigned int)&_end_kernel) & 0xFFFFF000)+0x1000)
 #define MALLOC_SIZE   (((unsigned int)&_sdend_start)-MALLOC_START)
 
-#define CONFIG_ARM_CLK 100000000
+#define CONFIG_ARM_CLK 101250000
 #define CONFIG_EXT_CLK 27000000
 
 #define CURRENT_ARCH  GMINI4XX_ARCH

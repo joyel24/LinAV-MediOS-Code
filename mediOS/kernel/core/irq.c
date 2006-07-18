@@ -82,7 +82,7 @@ void irq_init(void)
         i++;
     }
     
-#ifdef DSC25    
+#if defined(DSC25) || defined(DM270) || defined(DM320)
     irq_setRaw(0x0);
     fiq_setRaw(0x0);        
     int_setEabase(irq_tbl_ptr,0x2);

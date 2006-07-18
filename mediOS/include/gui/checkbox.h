@@ -24,8 +24,11 @@
     /* we inherit from WIDGET */       \
     WIDGET_MEMBERS                     \
                                        \
+    CHECKBOX_CHANGEEVENT onChange;     \
     char * caption;                    \
     bool checked;
+
+typedef void(*CHECKBOX_CHANGEEVENT)(void *);
 
 typedef struct {
     CHECKBOX_MEMBERS

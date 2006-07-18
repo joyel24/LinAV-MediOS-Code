@@ -21,6 +21,8 @@
     #include <kernel/exit.h>
     #include <kernel/dsp.h>
     #include <kernel/aic23.h>
+    #include <kernel/clkc.h>
+    #include <kernel/resize.h>
     //#define printf printk
 //#else
 //    #include <api.h>

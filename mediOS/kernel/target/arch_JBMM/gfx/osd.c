@@ -23,6 +23,6 @@ void arch_osd_init(void)
     osd_setMainConfig(0x1);
     osd_setMainShift(0x8F, 0x15);
     
-    outw(0x2182,PREVIEW_BASE); /* preview engine enable/diasble */
-    outw(0x0400,PREVIEW_BASE+0x2);        
+    outw(0x2182,VIDEO_BASE); /* preview engine enable/diasble */
+    outw(0x0400,VIDEO_BASE+0x2);
 }

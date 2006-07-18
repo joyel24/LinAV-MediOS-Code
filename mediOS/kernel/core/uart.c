@@ -77,7 +77,7 @@ void uart_restoreIrqHandler(int uartNum)
 
 void uart_need(int uart_num)
 {
-    arch_uartNeed(uart_num);
+    arch_uart_need(uart_num);
 }
 
 void uart_init(void)
@@ -97,7 +97,7 @@ void uart_init(void)
     irq_enable(IRQ_UART0);
     irq_enable(IRQ_UART1);
 
-    
+    arch_uart_init();
     
     printk("[init] uart\n");
 }

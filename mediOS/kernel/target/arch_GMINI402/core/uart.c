@@ -12,7 +12,12 @@
 
 #include <kernel/uart.h>
 
-void arch_uartNeed(int uart_num)
+void arch_uart_need(int uart_num)
+{
+
+}
+
+void arch_uart_init()
 {
 
 }

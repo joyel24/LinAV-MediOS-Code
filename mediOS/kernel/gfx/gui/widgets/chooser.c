@@ -42,6 +42,7 @@ void chooser_init(CHOOSER c){
     c->destroy=(WIDGET_DESTROYER)chooser_destroy;
     c->handleEvent=(WIDGET_EVENTHANDLER)chooser_handleEvent;
     c->paint=(WIDGET_PAINTHANDLER)chooser_paint;
+    c->onChange=NULL;
 
     // properties
     c->items=NULL;
@@ -51,6 +52,7 @@ void chooser_init(CHOOSER c){
 
 bool chooser_handleEvent(CHOOSER c,int evt){
     bool handled=true;
+    int oi=c->index;
 
     // let's see if the ancestor handles the event
     if (widget_handleEvent((WIDGET)c,evt)) return true;
@@ -76,6 +78,9 @@ bool chooser_handleEvent(CHOOSER c,int evt){
             handled=false;
             break;
     }
+
+    // onChange event
+    if (c->onChange!=NULL && oi!=c->index) c->onChange(c);
 
     return handled;
 }

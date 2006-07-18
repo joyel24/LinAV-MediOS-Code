@@ -1,5 +1,5 @@
 /*
-*   kernel/target/arch_AV1XX/uart.c
+*   include/kernel/clkc_DSC21.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,22 +10,12 @@
 * KIND, either express of implied.
 */
 
-#include <kernel/gio.h>
-#include <kernel/uart.h>
-#include <kernel/io.h>
+#ifndef __CLKC_DSC21_H
+#define __CLKC_DSC21_H
 
-void arch_uart_need(int uart_num)
-{
-    if(uart_num==UART_1)
-    {
-        /*GIO_DIRECTION(GIO_SPDIF,GIO_OUT);
-        GIO_DIRECTION(GIO_VID_OUT,GIO_OUT);
-        GIO_SET(GIO_SPDIF);
-        GIO_SET(GIO_VID_OUT);*/
-    }
-}
+#define CLKC_PLL_M_MAX                 0
+#define CLKC_PLL_N_MAX                 0
+#define CLKC_PLL_FREQ_MIN              0
+#define CLKC_PLL_FREQ_MAX              0
 
-void arch_uart_init()
-{
-
-}
+#endif

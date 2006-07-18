@@ -13,7 +13,7 @@
 #ifndef __OSD_H
 #define __OSD_H
 
-#ifdef DSC25
+#if defined(DSC25) || defined(DM270) || defined(DM320) 
     #include <kernel/osd_DSC25.h>
 #elif defined(DSC21)
     #include <kernel/osd_DSC21.h>

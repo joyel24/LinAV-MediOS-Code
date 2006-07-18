@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/dsp.h
 *
 * All files in this archive are subject to the GNU General Public License.
@@ -68,11 +68,11 @@ typedef struct _COFF_SCNHDR
 #endif
 //0x0020 STYP_TEXT If set, indicates that this section contains only executable code. 
 //0x0040 STYP_DATA If set, indicates that this section contains only initialized data. 
-//0x0080 STYP_BSS If set, indicates that this section defines uninitialized data, and has no data stored in the coff file for it. 
+//0x0080 STYP_BSS If set, indicates that this section defines uninitialized data, and has no data stored in the coff file for it.
 } COFF_SCNHDR;
 
-MED_RET_T load_dsp_program_hdd (const char* pszFilename);
-MED_RET_T load_dsp_program_mem (void* pCode, int nSize);
+MED_RET_T dsp_loadProgramFromHDD (char* pszFilename);
+MED_RET_T dsp_loadProgramFromMemory (void* pCode, int nSize);
 
 typedef void (*DSP_HANDLER)(void);
 

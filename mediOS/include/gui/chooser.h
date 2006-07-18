@@ -21,9 +21,12 @@
     /* we inherit from WIDGET */       \
     WIDGET_MEMBERS                     \
                                        \
+    CHOOSER_CHANGEEVENT onChange;      \
     char ** items;                     \
     int itemCount;                     \
     int index;
+
+typedef void(*CHOOSER_CHANGEEVENT)(void *);
 
 typedef struct {
     CHOOSER_MEMBERS

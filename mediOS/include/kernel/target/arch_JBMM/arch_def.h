@@ -20,7 +20,8 @@
 #define MALLOC_START  ((((unsigned int)&_end_kernel) & 0xFFFFF000)+0x1000)
 #define MALLOC_SIZE   (((unsigned int)&_sdend_start)-MALLOC_START)
 
-#define CONFIG_ARM_CLK 54000000
+#define CONFIG_ARM_CLK 37125000
+#define CONFIG_EXT_CLK 27000000
 
 #define CURRENT_ARCH  JBMM_ARCH
 
@@ -108,9 +109,8 @@
 #define CPLD_PORT3                        (CPLD_BASE+0x300)
 
 /* video */
+#define VIDEO_BASE                        0x30900
 
-#define VIDEO_BASE                        0x30800
-#define PREVIEW_BASE                      0x30900
 /* osd */
 #define OSD_BASE                          0x30680
 

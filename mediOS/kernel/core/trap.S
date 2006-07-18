@@ -177,7 +177,17 @@ __irq_loop:
     add    r4, r2, r3, lsl #4
     ldmia  R4, {R0-R3}
 .else
-.ifdef DSC25
+ .ifdef DSC25
+  .equ IRQ_DSC25_COMPATIBLE,1
+ .endif
+ .ifdef DM270
+  .equ IRQ_DSC25_COMPATIBLE,1
+ .endif
+ .ifdef DM320
+  .equ IRQ_DSC25_COMPATIBLE,1
+ .endif
+
+ .ifdef IRQ_DSC25_COMPATIBLE
     ldr    R2, =irq_entry
     ldrh   R3, [R2,#2]
     ldrh   R2, [R2]
@@ -185,9 +195,9 @@ __irq_loop:
     ldmia  R4, {R0-R3}
     cmp    R3, #0
     beq    __exit_irq_loop   @ if handler = 0 => no handler
-.else
-.err
-.endif
+ .else
+  .err
+ .endif
 .endif
     @ R4 points on the bloc  
     @ read whole bloc

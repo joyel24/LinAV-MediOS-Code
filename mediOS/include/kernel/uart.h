@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/kernel/uart.h
 *
 *   MediOS project
@@ -37,6 +37,8 @@ void uart_outString  (unsigned char * data,int uartNum);
 void uart_init       (void);
 
 void uart_need       (int uart_num);
-void arch_uartNeed   (int uart_num);
+
+void arch_uart_need  (int uart_num);
+void arch_uart_init  ();
 
 #endif

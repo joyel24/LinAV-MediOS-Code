@@ -129,7 +129,7 @@ if [ $CONFIGURE_TARGET_DEVICE == "GMINI4XX" ]; then
             CONFIGURE_HAVE_DVR="0"
             CONFIGURE_HAVE_EXT_MODULE="0"
             CONFIGURE_HAVE_FM_REMOTE="0"
-            CONFIGURE_CHIP_TYPE="DSC25"
+            CONFIGURE_CHIP_TYPE="DM270"
 fi
 
 if [ $CONFIGURE_TARGET_DEVICE == "AV1XX" ]; then
@@ -153,7 +153,7 @@ if [ $CONFIGURE_TARGET_DEVICE == "GMINI402" ]; then
             CONFIGURE_HAVE_DVR="0"
             CONFIGURE_HAVE_EXT_MODULE="0"
             CONFIGURE_HAVE_FM_REMOTE="0"
-            CONFIGURE_CHIP_TYPE="DSC25"
+            CONFIGURE_CHIP_TYPE="DM320"
 fi
 
 # this section of the script asks all of the yes or no querys, they are of the following format:

@@ -25,12 +25,15 @@
     /* we inherit from WIDGET */       \
     WIDGET_MEMBERS                     \
                                        \
+    TRACKBAR_CHANGEEVENT onChange;     \
     int value;                         \
     int minimum;                       \
     int maximum;                       \
     int increment;                     \
     int numTicks;                      \
     int numValueDigits;
+
+typedef void(*TRACKBAR_CHANGEEVENT)(void *);
 
 typedef struct {
     TRACKBAR_MEMBERS

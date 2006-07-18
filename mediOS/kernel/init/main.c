@@ -74,14 +74,35 @@ extern int endOfList;
 #define DEBUG_MSG_STATE ((volatile unsigned short *)0x40102)
 #define DEBUG_MSG_TEXT  ((short *)0x40104)
 
-void tst_fct(void)
-{
-    mvfile("/tata/test.fichier","/test/test2.fes");
-    
-    mvdir("/tata","/tutu");
+#include <kernel/clkc.h>
 
-    while(1) /*nothing */;
+void tst_fct(void){
+    int m,n,d,p;
+    int f;
 
+    clkc_getClockParameters(CLK_ARM,&m,&n,&d);
+    p=clkc_getPllNum(CLK_ARM);
+    f=clkc_getClockFrequency(CLK_ARM);
+    printk("arm f=%d m=%d n=%d d=%d p=%d\n",f,m,n,d,p);
+    clkc_getClockParameters(CLK_DSP,&m,&n,&d);
+    p=clkc_getPllNum(CLK_DSP);
+    f=clkc_getClockFrequency(CLK_DSP);
+    printk("dsp f=%d m=%d n=%d d=%d p=%d\n",f,m,n,d,p);
+    clkc_getClockParameters(CLK_SDRAM,&m,&n,&d);
+    p=clkc_getPllNum(CLK_SDRAM);
+    f=clkc_getClockFrequency(CLK_SDRAM);
+    printk("sdr f=%d m=%d n=%d d=%d p=%d\n",f,m,n,d,p);
+    clkc_getClockParameters(CLK_ACCEL,&m,&n,&d);
+    p=clkc_getPllNum(CLK_ACCEL);
+    f=clkc_getClockFrequency(CLK_ACCEL);
+    printk("axl f=%d m=%d n=%d d=%d p=%d\n",f,m,n,d,p);
+
+    for(f=80000000;f<=200000000;f+=2000000){
+        clkc_setClockFrequency(CLK_ARM,f);
+        mdelay(500);
+    }
+
+    reload_firmware();
 }
 
 void kernel_start (void)
@@ -145,14 +166,14 @@ void kernel_start (void)
     print_boot_info();
     printk("[init] END\n");
 
-#if 0
-   tst_fct();
-#endif
-
 #ifdef BUILD_LIB
     do_bkpt();
     app_main(1,"STDALONE");
     reload_firmware();
+#endif
+
+#if 0
+   tst_fct();
 #endif
 
     do_bkpt();

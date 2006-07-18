@@ -12,6 +12,8 @@
 
 #include <gui/checkbox.h>
 
+#include <sys_def/stddef.h>
+
 #include <kernel/malloc.h>
 #include <kernel/kfont.h>
 
@@ -40,6 +42,7 @@ void checkbox_init(CHECKBOX c){
     c->destroy=(WIDGET_DESTROYER)checkbox_destroy;
     c->handleEvent=(WIDGET_EVENTHANDLER)checkbox_handleEvent;
     c->paint=(WIDGET_PAINTHANDLER)checkbox_paint;
+    c->onChange=NULL;
 
     // properties
     c->caption="Checkbox";
@@ -58,6 +61,7 @@ bool checkbox_handleEvent(CHECKBOX c,int evt){
         case WIDGET_ACTION_BTN:
             c->checked=!c->checked;
             c->paint(c);
+            if (c->onChange!=NULL) c->onChange(c);
             break;
         default:
             handled=false;
