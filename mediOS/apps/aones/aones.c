@@ -291,7 +291,7 @@ __IRAM_CODE void emu_handleVideoBuffer(){
     dspCom->inBufReady=1;
 #else
  #ifdef SCREEN_USE_RESIZE
-    ccd_vdSim();
+    resize_execute();
  #endif
 #endif
 }
