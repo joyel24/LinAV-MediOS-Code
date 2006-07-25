@@ -53,6 +53,7 @@ void menuItem_init(MENU_ITEM mi);
     MENU_ITEMADDER addItem;            \
     MENU_ITEMSCLEARER clearItems;      \
     MENU_INDEXGETTER indexOf;          \
+    MENU_INDEXFROMCAPTIONGETTER indexFromCaption;\
     MENU_ITEM * items;                 \
     int itemCount;                     \
     bool ownItems;                     \
@@ -69,6 +70,7 @@ typedef void(*MENU_CLICKEVENT)(void *,void *);
 typedef void(*MENU_ITEMADDER)(void *,void *);
 typedef void(*MENU_ITEMSCLEARER)(void *);
 typedef int(*MENU_INDEXGETTER)(void *,void *);
+typedef int(*MENU_INDEXFROMCAPTIONGETTER)(void *,char *);
 
 struct MENU_STRUCT {
     MENU_MEMBERS
@@ -82,5 +84,6 @@ void menu_paint(MENU m);
 void menu_addItem(MENU m, MENU_ITEM item);
 void menu_clearItems(MENU m);
 int menu_indexOf(MENU m, MENU_ITEM item);
+int menu_indexFromCaption(MENU m, char * caption);
 
 #endif

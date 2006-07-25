@@ -131,12 +131,16 @@ bool textMenu_handleEvent(TEXTMENU m,int evt){
 
     switch(evt){
         case BTN_UP:
-            m->index--;
-            if(m->index<0) m->index=m->itemCount-1;
+            do{ // find previous focusable item
+                m->index--;
+                if(m->index<0) m->index=m->itemCount-1;
+            }while(!m->items[m->index]->canFocus);
             break;
         case BTN_DOWN:
-            m->index++;
-            if(m->index>=m->itemCount) m->index=0;
+            do{ // find next focusable item
+                m->index++;
+                if(m->index>=m->itemCount) m->index=0;
+            }while(!m->items[m->index]->canFocus);
             break;
         case BTN_RIGHT:
             menu_handleEvent((MENU)m,WIDGET_ACTION_BTN);

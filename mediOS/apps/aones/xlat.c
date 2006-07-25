@@ -1,4 +1,5 @@
 #include "medios.h"
+#include "aones.h"
 #include "datatypes.h"
 #include "unes_ppu.h"
 #include "nes_pal.h"

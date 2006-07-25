@@ -1,15 +1,11 @@
-#ifndef __MEDIOS__
-#define __MEDIOS__
+#ifndef __MEDIOS_H
+#define __MEDIOS_H
 
 #include "datatypes.h"
 #include "dspshared.h"
 
-#define GMINI_OVERCLOCKING
-
-#define SCREEN_USE_DSP
-#define SCREEN_USE_RESIZE
-
 //#ifdef BUILD_STDALONE
+#if 1 //TODO: need a way to propagate BUILD_STDALONE GCC flag in subdirs
     #include <kernel/graphics.h>
     #include <kernel/stdfs.h>
     #include <kernel/malloc.h>
@@ -23,11 +19,13 @@
     #include <kernel/aic23.h>
     #include <kernel/clkc.h>
     #include <kernel/resize.h>
-    //#define printf printk
-//#else
-//    #include <api.h>
-//#endif
+    #include <kernel/evt.h>
+    #include <kernel/bat_power.h>
+#else
+    #include <api.h>
+#endif
 
+#include <int_timer.h>
 #include <buttons.h>
 #include <kernel/io.h>
 
@@ -41,14 +39,12 @@
 #include <sys_def/colordef.h>
 #include <gui/file_browser.h>
 #include <gui/icons.h>
-
+#include <gui/widgetlist.h>
+#include <gui/widgetmenu.h>
 
 #define F_HANDLE int
 
 #define DEBUGS printf
-
-#define LJ_ROMSDIR "/"
-#define LJ_SAVESDIR "/"
 
 /*
 #undef __IRAM_CODE

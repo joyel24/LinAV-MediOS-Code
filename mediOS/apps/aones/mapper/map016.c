@@ -8,7 +8,7 @@
 static uint8 patch, patch2;
 static uint8 regs[3];
 
-static uint8 serial_out[0x2000];
+//static uint8 serial_out[0x2000];
 
 
 
@@ -241,6 +241,7 @@ static void map16_write(uint32 addr, uint8 data)
 	}
 }
 
+#if 0
 static void map16_writeSaveRAM(uint32 addr, uint8 data)
 {
 	if(patch)
@@ -252,7 +253,7 @@ static void map16_writeSaveRAM(uint32 addr, uint8 data)
 		map16_write2(addr, data);
 	}
 }
-
+#endif
 
 static void map16_hblank(uint32 scanline)
 {	

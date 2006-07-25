@@ -1,10 +1,13 @@
 #include "medios.h"
+#include "aones.h"
+#include "aones_gui.h"
+#include "nes_apu.h"
 #include "unes.h"
 #include "unes_io.h"
 
 __IRAM_DATA VirtualNES Vnes;
 unsigned char * lj_curRenderingScreenPtr;
-char CurrentROMFile[256];
+char CurrentROMFile[256]="";
 
 tDspCom * dspCom;
 
@@ -12,6 +15,9 @@ __IRAM_DATA volatile int vblankNum;
 
 // tick of last rendered frame
 int prevRenderedFrameTick=0;
+
+// vblank # of last rendered frame
+int prevVblankNun=0;
 
 // used for fps calculation
 int prevFpsTick=0;
@@ -23,17 +29,36 @@ int frameCount=0;
 // number of frames to skip between 2 rendered frames
 int frameSkip=0;
 
+// buttons stuff
+int autoFire=0;
+int f3Use=0;
+bool buttonsSwap=false;
+bool stickyAPressed=false;
+bool stickyBPressed=false;
+bool prevF3Pressed=false;
+bool autoFirePressed=false;
+
+// OC stuff
+bool overclocking=false;
+int armFrequency=0;
+int dspFrequency=0;
 
 
-
-void clkc_overclockArm(bool over){
+void clk_overclock(bool en){
 #ifdef GMINI_OVERCLOCKING
-    if(over){
-        clkc_setClockFrequency(CLK_ARM,135000000);
-        clkc_setClockFrequency(CLK_DSP,148500000);
+    int dspf;
+
+    if(en && overclocking){
+        // dsp freq must always be higher than arm freq or equal
+        dspf=MAX(armFrequency,dspFrequency);
+        clkc_setClockFrequency(CLK_DSP,dspf*1000000);
+
+        clkc_setClockFrequency(CLK_ARM,armFrequency*1000000);
     }else{
-        clkc_setClockFrequency(CLK_ARM,101250000);
-        clkc_setClockFrequency(CLK_DSP,121500000);
+        // default params
+        clkc_setClockParameters(CLK_DSP,9,1,2);
+        clkc_setClockParameters(CLK_ARM,15,2,2);
+        clkc_setClockParameters(CLK_ACCEL,15,2,1);
     }
 #endif
 };
@@ -81,7 +106,7 @@ void dsp_interrupt(int irq,struct pt_regs * regs){
         dspCom->outBufReady=0;
     }
 
-    // debug message comming from the dsp
+    // debug message coming from the dsp
     if (dspCom->hasDbgMsg){
         static char str[255];
         int i;
@@ -155,7 +180,6 @@ __IRAM_CODE void osd_interrupt(int irq,struct pt_regs * regs){
 
 void snd_init(){
     aic23_setSampleRate(SAMPLE_RATE);
-    aic23_setOutputVolume(110,AIC23_CHANNEL_BOTH);
     aic23_enableOutput(true);
 }
 
@@ -167,13 +191,13 @@ void emu_init()
 {
     memset((char*)&Vnes,0,sizeof(Vnes));
 
-    Vnes.var.LineOffset=malloc(NES_PAL_HEIGHT);
+    Vnes.var.LineOffset=malloc(NES_PAL_HEIGHT*sizeof(uint32));
 
     Vnes.CPUMemory=(uint8 *)malloc(65536);
     Vnes.PPU_patterntables=(uint8 *)malloc(0x8000);
     Vnes.PPU_nametables=(uint8 *)malloc(0x1000);
     Vnes.PPU_palette=(uint8*)malloc(0x100);
-  
+
     Vnes.mapper_extram=(uint8 *)malloc(0x10000);
     Vnes.mapper_extramsize=0;
     Vnes.NESSRAM=(uint8*)malloc(0x10000);
@@ -185,11 +209,13 @@ void emu_init()
 
     memset(Vnes.var.Vbuffer,0,NES_BUFFER_WIDTH*NES_PAL_HEIGHT);
     memset(Vnes.var.Vbuffer2,0,NES_BUFFER_WIDTH*NES_PAL_HEIGHT);
-    memset(Vnes.var.LineOffset,0,NES_PAL_HEIGHT);
+    memset(Vnes.var.LineOffset,0,NES_PAL_HEIGHT*sizeof(uint32));
+
 }
 
 void emu_close()
 {
+    if (Vnes.var.LineOffset) free(Vnes.var.LineOffset);
     if (Vnes.CPUMemory) free(Vnes.CPUMemory);
     if (Vnes.PPU_patterntables) free(Vnes.PPU_patterntables);
     if (Vnes.PPU_nametables) free(Vnes.PPU_nametables);
@@ -228,6 +254,9 @@ void emu_setDefaultParams()
 
     Vnes.var.sndfreq=8;
     Vnes.var.sndfilter=2;
+
+    stickyAPressed=false;
+    stickyBPressed=false;
 }
 
 void display_init(){
@@ -256,13 +285,27 @@ void display_init(){
 #endif
 };
 
+void emu_loadRom(){
+    Load_ROM(CurrentROMFile);
+};
+
 void emu_run(){
     emu_setDefaultParams();
 
-    if ((!Load_ROM(CurrentROMFile))&&
-        (!Open_ROM())&&
+    if ((!Open_ROM())&&
         (!Init_NES(CurrentROMFile))){
+
+        // load a possible sram file
+        LoadSaveSRAM(false);
+
         LaunchEmu();
+
+        if(Vnes.var.SaveRAM){
+            aic23_setOutputVolume(0,AIC23_CHANNEL_BOTH); // mute sound
+            gui_showText("Saving SRAM...");
+
+            LoadSaveSRAM(true);
+        }
     }
 
     Close_ROM(0);
@@ -296,31 +339,89 @@ __IRAM_CODE void emu_handleVideoBuffer(){
 #endif
 }
 
+long emu_joypad1State(){
+    long state;
+    int bt;
+    state=0;
+
+    if ((Vnes.var.padmode==0)||(Vnes.var.padmode==2)){
+
+        bt=btn_readState();
+
+        if (Vnes.var.padmode==0){
+            if(bt & BTMASK_UP) state|=0x10;
+            if(bt & BTMASK_DOWN) state|=0x20;
+            if(bt & BTMASK_LEFT) state|=0x40;
+            if(bt & BTMASK_RIGHT) state|=0x80;
+
+            if (buttonsSwap){
+                if(bt & BTMASK_BTN1) state|=2;
+                if(bt & BTMASK_BTN2) state|=1;
+            }else{
+                if(bt & BTMASK_BTN1) state|=1;
+                if(bt & BTMASK_BTN2) state|=2;
+            }
+
+            if(bt & BTMASK_F3){
+                switch(f3Use){
+                    case 0: //A+B
+                        state|=3;
+                        break;
+                    case 1: //Sticky A
+                        if (!prevF3Pressed){ // only on F3 button state change
+                            stickyAPressed=!stickyAPressed;
+                        }
+                        break;
+                    case 2: //Sticky B
+                        if (!prevF3Pressed){ // only on F3 button state change
+                            stickyBPressed=!stickyBPressed;
+                        }
+                        break;
+                }
+                prevF3Pressed=true;
+            }else{
+                prevF3Pressed=false;
+            }
+
+            if (stickyAPressed) state|=1;
+            if (stickyBPressed) state|=2;
+
+            if (autoFire){
+                if (state&1 && autoFire&1 && !autoFirePressed) state&=0xfffe;
+                if (state&2 && autoFire&2 && !autoFirePressed) state&=0xfffd;
+            }
+        }
+
+        if(bt & BTMASK_ON) state|=8;
+        if(bt & BTMASK_F2) state|=4;
+    }
+
+    state|=0x10000;           //1player signature
+    return(state);
+}
+
+long emu_joypad2State(){
+    long state;
+    if (Vnes.var.padmode!=1) return 0x20000;
+    state=0;
+    state|=0x20000;           //1player signature
+    return(state);
+}
 
 int emu_processIngameKeys()
 {
-  int Key;
+  int bt;
 
-  Key=btn_readState();
+  bt=btn_readState();
 
-/*
-  if (Key & BTMASK_F2)
+  if (bt & BTMASK_F1)
   {
-     NES_reset();
-  }
-*/
-
-  if (Key & BTMASK_F2)
-  {
-     SaveStateSnss(0);
+     aic23_setOutputVolume(0,AIC23_CHANNEL_BOTH); // mute sound
+     gui_execute();
+     gui_applySettings();
   }
 
-  if (Key & BTMASK_F3)
-  {
-     LoadStateSnss(0);
-  }
-
-  if (Key & BTMASK_OFF)
+  if (bt & BTMASK_OFF)
   {
      return 1;
   }
@@ -356,9 +457,10 @@ int emu_frameCompleted()
             //we use the vblank interrupt to get sync
             tick=tmr_getMicroTick();
             if ((tick-prevRenderedFrameTick)<frameLength){
-                int vbl=vblankNum;
 
-                while((vblankNum-vbl)<(frameSkip+1)) /* nothing */;
+                while((vblankNum-prevVblankNun)<(frameSkip+1)) /* nothing */;
+
+                prevVblankNun=vblankNum;
 
                 tick=tmr_getMicroTick();
             }
@@ -376,59 +478,88 @@ int emu_frameCompleted()
 
     // handle frame skip
     Vnes.var.DrawCframe=(frameCount%(frameSkip+1))==0;
+    
+    // handle autofire
+    if(autoFire && frameCount%AUTOFIRE_INTERVAL==0) autoFirePressed=!autoFirePressed;
 
     return 0;
 }
 
 
 int app_main(){
+    // disable LCD & halt timer
+    set_timer_status(LCD_TIMER,TIMER_MODE_BAT,MODE_DISABLE);
+    set_timer_status(LCD_TIMER,TIMER_MODE_DC,MODE_DISABLE);
+    set_timer_status(HALT_TIMER,TIMER_MODE_BAT,MODE_DISABLE);
+    set_timer_status(HALT_TIMER,TIMER_MODE_DC,MODE_DISABLE);
+
+    // create dirs if they don't exist
+    mkdir(AONES_PATH,-1);
+    mkdir(SAVES_PATH,-1);
+
+    // init sound
     snd_init();
 
+    // init dsp
     dsp_init();
 
-    icon_init();
-    iniBrowser();
-
+    // init graphics
     gfx_openGraphics();
     gfx_clearScreen(COLOR_WHITE);
     gfx_fontSet(STD6X9);
 
+    // init gui
+    gui_init();
+
+    // init emu stuff
     emu_init();
 
+    // init planes addresses, size & all
     display_init();
 
 #ifdef SCREEN_USE_RESIZE
+    // init hw resize
     resize_init();
 #endif
 
+    // init hw resize
     dsp_write32(&dspCom->outBufAddr,(uint32)lj_curRenderingScreenPtr);
 
+    // apply settings
+    gui_applySettings();
+
+    // welcome screen
+    gui_welcomeScreen();
+
     for(;;){
-        clkc_overclockArm(false);
+        // don't overclock during hdd access
+        clk_overclock(false);
 
-        gfx_planeHide(VID1);
-        gfx_setPlane(BMAP1);
-        gfx_planeShow(BMAP1);
+        gui_showGuiPlane();
 
-        if(browser_simpleBrowse("/roms/nes",CurrentROMFile)!=MED_OK) break;
+        if(!gui_browse()) break;
 
-        gfx_planeHide(BMAP1);
-        gfx_setPlane(VID1);
-        gfx_clearScreen(COLOR32_BLACK);
-        gfx_planeShow(VID1);
+        gui_showText("Loading ROM...");
 
-        clkc_overclockArm(true);
+        emu_loadRom();
+
+        gui_applySettings();
+
+        gui_showEmuPlane();
+
         emu_run();
 
-        // temp
-        apu_reset();
-        while(btn_readState());
+        aic23_setOutputVolume(0,AIC23_CHANNEL_BOTH); // mute sound
+        apu_reset(); // reset apu //HACK: it prevents the dsp from crashing on frequency change
     }
 
-    clkc_overclockArm(false);
-    emu_close();
-    gfx_closeGraphics();
+    gui_showText("Saving settings...");
+
+    clk_overclock(false);
     snd_close();
+    gui_close();
+    gfx_closeGraphics();
+    emu_close();
 
     return 0;
 }

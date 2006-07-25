@@ -1,7 +1,7 @@
 include ../../../Makefile.conf
 
 ASFLAGS  += -I../../../include -I. -I../
-GCCFLAGS += -I../../../include -I. -I../
+GCCFLAGS += -I../../../include -I. -I../ -O3
 
 SRC = $(wildcard *.c)
 OBJS = $(SRC:%.c=%.o) ncpu.o

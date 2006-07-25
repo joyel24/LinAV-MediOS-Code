@@ -25,7 +25,7 @@ all: subdirs builddir $(LIBS) $(OBJS)
         
 
 stdalone: GCCFLAGS += -DBUILD_STDALONE
-stdalone: subdirs builddir $(OBJS)
+stdalone: builddir subdirs $(OBJS)
 	@cp -f $(OBJS) build
         
 $(LIBS):

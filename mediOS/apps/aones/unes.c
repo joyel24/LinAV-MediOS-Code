@@ -10,6 +10,7 @@
 #include "datatypes.h"
 #include "dspshared.h"
 
+#include "aones.h"
 #include "snss.h"
 #include "unes.h"
 #include "unes_ppu.h"
@@ -71,22 +72,14 @@ void nes_reset(void);
 void CloseAll(void);
 int SaveStateSnss(byte b);
 int LoadStateSnss(byte b);
-void SaveSRAM(void);
+void LoadSaveSRAM(bool save);
 
 void reset_asmcpu(void);
-
-extern __IRAM_DATA VirtualNES Vnes;
-
-extern char CurrentROMFile[256];
 
 #include "unes_ROM_Correct.h"
 
 char Init_NES(char *RomName)
 {
-    int i,j,k;
-    char sramfile[256];
-    char strresult[256];
-  
     printf("Init NES\n");
   
     memset(Vnes.PPU_patterntables,0,0x8000);
@@ -115,7 +108,7 @@ char Init_NES(char *RomName)
     }
     if (Vnes.ROM_Header.rom_ctrl1&8) Vnes.var.mirroring=5;
 
-    //set vram 
+    //set vram
     Vnes.var.vrom=0;
 
     //set low cpu page
@@ -161,28 +154,6 @@ char Init_NES(char *RomName)
     Vnes.var.JoyPad2_BitIndex=0;    
       
     Vnes.var.SaveRAM=Vnes.ROM_Header.rom_ctrl1&2;
-
-    //    if (Vnes.ROM_Header.rom_ctrl1&2)
-    {
-        //load the sram
-        i=0;
-        j=255;
-        k=-1;
-        while (RomName[i]!=0)
-        {
-            if (RomName[i]=='.') j=i;
-            if (RomName[i]=='/') k=i;
-            if (RomName[i]=='\\') k=i;
-            i++;
-        }
-        if (j==255) j=i;  //pas d'extension
-        memcpy(sramfile,RomName+k+1,j+1-k-1);
-        sramfile[j+1-k-1]=0;
-        strcat(sramfile,"srm");
-
-        sprintf(strresult,"%s%s",LJ_SAVESDIR,sramfile);
-        strresult[0]=lj_curVolume+'0';
-    }
 
     return 0;
 }
@@ -242,6 +213,8 @@ char Load_ROM(char *RomName)
 
 char Open_ROM()
 {
+    int prevcpucycle;
+
     Vnes.romsize=romsize;
 
     printf("Opening ROM, size=%dKB\n",romsize/1024);
@@ -265,12 +238,14 @@ char Open_ROM()
 
     Vnes.var.crc = 0;
     Vnes.var.crc_all = 0;
+/*gli
     Vnes.var.country[0]='?';
     Vnes.var.country[1]=0;
     Vnes.var.publisher[0]='?';
     Vnes.var.publisher[1]=0;
     Vnes.var.date[0]='?';
     Vnes.var.date[1]=0;
+*/
 
     if (!Vnes.var.nsfmode)
     {
@@ -301,7 +276,19 @@ char Open_ROM()
         }
         */
 
+        prevcpucycle=Vnes.var.cpucycle;
+        Vnes.var.cpucycle=0;
+
         Crc_CorrectRomSettings();
+
+        //gli: ignore gui setting when there's a game fix
+        if (Vnes.var.cpucycle!=0){
+            Vnes.var.CustomCpuCycle=true;
+        }else{
+            Vnes.var.cpucycle=prevcpucycle;
+            Vnes.var.CustomCpuCycle=false;
+        }
+
 
         if (Vnes.rom[12]==0)
             Vnes.Mapper_used=(Vnes.ROM_Header.rom_ctrl1>>4)+(Vnes.ROM_Header.rom_ctrl2&0xf0);
@@ -330,58 +317,57 @@ char Open_ROM()
     return(0);
 }
 
-void SaveSRAM(void)
+void LoadSaveSRAM(bool save)
 {
-#ifdef __PALM__
-    FILE *f;
+    int f;
     int i,j,k;
-    int err_code;
-    char sramfile[256],result[256];
-   
-    if (Vnes.var.SaveRAM)
+    char * sramfile = malloc(256);
+    char * result = malloc(256);
+
+    i=0;
+    j=255;
+    k=-1;
+    while (CurrentROMFile[i]!=0)
     {
-        //save the sram
-        i=0;
-        j=255;
-        k=-1;
-        while (CurrentROMFile[i]!=0)
+        if (CurrentROMFile[i]=='.') j=i;
+        if (CurrentROMFile[i]=='/') k=i;
+        if (CurrentROMFile[i]=='\\') k=i;
+        i++;
+    }
+    if (j==255) j=i;  //pas d'extension
+    memcpy(sramfile,CurrentROMFile+k+1,j+1-k-1);
+    sramfile[j+1-k-1]=0;
+    strcat(sramfile,"srm");
+
+    sprintf(result,SAVES_PATH"%s",sramfile);
+
+    if(save){
+        printf("Saving SRAM...\n");
+
+        f = open(result,O_RDWR|O_CREAT);
+        if (f>=0)
         {
-            if (CurrentROMFile[i]=='.') j=i;
-            if (CurrentROMFile[i]=='/') k=i;
-            if (CurrentROMFile[i]=='\\') k=i;
-            i++;
+            write(f,Vnes.NESSRAM ,0x2000);
+            close(f);
         }
-        if (j==255) j=i;  //pas d'extension
-        memcpy(sramfile,CurrentROMFile+k+1,j+1-k-1);
-        sramfile[j+1-k-1]=0;
-        strcat(sramfile,"srm");
+    }else{
+        printf("Loading SRAM...\n");
 
-        sprintf(result,"%s%s",LJ_SAVESDIR,sramfile);
-        result[0]=lj_curVolume+'0';
-
-//      DrawMessage(result,1);
-
-        f = fopen(result,"wb");
-        if (!f)
+        f = open(result,O_RDONLY);
+        if (f>=0)
         {
-            //gpprintf(0,48,"Error during creation",5);
-            DEBUGS("Error during creation of SRAM file");
-
-        }
-        else
-        {
-            fwrite(Vnes.NESSRAM ,0x2000,1,f);
-            fclose(f);
+            read(f,Vnes.NESSRAM ,0x2000);
+            close(f);
         }
     }
-#endif
+
+    free(result);
+    free(sramfile);
 }
 
 char Close_ROM(int b)
 {
     printf("Closing ROM\n");
-
-    if (b) SaveSRAM();
 
     mmc_destroy(&mapper);
 
@@ -390,7 +376,7 @@ char Close_ROM(int b)
     return(0);
 }
 
-void nes_reset()
+void Reset_NES()
 {
     printf("Reset NES\n");
 
@@ -398,25 +384,33 @@ void nes_reset()
 
     ppu_reset(true);
 
+    printf("ppu\n");
+
     apu_reset();
-  
+
+    printf("apu\n");
+
     mmc_reset();
-  
+
+    printf("mmc\n");
+
     if (ppu_noLatchFunc()) Vnes.var.lazy_mode_avail=1;
     else Vnes.var.lazy_mode_avail=0;
-  
+
     if (Vnes.var.lazy_mode_avail) Vnes.var.lazy_mode=1;
     else Vnes.var.lazy_mode=0;
-  
+
     Vnes.var.frame_irq_enabled = 0xFF;
     Vnes.var.frame_irq_disenabled = 0;
-  
-  
+
+
 #ifdef __asmcpu__
     reset_asmcpu();
 #else
     nes6502_reset();
 #endif
+
+    printf("cpu\n");
 
     Vnes.var.curdeccycle=0;
     Vnes.var.currentcpucycle=0;
@@ -426,10 +420,10 @@ void LaunchEmu()
 {
     long l;
     bool wantQuit;
-  
+
     l=16;
-    nes_reset();
-  
+    Reset_NES();
+
     wantQuit=false;
     do{
         if (Vnes.var.fps==60)
@@ -439,59 +433,27 @@ void LaunchEmu()
     }while(!wantQuit);
 }
 
-long JoyPad1_State()
-{
-    long state;
-    int ExKey;
-    state=0;
-  
-    if ((Vnes.var.padmode==0)||(Vnes.var.padmode==2))
-    {
-        ExKey=btn_readState();
-        if (Vnes.var.padmode==0)
-        {
-            if(ExKey & BTMASK_LEFT) state|=0x40;
-            if(ExKey & BTMASK_UP) state|=0x10;
-            if(ExKey & BTMASK_RIGHT) state|=0x80;
-            if(ExKey & BTMASK_DOWN) state|=0x20;
-            if(ExKey & BTMASK_BTN2) state|=2;
-            if(ExKey & BTMASK_BTN1) state|=1;
-        }
-        if(ExKey & BTMASK_ON) state|=8;
-        if(ExKey & BTMASK_F1) state|=4;
-    }
-
-    state|=0x10000;           //1player signature
-    return(state);
-}
-
-long JoyPad2_State()
-{
-    long state;
-    if (Vnes.var.padmode!=1) return 0x20000;
-    state=0;
-    state|=0x20000;           //1player signature
-    return(state);
-}
-
 void GetStateFileName(int num,char *str)
 {
     char * result=malloc(256);
-    byte i=0,j=255;
-  
-    i=0;
-    j=255;
+    int i;
+    int beg,end;
 
-    while (CurrentROMFile[i]!=0)
+    i=0;
+    beg=0;
+    end=-1;
+
+    while (CurrentROMFile[i])
     {
-        if (CurrentROMFile[i]=='.') j=i;
+        if (CurrentROMFile[i]=='/') beg=i;
+        if (CurrentROMFile[i]=='.') end=i;
         i++;
     }
-    if (j==255) j=i;  //pas d'extension
+    if (end==-1) end=i;  //pas d'extension
 
-    memcpy(result,CurrentROMFile,j+1);
-    result[j+1]=0;
-    sprintf(str,"%sss%d",result,num);
+    memcpy(result,CurrentROMFile+beg+1,end+1-beg-1);
+    result[end+1-beg-1]=0;
+    sprintf(str,SAVES_PATH"%sss%d",result,num);
 
     free(result);
 }
@@ -673,7 +635,7 @@ int LoadStateSnss(byte b)
     }
 
      // now we are too far to not reset the nes if there is a pb
-    nes_reset();
+    Reset_NES();
 
     for (j = 0; j < f->headerBlock.numberOfBlocks; j++)
     {

@@ -34,6 +34,7 @@
     WIDGET_DESTROYER destroy;          \
     WIDGET_EVENTHANDLER handleEvent;   \
     WIDGET_PAINTHANDLER paint;         \
+    WIDGET_RECTSETTER setRect;         \
     int x;                             \
     int y;                             \
     int width;                         \
@@ -51,6 +52,7 @@
 typedef bool(*WIDGET_EVENTHANDLER)(void *,int);
 typedef void(*WIDGET_PAINTHANDLER)(void *);
 typedef void(*WIDGET_DESTROYER)(void *);
+typedef void(*WIDGET_RECTSETTER)(void *,int,int,int,int);
 
 typedef struct {
     WIDGET_MEMBERS
@@ -61,5 +63,6 @@ void widget_destroy(WIDGET w);
 void widget_init(WIDGET w);
 bool widget_handleEvent(WIDGET w,int evt);
 void widget_paint(WIDGET w);
+void widget_setRect(WIDGET w,int x,int y,int width,int height);
 
 #endif

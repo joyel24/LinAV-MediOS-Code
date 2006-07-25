@@ -31,6 +31,8 @@
 
 char * chooser_items[]={"Choice 1","Choice 2","Choice 3","Choice 4","Choice 5","Pouet!"};
 
+int eventHandler;
+
 WIDGETLIST widgetList;
 
 WIDGETLIST menuList;
@@ -103,10 +105,7 @@ void buildMainMenu(){
     TEXTMENU_ITEM mi;
 
     mainMenu=textMenu_create();
-    mainMenu->x=0;
-    mainMenu->y=20;
-    mainMenu->width=220;
-    mainMenu->height=156;
+    mainMenu->setRect(mainMenu,0,20,220,156);
     mainMenu->ownItems=true; // the menu will handle items destroy
 
     mi=textMenuItem_create();
@@ -135,10 +134,7 @@ void buildTextMenu(){
     char * s;
 
     textMenu=textMenu_create();
-    textMenu->x=0;
-    textMenu->y=20;
-    textMenu->width=220;
-    textMenu->height=156;
+    textMenu->setRect(textMenu,0,20,220,156);
     textMenu->ownItems=true; // the menu will handle items destroy
     textMenu->onClick=(MENU_CLICKEVENT)menu_onClick;
 
@@ -191,10 +187,7 @@ void buildWidgetMenu(){
     char * s;
 
     widgetMenu=widgetMenu_create();
-    widgetMenu->x=0;
-    widgetMenu->y=20;
-    widgetMenu->width=220;
-    widgetMenu->height=156;
+    widgetMenu->setRect(widgetMenu,0,20,220,156);
     widgetMenu->ownItems=true; // the menu will handle items destroy
     widgetMenu->onClick=(MENU_CLICKEVENT)widgetMenu_onClick;
 
@@ -231,12 +224,18 @@ void buildWidgetMenu(){
     widgetMenu->addItem(widgetMenu,mih);
 
     mi=widgetMenuItem_create();
-    mi->caption="SiconMenuple widgetMenuItem example";
+    mi->caption="Simple widgetMenuItem example";
     mi->widgetWidth=0;
     widgetMenu->addItem(widgetMenu,mi);
 
     mi=widgetMenuItem_create();
     mi->caption="(can be used for onClick evts)";
+    mi->widgetWidth=0;
+    widgetMenu->addItem(widgetMenu,mi);
+
+    mi=widgetMenuItem_create();
+    mi->caption="This item can't be selected";
+    mi->canFocus=false;
     mi->widgetWidth=0;
     widgetMenu->addItem(widgetMenu,mi);
 
@@ -273,10 +272,7 @@ void buildIconMenu(){
                     icon_load("browser_icon.ico")->bmap_data};
 
     iconMenu=iconMenu_create();
-    iconMenu->x=0;
-    iconMenu->y=20;
-    iconMenu->width=220;
-    iconMenu->height=156;
+    iconMenu->setRect(iconMenu,0,20,220,156);
     iconMenu->itemWidth=52;
     iconMenu->itemHeight=64;
     iconMenu->ownItems=true; // the menu will handle items destroy
@@ -317,17 +313,11 @@ void buildWidgetList(){
     LABEL l;
 
     widgetList=widgetList_create();
-    widgetList->x=0;
-    widgetList->y=20;
-    widgetList->width=220;
-    widgetList->height=156;
+    widgetList->setRect(widgetList,0,20,220,156);
     widgetList->ownWidgets=true; // the list will handle items destroy
 
     l=label_create();
-    l->x=0;
-    l->y=25;
-    l->width=220;
-    l->height=13;
+    l->setRect(l,0,25,220,13);
     l->font=STD8X13;
     l->alignment=LA_CENTER;
     l->foreColor=COLOR_RED;
@@ -335,49 +325,34 @@ void buildWidgetList(){
     widgetList->addWidget(widgetList,l);
 
     l=label_create();
-    l->x=0;
-    l->y=40;
-    l->width=220;
-    l->height=6;
+    l->setRect(l,0,40,220,6);
     l->font=STD4X6;
     l->foreColor=COLOR_GREEN;
     l->caption="handles widgets focus, F1/F2: change focus, F3: quit";
     widgetList->addWidget(widgetList,l);
 
     b=button_create();
-    b->x=10;
-    b->y=155;
-    b->width=100;
-    b->height=15;
+    b->setRect(b,10,155,100,15);
     b->focusPosition=5;
     b->onClick=(BUTTON_CLICKEVENT)menuDemoButton_onClick;
     b->caption="Go to menu demo";
     widgetList->addWidget(widgetList,b);
 
     c=checkbox_create();
-    c->x=10;
-    c->y=55;
-    c->width=150;
-    c->height=15;
+    c->setRect(c,10,55,150,15);
     c->focusPosition=1;
     c->caption="Example checkbox";
     widgetList->addWidget(widgetList,c);
 
     t=trackbar_create();
-    t->x=10;
-    t->y=75;
-    t->width=150;
-    t->height=15;
+    t->setRect(t,10,75,150,15);
     t->focusPosition=2;
     t->numTicks=7;
     t->minimum=-10;
     widgetList->addWidget(widgetList,t);
 
     h=chooser_create();
-    h->x=10;
-    h->y=95;
-    h->width=150;
-    h->height=15;
+    h->setRect(h,10,95,150,15);
     h->focusPosition=3;
     h->items=chooser_items;
     h->itemCount=6;
@@ -385,10 +360,7 @@ void buildWidgetList(){
     widgetList->addWidget(widgetList,h);
 
     b=button_create();
-    b->x=10;
-    b->y=115;
-    b->width=100;
-    b->height=15;
+    b->setRect(b,10,115,100,15);
     b->focusPosition=4;
     b->onClick=(BUTTON_CLICKEVENT)exampleButton_onClick;
     b->caption="Example button";
@@ -399,13 +371,11 @@ void buildWidgetList(){
 }
 
 void widgetListHandleEvents(){
-    int eventHandler;
     int event;
 
-    // draw
+    // initial paint
     widgetList->paint(widgetList);
 
-    eventHandler = evt_getHandler(ALL_CLASS);
     do{
         event=evt_getStatus(eventHandler);
         if (!event) continue; // no new events
@@ -424,19 +394,15 @@ void widgetListHandleEvents(){
 
     }while(event!=BTN_F3 && !useMenuHandler);
 
-    evt_freeHandler(eventHandler);
-
     wantQuit=!useMenuHandler;
 }
 
 void mainMenuHandleEvents(){
-    int eventHandler;
     int event;
 
-    // draw
+    // intial paint
     menuList->focusedWidget->paint(menuList->focusedWidget);
 
-    eventHandler = evt_getHandler(ALL_CLASS);
     do{
         event=evt_getStatus(eventHandler);
         if (!event) continue; // no new events
@@ -444,8 +410,6 @@ void mainMenuHandleEvents(){
         menuList->handleEvent(menuList,event);
 
     }while(event!=BTN_F3 && useMenuHandler);
-
-    evt_freeHandler(eventHandler);
 
     useMenuHandler=false;
 }
@@ -455,6 +419,8 @@ int app_main(void)
 {
     gfx_openGraphics();
     gfx_clearScreen(COLOR_GREY);
+
+    eventHandler = evt_getHandler(BTN_CLASS|GUI_CLASS);
 
     // build menus & all
 
@@ -479,6 +445,8 @@ int app_main(void)
     }
 
     gfx_clearScreen(COLOR_GREY);
+
+    evt_freeHandler(eventHandler);
 
     menuList->destroy(menuList);
     widgetList->destroy(widgetList);

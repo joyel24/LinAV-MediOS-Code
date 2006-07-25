@@ -28,7 +28,9 @@ extern VirtualNES Vnes;
 extern uint32 nametables_switched;
 extern uint32 patterntables_switched;
 
+#ifndef __asmcpu__
 static nes6502_context _NEScontext;
+#endif
 
 
 uint32 num_8k_ROM_banks,num_16k_ROM_banks,num_32k_ROM_banks;

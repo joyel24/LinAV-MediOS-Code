@@ -2489,8 +2489,6 @@ end_execute:
 
 #else /* OPCODES_BY_FREQUENCY */
 
-static int nes6502_rare_op_execute(int remaining_cycles);
-
 /* Execute instructions until count expires
 **
 ** Returns the number of cycles *actually* executed, which will be
@@ -2506,9 +2504,6 @@ int nes6502_execute(int remaining_cycles)
    uint8 btemp, baddr; /* for macros */
    uint8 data;
 #endif
-   uint8 dum;
-   int ExKey;
-   uint8 chaine[256];
 
    /* flags */
    //uint8 n_flag, v_flag, b_flag;
@@ -2527,7 +2522,6 @@ int nes6502_execute(int remaining_cycles)
 #undef stack
    uint8*	ram_l   = ram;
    uint8*	stack_l = stack;
-   uint8**  mem_page = cpu.mem_page;
    uint8 (*read_func)(uint32 address) = cpu.read_handler->read_func;
    void (*write_func)(uint32 address, uint8 value) = cpu.write_handler->write_func;
 #define ram		ram_l
@@ -2588,22 +2582,6 @@ next_opcode:
 	  */
 //#pragma warning ( disable : 4101 )
 
- /////////////////////////////////////////
-/*   GpRectFill(NULL,&gpDraw[0],0,120,320,100,0);     
-   dum=*(uint8 *)PC;
-  PTR_TO_PC();
-   gm_sprintf((char*)chaine,"pc %04X op %02X %d",PC,dum,remaining_cycles);
-  PC_TO_PTR();
-   GpTextOut(NULL,&gpDraw[0],0,120,(char*)chaine,0xe0);
-   gm_sprintf((char*)chaine,"n=%d v=%d b=%d i=%d z=%d c=%d",n_flag, v_flag, b_flag,i_flag, z_flag, c_flag);
-   GpTextOut(NULL,&gpDraw[0],0,140,(char*)chaine,0xe0);
-   gm_sprintf((char*)chaine,"A=%d X=%d Y=%d S=%d bt=%d",A,X,Y,S,btemp);
-   GpTextOut(NULL,&gpDraw[0],0,160,(char*)chaine,0xe0);
-
-   do GpKeyGetEx(&ExKey);while (!ExKey);
-   do GpKeyGetEx(&ExKey); while (ExKey);*/
-	/////////////////////////////////////////   
-   //gpprintf(0,120,chaine,-1,0,0xe0);
    #ifdef __debug_op__
 	gm_sprintf(chaineDEB,"A=%02X X=%02X Y=%02X S=%02X\nPC=%04X opcode=%02X\np=%02X\n%02X %02X %02X %02X %02X %02X %02X %02X",
 	A,X,Y,S,PC-(uint32)last_bank_ptr,*(uint8 *)PC,COMBINE_FLAGS(),
@@ -3599,10 +3577,9 @@ void nes6502_nmi(void)
    /* flags */
    uint32 n_flag, v_flag, b_flag;
    uint32 i_flag, z_flag, c_flag;
-#undef stack 
+#undef stack
    uint8* stack_l = stack;
-   uint8** mem_page = cpu.mem_page;
-#define stack	stack_l 
+#define stack	stack_l
 
    if (FALSE == cpu.jammed)
    {
@@ -3626,9 +3603,8 @@ void nes6502_irq(void)
 			uint32  S, P;
 #undef stack
             uint8* stack_l = stack;
-			uint8** mem_page = cpu.mem_page;
 #define stack	stack_l
-			
+
 			PC = pcpu->pc_reg;
 			S  = pcpu->s_reg;
 			P  = pcpu->p_reg;
@@ -3677,9 +3653,8 @@ void nes6502_pending_irq(void)
 			uint32  S, P;
 #undef stack
             uint8* stack_l = stack;
-			uint8** mem_page = cpu.mem_page;
 #define stack	stack_l
-			
+
 			PC = pcpu->pc_reg;
 			S  = pcpu->s_reg;
 			P  = pcpu->p_reg;
@@ -3705,6 +3680,10 @@ void nes6502_pending_irq(void)
 
 /*
 ** $Log$
+** Revision 1.2  2006/05/23 20:44:21  sfxgligli
+** - fixes for min & max
+** - re-added dsp & osd irqs
+**
 ** Revision 1.1  2006/05/22 23:18:57  sfxgligli
 ** Adding aoNES (port of LittleJohnGP by yoyo)
 **

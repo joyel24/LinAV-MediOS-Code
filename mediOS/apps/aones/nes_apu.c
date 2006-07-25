@@ -1,4 +1,5 @@
 #include "medios.h"
+#include "aones.h"
 #include "unes.h"
 #include "nes_apu.h"
 

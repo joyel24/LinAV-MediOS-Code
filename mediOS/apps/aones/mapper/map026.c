@@ -144,7 +144,7 @@ static void map26_MemoryWrite(uint32 addr, uint8 data)
 		break;
 	}
 
-	addr = addr & 0xfffc | ((addr & 1) << 1) | ((addr & 2) >> 1);
+	addr = (addr & 0xfffc) | ((addr & 1) << 1) | ((addr & 2) >> 1);
 	//parent_NES->apu->ExWrite(addr, data);
 	//exsound ex_write(addr,data);
 }

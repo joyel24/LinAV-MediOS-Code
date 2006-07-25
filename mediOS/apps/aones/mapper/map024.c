@@ -35,7 +35,7 @@ static struct
    int latch, wait_state;
 } irq;
 
-static uint8 patch;
+//static uint8 patch;
 
 static void map24_init(void)
 {

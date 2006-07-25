@@ -187,7 +187,7 @@ SNSS_RETURN_CODE SNSS_WriteFileHeader (SNSS_FILE *snssFile)
 /* general file manipulation functions */
 /**************************************************************************/
 SNSS_RETURN_CODE
-SNSS_OpenFile (SNSS_FILE **snssFile, const char *filename, SNSS_OPEN_MODE mode)
+SNSS_OpenFile (SNSS_FILE **snssFile, char *filename, SNSS_OPEN_MODE mode)
 {
    *snssFile = (SNSS_FILE*)malloc(sizeof(SNSS_FILE));
    if (NULL == *snssFile)
@@ -801,6 +801,9 @@ SNSS_WriteBlock (SNSS_FILE *snssFile, SNSS_BLOCK_TYPE blockType)
 
 /*
 ** $Log$
+** Revision 1.3  2006/06/13 20:07:48  sfxgligli
+** aoNes update
+**
 ** Revision 1.2  2006/05/23 20:44:21  sfxgligli
 ** - fixes for min & max
 ** - re-added dsp & osd irqs

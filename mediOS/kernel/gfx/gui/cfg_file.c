@@ -47,12 +47,12 @@ static CFG_ITEM * cfg_getItem(char * name){
 }
 
 static CFG_ITEM * cfg_addItem(){
-    cfg_itemCount++;
-
     if(cfg_items==NULL){
         printk("[cfg] cfg_items not allocated !\n");
         return NULL;
     }
+
+    cfg_itemCount++;
 
     cfg_items=realloc(cfg_items,cfg_itemCount*sizeof(CFG_ITEM));
 
@@ -178,6 +178,8 @@ bool cfg_readFile(char * filename){
         i++;
         ii++;
     }while(i<size);
+
+    free(data);
 
     return true;
 }

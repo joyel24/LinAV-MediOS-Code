@@ -13,6 +13,7 @@
 #include <gui/menu.h>
 
 #include <sys_def/stddef.h>
+#include <sys_def/string.h>
 
 #include <kernel/kernel.h>
 #include <kernel/malloc.h>
@@ -88,6 +89,7 @@ void menu_init(MENU m){
     m->addItem=(MENU_ITEMADDER)menu_addItem;
     m->clearItems=(MENU_ITEMSCLEARER)menu_clearItems;
     m->indexOf=(MENU_INDEXGETTER)menu_indexOf;
+    m->indexFromCaption=(MENU_INDEXFROMCAPTIONGETTER)menu_indexFromCaption;
 
     // properties
     m->items=malloc(0); // will be realloced as items are added
@@ -176,7 +178,7 @@ void menu_addItem(MENU m, MENU_ITEM item){
     m->items[m->itemCount-1]=item;
 
     // we have now at least 1 item -> indicies can now be valid
-    m->index=MAX(0,m->index);
+    if (m->index<0 && item->canFocus) m->index=m->itemCount-1; // don't set a non focusable item as the active one
     m->topIndex=MAX(0,m->topIndex);
 }
 
@@ -200,6 +202,15 @@ int menu_indexOf(MENU m, MENU_ITEM item){
     int i;
     for(i=0;i<m->itemCount;++i){
         if(m->items[i]==item) return i;
+    }
+    // item not found
+    return -1;
+}
+
+int menu_indexFromCaption(MENU m, char * caption){
+    int i;
+    for(i=0;i<m->itemCount;++i){
+        if(!strcmp(m->items[i]->caption,caption)) return i;
     }
     // item not found
     return -1;

@@ -111,20 +111,12 @@ MED_RET_T dsp_loadProgramFromMemory (void* pDSPCode, int nSize)
 		sec_name[6] = psec->s_name[6];
 		sec_name[7] = psec->s_name[7];
 
-		if (!psec->s_size_lo)
-		{
-			printk ("[dsp] Skipping empty %s section...\n",
-				sec_name);
-			continue;
-		}
-
 		unsigned long nVirtAddress = psec->s_vaddr_lo/* + (((int)psec->s_page) << 16)*/;
 		unsigned long nSectSize    = psec->s_size_lo;
 
-		if (!nVirtAddress)
+		if (!nVirtAddress || !nSectSize)
 		{
-			printk ("[dsp] Skipping address 0 %s section...\n",
-				sec_name);
+			printk ("[dsp] Skipping invalid section...\n");
 			continue;
 		}
 

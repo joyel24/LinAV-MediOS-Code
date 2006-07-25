@@ -163,11 +163,11 @@ typedef struct {
   	
   	uint32  crc;
   	uint32  crc_all;
-  	
+/*
   	char  country[8];
   	char  publisher[128];
   	char  date[16];
-
+*/
   	uint8 ppu_mirror0;
   	uint8 ppu_mirror1;
   	uint8 ppu_mirror2;
@@ -185,8 +185,9 @@ typedef struct {
 
 /* gli */
   	byte *Vbuffer2;
-    uint16 *LineOffset;
+    uint32 *LineOffset;
     uint16 *SndRegs;
+    bool CustomCpuCycle;
 } NesVar;
 
 
@@ -247,9 +248,6 @@ typedef struct {
 	char  dummy[512-256-16];
 } config_data;
 
-long JoyPad1_State(void);
-long JoyPad2_State(void);
-
 /*****************************************************
   Send an error msg
 *****************************************************/
@@ -267,19 +265,16 @@ char Init_NES(char *RomName);
 *****************************************************/
 char Close_ROM(int b);
 
-
-
-int InitSound(void);
-void InitDisplay(void);
-void InitGUI(void);
-void ljZ_PauseAudio(Uint8 pause);
-void gpwait(int l);
-
-byte emulate_one_frame(void);
-
 void LaunchEmu();
 
 void CloseAll();
+
+void Reset_NES();
+
+int LoadStateSnss(byte b);
+int SaveStateSnss(byte b);
+void LoadSaveSRAM(bool save);
+
 
 typedef struct {uint32 __r9;uint32 __r10;} reg_sys_t;
 

@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/int_timer.h
 *
 *   MediOS project
@@ -20,7 +20,7 @@
 #define HD_TIMER              1
 #define HALT_TIMER            2
 
-#define MODE_ENABLE           0
-#define MODE_DISABLE          1
+#define MODE_ENABLE           1
+#define MODE_DISABLE          0
 
 #endif

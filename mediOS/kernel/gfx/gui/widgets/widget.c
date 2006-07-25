@@ -38,6 +38,7 @@ void widget_init(WIDGET w){
     w->destroy=(WIDGET_DESTROYER)widget_destroy;
     w->handleEvent=(WIDGET_EVENTHANDLER)widget_handleEvent;
     w->paint=(WIDGET_PAINTHANDLER)widget_paint;
+    w->setRect=(WIDGET_RECTSETTER)widget_setRect;
 
     // properties
     w->x=0;
@@ -75,4 +76,11 @@ void widget_paint(WIDGET w){
     if(w->clearBackground){
         gfx_fillRect(w->backColor,w->x,w->y,w->width,w->height);
     }
+}
+
+void widget_setRect(WIDGET w,int x,int y,int width,int height){
+    w->x=x;
+    w->y=y;
+    w->width=width;
+    w->height=height;
 }

@@ -137,13 +137,8 @@ void con_screenUpdate(){
 
     if(con_screenEnd>con_lastUpdateScreenEnd){ // moved up or down?
       // find the buffer position corresponding to the screen top after the scroll
-      y=con_lastUpdateEndY;
-      topPos=con_screenEnd;
-      do{
-        prevTopPos=topPos;
-        topPos=con_nextLineEnd(topPos,true);
-        y-=CON_FONT->height;
-      }while(y>=0 && topPos<prevTopPos);
+      // in the worst case ie: screen totally filled + CRLF on each line
+      topPos=con_screenEnd-((con_numLines+2)*con_numCols);
 
       // if there's more than 1 screen to scroll, just scroll enough to redraw the screen
       if (con_lastUpdateEndY>=CON_LAST_LINE_Y() && pos<topPos){

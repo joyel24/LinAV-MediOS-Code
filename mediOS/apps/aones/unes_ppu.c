@@ -10,6 +10,7 @@
 ************************************************************/
 
 #include "medios.h"
+#include "aones.h"
 
 
 #include "datatypes.h"
@@ -1165,7 +1166,6 @@ __IRAM_CODE void ppu_lazy_scanlineNTSC()
         if(ppu_Latch_RenderScreen) ppu_Latch_RenderScreen(0,0);
         ppu_cacheOAM0();
       }
-
    }
    else if (ppuScanline == 241)
    {

@@ -654,7 +654,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* general file manipulation routines */
-SNSS_RETURN_CODE SNSS_OpenFile (SNSS_FILE **snssFile, const char *filename, 
+SNSS_RETURN_CODE SNSS_OpenFile (SNSS_FILE **snssFile, char *filename, 
                                 SNSS_OPEN_MODE mode);
 SNSS_RETURN_CODE SNSS_CloseFile (SNSS_FILE **snssFile);
 
@@ -678,6 +678,9 @@ const char *SNSS_GetErrorString (SNSS_RETURN_CODE code);
 
 /*
 ** $Log$
+** Revision 1.1  2006/05/22 23:18:55  sfxgligli
+** Adding aoNES (port of LittleJohnGP by yoyo)
+**
 ** Revision 2.1  2001/05/01 16:36:00  TAKEDA, tohisya
 ** add mapper infomations
 **

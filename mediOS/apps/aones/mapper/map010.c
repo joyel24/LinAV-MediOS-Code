@@ -168,11 +168,13 @@ static void map10_setstate(SnssMapperBlock *state)
 	map10_set_VROM_1000();
 }
 
+/*
 static map_memwrite map10_memwrite[] =
-{   
+{
    { 0x8000, 0xFFFF, map10_write },
    {     -1,     -1, NULL }
 };
+*/
 
 mapintf_t map10_intf =
 {

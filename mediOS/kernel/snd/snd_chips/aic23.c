@@ -78,10 +78,10 @@ void aic23_setOutputVolume(int volume,int channel){
   if (vol>AIC23_MAX_OUTPUT_VOLUME) vol=AIC23_MAX_OUTPUT_VOLUME;
 
   if(channel&AIC23_CHANNEL_LEFT){
-  	aic23_writeReg(AIC23_REG_LEFT_OUTPUT_VOLUME,AIC23_REG_OUTVOL_ZERO_CROSS_DETECT|vol);
+  	aic23_writeReg(AIC23_REG_LEFT_OUTPUT_VOLUME,vol);
   };
   if(channel&AIC23_CHANNEL_RIGHT){
-  	aic23_writeReg(AIC23_REG_RIGHT_OUTPUT_VOLUME,AIC23_REG_OUTVOL_ZERO_CROSS_DETECT|vol);
+  	aic23_writeReg(AIC23_REG_RIGHT_OUTPUT_VOLUME,vol);
   };
 }
 

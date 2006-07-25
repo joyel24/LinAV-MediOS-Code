@@ -238,6 +238,7 @@ static void map112_MemoryWrite(uint32 addr, uint8 data)
 	}
 }
 
+#if 0
 static void map112_HSync(uint32 scanline)
 {
 	if(irq_enabled)
@@ -257,6 +258,7 @@ static void map112_HSync(uint32 scanline)
 		}
 	}
 }
+#endif
 
 #define MAP112_ROM(ptr)  (((ptr)-mmc_getinfo()->var.prg_beg)  >> 13)
 #define MAP112_VROM(ptr) (((ptr)-mmc_getinfo()->var.chr_beg) >> 10)

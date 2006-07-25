@@ -8,7 +8,7 @@
 
 #include "medios.h"
 
-
+#include "aones.h"
 
 #include "unes.h"
 #include "unes_io.h"
@@ -16,11 +16,6 @@
 #include "unes_mapper.h"
 #include "nes_apu.h"
 
-//extern Mapper_Func mapfunc;
-
-extern VirtualNES Vnes;
-
-extern uint32 framecounter;
 extern uint32 debugison;
 
 extern char chaine[1024];
@@ -90,8 +85,8 @@ __IRAM_CODE void Wr6502(uint32 Addr, uint8 Value)
                             pad4_bitsnes = pad4_bits = *pad4;               */
                             Vnes.var.JoyPad1_BitIndex=0;
                             Vnes.var.JoyPad2_BitIndex=0;
-                            pad1_bits=JoyPad1_State();
-                            pad2_bits=JoyPad2_State();
+                            pad1_bits=emu_joypad1State();
+                            pad2_bits=emu_joypad2State();
                         }
                         break;
                     case 0x4017:
