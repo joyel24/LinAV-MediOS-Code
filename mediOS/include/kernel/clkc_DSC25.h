@@ -19,6 +19,7 @@
 #define CLKC_PLL1                      (CLKC_BASE + 0x0002)
 #define CLKC_PLL2                      (CLKC_BASE + 0x0004)
 #define CLKC_PLL_DIVIDER               (CLKC_BASE + 0x0008)
+#define CLKC_BYPASS                    (CLKC_BASE + 0x000e)
 #define CLKC_POWER0                    (CLKC_BASE + 0x0014)
 #define CLKC_POWER1                    (CLKC_BASE + 0x0016)
 
@@ -37,5 +38,8 @@
 #define CLKC_DIV_ARM_MASK              0x0003
 #define CLKC_DIV_DSP_MASK              0x0030
 #define CLKC_DIV_SDRAM_MASK            0x0300
+
+#define CLKC_BYP_ALL                   0x0007
+#define CLKC_BYP_NONE                  0x0000
 
 #endif

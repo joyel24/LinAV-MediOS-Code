@@ -20,6 +20,7 @@
 #define CLKC_SOURCE_SELECT             (CLKC_BASE + 0x0004)
 #define CLKC_PLL_SELECT                (CLKC_BASE + 0x0006)
 #define CLKC_PLL_DIVIDER               (CLKC_BASE + 0x0008)
+#define CLKC_BYPASS                    (CLKC_BASE + 0x000a)
 #define CLKC_POWER0                    (CLKC_BASE + 0x0010)
 #define CLKC_POWER1                    (CLKC_BASE + 0x0012)
 #define CLKC_POWER2                    (CLKC_BASE + 0x0014)
@@ -85,5 +86,8 @@
 #define CLKC_DIV_DSP_MASK              0x0030
 #define CLKC_DIV_SDRAM_MASK            0x0300
 #define CLKC_DIV_ACCEL_MASK            0x3000
+
+#define CLKC_BYP_ALL                   0x1111
+#define CLKC_BYP_NONE                  0x0000
 
 #endif

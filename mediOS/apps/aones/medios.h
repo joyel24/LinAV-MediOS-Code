@@ -46,11 +46,11 @@
 
 #define DEBUGS printf
 
-/*
-#undef __IRAM_CODE
-#define __IRAM_CODE
-#undef __IRAM_DATA
-#define __IRAM_DATA
-*/
+#ifdef DM320
+    #undef __IRAM_CODE
+    #define __IRAM_CODE
+    #undef __IRAM_DATA
+    #define __IRAM_DATA
+#endif
 
 #endif

@@ -90,10 +90,10 @@ __attribute__((section(".fwuncomp_code"))) void arch_reload_firmware(void){
     gfx_planeShow(BMAP1);
 
     // set default clock parameters (not reinitialized by the firmware)
-    clkc_setClockParameters(CLK_DSP,9,1,2);
     clkc_setClockParameters(CLK_ARM,15,2,2);
     clkc_setClockParameters(CLK_SDRAM,15,2,2);
     clkc_setClockParameters(CLK_ACCEL,15,2,1);
+    clkc_setClockParameters(CLK_DSP,9,1,2);
     outw(0x40e0,CLKC_SOURCE_SELECT); //restore uart & timer source select
 
     // uncompressing firmware

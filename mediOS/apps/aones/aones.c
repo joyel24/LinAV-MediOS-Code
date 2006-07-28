@@ -56,9 +56,9 @@ void clk_overclock(bool en){
         clkc_setClockFrequency(CLK_ARM,armFrequency*1000000);
     }else{
         // default params
-        clkc_setClockParameters(CLK_DSP,9,1,2);
         clkc_setClockParameters(CLK_ARM,15,2,2);
         clkc_setClockParameters(CLK_ACCEL,15,2,1);
+        clkc_setClockParameters(CLK_DSP,9,1,2);
     }
 #endif
 };
@@ -179,12 +179,16 @@ __IRAM_CODE void osd_interrupt(int irq,struct pt_regs * regs){
 }
 
 void snd_init(){
+#ifdef SOUND_USE_AIC23
     aic23_setSampleRate(SAMPLE_RATE);
     aic23_enableOutput(true);
+#endif
 }
 
 void snd_close(){
+#ifdef SOUND_USE_AIC23
     aic23_enableOutput(false);
+#endif
 }
 
 void emu_init()
@@ -313,6 +317,7 @@ void emu_run(){
 
 __IRAM_CODE void emu_handleVideoBuffer(){
 #ifdef SCREEN_USE_DSP
+
     byte * tmp;
     int i;
 
@@ -332,6 +337,7 @@ __IRAM_CODE void emu_handleVideoBuffer(){
 
     dsp_write32(&dspCom->inBufAddr,(uint32)Vnes.var.Vbuffer2);
     dspCom->inBufReady=1;
+
 #else
  #ifdef SCREEN_USE_RESIZE
     resize_execute();
@@ -478,7 +484,7 @@ int emu_frameCompleted()
 
     // handle frame skip
     Vnes.var.DrawCframe=(frameCount%(frameSkip+1))==0;
-    
+
     // handle autofire
     if(autoFire && frameCount%AUTOFIRE_INTERVAL==0) autoFirePressed=!autoFirePressed;
 
@@ -522,7 +528,7 @@ int app_main(){
     resize_init();
 #endif
 
-    // init hw resize
+    // set dsp video output
     dsp_write32(&dspCom->outBufAddr,(uint32)lj_curRenderingScreenPtr);
 
     // apply settings

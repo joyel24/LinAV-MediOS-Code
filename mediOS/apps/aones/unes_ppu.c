@@ -1210,7 +1210,7 @@ void ppu_scanlinePAL()
       else ppu_renderScanline0();            
       ppu_endScanline();
 
-      if (Vnes.var.DrawCframe) 
+      if (Vnes.var.DrawCframe)
       {
         if (Vnes.var.morethan8spr) 
         {

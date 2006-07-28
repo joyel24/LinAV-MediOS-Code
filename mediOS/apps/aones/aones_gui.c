@@ -314,7 +314,9 @@ void gui_applySettings(){
     armFrequency=advancedMenu->getTrackbar(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"CPU frequency(Mhz)"))->value;
     dspFrequency=advancedMenu->getTrackbar(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"DSP frequency(Mhz)"))->value;
 
+#ifdef SOUND_USE_AIC23
     aic23_setOutputVolume(vol+27,AIC23_CHANNEL_BOTH);
+#endif
     clk_overclock(true);
     outw((bl<<10)|0x03ff,CLKC_PWM1_HIGH);
     if(!Vnes.var.CustomCpuCycle) Vnes.var.cpucycle=cc;
@@ -347,7 +349,7 @@ void gui_welcomeScreen(){
     gfx_planeShow(BMAP1);
 
     gfx_clearScreen(COLOR_WHITE);
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y,       "aoNES v0.x");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y,       "aoNES v0.1");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "==========");
 
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "Port of LittleJohnGP by yoyo.");

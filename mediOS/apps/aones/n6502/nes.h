@@ -1,7 +1,12 @@
 #ifndef NES_H
 #define NES_H
 
-#define SECTION_FAST .section ".core"//.section emu.fast, "awx"
+#ifndef DM320
+    #define SECTION_FAST .section ".core"//.section emu.fast, "awx"
+#else
+    #define SECTION_FAST .section ".text"//.section emu.fast, "awx"
+#endif
+
 #define SECTION_SLOW .section ".text"//.section emu.slow, "awx"
 #define SECTION_HEAD .section ".text"//.section emu.head, "awx"
 
