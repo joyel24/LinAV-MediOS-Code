@@ -16,19 +16,28 @@
 #include <sys_def/stddef.h>
 #include <sys_def/types.h>
 
-#define RESIZE_INVERTVD() {outw(inw(CCDC_SETUP)^CCDC_STP_VDSYNC_NEGATIVE,CCDC_SETUP);}
-
-#if defined(DM270) || defined(DM320)
+#if defined(DM270)
+    #define RESIZE_INVERTVD() {outw(inw(CCDC_SETUP)^CCDC_STP_VDSYNC_NEGATIVE,CCDC_SETUP);}
     #define RESIZE_INVERTCCDCLK() {outw(inw(CLKC_SOURCE_SELECT)^CLKC_SRC_CCD_INVERT,CLKC_SOURCE_SELECT);}
+
+    #define RESIZE_PREVIEW_SETUP PREVIEW_STP_BURST_ALIGNED|PREVIEW_STP_INPUT_SDRAM|PREVIEW_STP_MODE_RESIZEONLY|PREVIEW_STP_CONTINUOUS
+
+#elif defined(DM320)
+    #define RESIZE_INVERTVD() {}
+    #define RESIZE_INVERTCCDCLK() {}
+
+    #define RESIZE_PREVIEW_SETUP PREVIEW_STP_BURST_ALIGNED|PREVIEW_STP_INPUT_SDRAM|PREVIEW_STP_MODE_RESIZEONLY|PREVIEW_STP_ONESHOT|PREVIEW_STP_VD_INTERNAL
+
 #else
+    #define RESIZE_INVERTVD() {outw(inw(CCDC_SETUP)^CCDC_STP_VDSYNC_NEGATIVE,CCDC_SETUP);}
     #warning no idea on how to simulate CCD clock on DSC21/25
     #define RESIZE_INVERTCCDCLK() {}
+
+    #define RESIZE_PREVIEW_SETUP PREVIEW_STP_BURST_ALIGNED|PREVIEW_STP_INPUT_SDRAM|PREVIEW_STP_MODE_RESIZEONLY|PREVIEW_STP_ONESHOT
+
 #endif
 
-#define RESIZE_ONESHOT 0
-#define RESIZE_CONTINUOUS 1
-
-void resize_setup(int inAddr,int inBufWidth,int inWidth,int inHeight,int outAddr,int outWidth,int outHeight,int mode);
+void resize_setup(int inAddr,int inBufWidth,int inWidth,int inHeight,int outAddr,int outWidth,int outHeight);
 void resize_execute();
 
 #endif

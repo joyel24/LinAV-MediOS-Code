@@ -42,9 +42,6 @@ void clkc_getClockParameters(int clock,int * m,int * n,int * div){
 void clkc_setClockParameters(int clock,int m,int n,int div){
     int addr;
 
-    // set all clocks to bypass during PLL changes
-    outw(CLKC_BYP_ALL,CLKC_BYPASS);
-
     // divider
     outw((inw(CLKC_PLL_DIVIDER)&~clkc_divMask[clock]) | (((div-1)<<clkc_divShift[clock])&clkc_divMask[clock]),CLKC_PLL_DIVIDER);
 
@@ -52,10 +49,6 @@ void clkc_setClockParameters(int clock,int m,int n,int div){
     addr=clkc_pllAddress[clkc_getPllNum(clock)];
 
     outw((((m-1)<<CLKC_PLL_M_SHIFT)&CLKC_PLL_M_MASK) | (((n-1)<<CLKC_PLL_N_SHIFT)&CLKC_PLL_N_MASK),addr);
-
-    // wait for the PLL to lock and restore all clocks
-    mdelay(1);
-    outw(CLKC_BYP_NONE,CLKC_BYPASS);
 }
 
 int clkc_getPllNum(int clock){

@@ -69,7 +69,7 @@ void resize_init(){
     op=(long)gfx_planeGetBufferOffset(VID1);
     ip=(long)lj_curRenderingScreenPtr+/*4*/10*NES_WIDTH*4;
 
-    resize_setup(ip,NES_WIDTH*2,NES_WIDTH*2,220,op,224*2,176,RESIZE_CONTINUOUS);
+    resize_setup(ip,NES_WIDTH*2,NES_WIDTH*2,220,op,224*2,176);
 }
 
 int t=0;
@@ -287,6 +287,11 @@ void display_init(){
     gfx_planeSetBufferOffset(VID1,lj_curRenderingScreenPtr);
     gfx_planeSetSize(VID1,NES_WIDTH,NES_PAL_HEIGHT,32);
 #endif
+
+#ifdef SCREEN_USE_DSP
+    // set dsp video output
+    dsp_write32(&dspCom->outBufAddr,(uint32)lj_curRenderingScreenPtr);
+#endif
 };
 
 void emu_loadRom(){
@@ -493,6 +498,7 @@ int emu_frameCompleted()
 
 
 int app_main(){
+
     // disable LCD & halt timer
     set_timer_status(LCD_TIMER,TIMER_MODE_BAT,MODE_DISABLE);
     set_timer_status(LCD_TIMER,TIMER_MODE_DC,MODE_DISABLE);
@@ -506,8 +512,10 @@ int app_main(){
     // init sound
     snd_init();
 
+#if defined(SCREEN_USE_DSP) || defined(SOUND_USE_DSP)
     // init dsp
     dsp_init();
+#endif
 
     // init graphics
     gfx_openGraphics();
@@ -527,9 +535,6 @@ int app_main(){
     // init hw resize
     resize_init();
 #endif
-
-    // set dsp video output
-    dsp_write32(&dspCom->outBufAddr,(uint32)lj_curRenderingScreenPtr);
 
     // apply settings
     gui_applySettings();

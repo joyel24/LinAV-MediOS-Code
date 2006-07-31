@@ -14,6 +14,10 @@
     #define SOUND_USE_AIC23
 #endif
 
+#ifdef GMINI402
+    #define SCREEN_USE_RESIZE
+#endif
+
 #define AONES_PATH "/aoNES/"
 #define SAVES_PATH "/aoNES/saves/"
 #define CFG_FILE_PATH "/aoNES/aoNES.cfg"

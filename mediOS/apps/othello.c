@@ -28,7 +28,7 @@ struct position cursor_pos={3,2};
 #define NB_CELL    8
 #define X_INI      10
 
-#ifdef GMINI4XX
+#if defined(GMINI4XX) || defined(GMINI402)
 #define CELL_SIZE  16
 #define NB_PIECE_Y 156
 #define Y_INI      ((240-((CELL_SIZE+1)*NB_CELL)-1)/2)-46

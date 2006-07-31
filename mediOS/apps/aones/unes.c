@@ -816,8 +816,10 @@ __IRAM_CODE inline uint8 emulate_one_frameNTSC(void)
             synccycles=0;
         }
 
+#ifdef SOUND_USE_DSP
         // for snd sync on dsp
         dsp_write32(&dspCom->cpuCurCycle,CPU_GET_CYCLES());
+#endif
 
         if (mapper->intf->HSync) mapper->intf->HSync(curscanline);
 

@@ -31,7 +31,7 @@ void resize_simulateVD(){
     RESIZE_INVERTCCDCLK();
 }
 
-void resize_setup(int inAddr,int inBufWidth,int inWidth,int inHeight,int outAddr,int outWidth,int outHeight,int mode){
+void resize_setup(int inAddr,int inBufWidth,int inWidth,int inHeight,int outAddr,int outWidth,int outHeight){
     int hrsz,vrsz;
     int realWidth,realHeight;
     int inOffset,outOffset;
@@ -39,13 +39,11 @@ void resize_setup(int inAddr,int inBufWidth,int inWidth,int inHeight,int outAddr
     inOffset=(inAddr-SDRAM_START)/32;
     outOffset=(outAddr-SDRAM_START)/32;
 
-    hrsz=(inWidth*16)/outWidth;
-    vrsz=(inHeight*16)/outHeight;
+    hrsz=(inWidth*PREVIEW_RESIZE_RATIO)/outWidth;
+    vrsz=(inHeight*PREVIEW_RESIZE_RATIO)/outHeight;
 
-    realWidth=(outWidth*hrsz)/16;
-    realHeight=(outHeight*vrsz)/16;
-
-    printk("%d %d %d %d\n",hrsz,vrsz,realWidth,realHeight);
+    realWidth=(outWidth*hrsz)/PREVIEW_RESIZE_RATIO;
+    realHeight=(outHeight*vrsz)/PREVIEW_RESIZE_RATIO;
 
     // setup CCD controller
     outw(0,CCDC_ENABLE);
@@ -55,11 +53,7 @@ void resize_setup(int inAddr,int inBufWidth,int inWidth,int inHeight,int outAddr
 
     // setup preview engine
     outw(0,PREVIEW_ENABLE);
-    outw(PREVIEW_STP_BURST_ALIGNED|
-         PREVIEW_STP_INPUT_SDRAM|
-         PREVIEW_STP_MODE_RESIZEONLY|
-         ((mode==RESIZE_ONESHOT)?PREVIEW_STP_ONESHOT:PREVIEW_STP_CONTINUOUS)
-         ,PREVIEW_SETUP);
+    outw(RESIZE_PREVIEW_SETUP,PREVIEW_SETUP);
 
     outw(inOffset>>16,PREVIEW_SDRAM_READ_HI);
     outw(inOffset&0xffff,PREVIEW_SDRAM_READ_LO);
