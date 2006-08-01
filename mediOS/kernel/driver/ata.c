@@ -110,7 +110,7 @@ int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_
     
     if(((unsigned int)(data) < SDRAM_START) && use_dma==ATA_WITH_DMA)
     {
-        printk("Destination buffer not in SDRAM => no DMA\n");    
+        //printk("Destination buffer not in SDRAM => no DMA\n");    
         use_dma=ATA_NO_DMA;
     }
 

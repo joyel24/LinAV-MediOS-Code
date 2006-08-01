@@ -825,12 +825,13 @@ MED_RET_T fat_readdir(struct fat_entry * dir,struct fat_direntry * entry)
                     //printk("VOL ID => loop\n");
                     continue;
                 }
-                if((entry->name[0]=='.' && entry->name[1]=='\0') ||
+                
+                /*if((entry->name[0]=='.' && entry->name[1]=='\0') ||
                     (entry->name[0]=='.' && entry->name[1]=='.' && entry->name[2]=='\0'))
                 {
                     //printk("empty name or dot => loop\n");
                     continue;
-                }
+                }*/
                 if ( longs )
                 {
                     int j,l=0;
@@ -1450,6 +1451,7 @@ MED_RET_T fat_createDir(struct vfs_pathname *  name,DIR * dir)
     memset(new_node,0,sizeof(struct vfs_node));
     vfs_nodeInitChild(NULL,name,new_node,VFS_TYPE_DIR);
     new_node->custom_data = new_dir;
+    new_node->dir_loaded = 1;
     new_dir->node=new_node;
     VFS_PRINT("[fat_createDir] new_node\n");
     
