@@ -301,6 +301,11 @@ MED_RET_T fat_addDirEntry(struct vfs_node * dir_node,struct vfs_node * file_node
             entries_needed++;
     }
 
+#warning need something to deal with file mode
+    file_entry->attr = 0;    
+    if(is_directory)
+        file_entry->attr=FAT_ATTR_DIRECTORY;
+    
  restart:
     firstentry = 0;
 
@@ -511,7 +516,9 @@ MED_RET_T fat_updateShortEntry(struct vfs_node * file, int size, int attr)
     ret_val = fat_readWrite(dir_entry, 1, buf, true);
     if (ret_val < 1)
         return ret_val;
-
+        
+    file_entry->attr=attr;
+    
     return MED_OK;
 }
 
@@ -928,12 +935,6 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
 
         VFS_PRINT("[LOAD Dir] ok we have: %s (%d)\n",entry->name,current_dir->entryN-1);
 
-        if ( entry->attr == FAT_ATTR_DIRECTORY )
-            new_node->type=VFS_TYPE_DIR;
-        else
-            new_node->type=VFS_TYPE_FILE;
-
-
         new_entry->size = entry->filesize;
         new_entry->attr = entry->attr;
         new_entry->firstcluster=new_entry->lastcluster=new_node->storage_location = entry->firstcluster;
@@ -942,7 +943,8 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
         new_entry->dirEntryNum = current_dir->entryN-1;
         new_entry->nbDirEntries= current_dir->entryCount;
 
-        vfs_nodeInitChild(parent_node,NULL,new_node);
+        vfs_nodeInitChild(parent_node,NULL,new_node,
+            entry->attr==FAT_ATTR_DIRECTORY?VFS_TYPE_DIR:VFS_TYPE_FILE);
 
         new_node->name.str = entry->name;
         new_node->name.length = strlen(new_node->name.str);
@@ -1446,7 +1448,7 @@ MED_RET_T fat_createDir(struct vfs_pathname *  name,DIR * dir)
         return -MED_ENOMEM;
     }
     memset(new_node,0,sizeof(struct vfs_node));
-    vfs_nodeInitChild(NULL,name,new_node);
+    vfs_nodeInitChild(NULL,name,new_node,VFS_TYPE_DIR);
     new_node->custom_data = new_dir;
     new_dir->node=new_node;
     VFS_PRINT("[fat_createDir] new_node\n");
@@ -1461,7 +1463,7 @@ MED_RET_T fat_createDir(struct vfs_pathname *  name,DIR * dir)
     }
     dot_name.length = 1;
     dot_name.str=".";
-    vfs_nodeInitChild(new_node,&dot_name,dot_node);
+    vfs_nodeInitChild(new_node,&dot_name,dot_node,VFS_TYPE_DIR);
     dot_dir = (struct fat_entry*)malloc(sizeof(struct fat_entry));
     memset(dot_dir, 0, sizeof(struct fat_entry));
     dot_node->custom_data = dot_dir;
@@ -1481,7 +1483,7 @@ MED_RET_T fat_createDir(struct vfs_pathname *  name,DIR * dir)
     }
     dot_name.length = 2;
     dot_name.str="..";
-    vfs_nodeInitChild(new_node,&dot_name,dotdot_node);
+    vfs_nodeInitChild(new_node,&dot_name,dotdot_node,VFS_TYPE_DIR);
     dotdot_dir = (struct fat_entry*)malloc(sizeof(struct fat_entry));
     memset(dotdot_dir, 0, sizeof(struct fat_entry));
     dotdot_node->custom_data = dotdot_dir;
@@ -1596,7 +1598,6 @@ error_exit:
 }
 
 MED_RET_T fat_mvFileDir(struct vfs_node * opened_file,struct vfs_node * dir,struct vfs_pathname * newName)
-//int fat_rename(struct fat_file* file,struct fat_dir* dir,const unsigned char* newname,int size,int attr)
 {
     MED_RET_T ret_val;    
     struct vfs_node * new_node;
@@ -1615,7 +1616,7 @@ MED_RET_T fat_mvFileDir(struct vfs_node * opened_file,struct vfs_node * dir,stru
     memcpy(new_node,opened_file,sizeof(struct vfs_node));
     new_node->siblings_prev=new_node->siblings_next=NULL;
     new_node->opened=0;    
-    vfs_nodeInitChild(dir,newName,new_node);
+    vfs_nodeInitChild(dir,newName,new_node,opened_file->type);
     new_node->ref_cnt=opened_file->ref_cnt-1;
     new_entry = (struct fat_entry *)malloc(sizeof(struct fat_entry));
     if(!new_entry)

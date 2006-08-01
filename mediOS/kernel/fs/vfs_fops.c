@@ -100,8 +100,7 @@ int open(char * name,int flags)
             }
 
             memset(new_node,0x0,sizeof(struct  vfs_node));
-            new_node->type=VFS_TYPE_FILE;
-            ret_val = vfs_nodeInitChild(fd,&path,new_node);
+            ret_val = vfs_nodeInitChild(fd,&path,new_node,VFS_TYPE_FILE);
             if(ret_val!=MED_OK)
             {
                 printk("Error in initChild (err=%d)\n",-ret_val);

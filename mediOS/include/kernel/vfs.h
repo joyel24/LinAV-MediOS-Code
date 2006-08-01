@@ -14,7 +14,6 @@
 #ifndef __VFS_H
 #define __VFS_H
 
-
 //#define DEBUG_VFS
 
 #ifdef DEBUG_VFS

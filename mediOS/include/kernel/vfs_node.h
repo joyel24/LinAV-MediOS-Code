@@ -22,7 +22,6 @@ typedef struct vfs_node DIR;
 
 #include <sys_def/stdfs.h>
 
-
 #define FILE_WRITE(FLAG)  ((FLAG) & (O_RDWR | O_WRONLY))
 #define FILE_TRUNC(FLAG)  ((FLAG) & (O_TRUNC))
 #define FILE_CREATE(FLAG) ((FLAG) & (O_CREAT))
@@ -77,7 +76,8 @@ struct vfs_node {
 void vfs_nodePrintTree(struct vfs_node *node,int level);
 MED_RET_T vfs_nodeInitChild(struct vfs_node * parent,
                 struct  vfs_pathname * name,
-                struct vfs_node * node);
+                struct vfs_node * node,
+                vfs_node_type type);
 MED_RET_T vfs_nodeAddChild(struct vfs_node * parent, struct vfs_node * child);
 MED_RET_T vfs_nodeRef(struct vfs_node * node);
 MED_RET_T vfs_nodeLookup(struct  vfs_pathname * path,

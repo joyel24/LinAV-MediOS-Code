@@ -68,12 +68,7 @@ void print_boot_info(void)
     tmr_print();
 }
 
-extern int endOfList;
-
-#define WAVE_PERIOD ((volatile unsigned short *)0x40100)
-#define DEBUG_MSG_STATE ((volatile unsigned short *)0x40102)
-#define DEBUG_MSG_TEXT  ((short *)0x40104)
-
+#if 0
 #include <kernel/clkc.h>
 
 void tst_fct(void){
@@ -103,6 +98,42 @@ void tst_fct(void){
     }
 
     reload_firmware();
+}
+#endif
+
+void tst_fct(void)
+{
+    DIR * dir_ptr;
+    struct dirent * dir_entry;
+    int i=0;
+    mkdir("/testd",0);
+    vfs_rootPrint();
+    mkdir("/testd/testa",0);
+    vfs_rootPrint();
+    
+    /*dir_ptr=opendir("/");
+    if(!dir_ptr)
+    {
+        printk("Error opening root folder\n");
+        return;
+    }
+    while((dir_entry=readdir(dir_ptr))!=NULL)
+    {
+        printk("%d:%s: %s\n",i++,(dir_entry->attribute&ATTR_DIRECTORY)!=0?"folder":"file",dir_entry->d_name);
+    }
+    closedir(dir_ptr);*/
+    printk("opening testd\n");
+    dir_ptr=opendir("/testd");
+    if(!dir_ptr)
+    {
+        printk("Error opening folder\n");
+        return;
+    }
+    while((dir_entry=readdir(dir_ptr))!=NULL)
+    {
+        printk("%d:%s: %s\n",i++,(dir_entry->attribute&ATTR_DIRECTORY)!=0?"folder":"file",dir_entry->d_name);
+    }
+    closedir(dir_ptr);
 }
 
 void kernel_start (void)

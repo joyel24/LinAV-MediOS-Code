@@ -62,7 +62,8 @@ void vfs_nodePrintTree(struct vfs_node *node,int level)
 
 MED_RET_T vfs_nodeInitChild(struct vfs_node * parent,
                 struct  vfs_pathname * name,
-                struct vfs_node * node)
+                struct vfs_node * node,
+                vfs_node_type type)
 {
     /*allocate space for the name*/
     if(name && name->length>0)
@@ -81,7 +82,8 @@ MED_RET_T vfs_nodeInitChild(struct vfs_node * parent,
     }
 
     node->ref_cnt = 0;
-
+    node->type = type;
+    
     vfs_nodeAddChild(parent,node);
 
     return MED_OK;

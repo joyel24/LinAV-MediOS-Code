@@ -31,7 +31,8 @@ MED_RET_T mkdir(char *name, int mode)
     struct vfs_pathname dirName;
 
     char namecopy[MAX_PATH];
-
+    char namecopy2[MAX_PATH];
+    
     struct dirent *entry;
     MED_RET_T ret_val;
 
@@ -49,6 +50,8 @@ MED_RET_T mkdir(char *name, int mode)
         return -MED_EINVAL;
     }
 
+    vfs_pathNameDup(&path,&path,namecopy2);
+    
     /* check for an ending '/' */
 
    if(path.str[path.length-1] == '/')
