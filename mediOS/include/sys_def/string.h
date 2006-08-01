@@ -20,8 +20,7 @@
 #include <sys_def/types.h>	/* for size_t */
 #include <sys_def/stddef.h>	/* for NULL */
 
-
-extern char * ___strtok;
+//extern char * ___strtok;
 
 #define    toLower(chr)  ((chr>64 && chr<91)?chr+32:chr)
 

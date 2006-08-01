@@ -13,11 +13,7 @@
 #include <sys_def/ctype.h>
 #include <sys_def/string.h>
 
-#ifdef BUILD_LIB
-#include <sys_def/malloc.h>
-#else
 #include <kernel/malloc.h>
-#endif
 
 #if 0
 #include <dma.h>

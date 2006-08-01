@@ -9,7 +9,6 @@ all: builddir subdirs
 
 force: clean all        
 
-
 clean:  clean-subdirs
 	@echo '-----   cleaining kernel'
 	@rm -f *.o *.bak *~ build/*.o $(TARGET)

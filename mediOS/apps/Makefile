@@ -1,8 +1,6 @@
 include ../Makefile.conf
 
-
 ASFLAGS  += -I../include
-
 GCCFLAGS += -I../include
 
 LIBS = ../lib/libmedios.a
