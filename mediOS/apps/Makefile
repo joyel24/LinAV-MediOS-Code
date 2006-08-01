@@ -19,7 +19,10 @@ test: test.o
 	@$(LD) -o test.med test.o $(LDFLAGS)
 #	@$(ELF2FLT) -o test.grv test.elf
 #	@rm -f .elf *.gdb *.elf2flt
-        
+  
+uidemo: uidemo.o
+	@$(LD) -o uidemo.med uidemo.o $(LDFLAGS)
+      
 $(LIBS):
 	@make -C ../kernel --no-print-directory lib_medios
 

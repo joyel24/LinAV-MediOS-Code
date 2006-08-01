@@ -48,8 +48,8 @@ void msgBoxEvtHandler(int evt_hanlder)
     char evt=0;
     while(!stopBoxLoop)
     {
-        evt = evt_getHandler(evt_hanlder);
-        if(!evt)
+        evt = evt_getStatus(evt_hanlder);
+        if(evt==NO_EVENT)
             continue;
         
         switch(evt)
