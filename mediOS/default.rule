@@ -31,21 +31,26 @@ clean-subdirs:
 	@$(AS) $(ASFLAGS) -o $@ $<
 
 ifeq ("$(TARGET_DEVICE)","GMINI4XX")        
-%.wav: %.bin tools/bin2wav/bin2wav
+%.wav: %.bin
+	@make -C tools/bin2exploit/ -s 400fw2110wav.tpl
 	@echo "[$@]"
-	@tools/bin2wav/bin2wav $< tools/bin2wav/400loader.bin.wav $@
-	@echo "End"
+	@cp tools/bin2exploit/400fw2110wav.tpl $@
+	@dd if=$< of=$@ bs=39936 seek=1 conv=notrunc 2> /dev/null
 else
 %.wav:
-	@echo "End"
+	
 endif
 
 ifeq ("$(TARGET_DEVICE)","GMINI402")        
-%.avi: %.bin tools/bin2avi/bin2avi
+%.avi: %.bin
+	@make -C tools/bin2exploit/ -s 402fw1311avi.tpl
+	@make -C tools/bin2exploit/ -s 402ccfw1311avi.tpl
 	@echo "[$@]"
-	@tools/bin2avi/bin2avi $< tools/bin2avi/402loader.bin.avi $@ 2399744
-	@echo "End"
+	@cp tools/bin2exploit/402fw1311avi.tpl $@
+	@cp tools/bin2exploit/402ccfw1311avi.tpl cc_$@
+	@dd if=$< of=$@ bs=2399744 seek=1 conv=notrunc 2> /dev/null
+	@dd if=$< of=cc_$@ bs=2245632 seek=1 conv=notrunc 2> /dev/null
 else
 %.avi:
-	@echo "End"
+	
 endif

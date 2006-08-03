@@ -18,12 +18,6 @@ force: clean all
 mk_api_file:
 	@make -C tools/api_files/ --no-print-directory
 
-tools/bin2wav/bin2wav:        
-	@make -C tools/bin2wav/ --no-print-directory
-	
-tools/bin2avi/bin2avi:        
-	@make -C tools/bin2avi/ --no-print-directory
-
 incdir:
 	@make -C include/kernel/target --no-print-directory incdir
 
