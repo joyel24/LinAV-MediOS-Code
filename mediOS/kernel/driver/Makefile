@@ -10,7 +10,7 @@ ifeq ("$(CHIP_TYPE)","DM270")
 endif
 
 ifeq ("$(CHIP_TYPE)","DM320")
-	OBJS += clkc_DM270.o
+	OBJS += clkc_DM320.o
 endif
 
 ifeq ("$(CHIP_TYPE)","DSC21")

@@ -15,6 +15,8 @@
 #endif
 
 #ifdef GMINI402
+    #define GMINI_OVERCLOCKING
+
     #define SCREEN_USE_RESIZE
 #endif
 

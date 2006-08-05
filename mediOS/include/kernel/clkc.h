@@ -16,8 +16,10 @@
 #include <sys_def/stddef.h>
 #include <sys_def/types.h>
 
-#if defined(DM270) || defined(DM320)
+#if defined(DM270)
     #include <kernel/clkc_DM270.h>
+#elif defined(DM320)
+    #include <kernel/clkc_DM320.h>
 #elif defined(DSC25)
     #include <kernel/clkc_DSC25.h>
 #elif defined(DSC21)

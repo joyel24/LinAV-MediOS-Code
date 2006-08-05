@@ -318,7 +318,12 @@ void gui_applySettings(){
     aic23_setOutputVolume(vol+27,AIC23_CHANNEL_BOTH);
 #endif
     clk_overclock(true);
-    outw((bl<<10)|0x03ff,CLKC_PWM1_HIGH);
+#ifdef GMINI402
+    outw((bl<<10)|0x03ff,CLKC_PWM0_HIGH); // Gmini402
+#endif
+#ifdef GMINI4XX
+    outw((bl<<10)|0x03ff,CLKC_PWM1_HIGH); // Gmini400
+#endif
     if(!Vnes.var.CustomCpuCycle) Vnes.var.cpucycle=cc;
 }
 
