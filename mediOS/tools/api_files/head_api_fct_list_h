@@ -16,4 +16,7 @@
 #include <sys_def/stddef.h>
 #include <kernel/swi.h>
 
+/* needed for ctype pointeur def */
+#include <sys_def/ctype.h>
+
 /* include needed by api functions */

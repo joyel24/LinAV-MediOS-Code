@@ -152,3 +152,7 @@ int    # vsprintf                  # char *buf, const char *fmt, va_list args
 int    # sprintf                   # char * buf, const char *fmt, ...
 int    # vsscanf                   # const char * buf, const char * fmt, va_list args
 int    # sscanf                    # const char * buf, const char * fmt, ...
+
+#k_inc#sys_def/random.h
+void   # srand                     # unsigned int seed
+int    # rand                      # void

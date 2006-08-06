@@ -28,13 +28,15 @@
 #include <kernel/buttons.h>
 #include <kernel/timer.h>
 #include <kernel/delay.h>
+#include <sys_def/string.h>
+#include <sys_def/random.h>
 #else
 #include <api.h>
 #include <sys_def/malloc.h>
 #endif
 
 #include <sys_def/section_types.h>
-
+#include <sys_def/stddef.h>
 
 #define IS_LITTLE_ENDIAN
 

@@ -10,7 +10,6 @@
 * KIND, either express of implied.
 *
 */
-#include <sys_def/string.h>
 #include <sys_def/colordef.h>
 #include <sys_def/font.h>
 

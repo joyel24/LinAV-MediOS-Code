@@ -1,35 +1,25 @@
-include ../../Makefile.conf
+include $(MEDIOS_SRC_PATH)/Makefile.conf
 
-ASFLAGS  += -I../../include
-GCCFLAGS += -I../../include
-
-OBJS = graphics_32.o graphics.o resize.o
+SRC = graphics_32.c graphics.c resize.c
 
 ifeq ("$(CHIP_TYPE)","DSC21")
-OBJS += osd_DSC21.o graphics_8_DSC21.o
+SRC += osd_DSC21.c graphics_8_DSC21.c
 endif
 
 ifeq ("$(CHIP_TYPE)","DSC25")
-OBJS += osd_DSC25.o graphics_8_DSC25.o
+SRC += osd_DSC25.c graphics_8_DSC25.c
 endif
 
 ifeq ("$(CHIP_TYPE)","DM270")
-OBJS += osd_DSC25.o graphics_8_DSC25.o
+SRC += osd_DSC25.c graphics_8_DSC25.c
 endif
 
 ifeq ("$(CHIP_TYPE)","DM320")
-OBJS += osd_DSC25.o graphics_8_DSC25.o
+SRC += osd_DSC25.c graphics_8_DSC25.c
 endif
-
 
 SUBDIRS = fonts gui
 
-all: subdirs $(OBJS)
-	@cp -f *.o ../build
+all: do_build
 
-kernel_lib: all
-
-clean: clean-subdirs 
-	@rm -f *.o *.bak *~ $(TARGET)
-
-include ../../default.rule
+include $(MEDIOS_SRC_PATH)/default.rule

@@ -1,18 +1,14 @@
 GCCFLAGS = -Wall  -nostdlib -fno-builtin  -mcpu=arm7tdmi -O2
-#-Os -mlong-calls 
+ASFLAGS = -mfpu=softfpa
 
 ifeq ("$(TARGET_DEVICE)","JBMM")
 GCCFLAGS += -mlong-calls 
 endif
 
-#GCCFLAGS +=   -fomit-frame-pointer -fno-strict-aliasing
+GCCFLAGS += -D$(TARGET_DEVICE) -D$(CHIP_TYPE) -I$(MEDIOS_SRC_PATH)/include
+ASFLAGS  += --defsym $(TARGET_DEVICE)=1 --defsym $(CHIP_TYPE)=1 -I$(MEDIOS_SRC_PATH)/include
 
-
-ASFLAGS = -mfpu=softfpa
-
-
-GCCFLAGS += -D$(TARGET_DEVICE) -D$(CHIP_TYPE)
-ASFLAGS  += --defsym $(TARGET_DEVICE)=1 --defsym $(CHIP_TYPE)=1
+BUILD_DIR = $(MEDIOS_SRC_PATH)/kernel/build
 
 ifeq ($(HAVE_CONSOLE),1)
 	GCCFLAGS += -DHAVE_CONSOLE
@@ -64,6 +60,9 @@ ifeq ($(HAVE_EVT),1)
 	GCCFLAGS += -DHAVE_EVT
 endif
 
+ifeq ($(DO_STDALONE_APP),1)
+	GCCFLAGS += -DBUILD_LIB
+endif
 
 # Font definition:
 FONT_LIST = 4x6 5x8 6x9 7x13 8x13 
@@ -77,3 +76,8 @@ RM=rm
 AR=$(TOOL)-ar
 RANLIB=$(TOOL)-ranlib
 ELF2FLT=arm-linux-elf2flt
+
+SRC = $(wildcard *.c) $(wildcard *.S)
+
+CUR_PATH=$(shell pwd)
+CUR_DIR=$(shell basename $(CUR_PATH))

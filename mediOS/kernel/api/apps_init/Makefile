@@ -1,8 +1,7 @@
 include $(MEDIOS_SRC_PATH)/Makefile.conf
 
-SUBDIRS = gui
-BUILD_DIR = ../build
+BUILD_DIR = $(MEDIOS_SRC_PATH)/lib
 
-all: do_build
-        
+all : do_build
+
 include $(MEDIOS_SRC_PATH)/default.rule

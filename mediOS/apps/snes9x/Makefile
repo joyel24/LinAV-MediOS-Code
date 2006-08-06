@@ -34,9 +34,6 @@ $(LIBS):
                
 builddir:
 	@mkdir -p build   
-             
-clean:   clean-subdirs
-	@rm -f *.o *.bak *~ *.elf *.elf2flt *.grv *.gdb build/*
 
 #dspcode.o: dspcode.h dspshared.h
 dspcode.o: dspshared.h

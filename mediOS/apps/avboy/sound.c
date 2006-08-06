@@ -16,7 +16,7 @@
 *  Modified by CjNr11 06/12/2005
 */
 
-#include <sys_def/string.h>
+
 
 #include "defs.h"
 #include "pcm.h"

@@ -38,5 +38,9 @@ unsigned int __divdi3(unsigned int a, unsigned int b) { return float_divdi3(a,b)
 void * malloc(unsigned int size) { return do_malloc(size,1); }
 void * realloc(void *buffer, unsigned int newsize) { return do_realloc(buffer,newsize,1); }
 
+unsigned char * _ctype;
+
 void ini_api(void)
 {
+    _ctype = (unsigned char*)api_getFctPtr("_ctype");
+    

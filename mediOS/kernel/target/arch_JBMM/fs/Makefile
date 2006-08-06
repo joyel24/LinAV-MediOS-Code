@@ -1,20 +1,7 @@
-include ../../../../Makefile.conf
+include $(MEDIOS_SRC_PATH)/Makefile.conf
 
-ASFLAGS  += -I../../../../include
-GCCFLAGS += -I../../../../include
+BUILD_DIR = ../build
 
-SRC = $(wildcard *.c)
-SRC2 = $(wildcard *.S)
-OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
-
-all: $(OBJS)
-	cp -f $(OBJS) ../build
-
-force: clean all        
-
-kernel_lib: all
-
-clean:  
-	@rm -f *.o *.bak *~ $(TARGET)
-
-include ../../../../default.rule
+all: do_build
+        
+include $(MEDIOS_SRC_PATH)/default.rule

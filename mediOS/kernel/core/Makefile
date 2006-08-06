@@ -1,36 +1,26 @@
-include ../../Makefile.conf
+include $(MEDIOS_SRC_PATH)/Makefile.conf
 
-ASFLAGS  += -I../../include
-GCCFLAGS += -I../../include
-
-OBJS = delay.o dsp.o irq.o malloc.o pipes.o printk.o timer.o trap_fct.o trap.o uart.o ti_wdt.o 
-
-OBJS += swi.o kdelay.o kernel.o libfloat.o
+SRC = dsp.c irq.c malloc.c pipes.c printk.c timer.c trap_fct.c uart.c ti_wdt.c swi.c kdelay.c kernel.c libfloat.c \
+    delay.S trap.S
 
 ifeq ($(HAVE_CMD_LINE),1)
-	OBJS += cmd_line.o
+	SRC += cmd_line.c
 endif
 
 ifeq ($(HAVE_EVT),1)
-	OBJS += evt.o
+	SRC += evt.c
 endif
 
 ifeq ($(HAVE_DBUG),1)
-	OBJS += bkpt.o
+	SRC += bkpt.S
 else
-	OBJS += bkpt_dummy.o
+	SRC += bkpt_dummy.c
 endif
 
 ifeq ($(HAVE_CONSOLE),1)
-	OBJS += console.o
+	SRC += console.c
 endif
 
-all: $(OBJS)
-	@cp -f $(OBJS) ../build
+all: do_build
 
-kernel_lib: all
-
-clean:  
-	@rm -f *.o *.bak *~ $(TARGET)
-
-include ../../default.rule
+include $(MEDIOS_SRC_PATH)/default.rule

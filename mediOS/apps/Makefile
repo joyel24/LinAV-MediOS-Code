@@ -1,36 +1,30 @@
-include ../Makefile.conf
+MEDIOS_SRC_PATH_TMP = $(shell pwd)
+export MEDIOS_SRC_PATH = $(dir $(MEDIOS_SRC_PATH_TMP))
 
-ASFLAGS  += -I../include
-GCCFLAGS += -I../include
+include $(MEDIOS_SRC_PATH)/Makefile.conf
 
-LIBS = ../lib/libmedios.a
+LIBS = $(MEDIOS_SRC_PATH)/lib/libmedios.a
 
-LDFLAGS = ../lib/*.o -L../lib -lmedios --emit-relocs
+LDFLAGS = $(MEDIOS_SRC_PATH)/lib/*.o -L$(MEDIOS_SRC_PATH)/lib -lmedios --emit-relocs
+
 all: $(LIBS) othello test apps
 
-othello: othello.o
+othello: $(LIBS) othello.o
 	@$(LD) -o othello.med othello.o $(LDFLAGS)
-#	@$(ELF2FLT) -o othello.grv othello.elf
-#	@rm -f .elf *.gdb *.elf2flt
 
-test: test.o
+test: $(LIBS) test.o
 	@$(LD) -o test.med test.o $(LDFLAGS)
-#	@$(ELF2FLT) -o test.grv test.elf
-#	@rm -f .elf *.gdb *.elf2flt
   
-uidemo: uidemo.o
-	@$(LD) -o uidemo.med uidemo.o $(LDFLAGS)
+uidemo: $(LIBS) uidemo.o
+	$(LD) -o uidemo.med uidemo.o $(LDFLAGS)
       
 $(LIBS):
-	@make -C ../kernel --no-print-directory lib_medios
+	@make -C $(MEDIOS_SRC_PATH) --no-print-directory medios_lib
 
-apps:
+SUBDIRS = doom avboy
+        
+apps: subdirs
 	@make -C doom --no-print-directory
 	@make -C avboy --no-print-directory
-                                
-clean:
-	@make -C doom --no-print-directory clean
-	@make -C avboy --no-print-directory clean
-	@rm -f *.o *.bak *~ *.elf *.elf2flt *.grv *.gdb
 
 include ../default.rule

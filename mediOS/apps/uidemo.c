@@ -10,8 +10,6 @@
 * KIND, either express of implied.
 */
 
-#include <sys_def/string.h>
-
 #include <kernel/malloc.h>
 #include <kernel/evt.h>
 

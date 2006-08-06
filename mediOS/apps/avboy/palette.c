@@ -19,7 +19,7 @@
 #include "defs.h"
 #include "avboy.h"
 #include "fb.h"
-#include <sys_def/string.h>
+
 
 
 static byte palmap[32768];

@@ -13,7 +13,4 @@ ncpu.o:
 	@echo "[$@]"
 	@$(GCC) $(GCCFLAGS) -c ncpu.S -o ncpu.o
 
-clean:  
-	@rm -f *.o *.bak *~
-
 include ../../../default.rule

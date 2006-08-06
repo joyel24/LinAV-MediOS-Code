@@ -1,20 +1,7 @@
-include ../../Makefile.conf
-
-ASFLAGS  += -I../../include
-GCCFLAGS += -I../../include
-
-SRC = $(wildcard *.c)
-SRC2 = $(wildcard *.S)
-OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
+include $(MEDIOS_SRC_PATH)/Makefile.conf
 
 SUBDIRS = snd_chips
 
-all: subdirs $(OBJS)
-	@cp -f $(OBJS) ../build
+all: do_build
 
-kernel_lib: all
-
-clean: clean-subdirs
-	@rm -f *.o *.bak *~ $(TARGET)
-
-include ../../default.rule
+include $(MEDIOS_SRC_PATH)/default.rule

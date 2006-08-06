@@ -21,7 +21,6 @@
 /* kernel include */
 
 
-#include <sys_def/string.h>
 #include <evt.h>
 #include <buttons.h>
 

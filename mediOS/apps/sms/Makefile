@@ -40,7 +40,4 @@ stdalone: subdirs $(OBJS)
 	@$(AR) -rc libsms.a build/*.o
 	@$(RANLIB) libsms.a
 
-clean:   clean-subdirs
-	@rm -f *.o *.bak *~ *.elf *.elf2flt $(TARGET).grv *.gdb
-
 include ../../default.rule

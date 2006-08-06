@@ -1,7 +1,6 @@
 // gCalc v0.1
 //by squidward
 
-#include <sys_def/string.h>
 #include <sys_def/colordef.h>
 #include <sys_def/font.h>
 #include <sys_def/random.h>

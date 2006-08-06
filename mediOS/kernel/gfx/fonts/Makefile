@@ -1,21 +1,17 @@
-include ../../../Makefile.conf
+include $(MEDIOS_SRC_PATH)/Makefile.conf
 
-GCCFLAGS+=-I../../../include -I../../../include/kernel
+SRC = $(FONT_LIST:%=%.c)
 
-OBJS = $(FONT_LIST:%=%.o)
+GCCFLAGS += -I/$(MEDIOS_SRC_PATH)/include/kernel
 
-OPT = $(OBJS:%.o=-D_std%)
+OPT = $(FONT_LIST:%=-D_std%)
 
-all: $(OBJS) font
-	@cp -f $(OBJS) ../
+BUILD_DIR = ../
+
+all: do_build font
 
 font:
 	$(GCC) $(GCCFLAGS) -c -o font.o font.c $(OPT)
 	@cp -f font.o ../
-        
-clean: 
-	@rm -f *.o *.bak *~ *.gdb
 
-.c.o:
-	@echo "[$@]"
-	$(GCC) $(GCCFLAGS) -c -o $@ $<
+include $(MEDIOS_SRC_PATH)/default.rule

@@ -18,7 +18,7 @@
 /*********************************************************************/
 
 #include <sys_def/ctype.h>
-#include <sys_def/string.h>
+
 
 #include <buttons.h>
 

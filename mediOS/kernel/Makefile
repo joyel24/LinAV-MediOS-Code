@@ -1,31 +1,15 @@
-include ../Makefile.conf
+include $(MEDIOS_SRC_PATH)/Makefile.conf
 
-ASFLAGS  += -I../include
-GCCFLAGS += -I../include
+SUBDIRS = api init core lib driver fs snd gfx target
 
-SUBDIRS = init core lib driver gfx fs snd target
+SUBDIRS_CLEAN = build
 
 all: builddir subdirs
 
-force: clean all        
+medios_lib: SUBDIRS = api
+medios_lib: subdirs
 
-clean:  clean-subdirs
-	@echo '-----   cleaining kernel'
-	@rm -f *.o *.bak *~ build/*.o $(TARGET)
-
-lib_clean:
-	@rm -f ../lib/*
-        
 builddir:
-	@mkdir -p build
+	@mkdir -p $(BUILD_DIR)
         
-kernel_lib: builddir subdirs_lib 
-
-lib_medios:
-	@mkdir -p ../lib
-	@make -C lib --no-print-directory -s lib        
-	@$(AR) -rc libmedios.a lib/*.o
-	@$(RANLIB) libmedios.a
-	@mv libmedios.a ../lib
-        
-include ../default.rule
+include $(MEDIOS_SRC_PATH)/default.rule

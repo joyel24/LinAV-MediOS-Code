@@ -17,13 +17,15 @@ LDFLAGS =  -nostdlib --emit-relocs -L../../lib -lmedios -T$(TARGET_DEVICE)_aoboy
 
 LIBS = ../../lib/libmedios.a
 
+SUBDIRS_CLEAN = build
+
 all: builddir $(LIBS) $(OBJS)
 	@cp -f $(OBJS) build
 	@$(LD)  build/*.o ../../lib/*.o -o $(TARGET).med $(LDFLAGS) -Map avboy.map
 	@rm -f .elf *.gdb *.elf2flt
         
 $(LIBS):
-	make -C ../../kernel lib_medios
+	make -C ../../ lib_medios
         
 stdalone: GCCFLAGS += -DBUILD_STDALONE
 stdalone: builddir $(OBJS)
@@ -31,8 +33,5 @@ stdalone: builddir $(OBJS)
 
 builddir:
 	@mkdir -p build
-        
-clean:   clean-subdirs
-	@rm -f *.o *.bak *~ *.elf *.elf2flt *.grv *.gdb build/*
 
 include ../../default.rule

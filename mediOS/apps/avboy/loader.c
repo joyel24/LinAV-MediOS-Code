@@ -25,15 +25,11 @@
 #include "rtc.h"
 #include "lcd.h"
 #include "sound.h"
-#include <sys_def/string.h>
+
 #include <sys_def/ctype.h>
-#include <sys_def/random.h>
 
 
-
-
-
-char *strdup();
+//char *strdup();
 
 static int mbc_table[256] =
 {
