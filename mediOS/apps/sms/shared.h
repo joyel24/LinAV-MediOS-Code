@@ -8,7 +8,7 @@
 //#include <math.h>
 
 #include <api.h>
-#include <fs_io.h>
+#include <sys_def/stdfs.h>
 #include <sys_def/string.h>
 
 #ifdef _MSC_VER

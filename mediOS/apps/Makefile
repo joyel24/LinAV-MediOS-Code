@@ -21,7 +21,7 @@ uidemo: $(LIBS) uidemo.o
 $(LIBS):
 	@make -C $(MEDIOS_SRC_PATH) --no-print-directory medios_lib
 
-SUBDIRS = doom avboy
+SUBDIRS = doom avboy aones snes9x sms
         
 apps: subdirs
 	@make -C doom --no-print-directory

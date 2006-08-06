@@ -18,7 +18,6 @@ OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
 
 all: $(OBJS)
 	@cp -f $(OBJS) ../build
-clean:  
-	@rm -f *.o *.bak *~
+
 
 include ../../../default.rule

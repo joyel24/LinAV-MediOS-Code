@@ -13,7 +13,7 @@
 */
 
 #include "shared.h"
-#include <graphics.h>
+//#include <graphics.h>
 #include <sys_def/colordef.h>
 
 #include <evt.h>

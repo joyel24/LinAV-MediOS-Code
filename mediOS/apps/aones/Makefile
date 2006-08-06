@@ -18,12 +18,9 @@ all: builddir $(LIBS) do_build
 	@$(LD) -b binary dspcode/aones_dsp.out -b elf32-littlearm \
 	 build/*.o ../../lib/*.o -o $(TARGET).med $(LDFLAGS) -Map aones.map
 	@rm -f .elf *.gdb *.elf2flt
-        
-
 
 stdalone: GCCFLAGS += -DBUILD_STDALONE
 stdalone: builddir do_build
-
         
 $(LIBS):
 	make -C ../../kernel lib_medios 

@@ -27,7 +27,7 @@ do_build_app : do_build_app_bin
 	@make -C ./ --no-print-directory -s  $(APP_NAME).wav
 	@make -C ./ --no-print-directory -s $(APP_NAME).avi
                         
-do_build_app_bin : clean incdir mk_api_file
+do_build_app_bin : incdir mk_api_file
 	@make -C apps/$(APP_NAME) --no-print-directory -s clean
 	@make -C kernel/ --no-print-directory -s all DO_STDALONE_APP=1
 	@make -C apps/$(APP_NAME) --no-print-directory -s stdalone

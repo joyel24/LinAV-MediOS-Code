@@ -7,7 +7,7 @@
 
 #include <api.h>
 #include <evt.h>
-#include <graphics.h>
+#include <kernel/graphics.h>
 
 #define LCD_WIDTH		220
 #define LCD_HEIGTH		176
