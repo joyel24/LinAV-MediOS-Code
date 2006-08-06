@@ -23,20 +23,20 @@ clean-subdirs:
 	done
 	@-rm -f $(SUBDIRS_CLEAN_OBJS)
 
-%_app : %_app.bin %.wav %.avi
+%.app : %.app.bin %.wav %.avi
 	@echo "[$@]"
                 
-%_app.bin : clean incdir mk_api_file
+%.app.bin : clean incdir mk_api_file
 	@make -C apps/$* --no-print-directory -s clean
 	@make -C kernel/ --no-print-directory -s all DO_STDALONE_APP=1
 	@make -C apps/$* --no-print-directory -s stdalone
 	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $*.elf $(KERNEL_OBJS) apps/$*/build/*.o $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary $*.elf $*.bin
 
-%_app_simple: %_app_simple.bin %.wav %.avi
+%.app.simple: %.app.simple.bin %.wav %.avi
 	@echo "[$@]"
         
-%_app_simple.bin: incdir mk_api_file apps/%.o
+%.app.simple.bin: incdir mk_api_file apps/%.o
 	@make -C kernel/ --no-print-directory -s all DO_STDALONE_APP=1
 	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $*.elf $(KERNEL_OBJS) apps/$*.o $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary $*.elf $*.bin
