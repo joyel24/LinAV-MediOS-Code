@@ -14,9 +14,8 @@ LDFLAGS =  -nostdlib --emit-relocs -L../../lib -lmedios -lfloat -T$(TARGET_DEVIC
 
 BUILD_DIR = build
 
-all: subdirs builddir $(LIBS) $(OBJS)
-	@cp -f $(OBJS) build
-	@$(LD) -b binary dspcode/ao nes_dsp.out -b elf32-littlearm \
+all: builddir $(LIBS) do_build
+	@$(LD) -b binary dspcode/aones_dsp.out -b elf32-littlearm \
 	 build/*.o ../../lib/*.o -o $(TARGET).med $(LDFLAGS) -Map aones.map
 	@rm -f .elf *.gdb *.elf2flt
         
