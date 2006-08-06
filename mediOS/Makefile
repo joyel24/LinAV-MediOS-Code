@@ -28,16 +28,21 @@ medios.bin: incdir mk_api_file subdirs
 medios_lib: incdir mk_api_file
 	@make -C $(MEDIOS_SRC_PATH)/kernel --no-print-directory -s medios_lib
 
-aoboy: avboy.app
+aoboy: APP_NAME = avboy
+aoboy: do_build_app
 
-doom: doom.app
+doom: APP_NAME = doom
+doom: do_build_app
 
-uidemo: uidemo.app.simple
+uidemo: APP_NAME = uidemo
+uidemo: do_build_simple_app
 
 snes9x: LDFLAGS += -b binary apps/snes9x/dspcode/snes9x_dsp.out -b elf32-littlearm
-snes9x: snes9x.app
+snes9x: APP_NAME = snes9x
+snes9x: do_build_app
      
 aones: LDFLAGS += -b binary apps/aones/dspcode/aones_dsp.out -b elf32-littlearm
-aones: aones.app
+aones: APP_NAME = aones
+aones: do_build_app
 
 include default.rule

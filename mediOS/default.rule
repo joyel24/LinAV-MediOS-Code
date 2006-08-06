@@ -1,7 +1,7 @@
 OBJS  = $(patsubst %.c,%.o,$(filter %.c,$(SRC)) )
 OBJS += $(patsubst %.S,%.o,$(filter %.S,$(SRC)) )
 DEPS = $(patsubst %.c,%.d,$(filter %.c,$(SRC)) )
-CLEAN_FILTER = *.o *.bak *~ *.a *.elf *.elf2flt *.grv *.med *.gdb *.wav *.map *.avi  *.tpl
+CLEAN_FILTER = *.o *.bak *~ *.a *.elf *.elf2flt *.grv *.med *.gdb *.wav *.map *.avi *.tpl *.d
 SUBDIRS_CLEAN_OBJS=$(foreach filter,$(CLEAN_FILTER),$(SUBDIRS_CLEAN:%=%/$(filter)))
 
 do_build: subdirs $(DEPS) $(OBJS)
@@ -23,23 +23,28 @@ clean-subdirs:
 	done
 	@-rm -f $(SUBDIRS_CLEAN_OBJS)
 
-%.app : %.app.bin %.wav %.avi
-	@echo "[$@]"
-                
-%.app.bin : clean incdir mk_api_file
-	@make -C apps/$* --no-print-directory -s clean
+do_build_app : do_build_app_bin
+	@make -C ./ --no-print-directory -s  $(APP_NAME).wav
+	@make -C ./ --no-print-directory -s $(APP_NAME).avi
+                        
+do_build_app_bin : clean incdir mk_api_file
+	@make -C apps/$(APP_NAME) --no-print-directory -s clean
 	@make -C kernel/ --no-print-directory -s all DO_STDALONE_APP=1
-	@make -C apps/$* --no-print-directory -s stdalone
-	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $*.elf $(KERNEL_OBJS) apps/$*/build/*.o $(LDFLAGS) -Map medios.map
-	@$(OBJCOPY) -O binary $*.elf $*.bin
+	@make -C apps/$(APP_NAME) --no-print-directory -s stdalone
+	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(APP_NAME).elf $(KERNEL_OBJS) \
+            apps/$(APP_NAME)/build/*.o $(LDFLAGS) -Map medios.map
+	@$(OBJCOPY) -O binary $(APP_NAME).elf $(APP_NAME).bin
 
-%.app.simple: %.app.simple.bin %.wav %.avi
-	@echo "[$@]"
+do_build_simple_app : do_build_simple_app_bin
+	@make -C ./ --no-print-directory -s $(APP_NAME).wav
+	@make -C ./ --no-print-directory -s $(APP_NAME).avi
         
-%.app.simple.bin: incdir mk_api_file apps/%.o
+do_build_simple_app_bin: incdir mk_api_file
+	@make -C apps/ --no-print-directory -s $(APP_NAME).o
 	@make -C kernel/ --no-print-directory -s all DO_STDALONE_APP=1
-	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $*.elf $(KERNEL_OBJS) apps/$*.o $(LDFLAGS) -Map medios.map
-	@$(OBJCOPY) -O binary $*.elf $*.bin
+	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(APP_NAME).elf $(KERNEL_OBJS)\
+            apps/$(APP_NAME).o $(LDFLAGS) -Map medios.map
+	@$(OBJCOPY) -O binary $(APP_NAME).elf $(APP_NAME).bin
                    
 %.o: %.c
 	@echo "[$@]"
@@ -83,7 +88,7 @@ endif
 
 clean:  clean-subdirs
 	@echo '-----   cleaning $(CUR_DIR)'
-	@rm -f *.o *.bak *~ *.a
+	@rm -f $(CLEAN_FILTER)
 
 depend: $(DEPS)
     

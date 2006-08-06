@@ -14,6 +14,7 @@
 #define __ARCH_BAT_POWER_H
 
 #include <kernel/io.h>
+
 #include <kernel/target/arch/tsc2003.h>
 
 /** power state **/
@@ -24,6 +25,5 @@
 /** Bat level **/
 
 #define GET_BAT_LEVEL (tsc2003getVal(CMD_BAT0|INTERNAL_ON))
-
 
 #endif

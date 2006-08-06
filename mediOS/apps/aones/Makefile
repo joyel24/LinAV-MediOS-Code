@@ -6,16 +6,13 @@ GCCFLAGS += -I../../include -I. -In6502 -Imapper -O3
 
 TARGET = aones
 
-SRC = $(wildcard *.c)
-SRC2 = $(wildcard *.S)
-OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
-
 SUBDIRS = n6502 mapper
 
 LIBS = ../../lib/libmedios.a
 
 LDFLAGS =  -nostdlib --emit-relocs -L../../lib -lmedios -lfloat -T$(TARGET_DEVICE)_aones.lds
 
+BUILD_DIR = build
 
 all: subdirs builddir $(LIBS) $(OBJS)
 	@cp -f $(OBJS) build
@@ -24,9 +21,10 @@ all: subdirs builddir $(LIBS) $(OBJS)
 	@rm -f .elf *.gdb *.elf2flt
         
 
+
 stdalone: GCCFLAGS += -DBUILD_STDALONE
-stdalone: builddir subdirs $(OBJS)
-	@cp -f $(OBJS) build
+stdalone: builddir do_build
+
         
 $(LIBS):
 	make -C ../../kernel lib_medios 
