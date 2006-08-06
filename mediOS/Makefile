@@ -10,25 +10,18 @@ KERNEL_OBJS = kernel/build/*.o kernel/target/arch_$(TARGET_DEVICE)/build/*.o
 
 export MEDIOS_SRC_PATH=$(shell pwd)
 
-
 all: medios
 
 mk_api_file:
 	@make -C tools/api_files/ --no-print-directory
 
-tools/bin2wav/bin2wav:        
-	@make -C tools/bin2wav/ --no-print-directory
-	
-tools/bin2avi/bin2avi:        
-	@make -C tools/bin2avi/ --no-print-directory
-
 incdir:
 	@make -C include/kernel/target --no-print-directory incdir
 
-medios: clean medios.bin medios.wav medios.avi
+medios: medios.bin medios.wav medios.avi
 
 medios.bin: incdir mk_api_file subdirs
-	@echo '-----   building kernel'
+	@echo '-----   Linking medios.bin'
 	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o medios.elf $(KERNEL_OBJS) $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary medios.elf medios.bin
 
