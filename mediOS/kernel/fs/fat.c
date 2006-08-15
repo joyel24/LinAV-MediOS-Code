@@ -767,6 +767,7 @@ MED_RET_T fat_readdir(struct fat_entry * dir,struct fat_direntry * entry)
             {
                 /* eof */
                 ret_val=-MED_ENOENT;
+                entry->name[0]='\0';
                 VFS_PRINT("[READ DIR] EOF\n");
                 break;
             }
@@ -787,7 +788,7 @@ MED_RET_T fat_readdir(struct fat_entry * dir,struct fat_direntry * entry)
             unsigned int entrypos = i * DIR_ENTRY_SIZE;
             firstbyte = buf[entrypos];
             dir->entryN++;
-
+            
             if (firstbyte == 0xe5) {
                 /* free entry */
                 sectoridx = 0;
@@ -891,7 +892,7 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
     struct fat_direntry * entry;
     int ret_val;
     current_dir->entryN=0;
-
+    
     while(1)
     {
         new_node = (struct vfs_node *)malloc(sizeof(struct vfs_node));
@@ -919,7 +920,7 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
 
         ret_val= fat_readdir(current_dir,entry);
 
-        if(ret_val != MED_OK)
+        if(ret_val != MED_OK && ret_val != -MED_ENOENT)
         {
             printk("[fat_loadDir] Error during readdir\n");
             free(new_entry);
