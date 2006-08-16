@@ -39,9 +39,9 @@ void resize_setup(int inAddr,int inBufWidth,int inWidth,int inHeight,int outAddr
     inOffset=(inAddr-SDRAM_START)/32;
     outOffset=(outAddr-SDRAM_START)/32;
 
-    hrsz=(inWidth*PREVIEW_RESIZE_RATIO)/outWidth;
-    vrsz=(inHeight*PREVIEW_RESIZE_RATIO)/outHeight;
-
+    hrsz=(int)(0.5f+(1.0f*inWidth*PREVIEW_RESIZE_RATIO)/outWidth);
+    vrsz=(int)(0.5f+(1.0f*inHeight*PREVIEW_RESIZE_RATIO)/outHeight);
+    
     realWidth=(outWidth*hrsz)/PREVIEW_RESIZE_RATIO;
     realHeight=(outHeight*vrsz)/PREVIEW_RESIZE_RATIO;
 

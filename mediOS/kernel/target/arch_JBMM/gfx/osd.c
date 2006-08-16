@@ -21,7 +21,7 @@
 void arch_osd_init(void)
 {
     osd_setMainConfig(0x1);
-    osd_setMainShift(0x8F, 0x15);
+    osd_setMainShift(SCREEN_LCD_SHIFT_X, SCREEN_LCD_SHIFT_Y);
     
     outw(0x2182,VIDEO_BASE); /* preview engine enable/diasble */
     outw(0x0400,VIDEO_BASE+0x2);

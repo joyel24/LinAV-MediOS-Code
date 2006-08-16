@@ -15,33 +15,26 @@ WIDGETMENU advancedMenu;
 
 char * autoFire_items[]={"Off","A Button","B Button","Both A and B"};
 char * f3Use_items[]={"A+B","Sticky A","Sticky B"};
+char * tvOut_items[]={"Off","PAL","Stretched PAL","NTSC"};
 
 void menu_onClick(MENU m, WIDGETMENU_ITEM mi){
     int slot=standardMenu->getTrackbar(standardMenu,standardMenu->indexFromCaption(standardMenu,"Slot"))->value;
     char * s=malloc(100);
 
     if(!strcmp(mi->caption,"Load state")){
-        clk_overclock(false);
-
         sprintf(s,"Loading state, slot %d...",slot);
         gui_showText(s);
 
         LoadStateSnss(slot-1);
         gui_wantExit=true;
-
-        clk_overclock(true);
     }
 
     if(!strcmp(mi->caption,"Save state")){
-        clk_overclock(false);
-
         sprintf(s,"Saving state, slot %d...",slot);
         gui_showText(s);
 
         SaveStateSnss(slot-1);
         gui_wantExit=true;
-
-        clk_overclock(true);
     }
 
     if(!strcmp(mi->caption,"Reset NES")){
@@ -105,6 +98,15 @@ void gui_init(){
     mit->trackbar->value=63;
     standardMenu->addItem(standardMenu,mit);
 
+    mih=widgetMenuChooser_create();
+    mih->caption="TV out";
+    mih->cfgName="tv_out";
+    mih->cfgStored=true;
+    mih->chooser->items=tvOut_items;
+    mih->chooser->itemCount=4;
+    mih->chooser->index=0;
+    standardMenu->addItem(standardMenu,mih);
+
     mi=widgetMenuItem_create();
     mi->caption="Buttons:";
     mi->foreColor=GUI_TITLE_COLOR;
@@ -161,12 +163,12 @@ void gui_init(){
     mi->caption="Save state";
     mi->widgetWidth=0;
     standardMenu->addItem(standardMenu,mi);
-
+/*
     mi=widgetMenuItem_create();
     mi->caption="";
     mi->canFocus=false;
     standardMenu->addItem(standardMenu,mi);
-
+*/
     mi=widgetMenuItem_create();
     mi->caption="Advanced menu";
     mi->widgetWidth=0;
@@ -305,6 +307,7 @@ void gui_applySettings(){
 
     vol=standardMenu->getTrackbar(standardMenu,standardMenu->indexFromCaption(standardMenu,"Volume"))->value;
     bl=standardMenu->getTrackbar(standardMenu,standardMenu->indexFromCaption(standardMenu,"Backlight strength"))->value;
+    tvOut=standardMenu->getChooser(standardMenu,standardMenu->indexFromCaption(standardMenu,"TV out"))->index;
     buttonsSwap=standardMenu->getCheckbox(standardMenu,standardMenu->indexFromCaption(standardMenu,"Swap buttons"))->checked;
     autoFire=standardMenu->getChooser(standardMenu,standardMenu->indexFromCaption(standardMenu,"Autofire"))->index;
     f3Use=standardMenu->getChooser(standardMenu,standardMenu->indexFromCaption(standardMenu,"F3 button use"))->index;
@@ -314,6 +317,7 @@ void gui_applySettings(){
     armFrequency=advancedMenu->getTrackbar(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"CPU frequency(Mhz)"))->value;
     dspFrequency=advancedMenu->getTrackbar(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"DSP frequency(Mhz)"))->value;
 
+    display_tvOutSet();
 #ifdef SOUND_USE_AIC23
     aic23_setOutputVolume(vol+27,AIC23_CHANNEL_BOTH);
 #endif

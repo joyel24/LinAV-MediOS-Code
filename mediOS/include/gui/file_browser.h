@@ -38,6 +38,7 @@ struct browser_data {
     int totSize;
     
     int nb_disp_entry;
+    int max_entry_length;
     int x_start;
     int y_start;
     
@@ -48,23 +49,22 @@ struct browser_data {
     
     int mode;
     int font;
-    
+
     struct dir_entry * list;
     int                listused;
     int                listsize;
     
     void (*draw_bottom_status)  (struct browser_data *bdata);
-    void (*draw_file_size)      (struct dir_entry * entry);
+    void (*draw_file_size)      (struct browser_data *bdata, struct dir_entry * entry);
     void (*clear_status)        (struct browser_data *bdata);
     
     char * retPath;
     
 };
 
-//#define MENU_SHADOW 2 // height of small shadow under the title
-
-//#define    UP_ARROW     0
-//#define    DOWN_ARROW   1
+#define    BROWSER_STATUS_HEIGHT 20
+#define    BROWSER_ICON_WIDTH 11
+#define    BROWSER_SCROLLBAR_WIDTH 10
 
 int browser_simpleBrowse(char * path,char * res);
 int browser_browse(struct browser_data *bdata,char * path,char * res);
@@ -95,8 +95,6 @@ int  viewNewDir         (struct browser_data *bdata,char *name);
 void printName          (struct dir_entry * dEntry,int pos,int clear,int selected,struct browser_data *bdata);
 void printAllName       (struct browser_data *bdata);
 void printAName         (struct browser_data *bdata,int pos, int nselect, int clear, int selected);
-void draw_bottom_status (struct browser_data *bdata);
-void draw_file_size     (struct dir_entry * entry);
 void createSizeString   (char * str,int Isize);
 void clearBrowser       (struct browser_data *bdata);
 void redrawBrowser      (struct browser_data *bdata);
@@ -106,7 +104,7 @@ void  bwseventHandler       (int evt);
 
 /**** drawings        ******/
 void draw_bottom_status  (struct browser_data *bdata);
-void draw_file_size      (struct dir_entry * entry);
+void draw_file_size      (struct browser_data *bdata, struct dir_entry * entry);
 void clear_status(struct browser_data *bdata);
 
 //char *  browse     (char * path,int mode);

@@ -23,11 +23,15 @@
 #define SCREEN_ORIGIN_X                   110
 #define SCREEN_ORIGIN_Y                   8
 
+#define SCREEN_LCD_SHIFT_X                164
+#define SCREEN_LCD_SHIFT_Y                9
+#define SCREEN_PAL_SHIFT_X                34
+#define SCREEN_PAL_SHIFT_Y                15
+#define SCREEN_NTSC_SHIFT_X               0
+#define SCREEN_NTSC_SHIFT_Y               11
+
 #define LCD_WIDTH SCREEN_REAL_WIDTH
 #define LCD_HEIGHT SCREEN_HEIGHT
-
-#define MAX_COL                           53
-#define MAX_LINE                          27
 
 #define OSD_BMAP_1_CFG      OSD_BITMAP_RAMCLUT | OSD_BITMAP_ZX1 \
                 | OSD_BITMAP_8BIT | COLOR_TRSP << OSD_BITMAP_A_SHIFT

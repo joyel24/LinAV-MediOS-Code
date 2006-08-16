@@ -71,7 +71,7 @@ void XlatNESBufferLineLazy (unsigned char *src, unsigned char *dest,uint8 *nespp
                                                                              \n\
         mov r12,#0x3fc                                                       \n\
                                                                              \n\
-        sub r0,r0,#8                                                         \n\
+        sub r0,r0,#16                                                        \n\
                                                                              \n\
         line_loop:                                                           \n\
             add r0,r0,#16                                                    \n\

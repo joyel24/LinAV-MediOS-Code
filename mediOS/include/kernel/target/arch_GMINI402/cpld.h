@@ -23,7 +23,7 @@
 #define CPLD_PORT0_INIT        0x3
 #define CPLD_PORT1_INIT        0x7
 #define CPLD_PORT2_INIT        0x3
-#define CPLD_PORT3_INIT        0x8 /* or 0xc, whereas 0x4 and 0x7 changes the frequency of the aic */
+#define CPLD_PORT3_INIT        0xf /* or 0xc, whereas 0x4 and 0x7 changes the frequency of the aic */
 
 /* PORT 0 */
 

@@ -45,6 +45,10 @@ typedef struct {
 } sndItem;
 
 typedef volatile struct {
+  // init
+  uint16 armInitFinished;
+  uint16 port280Interrupt;
+
   // video buffers addresses ans status
   uint32 inBufAddr;
   uint32 outBufAddr;
@@ -55,8 +59,12 @@ typedef volatile struct {
   uint16 pal[32];
   uint16 lineOffset[NES_PAL_HEIGHT];
 
-  // 1 if arm wants apu reset
+  // apu reset requests from arm
   uint16 sndWantApuReset;
+
+  // sound pause requests from arm
+  uint16 sndWantPause;
+  uint16 sndIsPaused;
 
   // apu registers writes queue
   sndItem sndQueue[SNDQUEUE_LENGTH];
@@ -66,7 +74,7 @@ typedef volatile struct {
   // apu status
   uint16 sndStatusReg;
 
-  // apu dmc samples request to arm
+  // apu dmc samples requests to arm
   uint16 sndDmcWantRead;
   uint16 sndDmcAddress;
   uint16 sndDmcLength;

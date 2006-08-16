@@ -17,6 +17,7 @@
 #include <kernel/graphics.h>
 #include <kernel/evt.h>
 #include <kernel/errors.h>
+#include <kernel/malloc.h>
 
 #include <gui/icons.h>
 #include <gui/file_browser.h>
@@ -31,8 +32,6 @@ BITMAP * gui_ls_textBitmap;
 BITMAP * gui_ls_imageBitmap;
 
 //#include "browser_icons.h"
-
-#define    FILE_X_OFFSET 10
 
 struct scroll_bar browser_scroll = {
     border_color : COLOR_BLACK,
@@ -61,7 +60,6 @@ void iniBrowser(void)
 
 int viewNewDir(struct browser_data *bdata,char *name)
 {
-    
     if(name!=NULL)
     {
         if(strlen(name)>PATHLEN)
@@ -71,10 +69,9 @@ int viewNewDir(struct browser_data *bdata,char *name)
         }
         strcpy(bdata->path,name);
     }
-        
+
 
     cleanList(bdata);
-    printk("before doLS\n");
     if(!doLs(bdata))
     {
         cleanList(bdata);
@@ -82,19 +79,38 @@ int viewNewDir(struct browser_data *bdata,char *name)
         return 0;
     }
 
+    // compute nb_disp_entry if none is given
+    if (bdata->nb_disp_entry<0)
+    {
+        bdata->nb_disp_entry=(bdata->height-BROWSER_STATUS_HEIGHT)/bdata->entry_height;
+    }
+
+    // compute max_entry_length if none is given
+    if (bdata->max_entry_length<0)
+    {
+        int fw,fh;
+        
+        gfx_getStringSize("M",&fw,&fh);
+
+        bdata->max_entry_length=(bdata->width-
+                                  (bdata->scroll_pos==LEFT_SCROLL?BROWSER_SCROLLBAR_WIDTH:0)-
+                                  BROWSER_ICON_WIDTH)
+                                /fw;
+    }
+
     gfx_fontSet(bdata->font);
-    
+
     gfx_fillRect(COLOR_WHITE,bdata->x_start,bdata->y_start,bdata->width,bdata->height);
 
-    browser_scroll.x=bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?1:bdata->width-10);
+    browser_scroll.x=bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?1:bdata->width-BROWSER_SCROLLBAR_WIDTH);
     browser_scroll.y=bdata->y_start;
-    browser_scroll.width=8;    
-    browser_scroll.height=bdata->height;
-    
+    browser_scroll.width=8;
+    browser_scroll.height=bdata->nb_disp_entry*bdata->entry_height;
+
     bdata->pos=0;
     bdata->nselect=0;
     redrawBrowser(bdata);
-    
+
     return 1;
 }
 
@@ -152,15 +168,11 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
     int             color=COLOR_BLACK;
     int             select_color=COLOR_BLUE;
     char *          cp;
-#if defined(GMINI4XX) || defined(AV1XX) || defined(JBMM) || defined(GMINI402)
-    char            trimmed_filename[34];
-    int             i;
-#endif
     int             type;
     int             H=bdata->entry_height;
-    int             X=bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0);
+    int             X=bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?BROWSER_SCROLLBAR_WIDTH:0);
     int             Y=bdata->y_start+pos*H;
-    int             W=bdata->width-10;
+    int             W=bdata->width-BROWSER_SCROLLBAR_WIDTH;
 
     cp = strrchr(dEntry->name,(int) '/');
     if (cp)
@@ -212,7 +224,7 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
         if(dEntry->selected)
             select_color=COLOR_ORANGE2;
         if(bdata->draw_file_size)
-            bdata->draw_file_size(dEntry);
+            bdata->draw_file_size(bdata,dEntry);
     }
     else
     {
@@ -221,17 +233,22 @@ void printName(struct dir_entry * dEntry,int pos,int clear,int selected,struct b
         else
             select_color= COLOR_WHITE;
     }
-#if defined(GMINI4XX) || defined(AV1XX) || defined(JBMM) || defined(GMINI402)
-    for(i=0;i<=32;i++)
+    
+
+    if(strlen(dEntry->name)<bdata->max_entry_length)
     {
-    	trimmed_filename[i]=dEntry->name[i];
+        gfx_putS(color, select_color,X+BROWSER_ICON_WIDTH, Y, dEntry->name);
     }
-    trimmed_filename[33]='\0';
-    gfx_putS(color, select_color,X+11, Y, trimmed_filename);
-#endif
-#ifdef AV3XX
-    gfx_putS(color, select_color,X+11, Y, dEntry->name);
-#endif
+    else
+    {
+        char * trimmed_filename=malloc(PATHLEN);
+        memset(trimmed_filename,0,PATHLEN);
+
+        strncpy(trimmed_filename,dEntry->name,bdata->max_entry_length);
+        gfx_putS(color, select_color,X+BROWSER_ICON_WIDTH, Y, trimmed_filename);
+
+        free(trimmed_filename);
+    }
 }
 
 void printAllName(struct browser_data *bdata)
@@ -240,9 +257,9 @@ void printAllName(struct browser_data *bdata)
     int pos=bdata->pos;
     int nselect=bdata->nselect;
     int H=bdata->entry_height;
-    int X=bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0);
+    int X=bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?BROWSER_SCROLLBAR_WIDTH:0);
     int Y=bdata->y_start+pos*H;
-    int W=bdata->width-10;
+    int W=bdata->width-BROWSER_SCROLLBAR_WIDTH;
 
     for (i = pos; i < bdata->listused && i < pos+bdata->nb_disp_entry; i++)
         printName(&bdata->list[i], i-pos,1,(i-pos)==nselect,bdata);

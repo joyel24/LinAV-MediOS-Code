@@ -1,6 +1,6 @@
 include $(MEDIOS_SRC_PATH)/Makefile.conf
 
-SRC = graphics_32.c graphics.c resize.c
+SRC = graphics_32.c graphics.c resize.c videnc.c
 
 ifeq ("$(CHIP_TYPE)","DSC21")
 SRC += osd_DSC21.c graphics_8_DSC21.c

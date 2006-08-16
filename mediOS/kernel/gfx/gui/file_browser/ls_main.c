@@ -43,34 +43,21 @@ struct browser_data realData = {
     nbFile          : 0,
     nbDir           : 0,
     totSize         : 0,
-    
-#ifdef GMINI4XX
-    nb_disp_entry   : 15,
-#endif
-#ifdef GMINI402
-    nb_disp_entry   : 15,
-#endif
-#ifdef AV3XX
-    nb_disp_entry   : 22,
-#endif
-#ifdef AV1XX
-    nb_disp_entry   : 11,
-#endif
+    nb_disp_entry   : -1, // will be computed
+    max_entry_length: -1,
 
-#ifdef JBMM
-    nb_disp_entry   : 9,
-#endif
+
     x_start         : 0,
     y_start         : 0,
     
     font            : STD6X9,
 
     width           : LCD_WIDTH,
-    height          : LCD_HEIGHT-28,
+    height          : LCD_HEIGHT,
 
 
     entry_height    : 10,
-    
+
     draw_bottom_status : draw_bottom_status,
     draw_file_size     : draw_file_size,
     clear_status       : clear_status
@@ -92,6 +79,7 @@ struct browser_data * browser_NewBrowse(void)
     if(!ptr)
         return NULL;
     memcpy(ptr,&realData,sizeof(struct browser_data));
+    
     return ptr;
 }
 
@@ -101,22 +89,26 @@ void browser_disposeBrowse(struct browser_data * bdata)
     free(bdata);
 }
 
-int x=LCD_WIDTH;
+int browser_oldFileSizeX=LCD_WIDTH;
 
-void draw_file_size(struct dir_entry * entry)
+void draw_file_size(struct browser_data *bdata, struct dir_entry * entry)
 {
-    int h,w;
+    int sh,sw;
     char tmpS[15];
-    
-    /* erase previsous drawing */
+    int bx,by;
 
-    gfx_fillRect(COLOR_WHITE,x, LCD_HEIGHT-10,LCD_WIDTH-x,10);
+    by=bdata->y_start+bdata->height;
+    bx=bdata->x_start+bdata->width;
+
+    /* erase previous drawing */
+
+    gfx_fillRect(COLOR_WHITE,browser_oldFileSizeX, by-10,bx-browser_oldFileSizeX,10);
     if(entry->type == TYPE_FILE)
     {
         createSizeString(tmpS,entry->size);
-        gfx_getStringSize(tmpS,&w,&h);
-        x=LCD_WIDTH-w;
-        gfx_putS(COLOR_BLUE, COLOR_WHITE,x, LCD_HEIGHT-10, tmpS);
+        gfx_getStringSize(tmpS,&sw,&sh);
+        browser_oldFileSizeX=bx-sw;
+        gfx_putS(COLOR_BLUE, COLOR_WHITE,browser_oldFileSizeX, by-10, tmpS);
     }
 }
 
@@ -124,31 +116,36 @@ void draw_bottom_status(struct browser_data *bdata)
 {
     char tmp[100];
     char tmpS[15];
+    int bx,by;
 
-    //int len=0;   
-    
+    by=bdata->y_start+bdata->height;
+    bx=bdata->x_start+bdata->width;
+
     createSizeString(tmpS,bdata->totSize);
-        
-    gfx_fillRect(COLOR_WHITE,2, LCD_HEIGHT-20,LCD_WIDTH-4,20);
-          
-    gfx_putS(COLOR_BLUE, COLOR_WHITE,2, LCD_HEIGHT-20,bdata->path);  
-    
+
+    gfx_fillRect(COLOR_WHITE,2, by-20,bx-4,20);
+
+    gfx_putS(COLOR_BLUE, COLOR_WHITE,2, by-20,bdata->path);
+
 
 #if defined(GMINI4XX) || defined(AV1XX) || defined(JBMM) || defined(GMINI402)
-    snprintf(tmp,100,"%d %s, %s",bdata->nbFile,bdata->nbFile>0?"files":"file",tmpS);
+    snprintf(tmp,100,"%d %s, %s",bdata->nbFile,bdata->nbFile>1?"files":"file",tmpS);
 #else
-    snprintf(tmp,100,"%d %s, %d %s, %s",bdata->nbFile,bdata->nbFile>0?"files":"file",
-            bdata->nbDir,bdata->nbDir>0?"folders":"folder",tmpS);
+    snprintf(tmp,100,"%d %s, %d %s, %s",bdata->nbFile,bdata->nbFile>1?"files":"file",
+            bdata->nbDir,bdata->nbDir>1?"folders":"folder",tmpS);
 #endif
 
-    printk("%s\n",tmp);
-
-    gfx_putS(COLOR_BLUE, COLOR_WHITE,2, LCD_HEIGHT-10, tmp);    
+    gfx_putS(COLOR_BLUE, COLOR_WHITE,2, by-10, tmp);
 }
 
 void clear_status(struct browser_data *bdata)
 {
-    gfx_fillRect(COLOR_WHITE,2, LCD_HEIGHT-20,LCD_WIDTH-24,20);
+    int bx,by;
+
+    by=bdata->y_start+bdata->height;
+    bx=bdata->x_start+bdata->width;
+
+    gfx_fillRect(COLOR_WHITE,2, by-20,bx-24,20);
 }
 
 void createSizeString(char * str,int Isize)

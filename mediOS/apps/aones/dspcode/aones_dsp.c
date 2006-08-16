@@ -31,6 +31,7 @@ unsigned long outBuf2[NES_WIDTH*CHUNK_HEIGHT];
 unsigned long framePal[32];
 
 ioport unsigned short portFFFF;
+ioport unsigned short port280;
 tDspCom dspComBuffer;
 tDspCom * dspCom;
 
@@ -143,6 +144,9 @@ void main(){
 	memset((void *)dspCom,0,sizeof(dspCom));
     *DSP_COM = (unsigned short) dspCom;
 
+	// wait for ARM to finish init
+	while(!dspCom->armInitFinished);
+
 	if (aicDma==INV) debug("AIC DMA NOK");
 	if (aicDataPort==INV) debug("Data Port NOK");
 
@@ -196,6 +200,7 @@ void handleVideoBuffer(){
 					IB_BUF_A,IB_DIR_SD2IB,1);
 		while(ibdma_pending());
 		ibdma_reset();
+
 #ifndef IDMA
 		memcpy(inBuf,IB_BUFA_ADDR,sizeof(inBuf));
 #else
@@ -278,12 +283,22 @@ interrupt void aicDmaEnd(void){
 		sndBufNum--;
 	}
 
-	// handle reset
-	if (dspCom->sndWantApuReset){
-		debug("apu reset");
-		apu_reset();
-		dspCom->sndWantApuReset=0;
-	}
+	// handle pause & reset
+	dspCom->sndIsPaused=dspCom->sndWantPause;
+	if (dspCom->sndIsPaused) debug("sound paused");
+	do{
+		// handle reset
+		if (dspCom->sndWantApuReset){
+			debug("apu reset");
+			apu_reset();
+			dspCom->sndWantApuReset=0;
+		}
+
+		if (dspCom->sndIsPaused && !dspCom->sndWantPause){
+			dspCom->sndIsPaused=0;
+			debug("sound unpaused");
+		}
+	}while(dspCom->sndIsPaused);
 
 	dspCom->sndStatusReg=apu_read(APU_SMASK);
 
@@ -307,9 +322,14 @@ void debug(const char* msg){
 }
 
 void interruptARM(){
-	// Interrupt ARM
-	portFFFF |= 0x0001;
+	if (dspCom->port280Interrupt){
+		// Interrupt ARM
+		port280 |= 0x0008;
+	}else{
+		// Interrupt ARM
+		portFFFF |= 0x0001;
 
-	// Clear interrupt ARM
-	portFFFF &= 0xFFFE;
+		// Clear interrupt ARM
+		portFFFF &= 0xFFFE;
+	}
 }

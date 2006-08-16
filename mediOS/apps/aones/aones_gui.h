@@ -5,6 +5,9 @@
 
 #define GUI_TITLE_COLOR COLOR_RED
 
+extern bool gui_browserNeedInit;
+extern struct browser_data * browser;
+
 void gui_init();
 void gui_close();
 void gui_execute();

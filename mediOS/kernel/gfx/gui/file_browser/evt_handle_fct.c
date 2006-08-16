@@ -95,7 +95,7 @@ MED_RET_T browserEvt(struct browser_data * bdata)
                         }
                         else // not going up, scrolling
                         {
-                            gfx_scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
+                            gfx_scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?BROWSER_SCROLLBAR_WIDTH:0), bdata->y_start,
     					     bdata->width-10, (h)*(bdata->nb_disp_entry), h,0);
                             printAName(bdata,bdata->pos+bdata->nselect+1,bdata->nselect+1,1,0);
                             printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);
@@ -148,7 +148,7 @@ MED_RET_T browserEvt(struct browser_data * bdata)
                             }
                             else // not going down, scrolling
                             {
-                                gfx_scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?10:0), bdata->y_start,
+                                gfx_scrollWindowVert(COLOR_WHITE, bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?BROWSER_SCROLLBAR_WIDTH:0), bdata->y_start,
     						 bdata->width-10, (h)*(bdata->nb_disp_entry-1), h,1);
                                 printAName(bdata,bdata->pos+bdata->nselect-1,bdata->nselect-1,1,0);
                                 printAName(bdata,bdata->pos+bdata->nselect,bdata->nselect,1,1);
@@ -164,12 +164,9 @@ MED_RET_T browserEvt(struct browser_data * bdata)
                     }
                 }
                 break;
-#ifdef GMINI4XX
+#if defined(GMINI4XX) || defined(GMINI402)
             case BTN_1:
-#endif  
-#ifdef GMINI402
-            case BTN_1:
-#endif  
+#endif
             case BTN_RIGHT:
                 if(bdata->listused) // is there items in the list?
                 {
@@ -244,10 +241,7 @@ MED_RET_T browserEvt(struct browser_data * bdata)
                     }
                 }
                 break;
-#ifdef GMINI4XX  
-            case BTN_2:
-#endif
-#ifdef GMINI402  
+#if defined(GMINI4XX) || defined(GMINI402)
             case BTN_2:
 #endif
             case BTN_LEFT:

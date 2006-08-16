@@ -21,6 +21,7 @@
     #include <kernel/resize.h>
     #include <kernel/evt.h>
     #include <kernel/bat_power.h>
+    #include <kernel/videnc.h>
 #else
     #include <api.h>
 #endif

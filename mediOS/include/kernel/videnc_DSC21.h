@@ -1,5 +1,5 @@
 /*
-*   kernel/target/arch_GMINI4XX/osd.c
+*   include/kernel/videnc_DSC21.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -10,17 +10,14 @@
 * KIND, either express of implied.
 */
 
-#include <sys_def/stddef.h>
+#ifndef __VIDENC_DSC21_H
+#define __VIDENC_DSC21_H
 
-#include <kernel/io.h>
-#include <kernel/hardware.h>
-#include <kernel/kernel.h>
-#include <kernel/osd.h>
-#include <kernel/lcd.h>
+#include "kernel/videnc.h"
+#include "kernel/io.h"
 
-void arch_osd_init(void)
-{
-	osd_setMainShift(SCREEN_LCD_SHIFT_X, SCREEN_LCD_SHIFT_Y);
+#define VIDENC_BASE                      0x00030900
 
-	outw(9,VIDEO_BASE+0x2C); // LCD VSync
-}
+#define VIDENC_SET_PARAMETERS(mode,interlace) {}
+
+#endif

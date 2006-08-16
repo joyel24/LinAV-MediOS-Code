@@ -90,7 +90,11 @@ char Init_NES(char *RomName)
   
     memset(Vnes.NESSRAM,0,0x10000);
     memset(Vnes.mapper_extram,0,0x10000);
-    
+
+    memset(Vnes.var.Vbuffer,0,NES_BUFFER_WIDTH*NES_PAL_HEIGHT);
+    memset(Vnes.var.Vbuffer2,0,NES_BUFFER_WIDTH*NES_PAL_HEIGHT);
+    memset(Vnes.var.LineOffset,0,NES_PAL_HEIGHT*sizeof(uint32));
+
     Vnes.sramsize=0x2000;
     Vnes.vramsize=0x2000;
 
@@ -416,13 +420,9 @@ void Reset_NES()
     Vnes.var.currentcpucycle=0;
 }
 
-void LaunchEmu()
+void Run_NES()
 {
-    long l;
     bool wantQuit;
-
-    l=16;
-    Reset_NES();
 
     wantQuit=false;
     do{

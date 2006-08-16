@@ -37,11 +37,11 @@ doom: do_build_app
 uidemo: APP_NAME = uidemo
 uidemo: do_build_simple_app
 
-snes9x: LDFLAGS := -b binary apps/snes9x/dspcode/snes9x_dsp.out -b elf32-littlearm $(LDFLAGS)
+snes9x: LD_BIN_INC = apps/snes9x/dspcode/snes9x_dsp.out
 snes9x: APP_NAME = snes9x
 snes9x: do_build_app
      
-aones: LDFLAGS := -b binary apps/aones/dspcode/aones_dsp.out -b elf32-littlearm $(LDFLAGS)
+aones: LD_BIN_INC = apps/aones/dspcode/aones_dsp.out
 aones: APP_NAME = aones
 aones: do_build_app
 

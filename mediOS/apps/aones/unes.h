@@ -265,7 +265,7 @@ char Init_NES(char *RomName);
 *****************************************************/
 char Close_ROM(int b);
 
-void LaunchEmu();
+void Run_NES();
 
 void CloseAll();
 

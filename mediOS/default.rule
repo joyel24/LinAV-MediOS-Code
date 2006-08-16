@@ -28,11 +28,11 @@ do_build_app : do_build_app_bin
 	@make -C ./ --no-print-directory -s $(APP_NAME).avi
                         
 do_build_app_bin : incdir mk_api_file
-	@make -C apps/$(APP_NAME) --no-print-directory -s clean
 	@make -C kernel/ --no-print-directory -s all DO_STDALONE_APP=1
 	@make -C apps/$(APP_NAME) --no-print-directory -s stdalone
-	$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(APP_NAME).elf $(KERNEL_OBJS) \
-            apps/$(APP_NAME)/build/*.o $(LDFLAGS) -Map medios.map
+	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(APP_NAME).elf \
+            -b binary $(LD_BIN_INC) -b elf32-littlearm \
+            $(KERNEL_OBJS) apps/$(APP_NAME)/build/*.o $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary $(APP_NAME).elf $(APP_NAME).bin
 
 do_build_simple_app : do_build_simple_app_bin
@@ -42,8 +42,9 @@ do_build_simple_app : do_build_simple_app_bin
 do_build_simple_app_bin: incdir mk_api_file
 	@make -C apps/ --no-print-directory -s $(APP_NAME).o
 	@make -C kernel/ --no-print-directory -s all DO_STDALONE_APP=1
-	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(APP_NAME).elf $(KERNEL_OBJS)\
-            apps/$(APP_NAME).o $(LDFLAGS) -Map medios.map
+	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(APP_NAME).elf \
+            -b binary $(LD_BIN_INC) -b elf32-littlearm \
+            $(KERNEL_OBJS) apps/$(APP_NAME).o $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary $(APP_NAME).elf $(APP_NAME).bin
                    
 %.o: %.c

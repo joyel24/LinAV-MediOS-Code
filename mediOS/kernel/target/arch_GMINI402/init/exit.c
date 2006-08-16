@@ -15,17 +15,9 @@
 
 #include <kernel/io.h>
 #include <kernel/hardware.h>
-
-void (*firmware_start)(void) = (void (*)(void)) SDRAM_START;
+#include <kernel/exit.h>
 
 void arch_reload_firmware(void){
-  //clear firmware screen
-  //memset((char *)0x18d1500,0,240*176*2);
-
-  //jump to sdram start (where the uncompressed firmware is)
-  //firmware_start();
-  
-  
   halt_device();
 }
 

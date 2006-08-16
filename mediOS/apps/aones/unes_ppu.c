@@ -70,7 +70,7 @@ __IRAM_DATA uint8    ppuVDataLatch;
 
 __IRAM_DATA uint32   ppuScanline;
 
-uint8    patternTOpix[65536*4*8];
+uint8 patternTOpix[65536*4*8];
 
 
 // lazy updating stuff
@@ -331,7 +331,7 @@ __IRAM_CODE void ppu_writereg(uint32 Addr,uint8 Value)
          // sprite has to be draw next lazy_update
             lazy_spr_need_update = 1;
       }
-/**/      
+/**/
       oamMemory.memory[ppuRegs[REG_OAMADDR]++]=Value;            
       return;
      case REG_SCROLL:
@@ -386,13 +386,13 @@ __IRAM_CODE void ppu_writereg(uint32 Addr,uint8 Value)
         // v=t
         ppuVAddr = ppuVAddrLatch;        
 
-        //map 96        
+        //map 96
         if (ppu_Latch_Address) ppu_Latch_Address(ppuVAddr);
       }
 
 /*lazy stuff*/
       lazy_bg_need_update = 1;
-/**/      
+/**/
       
       return;
 
@@ -441,7 +441,7 @@ __IRAM_CODE void ppu_writereg(uint32 Addr,uint8 Value)
                 if (addr&0x10) lazy_spr_need_update=1;
                 else lazy_bg_need_update=1;
             }
-/**/            
+/**/
          }
       }      
       return;
@@ -501,25 +501,25 @@ void ppu_deinit()
 
 void ppu_init()
 {
-   int i,j,pattern,pat0,pat1;            
-   //patternTOpix = malloc(65536*4*8);
-   memset(patternTOpix,0,65536*4*8);
-   for (i=0;i<65536;i++)
-   for (j=0;j<4;j++)
-   {
-    pat0 = i&0xFF;
-    pat1 = (i>>8)&0xFF;
-    pattern = ((pat1 & 0xaa) << 8) | ((pat1 & 0x55) << 1)
+    int i,j,pattern,pat0,pat1;
+    //patternTOpix = malloc(65536*4*8);
+    memset(patternTOpix,0,65536*4*8);
+    for (i=0;i<65536;i++)
+    for (j=0;j<4;j++)
+    {
+        pat0 = i&0xFF;
+        pat1 = (i>>8)&0xFF;
+        pattern = ((pat1 & 0xaa) << 8) | ((pat1 & 0x55) << 1)
                     | ((pat0 & 0xaa) << 7) | (pat0 & 0x55);
-    if ((pattern >> 14) & 3) patternTOpix[i*4*8+j*8+0]= (j<<2) | ((pattern >> 14) & 3);     
-    if ((pattern >> 6) & 3) patternTOpix[i*4*8+j*8+1]= (j<<2) | ((pattern >> 6) & 3);
-    if ((pattern >> 12) & 3) patternTOpix[i*4*8+j*8+2]= (j<<2) | ((pattern >> 12) & 3);
-    if ((pattern >> 4) & 3) patternTOpix[i*4*8+j*8+3]= (j<<2) | ((pattern >> 4) & 3);
-    if ((pattern >> 10) & 3) patternTOpix[i*4*8+j*8+4]= (j<<2) | ((pattern >> 10) & 3);
-    if ((pattern >> 2) & 3) patternTOpix[i*4*8+j*8+5]= (j<<2) | ((pattern >> 2) & 3);
-    if ((pattern >> 8) & 3) patternTOpix[i*4*8+j*8+6]= (j<<2) | ((pattern >> 8) & 3);
-    if (pattern & 3) patternTOpix[i*4*8+j*8+7]= (j<<2) | (pattern & 3);
-   }
+        if ((pattern >> 14) & 3) patternTOpix[i*4*8+j*8+0]= (j<<2) | ((pattern >> 14) & 3);
+        if ((pattern >> 6) & 3) patternTOpix[i*4*8+j*8+1]= (j<<2) | ((pattern >> 6) & 3);
+        if ((pattern >> 12) & 3) patternTOpix[i*4*8+j*8+2]= (j<<2) | ((pattern >> 12) & 3);
+        if ((pattern >> 4) & 3) patternTOpix[i*4*8+j*8+3]= (j<<2) | ((pattern >> 4) & 3);
+        if ((pattern >> 10) & 3) patternTOpix[i*4*8+j*8+4]= (j<<2) | ((pattern >> 10) & 3);
+        if ((pattern >> 2) & 3) patternTOpix[i*4*8+j*8+5]= (j<<2) | ((pattern >> 2) & 3);
+        if ((pattern >> 8) & 3) patternTOpix[i*4*8+j*8+6]= (j<<2) | ((pattern >> 8) & 3);
+        if (pattern & 3) patternTOpix[i*4*8+j*8+7]= (j<<2) | (pattern & 3);
+    }
     ppu_Latch_FDFE=NULL;
     ppu_Latch_Address=NULL;
     ppu_Latch_RenderScreen=NULL;

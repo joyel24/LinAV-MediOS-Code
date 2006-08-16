@@ -6,12 +6,15 @@
 #include "unes_io.h"
 
 __IRAM_DATA VirtualNES Vnes;
-unsigned char * lj_curRenderingScreenPtr;
+unsigned long * lj_curRenderingScreenPtr;
 char CurrentROMFile[256]="";
 
 tDspCom * dspCom;
 
 __IRAM_DATA volatile int vblankNum;
+
+int screen_initialX=0;
+int screen_initialY=0;
 
 // tick of last rendered frame
 int prevRenderedFrameTick=0;
@@ -43,6 +46,8 @@ bool overclocking=false;
 int armFrequency=0;
 int dspFrequency=0;
 
+int tvOut=0;
+
 
 void clk_overclock(bool en){
 #ifdef GMINI_OVERCLOCKING
@@ -63,13 +68,13 @@ void clk_overclock(bool en){
 #endif
 };
 
-void resize_init(){
+void resize_init(int w,int h){
     long ip,op;
 
     op=(long)gfx_planeGetBufferOffset(VID1);
-    ip=(long)lj_curRenderingScreenPtr+/*4*/10*NES_WIDTH*4;
+    ip=(long)lj_curRenderingScreenPtr+/*4*/8*NES_WIDTH*4;
 
-    resize_setup(ip,NES_WIDTH*2,NES_WIDTH*2,220,op,224*2,176);
+    resize_setup(ip,NES_WIDTH*2,NES_WIDTH*2,224,op,w*2,h);
 }
 
 int t=0;
@@ -108,7 +113,7 @@ void dsp_interrupt(int irq,struct pt_regs * regs){
 
     // debug message coming from the dsp
     if (dspCom->hasDbgMsg){
-        static char str[255];
+        char * str=malloc(256);
         int i;
 
         for(i=0;i<256;++i){
@@ -117,6 +122,7 @@ void dsp_interrupt(int irq,struct pt_regs * regs){
         printf("dsp> %s\n",str);
 
         dspCom->hasDbgMsg=0;
+        free(str);
     }
 
 #ifdef DSP_VID_PROFILE
@@ -164,6 +170,13 @@ void dsp_init(){
     while(!(*DSP_COM)); // wait for the dsp to finish init
 
     dspCom = (tDspCom *) DSP_RAM(*DSP_COM);
+
+#ifdef DM320
+    dspCom->port280Interrupt=1;
+#else
+    dspCom->port280Interrupt=0;
+#endif
+    dspCom->armInitFinished=1;
 };
 
 
@@ -178,11 +191,27 @@ __IRAM_CODE void osd_interrupt(int irq,struct pt_regs * regs){
     vblankNum++;
 }
 
+void snd_pause(){
+#ifdef SOUND_USE_DSP
+    dspCom->sndWantPause=1;
+    while(!dspCom->sndIsPaused) /* nothing */;
+#endif
+}
+
+void snd_unPause(){
+#ifdef SOUND_USE_DSP
+    dspCom->sndWantPause=0;
+    while(dspCom->sndIsPaused) /* nothing */;
+#endif
+}
+
 void snd_init(){
 #ifdef SOUND_USE_AIC23
     aic23_setSampleRate(SAMPLE_RATE);
     aic23_enableOutput(true);
 #endif
+
+    snd_pause();
 }
 
 void snd_close(){
@@ -210,11 +239,6 @@ void emu_init()
     Vnes.var.Vbuffer=(char*)(((unsigned int)Vnes.var.Vbuffer+32)&0xffffffe0);
     Vnes.var.Vbuffer2=(uint8 *)malloc(NES_BUFFER_WIDTH*NES_PAL_HEIGHT+64);
     Vnes.var.Vbuffer2=(char*)(((unsigned int)Vnes.var.Vbuffer2+32)&0xffffffe0);
-
-    memset(Vnes.var.Vbuffer,0,NES_BUFFER_WIDTH*NES_PAL_HEIGHT);
-    memset(Vnes.var.Vbuffer2,0,NES_BUFFER_WIDTH*NES_PAL_HEIGHT);
-    memset(Vnes.var.LineOffset,0,NES_PAL_HEIGHT*sizeof(uint32));
-
 }
 
 void emu_close()
@@ -263,8 +287,85 @@ void emu_setDefaultParams()
     stickyBPressed=false;
 }
 
+void display_tvOutSet(){
+    int w,h;
+    int x,y;
+    int gx,gy;
+    int gw,gh;
+    int mode;
+
+    switch(tvOut){
+        default:
+        case 0: // Off
+            mode=VIDENC_MODE_LCD;
+            x=-8;
+            y=-2;
+            w=224;
+            h=176;
+            gx=0;
+            gy=0;
+            getResolution(&gw,&gh);
+            break;
+        case 1: // PAL
+            mode=VIDENC_MODE_PAL;
+            x=40;
+            y=32;
+            w=320;
+            h=224;
+            gx=50;
+            gy=28;
+            gw=300;
+            gh=240;
+            break;
+        case 2: // Stretched PAL
+            mode=VIDENC_MODE_PAL;
+            x=40;
+            y=16;
+            w=320;
+            h=256;
+            gx=50;
+            gy=28;
+            gw=300;
+            gh=240;
+            break;
+        case 3: // NTSC
+            mode=VIDENC_MODE_NTSC;
+            x=40;
+            y=8;
+            w=320;
+            h=224;
+            gx=50;
+            gy=20;
+            gw=300;
+            gh=200;
+            break;
+    }
+
+    gfx_planeSetPos(BMAP1,screen_initialX+gx,screen_initialY+gy);
+    gfx_planeSetSize(BMAP1,gw,gh,8);
+
+    // resize browser
+    if (gw!=browser->width || gh!=browser->height){
+        browser->width=gw;
+        browser->height=gh;
+        browser->nb_disp_entry=-1; // recompute values
+        browser->max_entry_length=-1;
+        gui_browserNeedInit=true;
+    }
+
+    gfx_planeSetPos(VID1,screen_initialX+x,screen_initialY+y);
+#ifdef SCREEN_USE_RESIZE
+    gfx_planeSetSize(VID1,w,h,32);
+    resize_init(w,h);
+#endif
+
+    videnc_setup(mode,false);
+
+}
+
 void display_init(){
-    int x,y,w,h,bpp;
+    int i;
+    char * framebuf;
 
     vblankNum=0;
     irq_changeHandler(IRQ_OSD,osd_interrupt);
@@ -276,13 +377,23 @@ void display_init(){
     gfx_planeHide(VID2);
 
     lj_curRenderingScreenPtr=malloc(NES_WIDTH*NES_PAL_HEIGHT*4+64);
-    lj_curRenderingScreenPtr=(char*)(((unsigned int)lj_curRenderingScreenPtr+32)&0xffffffe0);
+    lj_curRenderingScreenPtr=(unsigned long*)(((unsigned long)lj_curRenderingScreenPtr+32)&0xffffffe0);
+
+    // clear buffer
+    for(i=0;i<NES_WIDTH*NES_PAL_HEIGHT;++i){
+        lj_curRenderingScreenPtr[i]=COLOR32_BLACK;
+    }
+
+    framebuf=malloc(320*256);
+    framebuf=(char*)(((unsigned int)framebuf+32)&0xffffffe0);
+    gfx_planeSetBufferOffset(BMAP1,framebuf);
+
+    gfx_planeGetPos(VID1,&screen_initialX,&screen_initialY);
 
 #ifdef SCREEN_USE_RESIZE
-    gfx_planeGetPos(VID1,&x,&y);
-    gfx_planeGetSize(VID1,&w,&h,&bpp);
-    gfx_planeSetPos(VID1,x-8,y);
-    gfx_planeSetSize(VID1,w+4,h,bpp);
+    framebuf=malloc(320*256*4);
+    framebuf=(char*)(((unsigned int)framebuf+32)&0xffffffe0);
+    gfx_planeSetBufferOffset(VID1,framebuf);
 #else
     gfx_planeSetBufferOffset(VID1,lj_curRenderingScreenPtr);
     gfx_planeSetSize(VID1,NES_WIDTH,NES_PAL_HEIGHT,32);
@@ -292,6 +403,8 @@ void display_init(){
     // set dsp video output
     dsp_write32(&dspCom->outBufAddr,(uint32)lj_curRenderingScreenPtr);
 #endif
+
+    display_tvOutSet();
 };
 
 void emu_loadRom(){
@@ -307,10 +420,15 @@ void emu_run(){
         // load a possible sram file
         LoadSaveSRAM(false);
 
-        LaunchEmu();
+        Reset_NES();
+    
+        snd_unPause();
+
+        Run_NES();
+
+        snd_pause();
 
         if(Vnes.var.SaveRAM){
-            aic23_setOutputVolume(0,AIC23_CHANNEL_BOTH); // mute sound
             gui_showText("Saving SRAM...");
 
             LoadSaveSRAM(true);
@@ -322,7 +440,6 @@ void emu_run(){
 
 __IRAM_CODE void emu_handleVideoBuffer(){
 #ifdef SCREEN_USE_DSP
-
     byte * tmp;
     int i;
 
@@ -427,9 +544,15 @@ int emu_processIngameKeys()
 
   if (bt & BTMASK_F1)
   {
-     aic23_setOutputVolume(0,AIC23_CHANNEL_BOTH); // mute sound
+     snd_pause();
+
+     // no OC in gui, saves battery & safe save/load state
+     clk_overclock(false);
+
      gui_execute();
      gui_applySettings();
+
+     snd_unPause();
   }
 
   if (bt & BTMASK_OFF)
@@ -463,7 +586,7 @@ int emu_frameCompleted()
         // handle frame limit
 
         frameLength=(frameSkip+1)*Vnes.var.frame_time;
-        if (Vnes.var.fps==60){
+        if (Vnes.var.fps==60 && (tvOut==0 || tvOut==3)){
 
             //we use the vblank interrupt to get sync
             tick=tmr_getMicroTick();
@@ -509,13 +632,13 @@ int app_main(){
     mkdir(AONES_PATH,-1);
     mkdir(SAVES_PATH,-1);
 
-    // init sound
-    snd_init();
-
 #if defined(SCREEN_USE_DSP) || defined(SOUND_USE_DSP)
     // init dsp
     dsp_init();
 #endif
+
+    // init sound
+    snd_init();
 
     // init graphics
     gfx_openGraphics();
@@ -530,11 +653,6 @@ int app_main(){
 
     // init planes addresses, size & all
     display_init();
-
-#ifdef SCREEN_USE_RESIZE
-    // init hw resize
-    resize_init();
-#endif
 
     // apply settings
     gui_applySettings();
@@ -557,11 +675,8 @@ int app_main(){
         gui_applySettings();
 
         gui_showEmuPlane();
-
+        
         emu_run();
-
-        aic23_setOutputVolume(0,AIC23_CHANNEL_BOTH); // mute sound
-        apu_reset(); // reset apu //HACK: it prevents the dsp from crashing on frequency change
     }
 
     gui_showText("Saving settings...");

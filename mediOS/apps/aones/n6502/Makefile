@@ -5,7 +5,7 @@ GCCFLAGS += -I../../../include -I. -I../ -O3
 
 BUILD_DIR = ../build
 
-all: do_build
+all: do_build ncpu.o
 
 ncpu.o:
 	@echo "[$@]"

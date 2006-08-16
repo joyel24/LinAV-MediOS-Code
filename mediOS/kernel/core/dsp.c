@@ -19,17 +19,21 @@
 void dsp_on ()
 {
 	printk ("[dsp] Enabled...\n");
-	outw (inw(MOD1_REG) & 0x9FFF, MOD1_REG);
+#if 0
+    outw (inw(MOD1_REG) & 0x9FFF, MOD1_REG);
 	outw (inw(MOD1_REG) | 0x6000, MOD1_REG);
 	outw (inw(MOD2_REG) & 0xFF1F, MOD2_REG);
 	outw (inw(MOD2_REG) | 0x00E0, MOD2_REG);
+#endif
 }
 
 void dsp_off ()
 {
 	printk ("[dsp] Disabled...\n");
+#if 0
 	outw (inw(MOD1_REG) & 0x9FFF, MOD1_REG);
 	outw (inw(MOD2_REG) & 0xFF1F, MOD2_REG);
+#endif
 }
 
 void dsp_clear ()
