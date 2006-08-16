@@ -34,7 +34,7 @@ void vfs_init(void)
 {
     root_node=NULL;
     opened_node=NULL;
-    dirty_list=NULL;    
+    dirty_list=NULL;
 }
 
 MED_RET_T vfs_mount(int device,unsigned int startsector)
@@ -74,7 +74,7 @@ MED_RET_T vfs_Destructor(void)
     if(ret_val != MED_OK)
         return ret_val;
 
-    free(root_node);
+    vfs_nodeDestroy(root_node);
 
     root_node=NULL;
     opened_node=NULL;
@@ -116,7 +116,7 @@ MED_RET_T vfs_clearNodeTree(struct vfs_node * root,int force)
             }
             
             ptr2=ptr->siblings_next;
-            free(ptr);
+            vfs_nodeDestroy(ptr);
             ptr=ptr2;
         }
     }

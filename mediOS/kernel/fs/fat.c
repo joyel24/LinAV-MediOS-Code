@@ -125,6 +125,7 @@ MED_RET_T fat_unmount(struct vfs_node * root, int flush)
 
         ret_val = MED_OK;
     }
+    free(fat_bpb);
     return ret_val;
 }
 

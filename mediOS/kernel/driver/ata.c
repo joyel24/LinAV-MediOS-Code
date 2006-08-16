@@ -339,8 +339,13 @@ void ata_init(void)
     ataStop_tmr.freeRun  = 1;
     ataStop_tmr.stdDelay = 1; /* 1 tick delay */
         
-    arch_ata_init();
+    ata_hwInit();
     printk("[ATA init] done\n");
+}
+
+void ata_hwInit(void)
+{
+    arch_ata_init();
 }
 
 void ide_intAction(int irq,struct pt_regs * regs)

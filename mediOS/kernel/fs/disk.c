@@ -62,11 +62,21 @@ void disk_init(void)
     ata_init();
     vfs_init();
     fat_init(); /* reset all mounted partitions */
-
     if(disk_mount(HD_DRIVE)!=MED_OK)
         printk("Error doing disk init\n");
 
     printk("[init disk] done\n");
+}
+
+void disk_reInit(void)
+{
+    ata_hwInit();
+    vfs_init();
+    fat_init(); /* reset all mounted partitions */
+    if(disk_mount(HD_DRIVE)!=MED_OK)
+        printk("Error doing disk init\n");
+
+    printk("[RE init disk] done\n");
 }
 
 MED_RET_T disk_mount(int drive)

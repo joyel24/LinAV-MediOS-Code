@@ -43,6 +43,7 @@ struct hd_info_s {
 #define NUM_VOLUMES  2 /* we can only mount 2 volumes */
 
 void disk_init(void);
+void disk_reInit(void);
 
 int disk_mount(int drive);
 int disk_umount(int drive,bool flush);

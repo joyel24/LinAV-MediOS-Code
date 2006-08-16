@@ -165,7 +165,7 @@ void mainMenu_doF3(void * data) // switch to usb
             disableUsbFw();
             usbMode=0;
             //mdelay(5);
-            disk_init();
+            disk_reInit();
 #warning we should also reload menu.cfg or other menu related files
             evt_purgeHandler(evt_hand);
             mainMenu_start();
