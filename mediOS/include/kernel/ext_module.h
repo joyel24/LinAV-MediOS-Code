@@ -37,6 +37,8 @@ struct module_actions {
 
 int  ext_module_register_action(struct module_actions * action_struct,int module_num);
 
+#define CF_IS_CONNECTED (get_connected_module()==AV_MODULE_CFC?1:0)
+
 /****************************************** end user functions */
 
 /****************************************** private functions */

@@ -20,15 +20,11 @@ endif
 
 
 ifeq ($(HAVE_EXT_MODULE),1)
-	SRC += ext_module.c
+	SRC += ext_module.c dvr_module.c ir_remote.c cf_module.c
 endif
 
 ifeq ($(HAVE_FM_REMOTE),1)
 	SRC += fm_remote.c
-endif
-
-ifeq ($(HAVE_DVR),1)
-	SRC += dvr_module.c ir_remote.c
 endif
 
 all: do_build

@@ -44,6 +44,7 @@
 #include <kernel/fm_remote.h>
 #include <kernel/ext_module.h>
 #include <kernel/dvr_module.h>
+#include <kernel/cf_module.h>
 #include <kernel/sound.h>
 #include <kernel/cmd_line.h>
 #include <kernel/evt.h>
@@ -101,7 +102,22 @@ void tst_fct(void){
 }
 #endif
 
+#define WAVE_PERIOD ((volatile unsigned short *)0x40100)
+#define DEBUG_MSG_STATE ((volatile unsigned short *)0x40102)
+#define DEBUG_MSG_TEXT  ((short *)0x40104)
+
 void tst_fct(void){
+    while(1)
+    {
+        if(*DEBUG_MSG_STATE)
+        {
+            int i=0;
+            while(DEBUG_MSG_TEXT[i])
+                uart_out(DEBUG_MSG_TEXT[i++],0);
+            uart_out('\n',0);
+            *DEBUG_MSG_STATE=0;
+        }
+    }
 }
 
 void kernel_start (void)
@@ -152,10 +168,10 @@ void kernel_start (void)
 #endif
 #ifdef HAVE_EXT_MODULE
     init_ext_module();
-#endif
-#ifdef HAVE_DVR
     init_dvr_module();
+    cf_initModule();
 #endif
+
     disk_init();
     sound_init();
     /* enable the IRQ */

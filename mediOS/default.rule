@@ -1,7 +1,7 @@
 OBJS  = $(patsubst %.c,%.o,$(filter %.c,$(SRC)) )
 OBJS += $(patsubst %.S,%.o,$(filter %.S,$(SRC)) )
 DEPS = $(patsubst %.c,%.d,$(filter %.c,$(SRC)) )
-CLEAN_FILTER = *.o *.bak *~ *.a *.elf *.elf2flt *.grv *.med *.gdb *.wav *.map *.avi *.tpl *.d *.lds *.bin
+CLEAN_FILTER = *.o *.bak *~ *.a *.elf *.elf2flt *.grv *.med *.gdb *.wav *.map *.avi *.tpl *.d *.bin
 SUBDIRS_CLEAN_OBJS=$(foreach filter,$(CLEAN_FILTER),$(SUBDIRS_CLEAN:%=%/$(filter)))
 
 do_build: subdirs $(DEPS) $(OBJS)

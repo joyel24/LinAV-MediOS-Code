@@ -1005,8 +1005,8 @@ void mas_i2sInit(void)
     mas_setD0(MAS_MAIN_IO_CONTROL,0x125);
     /* dsp code here */
 
-    load_dsp_program_hdd("/test.out");
-    *WAVE_PERIOD=10;
+    dsp_loadProgramFromHDD("/test.out");
+    *WAVE_PERIOD=30;
     *DEBUG_MSG_STATE=0;
     dsp_run();
 
@@ -1022,7 +1022,18 @@ void mas_i2sInit(void)
     mas_codecWrite(MAS_REG_DA_OUTPUT_MODE,0x0);
 
 
-    
+    mas_codecCtrlConf(MAS_SET,MAS_BALANCE,50);
+    mas_codecCtrlConf(MAS_SET,MAS_VOLUME,/*70*/70);
+
+    MAS_DELAY
+
+    printk("[MAS] stop all app\n");
+    if(!mas_stopApps())
+        return -1;
+
+    mas_setD0(MAS_INTERFACE_CONTROL,0x04);
+    mas_setClkSpeed(0x4800);
+    mas_setD0(MAS_MAIN_IO_CONTROL,0x125);
 }
 #endif
 // code from sound_init

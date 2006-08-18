@@ -68,7 +68,7 @@ struct irq_data_s irq_table[] = {
         action  : ide_intAction,
         name    : "IDE intr",
     },
-#ifdef HAVE_DVR
+#ifdef HAVE_EXT_MODULE
     {
         irq     : IRQ_IR,
         action  : ir_remote_interrupt,

@@ -12,6 +12,7 @@
 */
 
 #include <kernel/kernel.h>
+
 #include <kernel/version.h>
 #include <kernel/graphics.h>
 #include <kernel/rtc.h>
@@ -25,6 +26,10 @@
 #include <sys_def/string.h>
 
 #include <evt.h>
+
+#ifdef HAVE_EXT_MODULE
+#include <kernel/cf_module.h>
+#endif
 
 #define FORMAT_MMDDYYYY    0
 #define FORMAT_DDMMYYYY    1
@@ -48,10 +53,6 @@ int power = 0;
 int color = 0;
 int level = 0;
 int chargeProgress = 0;
-
-//void showSBar(void)  {status_bar_plugin.handle_on=1;sendEvt(&status_bar_plugin,EVT_REDRAW);}
-//void hideSBar(void)  {status_bar_plugin.handle_on=0;}
-//int  sBarStatus(void) {return status_bar_plugin.handle_on;}
 
 int date_format=FORMAT_DDMMYYYY;
 int time_format=FORMAT_24;
@@ -249,12 +250,13 @@ void statusLine_EvtHandler(int evt)
             fwExtState=kFWIsConnected();
             drawStatus();
             break;
-/*        case EVT_CF_IN:
+#ifdef HAVE_EXT_MODULE
+        case EVT_CF_IN:
         case EVT_CF_OUT:
-            cfState=CF_mod_is_connected();
+            cfState=CF_IS_CONNECTED;
             drawStatus();
-            break;
-  */      
+            break;    
+#endif
     }
 }
 
@@ -270,5 +272,9 @@ void statusBar_ini(void)
     pwrState=POWER_CONNECTED;
     usbState=kusbIsConnected();
     fwExtState=kFWIsConnected();
- //   cfState=CF_mod_is_connected();
+#ifdef HAVE_EXT_MODULE
+    cfState=CF_IS_CONNECTED;
+#else
+    cfState=0;
+#endif
 }
