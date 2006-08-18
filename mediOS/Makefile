@@ -21,8 +21,13 @@ incdir:
 medios: medios.bin medios.wav medios.avi
 
 medios.bin: incdir mk_api_file subdirs
-	@echo '-----   Linking medios.bin'
-	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o medios.elf $(KERNEL_OBJS) $(LDFLAGS) -Map medios.map
+	@echo '-----   Linking medios.bin 1/2'
+	@chmod 777 ./tools/lds_files/create_lds
+	@./tools/lds_files/create_lds init
+	@$(LD) -N -Tmedios.lds -o medios.elf $(KERNEL_OBJS) $(LDFLAGS) -Map medios.map
+	@echo '-----   Linking medios.bin 2/2'
+	@./tools/lds_files/create_lds final
+	@$(LD) -N -Tmedios.lds -o medios.elf $(KERNEL_OBJS) $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary medios.elf medios.bin
 
 medios_lib: incdir mk_api_file

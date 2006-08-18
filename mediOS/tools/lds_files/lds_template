@@ -2,8 +2,8 @@ ENTRY(entry_code)
 
 MEMORY
 {
-   DRAM : ORIGIN = 0x00900000,    LENGTH = 0x01000000
-   IRAM : ORIGIN = 0x00000004,    LENGTH = 0x00007C00-0x4
+   DRAM : ORIGIN = @DRAM_START@,    LENGTH = @DRAM_LEN@
+   IRAM : ORIGIN = @IRAM_START@,    LENGTH = @IRAM_LEN@-0x4
 }
 
 SECTIONS
@@ -31,7 +31,7 @@ SECTIONS
         _real_iram_start = .;
     } > DRAM
 
-    .iram 0x04 : AT ( _real_iram_start )
+    .iram @IRAM_START@ : AT ( _real_iram_start )
     {
         _iram_start = .;
         *(.vectors)
@@ -40,7 +40,7 @@ SECTIONS
         _iram_end = .;
     } > IRAM
 
-    .sdend ADDR(.text)+0x01000000-0x400 : AT ( _real_iram_start + SIZEOF(.iram) )
+    .sdend ADDR(.text)+@DRAM_LEN@-@END_DRAM_SIZE@ : AT ( _real_iram_start + SIZEOF(.iram) )
     {
         _sdend_start = .;
         *(.fwuncomp_code)

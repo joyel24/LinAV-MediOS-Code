@@ -1,7 +1,7 @@
 OBJS  = $(patsubst %.c,%.o,$(filter %.c,$(SRC)) )
 OBJS += $(patsubst %.S,%.o,$(filter %.S,$(SRC)) )
 DEPS = $(patsubst %.c,%.d,$(filter %.c,$(SRC)) )
-CLEAN_FILTER = *.o *.bak *~ *.a *.elf *.elf2flt *.grv *.med *.gdb *.wav *.map *.avi *.tpl *.d
+CLEAN_FILTER = *.o *.bak *~ *.a *.elf *.elf2flt *.grv *.med *.gdb *.wav *.map *.avi *.tpl *.d *.lds *.bin
 SUBDIRS_CLEAN_OBJS=$(foreach filter,$(CLEAN_FILTER),$(SUBDIRS_CLEAN:%=%/$(filter)))
 
 do_build: subdirs $(DEPS) $(OBJS)
@@ -30,7 +30,13 @@ do_build_app : do_build_app_bin
 do_build_app_bin : incdir mk_api_file
 	@make -C kernel/ --no-print-directory -s all DO_STDALONE_APP=1
 	@make -C apps/$(APP_NAME) --no-print-directory -s stdalone
-	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(APP_NAME).elf \
+	@chmod 777 ./tools/lds_files/create_lds
+	@./tools/lds_files/create_lds init
+	@$(LD) -N -Tmedios.lds -o $(APP_NAME).elf \
+            -b binary $(LD_BIN_INC) -b elf32-littlearm \
+            $(KERNEL_OBJS) apps/$(APP_NAME)/build/*.o $(LDFLAGS) -Map medios.map
+	@./tools/lds_files/create_lds final
+	@$(LD) -N -Tmedios.lds -o $(APP_NAME).elf \
             -b binary $(LD_BIN_INC) -b elf32-littlearm \
             $(KERNEL_OBJS) apps/$(APP_NAME)/build/*.o $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary $(APP_NAME).elf $(APP_NAME).bin
@@ -42,11 +48,17 @@ do_build_simple_app : do_build_simple_app_bin
 do_build_simple_app_bin: incdir mk_api_file
 	@make -C apps/ --no-print-directory -s $(APP_NAME).o
 	@make -C kernel/ --no-print-directory -s all DO_STDALONE_APP=1
-	@$(LD) -N -T$(TARGET_DEVICE)_mediOS.lds -o $(APP_NAME).elf \
+	@chmod 777 ./tools/lds_files/create_lds
+	@./tools/lds_files/create_lds init
+	@$(LD) -N -Tmedios.lds -o $(APP_NAME).elf \
+            -b binary $(LD_BIN_INC) -b elf32-littlearm \
+            $(KERNEL_OBJS) apps/$(APP_NAME).o $(LDFLAGS) -Map medios.map
+	@./tools/lds_files/create_lds final
+	@$(LD) -N -Tmedios.lds -o $(APP_NAME).elf \
             -b binary $(LD_BIN_INC) -b elf32-littlearm \
             $(KERNEL_OBJS) apps/$(APP_NAME).o $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary $(APP_NAME).elf $(APP_NAME).bin
-                   
+                           
 %.o: %.c
 	@echo "[$@]"
 	@$(GCC) $(GCCFLAGS) -c -o $@ $<
