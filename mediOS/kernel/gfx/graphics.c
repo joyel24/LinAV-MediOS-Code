@@ -540,6 +540,11 @@ void gfx_setPalletteRGB(int r, int g, int b, int index)
     osd_setPaletteRGB(r,g,b,index);
 }
 
+void gfx_setEntirePalette(int palette[256][3],int size)
+{
+    osd_setEntirePalette(palette,size);
+}
+
 void gfx_fontSet(int font_nb)
 {
     current_font=font_nb;

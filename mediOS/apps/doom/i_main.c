@@ -15,6 +15,13 @@
 // for more details.
 //
 // $Log$
+// Revision 1.6  2006/07/12 17:13:01  sfxgligli
+// - widget system
+// - new cfg file parser
+// - uidemo
+// - enabled random dos name generation in fat code
+// - some function name standardisation
+//
 // Revision 1.5  2006/06/19 16:36:30  sfxgligli
 // aoDoom update
 //
@@ -134,7 +141,7 @@ int app_main(){
     myargc = 0;
     myargv = NULL;
 
-    osd_setEntirePalette(gui_pal,256);
+    gfx_setEntirePalette(gui_pal,256);
 
     gfx_openGraphics();
     gfx_clearScreen(COLOR_WHITE);
@@ -192,6 +199,6 @@ void app_exit(bool error){
 #ifdef BUILD_STDALONE
     reload_firmware();
 #else
-    exit();
+    exit(0);
 #endif
 };

@@ -8,24 +8,18 @@ GCCFLAGS += -I../../include -I. -O3 \
 
 TARGET = doom
 
-SRC = $(wildcard *.c)
-SRC2 = $(wildcard *.S)
-OBJS = $(SRC:%.c=%.o) $(SRC2:%.S=%.o)
-
 LIBS = ../../lib/libmedios.a
 
 LDFLAGS =  -nostdlib --emit-relocs -L../../lib -lmedios -T$(TARGET_DEVICE)_doom.lds
 
+BUILD_DIR = build
 
-all: builddir $(LIBS) $(OBJS)
-	@cp -f $(OBJS) build
-	@$(LD) build/*.o ../../lib/*.o -o $(TARGET).med $(LDFLAGS) -Map doom.map
+all: builddir $(LIBS) do_build
+	@$(LD) build/*.o ../../lib/*.o $(LDFLAGS) -o $(TARGET).med -Map doom.map
 	@rm -f .elf *.gdb *.elf2flt
-        
 
 stdalone: GCCFLAGS += -DBUILD_STDALONE
-stdalone: builddir $(OBJS)
-	@cp -f $(OBJS) build
+stdalone: builddir do_build
         
 $(LIBS):
 	make -C ../../kernel lib_medios 

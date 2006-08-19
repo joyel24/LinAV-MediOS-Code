@@ -109,6 +109,7 @@ void   # gfx_drawBitmap            # BITMAP * bitmap, int x, int y
 void   # gfx_scrollWindowVert      # unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP
 void   # gfx_scrollWindowHoriz     # unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT
 void   # gfx_setPalletteRGB        # int r, int g, int b, int index
+void   # gfx_setEntirePalette      # int palette[256][3],int size
 void   # gfx_fontSet               # int font_nb
 int    # gfx_fontGet               # void
 

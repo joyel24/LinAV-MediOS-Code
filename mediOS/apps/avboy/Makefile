@@ -15,8 +15,7 @@ SUBDIRS_CLEAN = build
 
 BUILD_DIR = build
 
-all: builddir $(LIBS) $(OBJS)
-	@cp -f $(OBJS) build
+all: builddir $(LIBS) do_build
 	@$(LD)  build/*.o ../../lib/*.o -o $(TARGET).med $(LDFLAGS) -Map avboy.map
 	@rm -f .elf *.gdb *.elf2flt
         
@@ -30,3 +29,6 @@ builddir:
 	@mkdir -p build
 
 include ../../default.rule
+
+
+

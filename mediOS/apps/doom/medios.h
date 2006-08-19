@@ -13,17 +13,22 @@
     #include <kernel/osd.h>
     #include <kernel/uart.h>
     #include <kernel/exit.h>
+    #include <sys_def/string.h>
+    extern int gui_pal[256][3];
 #else
     #include <api.h>
+    #include <sys_def/malloc.h>
+    #include <sys_def/stddef.h>
+    #include <kernel/gui_pal.h>
 #endif
 
 #include <buttons.h>
 #include <kernel/io.h>
 
+#include <sys_def/ctype.h>
 #include <sys_def/section_types.h>
 
-#include <sys_def/ctype.h>
-#include <sys_def/string.h>
+
 #include <sys_def/alloca.h>
 #include <sys_def/timer.h>
 #include <sys_def/font.h>
@@ -53,7 +58,7 @@
 */
 extern void app_exit();
 
-extern int gui_pal[256][3];
+
 
 // buttons
 
