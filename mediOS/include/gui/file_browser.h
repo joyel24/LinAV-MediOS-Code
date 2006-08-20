@@ -68,6 +68,7 @@ struct browser_data {
 
 int browser_simpleBrowse(char * path,char * res);
 int browser_browse(struct browser_data *bdata,char * path,char * res);
+void browser_setPath(char * path,struct browser_data *bdata);
 
 void browser_disposeBrowse(struct browser_data * bdata);
 struct browser_data * browser_NewBrowse(void);

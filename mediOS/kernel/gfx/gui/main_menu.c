@@ -238,6 +238,12 @@ void mainMenu_loop(void)
     {
         if((evt=evt_getStatus(evt_hand))<0)
             printk("Bad evt (error:%d)\n",-evt);
+        
+        if(evt==EVT_CF_IN || evt==EVT_CF_OUT)
+        {
+            browser_setPath("/",browseData);
+        }
+        
         statusLine_EvtHandler(evt);
         menu_EvtHandler(evt);
     }

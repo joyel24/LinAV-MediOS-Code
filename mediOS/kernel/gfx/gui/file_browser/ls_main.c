@@ -83,6 +83,11 @@ struct browser_data * browser_NewBrowse(void)
     return ptr;
 }
 
+void browser_setPath(char * path,struct browser_data *bdata)
+{
+    strcpy(bdata->path,path);
+}
+
 void browser_disposeBrowse(struct browser_data * bdata)
 {
     cleanList(bdata);

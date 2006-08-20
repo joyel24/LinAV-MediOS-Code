@@ -55,6 +55,11 @@ MED_RET_T browserEvt(struct browser_data * bdata)
             continue;  
         switch(evt)
         {
+            case EVT_CF_IN:
+            case EVT_CF_OUT:
+                if(!viewNewDir(bdata,"/"))
+                    stop=1;
+                break;
             case BTN_OFF:
                 stop=1;
                 break;
