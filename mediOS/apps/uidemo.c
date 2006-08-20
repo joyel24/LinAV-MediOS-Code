@@ -10,22 +10,26 @@
 * KIND, either express of implied.
 */
 
-#include <kernel/malloc.h>
-#include <kernel/evt.h>
+#ifdef STDALONE
+    #include <kernel/malloc.h>
+    #include <kernel/evt.h>
+    
+    #include <gui/widget.h>
+    #include <gui/checkbox.h>
+    #include <gui/trackbar.h>
+    #include <gui/chooser.h>
+    #include <gui/button.h>
+    #include <gui/textmenu.h>
+    #include <gui/widgetmenu.h>
+    #include <gui/iconmenu.h>
+    #include <gui/icons.h>
+    #include <gui/widgetlist.h>
+    #include <gui/label.h>
 
-#include <gui/widget.h>
-#include <gui/checkbox.h>
-#include <gui/trackbar.h>
-#include <gui/chooser.h>
-#include <gui/button.h>
-#include <gui/textmenu.h>
-#include <gui/widgetmenu.h>
-#include <gui/iconmenu.h>
-#include <gui/icons.h>
-#include <gui/widgetlist.h>
-#include <gui/label.h>
-
-#include <gui/cfg_file.h>
+    #include <gui/cfg_file.h>
+#else
+    #include <api.h>
+#endif
 
 char * chooser_items[]={"Choice 1","Choice 2","Choice 3","Choice 4","Choice 5","Pouet!"};
 
@@ -262,12 +266,14 @@ void buildIconMenu(){
     ICONMENU_ITEM mi;
     int i;
     char * s;
-    BITMAP icons[]={icon_load("clock_icon.ico")->bmap_data,
-                    icon_load("calc.ico")->bmap_data,
-                    icon_load("mines.ico")->bmap_data,
-                    icon_load("snake.ico")->bmap_data,
-                    icon_load("othello.ico")->bmap_data,
-                    icon_load("browser_icon.ico")->bmap_data};
+    BITMAP icons[6];
+
+    icons[0]=icon_load("clock_icon.ico")->bmap_data;
+    icons[1]=icon_load("calc.ico")->bmap_data;
+    icons[2]=icon_load("mines.ico")->bmap_data;
+    icons[3]=icon_load("snake.ico")->bmap_data;
+    icons[4]=icon_load("othello.ico")->bmap_data;
+    icons[5]=icon_load("browser_icon.ico")->bmap_data;
 
     iconMenu=iconMenu_create();
     iconMenu->setRect(iconMenu,0,20,220,156);

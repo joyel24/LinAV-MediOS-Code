@@ -16,10 +16,6 @@
 
 #include <gui/widget.h>
 
-// paint parameters
-#define TRACKBAR_SPACING 2 // space between trackbar and value
-#define TRACKBAR_CURSOR_RATIO (1/1.618) // h/w ratio
-
 // members of the TRACKBAR object
 #define TRACKBAR_MEMBERS               \
     /* we inherit from WIDGET */       \
@@ -38,12 +34,5 @@ typedef void(*TRACKBAR_CHANGEEVENT)(void *);
 typedef struct {
     TRACKBAR_MEMBERS
 } * TRACKBAR;
-
-TRACKBAR trackbar_create();
-void trackbar_destroy(TRACKBAR t);
-void trackbar_init(TRACKBAR t);
-bool trackbar_handleEvent(TRACKBAR t,int evt);
-void trackbar_paint(TRACKBAR t);
-void trackbar_setValue(TRACKBAR t,int value);
 
 #endif

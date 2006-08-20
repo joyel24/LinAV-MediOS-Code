@@ -10,7 +10,7 @@
 * KIND, either express of implied.
 */
 
-#include <gui/chooser.h>
+#include <kernel/chooser.h>
 
 #include <sys_def/stddef.h>
 

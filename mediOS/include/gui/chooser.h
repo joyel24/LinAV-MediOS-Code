@@ -32,10 +32,4 @@ typedef struct {
     CHOOSER_MEMBERS
 } * CHOOSER;
 
-CHOOSER chooser_create();
-void chooser_destroy(CHOOSER c);
-void chooser_init(CHOOSER c);
-bool chooser_handleEvent(CHOOSER c,int evt);
-void chooser_paint(CHOOSER c);
-
 #endif

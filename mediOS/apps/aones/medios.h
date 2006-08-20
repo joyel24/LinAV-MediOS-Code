@@ -22,9 +22,14 @@
     #include <kernel/evt.h>
     #include <kernel/bat_power.h>
     #include <kernel/videnc.h>
+    #include <kernel/icons.h>
+    #include <kernel/widgetlist.h>
+    #include <kernel/widgetmenu.h>
 #else
     #include <api.h>
 #endif
+
+#include <gui/file_browser.h>
 
 #include <int_timer.h>
 #include <buttons.h>
@@ -38,11 +43,6 @@
 #include <sys_def/timer.h>
 #include <sys_def/font.h>
 #include <sys_def/colordef.h>
-#include <gui/file_browser.h>
-#include <gui/icons.h>
-#include <gui/widgetlist.h>
-#include <gui/widgetmenu.h>
-
 #define F_HANDLE int
 
 #define DEBUGS printf

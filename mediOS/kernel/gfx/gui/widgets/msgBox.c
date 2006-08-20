@@ -19,7 +19,7 @@
 #include <sys_def/string.h>
 
 #include <gui/msgBox.h>
-#include <gui/icons.h>
+#include <kernel/icons.h>
 
 BITMAP * MsgBox_ExclamationBitmap;
 BITMAP * MsgBox_QuestionBitmap;

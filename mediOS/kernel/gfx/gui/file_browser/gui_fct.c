@@ -19,7 +19,7 @@
 #include <kernel/errors.h>
 #include <kernel/malloc.h>
 
-#include <gui/icons.h>
+#include <kernel/icons.h>
 #include <gui/file_browser.h>
 #include <gui/scrollbar.h>
 #include <file_type.h>

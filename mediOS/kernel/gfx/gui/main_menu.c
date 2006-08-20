@@ -25,6 +25,7 @@
 #include <kernel/errors.h>
 #include <kernel/usb_fw.h>
 #include <kernel/lcd.h>
+#include <kernel/icons.h>
 
 #include <evt.h>
 
@@ -48,9 +49,9 @@ extern struct menu_data menu_cfg;
 
 extern int cfg_line_num;
 
-struct icon_elem * sub_icon=NULL;
-struct icon_elem * back_icon=NULL;
-struct icon_elem * plugin_icon=NULL;
+ICON sub_icon=NULL;
+ICON back_icon=NULL;
+ICON plugin_icon=NULL;
 
 
 #define SHOW_ALL        1

@@ -1,5 +1,5 @@
 /*
-* include/gui/label.h
+* include/kernel/label.h
 *
 * MediOS project
 * Copyright (c) 2005 by Christophe THOMAS
@@ -11,27 +11,19 @@
 *
 */
 
-#ifndef __LABEL_H
-#define __LABEL_H
+#ifndef __K_LABEL_H
+#define __K_LABEL_H
 
-#include <gui/widget.h>
+#include <gui/label.h>
 
-typedef enum {LA_LEFT, LA_CENTER, LA_RIGHT} LABEL_ALIGNMENT;
+#include <kernel/widget.h>
 
 //*****************************************************************************
 // LABEL
 //*****************************************************************************
 
-// members of the LABEL object
-#define LABEL_MEMBERS          \
-    /* we inherit from MENUITEM */     \
-    WIDGET_MEMBERS                     \
-                                       \
-    char * caption;                    \
-    LABEL_ALIGNMENT alignment;
-
-typedef struct {
-    LABEL_MEMBERS
-} * LABEL;
+LABEL label_create();
+void label_init(LABEL l);
+void label_paint(LABEL l);
 
 #endif

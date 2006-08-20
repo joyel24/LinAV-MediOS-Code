@@ -10,7 +10,7 @@
 * KIND, either express of implied.
 */
 
-#include <gui/trackbar.h>
+#include <kernel/trackbar.h>
 
 #include <sys_def/stddef.h>
 #include <sys_def/string.h>

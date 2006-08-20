@@ -16,9 +16,6 @@
 
 #include <gui/widget.h>
 
-// paint parameters
-#define CHECKBOX_SPACING 2 // space between text and box
-
 // members of the CHECKBOX object
 #define CHECKBOX_MEMBERS               \
     /* we inherit from WIDGET */       \
@@ -33,11 +30,5 @@ typedef void(*CHECKBOX_CHANGEEVENT)(void *);
 typedef struct {
     CHECKBOX_MEMBERS
 } * CHECKBOX;
-
-CHECKBOX checkbox_create();
-void checkbox_destroy(CHECKBOX c);
-void checkbox_init(CHECKBOX c);
-bool checkbox_handleEvent(CHECKBOX c,int evt);
-void checkbox_paint(CHECKBOX c);
 
 #endif

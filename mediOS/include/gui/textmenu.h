@@ -14,7 +14,7 @@
 #ifndef __TEXTMENU_H
 #define __TEXTMENU_H
 
-#include<gui/menu.h>
+#include <gui/menu.h>
 
 typedef enum {TMA_LEFT, TMA_CENTER, TMA_RIGHT} TM_ALIGNMENT;
 
@@ -33,11 +33,6 @@ typedef struct {
     TEXTMENU_ITEM_MEMBERS
 } * TEXTMENU_ITEM;
 
-TEXTMENU_ITEM textMenuItem_create();
-void textMenuItem_destroy(TEXTMENU_ITEM mi);
-void textMenuItem_init(TEXTMENU_ITEM mi);
-void textMenuItem_paint(TEXTMENU_ITEM mi);
-
 //*****************************************************************************
 // TEXTMENU
 //*****************************************************************************
@@ -52,12 +47,5 @@ void textMenuItem_paint(TEXTMENU_ITEM mi);
 typedef struct {
     TEXTMENU_MEMBERS
 } * TEXTMENU;
-
-TEXTMENU textMenu_create();
-void textMenu_destroy(TEXTMENU m);
-void textMenu_init(TEXTMENU m);
-bool textMenu_handleEvent(TEXTMENU m,int evt);
-void textMenu_addItem(TEXTMENU m, TEXTMENU_ITEM item);
-void textMenu_updateItems(TEXTMENU m, bool fast);
 
 #endif

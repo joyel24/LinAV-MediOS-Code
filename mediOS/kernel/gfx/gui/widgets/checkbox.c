@@ -10,7 +10,7 @@
 * KIND, either express of implied.
 */
 
-#include <gui/checkbox.h>
+#include <kernel/checkbox.h>
 
 #include <sys_def/stddef.h>
 

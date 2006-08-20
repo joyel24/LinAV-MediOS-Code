@@ -22,27 +22,6 @@ struct icon_elem {
     struct icon_elem * nxt;
 };
 
-void icon_init(void);
-
-struct icon_elem * icon_load(char * filename);
-struct icon_elem * icon_add(char * name,unsigned char * data,int w,int h);
-struct icon_elem * icon_get(char * name);
-
-/* icon list
-- linavLogo
-- usbIcon
-- powerIcon
-- upBitmap
-- dwBitmap
-- dirBitmap
-- mp3Bitmap
-- textBitmap
-- imageBitmap
-- MsgBoxExclamationBitmap
-- MsgBoxQuestionBitmap
-- MsgBoxWarningBitmap
-- MsgBoxInformationBitmap
-- MsgBoxErrorBitmap
-*/
+typedef struct icon_elem * ICON;
 
 #endif

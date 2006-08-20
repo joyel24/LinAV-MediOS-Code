@@ -1,7 +1,15 @@
+#api_inc#sys_def/arch.h
+#api_inc#sys_def/colordef.h
+#api_inc#sys_def/font.h
+#api_inc#sys_def/section_types.h
+#api_inc#sys_def/stddef.h
+#api_inc#sys_def/types.h
+
 #k_inc#kernel/errors.h
 #api_inc#kernel/errors.h
 
 #k_inc#kernel/malloc.h
+#api_inc#sys_def/malloc.h
 void* # do_malloc   # long size, int user_flag
 void* # do_realloc  # void *buffer, long newsize, int user_flag
 void  # free     # void *buf
@@ -72,12 +80,11 @@ int            # truncate  # int fdesc, int length
 int            # filesize  # int fdesc
 int            # ftell     # int fdesc
 
-#k_inc#kernel/stdfs.h
-#api_inc#sys_def/stdfs.h
 DIR*           # opendir    # const char* name
 int            # closedir   # DIR* dir
 struct dirent* # readdir    # DIR* dir
 int            # mkdir      # const char *name, int mode
+
 #k_inc#kernel/graphics.h
 #api_inc#sys_def/graphics.h
 void   # gfx_openGraphics          # void
@@ -157,3 +164,60 @@ int    # sscanf                    # const char * buf, const char * fmt, ...
 #k_inc#sys_def/random.h
 void   # srand                     # unsigned int seed
 int    # rand                      # void
+
+#api_inc#gui/widget.h
+#k_inc#kernel/widget.h
+WIDGET                  # widget_create               # void
+
+#api_inc#gui/checkbox.h
+#k_inc#kernel/checkbox.h
+CHECKBOX                # checkbox_create             # void
+
+#api_inc#gui/trackbar.h
+#k_inc#kernel/trackbar.h
+TRACKBAR                # trackbar_create             # void
+
+#api_inc#gui/chooser.h
+#k_inc#kernel/chooser.h
+CHOOSER                 # chooser_create              # void
+
+#api_inc#gui/button.h
+#k_inc#kernel/button.h
+BUTTON                  # button_create               # void
+
+#api_inc#gui/menu.h
+#k_inc#kernel/menu.h
+MENU                    # menu_create                 # void
+MENU_ITEM               # menuItem_create             # void
+
+#api_inc#gui/textmenu.h
+#k_inc#kernel/textmenu.h
+TEXTMENU                # textMenu_create             # void
+TEXTMENU_ITEM           # textMenuItem_create         # void
+
+#api_inc#gui/widgetmenu.h
+#k_inc#kernel/widgetmenu.h
+WIDGETMENU              # widgetMenu_create           # void
+WIDGETMENU_ITEM         # widgetMenuItem_create       # void
+WIDGETMENU_CHECKBOX     # widgetMenuCheckbox_create   # void
+WIDGETMENU_TRACKBAR     # widgetMenuTrackbar_create   # void
+WIDGETMENU_CHOOSER      # widgetMenuChooser_create    # void
+
+#api_inc#gui/iconmenu.h
+#k_inc#kernel/iconmenu.h
+ICONMENU                # iconMenu_create             # void
+ICONMENU_ITEM           # iconMenuItem_create         # void
+
+#api_inc#gui/widgetlist.h
+#k_inc#kernel/widgetlist.h
+WIDGETLIST              # widgetList_create           # void
+
+#api_inc#gui/label.h
+#k_inc#kernel/label.h
+LABEL                   # label_create                # void
+
+#api_inc#gui/icons.h
+#k_inc#kernel/icons.h
+ICON   # icon_load                 # char * filename
+ICON   # icon_add                  # char * name,unsigned char * data,int w,int h
+ICON   # icon_get                  # char * name

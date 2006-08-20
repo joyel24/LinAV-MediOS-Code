@@ -10,7 +10,7 @@
 * KIND, either express of implied.
 */
 
-#include <gui/label.h>
+#include <kernel/label.h>
 
 #include <kernel/malloc.h>
 

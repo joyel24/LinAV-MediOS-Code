@@ -20,8 +20,6 @@
 #include <sys_def/colordef.h>
 #include <sys_def/font.h>
 
-#include <kernel/graphics.h>
-
 // default parameters
 #define WIDGET_DEFAULT_FORECOLOR COLOR_BLACK
 #define WIDGET_DEFAULT_BACKCOLOR COLOR_WHITE
@@ -57,12 +55,5 @@ typedef void(*WIDGET_RECTSETTER)(void *,int,int,int,int);
 typedef struct {
     WIDGET_MEMBERS
 } * WIDGET;
-
-WIDGET widget_create();
-void widget_destroy(WIDGET w);
-void widget_init(WIDGET w);
-bool widget_handleEvent(WIDGET w,int evt);
-void widget_paint(WIDGET w);
-void widget_setRect(WIDGET w,int x,int y,int width,int height);
 
 #endif

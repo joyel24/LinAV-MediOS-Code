@@ -18,8 +18,8 @@
 #include <kernel/rtc.h>
 #include <kernel/bat_power.h>
 #include <kernel/usb_fw.h>
+#include <kernel/icons.h>
 
-#include <gui/icons.h>
 #include <gui/gui.h>
 
 #include <sys_def/colordef.h>

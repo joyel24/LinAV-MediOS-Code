@@ -24,9 +24,6 @@ typedef enum {IMIP_TOP, IMIP_LEFT} IM_ICONPOSITION;
 // ICONMENU_ITEM
 //*****************************************************************************
 
-// paint parameters
-#define ICONMENU_ITEM_SPACING 2 // space between icon and text in IMIP_LEFT
-
 // members of the TEXTMENUITEM object
 #define ICONMENU_ITEM_MEMBERS          \
     /* we inherit from MENUITEM */     \
@@ -38,11 +35,6 @@ typedef enum {IMIP_TOP, IMIP_LEFT} IM_ICONPOSITION;
 typedef struct {
     ICONMENU_ITEM_MEMBERS
 } * ICONMENU_ITEM;
-
-ICONMENU_ITEM iconMenuItem_create();
-void iconMenuItem_destroy(ICONMENU_ITEM mi);
-void iconMenuItem_init(ICONMENU_ITEM mi);
-void iconMenuItem_paint(ICONMENU_ITEM mi);
 
 //*****************************************************************************
 // ICONMENU
@@ -59,12 +51,5 @@ void iconMenuItem_paint(ICONMENU_ITEM mi);
 typedef struct {
     ICONMENU_MEMBERS
 } * ICONMENU;
-
-ICONMENU iconMenu_create();
-void iconMenu_destroy(ICONMENU m);
-void iconMenu_init(ICONMENU m);
-bool iconMenu_handleEvent(ICONMENU m,int evt);
-void iconMenu_addItem(ICONMENU m, ICONMENU_ITEM item);
-void iconMenu_updateItems(ICONMENU m, bool fast);
 
 #endif

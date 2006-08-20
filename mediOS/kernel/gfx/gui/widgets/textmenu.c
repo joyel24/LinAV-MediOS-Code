@@ -10,7 +10,7 @@
 * KIND, either express of implied.
 */
 
-#include <gui/textmenu.h>
+#include <kernel/textmenu.h>
 
 #include <sys_def/stddef.h>
 

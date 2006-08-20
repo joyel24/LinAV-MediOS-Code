@@ -30,10 +30,4 @@ typedef struct {
     BUTTON_MEMBERS
 } * BUTTON;
 
-BUTTON button_create();
-void button_destroy(BUTTON b);
-void button_init(BUTTON b);
-bool button_handleEvent(BUTTON b,int evt);
-void button_paint(BUTTON b);
-
 #endif

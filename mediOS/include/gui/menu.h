@@ -14,8 +14,8 @@
 #ifndef __MENU_H
 #define __MENU_H
 
-#include<gui/widget.h>
-#include<gui/widgetlist.h>
+#include <gui/widget.h>
+#include <gui/widgetlist.h>
 
 // forward declaration needed because MENU_ITEM has a MENU member and vice-versa
 typedef struct MENU_STRUCT * MENU;
@@ -35,10 +35,6 @@ typedef struct MENU_STRUCT * MENU;
 typedef struct {
     MENU_ITEM_MEMBERS
 } * MENU_ITEM;
-
-MENU_ITEM menuItem_create();
-void menuItem_destroy(MENU_ITEM mi);
-void menuItem_init(MENU_ITEM mi);
 
 //*****************************************************************************
 // MENU
@@ -75,15 +71,5 @@ typedef int(*MENU_INDEXFROMCAPTIONGETTER)(void *,char *);
 struct MENU_STRUCT {
     MENU_MEMBERS
 };
-
-MENU menu_create();
-void menu_destroy(MENU m);
-void menu_init(MENU m);
-bool menu_handleEvent(MENU m,int evt);
-void menu_paint(MENU m);
-void menu_addItem(MENU m, MENU_ITEM item);
-void menu_clearItems(MENU m);
-int menu_indexOf(MENU m, MENU_ITEM item);
-int menu_indexFromCaption(MENU m, char * caption);
 
 #endif

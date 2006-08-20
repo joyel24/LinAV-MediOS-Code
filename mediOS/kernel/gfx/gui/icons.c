@@ -14,7 +14,8 @@
 #include <kernel/stdfs.h>
 #include <kernel/malloc.h>
 #include <kernel/graphics.h>
-#include <gui/icons.h>
+#include <kernel/icons.h>
+
 #include <gui/icons_data.h>
 
 
@@ -23,14 +24,14 @@ char ident_str[]="AVICO";
 
 #define ICON_DIR "/icons"
 
-struct icon_elem * icon_list_head=NULL;
+ICON icon_list_head=NULL;
 
-struct icon_elem * icon_load(char * filename)
+ICON icon_load(char * filename)
 {
     int infile;
     int i;
     int len;
-    struct icon_elem * ptr;
+    ICON ptr;
     char * tmpF;
     char * name;
     char buff[6];
@@ -115,7 +116,7 @@ struct icon_elem * icon_load(char * filename)
     }
     
     /* create new icon struct*/
-    ptr=(struct icon_elem *)malloc(sizeof(struct icon_elem));
+    ptr=(ICON)malloc(sizeof(struct icon_elem));
     if(!ptr)
     {
         printk("[icon_load] not enough memory for icon structure\n"); 
@@ -205,9 +206,9 @@ err1:
     return NULL;
 }
 
-struct icon_elem * icon_add(char * name,unsigned char * data,int w,int h)
+ICON icon_add(char * name,unsigned char * data,int w,int h)
 {
-    struct icon_elem * ptr;
+    ICON ptr;
     printk("addIcon %s ",name);
     /* check if an icon with the same name is not already present */
     
@@ -221,7 +222,7 @@ struct icon_elem * icon_add(char * name,unsigned char * data,int w,int h)
     }
     printk("- not defined ");
     /* create new icon struct*/
-    ptr=(struct icon_elem *)malloc(sizeof(struct icon_elem));
+    ptr=(ICON)malloc(sizeof(struct icon_elem));
     if(!ptr)
     {
         printk("[icon_load] not enough memory for icon structure\n");
@@ -247,9 +248,9 @@ err1:
     return NULL;
 }
 
-struct icon_elem * icon_get(char * name)
+ICON icon_get(char * name)
 {
-    struct icon_elem * ptr;
+    ICON ptr;
     printk("Icon %s asked ",name);
     for(ptr=icon_list_head;ptr!=NULL;ptr=ptr->nxt)
     {
