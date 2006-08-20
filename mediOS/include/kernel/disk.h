@@ -18,12 +18,24 @@
 #define __DISK_H
 
 #include <sys_def/types.h>
+#include <kernel/errors.h>
 
 #define HD_DRIVE      0
 #define CF_DRIVE      1
 
+#define DISK_PART_0   0
+#define DISK_PART_1   1
+#define DISK_PART_2   2
+#define DISK_PART_3   3
+
 #define FLUSH         1
 #define NOFLUSH       0
+
+#ifdef HAVE_EXT_MODULE
+#define NB_DRIVE      2
+#else
+#define NB_DRIVE      1
+#endif
 
 struct partition_info {
     int start;
@@ -38,23 +50,34 @@ struct hd_info_s {
 	char model [41];
         unsigned long size;
         int multi_sector;
+        struct partition_info * partition_list;
 };
 
-#define NUM_VOLUMES  2 /* we can only mount 2 volumes */
+struct disk_mountInfo {
+    char * mount_path;
+    int drive;
+    int partition_num;
+};
+
+#define MOUNT_DISK_PARAM(INFO) drive_Info[INFO].mount_path,\
+    drive_Info[INFO].drive, \
+    drive_Info[INFO].partition_num
+
+extern struct hd_info_s * drive_info[NB_DRIVE];
 
 void disk_init(void);
+
+MED_RET_T disk_add(int drive);
+MED_RET_T disk_rm(int drive);
+MED_RET_T disk_rmAll(void);
+MED_RET_T disk_addAll(void);
+/* simple system for no */
+void disk_addCF(void);
+
+char * disk_getName(int id);
+
 void disk_reInit(void);
 
-int disk_mount(int drive);
-int disk_umount(int drive,bool flush);
-
-struct partition_info * disk_setup(int drive);
-
-void disk_identify(int drive, struct hd_info_s * hd_info);
-
-void disk_haltHD(void);
-
-void dd_swapChar(char * txt,int size);
-void dd_findEnd(char * txt,int size);
+struct hd_info_s * disk_setup(int drive);
 
 #endif

@@ -910,6 +910,7 @@ void fat_init(void)
     }
 
      memset(cache_list,0x0,sizeof(struct file_cache)*MAX_OPEN);
+     printk("[fat init] done\n");
 }
 
 

@@ -71,10 +71,14 @@ struct vfs_node {
     struct vfs_node *prev_dirty,*next_dirty;
     /* open node of the fs linkage */
     struct vfs_node *prev_open,*next_open;
+    
+    /* find the mountpoint structure */
+    struct vfs_mountPoint * mount_point;
 };
 
 void vfs_nodePrintTree(struct vfs_node *node,int level);
-MED_RET_T vfs_nodeInitChild(struct vfs_node * parent,
+MED_RET_T vfs_nodeInitChild(struct vfs_mountPoint * mount_point,
+                struct vfs_node * parent,
                 struct  vfs_pathname * name,
                 struct vfs_node * node,
                 vfs_node_type type);
@@ -91,5 +95,7 @@ MED_RET_T vfs_rmNodeFromTree(struct vfs_node * node);
 MED_RET_T vfs_nodeSetDirty(struct vfs_node * node);
 MED_RET_T vfs_nodeClearDirty(struct vfs_node * node);
 MED_RET_T vfs_nodeDestroy(struct vfs_node * node);
+
+MED_RET_T vfs_nodeExist(struct vfs_pathname * path,struct vfs_node ** node);
 
 #endif

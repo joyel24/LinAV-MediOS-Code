@@ -151,7 +151,7 @@ int doLs(struct browser_data * bdata)
         fullname[0] = '\0';
         strcat(fullname, dp->d_name);
                        
-        if(dp->attribute & ATTR_DIRECTORY)
+        if(dp->type & VFS_TYPE_DIR)
         {
             if(fullname[0]=='.' && fullname[1]=='\0')
                 continue;

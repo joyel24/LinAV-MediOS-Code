@@ -22,10 +22,7 @@
 #include <kernel/vfs_node.h>
 #include <kernel/list.h>
 
-extern struct vfs_node * root_node;
-
-extern struct vfs_node * dirty_list;
-extern struct vfs_node * opened_node;
+extern struct vfs_mountPoint * root_mountPoint;
 
 void vfs_nodePrintTree(struct vfs_node *node,int level)
 {
@@ -60,7 +57,8 @@ void vfs_nodePrintTree(struct vfs_node *node,int level)
     }
 }
 
-MED_RET_T vfs_nodeInitChild(struct vfs_node * parent,
+MED_RET_T vfs_nodeInitChild(struct vfs_mountPoint * mount_point,
+                struct vfs_node * parent,
                 struct  vfs_pathname * name,
                 struct vfs_node * node,
                 vfs_node_type type)
@@ -83,9 +81,33 @@ MED_RET_T vfs_nodeInitChild(struct vfs_node * parent,
 
     node->ref_cnt = 0;
     node->type = type;
-    
+    node->mount_point=mount_point;
     vfs_nodeAddChild(parent,node);
 
+    return MED_OK;
+}
+
+MED_RET_T vfs_nodeExist(struct vfs_pathname * path,struct vfs_node ** node)
+{
+    struct  vfs_pathname new_path;
+    char path_str[MAX_PATH];
+    int ret_val;
+    
+    if(!node)
+        return -MED_EINVAL;
+      
+    vfs_pathNameDup(path,&new_path,path_str);
+          
+    ret_val=vfs_nodeLookup(&new_path,root_mountPoint->root_node,node,&new_path);
+    if(ret_val!=MED_OK && ret_val!=-MED_ENOENT)
+    {
+        printk("[vfs_nodeExist] Err(%d): during 'vfs_nodeLookup' call\n",-ret_val);
+        return -MED_EINVAL;
+    }
+    
+    if(new_path.length>0)
+        *node=NULL;
+        
     return MED_OK;
 }
 
@@ -152,7 +174,7 @@ MED_RET_T vfs_nodeLookup(struct  vfs_pathname * path,
         {
 #warning if we go up, should we unref current and ref parent ?
             /* trying to reach upper level */
-            if(current_node == root_node)
+            if(current_node == root_mountPoint->root_node)
             {
                 /* already at root level
                 -> nothing more to do than return current node */
@@ -254,19 +276,15 @@ MED_RET_T vfs_rmNodeFromTree(struct vfs_node * node)
 {
     if(node->ref_cnt>0)
     {
-        printk("Error: can't delete node: %s\n",node->name.str);
+        printk("Error: can't delete node %s there has still %d ref\n",node->name.str,node->ref_cnt);
         return -MED_EINVAL;
     }
 
     if(node->parent)
     {
         struct vfs_node * parent = node->parent;
-        node->parent--;
-        if(!(parent->ref_cnt>=0))
-        {
-            printk("[FATAL ERROR] in vfs_nodeRef, parent cnt is not >=0 : %d\n",parent->ref_cnt);
+        if(vfs_nodeUnRef(node->parent)!=MED_OK)
             return -MED_EBADDATA;
-        }
         LIST_DELETE_NAMED(parent->children,node,siblings_prev,siblings_next);
     }
     vfs_nodeDestroy(node);
@@ -290,7 +308,7 @@ MED_RET_T vfs_nodeSetDirty(struct vfs_node * node)
     if(node->dirty)
         return MED_OK;
     node->dirty=1;
-    LIST_ADD_TAIL_NAMED(dirty_list,node,prev_dirty,next_dirty);
+    LIST_ADD_TAIL_NAMED(node->mount_point->dirty_list,node,prev_dirty,next_dirty);
     return MED_OK;
 }
 
@@ -299,7 +317,7 @@ MED_RET_T vfs_nodeClearDirty(struct vfs_node * node)
     if(!node->dirty)
         return MED_OK;
     node->dirty=0;
-    LIST_DELETE_NAMED(dirty_list,node,prev_dirty,next_dirty);
+    LIST_DELETE_NAMED(node->mount_point->dirty_list,node,prev_dirty,next_dirty);
     return MED_OK;
 }
 

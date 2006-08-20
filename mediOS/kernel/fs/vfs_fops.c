@@ -25,8 +25,7 @@
 #include <kernel/vfs.h>
 #include <kernel/vfs_node.h>
 
-extern struct vfs_node * root_node;
-extern struct vfs_node * opened_node;
+extern struct vfs_mountPoint * root_mountPoint;
 
 int open(char * name,int flags)
 {
@@ -35,7 +34,7 @@ int open(char * name,int flags)
 
     FILE * fd;
 
-    if(!root_node)
+    if(!root_mountPoint)
         return -MED_ENOENT;
     
     path.length = strlen(name);
@@ -51,7 +50,7 @@ int open(char * name,int flags)
         return -MED_EINVAL;
     }
 
-    ret_val=vfs_nodeLookup(&path,root_node,&fd,&path);
+    ret_val=vfs_nodeLookup(&path,root_mountPoint->root_node,&fd,&path);
 
     if(ret_val!=MED_OK && ret_val!=-MED_ENOENT)
     {
@@ -100,7 +99,7 @@ int open(char * name,int flags)
             }
 
             memset(new_node,0x0,sizeof(struct  vfs_node));
-            ret_val = vfs_nodeInitChild(fd,&path,new_node,VFS_TYPE_FILE);
+            ret_val = vfs_nodeInitChild(fd->mount_point,fd,&path,new_node,VFS_TYPE_FILE);
             if(ret_val!=MED_OK)
             {
                 printk("Error in initChild (err=%d)\n",-ret_val);
@@ -167,7 +166,7 @@ int open(char * name,int flags)
 
     vfs_nodeRef(fd);
     
-    LIST_ADD_TAIL_NAMED(opened_node,fd,prev_open,next_open);
+    LIST_ADD_TAIL_NAMED(fd->mount_point->opened_node,fd,prev_open,next_open);
 
     return (int)fd;
 }
@@ -221,10 +220,10 @@ MED_RET_T close(int fdesc)
         return ret_val;
 
     fd->opened = 0;
-
+    
+    LIST_DELETE_NAMED(fd->mount_point->opened_node,fd,prev_open,next_open);
     vfs_nodeUnRef(fd);
-    LIST_DELETE_NAMED(opened_node,fd,prev_open,next_open);
-
+    
     return MED_OK;
 }
 

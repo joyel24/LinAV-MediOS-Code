@@ -97,12 +97,12 @@ __IRAM_CODE void btn_chkPress(void)
             halt_launchTimer();
         }
     }
-    else if(need_clean)                  \
-    {                                    \
-        need_clean=0;                    \
-        memset(nb_pressed,0x0,sizeof(int)*NB_BUTTONS);\
-        memset(press_step,0x0,sizeof(int)*NB_BUTTONS);\
-    }                                     \
+    else if(need_clean)
+    {
+        need_clean=0;
+        memset(nb_pressed,0x0,sizeof(int)*NB_BUTTONS);
+        memset(press_step,0x0,sizeof(int)*NB_BUTTONS);
+    }
 }
 
 void btn_processPress(int val)

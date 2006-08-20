@@ -17,11 +17,15 @@
 #include <kernel/ext_module.h>
 #include <kernel/cf_module.h>
 #include <kernel/evt.h>
+#include <kernel/disk.h>
 
 struct evt_t cf_evt;
 
 void cf_connected(void)
 {
+    /* mounting */
+    disk_addCF();
+    /* send evt */
     cf_evt.evt=EVT_CF_IN;
     cf_evt.evt_class=CONNECT_CLASS;
     cf_evt.data=0;
@@ -30,6 +34,9 @@ void cf_connected(void)
 
 void cf_disconnected(void)
 {
+    /* umounting */
+    disk_rm(CF_DRIVE);
+    /* send evt */
     cf_evt.evt=EVT_CF_OUT;
     cf_evt.evt_class=CONNECT_CLASS;
     cf_evt.data=0;

@@ -61,7 +61,7 @@ void ata_selectHD         (void);
 void ata_selectCF         (void);
 
 void ata_init             (void);
-void ata_hwInit           (void);
+void ata_reset            (void);
 
 void arch_ata_resetHD     (void);
 void arch_ata_powerUpHD   (void);

@@ -52,8 +52,7 @@ MED_RET_T browserEvt(struct browser_data * bdata)
     {
         evt = evt_getStatus(evt_handler);
         if(!evt)
-            continue;
-            
+            continue;  
         switch(evt)
         {
             case BTN_OFF:

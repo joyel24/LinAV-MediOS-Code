@@ -14,6 +14,9 @@
 #ifndef __VFS_H
 #define __VFS_H
 
+#include <kernel/disk.h>
+#include <kernel/vfs_pathname.h>
+
 //#define DEBUG_VFS
 
 #ifdef DEBUG_VFS
@@ -24,12 +27,26 @@
 
 struct vfs_node;
 
-MED_RET_T vfs_mount(int device,unsigned int startsector);
+struct vfs_mountPoint {
+    int drive;
+    int partition_num;
+    struct vfs_node * root_node;
+    struct vfs_node * dirty_list;
+    struct vfs_node * opened_node;
+    struct vfs_mountPoint * next,*prev;
+};
+
+MED_RET_T vfs_mount(char * mount_path,int drive, int partition_num);
+MED_RET_T vfs_umount(int drive,int partition_num);
+struct vfs_mountPoint * vfs_isMounted(int drive,int partition_num);
+
 void vfs_init(void);
+
 void vfs_rootPrint(void);
 
-MED_RET_T vfs_Destructor(void);
-MED_RET_T vfs_clearNodeTree(struct vfs_node * root,int force);
+MED_RET_T vfs_DestroyAll(void);
+MED_RET_T vfs_Destructor(struct vfs_mountPoint * mount_root);
+MED_RET_T vfs_clearNodeTree(struct vfs_node * root);
 
 void vfs_PrintOpenList(void);
 int vfs_hasOpenNode(void);

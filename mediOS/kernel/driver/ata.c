@@ -333,17 +333,17 @@ void ata_stopTmrFct(void)
 void ata_init(void)
 {
     ata_stopping = 0;
-    
+
     tmr_setup(&ataStop_tmr,"ata Stop");
     ataStop_tmr.action   = ata_stopTmrFct;
     ataStop_tmr.freeRun  = 1;
     ataStop_tmr.stdDelay = 1; /* 1 tick delay */
         
-    ata_hwInit();
+    ata_reset();
     printk("[ATA init] done\n");
 }
 
-void ata_hwInit(void)
+void ata_reset(void)
 {
     arch_ata_init();
 }

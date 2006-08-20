@@ -178,7 +178,8 @@ void kernel_start (void)
     init_dvr_module();
     cf_initModule();
 #endif
-
+    ata_init();
+    vfs_init();
     disk_init();
     sound_init();
     /* enable the IRQ */

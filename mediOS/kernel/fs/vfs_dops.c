@@ -21,17 +21,19 @@
 
 #include <kernel/fat.h>
 #include <kernel/vfs_node.h>
+#include <kernel/vfs.h>
 
-
-extern struct vfs_node * root_node;
-extern struct vfs_node * opened_node;
+extern struct vfs_mountPoint * root_mountPoint;
 
 DIR * opendir(char * pathname)
 {
     MED_RET_T ret_val;
     struct vfs_pathname path;
     DIR * fd;
-
+    
+    if(!root_mountPoint)
+        return -MED_ENOENT;
+        
     path.length = strlen(pathname);
     if(path.length>0)
         path.str=pathname;
@@ -45,7 +47,7 @@ DIR * opendir(char * pathname)
         return NULL;//-MED_EINVAL;
     }
 
-    ret_val=vfs_nodeLookup(&path,root_node,&fd,&path);
+    ret_val=vfs_nodeLookup(&path,root_mountPoint->root_node,&fd,&path);
 
     if(ret_val!=MED_OK && ret_val!=-MED_ENOENT)
     {
@@ -103,7 +105,7 @@ DIR * opendir(char * pathname)
     fd->opened = 1;
     vfs_nodeRef(fd);
 
-    LIST_ADD_TAIL_NAMED(opened_node,fd,prev_open,next_open);
+    LIST_ADD_TAIL_NAMED(fd->mount_point->opened_node,fd,prev_open,next_open);
 
     return fd;
 }
@@ -119,9 +121,9 @@ MED_RET_T closedir(DIR * fd)
         return ret_val;
 
     fd->opened = 0;
+    LIST_DELETE_NAMED(fd->mount_point->opened_node,fd,prev_open,next_open);
     vfs_nodeUnRef(fd);
-    LIST_DELETE_NAMED(opened_node,fd,prev_open,next_open);
-
+    
     return MED_OK;
 }
 

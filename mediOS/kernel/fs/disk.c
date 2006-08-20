@@ -28,6 +28,9 @@
 #include <kernel/bat_power.h>
 #include <kernel/vfs.h>
 
+#ifdef HAVE_EXT_MODULE
+#include <kernel/cf_module.h>
+#endif
 
 /* Partition table entry layout:
    -----------------------
@@ -47,166 +50,234 @@
           (array[pos] | (array[pos+1] << 8 ) | \
           (array[pos+2] << 16 ) | (array[pos+3] << 24 ))
 
-static struct partition_info part[8]; /* space for 4 partitions on 2 drives */
-
-static struct hd_info_s disk_info[2];
+struct hd_info_s * drive_info[NB_DRIVE];
 
 char * fatStr[]={"zero", "FAT12", "FAT16<32MB", "ExtMSDOS", "FAT16>32MB", "FAT32<2048GB", "FAT32-LBA",
                     "FAT16>32MB-LBA", "ExtMSDOS-LBA"};
 int fatId[]={0x00, 0x01, 0x04, 0x05, 0x06, 0x0B, 0x0C, 0x0E, 0x0F};
 
+char * drive_name[] = { "Main HD", "CF card"};
+
 extern int hd_sleep_state;
+
+void dd_swapChar(char * txt,int size);
+void dd_findEnd(char * txt,int size);
+
+/* drive 0 will be mounted first */
+struct disk_mountInfo drive_Info[] = {
+{
+    mount_path    : "/",
+    drive         : HD_DRIVE,
+    partition_num : DISK_PART_0
+},
+#ifdef HAVE_EXT_MODULE 
+{
+    mount_path    : "/CF",
+    drive         : CF_DRIVE,
+    partition_num : DISK_PART_0
+}
+#endif
+};
+
+MED_RET_T disk_rmAll(void)
+{
+    MED_RET_T ret_val;
+#ifdef HAVE_EXT_MODULE    
+    if(CF_IS_CONNECTED)
+    {
+        ret_val=disk_rm(CF_DRIVE);
+        if(ret_val != MED_OK)
+            return ret_val;
+    }
+#endif
+    return disk_rm(HD_DRIVE);
+}
+
+
+
+MED_RET_T disk_rm(int drive)
+{
+    int i;
+    int ret_val;
+    if(drive_info[drive])
+    {
+        for(i=0;i<4;i++)
+        {
+            ret_val=vfs_umount(drive,i);
+            if(ret_val!=MED_OK)
+                return ret_val;
+        }
+        /* now we can remove disk info */
+        free(&drive_info[drive]->partition_list);
+        free(drive_info[drive]);
+        drive_info[drive]=NULL;
+    }
+    else
+    {
+        printk("No info on %s\n",drive_name[drive]);
+        return -MED_EINVAL;
+    }
+    return MED_OK;
+}
+
+MED_RET_T disk_add(int drive)
+{
+    drive_info[drive]=disk_setup(drive);
+    if(!drive_info[drive])
+        return -MED_ERROR; 
+    return MED_OK;   
+}
+
+MED_RET_T disk_addAll(void)
+{
+    MED_RET_T ret_val;
+    
+    ret_val=disk_add(HD_DRIVE);
+    if(ret_val != MED_OK)
+    {
+        printk("Error init main disk\n");
+        return ret_val;
+    }
+    vfs_mount(MOUNT_DISK_PARAM(HD_DRIVE));
+    
+#ifdef HAVE_EXT_MODULE    
+    if(CF_IS_CONNECTED)
+    {
+        disk_addCF();
+    }
+#endif
+    
+    return MED_OK;
+}
 
 void disk_init(void)
 {
-    ata_init();
-    vfs_init();
-    fat_init(); /* reset all mounted partitions */
-    if(disk_mount(HD_DRIVE)!=MED_OK)
-        printk("Error doing disk init\n");
-
-    printk("[init disk] done\n");
-}
-
-void disk_reInit(void)
-{
-    ata_hwInit();
-    vfs_init();
-    fat_init(); /* reset all mounted partitions */
-    if(disk_mount(HD_DRIVE)!=MED_OK)
-        printk("Error doing disk init\n");
-
-    printk("[RE init disk] done\n");
-}
-
-MED_RET_T disk_mount(int drive)
-{
-    struct partition_info* pinfo;
-
-    pinfo = disk_setup(drive);
-    if (pinfo == NULL)
+    int i;
+    for(i=0;i<NB_DRIVE;i++) drive_info[i]=NULL;
+    
+    /* we should always have a HDD, let's add it */
+    if(disk_add(HD_DRIVE)!=MED_OK)
     {
-        printk("Error in disk setup\n");
-        return -MED_EIO;
+        printk("Error init main disk\n");
+        return;
     }
+        
+    /* mount root partition */
+    vfs_mount(MOUNT_DISK_PARAM(HD_DRIVE));
 
-    vfs_mount(drive,pinfo[0].start);
-    return MED_OK;
-}
-
-MED_RET_T disk_umount(int drive,bool flush)
-{
-    if(vfs_hasOpenNode())
+    /* let's see if we have CF too */
+#ifdef HAVE_EXT_MODULE    
+    if(CF_IS_CONNECTED)
     {
-        printk("Can't umount => there is opened files\n");
-        return -MED_ENBUSY;
+        disk_addCF();
     }
-    vfs_Destructor();
-    return MED_OK;
+#endif
+        
+    printk("[DISK] init done\n");
 }
 
 
-struct partition_info * disk_setup(int drive)
+void disk_addCF(void)
+{
+    if(disk_add(CF_DRIVE)!=MED_OK)
+        printk("Error init CF disk\n");   
+    else
+        vfs_mount(MOUNT_DISK_PARAM(CF_DRIVE));
+}
+
+struct hd_info_s * disk_setup(int drive)
 {
     int i,j;
     unsigned char * sector=(unsigned char *)malloc(sizeof(unsigned char)*SECTOR_SIZE);
-    /* For each drive, start at a different position, in order not to destroy
-       the first entry of drive 0.
-       That one is needed to calculate config sector position. */
-    struct partition_info* pinfo = &part[drive*4];
-    if ((int)drive >= sizeof(part)/sizeof(*part)/4)
-        return NULL; /* out of space in table */
-
+    
     if(!sector)
         return NULL;
+    
+    struct hd_info_s * disk_info = (struct hd_info_s *)malloc(sizeof(struct hd_info_s));
+    if(!disk_info)
+        goto exit_error1;
+    /* let's assume we have only 4 partitions */
+    struct partition_info * part_info = (struct partition_info *)malloc(4*sizeof(struct partition_info));
+    if(!part_info)
+        goto exit_error2;
+    disk_info->partition_list=part_info;
+    
     /* identify disk */
-    disk_identify(drive,&disk_info[drive]);
-    printk("[init IDE-CF] reading drive %d\n     %s\n     %s|%s\n     %d sectors per ata request\n",
-                drive,disk_info[drive].model,
-                disk_info[drive].firmware,disk_info[drive].serial,disk_info[drive].multi_sector);
-
+    if(ata_rwData(drive,0,sector,1,ATA_DO_IDENT,ATA_WITH_DMA)<0)
+        goto main_exit;        
+    
+    strncpy(disk_info->serial, &sector[20], 20);
+    dd_swapChar(disk_info->serial,20);
+    dd_findEnd(disk_info->serial,20);
+    strncpy(disk_info->firmware, &sector[46], 8);
+    dd_swapChar(disk_info->firmware,8);
+    dd_findEnd(disk_info->firmware,8);
+    strncpy(disk_info->model, &sector[54], 40);
+    dd_swapChar(disk_info->model,40);
+    dd_findEnd(disk_info->model,40);
+    disk_info->multi_sector = sector[47] & 0xff ;
+    disk_info->partition_list=NULL;
+    
+    printk("[DISK] reading %s info\n     %s\n     %s|%s\n     %d sectors per ata request\n",
+                drive_name[drive],
+                disk_info->model,
+                disk_info->firmware,disk_info->serial,disk_info->multi_sector);
+                
+    
     /* Read MBR */
     if(ata_rwData(drive,0,sector,1,ATA_DO_READ,ATA_WITH_DMA)<0) /* read 1 sector at LBA 0 */
-        return NULL;
+        goto main_exit;
 
     /* check that the boot sector is initialized */
     if ( (sector[510] != 0x55) ||
          (sector[511] != 0xaa)) {
         printk("Bad boot sector signature\n");
-        return NULL;
+        goto main_exit;
     }
 
     /* parse partitions */
     for ( i=0; i<4; i++ ) {
         unsigned char* ptr = sector + 0x1be + 16*i;
-        pinfo[i].type  = ptr[4];
-        pinfo[i].start = BYTES2INT32(ptr, 8);
-        pinfo[i].size  = BYTES2INT32(ptr, 12);
+        part_info[i].type  = ptr[4];
+        part_info[i].start = BYTES2INT32(ptr, 8);
+        part_info[i].size  = BYTES2INT32(ptr, 12);
 
         j=0;
-        while(j<9 && fatId[j]!=pinfo[i].type) j++;
+        while(j<9 && fatId[j]!=part_info[i].type) j++;
 
         if(j<9)
-                strcpy(pinfo[i].strType,fatStr[j]);
+                strcpy(part_info[i].strType,fatStr[j]);
         else
-                printk("Error: partition type not supported: %x\n",pinfo[i].type);
+                printk("Error: partition type not supported: %x\n",part_info[i].type);
 
-        printk("Part%d: start=%08x, size=%08x, type:%s (%02x)\n",i,
-                pinfo[i].start,pinfo[i].size,
-                pinfo[i].strType,pinfo[i].type);
+        printk("\tPart%d: start=%08x, size=%08x, type:%s (%02x)\n",i,
+                part_info[i].start,part_info[i].size,
+                part_info[i].strType,part_info[i].type);
 
         /* extended? */
-        if ( pinfo[i].type == 5 ) {
+        if ( part_info[i].type == 5 ) {
             /* not handled yet */
         }
     }
+    
+    /* adding part_info to disk structure */
+    disk_info->partition_list=part_info;
+    
     free(sector);
-    return pinfo;
+    return disk_info;
+/* if something goes wrong exit here freeing what should be free*/    
+main_exit:
+    free(part_info);
+exit_error2:    
+    free(disk_info);
+exit_error1:
+    free(sector);
+    return NULL;
 }
 
-void disk_identify(int drive, struct hd_info_s * hd_info)
+char * disk_getName(int id)
 {
-    unsigned char * buffer=(unsigned char *)malloc(sizeof(unsigned char)*SECTOR_SIZE);
-
-    if(buffer && !ata_rwData(drive,0,buffer,1,ATA_DO_IDENT,ATA_WITH_DMA))
-    {
-        strncpy(hd_info->serial, &buffer[20], 20);
-        dd_swapChar(hd_info->serial,20);
-        dd_findEnd(hd_info->serial,20);
-        strncpy(hd_info->firmware, &buffer[46], 8);
-        dd_swapChar(hd_info->firmware,8);
-        dd_findEnd(hd_info->firmware,8);
-        strncpy(hd_info->model, &buffer[54], 40);
-        dd_swapChar(hd_info->model,40);
-        dd_findEnd(hd_info->model,40);
-        hd_info->multi_sector = buffer[47] & 0xff ;
-    }
-    else
-    {
-        hd_info->serial[0]='\0';
-        hd_info->firmware[0]='\0';
-        hd_info->model[0]='\0';
-        hd_info->size=0;
-    }
-    free(buffer);
-}
-
-/* !!!!! ata_stopHD should use the correct mode => ATA_FORCE_STOP or ATA_DELAY_STOP
-void disk_haltHD(void)
-{
-    disk_umount(HD_DRIVE,FLUSH);
-    hd_sleep_state=1;
-    ata_stopHD();
-}
-*/
-
-void disk_printPartInfo(struct partition_info * partition_list)
-{
-    int i;
-    for(i=0;i<4;i++)
-    printk("Partition %d: start=%x, size=%x, type:%s (%x)\n",i,
-                partition_list[i].start,partition_list[i].size,
-                partition_list[i].strType,partition_list[i].type);
+    return drive_name[id];
 }
 
 void dd_swapChar(char * txt,int size)

@@ -86,7 +86,7 @@ void mainMenu_doAction(void * data)
             if(!browseData)
                 return;
 
-            browser_browse(browseData,NULL,NULL);            
+            browser_browse(browseData,NULL,NULL);    
         }
         else if(!strcmp(cfg_data->link,"mp3Player"))
         {
@@ -142,9 +142,11 @@ void mainMenu_doF3(void * data) // switch to usb
         // not in usb mode => enable usb if cable present
         if(usb_isConnected() || FW_isConnected())
         {
-            if(disk_umount(HD_DRIVE,1)!=MED_OK)
+        #warning need to rework USB mode
+        
+            if(disk_rmAll()!=MED_OK)
             {
-                printk("File still open, can't umount\n");
+                printk("can't umount\n");
                 return;
             }
             gfx_clearScreen(COLOR_WHITE);
@@ -164,8 +166,10 @@ void mainMenu_doF3(void * data) // switch to usb
             }
             disableUsbFw();
             usbMode=0;
+            ata_reset();
+            vfs_init();
             //mdelay(5);
-            disk_reInit();
+            disk_addAll();
 #warning we should also reload menu.cfg or other menu related files
             evt_purgeHandler(evt_hand);
             mainMenu_start();

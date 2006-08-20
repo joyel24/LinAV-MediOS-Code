@@ -216,6 +216,12 @@ MED_RET_T mvEntry(char* path,char* newpath,struct vfs_node * openedfile, vfs_nod
         return -MED_ERROR;
     }
     
+    if(parent_dir->mount_point != openedfile->mount_point)
+    {
+        printk("[mv%s] error: src and dest not on the same drive => not supported atm",
+            type==VFS_TYPE_FILE?"file":"dir");
+        return -MED_ERROR;
+    }
     
     ret_val = fat_mvFileDir(openedfile, parent_dir, &VFS_newName);
     if ( ret_val != MED_OK )
