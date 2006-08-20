@@ -41,10 +41,17 @@
 #include <kernel/bat_power.h>
 #include <kernel/buttons.h>
 #include <kernel/disk.h>
+
+#ifdef HAVE_FM_REMOTE
 #include <kernel/fm_remote.h>
+#endif
+
+#ifdef HAVE_EXT_MODULE
 #include <kernel/ext_module.h>
 #include <kernel/dvr_module.h>
 #include <kernel/cf_module.h>
+#endif
+
 #include <kernel/sound.h>
 #include <kernel/cmd_line.h>
 #include <kernel/evt.h>
