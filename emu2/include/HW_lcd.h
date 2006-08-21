@@ -27,41 +27,38 @@ class HW_lcd;
 #define LCD_BMAP 0
 #define LCD_VID  1
 
-#define YCrCb2R(Y,Cr,Cb) ((int)(Y+1.402*(Cr-128)))
-#define YCrCb2G(Y,Cr,Cb) ((int)(Y-0.34414*(Cb-128)-0.71414*(Cr-128)))
-#define YCrCb2B(Y,Cr,Cb) ((int)(Y+1.772*(Cb-128)))
-
 class mem_space;
 
 class HW_lcd {
     public:
         HW_lcd(HW_mem * mem2, HW_OSD * osd);
         void updte_lcd(uint32_t base_addr,int type);
-        int setPalette(int r,int g, int b, int index);
-        void drawPix(uint32_t addr,uint32_t val);     
-        void drawVidPix(uint32_t addr,uint32_t val);     
+        int setPaletteRGB(int r,int g, int b, int index);
+        int setPaletteYCbCr(int y,int cb, int cr, int index);
+        void drawPix(uint32_t addr,uint32_t val);
+        void drawVidPix(uint32_t addr,uint32_t val);
         int nxtEvent(int * config,uint32_t * addr);
-          
+
     private:
         HW_mem * mem2;
         HW_OSD * osd;
-        
+
         Display* display;
         Window window1;
         Window window2;
-        
+
         GC gc;
         Colormap pal;
         int screen;
         XEvent event;
-        
+
         int colorTab[256];
 
         int skip;
 
-        void setPalette(int palette[256][3],int size);
+        void setFullPalette(int palette[256][3],int size);
         uint32_t getColor(uint32_t color);
-#ifdef USE_CACHE        
+#ifdef USE_CACHE
         uint32_t pixel_cache[PX_CACHE_SIZE][2];
         int in_cache;
         int cache_size;    

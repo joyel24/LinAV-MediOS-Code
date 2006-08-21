@@ -1,4 +1,4 @@
-/* 
+/*
 *   HW_OSD.cpp
 *
 *   AV3XX emulator
@@ -537,14 +537,14 @@ void HW_OSD::write(uint32_t addr,uint32_t val,int size)
                 int Cb = OSD_pallette_data_wr & 0xFF;
                 int Cr = (val >> 8) & 0xFF;
                 int index = val & 0xFF;
-                int ret = lcd->setPalette(YCrCb2R(Y,Cr,Cb),YCrCb2G(Y,Cr,Cb),YCrCb2B(Y,Cr,Cb),index);
+                int ret = lcd->setPaletteYCbCr(Y,Cb,Cr,index);
                 /*lcd->updte_lcd(OSD_offset_regs[2],LCD_BMAP);*/
                 /*lcd->updte_lcd(OSD_offset_regs[0],LCD_VID);*/
                 OSD_pallette_index=0;
                 OSD_pallette_data_wr=0;
                 DEBUG_HW(OSD_HW_DEBUG,"%s %s write %x (size %x)\n",name,"Pallette data & index",val,size);
-                DEBUG_HW(OSD_HW_DEBUG,"Palette update: Y=%x,Cr=%x,Cb=%x => r=%x,g=%x,b=%x index=%x => Xindex=%x\n",
-                    Y,Cb,Cr,YCrCb2R(Y,Cr,Cb),YCrCb2G(Y,Cr,Cb),YCrCb2B(Y,Cr,Cb),index,ret);
+                DEBUG_HW(OSD_HW_DEBUG,"Palette update: Y=%x,Cr=%x,Cb=%x index=%x => Xindex=%x\n",
+                    Y,Cb,Cr,index,ret);
             }
             break;
         case OSD_START+0x7C:

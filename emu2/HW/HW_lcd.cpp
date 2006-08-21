@@ -84,7 +84,7 @@ HW_lcd::HW_lcd(HW_mem * mem2,HW_OSD * osd)
 
     pal = DefaultColormap(display,screen);
     
-    setPalette(ini_pal,256);   
+    setFullPalette(ini_pal,256);
     
     /* initializing the tmp buffer and the screen */
     XSetForeground(display, gc, colorTab[0]);
@@ -105,33 +105,48 @@ HW_lcd::HW_lcd(HW_mem * mem2,HW_OSD * osd)
     printf("LCD init done\n");
 }
 
-void HW_lcd::setPalette(int palette[256][3],int size)
+void HW_lcd::setFullPalette(int palette[256][3],int size)
 {
-    int r,g,b,i,Y,Cb,Cr;
-    XColor c;
-    
+    int i,Y,Cb,Cr;
+
     for(i=0; i<size; i++)
     {
         Y = palette[i][0];
         Cb = palette[i][1];
         Cr = palette[i][2];
-        r=(int)(Y+1.402*(Cr-128));
-        g=(int)(Y-0.34414*(Cb-128)-0.71414*(Cr-128));
-        b=(int)(Y+1.772*(Cb-128));
-        setPalette(r,g,b,i);
+
+        setPaletteYCbCr(Y,Cb,Cr,i);
     }
 }
 
-int HW_lcd::setPalette(int r,int g, int b, int index)
+int HW_lcd::setPaletteYCbCr(int y,int cb, int cr, int index)
+{
+    int r,g,b;
+
+    r=(int)(y+1.402*(cr-128));
+    g=(int)(y-0.34414*(cb-128)-0.71414*(cr-128));
+    b=(int)(y+1.772*(cb-128));
+
+    r=(r>255)?255:r;
+    r=(r<0)?0:r;
+    g=(g>255)?255:g;
+    g=(g<0)?0:g;
+    b=(b>255)?255:b;
+    b=(b<0)?0:b;
+
+    setPaletteRGB(r,g,b,index);
+}
+
+int HW_lcd::setPaletteRGB(int r,int g, int b, int index)
 {
 #ifdef HAS_LCD
     XColor c;
-        
+
     c.red = r*0x100+r;
     c.green = g*0x100+g;
     c.blue = b*0x100+b;
     XAllocColor(display, pal, &c);
-    colorTab[index] = c.pixel;    
+    colorTab[index] = c.pixel;
     return c.pixel;
 #else
     return 0;
@@ -332,12 +347,20 @@ uint32_t HW_lcd::getColor(uint32_t color)
     r=(int)(Y+1.402*(Cr-128));
     g=(int)(Y-0.34414*(Cb-128)-0.71414*(Cr-128));
     b=(int)(Y+1.772*(Cb-128));
+
+    r=(r>255)?255:r;
+    r=(r<0)?0:r;
+    g=(g>255)?255:g;
+    g=(g<0)?0:g;
+    b=(b>255)?255:b;
+    b=(b<0)?0:b;
+    
     c.red = r*0x100+r;
     c.green = g*0x100+g;
     c.blue = b*0x100+b;
     XAllocColor(display, pal, &c);
 
-#ifdef USE_CACHE   
+#ifdef USE_CACHE
     pixel_cache[in_cache][0]=color;
     pixel_cache[in_cache][1]=c.pixel;
     in_cache++;
@@ -346,6 +369,6 @@ uint32_t HW_lcd::getColor(uint32_t color)
     if(in_cache>=PX_CACHE_SIZE)
         in_cache=0;
     //printf("-- find %x (cache size=%x cache pos=%x)\n",c.pixel,cache_size,in_cache);
-#endif    
+#endif
     return c.pixel;
 }
