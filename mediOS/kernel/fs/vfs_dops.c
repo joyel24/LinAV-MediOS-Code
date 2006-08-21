@@ -32,7 +32,7 @@ DIR * opendir(char * pathname)
     DIR * fd;
     
     if(!root_mountPoint)
-        return -MED_ENOENT;
+        return NULL;
         
     path.length = strlen(pathname);
     if(path.length>0)

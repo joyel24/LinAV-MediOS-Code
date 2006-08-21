@@ -41,6 +41,7 @@
 #include <kernel/bat_power.h>
 #include <kernel/buttons.h>
 #include <kernel/disk.h>
+#include <kernel/ata.h>
 
 #ifdef HAVE_FM_REMOTE
 #include <kernel/fm_remote.h>
@@ -63,8 +64,6 @@
 #include <kernel/stdfs.h>
 #include <kernel/vfs.h>
 
-#warning ADDED FOR TEST PURPOSE
-#include <kernel/vfs_pathname.h>
 
 
 unsigned int _iram_size = IRAM_SIZE;
@@ -113,9 +112,41 @@ void tst_fct(void){
 #define DEBUG_MSG_STATE ((volatile unsigned short *)0x40102)
 #define DEBUG_MSG_TEXT  ((short *)0x40104)
 
-void tst_fct(void){
+#include <kernel/evt.h>
+
+void tst_fct(void)
+{
+    int evt_hand=evt_getHandler(ALL_CLASS);
+    int evt;
+    int stop=0;
+    int i=0;
+    
     while(1)
     {
+        evt = evt_getStatus(evt_hand);
+    
+        if( evt == BTN_UP && !stop)
+        {
+            (*WAVE_PERIOD)++;
+            printk("per=%d\n",*WAVE_PERIOD);
+            for(i=0;i<100;i++);
+        }
+        
+        if( evt == BTN_DOWN && !stop)
+        {
+            if(*WAVE_PERIOD>0)
+            {
+                (*WAVE_PERIOD)--;    
+                printk("per=%d\n",*WAVE_PERIOD);        
+                for(i=0;i<100;i++);
+            }            
+        }
+        
+        if( evt == BTN_ON)
+        {
+            stop=0;
+        }
+        
         if(*DEBUG_MSG_STATE)
         {
             int i=0;

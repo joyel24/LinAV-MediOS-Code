@@ -22,6 +22,8 @@
 #include <kernel/evt.h>
 #include <kernel/delay.h>
 #include <kernel/disk.h>
+#include <kernel/vfs.h>
+#include <kernel/ata.h>
 #include <kernel/errors.h>
 #include <kernel/usb_fw.h>
 #include <kernel/lcd.h>
@@ -142,9 +144,7 @@ void mainMenu_doF3(void * data) // switch to usb
     {
         // not in usb mode => enable usb if cable present
         if(usb_isConnected() || FW_isConnected())
-        {
-        #warning need to rework USB mode
-        
+        {        
             if(disk_rmAll()!=MED_OK)
             {
                 printk("can't umount\n");
