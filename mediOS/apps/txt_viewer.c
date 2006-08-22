@@ -862,8 +862,7 @@ void app_main(int argc,char * * argv)
             }
         }
     }
-
-    return ;
+    evt_freeHandler(evt_handler)
 }
 
 

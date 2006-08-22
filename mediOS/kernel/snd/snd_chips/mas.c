@@ -59,6 +59,8 @@ __IRAM_DATA sound_buffer_s * soundBuffer;
     __i;                                                      \
   })
 
+//#define PCM_DSP_TEST
+  
 /********************* DSP                    ***************************/
 
 __IRAM_CODE void mas_dspInterrupt(int irq,struct pt_regs * regs)
@@ -136,9 +138,10 @@ void mas_init(void)
     printk("S%x:%d:%c%d ",version.major_number,version.derivate,version.char_order_version,version.digit_order_version);
     irq_disable(IRQ_MAS_DATA);
     printk("\n");
-
-   //mas_i2sInit();
-
+    
+#ifdef PCM_DSP_TEST
+   mas_i2sInit();
+#endif
 }
 
 int mas_reset(void)
@@ -415,7 +418,6 @@ int mas_getD0(int addr)
 
     return ret;
 }
-
 
 int mas_read_Di_register(int i,int addr,void * buf,int size) // !!! 20 bit values stored as 32 bit
 {
@@ -939,7 +941,7 @@ int mas_test_PCM(void)
 }
 #endif
 
-#if 0
+#ifdef PCM_DSP_TEST
 #include "mas_code/mas_pcm_struct.h"
 #include "mas_code/dsp_d0_800_463.h"
 #include "mas_code/dsp_d0_7f8_1.h"
@@ -1012,7 +1014,11 @@ void mas_i2sInit(void)
 
     mas_codecWrite(0x1,0x386);
     mas_setD0(0x347,0x0);
-    mas_setD0(0x348,0x4e5e);
+    //mas_setD0(0x348,0x4e5e);
+    //val=0x1b000;
+    //mas_write_Di_register(MAS_REGISTER_D0,0x348,&val,1)
+
+    mas_setD0(0x348,0x9000);
     mas_setD0(0x346,0x1a1);
 
     mas_codecWrite(MAS_REG_AUDIO_CONF,0x7);
