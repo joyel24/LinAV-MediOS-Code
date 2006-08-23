@@ -141,6 +141,7 @@ void mas_init(void)
     
 #ifdef PCM_DSP_TEST
    mas_i2sInit();
+   //mas_test_PCM();
 #endif
 }
 
@@ -862,7 +863,11 @@ void mas_stop_app(void)
     }
 }
 
+#define WAVE_PERIOD ((volatile unsigned short *)0x40100)
+#define DEBUG_MSG_STATE ((volatile unsigned short *)0x40102)
+#define DEBUG_MSG_TEXT  ((short *)0x40104)
 
+#define MAIN_CONFIG 0x0025
 
 void mas_run_app(void)
 {
@@ -873,7 +878,7 @@ void mas_run_app(void)
     mas_run();
 
 
-    val = 0x125;
+    val = MAIN_CONFIG;
     mas_write_Di_register(MAS_REGISTER_D0,0x661,&val,1);
     printk("bf loop1\n");
     while(1)
@@ -887,22 +892,22 @@ void mas_run_app(void)
     printk("af loop1\n");
     val = 0x8300;
     mas_write_Di_register(MAS_REGISTER_D0,0x7f8,&val,1);
-    val = 0x125;
-    mas_write_Di_register(MAS_REGISTER_D0,0x661,&val,1);
-    printk("bf loop2\n");
-    while(1)
-    {
-        val=0;
-        mas_read_Di_register(MAS_REGISTER_D0,0x666,&val,1);
-        if(val==0)
-            break;
-        printk("APP get: %x\n",val);
-
-    }
-    printk("af loop2\n");
+    
     val = 0x0069;
     mas_write_Di_register(MAS_REGISTER_D0,0x66b,&val,1);
-    val = 0x1125;
+     
+    val = 0x0028;
+    mas_write_Di_register(MAS_REGISTER_D0,0x662,&val,1);
+      
+    
+    dsp_loadProgramFromHDD("/test.out");
+    *WAVE_PERIOD=30;
+    *DEBUG_MSG_STATE=0;
+    dsp_run();
+    
+    
+    
+    val = MAIN_CONFIG | 0x1000;
     mas_write_Di_register(MAS_REGISTER_D0,0x661,&val,1);
     printk("bf loop2\n");
     while(1)
@@ -910,11 +915,11 @@ void mas_run_app(void)
         val=0;
         i++;
         mas_read_Di_register(MAS_REGISTER_D0,0x666,&val,1);
-        if(val==0 || i>10)
+        if(val==0x80001 || i>10)
             break;
         printk("APP get: %x\n",val);
     }
-    if(val!=0)
+    if(val!=0x80001)
         printk("APP get: bad val\n");
     else
         printk("APP get: ok\n");
@@ -928,6 +933,26 @@ void mas_run_app(void)
 
 int mas_test_PCM(void)
 {
+    mas_codecWrite(MAS_REG_AUDIO_CONF,0x7);
+    mas_codecWrite(MAS_REG_INPUT_MODE,0x0);
+    mas_codecWrite(MAS_REG_MIX_ADC_SCALE,0x0);
+    mas_codecWrite(MAS_REG_MIX_DSP_SCALE,0x4000);
+    mas_codecWrite(MAS_REG_DA_OUTPUT_MODE,0x0);
+
+
+    mas_codecCtrlConf(MAS_SET,MAS_BALANCE,50);
+    mas_codecCtrlConf(MAS_SET,MAS_VOLUME,/*70*/70);
+
+    MAS_DELAY
+
+    printk("[MAS] stop all app\n");
+    if(!mas_stopApps())
+        return -1;
+
+    mas_setD0(MAS_INTERFACE_CONTROL,0x04);
+    mas_setClkSpeed(0x4800);
+    mas_setD0(MAS_MAIN_IO_CONTROL,0x125);
+    
     printk("\t\tStopping\n");
     mas_stop_app();
     printk("\t\tDownloading\n");
@@ -935,12 +960,13 @@ int mas_test_PCM(void)
     printk("\t\tRuning\n");
     mas_run_app();
 
-
-
+    
+    
     return 0;
 }
 #endif
 
+//#ifdef PCM_DSP_TEST
 #ifdef PCM_DSP_TEST
 #include "mas_code/mas_pcm_struct.h"
 #include "mas_code/dsp_d0_800_463.h"
