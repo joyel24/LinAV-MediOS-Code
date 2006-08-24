@@ -21,10 +21,12 @@
 #include <gui/menu_old.h>
 #include <gui/main_menu.h>
 #include <gui/file_browser.h>
+#include <gui/msgBox.h>
 
 void gui_start(void)
 {
     icon_init();
+    iniMsgBox();
     iniBrowser();
     gfx_openGraphics();
     

@@ -108,8 +108,11 @@ void iniMsgBox(void)
     MsgBox_ErrorBitmap=&icon_get("MsgBoxErrorBitmap")->bmap_data;
 }
 
+#define POS_X(X) ((X)+posX)
+#define POS_Y(Y) ((Y)+posY)
+
 /* draw the msg box */
-void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
+void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon,int useOwnPlane)
 {
     int w1 = 0;
     int h1 = 0;
@@ -127,6 +130,7 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
     int buttonTextOffsetY=0;
     int i = 0;
     char strButtonText[10];
+    int x;
 
     // calculate width
     gfx_fontSet(STD7X13);
@@ -136,25 +140,29 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
     
     // calculate width of box for text
     if(w1>w2)
-        width = w1 + 20;
+        width = w1 + 20 + 20;
     else
-        width = w2 + 20;
+        width = w2 + 20 + 20;
 
     // calculate width of box for buttons
-    if(type == MSGBOX_TYPE_OK)
+    switch(type)
     {
-        cntButtons = 1; //only one button
-        if(width < MSGBOX_1BUTTON_MIN_WIDTH) width = MSGBOX_1BUTTON_MIN_WIDTH;
-    }
-    else if(type == MSGBOX_TYPE_YESNOCANCEL)
-    {
-        cntButtons = 3; //three buttons
-        if(width < MSGBOX_3BUTTON_MIN_WIDTH) width = MSGBOX_3BUTTON_MIN_WIDTH;
-    }
-    else
-    {
-        cntButtons = 2; //two buttons
-        if(width < MSGBOX_2BUTTON_MIN_WIDTH) width = MSGBOX_2BUTTON_MIN_WIDTH;
+        case MSGBOX_TYPE_OK:
+            cntButtons = 1; //only one button
+            if(width < MSGBOX_1BUTTON_MIN_WIDTH) width = MSGBOX_1BUTTON_MIN_WIDTH;
+            break;
+        case MSGBOX_TYPE_YESNOCANCEL:
+            cntButtons = 3; //three buttons
+            if(width < MSGBOX_3BUTTON_MIN_WIDTH) width = MSGBOX_3BUTTON_MIN_WIDTH;
+            break;
+        case MSGBOX_TYPE_OKCANCEL:
+        case MSGBOX_TYPE_YESNO:
+            cntButtons = 2; //two buttons
+            if(width < MSGBOX_2BUTTON_MIN_WIDTH) width = MSGBOX_2BUTTON_MIN_WIDTH;
+            break;
+        case MSGBOX_TYPE_INFO:
+            cntButtons = 0;
+            break;
     }
 
     // the width must be a multiple of 32 !
@@ -164,120 +172,139 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon)
     buttonPos = (width-(2*BUTTON_DISTANCE))/cntButtons;
     buttonOffset = (buttonPos - BUTTON_WIDTH)/2;
 
-    gfx_planeSetSize(BMAP2,width,MSGBOX_HEIGHT,8);
+    if(useOwnPlane);
+        gfx_planeSetSize(BMAP2,width,MSGBOX_HEIGHT,8);
 
     // center box
-    posX = SCREEN_REAL_WIDTH-width;
+    if(useOwnPlane)
+        posX = SCREEN_REAL_WIDTH-width;
+    else
+        posX = (SCREEN_REAL_WIDTH-width)/2;
     posY = (SCREEN_HEIGHT/2)-(MSGBOX_HEIGHT/2);
-
-    gfx_planeSetPos(BMAP2,0x14+posX,0x13+posY);
+    if(useOwnPlane)
+        gfx_planeSetPos(BMAP2,0x14+posX,0x13+posY);
 
     // show box
-    gfx_setPlane(BMAP2);
+    if(useOwnPlane)
+        gfx_setPlane(BMAP2);
     
     // fill background
-    gfx_drawRect(COLOR_BLACK, 0, 0, width, MSGBOX_HEIGHT);
-    gfx_fillRect(COLOR_WHITE, 1, 1, width-2, MSGBOX_HEIGHT-2);
+    gfx_drawRect(COLOR_BLACK, POS_X(0), POS_Y(0), width, MSGBOX_HEIGHT);
+    gfx_fillRect(COLOR_WHITE, POS_X(1), POS_Y(1), width-2, MSGBOX_HEIGHT-2);
     // write caption
     gfx_fontSet(STD7X13);
-    posX = (width/2)-(w1/2);
-    gfx_putS(COLOR_BLACK, COLOR_WHITE, posX, 2, caption);
-    gfx_drawLine(COLOR_BLACK,0, h1+2+2, width, h1+2+2);
+    
+    x = (width/2)-(w1/2);
+    
+    gfx_putS(COLOR_BLACK, COLOR_WHITE, POS_X(x), POS_Y(2), caption);
+    gfx_drawLine(COLOR_BLACK,POS_X(0), POS_Y(h1+2+2), POS_X(width), POS_Y(h1+2+2));
     // draw bitmap and buttons
     if(icon == MSGBOX_ICON_EXCLAMATION)
-        gfx_drawBitmap (MsgBox_ExclamationBitmap, 2,h1+2+2+5);
+        gfx_drawBitmap (MsgBox_ExclamationBitmap, POS_X(2),POS_Y(h1+2+2+5));
     else if(icon == MSGBOX_ICON_WARNING)
-        gfx_drawBitmap (MsgBox_WarningBitmap, 2,h1+2+2+5);
+        gfx_drawBitmap (MsgBox_WarningBitmap, POS_X(2),POS_Y(h1+2+2+5));
     else if(icon == MSGBOX_ICON_INFORMATION)
-        gfx_drawBitmap (MsgBox_InformationBitmap, 2,h1+2+2+5);
+        gfx_drawBitmap (MsgBox_InformationBitmap, POS_X(2),POS_Y(h1+2+2+5));
     else if(icon == MSGBOX_ICON_QUESTION)
-        gfx_drawBitmap (MsgBox_QuestionBitmap, 2,h1+2+2+5);
+        gfx_drawBitmap (MsgBox_QuestionBitmap, POS_X(2),POS_Y(h1+2+2+5));
     else if(icon == MSGBOX_ICON_ERROR)
-        gfx_drawBitmap (MsgBox_ErrorBitmap, 2,h1+2+2+5);
+        gfx_drawBitmap (MsgBox_ErrorBitmap, POS_X(2),POS_Y(h1+2+2+5));
     // print message
     gfx_fontSet(STD5X8);
-    if(icon == MSGBOX_ICON_NO_ICON)
-        gfx_putS(COLOR_BLACK, COLOR_WHITE, 2, h1+2+2+10, msg); // if no icon, print the text on the left side
+    if(icon == MSGBOX_ICON_NO_ICON) // if no icon, print the text on the left side
+        gfx_putS(COLOR_BLACK, COLOR_WHITE, POS_X(2), POS_Y(h1+2+2+10), msg);
     else
-        gfx_putS(COLOR_BLACK, COLOR_WHITE, 25, h1+2+2+10, msg); // xPos with offset for icon
+        gfx_putS(COLOR_BLACK, COLOR_WHITE, POS_X(25), POS_Y(h1+2+2+10), msg); // xPos with offset for icon
     // print buttons
-    if(type == MSGBOX_TYPE_OK)
+    switch(type)
     {
-        cntButtons = 1; //only one button
-
-        buttonPos = (width-(2*BUTTON_DISTANCE))/cntButtons;
-        buttonOffset = (buttonPos - BUTTON_WIDTH)/2;
-
-        for(i = 0; i < cntButtons; i++)
-        {
-            gfx_drawRect(COLOR_BLACK, BUTTON_DISTANCE+i*buttonPos+buttonOffset, MSGBOX_HEIGHT-20, BUTTON_WIDTH, BUTTON_HEIGHT);
-
-            gfx_getStringSize("Ok(F1)", &w_buttonText, &h_buttonText);
-            buttonTextOffsetX = (BUTTON_WIDTH/2)-(w_buttonText/2);
-            buttonTextOffsetY = (BUTTON_HEIGHT/2)-(h_buttonText/2);
-            gfx_putS(COLOR_BLACK, COLOR_WHITE, BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX, MSGBOX_HEIGHT-20+buttonTextOffsetY , "Ok(F1)");
-        }
-    }
-    else if(type == MSGBOX_TYPE_YESNOCANCEL)
-    {
-        cntButtons = 3; //three buttons
-
-        buttonPos = (width-(2*BUTTON_DISTANCE))/cntButtons;
-        buttonOffset = (buttonPos - BUTTON_WIDTH)/2;
-
-        for(i = 0; i < cntButtons; i++)
-        {
-            gfx_drawRect(COLOR_BLACK, BUTTON_DISTANCE+i*buttonPos+buttonOffset, MSGBOX_HEIGHT-20, BUTTON_WIDTH, BUTTON_HEIGHT);
-
-            if(i == 0)
-                strcpy(strButtonText,"Yes(F1)");
-            else if (i == 1)
-                strcpy(strButtonText,"No(F2)");
-            else
-                strcpy(strButtonText,"Cancel(F3)");
-
-            gfx_getStringSize(strButtonText, &w_buttonText, &h_buttonText);
-            buttonTextOffsetX = (BUTTON_WIDTH/2)-(w_buttonText/2);
-            buttonTextOffsetY = (BUTTON_HEIGHT/2)-(h_buttonText/2);
-            gfx_putS(COLOR_BLACK, COLOR_WHITE, BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX, MSGBOX_HEIGHT-20+buttonTextOffsetY , strButtonText);
-        }
-    }
-    else
-    {
-        cntButtons = 2; //two buttons
-
-        buttonPos = (width-(2*BUTTON_DISTANCE))/cntButtons;
-        buttonOffset = (buttonPos - BUTTON_WIDTH)/2;
-
-        for(i = 0; i < cntButtons; i++)
-        {
-            gfx_drawRect(COLOR_BLACK, BUTTON_DISTANCE+i*buttonPos+buttonOffset, MSGBOX_HEIGHT-20, BUTTON_WIDTH, BUTTON_HEIGHT);
-
-            if(i == 0)
+        case MSGBOX_TYPE_OK:
+            cntButtons = 1; //only one button
+    
+            buttonPos = (width-(2*BUTTON_DISTANCE))/cntButtons;
+            buttonOffset = (buttonPos - BUTTON_WIDTH)/2;
+    
+            for(i = 0; i < cntButtons; i++)
             {
-                if(type == MSGBOX_TYPE_YESNO)
-                    strcpy(strButtonText,"Yes(F1)");
-                else
-                    strcpy(strButtonText,"Ok(F1)");
+                gfx_drawRect(COLOR_BLACK, POS_X(BUTTON_DISTANCE+i*buttonPos+buttonOffset), POS_Y(MSGBOX_HEIGHT-20),
+                    BUTTON_WIDTH, BUTTON_HEIGHT);
+    
+                gfx_getStringSize("Ok(F1)", &w_buttonText, &h_buttonText);
+                buttonTextOffsetX = (BUTTON_WIDTH/2)-(w_buttonText/2);
+                buttonTextOffsetY = (BUTTON_HEIGHT/2)-(h_buttonText/2);
+                gfx_putS(COLOR_BLACK, COLOR_WHITE, POS_X(BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX),
+                    POS_Y(MSGBOX_HEIGHT-20+buttonTextOffsetY) , "Ok(F1)");
             }
-            else
+            break;
+        case MSGBOX_TYPE_YESNOCANCEL:
+            cntButtons = 3; //three buttons
+    
+            buttonPos = (width-(2*BUTTON_DISTANCE))/cntButtons;
+            buttonOffset = (buttonPos - BUTTON_WIDTH)/2;
+    
+            for(i = 0; i < cntButtons; i++)
             {
-                if(type == MSGBOX_TYPE_YESNO)
+                gfx_drawRect(COLOR_BLACK, POS_X(BUTTON_DISTANCE+i*buttonPos+buttonOffset), 
+                    POS_Y(MSGBOX_HEIGHT-20), BUTTON_WIDTH, BUTTON_HEIGHT);
+    
+                if(i == 0)
+                    strcpy(strButtonText,"Yes(F1)");
+                else if (i == 1)
                     strcpy(strButtonText,"No(F2)");
                 else
-                    strcpy(strButtonText,"Cancel(F2)");
+                    strcpy(strButtonText,"Cancel(F3)");
+    
+                gfx_getStringSize(strButtonText, &w_buttonText, &h_buttonText);
+                buttonTextOffsetX = (BUTTON_WIDTH/2)-(w_buttonText/2);
+                buttonTextOffsetY = (BUTTON_HEIGHT/2)-(h_buttonText/2);
+                gfx_putS(COLOR_BLACK, COLOR_WHITE, POS_X(BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX),
+                    POS_Y(MSGBOX_HEIGHT-20+buttonTextOffsetY) , strButtonText);
             }
-
-            gfx_getStringSize(strButtonText, &w_buttonText, &h_buttonText);
-            buttonTextOffsetX = (BUTTON_WIDTH/2)-(w_buttonText/2);
-            buttonTextOffsetY = (BUTTON_HEIGHT/2)-(h_buttonText/2);
-            gfx_putS(COLOR_BLACK, COLOR_WHITE, BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX, MSGBOX_HEIGHT-20+buttonTextOffsetY , strButtonText);
-        }
+            break;
+        case MSGBOX_TYPE_OKCANCEL:
+        case MSGBOX_TYPE_YESNO:
+            cntButtons = 2; //two buttons
+    
+            buttonPos = (width-(2*BUTTON_DISTANCE))/cntButtons;
+            buttonOffset = (buttonPos - BUTTON_WIDTH)/2;
+    
+            for(i = 0; i < cntButtons; i++)
+            {
+                gfx_drawRect(COLOR_BLACK, POS_X(BUTTON_DISTANCE+i*buttonPos+buttonOffset), POS_Y(MSGBOX_HEIGHT-20),
+                    BUTTON_WIDTH, BUTTON_HEIGHT);
+    
+                if(i == 0)
+                {
+                    if(type == MSGBOX_TYPE_YESNO)
+                        strcpy(strButtonText,"Yes(F1)");
+                    else
+                        strcpy(strButtonText,"Ok(F1)");
+                }
+                else
+                {
+                    if(type == MSGBOX_TYPE_YESNO)
+                        strcpy(strButtonText,"No(F2)");
+                    else
+                        strcpy(strButtonText,"Cancel(F2)");
+                }
+    
+                gfx_getStringSize(strButtonText, &w_buttonText, &h_buttonText);
+                buttonTextOffsetX = (BUTTON_WIDTH/2)-(w_buttonText/2);
+                buttonTextOffsetY = (BUTTON_HEIGHT/2)-(h_buttonText/2);
+                gfx_putS(COLOR_BLACK, COLOR_WHITE, POS_X(BUTTON_DISTANCE+i*buttonPos+buttonOffset+buttonTextOffsetX),
+                    POS_Y(MSGBOX_HEIGHT-20+buttonTextOffsetY) , strButtonText);
+            }
+            break;
+        case MSGBOX_TYPE_INFO:
+            /* no button */
+            break;
     }
     
-    gfx_planeShow(BMAP2);
-
-    gfx_setPlane(BMAP1);
+    if(useOwnPlane)
+    {
+        gfx_planeShow(BMAP2);
+        gfx_setPlane(BMAP1);
+    }
 }
 
 
@@ -295,8 +322,14 @@ int msgBox(unsigned char* caption, unsigned char* msg, int type, int icon, int e
 {
     g_type = type;
     fontVal=gfx_fontGet();
-    drawMsgBox(caption,msg,type,icon);
+    drawMsgBox(caption,msg,type,icon,1);
     msgBoxEvtHandler(evt_hanlder);
     eraseMsgBox();
     return res;
+}
+
+void infoBox(unsigned char* msg)
+{
+    fontVal=gfx_fontGet();
+    drawMsgBox("Info",msg,MSGBOX_TYPE_INFO,MSGBOX_ICON_INFORMATION,0);
 }

@@ -27,6 +27,7 @@
 
 #include <gui/file_browser.h>
 #include <gui/scrollbar.h>
+#include <gui/msgBox.h>
 
 extern struct scroll_bar browser_scroll;
 extern int evt_handler;
@@ -214,6 +215,7 @@ MED_RET_T browserEvt(struct browser_data * bdata)
                                 switch(type)
                                 {
                                     case MED_TYPE:
+                                        infoBox("Launching med\n");
                                         med_load(path);
                                         gfx_openGraphics();
                                         evt_purgeHandler(evt_handler);
@@ -225,6 +227,7 @@ MED_RET_T browserEvt(struct browser_data * bdata)
                                     case GB_TYPE:
                                         {
                                             char ** argv=(char**)malloc(2*sizeof(char**));
+                                            infoBox("Launching GB\n");
                                             argv[0]=AO_BOY_BIN;
                                             argv[1]=path;
                                             med_loadParam(2,argv);
@@ -240,6 +243,7 @@ MED_RET_T browserEvt(struct browser_data * bdata)
                                     case TXT_TYPE:
                                     {
                                         char ** argv=(char**)malloc(2*sizeof(char**));
+                                        infoBox("Launching Txt viewer\n");
                                         argv[0]=TXT_VIEW_BIN;
                                         argv[1]=path;
                                         med_loadParam(2,argv);

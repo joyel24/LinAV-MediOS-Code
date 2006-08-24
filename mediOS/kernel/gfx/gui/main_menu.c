@@ -36,6 +36,7 @@
 #include <gui/main_menu.h>
 #include <gui/file_browser.h>
 #include <gui/gui.h>
+#include <gui/msgBox.h>
 
 char item_buff[MAX_TOKEN+1];
 char value_buff[MAX_TOKEN+1];
@@ -107,6 +108,7 @@ void mainMenu_doAction(void * data)
     else
     {
         printk("launching ext app: %s\n",cfg_data->link);
+        infoBox("Launching med");
         med_load(cfg_data->link);
         gfx_openGraphics();
         evt_purgeHandler(evt_hand);
@@ -132,7 +134,8 @@ void mainMenu_doF3(void * data) // switch to usb
 {
     int h,w;
     int evt;
-    char * msg1 = "In USB mode (F3 to exit)";
+    char * msg1 = "Switching to USB mode";
+    char * msg2 = "In USB mode (F3 to exit)";
 
     if(usbMode)
     {
@@ -145,15 +148,19 @@ void mainMenu_doF3(void * data) // switch to usb
         // not in usb mode => enable usb if cable present
         if(usb_isConnected() || FW_isConnected())
         {        
+            gfx_clearScreen(COLOR_WHITE);
+            gfx_fontSet(STD8X13);
+            gfx_getStringSize(msg1,&w,&h);
+            gfx_putS(COLOR_RED,COLOR_WHITE,(SCREEN_REAL_WIDTH-w)/2,(SCREEN_HEIGHT-h)/2,msg1);
+            
             if(disk_rmAll()!=MED_OK)
             {
                 printk("can't umount\n");
                 return;
             }
             gfx_clearScreen(COLOR_WHITE);
-            gfx_fontSet(STD8X13);
-            gfx_getStringSize(msg1,&w,&h);
-            gfx_putS(COLOR_RED,COLOR_WHITE,(SCREEN_REAL_WIDTH-w)/2,(SCREEN_HEIGHT-h)/2,msg1);
+            gfx_getStringSize(msg2,&w,&h);
+            gfx_putS(COLOR_RED,COLOR_WHITE,(SCREEN_REAL_WIDTH-w)/2,(SCREEN_HEIGHT-h)/2,msg2);
             enableUsbFw();
             usbMode=1;
             mdelay(10);

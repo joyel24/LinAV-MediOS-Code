@@ -33,6 +33,7 @@
     #define MSGBOX_TYPE_OKCANCEL    1
     #define MSGBOX_TYPE_YESNO       2
     #define MSGBOX_TYPE_YESNOCANCEL 3
+    #define MSGBOX_TYPE_INFO        4
 
     // Messagebox icons
     #define MSGBOX_ICON_NO_ICON     0
@@ -44,5 +45,6 @@
 
     void iniMsgBox(void);
     int msgBox(unsigned char* caption, unsigned char* msg, int type, int icon,int evt_hanlder);
+    void infoBox(unsigned char* msg);
 
 #endif
