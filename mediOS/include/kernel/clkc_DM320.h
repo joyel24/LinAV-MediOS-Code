@@ -17,6 +17,7 @@
 
 #define CLKC_PLL0                      (CLKC_BASE + 0x0000)
 #define CLKC_PLL1                      (CLKC_BASE + 0x0002)
+#define CLKC_SOURCE_SELECT             (CLKC_BASE + 0x0004)
 #define CLKC_PLL_SELECT                (CLKC_BASE + 0x0008)
 #define CLKC_PLL_DIVIDER0              (CLKC_BASE + 0x000a)
 #define CLKC_PLL_DIVIDER1              (CLKC_BASE + 0x000c)
@@ -34,6 +35,19 @@
 #define CLKC_PLL_N_MAX                 8
 #define CLKC_PLL_FREQ_MIN              110000000
 #define CLKC_PLL_FREQ_MAX              351000000
+
+#define CLKC_SRC_TMR0_ARM              0x0000
+#define CLKC_SRC_TMR0_27M              0x0002
+#define CLKC_SRC_TMR1_ARM              0x0000
+#define CLKC_SRC_TMR1_27M              0x0004
+#define CLKC_SRC_TMR2_ARM              0x0000
+#define CLKC_SRC_TMR2_27M              0x0008
+#define CLKC_SRC_TMR3_ARM              0x0000
+#define CLKC_SRC_TMR3_27M              0x0010
+#define CLKC_SRC_UART0_ARM             0x0000
+#define CLKC_SRC_UART0_27M             0x0020
+#define CLKC_SRC_UART1_ARM             0x0000
+#define CLKC_SRC_UART1_27M             0x0040
 
 #define CLKC_SEL_ARM_PLL0              0x0000
 #define CLKC_SEL_ARM_PLL1              0x0001

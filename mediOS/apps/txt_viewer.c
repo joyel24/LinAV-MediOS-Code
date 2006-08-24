@@ -17,10 +17,9 @@
 #include <sys_def/colordef.h>
 #include <sys_def/stddef.h>
 
-#define TEXT_HEIGHT  13
-#define TEXT_WIDTH   7
-
 int yDebug = 100;
+
+//#define STATUS_LINE
 
 #define WRAP_TRIM          44  /* Max number of spaces to trim (arbitrary) */
 #define MAX_COLUMNS        64  /* Max displayable string len (over-estimate) */
@@ -56,31 +55,28 @@ int yDebug = 100;
 
 enum {
     WRAP=0,      
-    CHOP,        
+    CHOP,
     WORD_MODES
 } word_mode = 0;
-static unsigned char *word_mode_str[] = {"wrap", "chop", "words"};
 
 enum {
-    NORMAL=0,    
-    JOIN,        
-    EXPAND,     
+    NORMAL=0,
+    JOIN,
+    EXPAND,
     LINE_MODES
 } line_mode = 0;
-static unsigned char *line_mode_str[] = {"normal", "join", "expand", "lines"};
 
 enum {
     NARROW=0,
     WIDE,
     VIEW_MODES
 } view_mode = 0;
-static unsigned char *view_mode_str[] = {"narrow", "wide", "view"};
 
 enum {
     SB_OFF=0,
     SB_ON,
     SCROLLBAR_MODES
-} scrollbar_mode[VIEW_MODES] = {SB_OFF, SB_ON};
+} scrollbar_mode[VIEW_MODES] = {SB_ON, SB_ON};
 
 static int need_scrollbar;
 enum {
@@ -89,20 +85,11 @@ enum {
     PAGE_MODES
 } page_mode = 0;
 
-void DrawStatusLine(int type)
-{
-   char tmp[50];
-
-   sprintf(tmp, "%s %s / %s %s / %s %s",  word_mode_str[word_mode],
-	word_mode_str[WORD_MODES],
-	line_mode_str[line_mode],
-	line_mode_str[LINE_MODES],
-	view_mode_str[view_mode],
-	view_mode_str[VIEW_MODES]);
-
-	gfx_fillRect(COLOR_BLUE, 0, 320, 200, 16);
-	gfx_putS(COLOR_BLACK, COLOR_BLUE, 5, 225, tmp);
-}
+#ifdef STATUS_LINE
+static unsigned char *word_mode_str[] = {"wrap", "chop", "words"};
+static unsigned char *line_mode_str[] = {"normal", "join", "expand", "lines"};
+static unsigned char *view_mode_str[] = {"narrow", "wide", "view"};
+#endif
 
 static unsigned char buffer[BUFFER_SIZE + 1];
 static unsigned char line_break[] = {0,0x20,'-',9,0xB,0xC};
@@ -118,8 +105,33 @@ static unsigned char *screen_top_ptr;
 static unsigned char *next_screen_ptr;
 static unsigned char *next_screen_to_draw_ptr;
 static unsigned char *next_line_ptr;
+static int screen_height,screen_width;
+static int font_height,font_width;
 
+WIDGETMENU menu;
 
+char * font_items[]={"4x6","5x8","6x9","7x13","8x13"};
+int font_ids[]={STD4X6,STD5X8,STD6X9,STD7X13,STD8X13};
+
+char * word_items[]={"Wrap","Chop"};
+char * line_items[]={"Normal","Join","Expand"};
+
+void DrawStatusLine(int type)
+{
+#ifdef STATUS_LINE
+   char tmp[50];
+
+   sprintf(tmp, "%s %s / %s %s / %s %s",  word_mode_str[word_mode],
+	word_mode_str[WORD_MODES],
+	line_mode_str[line_mode],
+	line_mode_str[LINE_MODES],
+	view_mode_str[view_mode],
+	view_mode_str[VIEW_MODES]);
+
+	gfx_fillRect(COLOR_BLUE, 0, screen_width, screen_height, 16);
+	gfx_putS(COLOR_BLACK, COLOR_BLUE, 5, display_lines * font_height, tmp);
+#endif
+}
 
 static unsigned char* find_first_feed(const unsigned char* p, int size)
 {
@@ -448,7 +460,8 @@ static void viewer_scrollbar(void)
         max_shown = items;
     else
         max_shown = min_shown + (next_screen_ptr - screen_top_ptr);
-
+        
+    printf("i %d min %d max %d\n",items,min_shown,max_shown);
 }
 
 static void viewer_draw(int col)
@@ -463,7 +476,7 @@ static void viewer_draw(int col)
     /* If col==-1 do all calculations but don't display */
     if (col != -1)
 	 {
-        gfx_fillRect(COLOR_WHITE, 0, 0, 320, 240);
+        gfx_fillRect(COLOR_WHITE, 0, 0, screen_width, screen_height);
     }
 
     max_line_len = 0;
@@ -487,7 +500,7 @@ static void viewer_draw(int col)
 					 {
                     if (col != -1)
 						  {
-                       gfx_fillRect(COLOR_WHITE, 0, 0, 320, 240);
+                       gfx_fillRect(COLOR_WHITE, 0, 0, screen_width, screen_height);
 						  }
 
                     for (; i < display_lines - 1; i++)
@@ -553,7 +566,7 @@ static void viewer_draw(int col)
 
 						  memset(text, 0, sizeof(text));
 						  strncpy(text,scratch_buffer + col, k);
-                    gfx_putS(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, text);
+                    gfx_putS(COLOR_BLACK, COLOR_WHITE, left_col*font_width, i*font_height, text);
 
                 }
         }
@@ -568,7 +581,7 @@ static void viewer_draw(int col)
 
 						  memset(text, 0, sizeof(text));
 						  strncpy(text, line_begin + col, line_len);
-                    gfx_putS(COLOR_BLACK, COLOR_WHITE, left_col*TEXT_WIDTH, i*TEXT_HEIGHT, text);
+                    gfx_putS(COLOR_BLACK, COLOR_WHITE, left_col*font_width, i*font_height, text);
 
                     line_end[0] = c;
                 }
@@ -636,14 +649,6 @@ static void init_need_scrollbar(void) {
 
 static int viewer_init(char* file)
 {
-	int w=TEXT_WIDTH,h=TEXT_HEIGHT;
-	int screen_height,screen_width;
-	getResolution(&screen_width,&screen_height);
-
-//xxx    cops->getStringS("M", &w, &h);
-    display_lines = (screen_height / h) - 1;  // -1 for reserve status line
-    display_columns = screen_width / w ;
-
     /*********************
     * (Could re-initialize settings here, if you
     *   wanted viewer to start the same way every time)*/
@@ -676,6 +681,18 @@ static int viewer_init(char* file)
     return 1;
 }
 
+void font_set(int font){
+    gfx_fontSet(font);
+
+    gfx_getStringSize("M", &font_width, &font_height);
+
+    display_lines = (screen_height / font_height);
+#ifdef STATUS_LINE
+    display_lines--;  // reserve status line
+#endif
+    display_columns = screen_width / font_width ;
+}
+
 static void viewer_exit(void)
 {
     close(fd);
@@ -692,9 +709,64 @@ static int col_limit(int col)
     return col;
 }
 
-static int viewer_recorder_on_button(int col)
-{
-    return col;
+void menu_init(){
+    WIDGETMENU_CHOOSER mih;
+    WIDGETMENU_CHECKBOX mic;
+
+    menu=widgetMenu_create();
+    menu->setRect(menu,0,0,screen_width,screen_height);
+    menu->ownItems=true;
+
+    mih=widgetMenuChooser_create();
+    mih->caption="Font";
+    mih->chooser->items=font_items;
+    mih->chooser->itemCount=5;
+    mih->chooser->index=3;
+    menu->addItem(menu,mih);
+
+    mic=widgetMenuCheckbox_create();
+    mic->caption="Line wrap";
+    mic->checkbox->caption="Wrap";
+    mic->checkbox->checked=true;
+    menu->addItem(menu,mic);
+
+    mih=widgetMenuChooser_create();
+    mih->caption="Words";
+    mih->chooser->items=word_items;
+    mih->chooser->itemCount=2;
+    mih->chooser->index=0;
+    menu->addItem(menu,mih);
+
+    mih=widgetMenuChooser_create();
+    mih->caption="Lines";
+    mih->chooser->items=line_items;
+    mih->chooser->itemCount=3;
+    mih->chooser->index=0;
+    menu->addItem(menu,mih);
+}
+
+void menu_execute(int evt_handler){
+    bool wrap;
+    int font;
+    int event;
+
+    menu->handleEvent(menu,EVT_REDRAW);
+
+    do
+    {
+        event=evt_getStatus(evt_handler);
+        if (!event) continue; // no new events
+
+        menu->handleEvent(menu,event);
+    }
+    while(event!=BTN_OFF);
+
+    font=menu->getChooser(menu,menu->indexFromCaption(menu,"Font"))->index;
+    word_mode=menu->getChooser(menu,menu->indexFromCaption(menu,"Words"))->index;
+    line_mode=menu->getChooser(menu,menu->indexFromCaption(menu,"Lines"))->index;
+    wrap=menu->getCheckbox(menu,menu->indexFromCaption(menu,"Line wrap"))->checked;
+    view_mode=(wrap)?NARROW:WIDE;
+    font_set(font_ids[font]);
 }
 
 void app_main(int argc,char * * argv)
@@ -707,7 +779,7 @@ void app_main(int argc,char * * argv)
 	int i = 0;
 	int evt_handler = evt_getHandler(BTN_CLASS);
 
-    if(argc<1)
+    if(argc<2)
         return ; // Quit
     else
     {
@@ -717,8 +789,12 @@ void app_main(int argc,char * * argv)
 
 	gfx_openGraphics();
 
-	 // set standard font
-    gfx_fontSet(STD7X13);
+	getResolution(&screen_width,&screen_height);
+
+    // set sandard font
+    font_set(STD6X9);
+
+    menu_init();
 
     ok = viewer_init(file);
 
@@ -741,71 +817,7 @@ void app_main(int argc,char * * argv)
                         viewer_exit();
                         stop = 1;
                         break;
-                
-                case BTN_F1:
-                        /* Word-wrap mode: WRAP or CHOP */
-                        if (++word_mode == WORD_MODES)
-                                word_mode = 0;
-                
-                        init_need_scrollbar();
-                
-                        viewer_draw(col);
-                
-                        DrawStatusLine(1);
-                
-                        break;
-                
-                case BTN_F2:
-                        /* Line-paragraph mode: NORMAL, JOIN or EXPAND */
-                        if (++line_mode == LINE_MODES)
-                                line_mode = 0;
-                
-                        if (view_mode == WIDE)
-                                if (line_mode == JOIN)
-                                                if (++line_mode == LINE_MODES)
-                                                        line_mode = 0;
-                
-                        init_need_scrollbar();
-                
-                        viewer_draw(col);
-                
-                        DrawStatusLine(2);
-                
-                        break;
-                
-                case BTN_F3:
-                        /* View-width mode: NARROW or WIDE */
-                        if (line_mode == JOIN)
-                        {
-                                DrawStatusLine(3);
-                        }
-                        else
-                                if (++view_mode == VIEW_MODES)
-                                                view_mode = 0;
-                
-                        col = 0;
-                
-                        /***** Could do this after change of word-wrap mode
-                        * and after change of view-width mode, to normalize
-                        * view:
-                        if (screen_top_ptr > buffer + BUFFER_SIZE/2) {
-                                screen_top_ptr = find_prev_line(screen_top_ptr);
-                                screen_top_ptr = find_next_line(screen_top_ptr);
-                        }
-                        else {
-                                screen_top_ptr = find_next_line(screen_top_ptr);
-                                screen_top_ptr = find_prev_line(screen_top_ptr);
-                        }
-                        ***********/
-                
-                        init_need_scrollbar();
-                
-                        viewer_draw(col);
-                
-                        DrawStatusLine(4);
-                
-                        break;
-                
+
                 case BTN_UP:
                         /* Page up */
                         for (i = page_mode==OVERLAP? 1:0; i < display_lines; i++)
@@ -853,16 +865,83 @@ void app_main(int argc,char * * argv)
                         viewer_draw(col);
                         DrawStatusLine(0);
                         break;
+
+#ifdef STATUS_LINE
+                case BTN_F1:
+                        /* Word-wrap mode: WRAP or CHOP */
+                        if (++word_mode == WORD_MODES)
+                                word_mode = 0;
+
+                        init_need_scrollbar();
+
+                        viewer_draw(col);
+
+                        DrawStatusLine(1);
                 
+                        break;
+                
+                case BTN_F2:
+                        /* Line-paragraph mode: NORMAL, JOIN or EXPAND */
+                        if (++line_mode == LINE_MODES)
+                                line_mode = 0;
+                
+                        if (view_mode == WIDE)
+                                if (line_mode == JOIN)
+                                                if (++line_mode == LINE_MODES)
+                                                        line_mode = 0;
+                
+                        init_need_scrollbar();
+                
+                        viewer_draw(col);
+                
+                        DrawStatusLine(2);
+                
+                        break;
+                
+                case BTN_F3:
+                        /* View-width mode: NARROW or WIDE */
+                        if (line_mode == JOIN)
+                        {
+                                DrawStatusLine(3);
+                        }
+                        else
+                                if (++view_mode == VIEW_MODES)
+                                                view_mode = 0;
+
+                        col = 0;
+
+                        /***** Could do this after change of word-wrap mode
+                        * and after change of view-width mode, to normalize
+                        * view:
+                        if (screen_top_ptr > buffer + BUFFER_SIZE/2) {
+                                screen_top_ptr = find_prev_line(screen_top_ptr);
+                                screen_top_ptr = find_next_line(screen_top_ptr);
+                        }
+                        else {
+                                screen_top_ptr = find_next_line(screen_top_ptr);
+                                screen_top_ptr = find_prev_line(screen_top_ptr);
+                        }
+                        ***********/
+
+                        init_need_scrollbar();
+
+                        viewer_draw(col);
+
+                        DrawStatusLine(4);
+
+                        break;
+#else
+                case BTN_F1:
+                case BTN_F2:
+                case BTN_F3:
+#endif
                 case BTN_ON:
-                        /*Go to On-btn combinations */
-                        col = viewer_recorder_on_button(col);
-                        DrawStatusLine(0);
+                        menu_execute(evt_handler);
+                        viewer_draw(col);
                         break;
             }
         }
     }
-    evt_freeHandler(evt_handler)
+    evt_freeHandler(evt_handler);
 }
-
 

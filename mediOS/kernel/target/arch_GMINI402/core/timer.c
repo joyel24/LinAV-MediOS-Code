@@ -17,19 +17,21 @@
 #include <kernel/irq.h>
 #include <kernel/timer.h>
 #include <kernel/kernel.h>
+#include <kernel/clkc.h>
 
 void arch_tmr_init(void)
 {
+    // set timer clk to be 27Mhz
+    outw(inw(CLKC_SOURCE_SELECT)|CLKC_SRC_TMR0_27M|CLKC_SRC_TMR1_27M|CLKC_SRC_TMR2_27M|CLKC_SRC_TMR3_27M,CLKC_SOURCE_SELECT);
+
     /*
     * System clock formula:
     *         freq = clock / (div * scale)
     *  freq need to be 100Hz
     */
 
-    TMR_SET_SEL(TMR_SEL_EXT,TMR0);
-
     /* prescale  */
-    
+
     TMR_SET_SCAL(9, TMR0);
 
     /* div  */
@@ -46,13 +48,11 @@ void arch_tmr_init(void)
     * Sends FIQ at 2khz
     */
 
-    TMR_SET_SEL(TMR_SEL_ARM,TMR3);
-
     /* prescale  */
     TMR_SET_SCAL(0, TMR3);
 
     /* div  */
-    TMR_SET_DIV(50624, TMR3);
+    TMR_SET_DIV(((CONFIG_EXT_CLK/1000)-1), TMR3);
 
     /* freerun */
     TMR_SET_MODE(TMR_MODE_FREERUN, TMR3);

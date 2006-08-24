@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.10  2006/05/28 17:08:45  sfxgligli
+// aoDoom update (adding browser, PWADs support, optimisations,...)
+//
 // Revision 1.9  2006/02/06 22:45:48  oxygen77
 // make doom work with new api, we lack of exit() now
 //
@@ -66,7 +69,7 @@ rcsid[] = "$Id$";
 
 #include "doomdef.h"
 
-#ifdef GMINI4XX
+#if defined(GMINI4XX) ||defined(GMINI402)
 char button_to_key[2][NB_BUTTONS]=
   // ingame
  {{KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
@@ -93,7 +96,7 @@ char button_to_key[2][NB_BUTTONS]=
   KEY_ESCAPE,KEY_F11,
   KEY_ENTER,KEY_ESCAPE}};
 #endif
-#ifdef GMINI4XX
+#if defined(GMINI4XX) ||defined(GMINI402)
 // 320px -> 220px clever resize of the HUD (thx to WireDDD for the idea)
 int hud_resize_table[REALSCREENWIDTH]={
 0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,
@@ -115,7 +118,7 @@ static char * offset2;
 int x_resize_lookup[REALSCREENWIDTH];
 char * y_resize_lookup[REALSCREENHEIGHT];
 
-#ifdef GMINI4XX
+#if defined(GMINI4XX) ||defined(GMINI402)
 __IRAM_DATA char * hud_resize_lookup[REALSCREENWIDTH];
 
 void InitResizeLookups(){
@@ -265,7 +268,7 @@ void I_FinishUpdate (void)
   }
 
 
-#ifdef GMINI4XX
+#if defined(GMINI4XX) ||defined(GMINI402)
   if(menuactive || (gamestate!=GS_LEVEL)){ // not playing?
     // full screen resize
     DoFullScreenResize();
@@ -329,7 +332,7 @@ void I_InitGraphics(void)
 
   gfx_planeSetSize(BMAP1,SCREENWIDTH,SCREENHEIGHT,8);
 
-#ifdef GMINI4XX
+#if defined(GMINI4XX) ||defined(GMINI402)
   InitResizeLookups();
 #endif
 }

@@ -41,7 +41,7 @@
 
 #define ROOTFOLDER "/doom/"
 
-#ifdef GMINI4XX
+#if defined(GMINI4XX) ||defined(GMINI402)
 #define REALSCREENWIDTH 224
 #define REALSCREENHEIGHT 176
 #endif
@@ -50,12 +50,14 @@
 #define REALSCREENWIDTH 320
 #define REALSCREENHEIGHT 200
 #endif
-/*
+
+#ifdef DM320
 #undef __IRAM_CODE
 #define __IRAM_CODE
 #undef __IRAM_DATA
 #define __IRAM_DATA
-*/
+#endif
+
 extern void app_exit();
 
 

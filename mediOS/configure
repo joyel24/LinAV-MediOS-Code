@@ -157,7 +157,7 @@ fi
 # CONFIG_QUERY_YN $variable_to_set "question to ask" "default answer"
 # variable_to_set=$?
 
-CONFIG_QUERY_YN $CONFIGURE_HAVE_DBUG "Build with support for emu2?" "n"
+CONFIG_QUERY_YN $CONFIGURE_HAVE_DBUG "Build with emu2 breakpoints support? (disable this on Gmini402)" "n"
 CONFIGURE_HAVE_DBUG=$?
 
 CONFIG_QUERY_YN $CONFIGURE_CHK_BAT_POWER "CHK_BAT_POWER? note: this must be yes atm, it is used to turn off lcd, HD and device" "y"
