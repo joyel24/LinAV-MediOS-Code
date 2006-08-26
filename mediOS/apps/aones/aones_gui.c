@@ -358,7 +358,7 @@ void gui_welcomeScreen(){
     gfx_planeShow(BMAP1);
 
     gfx_clearScreen(COLOR_WHITE);
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y,       "aoNES v0.1");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y,       "aoNES v0.2");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "==========");
 
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "Port of LittleJohnGP by yoyo.");

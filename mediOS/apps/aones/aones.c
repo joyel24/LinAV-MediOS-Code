@@ -60,10 +60,17 @@ void clk_overclock(bool en){
 
         clkc_setClockFrequency(CLK_ARM,armFrequency*1000000);
     }else{
+#ifdef GMINI402
+        //HACK: underclock DSP to 81Mhz, and ARM to 99Mhz, fixes some hangs
+        clkc_setClockParameters(CLK_ARM,11,1,3);
+        clkc_setClockParameters(CLK_ACCEL,11,1,3);
+        clkc_setClockParameters(CLK_DSP,6,1,2);
+#else
         // default params
         clkc_setClockParameters(CLK_ARM,15,2,2);
         clkc_setClockParameters(CLK_ACCEL,15,2,1);
         clkc_setClockParameters(CLK_DSP,9,1,2);
+#endif
     }
 #endif
 };
@@ -622,6 +629,9 @@ int emu_frameCompleted()
 
 int app_main(){
 
+    // set default clocks
+    clk_overclock(false);
+
     // disable LCD & halt timer
     set_timer_status(LCD_TIMER,TIMER_MODE_BAT,MODE_DISABLE);
     set_timer_status(LCD_TIMER,TIMER_MODE_DC,MODE_DISABLE);
@@ -684,6 +694,7 @@ int app_main(){
     clk_overclock(false);
     snd_close();
     gui_close();
+    tvOut=0;display_tvOutSet();
     gfx_closeGraphics();
     emu_close();
 
