@@ -1,11 +1,11 @@
 # lds file creation
 
 function conv_hexa {
-	cur_txt=`echo $1 | gawk '{ printf("0x%x",$1)}'`
+	cur_txt=`echo $1 | awk '{ printf("0x%x",$1)}'`
 }
 
 function get_data {
-	cur_txt=`cat $include_file | grep $1 | gawk '{print $3}'`
+	cur_txt=`cat $include_file | grep $1 | awk '{print $3}'`
 }
 
 dest_file="medios.lds"
