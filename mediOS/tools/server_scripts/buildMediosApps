@@ -1,0 +1,22 @@
+#building mediOS apps
+
+curDate=`date +"%Y%m%d"`
+
+cd ~/archopen_src/build/mediOS
+cp -f ../av3xx.conf ./Makefile.conf
+make incdir
+make mk_api_file
+#disarding messages from make clean
+make clean 2>&1 > /dev/null
+make 2>&1 > /dev/null
+cd apps
+
+zipFile="apps_${curDate}.zip"
+makeResult="apps_make_${curDate}.log"
+reportFile="apps_report_${curDate}.log"
+
+buildAndReport  ${makeResult} ${reportFile} "all_med"
+
+zip ${zipFile} *.med
+
+mvFtp $reportFile $makeResult $zipFile

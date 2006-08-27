@@ -1,0 +1,49 @@
+# compilation script for mediOS
+
+curDate=`date +"%Y%m%d"`
+arch=$1
+reportFile="report_medios_${arch}_${curDate}.log"
+
+if [ "$arch" == "av3xx" ] || [ "$arch" == "av1xx" ] || [ "$arch" == "jbmm" ]; then
+ext="bin"
+else
+if [ "$arch" == "g4xx" ]; then
+ext="wav"
+else
+if [ "$arch" == "g402" ]; then
+ext="avi"
+else
+echo "Error unsupported arch: $arch"
+exit
+fi
+fi
+fi
+
+echo "Building mediOS for $arch"
+
+zipFile="${arch}_medios_${curDate}.zip"
+makeResult="${arch}_makeMedios_${curDate}.log"
+reportFile="${arch}_reportMedios_${curDate}.log"
+
+cd ~/archopen_src/build/mediOS
+
+cp -f ../$1.conf ./Makefile.conf
+
+make incdir
+make mk_api_file
+#disarding messages from make clean
+make clean 2>&1 > /dev/null
+
+buildAndReport ${makeResult} ${reportFile}
+
+#zipping bin
+zip -9 ${zipFile} medios.${ext}
+if [ "$arch" == "g402" ]; then
+zip -9 cc_${zipFile} cc_medios.${ext}
+fi
+
+# ok everything is ready we can send
+mvFtp $reportFile $makeResult $zipFile
+if [ "$arch" == "g402" ]; then
+mvFtp cc_$zipFile
+fi

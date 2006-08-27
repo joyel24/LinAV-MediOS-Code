@@ -1,0 +1,19 @@
+# build everything
+
+# mediOS
+mediOS_arch="jbmm av1xx av3xx g4xx g402"
+
+echo "Cpy mediOS folder"
+cd ~/archopen_src
+cp -Rf mediOS build/
+
+for arch in $mediOS_arch; do
+buildMediOS $arch
+done
+
+# apps in mediOS
+
+buildMediosApps
+
+echo "removing mediOS folder"
+rm -Rf ~/archopen_src/build/mediOS
