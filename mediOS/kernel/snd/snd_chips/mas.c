@@ -59,8 +59,6 @@ __IRAM_DATA sound_buffer_s * soundBuffer;
     __i;                                                      \
   })
 
-//#define PCM_DSP_TEST
-  
 /********************* DSP                    ***************************/
 
 __IRAM_CODE void mas_dspInterrupt(int irq,struct pt_regs * regs)
@@ -138,11 +136,6 @@ void mas_init(void)
     printk("S%x:%d:%c%d ",version.major_number,version.derivate,version.char_order_version,version.digit_order_version);
     irq_disable(IRQ_MAS_DATA);
     printk("\n");
-    
-#ifdef PCM_DSP_TEST
-   mas_i2sInit();
-   //mas_test_PCM();
-#endif
 }
 
 int mas_reset(void)
@@ -372,7 +365,7 @@ int mas_read_register(int reg)
     return ret;
 }
 
-int mas_write_register(int reg,int val)
+int mas_write_register(int reg,unsigned int val)
 {
     //i2c_ini_xfer();
     i2c_start();
@@ -406,12 +399,12 @@ int mas_run(void)
     return 0;
 }
 
-int mas_setD0(int addr,int val)
+int mas_setD0(int addr,unsigned int val)
 {
     return mas_write_Di_register(MAS_REGISTER_D0,addr,&val,1);
 }
 
-int mas_getD0(int addr)
+unsigned int mas_getD0(int addr)
 {
     unsigned int ret;
     if( mas_read_Di_register(MAS_REGISTER_D0,addr,&ret,1)<0)
@@ -449,7 +442,7 @@ int mas_read_Di_register(int i,int addr,void * buf,int size) // !!! 20 bit value
                 buffer[j+2]=(ret>>16)&0xFF;
         buffer[j+1]=(ret>>8)&0x0F;
         buffer[j]=0;*/
-                buffer[j+3]=0;
+        buffer[j+3]=0;
         buffer[j+2]=(ret>>16)&0x0F;
         buffer[j+1]=(ret>>8)&0xFF;
         buffer[j]=ret&0xFF;
@@ -491,6 +484,11 @@ int mas_shortRead_Di_register(int i,int addr,void * buf,int size) // no problem 
     i2c_notAck();
     i2c_stop();
     return 0;
+}
+
+int mas_write_Di_regFromData(struct mas_data_struct * data)
+{
+    return mas_write_Di_register(data->reg,data->addr,(void *)data->buffer,data->length);
 }
 
 int mas_write_Di_register(int i,int addr,void * buf,int size) // !!! 20 bit values read as 32 bit
@@ -796,256 +794,70 @@ int mas_codecWrite(int reg,int val)
     return 0;
 }
 
-/*********************  PCM  code       ***************************/
+#include "mas_codecI2S.h"
+
+int mas_stop_data[8][2] = {
+    { 0x3B,0x00318 },
+    { 0x43,0x00300 },
+    { 0x4B,0x00000 },
+    { 0x53,0x00318 },
+    { 0x6B,0x00000 },
+    { 0xBB,0x00318 },
+    { 0xC3,0x00300 },
+    { 0x06,0x00000 }
+};
+
+unsigned int sample_rate_cfg[][2]= {
+{0x4E5E,0x106}, /*  5.0125 */
+{0x4800,0x106}, /*  8      */
+{0x4E5E,0x186}, /* 11.025  */
+{0x4800,0x186}, /* 12      */
+{0x4800,0x206}, /* 16      */
+{0x4E5E,0x286}, /* 22.05   */
+{0x4800,0x286}, /* 24      */
+{0x6C00,0x306}, /* 32      */
+{0x4E5E,0x306}, /* 44.1    */
+{0x4800,0x306}, /* 48      */
+};
+
+#define WAVE_PERIOD ((volatile unsigned short *)0x40100)
+#define DEBUG_MSG_STATE ((volatile unsigned short *)0x40102)
+#define DEBUG_MSG_TEXT  ((short *)0x40104)
+
 #if 0
-
-#include "mas_code/mas_pcm_struct.h"
-#include "mas_code/d0_640_1e.h"
-#include "mas_code/d0_674_51.h"
-#include "mas_code/d0_661_13.h"
-#include "mas_code/d0_6e4_10.h"
-#include "mas_code/d0_700_12.h"
-#include "mas_code/d1_600_3f.h"
-#include "mas_code/d1_640_c.h"
-#include "mas_code/d1_660_1c.h"
-#include "mas_code/d0_800_684.h"
-#include "mas_code/d1_800_435.h"
-
-#define NB_CHUNK 10
-
-struct mas_pcm_struct * chunk_list[NB_CHUNK] = {
-    &D0_640_1e,
-    &D0_674_51,
-    &D0_661_13,
-    &D0_6e4_10,
-    &D0_700_12,
-    &D1_600_3f,
-    &D1_640_c,
-    &D1_660_1c,
-    &D0_800_684,
-    &D1_800_435
-};
-
-int mas_load_PCM_code(void)
-{
-    int i,val;
-    for(i=0;i<NB_CHUNK;i++)
-    {
-        printk("loading %s(%x@%x,%x)\n",chunk_list[i]->name,chunk_list[i]->reg,chunk_list[i]->addr,chunk_list[i]->length);
-        mas_write_Di_register(chunk_list[i]->reg,chunk_list[i]->addr,(void *)chunk_list[i]->buffer,chunk_list[i]->length);
-        mas_read_Di_register(chunk_list[i]->reg,chunk_list[i]->addr,&val,1);
-        printk("read back : @%x:%x get: %x\n",chunk_list[i]->reg,chunk_list[i]->addr,val);
-    }
-    return 0;
-}
-
-int mas_stop_data[8][2] = {
-    { 0x3B,0x00318 },
-    { 0x43,0x00300 },
-    { 0x4B,0x00000 },
-    { 0x53,0x00318 },
-    { 0x6B,0x00000 },
-    { 0xBB,0x00318 },
-    { 0xC3,0x00300 },
-    { 0x06,0x00000 }
-};
-
-void mas_stop_app(void)
-{
-    int i,val,val2;
-    mas_freeze();
-    for(i=0;i<8;i++)
-    {
-        val2 = mas_read_register(mas_stop_data[i][0]);
-        mas_write_register(mas_stop_data[i][0],mas_stop_data[i][1]);
-        val = mas_read_register(mas_stop_data[i][0]);
-        printk("READ back reg : %x=%x was %x, should be %x\n",mas_stop_data[i][0],val,val2,mas_stop_data[i][1]);
-    }
-}
-
-#define WAVE_PERIOD ((volatile unsigned short *)0x40100)
-#define DEBUG_MSG_STATE ((volatile unsigned short *)0x40102)
-#define DEBUG_MSG_TEXT  ((short *)0x40104)
-
-#define MAIN_CONFIG 0x0025
-
-void mas_run_app(void)
-{
-    int val=0;
-    int i=0;
-
-    mas_write_register(0x6B,0xC0000);
-    mas_run();
-
-
-    val = MAIN_CONFIG;
-    mas_write_Di_register(MAS_REGISTER_D0,0x661,&val,1);
-    printk("bf loop1\n");
-    while(1)
-    {
-        val=0;
-        mas_read_Di_register(MAS_REGISTER_D0,0x666,&val,1);
-        if(val==0)
-            break;
-        printk("APP get: %x\n",val);
-    }
-    printk("af loop1\n");
-    val = 0x8300;
-    mas_write_Di_register(MAS_REGISTER_D0,0x7f8,&val,1);
-    
-    val = 0x0069;
-    mas_write_Di_register(MAS_REGISTER_D0,0x66b,&val,1);
-     
-    val = 0x0028;
-    mas_write_Di_register(MAS_REGISTER_D0,0x662,&val,1);
-      
-    
-    dsp_loadProgramFromHDD("/test.out");
-    *WAVE_PERIOD=30;
-    *DEBUG_MSG_STATE=0;
-    dsp_run();
-    
-    
-    
-    val = MAIN_CONFIG | 0x1000;
-    mas_write_Di_register(MAS_REGISTER_D0,0x661,&val,1);
-    printk("bf loop2\n");
-    while(1)
-    {
-        val=0;
-        i++;
-        mas_read_Di_register(MAS_REGISTER_D0,0x666,&val,1);
-        if(val==0x80001 || i>10)
-            break;
-        printk("APP get: %x\n",val);
-    }
-    if(val!=0x80001)
-        printk("APP get: bad val\n");
-    else
-        printk("APP get: ok\n");
-        //while(1);
-    printk("af loop2\n");
-    printk("all ok\n");
-
-}
-
-
-
-int mas_test_PCM(void)
-{
-    mas_codecWrite(MAS_REG_AUDIO_CONF,0x7);
-    mas_codecWrite(MAS_REG_INPUT_MODE,0x0);
-    mas_codecWrite(MAS_REG_MIX_ADC_SCALE,0x0);
-    mas_codecWrite(MAS_REG_MIX_DSP_SCALE,0x4000);
-    mas_codecWrite(MAS_REG_DA_OUTPUT_MODE,0x0);
-
-
-    mas_codecCtrlConf(MAS_SET,MAS_BALANCE,50);
-    mas_codecCtrlConf(MAS_SET,MAS_VOLUME,/*70*/70);
-
-    MAS_DELAY
-
-    printk("[MAS] stop all app\n");
-    if(!mas_stopApps())
-        return -1;
-
-    mas_setD0(MAS_INTERFACE_CONTROL,0x04);
-    mas_setClkSpeed(0x4800);
-    mas_setD0(MAS_MAIN_IO_CONTROL,0x125);
-    
-    printk("\t\tStopping\n");
-    mas_stop_app();
-    printk("\t\tDownloading\n");
-    mas_load_PCM_code();
-    printk("\t\tRuning\n");
-    mas_run_app();
-
-    
-    
-    return 0;
-}
-#endif
-
-//#ifdef PCM_DSP_TEST
-#ifdef PCM_DSP_TEST
-#include "mas_code/mas_pcm_struct.h"
-#include "mas_code/dsp_d0_800_463.h"
-#include "mas_code/dsp_d0_7f8_1.h"
-
-struct mas_pcm_struct * chunk_list[2] = {
-    &D0_800_463,
-    &D0_7f8_1
-};
-
-int mas_stop_data[8][2] = {
-    { 0x3B,0x00318 },
-    { 0x43,0x00300 },
-    { 0x4B,0x00000 },
-    { 0x53,0x00318 },
-    { 0x6B,0x00000 },
-    { 0xBB,0x00318 },
-    { 0xC3,0x00300 },
-    { 0x06,0x00000 }
-};
-
-#define WAVE_PERIOD ((volatile unsigned short *)0x40100)
-#define DEBUG_MSG_STATE ((volatile unsigned short *)0x40102)
-#define DEBUG_MSG_TEXT  ((short *)0x40104)
-
-#include <kernel/dsp.h>
-
-void mas_i2sInit(void)
+void mas_i2sInit(int sample_rate)
 {
     int i,val,val2;
 
     mas_stopApps();
-
-    mas_setD0(MAS_INTERFACE_CONTROL,0x04);
-    mas_setClkSpeed(0x4800);
-    mas_setD0(MAS_MAIN_IO_CONTROL,0x125);
-
     printk("\t\tStop & init MAS mem\n");
-
     mas_freeze();
     for(i=0;i<8;i++)
     {
-        //val2 = mas_read_register(mas_stop_data[i][0]);
         mas_write_register(mas_stop_data[i][0],mas_stop_data[i][1]);
-        //val = mas_read_register(mas_stop_data[i][0]);
-        //printk("READ back reg : %x=%x was %x, should be %x\n",mas_stop_data[i][0],val,val2,mas_stop_data[i][1]);
     }
-
     printk("\t\tDownloading\n");
-
-    mas_write_Di_register(chunk_list[0]->reg,chunk_list[0]->addr,(void *)chunk_list[0]->buffer,chunk_list[0]->length);
-
+    mas_write_Di_regFromData(&I2S_codec);
     printk("\t\tRun code\n");
-
     mas_write_register(0x6B,0xC0000);
     mas_run();
 
-    //mas_write_Di_register(chunk_list[1]->reg,chunk_list[1]->addr,(void *)chunk_list[1]->buffer,chunk_list[1]->length);
-
-    mas_setD0(0x7f8,0x00008300);
-    
+    mas_setD0(0x7f8,0x00008300);    
     mas_setD0(0x7f2,0x04);
+    //mas_setD0(MAS_MAIN_IO_CONTROL,0x125);
     
-    mas_setD0(MAS_MAIN_IO_CONTROL,0x125);
-    /* dsp code here */
-
     dsp_loadProgramFromHDD("/test.out");
     *WAVE_PERIOD=30;
     *DEBUG_MSG_STATE=0;
     dsp_run();
-
-    mas_codecWrite(0x1,0x386);
+    
+    /* sample rate config*/
+    mas_codecWrite(0x1,0x106);
     mas_setD0(0x347,0x0);
-    //mas_setD0(0x348,0x4e5e);
-    //val=0x1b000;
-    //mas_write_Di_register(MAS_REGISTER_D0,0x348,&val,1)
-
-    mas_setD0(0x348,0x9000);
+    mas_setD0(0x348,0x4800); 
     mas_setD0(0x346,0x1a1);
+    /*printk("[MAS-I2S init] wrote %x,%x for %d\n",sample_rate_cfg[sample_rate][0],
+            sample_rate_cfg[sample_rate][1],sample_rate);*/
 
     mas_codecWrite(MAS_REG_AUDIO_CONF,0x7);
     mas_codecWrite(MAS_REG_INPUT_MODE,0x0);
@@ -1057,94 +869,60 @@ void mas_i2sInit(void)
     mas_codecCtrlConf(MAS_SET,MAS_BALANCE,50);
     mas_codecCtrlConf(MAS_SET,MAS_VOLUME,/*70*/70);
 
-    MAS_DELAY
-
-    printk("[MAS] stop all app\n");
-    if(!mas_stopApps())
-        return -1;
-
-    mas_setD0(MAS_INTERFACE_CONTROL,0x04);
-    mas_setClkSpeed(0x4800);
-    mas_setD0(MAS_MAIN_IO_CONTROL,0x125);
 }
 #endif
-// code from sound_init
-    //ini_mas_for_mp3();
-#if 0
-    mas_codecWrite(MAS_REG_AUDIO_CONF,MAS_INPUT_AD | MAS_L_AD_CONVERTER | MAS_R_AD_CONVERTER | MAS_DA_CONVERTER
-                                | 0xf  << 4 // mic gain
-                                | 0xf << 8  // adc gain right
-                                | 0xf <<12  // adc gain left
-                                );
-    mas_codecWrite(MAS_REG_INPUT_MODE,MAS_CONFIG_INPUT_MONO);
-    mas_codecWrite(MAS_REG_MIX_ADC_SCALE,0x00 << 8);
-    mas_codecWrite(MAS_REG_MIX_DSP_SCALE,0x40 << 8);
+
+void mas_i2sInit(int sampleRate)
+{
+    int i;
+
+    mas_stopApps();
+    mas_freeze();
+    for(i=0;i<8;i++)
+    {
+        mas_write_register(mas_stop_data[i][0],mas_stop_data[i][1]);
+    }
+
+    mas_write_Di_regFromData(&I2S_codec);
+    
+    mas_write_register(0x6B,0xC0000);
+    mas_run();
+
+    mas_setD0(0x7f8,0x00008300);    
+    mas_setD0(0x7f2,0x04);  
+    
+    /* dsp code here */
+    printk("[MAS-I2S init] wrote %x,%x for %d\n",sample_rate_cfg[sampleRate][0],
+            sample_rate_cfg[sampleRate][1],sampleRate);
+
+    mas_codecWrite(0x1,sample_rate_cfg[sampleRate][1]);
+    mas_setD0(0x347,0x0);
+    mas_setD0(0x348,sample_rate_cfg[sampleRate][0]);
+    mas_setD0(0x346,0x1a1);    
+
+    mas_codecWrite(MAS_REG_AUDIO_CONF,0x7);
+    mas_codecWrite(MAS_REG_INPUT_MODE,0x0);
+    mas_codecWrite(MAS_REG_MIX_ADC_SCALE,0x0);
+    mas_codecWrite(MAS_REG_MIX_DSP_SCALE,0x4000);
     mas_codecWrite(MAS_REG_DA_OUTPUT_MODE,0x0);
     mas_codecCtrlConf(MAS_SET,MAS_BALANCE,50);
-    mas_codecCtrlConf(MAS_SET,MAS_VOLUME,70);
+    mas_codecCtrlConf(MAS_SET,MAS_VOLUME,/*70*/70);
+}
 
-    mas_stop_mp3_app();
 
-    mas_set_D0(MAS_INTERFACE_CONTROL,0x04);
-    mas_set_clk_speed(0x4800);
-    mas_set_D0(MAS_MAIN_IO_CONTROL,0x125);
-
-    mas_test_PCM();
-
-#if 1
-    int mp3ptr=0;
-    int fd = open("/out.wav",O_RDONLY);
-    if(fd<0)
-        printk("Error loading file\n");
+void mas_i2sChgSRate(int sample_rate)
+{
+    if(sample_rate<SRATE_5012 || sample_rate>SRATE_48000)
+    {
+        printk("[MAS-SRATE] Error: unsupported sample rate: %d\n",sample_rate);
+    }
     else
     {
-        char * mp3Buff = malloc(1024*1024*7);
-        int cnt=1;
-        int size=filesize(fd);
-        /*
-        while(cnt>0)
-        {
-            cnt = read(fd,mp3Buff+size,1024);
-            size += cnt;
-        }*/
-        size = read(fd,mp3Buff,size);
-        printk("Read from file: %x\n",size);
-        close(fd);
-        //int size=0x46500;
-        char * data_buff = mp3Buff;
-        int data;
-        if(size>0)
-        {
-            while(1)
-            {
-                if(inw(GIO_BITSET0) & (0x1<<GIO_MAS_EOD))
-                    continue;
-
-                data = (data_buff[0] & 0xFF) | ((data_buff[1] & 0xFF)<<8);
-
-                data++;
-
-                outw(0xFF00,GIO_BITCLEAR0);
-                outw(((data & 0xFF)<<8),GIO_BITSET0);
-                /* try to latch data (raise PR) */
-                outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);
-                outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);
-                outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);
-
-                outw(0xFF00,GIO_BITCLEAR0);
-                outw((data & 0xFF00),GIO_BITSET0);
-                outw(0x1<<(GIO_MAS_PR-16),GIO_BITSET1);
-
-                data_buff+=2;
-                if ((data_buff-mp3Buff)>=size) {data_buff=mp3Buff; printk("loop\n"); break;}
-
-                outw(0x1<<(GIO_MAS_PR-16),GIO_BITCLEAR1);
-            }
-        }
-        //cnt = mas_pio_write(mp3Buff + mp3ptr, 2000);
-        //printk("%d ",cnt);
-        //mp3ptr+=cnt;
-        //if (mp3ptr>=65000){mp3ptr=0; printk("loop ");}
-        }
-#endif
-#endif
+        mas_codecWrite(0x1,sample_rate_cfg[sample_rate][1]);
+        mas_setD0(0x347,0x0);
+        mas_setD0(0x348,sample_rate_cfg[sample_rate][0]); 
+        mas_setD0(0x346,0x1a1);
+        printk("[MAS-SRATE] wrote %x,%x for %d\n",sample_rate_cfg[sample_rate][0],
+            sample_rate_cfg[sample_rate][1],sample_rate);
+    }
+}

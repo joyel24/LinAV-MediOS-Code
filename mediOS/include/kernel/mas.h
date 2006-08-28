@@ -36,8 +36,6 @@ void mas_dspInterrupt(int irq,struct pt_regs * regs);
 int sound_buff_write(sound_buffer_s * sound_buffer, int (*reader_fct)(char * data,int count,void* param),
             int count,void * param);
 
-void mas_i2sInit(void);
-
 /* sound API */
 #define SOUND_INI_MP3             0x0001
 #define SOUND_START_MP3           0x0002
@@ -144,13 +142,23 @@ int mas_setClkSpeed(int spd);
 int mas_getFrameCount(void);
 
 /********************* Register i2c read/write ***************************/
+
+struct mas_data_struct {
+    char * name;
+    int reg;
+    int addr;
+    int length;
+    int * buffer;
+};
+
 int mas_read_register(int reg);
-int mas_write_register(int reg,int val);
+int mas_write_register(int reg,unsigned int val);
 int mas_freeze(void);
 int mas_run(void);
-int mas_setD0(int addr,int val);
-int mas_getD0(int addr);
+int mas_setD0(int addr,unsigned int val);
+unsigned int mas_getD0(int addr);
 
+int mas_write_Di_regFromData(struct mas_data_struct * data);
 int mas_read_Di_register(int i,int addr,void * buf,int size); // !!! 20 bit values stored as 32 bit
 int mas_shortRead_Di_register(int i,int addr,void * buf,int size); // no problem here, 16 bit values used
 int mas_write_Di_register(int i,int addr,void * buf,int size); // !!! 20 bit values read as 32 bit
@@ -224,19 +232,20 @@ int mas_codecRead(int reg);
 int mas_codecWrite(int reg,int val);
 
 /********************* PCM decoding        ***************************/
-extern char ** wav_chunks;
-extern int * wav_chunk_size;
-extern int nb_wav_chunk;
-extern char * mp3Buff;
 
-int  mas_load_PCM_code(void);
-void mas_stop_app(void);
-void mas_run_app(void);
+void mas_i2sInit(int sample_rate);
+void mas_i2sChgSRate(int sample_rate);
 
-void mas_run_PCM(void);
-
-int mas_test_PCM(void);
-
+#define SRATE_5012     0
+#define SRATE_8000     1
+#define SRATE_11025    2
+#define SRATE_12000    3
+#define SRATE_16000    4
+#define SRATE_22050    5
+#define SRATE_24000    6
+#define SRATE_32000    7
+#define SRATE_44100    8
+#define SRATE_48000    9
 
 #endif
 
