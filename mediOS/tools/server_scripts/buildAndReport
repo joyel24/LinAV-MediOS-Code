@@ -2,11 +2,16 @@
 
 makeResult=$1
 reportFile=$2
-target=$3
+phpReport=$3
+arch=$4
+target=$5
+
+echo "makeResult=${makeResult} reportFile=${reportFile} phpReport=${phpReport} arch=${arch} target=${target}"
+
 curDate=`date +"%Y%m%d"`
 
 #should be set to 0 to remove all dev warnings
-DEV_WARN=0
+DEV_WARN=1
 
 make ${target} 2>&1 | cat -b > ${makeResult}
 
@@ -23,6 +28,9 @@ echo "####################################################################" >> $
 echo "" >> $reportFile
 
 echo "$cError errors, $cWarn warnings, $cDevWarn dev warnings" >> $reportFile
+
+echo "\$error[\"${curDate}\"][\"${arch}\"]=$cError;" >> ${phpReport}
+echo "\$warning[\"${curDate}\"][\"${arch}\"]=$cWarn;" >> ${phpReport}
 
 if [ $cError -gt 0 ]; then
 echo "" >> $reportFile

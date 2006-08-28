@@ -2,6 +2,7 @@
 
 curDate=`date +"%Y%m%d"`
 arch=$1
+phpReport=$2
 reportFile="report_medios_${arch}_${curDate}.log"
 
 if [ "$arch" == "av3xx" ] || [ "$arch" == "av1xx" ] || [ "$arch" == "jbmm" ]; then
@@ -34,7 +35,7 @@ make mk_api_file
 #disarding messages from make clean
 make clean 2>&1 > /dev/null
 
-buildAndReport ${makeResult} ${reportFile}
+buildAndReport ${makeResult} ${reportFile} ${phpReport} ${arch}
 
 #zipping bin
 zip -9 ${zipFile} medios.${ext}

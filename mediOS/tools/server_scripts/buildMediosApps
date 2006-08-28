@@ -2,6 +2,8 @@
 
 curDate=`date +"%Y%m%d"`
 
+phpReport=$1
+
 cd ~/archopen_src/build/mediOS
 cp -f ../av3xx.conf ./Makefile.conf
 make incdir
@@ -11,11 +13,11 @@ make clean 2>&1 > /dev/null
 make 2>&1 > /dev/null
 cd apps
 
-zipFile="apps_${curDate}.zip"
-makeResult="apps_make_${curDate}.log"
-reportFile="apps_report_${curDate}.log"
+zipFile="apps_medios_${curDate}.zip"
+makeResult="apps_makeMedios_${curDate}.log"
+reportFile="apps_reportMedios_${curDate}.log"
 
-buildAndReport  ${makeResult} ${reportFile} "all_med"
+buildAndReport  ${makeResult} ${reportFile} ${phpReport} "apps" "all_med"
 
 zip ${zipFile} *.med
 
