@@ -4,6 +4,7 @@ curDate=`date +"%Y%m%d"`
 arch=$1
 phpReport=$2
 reportFile="report_medios_${arch}_${curDate}.log"
+savPath=$3
 
 if [ "$arch" == "av3xx" ] || [ "$arch" == "av1xx" ] || [ "$arch" == "jbmm" ]; then
 ext="bin"
@@ -45,6 +46,8 @@ fi
 
 # ok everything is ready we can send
 mvFtp $reportFile $makeResult $zipFile
+cp -f $reportFile $makeResult $zipFile $savPath
 if [ "$arch" == "g402" ]; then
 mvFtp cc_$zipFile
+cp -f cc_$zipFile $savPath
 fi

@@ -9,7 +9,7 @@ target=$5
 echo "makeResult=${makeResult} reportFile=${reportFile} phpReport=${phpReport} arch=${arch} target=${target}"
 
 curDate=`date +"%Y%m%d"`
-
+curTime=`date +"%H:%M"`
 #should be set to 0 to remove all dev warnings
 DEV_WARN=1
 
@@ -22,9 +22,9 @@ cDevWarn=`grep -c "warning: #warning" ${makeResult}`
 cWarn=$(($cWarn-$cDevWarn))
 
 #init report file
-echo "####################################################################" > $reportFile
-echo "# File : ${reportFile} - generated:${curDate}" >> $reportFile
-echo "####################################################################" >> $reportFile
+echo "##########################################################################" > $reportFile
+echo "# File : ${reportFile} - generated:${curDate} at ${curTime}" >> $reportFile
+echo "##########################################################################" >> $reportFile
 echo "" >> $reportFile
 
 echo "$cError errors, $cWarn warnings, $cDevWarn dev warnings" >> $reportFile

@@ -5,7 +5,7 @@ ifeq ("$(TARGET_DEVICE)","JBMM")
 GCCFLAGS += -mlong-calls 
 endif
 
-GCCFLAGS += -D$(TARGET_DEVICE) -D$(CHIP_TYPE) -I$(MEDIOS_SRC_PATH)/include
+GCCFLAGS += -D$(TARGET_DEVICE) -D$(CHIP_TYPE) -I$(MEDIOS_SRC_PATH)/include --pipe
 ASFLAGS  += --defsym $(TARGET_DEVICE)=1 --defsym $(CHIP_TYPE)=1 -I$(MEDIOS_SRC_PATH)/include
 
 BUILD_DIR = $(MEDIOS_SRC_PATH)/kernel/build
