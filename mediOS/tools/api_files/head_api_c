@@ -34,6 +34,13 @@ long __umodsi3(long a, long b) { return float_umodsi3(a,b);}
 long __divsi3(long a, long b)  { return float_divsi3(a,b);}
 long __udivsi3(long a, long b) { return float_udivsi3(a,b);}
 unsigned int __divdi3(unsigned int a, unsigned int b) { return float_divdi3(a,b);}
+float __floatsisf(long a) { return float_floatsisf(a);}
+float __divsf3 (float a, float b) { return float_divsf3(a,b); }
+float __addsf3 (float a, float b) { return float_addsf3(a,b); }
+float __mulsf3 (float a, float b) { return float_mulsf3(a,b); }
+float __subsf3 (float a, float b) { return float_subsf3(a,b); }
+int __fixsfsi (float a) { return float_fixsfsi(a); }
+int __nesf2(float a, float b) {return float_nesf2(a,b);}
 
 void * malloc(unsigned int size) { return do_malloc(size,1); }
 void * realloc(void *buffer, unsigned int newsize) { return do_realloc(buffer,newsize,1); }

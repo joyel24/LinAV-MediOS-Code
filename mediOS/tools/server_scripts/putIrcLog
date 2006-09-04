@@ -4,7 +4,7 @@ yestDate=`date --date="1 day ago" +"%Y%m%d"`
 
 cd ~/eggdrop/logs/
 
-fname=archopen.log.${yestDate}
+fname=archopen.${yestDate}.log
 
 if [ -e $fname ]; then
 mvFtp $fname

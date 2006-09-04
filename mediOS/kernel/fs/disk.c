@@ -81,8 +81,8 @@ struct disk_mountInfo drive_Info[] = {
 
 MED_RET_T disk_rmAll(void)
 {
-    MED_RET_T ret_val;
 #ifdef HAVE_EXT_MODULE    
+        MED_RET_T ret_val;
     if(CF_IS_CONNECTED)
     {
         ret_val=disk_rm(CF_DRIVE);

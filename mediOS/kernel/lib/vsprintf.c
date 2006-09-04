@@ -257,20 +257,14 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 				/* 'z' support added 23/7/1999 S.H.    */
 				/* 'z' changed to 'Z' --davidm 1/25/99 */
 
-#warning size check removed
-#if 0
 	/* Reject out-of-range values early */
-	if (unlikely((int) size < 0)) {
+	if ((int) size < 0)
+        {
 		/* There can be only one.. */
-		static int warn = 1;
-		if (warn) {
-			printk("improper call of vsnprintf!\n");
-			dump_stack();
-			warn = 0;
-		}
+		printk("Bad size\n");
 		return 0;
 	}
-#endif
+
 	str = buf;
 	end = buf + size - 1;
 

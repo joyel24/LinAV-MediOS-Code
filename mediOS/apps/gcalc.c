@@ -3,11 +3,9 @@
 
 #include <sys_def/colordef.h>
 #include <sys_def/font.h>
-#include <sys_def/random.h>
 
 #include <api.h>
 #include <evt.h>
-#include <kernel/graphics.h>
 
 #define LCD_WIDTH		220
 #define LCD_HEIGTH		176
@@ -31,25 +29,11 @@ int seltonum[16] = {7,8,9,10,4,5,6,11,1,2,3,12,0,13,14,15};
 int oper = 0;
 float left = 0;
 float outputnum = 0;
-char inputstr[30];
-char outputstr[30];
-/*
-void         clearScreen      (unsigned int color);
-void         drawPixel        (unsigned int color, int x, int y);
-unsigned int readPixel        (int x, int y);
-void         drawRect         (unsigned int color, int x, int y, int width, int height);
-void         fillRect         (unsigned int color, int x, int y, int width, int height);
-void         drawLine         (unsigned int color, int x1, int y1, int x2, int y2);
-void         putS             (unsigned int color, unsigned int bg_color,int x, int y, unsigned char *s);
-void         putC             (unsigned int color, unsigned int bg_color,int x, int y, unsigned char s);
-void         getStringS       (unsigned char *str, int *w, int *h);
-void         drawSprite       (unsigned int * palette, SPRITE * sprite, int x, int y);
-void         drawBITMAP       (BITMAP * bitmap, int x, int y);
-void         scrollWindowVert (unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP);
-void         scrollWindowHoriz(unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT);
-*/
+char ingfx_putStr[30];
+char outgfx_putStr[30];
+
 void initbackground(){
-	clearScreen(COLOR_BLUE);
+	gfx_clearScreen(COLOR_BLUE);
 	
 	i=0;
 	j=0;
@@ -62,44 +46,44 @@ void initbackground(){
 		while(j<tmp){
 			int tmp2;
 			tmp2 = rand()%220;
-			drawPixel(COLOR_BLUE2,tmp2,i);
+			gfx_drawPixel(COLOR_BLUE2,tmp2,i);
 			j++;
 		}
 		i++;
 	}
 
-	setFont(STD8X13);
+	gfx_fontSet(STD8X13);
 
-	getStringS("gCalc v0.1", &w, &h);
-	putS(COLOR_WHITE,COLOR_BLUE,(LCD_WIDTH-w)/2,0,"gCalc v0.1");
+	gfx_getStringSize("gCalc v0.1", &w, &h);
+	gfx_putS(COLOR_WHITE,COLOR_BLUE,(LCD_WIDTH-w)/2,0,"gCalc v0.1");
 	int h2=0;
-	getStringS("by SquidWard",&w,&h2);
-	putS(COLOR_WHITE,COLOR_BLUE,(LCD_WIDTH-w)/2,h,"by SquidWard");
+	gfx_getStringSize("by SquidWard",&w,&h2);
+	gfx_putS(COLOR_WHITE,COLOR_BLUE,(LCD_WIDTH-w)/2,h,"by SquidWard");
 }
 void initbar(){
-	fillRect(COLOR_WHITE,BAR_X,BAR_Y,BAR_WIDTH,BAR_HEIGTH);
-	drawLine(COLOR_LIGHT_GRAY,BAR_X,BAR_Y+20,BAR_X+BAR_WIDTH,BAR_Y+20);
-	drawRect(COLOR_BLACK,BAR_X,BAR_Y,BAR_WIDTH,BAR_HEIGTH);
-	drawRect(COLOR_BLACK,BAR_X-1,BAR_Y-1,BAR_WIDTH+2,BAR_HEIGTH+2);
-	getStringS("= ",&w,&h);
-	putS(COLOR_BLACK,COLOR_WHITE,BAR_X+5,BAR_Y+20+(20-h)/2,"= ");
+	gfx_fillRect(COLOR_WHITE,BAR_X,BAR_Y,BAR_WIDTH,BAR_HEIGTH);
+	gfx_drawLine(COLOR_LIGHT_GRAY,BAR_X,BAR_Y+20,BAR_X+BAR_WIDTH,BAR_Y+20);
+	gfx_drawRect(COLOR_BLACK,BAR_X,BAR_Y,BAR_WIDTH,BAR_HEIGTH);
+	gfx_drawRect(COLOR_BLACK,BAR_X-1,BAR_Y-1,BAR_WIDTH+2,BAR_HEIGTH+2);
+	gfx_getStringSize("= ",&w,&h);
+	gfx_putS(COLOR_BLACK,COLOR_WHITE,BAR_X+5,BAR_Y+20+(20-h)/2,"= ");
 	}
 void initkeypad(){
 
-	//fillRect         (unsigned int color, int x, int y, int width, int height);
+	//gfx_fillRect         (unsigned int color, int x, int y, int width, int height);
 	//Clearing field...
-	fillRect(COLOR_WHITE,KEYPAD_X,KEYPAD_Y,KEYPAD_WIDTH,KEYPAD_HEIGTH);
-	drawRect(COLOR_BLACK,KEYPAD_X,KEYPAD_Y,KEYPAD_WIDTH,KEYPAD_HEIGTH);
-	drawRect(COLOR_BLACK,KEYPAD_X-1,KEYPAD_Y-1,KEYPAD_WIDTH+2,KEYPAD_HEIGTH+2);
+	gfx_fillRect(COLOR_WHITE,KEYPAD_X,KEYPAD_Y,KEYPAD_WIDTH,KEYPAD_HEIGTH);
+	gfx_drawRect(COLOR_BLACK,KEYPAD_X,KEYPAD_Y,KEYPAD_WIDTH,KEYPAD_HEIGTH);
+	gfx_drawRect(COLOR_BLACK,KEYPAD_X-1,KEYPAD_Y-1,KEYPAD_WIDTH+2,KEYPAD_HEIGTH+2);
 
 	i=0;
 	while(i<6){
-		drawLine(COLOR_BLACK,KEYPAD_X+20*i,KEYPAD_Y,KEYPAD_X+20*i,KEYPAD_Y+KEYPAD_HEIGTH);
+		gfx_drawLine(COLOR_BLACK,KEYPAD_X+20*i,KEYPAD_Y,KEYPAD_X+20*i,KEYPAD_Y+KEYPAD_HEIGTH);
 		i++;
 	}
 	i=0;
 	while(i<5){
-		drawLine(COLOR_BLACK,KEYPAD_X,KEYPAD_Y+20*i,KEYPAD_X+KEYPAD_WIDTH-20,KEYPAD_Y+20*i);
+		gfx_drawLine(COLOR_BLACK,KEYPAD_X,KEYPAD_Y+20*i,KEYPAD_X+KEYPAD_WIDTH-20,KEYPAD_Y+20*i);
 		i++;
 	}
 	int x=0;
@@ -107,117 +91,117 @@ void initkeypad(){
 	/* DOESNT WORK -> DONT KNOW WHY
 	while(x<4){
 		while(y<4){
-			drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-			drawRect(COLOR_GREY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-			drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+3,KEYPAD_Y+20*y+3,20-6,20-6);
+			gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+			gfx_drawRect(COLOR_GREY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+			gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+3,KEYPAD_Y+20*y+3,20-6,20-6);
 			y++;
 		}
 		x++;
 	}*/
 	x=0;
 	y=0;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=1;
 	y=0;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=2;
 	y=0;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=3;
 	y=0;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=0;
 	y=1;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=1;
 	y=1;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=2;
 	y=1;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=3;
 	y=1;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=0;
 	y=2;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=1;
 	y=2;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=2;
 	y=2;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=3;
 	y=2;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=0;
 	y=3;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=1;
 	y=3;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=2;
 	y=3;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 	x=3;
 	y=3;
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
 
 
 
-	drawRect(COLOR_DARK_GREY,KEYPAD_X+80+1,KEYPAD_Y+1,20-2,80-2);
-	drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+80+2,KEYPAD_Y+2,20-4,80-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+80+1,KEYPAD_Y+1,20-2,80-2);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+80+2,KEYPAD_Y+2,20-4,80-4);
 
 	w=5;
 	h=12;
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+(20-w)/2,KEYPAD_Y+(20-h)/2,55);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+20+(20-w)/2,KEYPAD_Y+(20-h)/2,56);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+40+(20-w)/2,KEYPAD_Y+(20-h)/2,57);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+(20-w)/2,KEYPAD_Y+20+(20-h)/2,52);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+20+(20-w)/2,KEYPAD_Y+20+(20-h)/2,53);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+40+(20-w)/2,KEYPAD_Y+20+(20-h)/2,54);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+(20-w)/2,KEYPAD_Y+40+(20-h)/2,49);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+20+(20-w)/2,KEYPAD_Y+40+(20-h)/2,50);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+40+(20-w)/2,KEYPAD_Y+40+(20-h)/2,51);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+(20-w)/2,KEYPAD_Y+60+(20-h)/2,48);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+40+(20-w)/2,KEYPAD_Y+60+(20-h)/2,44);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+20+(20-w)/2,KEYPAD_Y+60+(20-h)/2,67);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+60+(20-w)/2,KEYPAD_Y+(20-h)/2,47);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+60+(20-w)/2,KEYPAD_Y+20+(20-h)/2,42);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+60+(20-w)/2,KEYPAD_Y+40+(20-h)/2,45);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+60+(20-w)/2,KEYPAD_Y+60+(20-h)/2,43);
-	putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+80+(20-w)/2,KEYPAD_Y+(KEYPAD_HEIGTH-h)/2,61);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+(20-w)/2,KEYPAD_Y+(20-h)/2,55);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+20+(20-w)/2,KEYPAD_Y+(20-h)/2,56);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+40+(20-w)/2,KEYPAD_Y+(20-h)/2,57);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+(20-w)/2,KEYPAD_Y+20+(20-h)/2,52);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+20+(20-w)/2,KEYPAD_Y+20+(20-h)/2,53);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+40+(20-w)/2,KEYPAD_Y+20+(20-h)/2,54);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+(20-w)/2,KEYPAD_Y+40+(20-h)/2,49);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+20+(20-w)/2,KEYPAD_Y+40+(20-h)/2,50);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+40+(20-w)/2,KEYPAD_Y+40+(20-h)/2,51);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+(20-w)/2,KEYPAD_Y+60+(20-h)/2,48);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+40+(20-w)/2,KEYPAD_Y+60+(20-h)/2,44);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+20+(20-w)/2,KEYPAD_Y+60+(20-h)/2,67);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+60+(20-w)/2,KEYPAD_Y+(20-h)/2,47);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+60+(20-w)/2,KEYPAD_Y+20+(20-h)/2,42);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+60+(20-w)/2,KEYPAD_Y+40+(20-h)/2,45);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+60+(20-w)/2,KEYPAD_Y+60+(20-h)/2,43);
+	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+80+(20-w)/2,KEYPAD_Y+(KEYPAD_HEIGTH-h)/2,61);
 }
 void drawselected(int selected){
 	initkeypad();
@@ -230,75 +214,75 @@ void drawselected(int selected){
 		*/
 
 		case 0:
-			drawRect(COLOR_YELLOW,KEYPAD_X,KEYPAD_Y,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X-1,KEYPAD_Y-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X,KEYPAD_Y,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X-1,KEYPAD_Y-1,20+2,20+2);
 			break;
 		case 1:
-			drawRect(COLOR_YELLOW,KEYPAD_X+20,KEYPAD_Y,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X+20-1,KEYPAD_Y-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+20,KEYPAD_Y,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+20-1,KEYPAD_Y-1,20+2,20+2);
 			break;
 		case 2:
-			drawRect(COLOR_YELLOW,KEYPAD_X+40,KEYPAD_Y,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X+40-1,KEYPAD_Y-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+40,KEYPAD_Y,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+40-1,KEYPAD_Y-1,20+2,20+2);
 			break;
 		case 3:
-			drawRect(COLOR_YELLOW,KEYPAD_X+60,KEYPAD_Y,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X+60-1,KEYPAD_Y-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+60,KEYPAD_Y,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+60-1,KEYPAD_Y-1,20+2,20+2);
 			break;
 
 		case 4:
-			drawRect(COLOR_YELLOW,KEYPAD_X,KEYPAD_Y+20,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X-1,KEYPAD_Y+20-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X,KEYPAD_Y+20,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X-1,KEYPAD_Y+20-1,20+2,20+2);
 			break;
 		case 5:
-			drawRect(COLOR_YELLOW,KEYPAD_X+20,KEYPAD_Y+20,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X+20-1,KEYPAD_Y+20-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+20,KEYPAD_Y+20,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+20-1,KEYPAD_Y+20-1,20+2,20+2);
 			break;
 		case 6:
-			drawRect(COLOR_YELLOW,KEYPAD_X+40,KEYPAD_Y+20,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X+40-1,KEYPAD_Y+20-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+40,KEYPAD_Y+20,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+40-1,KEYPAD_Y+20-1,20+2,20+2);
 			break;
 		case 7:
-			drawRect(COLOR_YELLOW,KEYPAD_X+60,KEYPAD_Y+20,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X+60-1,KEYPAD_Y+20-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+60,KEYPAD_Y+20,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+60-1,KEYPAD_Y+20-1,20+2,20+2);
 			break;
 
 		case 8:
-			drawRect(COLOR_YELLOW,KEYPAD_X,KEYPAD_Y+40,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X-1,KEYPAD_Y+40-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X,KEYPAD_Y+40,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X-1,KEYPAD_Y+40-1,20+2,20+2);
 			break;
 		case 9:
-			drawRect(COLOR_YELLOW,KEYPAD_X+20,KEYPAD_Y+40,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X+20-1,KEYPAD_Y+40-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+20,KEYPAD_Y+40,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+20-1,KEYPAD_Y+40-1,20+2,20+2);
 			break;
 		case 10:
-			drawRect(COLOR_YELLOW,KEYPAD_X+40,KEYPAD_Y+40,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X+40-1,KEYPAD_Y+40-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+40,KEYPAD_Y+40,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+40-1,KEYPAD_Y+40-1,20+2,20+2);
 			break;
 		case 11:
-			drawRect(COLOR_YELLOW,KEYPAD_X+60,KEYPAD_Y+40,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X+60-1,KEYPAD_Y+40-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+60,KEYPAD_Y+40,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+60-1,KEYPAD_Y+40-1,20+2,20+2);
 			break;
 
 		case 12:
-			drawRect(COLOR_YELLOW,KEYPAD_X,KEYPAD_Y+60,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X-1,KEYPAD_Y+60-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X,KEYPAD_Y+60,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X-1,KEYPAD_Y+60-1,20+2,20+2);
 			break;
 		case 13:
-			drawRect(COLOR_YELLOW,KEYPAD_X+20,KEYPAD_Y+60,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X+20-1,KEYPAD_Y+60-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+20,KEYPAD_Y+60,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+20-1,KEYPAD_Y+60-1,20+2,20+2);
 			break;
 		case 14:
-			drawRect(COLOR_YELLOW,KEYPAD_X+40,KEYPAD_Y+60,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X+40-1,KEYPAD_Y+60-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+40,KEYPAD_Y+60,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+40-1,KEYPAD_Y+60-1,20+2,20+2);
 			break;
 		case 15:
-			drawRect(COLOR_YELLOW,KEYPAD_X+60,KEYPAD_Y+60,20,20);
-			drawRect(COLOR_YELLOW,KEYPAD_X+60-1,KEYPAD_Y+60-1,20+2,20+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+60,KEYPAD_Y+60,20,20);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+60-1,KEYPAD_Y+60-1,20+2,20+2);
 			break;
 		case 16:
-			drawRect(COLOR_YELLOW,KEYPAD_X+80,KEYPAD_Y,20,KEYPAD_HEIGTH);
-			drawRect(COLOR_YELLOW,KEYPAD_X+80-1,KEYPAD_Y-1,20+2,KEYPAD_HEIGTH+2);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+80,KEYPAD_Y,20,KEYPAD_HEIGTH);
+			gfx_drawRect(COLOR_YELLOW,KEYPAD_X+80-1,KEYPAD_Y-1,20+2,KEYPAD_HEIGTH+2);
 			break;
 
 	}
@@ -331,14 +315,14 @@ void reactoninput(int sel){
 			}
 			if((inputnum!=0)||(weigth!=1)){
 				sprintf(tmpstr,"%1d",num);
-				strcat(inputstr,tmpstr);
+				strcat(ingfx_putStr,tmpstr);
 			}
 		}
 		break;
 		case 14:// ',' Pressed
 		if(eqPressed==0){
 			if(weigth==1){
-				strcat(inputstr,".\0");
+				strcat(ingfx_putStr,".\0");
 				weigth=10*weigth;
 			}
 		}
@@ -356,16 +340,16 @@ void reactoninput(int sel){
 			inputnum = 0;
 			if(sel==3){
 				oper=1;
-				strcat(inputstr,"/\0");
+				strcat(ingfx_putStr,"/\0");
 			}else if(sel==7){
 				oper=2;
-				strcat(inputstr,"*\0");
+				strcat(ingfx_putStr,"*\0");
 			}else if(sel==11){
 				oper=3;
-				strcat(inputstr,"-\0");
+				strcat(ingfx_putStr,"-\0");
 			}else if(sel==15){
 				oper=4;
-				strcat(inputstr,"+\0");
+				strcat(ingfx_putStr,"+\0");
 			}
 			eqPressed=0;
 		}
@@ -374,10 +358,10 @@ void reactoninput(int sel){
 		case 16://'=' Pressed
 		if((oper!=0)&&(inputnum!=0)&&(eqPressed==0)){
 			initbar();
-			strcpy(tmpstr,inputstr);
-			strcpy(inputstr,"(\0");
-			strcat(inputstr,tmpstr);
-			strcat(inputstr,")\0");
+			strcpy(tmpstr,ingfx_putStr);
+			strcpy(ingfx_putStr,"(\0");
+			strcat(ingfx_putStr,tmpstr);
+			strcat(ingfx_putStr,")\0");
 			switch(oper){
 				case 1:
 				outputnum=left/inputnum;
@@ -408,9 +392,9 @@ void reactoninput(int sel){
 			}
 			oper = 0;
 			weigth=1;
-			sprintf(outputstr,"%d",leftpart);
+			sprintf(outgfx_putStr,"%d",leftpart);
 			if(fracpart!=1){
-			strcat(outputstr,".");
+			strcat(outgfx_putStr,".");
 			}
 			sprintf(tmpstr,"%d",fracpart);
 			i=0;
@@ -419,9 +403,9 @@ void reactoninput(int sel){
 				tmpstr[i]=tmpstr[i+1];
 				i++;
 			}
-			strcat(outputstr,tmpstr);
-			getStringS(outputstr,&w,&h);
-			putS(COLOR_BLACK,COLOR_WHITE,BAR_X+BAR_WIDTH-w-5,BAR_Y+20+(20-h)/2,outputstr);
+			strcat(outgfx_putStr,tmpstr);
+			gfx_getStringSize(outgfx_putStr,&w,&h);
+			gfx_putS(COLOR_BLACK,COLOR_WHITE,BAR_X+BAR_WIDTH-w-5,BAR_Y+20+(20-h)/2,outgfx_putStr);
 		}
 		
 		break;
@@ -438,17 +422,17 @@ void reactoninput(int sel){
 
 		initbar();
 	
-		strcpy(inputstr,"\0");
-		strcpy(outputstr,"\0");
-		getStringS(inputstr,&w,&h);
-		putS(COLOR_BLACK,COLOR_WHITE,BAR_X+BAR_WIDTH-w-5,BAR_Y+(20-h)/2,inputstr);
+		strcpy(ingfx_putStr,"\0");
+		strcpy(outgfx_putStr,"\0");
+		gfx_getStringSize(ingfx_putStr,&w,&h);
+		gfx_putS(COLOR_BLACK,COLOR_WHITE,BAR_X+BAR_WIDTH-w-5,BAR_Y+(20-h)/2,ingfx_putStr);
 		drawselected(sel);
 		break;
 	}
 	
 	
-	getStringS(inputstr,&w,&h);
-	putS(COLOR_BLACK,COLOR_WHITE,BAR_X+BAR_WIDTH-w-5,BAR_Y+(20-h)/2,inputstr);
+	gfx_getStringSize(ingfx_putStr,&w,&h);
+	gfx_putS(COLOR_BLACK,COLOR_WHITE,BAR_X+BAR_WIDTH-w-5,BAR_Y+(20-h)/2,ingfx_putStr);
 	
 }
 void react(int but){
@@ -504,23 +488,23 @@ void react(int but){
 	}
 	i=0;
 }
-void _start(void)
+void app_main(int argc,char ** argv)
 {
     
     printf("\nIn othello\n");
     
-    open_graphics();
+    gfx_openGraphics();
 	
 	initbackground();
 
 	initbar();
 	
-	strcpy(inputstr,"\0");
-	strcpy(outputstr,"\0");
-	getStringS(inputstr,&w,&h);
-	putS(COLOR_BLACK,COLOR_WHITE,BAR_X+BAR_WIDTH-w-5,BAR_Y+(20-h)/2,inputstr);
-	getStringS("= ",&w,&h);
-	putS(COLOR_BLACK,COLOR_WHITE,BAR_X+5,BAR_Y+20+(20-h)/2,"= ");
+	strcpy(ingfx_putStr,"\0");
+	strcpy(outgfx_putStr,"\0");
+	gfx_getStringSize(ingfx_putStr,&w,&h);
+	gfx_putS(COLOR_BLACK,COLOR_WHITE,BAR_X+BAR_WIDTH-w-5,BAR_Y+(20-h)/2,ingfx_putStr);
+	gfx_getStringSize("= ",&w,&h);
+	gfx_putS(COLOR_BLACK,COLOR_WHITE,BAR_X+5,BAR_Y+20+(20-h)/2,"= ");
 	i = 0;
 	j = 0;
 	inputnum = 0;
@@ -542,7 +526,7 @@ void _start(void)
     while(!stop_othello)
     {
 //FIXME: get_evt() never returns on the gmini so until it is fixed this work around is needed.
-        newbutton = read_btn();
+        newbutton = btn_readState();
 				if(newbutton != oldbutton)
 				{
 					switch(newbutton)

@@ -256,7 +256,6 @@ void graphics32_ScrollWindowHoriz(unsigned int bgColor, int x, int y, int width,
             offset=src;
             for(j=0;j<height;j++)
             {
-#warning optimization needed here in Scroll 32 horizontal - left
                 for(i=0;i<(width-scroll);i++)
                     outl(inl(src+i),tmp+i);
                 for(i=0;i<(width-scroll);i++)
@@ -294,7 +293,6 @@ void graphics32_ScrollWindowHoriz(unsigned int bgColor, int x, int y, int width,
             offset=src;
             for(j=0;j<height;j++)
             {
-#warning optimization needed here in Scroll 32 horizontal -right
                 for(i=0;i<(width-scroll);i++)
                     outl(inl(src+i),tmp+i);
                 for(i=0;i<(width-scroll);i++)

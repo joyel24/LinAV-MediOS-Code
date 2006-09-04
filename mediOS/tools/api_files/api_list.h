@@ -67,7 +67,13 @@ long         # float_umodsi3 # long a, long b
 long         # float_divsi3  # long a, long b
 long         # float_udivsi3 # long a, long b
 unsigned int # float_divdi3  # unsigned int a, unsigned int b
-
+float        # float_floatsisf # long a
+float        # float_divsf3    # float a, float b
+float        # float_addsf3    # float a, float b
+float        # float_mulsf3    # float a, float b
+float        # float_subsf3    # float a, float b
+int          # float_fixsfsi   # float a
+int          # float_nesf2     # float a, float b
 #k_inc#kernel/stdfs.h
 #api_inc#sys_def/stdfs.h
 int            # open      # const char* pathname, int flags
