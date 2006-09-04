@@ -260,8 +260,6 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 	/* Reject out-of-range values early */
 	if ((int) size < 0)
         {
-		/* There can be only one.. */
-		printk("Bad size\n");
 		return 0;
 	}
 

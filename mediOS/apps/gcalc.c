@@ -522,7 +522,7 @@ void app_main(int argc,char ** argv)
     int oldbutton;
     int newbutton;
     oldbutton = 0;
-	char debugtxt[10];
+	//char debugtxt[10];
     while(!stop_othello)
     {
 //FIXME: get_evt() never returns on the gmini so until it is fixed this work around is needed.

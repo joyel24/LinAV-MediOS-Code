@@ -24,3 +24,4 @@ float float_mulsf3 (float a, float b) { return __mulsf3(a,b); }
 float float_subsf3 (float a, float b) { return __subsf3(a,b); }
 int float_fixsfsi (float a) { return __fixsfsi(a); }
 int float_nesf2(float a, float b) {return __nesf2(a,b);}
+
