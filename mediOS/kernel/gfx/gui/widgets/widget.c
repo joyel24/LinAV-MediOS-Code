@@ -14,6 +14,8 @@
 
 #include <kernel/malloc.h>
 
+#include <sys_def/stddef.h>
+
 #include <evt.h>
 
 WIDGET widget_create(){
@@ -54,6 +56,8 @@ void widget_init(WIDGET w){
     w->backColor=WIDGET_DEFAULT_BACKCOLOR;
     w->focusColor=WIDGET_DEFAULT_FOCUSCOLOR;
     w->font=WIDGET_DEFAULT_FONT;
+    w->tag=0;
+    w->data=NULL;
 }
 
 bool widget_handleEvent(WIDGET w,int evt){

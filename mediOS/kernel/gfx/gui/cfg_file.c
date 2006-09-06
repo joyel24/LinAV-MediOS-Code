@@ -10,7 +10,7 @@
 * KIND, either express of implied.
 */
 
-#include <gui/cfg_file.h>
+#include <kernel/cfg_file.h>
 
 #include <kernel/kernel.h>
 #include <kernel/malloc.h>
@@ -29,7 +29,7 @@ typedef struct {
 static CFG_ITEM * cfg_items = NULL;
 static int cfg_itemCount = 0;
 
-static int cfg_currentItem = 0;
+static int cfg_currentItem = -1;
 
 static CFG_ITEM * cfg_getItem(char * name){
     int i;
@@ -232,7 +232,7 @@ bool cfg_writeFile(char * filename){
 }
 
 void cfg_rewindItems(){
-    cfg_currentItem=0;
+    cfg_currentItem=-1;
 }
 
 bool cfg_nextItem(char * * name,char * * value){
@@ -242,7 +242,7 @@ bool cfg_nextItem(char * * name,char * * value){
     // find next valid item
     do{
         cfg_currentItem++;
-    }while(cfg_items[cfg_currentItem].dummy);
+    }while(cfg_items[cfg_currentItem].dummy || cfg_items[cfg_currentItem].deleted);
 
     if(cfg_currentItem<cfg_itemCount){
         *name=cfg_items[cfg_currentItem].name;

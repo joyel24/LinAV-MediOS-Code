@@ -25,8 +25,6 @@
     #include <gui/icons.h>
     #include <gui/widgetlist.h>
     #include <gui/label.h>
-
-    #include <gui/cfg_file.h>
 #else
     #include <api.h>
 #endif

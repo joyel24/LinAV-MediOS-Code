@@ -54,7 +54,7 @@ void iconMenuItem_init(ICONMENU_ITEM mi){
 
 void iconMenuItem_paint(ICONMENU_ITEM mi){
     int tx,ty;
-    int ix,iy;
+    int ix,iw,ih;
     int tw,th;
     int color;
     int of;
@@ -72,21 +72,23 @@ void iconMenuItem_paint(ICONMENU_ITEM mi){
     switch (mi->iconPosition){
         default:
         case IMIP_TOP:
-            ix=mi->x+(mi->width-mi->icon.width)/2;
-            iy=mi->y+(mi->height-mi->icon.height-th-mi->margin)/2;
+            ix=mi->x;
+            iw=mi->width;
+            ih=mi->height-mi->margin-th;
             tx=mi->x+(mi->width-tw)/2;
             ty=mi->y+mi->height-mi->margin-th;
             break;
         case IMIP_LEFT:
             ix=mi->x+mi->margin;
-            iy=mi->y+(mi->height-mi->icon.height)/2;
-            tx=ix+mi->icon.width+ICONMENU_ITEM_SPACING;
+            ih=mi->height;
+            iw=ih;
+            tx=ix+iw+ICONMENU_ITEM_SPACING;
             ty=mi->y+(mi->height-th)/2;
             break;
     }
 
     // icon
-    gfx_drawBitmap(&mi->icon,ix,iy);
+    gfx_drawResizedBitmap(&mi->icon,ix,mi->y,iw,ih,RESIZE_INTEGER);
 
     // caption
     gfx_putS(mi->foreColor,color,tx,ty,mi->caption);

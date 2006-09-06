@@ -119,6 +119,7 @@ void   # gfx_getStringSize         # unsigned char *str, int *w, int *h
 void   # gfx_putC                  # unsigned int color, unsigned int bg_color, int x, int y, unsigned char s
 void   # gfx_drawSprite            # unsigned int * palette, SPRITE * sprite, int x, int y
 void   # gfx_drawBitmap            # BITMAP * bitmap, int x, int y
+void   # gfx_drawResizedBitmap     # BITMAP * bitmap, int x, int y,int width,int height,int mode
 void   # gfx_scrollWindowVert      # unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP
 void   # gfx_scrollWindowHoriz     # unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT
 void   # gfx_setPalletteRGB        # int r, int g, int b, int index

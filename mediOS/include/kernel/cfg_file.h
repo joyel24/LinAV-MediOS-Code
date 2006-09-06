@@ -1,5 +1,5 @@
 /*
-* include/gui/cfg_file.h
+* include/kernel/cfg_file.h
 *
 * MediOS project
 * Copyright (c) 2005 by Christophe THOMAS

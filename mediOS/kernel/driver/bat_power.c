@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/driver/bat_power.c
 *
 *   MediOS project
@@ -24,6 +24,8 @@
 
 #include <kernel/bat_power.h>
 #include <kernel/target/arch/lcd.h>
+
+#include <sys_def/stddef.h>
 
 int lcd_state=1;
 int lcd_bright=10;
@@ -152,12 +154,12 @@ void lcd_set_state(int state)
         if(state) /* turn on */
         {
             lcd_ON();
-            printk("Turning on lcd\n");
+            printk("[power] Turning on lcd\n");
         }
         else
         {
             lcd_OFF();
-            printk("Turning off lcd\n");
+            printk("[power] Turning off lcd\n");
         }
    }
 }
@@ -205,7 +207,7 @@ void halt_timer_action(void)
     int num=getCurrentTimer();
     if(halt_timer_used[num])
     {
-        printk("[POWER OFF timer] => halt\n");
+        printk("[power] Power off timer => halt\n");
         halt_device();
     }
 }
@@ -278,7 +280,7 @@ void chgTimer(void)
     lcd_launchTimer();
     hd_launchTimer();
 
-    printk("DC changed (tick=%d)=> changing timers (LCD:%d,HALT:%d,HD:%d)\n",
+    printk("[power] DC changed (tick=%d)=> changing timers (LCD:%d,HALT:%d,HD:%d)\n",
             tick,
             lcd_timer_used[num],
             halt_timer_used[num],
@@ -301,11 +303,11 @@ void process_DC_change(void)
     kpwrState=POWER_CONNECTED;
     /* change the timers */
     chgTimer();
-    evt.evt = EVT_PWR;
+    evt.evt = (kpwrState)?EVT_PWR_IN:EVT_PWR_OUT;
     evt.evt_class = CONNECT_CLASS;
-    evt.data = (void*)kpwrState;
+    evt.data = NULL;
     evt_send(&evt);
-    printk("DC connector %s\n",kpwrState==1?"plugged":"unplugged");
+    printk("[power] DC connector %s\n",kpwrState==1?"plugged":"unplugged");
 }
 
 int DC_isConnected(void)

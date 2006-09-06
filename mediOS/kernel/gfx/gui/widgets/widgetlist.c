@@ -65,6 +65,7 @@ void widgetList_init(WIDGETLIST l){
     l->previousWidget=NULL;
     l->focusedWidget=NULL;
     l->fastRepaint=false;
+    l->repaintAllWidgets=true;
 }
 
 bool widgetList_handleEvent(WIDGETLIST l,int evt){
@@ -94,11 +95,21 @@ void widgetList_paint(WIDGETLIST l){
         l->focusedWidget->paint(l->focusedWidget);
     }else{
 
-        widget_paint((WIDGET)l);
+        if(l->repaintAllWidgets){
+            widget_paint((WIDGET)l);
 
-        // repaint all widgets
-        for(i=0;i<l->widgetCount;++i){
-            l->widgets[i]->paint(l->widgets[i]);
+            // repaint all widgets except focused widget
+            for(i=0;i<l->widgetCount;++i){
+                if(l->widgets[i]!=l->focusedWidget){
+                    l->widgets[i]->paint(l->widgets[i]);
+                }
+            }
+
+        }
+
+        // paint focused widget after all others (fixes overdraw problems)
+        if(l->focusedWidget!=NULL){
+            l->focusedWidget->paint(l->focusedWidget);
         }
     }
 }

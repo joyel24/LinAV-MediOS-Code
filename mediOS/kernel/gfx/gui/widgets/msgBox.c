@@ -10,16 +10,18 @@
 * KIND, either express of implied.
 */
 
+#include <gui/msgBox.h>
+
 #include <kernel/graphics.h>
 #include <kernel/evt.h>
 #include <kernel/lcd.h>
+#include <kernel/icons.h>
+#include <kernel/widget.h>
 
 #include <sys_def/colordef.h>
 #include <sys_def/font.h>
 #include <sys_def/string.h>
 
-#include <gui/msgBox.h>
-#include <kernel/icons.h>
 
 BITMAP * MsgBox_ExclamationBitmap;
 BITMAP * MsgBox_QuestionBitmap;
@@ -31,29 +33,27 @@ BITMAP * MsgBox_ErrorBitmap;
 #define BUTTON_HEIGHT 15
 #define BUTTON_DISTANCE 10
 
-int res; // updated in msgBoxEvtHandler
-// we should add some define in msgBox.h such as RES_OK RES_YES RES_NO RES_CANCEL ...
-// maybe a param to msgBox to set the type of box: alert, choice yes/no, input text
 
-
-int stopBoxLoop = 0; /* global variable used to stop the private evt loop*/
 int cntButtons  = 0; /* Buttons in MSgBox */
 int g_type = MSGBOX_TYPE_OK;
 
 int fontVal;
 
 /* msg_box event handler */
-void msgBoxEvtHandler(int evt_hanlder)
+int msgBox_evtHandler(int evt_hanlder)
 {
+    int stopBoxLoop = 0;
+    int res=MSGBOX_NOTHING;
     char evt=0;
     while(!stopBoxLoop)
     {
         evt = evt_getStatus(evt_hanlder);
         if(evt==NO_EVENT)
             continue;
-        
+
         switch(evt)
         {
+            case WIDGET_ACTION_BTN:
             case BTN_F1:
                 if(cntButtons>0)
                 {
@@ -65,10 +65,11 @@ void msgBoxEvtHandler(int evt_hanlder)
                         res =  MSGBOX_YES;
                     else if(g_type == MSGBOX_TYPE_YESNOCANCEL)
                         res =  MSGBOX_YES;
+                    stopBoxLoop=1;
                 }
-                stopBoxLoop=1;
                 break;
-    
+
+            case WIDGET_BACK_BTN:
             case BTN_F2:
                 if(cntButtons>1)
                 {
@@ -78,28 +79,31 @@ void msgBoxEvtHandler(int evt_hanlder)
                         res =  MSGBOX_NO;
                     else if(g_type == MSGBOX_TYPE_YESNOCANCEL)
                         res =  MSGBOX_NO;
+                    stopBoxLoop=1;
                 }
-                stopBoxLoop=1;
                 break;
-    
+
             case BTN_F3:
                 if(cntButtons>2)
                 {
                     if(g_type == MSGBOX_TYPE_YESNOCANCEL)
                         res =  MSGBOX_CANCEL;
+                    stopBoxLoop=1;
                 }
-                stopBoxLoop=1;
                 break;
-    
+/*
             case BTN_OFF:
                 res = MSGBOX_NOTHING;
                 stopBoxLoop=1;
                 break;
+*/
         }
     }
+
+    return res;
 }
 
-void iniMsgBox(void)
+void msgBox_init(void)
 {
     MsgBox_ExclamationBitmap=&icon_get("MsgBoxExclamationBitmap")->bmap_data;
     MsgBox_QuestionBitmap=&icon_get("MsgBoxQuestionBitmap")->bmap_data;
@@ -112,7 +116,7 @@ void iniMsgBox(void)
 #define POS_Y(Y) ((Y)+posY)
 
 /* draw the msg box */
-void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon,int useOwnPlane)
+void msgBox_draw(unsigned char* caption, unsigned char* msg, int type, int icon,int useOwnPlane)
 {
     int w1 = 0;
     int h1 = 0;
@@ -131,6 +135,10 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon,i
     int i = 0;
     char strButtonText[10];
     int x;
+    int prevFont;
+
+    //save font
+    prevFont=gfx_fontGet();
 
     // calculate width
     gfx_fontSet(STD7X13);
@@ -182,12 +190,12 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon,i
         posX = (SCREEN_REAL_WIDTH-width)/2;
     posY = (SCREEN_HEIGHT/2)-(MSGBOX_HEIGHT/2);
     if(useOwnPlane)
-        gfx_planeSetPos(BMAP2,0x14+posX,0x13+posY);
+        gfx_planeSetPos(BMAP2,SCREEN_ORIGIN_X+posX,SCREEN_ORIGIN_Y+posY);
 
     // show box
     if(useOwnPlane)
         gfx_setPlane(BMAP2);
-    
+
     // fill background
     gfx_drawRect(COLOR_BLACK, POS_X(0), POS_Y(0), width, MSGBOX_HEIGHT);
     gfx_fillRect(COLOR_WHITE, POS_X(1), POS_Y(1), width-2, MSGBOX_HEIGHT-2);
@@ -210,11 +218,13 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon,i
     else if(icon == MSGBOX_ICON_ERROR)
         gfx_drawBitmap (MsgBox_ErrorBitmap, POS_X(2),POS_Y(h1+2+2+5));
     // print message
+
     gfx_fontSet(STD5X8);
     if(icon == MSGBOX_ICON_NO_ICON) // if no icon, print the text on the left side
         gfx_putS(COLOR_BLACK, COLOR_WHITE, POS_X(2), POS_Y(h1+2+2+10), msg);
     else
         gfx_putS(COLOR_BLACK, COLOR_WHITE, POS_X(25), POS_Y(h1+2+2+10), msg); // xPos with offset for icon
+
     // print buttons
     switch(type)
     {
@@ -299,7 +309,10 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon,i
             /* no button */
             break;
     }
-    
+
+    //restore font
+    gfx_fontSet(prevFont);
+
     if(useOwnPlane)
     {
         gfx_planeShow(BMAP2);
@@ -310,7 +323,7 @@ void drawMsgBox(unsigned char* caption, unsigned char* msg, int type, int icon,i
 
 
 /* restore the previous state */
-void eraseMsgBox(void)
+void msgBox_erase(void)
 {
     gfx_planeHide(BMAP2);
     gfx_setPlane(BMAP1);
@@ -318,18 +331,28 @@ void eraseMsgBox(void)
 }
 
 /* main function */
-int msgBox(unsigned char* caption, unsigned char* msg, int type, int icon, int evt_hanlder)
+int msgBox_show(unsigned char* caption, unsigned char* msg, int type, int icon, int evt_hanlder)
 {
+    int res=MSGBOX_NOTHING;
+
     g_type = type;
     fontVal=gfx_fontGet();
-    drawMsgBox(caption,msg,type,icon,1);
-    msgBoxEvtHandler(evt_hanlder);
-    eraseMsgBox();
+
+    //gli: use default plane for now
+    msgBox_draw(caption,msg,type,icon,0);
+
+    //info message boxes are display only
+    if(type!=MSGBOX_TYPE_INFO){
+        res=msgBox_evtHandler(evt_hanlder);
+    }
+
+    //msgBox_erase();
+
     return res;
 }
 
-void infoBox(unsigned char* msg)
+void msgBox_info(unsigned char* msg)
 {
     fontVal=gfx_fontGet();
-    drawMsgBox("Info",msg,MSGBOX_TYPE_INFO,MSGBOX_ICON_INFORMATION,0);
+    msgBox_draw("Info",msg,MSGBOX_TYPE_INFO,MSGBOX_ICON_INFORMATION,0);
 }

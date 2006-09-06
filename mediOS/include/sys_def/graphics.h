@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/sys_def/graphics.h
 *
 *   MediOS project
@@ -41,6 +41,12 @@ typedef struct spriteBuffer       BITMAP;
 #define S24bit     5
 #define S32bit     6
 
-#define PALETTE unsigned int 
+#define PALETTE unsigned int
+
+// resize modes
+
+#define RESIZE_INTEGER  0
+#define RESIZE_MAGNIFY  1
+#define RESIZE_STRETCH  2
 
 #endif

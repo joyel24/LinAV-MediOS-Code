@@ -13,7 +13,21 @@
 #ifndef __GUI_FILE_BROWSER_H
 #define __GUI_FILE_BROWSER_H
 
-#include <gui/gui.h>
+#define TYPE_STD      0
+#define TYPE_BACK     1
+#define TYPE_DIR      2
+#define TYPE_FILE     3
+
+#define TYPE_INTERNAL 4
+
+#define LEFT_SCROLL  0
+#define RIGHT_SCROLL 1
+
+#define PATHLEN    256
+
+#define MODE_SELECT   0
+#define MODE_NOSELECT 1
+#define MODE_STRING   2
 
 struct dir_entry {
     char * name;

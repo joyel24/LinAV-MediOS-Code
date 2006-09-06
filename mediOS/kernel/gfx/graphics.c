@@ -519,9 +519,63 @@ void gfx_drawSprite(unsigned int * palette, SPRITE * sprite, int x, int y)
 
 void gfx_drawBitmap(BITMAP * bitmap, int x, int y)
 {
+    if(!bitmap->data) return;
+
     buffers[current_plane]->gops->drawBITMAP(bitmap,-1, // no trsp atm
                                 x,y,buffers[current_plane]);
 }
+
+void gfx_drawResizedBitmap (BITMAP * bitmap, int x, int y,int width, int height, int mode){
+    int xp,yp,xinc,yinc;
+
+    if(!bitmap->data || !width || !height) return;
+
+    xinc=(bitmap->width<<16)/width;
+    yinc=(bitmap->height<<16)/height;
+
+    if(mode==RESIZE_INTEGER || mode==RESIZE_MAGNIFY)
+    {
+        if(xinc<yinc)
+        {
+            xinc=yinc;
+        }
+        else
+        {
+            yinc=xinc;
+        }
+    }
+    
+    if(mode==RESIZE_INTEGER)
+    {
+        if(xinc>=0x10000)
+        {
+            xinc=(xinc+0xffff) & 0xffff0000; //round to higher
+        }
+        else
+        {
+            int inv;
+            inv=0x10000/xinc;
+            xinc=0x10000/inv;
+        }
+        yinc=xinc;
+    }
+
+    if(xinc==0x10000 && yinc==0x10000) // simple bitmap drawing when no resize needed
+    {
+        xp=x+(width-bitmap->width)/2;
+        yp=y+(height-bitmap->height)/2;
+
+        buffers[current_plane]->gops->drawBITMAP(bitmap,-1,xp,yp,buffers[current_plane]);
+    }
+    else
+    {
+        xp=x+(width-(bitmap->width<<16)/xinc)/2;
+        yp=y+(height-(bitmap->height<<16)/yinc)/2;
+
+        buffers[current_plane]->gops->drawResizedBITMAP(bitmap,xp,yp,xinc,yinc,buffers[current_plane]);
+    }
+}
+
 
 void gfx_scrollWindowVert(unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP)
 {

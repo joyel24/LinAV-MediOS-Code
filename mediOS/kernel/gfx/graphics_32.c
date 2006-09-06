@@ -25,6 +25,7 @@ void         graphics32_DrawChar          (struct graphicsFont * font, unsigned 
 void         graphics32_DrawSprite        (unsigned int * palette, SPRITE * sprite, unsigned int trsp,int x, int y,
                                                 struct graphicsBuffer * buff);
 void         graphics32_DrawBITMAP        (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+void         graphics32_DrawResizedBITMAP (BITMAP * bitmap, int x, int y, int xinc, int yinc , struct graphicsBuffer * buff);
 void         graphics32_ScrollWindowVert  (unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP,
                                                 struct graphicsBuffer * buff);
 void         graphics32_ScrollWindowHoriz (unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT,
@@ -44,6 +45,7 @@ struct graphics_operations g32ops =  {
 	drawSprite        : graphics32_DrawSprite,
 	drawChar          : graphics32_DrawChar,
 	drawBITMAP        : graphics32_DrawBITMAP,
+    drawResizedBITMAP : graphics32_DrawResizedBITMAP,
 	drawString        : graphics32_DrawString,
 	scrollWindowVert  : graphics32_ScrollWindowVert,
 	scrollWindowHoriz : graphics32_ScrollWindowHoriz,
@@ -190,6 +192,25 @@ void graphics32_DrawBITMAP(BITMAP * bitmap, unsigned int trsp, int x, int y, str
             dest+=buff->width;
             src+=bitmap->width;
         }
+    }
+}
+
+void graphics32_DrawResizedBITMAP (BITMAP * bitmap, int x, int y, int xinc, int yinc , struct graphicsBuffer * buff){
+    int i,j;
+    unsigned int * baseDest=getOffset(x,y,buff,unsigned int);
+    unsigned int * baseSrc=(unsigned int *)bitmap->data;
+    unsigned int * dest=baseDest;
+    unsigned int * src=baseSrc;
+
+    for(j=0;j<bitmap->height<<16;j+=yinc)
+    {
+        dest=baseDest;
+        baseDest+=buff->width;
+        for(i=0;i<bitmap->width<<16;i+=xinc)
+        {
+            *(dest++)=*(src+(i>>16));
+        }
+        src=baseSrc+bitmap->width*(j>>16);
     }
 }
 

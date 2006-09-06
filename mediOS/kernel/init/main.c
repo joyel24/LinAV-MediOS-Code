@@ -59,12 +59,14 @@
 
 #include <kernel/graphics.h>
 
-#include <gui/gui.h>
+#include <kernel/shell.h>
 
 #include <kernel/stdfs.h>
 #include <kernel/vfs.h>
 
-
+#ifdef BUILD_LIB
+extern int app_main(int argc, char * argv[]);
+#endif
 
 unsigned int _iram_size = IRAM_SIZE;
 
@@ -75,91 +77,36 @@ void print_boot_info(void)
     tmr_print();
 }
 
-#if 0
-#include <kernel/clkc.h>
-
-void tst_fct(void){
-    int m,n,d,p;
-    int f;
-
-    clkc_getClockParameters(CLK_ARM,&m,&n,&d);
-    p=clkc_getPllNum(CLK_ARM);
-    f=clkc_getClockFrequency(CLK_ARM);
-    printk("arm f=%d m=%d n=%d d=%d p=%d\n",f,m,n,d,p);
-    clkc_getClockParameters(CLK_DSP,&m,&n,&d);
-    p=clkc_getPllNum(CLK_DSP);
-    f=clkc_getClockFrequency(CLK_DSP);
-    printk("dsp f=%d m=%d n=%d d=%d p=%d\n",f,m,n,d,p);
-    clkc_getClockParameters(CLK_SDRAM,&m,&n,&d);
-    p=clkc_getPllNum(CLK_SDRAM);
-    f=clkc_getClockFrequency(CLK_SDRAM);
-    printk("sdr f=%d m=%d n=%d d=%d p=%d\n",f,m,n,d,p);
-    clkc_getClockParameters(CLK_ACCEL,&m,&n,&d);
-    p=clkc_getPllNum(CLK_ACCEL);
-    f=clkc_getClockFrequency(CLK_ACCEL);
-    printk("axl f=%d m=%d n=%d d=%d p=%d\n",f,m,n,d,p);
-
-    for(f=80000000;f<=200000000;f+=2000000){
-        clkc_setClockFrequency(CLK_ARM,f);
-        mdelay(500);
-    }
-
-    reload_firmware();
-}
-#endif
-
-#define WAVE_PERIOD ((volatile unsigned short *)0x40100)
-#define DEBUG_MSG_STATE ((volatile unsigned short *)0x40102)
-#define DEBUG_MSG_TEXT  ((short *)0x40104)
-
 #include <kernel/evt.h>
-
+#include <kernel/icons.h>
+#include <kernel/graphics.h>
 void tst_fct(void)
 {
-    int evt_hand=evt_getHandler(ALL_CLASS);
-    int evt;
-    int stop=0;
-    int i=0;
-    
-    while(1)
-    {
-        evt = evt_getStatus(evt_hand);
-    
-        if( evt == BTN_UP && !stop)
-        {
-            (*WAVE_PERIOD)++;
-            printk("per=%d\n",*WAVE_PERIOD);
-            for(i=0;i<100;i++);
-        }
-        
-        if( evt == BTN_DOWN && !stop)
-        {
-            if(*WAVE_PERIOD>0)
-            {
-                (*WAVE_PERIOD)--;    
-                printk("per=%d\n",*WAVE_PERIOD);        
-                for(i=0;i<100;i++);
-            }            
-        }
-        
-        if( evt == BTN_ON)
-        {
-            stop=0;
-        }
-        
-        if(*DEBUG_MSG_STATE)
-        {
-            int i=0;
-            while(DEBUG_MSG_TEXT[i])
-                uart_out(DEBUG_MSG_TEXT[i++],0);
-            uart_out('\n',0);
-            *DEBUG_MSG_STATE=0;
-        }
+    int i;
+    BITMAP * b;
+
+    gfx_openGraphics();
+    gfx_clearScreen(COLOR_BLUE);
+
+    b=&icon_load("browser_icon.ico")->bmap_data;
+
+    for(i=0;i<170;i++){
+        gfx_clearScreen(COLOR_BLUE);
+        gfx_drawResizedBitmap(b,5,5,i,i,RESIZE_INTEGER);
+        gfx_drawRect(COLOR_RED,5,5,i,i);
+
+        mdelay(200);
+
+        if(btn_readState()) return;
     }
+
 }
 
 void kernel_start (void)
 {
+#ifdef BUILD_LIB
+    char * stdalone="STDALONE";
+#endif
 
     /* malloc of max space in SDRAM */
     mem_addPool((void*)MALLOC_START,MALLOC_SIZE);
@@ -222,7 +169,7 @@ void kernel_start (void)
 
 #ifdef BUILD_LIB
     do_bkpt();
-    app_main(1,"STDALONE");
+    app_main(1,&stdalone);
     reload_firmware();
 #endif
 
@@ -232,9 +179,9 @@ void kernel_start (void)
 
     do_bkpt();
 
-    gui_start();
+    shell_main();
 
     /* should we launch HALT */
-    printk("BACK TO MAIN !!!!\n");
-    while(1);
+    printk("[init] error: back to main()\n");
+    for(;;);
 }

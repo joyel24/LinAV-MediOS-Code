@@ -222,6 +222,28 @@ void graphics8_DrawBITMAP(BITMAP * bitmap, unsigned int trsp, int x, int y, stru
     }
 }
 
+void graphics8_DrawResizedBITMAP (BITMAP * bitmap, int x, int y, int xinc, int yinc , struct graphicsBuffer * buff){
+    int i,j,c;
+    unsigned char * baseDest=getOffset(x,y,buff,unsigned char);
+    unsigned char * baseSrc=(unsigned char*)bitmap->data;
+    unsigned char * dest=baseDest;
+    unsigned char * src=baseSrc;
+    unsigned char * tmp;
+
+    for(j=0;j<bitmap->height<<16;j+=yinc)
+    {
+        dest=baseDest;
+        baseDest+=buff->width*2;
+        for(i=0;i<bitmap->width<<16;i+=xinc)
+        {
+            tmp=dest++;
+            c=*(src+(i>>16));
+            putPix(c,tmp,buff);
+        }
+        src=baseSrc+bitmap->width*(j>>16);
+    }
+}
+
 void graphics8_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP, struct graphicsBuffer * buff)
 {
     int j,inc;

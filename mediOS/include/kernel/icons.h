@@ -15,6 +15,10 @@
 
 #include <gui/icons.h>
 
+#include <kernel/shell.h>
+
+#define ICON_DIR SHELL_DIR"/icons"
+
 void icon_init(void);
 
 struct icon_elem * icon_load(char * filename);

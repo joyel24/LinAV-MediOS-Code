@@ -11,6 +11,7 @@
 *
 */
 
+#include <kernel/status_line.h>
 #include <kernel/hardware.h>
 #include <kernel/lcd.h>
 
@@ -18,36 +19,7 @@
 #include <sys_def/font.h>
 #include <sys_def/stddef.h>
 
-#include <gui/menu.h>
-#include <gui/main_menu.h>
-#include <gui/gui.h>
-
-struct menu_data menu_cfg = {
-    useOwnDisp     : 0,
-    x:0,y:0,width:220,height:176,
-    txt_color      : COLOR_BLACK,
-    bg_color       : COLOR_WHITE,
-    select_color   : COLOR_BLUE,
-    sub_color      : COLOR_RED,
-    font           : STD6X9,
-    root           : NULL,
-    do_action      : mainMenu_doAction,
-    on_action      : mainMenu_doOn,
-    off_action     : mainMenu_doOff,
-    f1_action      : mainMenu_doF1,
-    f2_action      : mainMenu_doF2,
-    f3_action      : mainMenu_doF3,
-    item_str       : mainMenu_mkItemStr,
-    submenu_str    : mainMenu_mkSubmenuStr,
-    getSubIcon     : mainMenu_mkSubIcon,
-    getItemIcon    : mainMenu_mkItemIcon,
-    isTxtMenu      : 0,
-    border_color   : COLOR_BLACK,
-    has_border     : 0,
-    title          : NULL,
-};
-
-struct statusBar_data barData = {
+struct statusLine_data lineData = {
     x:0,y:0,
     w:SCREEN_REAL_WIDTH,
     bg_color:COLOR_LIGHT_BLUE,

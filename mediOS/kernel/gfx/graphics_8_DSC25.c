@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/gfx/graphics_8.c
 *
 *   MediOS project
@@ -22,9 +22,10 @@ void         graphics8_DrawRect          (unsigned int color, int x, int y, int 
 void         graphics8_FillRect          (unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff);
 void         graphics8_DrawChar          (struct graphicsFont * font, unsigned int color,unsigned int bg_color, int x, int y,
                                             unsigned char c, struct graphicsBuffer * buff);
-void         graphics8_DrawSprite        (unsigned int * palette, SPRITE * sprite, unsigned int trsp,int x, int y, 
+void         graphics8_DrawSprite        (unsigned int * palette, SPRITE * sprite, unsigned int trsp,int x, int y,
                                             struct graphicsBuffer * buff);
 void         graphics8_DrawBITMAP        (BITMAP * bitmap, unsigned int trsp, int x, int y, struct graphicsBuffer * buff);
+void         graphics8_DrawResizedBITMAP (BITMAP * bitmap, int x, int y, int xinc, int yinc , struct graphicsBuffer * buff);
 void         graphics8_ScrollWindowVert  (unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP,
                                             struct graphicsBuffer * buff);
 void         graphics8_ScrollWindowHoriz (unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT,
@@ -44,6 +45,7 @@ struct graphics_operations g8ops =  {
     drawSprite        : graphics8_DrawSprite,
     drawChar          : graphics8_DrawChar,
     drawBITMAP        : graphics8_DrawBITMAP,
+    drawResizedBITMAP : graphics8_DrawResizedBITMAP,
     drawString        : graphics8_DrawString,
     scrollWindowVert  : graphics8_ScrollWindowVert,
     scrollWindowHoriz : graphics8_ScrollWindowHoriz,
@@ -155,8 +157,8 @@ void graphics8_DrawSprite(unsigned int * palette,SPRITE * sprite, unsigned int t
                 outb(palette[index],dest+i);
             }
             dest+=buff->width;
-            src+=sprite->width; 
-        }    
+            src+=sprite->width;
+        }
     }
         
 }
@@ -186,21 +188,42 @@ void graphics8_DrawBITMAP(BITMAP * bitmap, unsigned int trsp, int x, int y, stru
         for(j=0;j<bitmap->height;j++)
         {
             memcpy(dest,src,bitmap->width);
-            
+
             dest+=buff->width;
             src+=bitmap->width;
         }
-        
-        
+
+
+    }
+}
+
+void graphics8_DrawResizedBITMAP (BITMAP * bitmap, int x, int y, int xinc, int yinc , struct graphicsBuffer * buff){
+    int i,j;
+    unsigned char * baseDest=getOffset(x,y,buff,unsigned char);
+    unsigned char * baseSrc=(unsigned char*)bitmap->data;
+    unsigned char * dest=baseDest;
+    unsigned char * src=baseSrc;
+
+//    printk("x %d y %d xinc %0.8x %d yinc %0.8x %d\n",x,y,xinc,xinc>>16,yinc,yinc>>16);
+
+    for(j=0;j<bitmap->height<<16;j+=yinc)
+    {
+        dest=baseDest;
+        baseDest+=buff->width;
+        for(i=0;i<bitmap->width<<16;i+=xinc)
+        {
+            *(dest++)=*(src+(i>>16));
+        }
+        src=baseSrc+bitmap->width*(j>>16);
     }
 }
 
 void graphics8_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP, struct graphicsBuffer * buff)
 {
     int j,inc;
-    
+
     unsigned char *src,*dest;
-    
+
     if(scroll == 0)
         return;
         

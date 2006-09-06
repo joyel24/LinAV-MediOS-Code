@@ -98,10 +98,6 @@ int viewNewDir(struct browser_data *bdata,char *name)
                                 /fw;
     }
 
-    gfx_fontSet(bdata->font);
-
-    gfx_fillRect(COLOR_WHITE,bdata->x_start,bdata->y_start,bdata->width,bdata->height);
-
     browser_scroll.x=bdata->x_start+(bdata->scroll_pos==LEFT_SCROLL?1:bdata->width-BROWSER_SCROLLBAR_WIDTH);
     browser_scroll.y=bdata->y_start;
     browser_scroll.width=8;
@@ -151,6 +147,9 @@ int browser_simpleBrowse(char * path,char * res)
 
 void redrawBrowser(struct browser_data *bdata)
 {
+    gfx_fontSet(bdata->font);
+    gfx_fillRect(COLOR_WHITE,bdata->x_start,bdata->y_start,bdata->width,bdata->height);
+
     printAllName(bdata);
     draw_scrollBar(&browser_scroll, bdata->listused, bdata->pos,bdata->nb_disp_entry+bdata->pos);
 }

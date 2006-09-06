@@ -11,7 +11,7 @@
 */
 
 #include <kernel/widgetmenu.h>
-#include <gui/cfg_file.h>
+#include <kernel/cfg_file.h>
 
 #include <sys_def/stddef.h>
 #include <sys_def/string.h>

@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/driver/usb_fw.c
 *
 *   MediOS project
@@ -13,6 +13,8 @@
 #include <kernel/kernel.h>
 #include <kernel/evt.h>
 #include <kernel/timer.h>
+
+#include <sys_def/stddef.h>
 
 int kusb_state,kfw_state;
 
@@ -36,13 +38,13 @@ void setUsbFw(int state)
             {
                 USB_enable();
                 k_usb_fw=1;
-                printk("[usb-FW_EXT] usb enable\n");
+                printk("[USB/FW] USB enable\n");
             }
             else if(kFWIsConnected())
             {
                 FW_enable();
                 k_usb_fw=2;
-                printk("[usb-FW_EXT] FW_EXT enable\n");
+                printk("[USB/FW] FW_EXT enable\n");
             }
         }
         else
@@ -50,12 +52,12 @@ void setUsbFw(int state)
             if(k_usb_fw==1)
             {
                USB_disable();
-                printk("[usb-FW_EXT] usb disable\n");
+                printk("[USB/FW] USB disable\n");
             }
             else if(k_usb_fw==2)
             {
                 FW_disable();
-                printk("[usb-FW_EXT] FW_EXT disable\n");
+                printk("[USB/FW] FW_EXT disable\n");
             }
             k_usb_fw=0;                
         }
@@ -64,9 +66,9 @@ void setUsbFw(int state)
     else
     {
         if(state)
-            printk("[usb state] warning: enabling usb while it is already enabled\n");
+            printk("[USB/FW] warning: enabling USB while it is already enabled\n");
         else
-            printk("[usb state] warning: disabling usb while it is already disabled\n");
+            printk("[USB/FW] warning: disabling USB while it is already disabled\n");
     }
 }
 
@@ -97,20 +99,20 @@ void usbFw_cableChk(void)
     {
         struct evt_t _evt;
         kusb_state=kusbIsConnected();
-        printk("[USB FW] usb %s\n",kusb_state==1?"connected":"disconnected");
-        _evt.evt=EVT_USB;
+        printk("[USB/FW] USB %s\n",kusb_state==1?"connected":"disconnected");
+        _evt.evt=(kusb_state)?EVT_USB_IN:EVT_USB_OUT;
         _evt.evt_class = CONNECT_CLASS;
-        _evt.data=(void*)kusb_state;
+        _evt.data=NULL;
         evt_send(&_evt);
     }
     if(kFWIsConnected()!=kfw_state)
     {
         struct evt_t _evt;
         kfw_state=kFWIsConnected();
-        printk("[USB FW] FW %s\n",kfw_state==1?"connected":"disconnected");
-        _evt.evt=EVT_FW_EXT;
+        printk("[USB/FW] FW %s\n",kfw_state==1?"connected":"disconnected");
+        _evt.evt=(kfw_state)?EVT_FW_EXT_IN:EVT_FW_EXT_OUT;
         _evt.evt_class = CONNECT_CLASS;
-        _evt.data=(void*)kfw_state;
+        _evt.data=NULL;
         evt_send(&_evt);
     }
 }
@@ -126,7 +128,7 @@ void init_usb_fw(void)
     usbFw_tmr.freeRun = 1;
     usbFw_tmr.stdDelay=1*HZ; /* 1s period */
     tmr_start(&usbFw_tmr);
-    
-    printk("[init] usb FW (usb %s - FW %s)\n",
+
+    printk("[init] USB/FW (USB %s - FW %s)\n",
         kusb_state==1?"connected":"disconnected",kfw_state==1?"connected":"disconnected");
 }

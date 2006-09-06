@@ -11,8 +11,9 @@
 *
 */
 
-#include <kernel/kernel.h>
+#include <kernel/status_line.h>
 
+#include <kernel/kernel.h>
 #include <kernel/version.h>
 #include <kernel/graphics.h>
 #include <kernel/rtc.h>
@@ -20,9 +21,8 @@
 #include <kernel/usb_fw.h>
 #include <kernel/icons.h>
 
-#include <gui/gui.h>
-
 #include <sys_def/colordef.h>
+#include <sys_def/font.h>
 #include <sys_def/string.h>
 
 #include <evt.h>
@@ -62,7 +62,7 @@ int time_format=FORMAT_24;
 #define DATE1(DD,MM)   (date_format==FORMAT_DDMMYYYY?DD:MM)
 #define DATE2(DD,MM)   (date_format==FORMAT_DDMMYYYY?MM:DD)
 
-extern struct statusBar_data barData;
+extern struct statusLine_data lineData;
 
 int clk_w=0,clk_h=0;
 
@@ -71,10 +71,10 @@ void drawTime(void)
 {
     char timeSt[50];
     struct med_tm  date_time;
-    
+
     if(rtc_getTime(&date_time)==MED_OK)
-    {   
-        if(barData.has_date)
+    {
+        if(lineData.has_date)
             sprintf(timeSt,"%02d:%02d%s %02d/%02d/%04d",HOUR(date_time.tm_hour),date_time.tm_min,
                     AMPM_ADD(date_time.tm_hour),
                     DATE1(date_time.tm_mday,date_time.tm_mon),
@@ -83,9 +83,10 @@ void drawTime(void)
         else
             sprintf(timeSt,"%02d:%02d%s",HOUR(date_time.tm_hour),date_time.tm_min,
                     AMPM_ADD(date_time.tm_hour));
-        gfx_fillRect(barData.bg_color,barData.clk_x,barData.clk_y,clk_w,clk_h);
+        gfx_fillRect(lineData.bg_color,lineData.clk_x,lineData.clk_y,clk_w,clk_h);
         gfx_getStringSize(timeSt,&clk_w,&clk_h);
-        gfx_putS(barData.clk_color,barData.bg_color,barData.clk_x,barData.clk_y,timeSt);
+        gfx_fontSet(STD6X9);
+        gfx_putS(lineData.clk_color,lineData.bg_color,lineData.clk_x,lineData.clk_y,timeSt);
     }
 
 }
@@ -100,7 +101,7 @@ void drawBat(void)
     if(pwrState == 0)
     {
         power = batLevel();
-       
+
         if(power < 2)
             color = COLOR_DARK_RED;
         else if(power < 4)
@@ -134,11 +135,11 @@ void drawBat(void)
         color = COLOR_GREEN;
     }
 
-    gfx_drawRect(COLOR_BLACK,barData.bat_x,barData.bat_y,23,10);
-    gfx_fillRect(COLOR_BLACK,barData.bat_x+23,barData.bat_y+2,3,6);
-    gfx_fillRect(barData.bg_color,barData.bat_x+1,barData.bat_y+1,21,8);
-    gfx_fillRect(color,barData.bat_x+1,barData.bat_y+1,level,8);
-#if 0    
+    gfx_drawRect(COLOR_BLACK,lineData.bat_x,lineData.bat_y,23,10);
+    gfx_fillRect(COLOR_BLACK,lineData.bat_x+23,lineData.bat_y+2,3,6);
+    gfx_fillRect(lineData.bg_color,lineData.bat_x+1,lineData.bat_y+1,21,8);
+    gfx_fillRect(color,lineData.bat_x+1,lineData.bat_y+1,level,8);
+#if 0
     if(fmIsConnected()) /* show bat status on FM remote */
     {
         if(level<7)
@@ -164,54 +165,55 @@ void drawStatus(void)
     }
     
     if(fwExtState)
-        gfx_drawBitmap(st_fwExtIcon, barData.module_x, barData.module_y);
+        gfx_drawBitmap(st_fwExtIcon, lineData.module_x, lineData.module_y);
     /*else
-        fillRect(barData.bg_color,242,4,15,6);*/
+        fillRect(lineData.bg_color,242,4,15,6);*/
         
     if(cfState)
-        gfx_drawBitmap(st_cfIcon, barData.module_x, barData.module_y);
+        gfx_drawBitmap(st_cfIcon, lineData.module_x, lineData.module_y);
     /*else
-        fillRect(barData.bg_color,242,4,15,6);*/
+        fillRect(lineData.bg_color,242,4,15,6);*/
     if(!cfState && !fwExtState)
-        gfx_fillRect(barData.bg_color,barData.module_x,barData.module_y,15,6);
+        gfx_fillRect(lineData.bg_color,lineData.module_x,lineData.module_y,15,6);
     
         
     if(pwrState)
-        gfx_drawBitmap(st_powerIcon, barData.pwr_x, barData.pwr_y);
+        gfx_drawBitmap(st_powerIcon, lineData.pwr_x, lineData.pwr_y);
     else
-        gfx_fillRect(barData.bg_color,barData.pwr_x,barData.pwr_y,15,6);
+        gfx_fillRect(lineData.bg_color,lineData.pwr_x,lineData.pwr_y,15,6);
 
     if(usbState)
-        gfx_drawBitmap(st_usbIcon, barData.usb_x, barData.usb_y);
+        gfx_drawBitmap(st_usbIcon, lineData.usb_x, lineData.usb_y);
     else
-        gfx_fillRect(barData.bg_color,barData.usb_x,barData.usb_y,15,6);
+        gfx_fillRect(lineData.bg_color,lineData.usb_x,lineData.usb_y,15,6);
 }
 
 void drawLogo(void)
 {
-    gfx_drawBitmap(st_mediosLogo, barData.logo_x, barData.logo_y);
+    gfx_drawBitmap(st_mediosLogo, lineData.logo_x, lineData.logo_y);
 }
 
 void drawGui(void)
 {
     int w = 0;
     int h = 0;
-
     char medios_ver[10];
+
+    gfx_fontSet(STD6X9);
 
     gfx_getStringSize("M", &w, &h);
 
     /* blue background */
-    gfx_fillRect(barData.bg_color,barData.x,barData.y,barData.w,h+6);
+    gfx_fillRect(lineData.bg_color,lineData.x,lineData.y,lineData.w,h+6);
 
     /* nice little shadow */
-    gfx_drawLine(COLOR_BLACK,barData.x,barData.y+h+5,barData.w-1,h+5);
-    gfx_drawLine(COLOR_DARK_GREY,barData.x+0,barData.y+h+6,barData.w-1,h+6);
-    gfx_drawLine(COLOR_LIGHT_GREY,barData.x+0,barData.y+h+7,barData.w-1,h+7);
+    gfx_drawLine(COLOR_BLACK,lineData.x,lineData.y+h+5,lineData.w-1,h+5);
+    gfx_drawLine(COLOR_DARK_GREY,lineData.x+0,lineData.y+h+6,lineData.w-1,h+6);
+    gfx_drawLine(COLOR_LIGHT_GREY,lineData.x+0,lineData.y+h+7,lineData.w-1,h+7);
 
     /* show version */
     sprintf(medios_ver,"%d.%d",VER_MAJOR,VER_MINOR);
-    gfx_putS(barData.ver_color,barData.bg_color,barData.ver_x,barData.ver_y,medios_ver);
+    gfx_putS(lineData.ver_color,lineData.bg_color,lineData.ver_x,lineData.ver_y,medios_ver);
 
     /* and time, and battery */
     drawTime();
@@ -221,7 +223,7 @@ void drawGui(void)
 }
 
 /* events */
-void statusLine_EvtHandler(int evt)
+void statusLine_handleEvent(int evt)
 {
     switch (evt) {
         case EVT_REDRAW:
@@ -236,17 +238,20 @@ void statusLine_EvtHandler(int evt)
             else
                 batteryRefresh = 0;
             break;
-        case EVT_PWR:
+        case EVT_PWR_IN:
+        case EVT_PWR_OUT:
 #warning we could use here and for usb / FW ... the data of the evt
             pwrState=POWER_CONNECTED;
             batteryRefresh = 0;
             drawStatus();
             break;
-        case EVT_USB:
+        case EVT_USB_IN:
+        case EVT_USB_OUT:
             usbState=kusbIsConnected();
             drawStatus();
             break;
-        case EVT_FW_EXT:
+        case EVT_FW_EXT_IN:
+        case EVT_FW_EXT_OUT:
             fwExtState=kFWIsConnected();
             drawStatus();
             break;
@@ -260,7 +265,7 @@ void statusLine_EvtHandler(int evt)
     }
 }
 
-void statusBar_ini(void)
+void statusLine_init(void)
 {
     /* get icons */
     st_fwExtIcon=&icon_get("fwExtIcon")->bmap_data;

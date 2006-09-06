@@ -37,7 +37,8 @@ typedef enum {WLD_NEXT, WLD_PREVIOUS} WL_DIRECTION;
     bool ownWidgets;                                       \
     WIDGET previousWidget;                                 \
     WIDGET focusedWidget;                                  \
-    bool fastRepaint;
+    bool fastRepaint;                                      \
+    bool repaintAllWidgets;
 
 typedef void(*WIDGETLIST_WIDGETADDER)(void *,void *);
 typedef void(*WIDGETLIST_WIDGETSCLEARER)(void *);

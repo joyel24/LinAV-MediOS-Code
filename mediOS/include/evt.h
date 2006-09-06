@@ -49,11 +49,14 @@ struct evt_t {
 
 #define        EVT_TIMER         0x0020
 
-#define        EVT_PWR           0x0031
-#define        EVT_USB           0x0032
-#define        EVT_FW_EXT        0x0033
-#define        EVT_CF_IN         0x0034
-#define        EVT_CF_OUT        0x0035
+#define        EVT_PWR_IN        0x0031
+#define        EVT_PWR_OUT       0x0032
+#define        EVT_USB_IN        0x0033
+#define        EVT_USB_OUT       0x0034
+#define        EVT_FW_EXT_IN     0x0035
+#define        EVT_FW_EXT_OUT    0x0036
+#define        EVT_CF_IN         0x0037
+#define        EVT_CF_OUT        0x0038
 
 #define        EVT_REDRAW        0x0050
 #define        EVT_MENU_UP_LVL   0x0051

@@ -20,10 +20,9 @@
 #include <kernel/evt.h>
 #include <kernel/errors.h>
 
-#include <kernel/med.h>
+#include <kernel/shell.h>
 
 #include <evt.h>
-#include <file_type.h>
 
 #include <gui/file_browser.h>
 #include <gui/scrollbar.h>
@@ -31,9 +30,6 @@
 
 extern struct scroll_bar browser_scroll;
 extern int evt_handler;
-
-#define AO_BOY_BIN "/aoboy.med"
-#define TXT_VIEW_BIN "/txt_viewer.med"
 
 MED_RET_T browserEvt(struct browser_data * bdata)
 {
@@ -203,63 +199,18 @@ MED_RET_T browserEvt(struct browser_data * bdata)
                             }
                             else
                             {
-                                int type;
                                 char path[PATHLEN];
                                 if(bdata->path[0]=='/' && bdata->path[1]=='\0')
                                     sprintf(path,"/%s",bdata->list[bdata->pos+bdata->nselect].name);
                                 else
                                     sprintf(path,"%s/%s",bdata->path,bdata->list[bdata->pos+bdata->nselect].name);
-                                                           
-                                printk("launching %s\n",path);
-                                type=get_file_type(path);
-                                switch(type)
-                                {
-                                    case MED_TYPE:
-                                        infoBox("Launching med");
-                                        med_load(path);
-                                        gfx_openGraphics();
-                                        evt_purgeHandler(evt_handler);
-                                        if(!viewNewDir(bdata,NULL))
-                                        {
-                                            stop=1;
-                                        }
-                                        break;
-                                    case GB_TYPE:
-                                        {
-                                            char ** argv=(char**)malloc(2*sizeof(char**));
-                                            infoBox("Launching GB");
-                                            argv[0]=AO_BOY_BIN;
-                                            argv[1]=path;
-                                            med_loadParam(2,argv);
-                                            gfx_openGraphics();
-                                            free(argv);
-                                            evt_purgeHandler(evt_handler);
-                                            if(!viewNewDir(bdata,NULL))
-                                            {
-                                                stop=1;
-                                            }
-                                            break;
-                                        }
-                                    case TXT_TYPE:
-                                    {
-                                        char ** argv=(char**)malloc(2*sizeof(char**));
-                                        infoBox("Launching Txt viewer");
-                                        argv[0]=TXT_VIEW_BIN;
-                                        argv[1]=path;
-                                        med_loadParam(2,argv);
-                                        gfx_openGraphics();
-                                        free(argv);
-                                        evt_purgeHandler(evt_handler);
-                                        if(!viewNewDir(bdata,NULL))
-                                        {
-                                            stop=1;
-                                        }
-                                        break;
-                                    }
-                                    default:
-                                        printk("Bad type : %d\n",type);
-                                        break;
-                                }
+
+                                // execute file
+                                shell_execute(path,NULL);
+
+                                //TODO: not very nice, browser should be able to recieve EVT_REDRAW and process it
+                                evt_purgeHandler(evt_handler);
+                                redrawBrowser(bdata);
                             }
                             break;
                         }

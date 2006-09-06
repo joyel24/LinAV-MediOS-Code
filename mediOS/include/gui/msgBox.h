@@ -43,8 +43,8 @@
     #define MSGBOX_ICON_QUESTION    4
     #define MSGBOX_ICON_ERROR       5
 
-    void iniMsgBox(void);
-    int msgBox(unsigned char* caption, unsigned char* msg, int type, int icon,int evt_hanlder);
-    void infoBox(unsigned char* msg);
+    void msgBox_init(void);
+    int msgBox_show(unsigned char* caption, unsigned char* msg, int type, int icon,int evt_hanlder);
+    void msgBox_info(unsigned char* msg);
 
 #endif

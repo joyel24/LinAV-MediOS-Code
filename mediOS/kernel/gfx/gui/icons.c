@@ -22,8 +22,6 @@
 
 char ident_str[]="AVICO";
 
-#define ICON_DIR "/icons"
-
 ICON icon_list_head=NULL;
 
 ICON icon_load(char * filename)

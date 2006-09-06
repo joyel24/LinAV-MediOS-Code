@@ -45,7 +45,9 @@
     int foreColor;                     \
     int backColor;                     \
     int focusColor;                    \
-    int font;
+    int font;                          \
+    union { int tag; void * data; };
+
 
 typedef bool(*WIDGET_EVENTHANDLER)(void *,int);
 typedef void(*WIDGET_PAINTHANDLER)(void *);
