@@ -1,4 +1,4 @@
-/* 
+/*
 *   kernel/fs/med.c
 *
 *   MediOS project
@@ -22,6 +22,8 @@
 
 #include <kernel/med.h>
 #include <kernel/errors.h>
+
+#include <kernel/cache.h>
 
 #define CORE_START   ((char*)&_iram_end+0x10)
 
@@ -406,26 +408,29 @@ int med_loadParam(int argc,char**argv)
     run_med = (int (*)(int ,char**))entry;
     
     printk("calling app (entry %x)\n", run_med);      
-    DEBUG_MED("calling app (entry %x)\n", run_med); 
-             
+    DEBUG_MED("calling app (entry %x)\n", run_med);
+
     do_bkpt();
-    
+
+    /* invalidate caches */
+    cache_invalidate(CACHE_ALL);
+
     ret_val=run_med(argc,argv);
-    
-    printk("back from app\n"); 
-    free_user();          
+
+    printk("back from app\n");
+    free_user();
     free(sdram_start);
-    printk("sdram freed %x\n",sdram_start); 
+    printk("sdram freed %x\n",sdram_start);
     free(sections_name);
     printk("sections_name freed %x\n",sections_name);
     free(section_list);
     printk("section_list freed %x\n",section_list);
     return ret_val;
-    
+
 exit_point3:       
     free(sdram_start);
     printk("sdram freed\n"); 
-exit_point2:    
+exit_point2:
     free(sections_name);
     printk("sections_name freed\n"); 
 exit_point1:
