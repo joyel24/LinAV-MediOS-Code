@@ -818,7 +818,7 @@ MED_RET_T fat_readdir(struct fat_entry * dir,struct fat_direntry * entry)
                 fat_parseDirEntry(entry,&buf[entrypos]);
                 /* don't return volume id entry */
                 VFS_PRINT("[READ DIR] found: %s\n",entry->name);
-                if ( entry->attr == FAT_ATTR_VOLUME_ID )
+                if ( entry->attr & FAT_ATTR_VOLUME_ID )
                 {
                     //printk("VOL ID => loop\n");
                     continue;
@@ -932,7 +932,7 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
             break;
         }
 
-        VFS_PRINT("[LOAD Dir] ok we have: %s (%d)\n",entry->name,current_dir->entryN-1);
+        VFS_PRINT("[LOAD Dir] ok we have: %s (entryN=%d attr=%0.4x)\n",entry->name,current_dir->entryN-1,entry->attr);
 
         new_entry->size = entry->filesize;
         new_entry->attr = entry->attr;
@@ -943,7 +943,7 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
         new_entry->nbDirEntries= current_dir->entryCount;
 
         vfs_nodeInitChild(parent_node->mount_point,parent_node,NULL,new_node,
-            entry->attr==FAT_ATTR_DIRECTORY?VFS_TYPE_DIR:VFS_TYPE_FILE);
+            entry->attr&FAT_ATTR_DIRECTORY?VFS_TYPE_DIR:VFS_TYPE_FILE);
 
         new_node->name.str = entry->name;
         new_node->name.length = strlen(new_node->name.str);
