@@ -412,8 +412,10 @@ int med_loadParam(int argc,char**argv)
 
     do_bkpt();
 
+#ifdef DM270
     /* invalidate caches */
     cache_invalidate(CACHE_ALL);
+#endif
 
     ret_val=run_med(argc,argv);
 
