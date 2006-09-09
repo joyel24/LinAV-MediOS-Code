@@ -17,7 +17,7 @@ $(TARGET) :
 
 clean:  clean-subdirs
 	@echo '-----   cleaning MAIN'
-	@rm -f *.o *~ $(TARGET) include/*~ build/*
+	@rm -f *.o *~ *.exe $(TARGET) include/*~ build/*
         
 builddir:
 	@mkdir -p build

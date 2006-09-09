@@ -94,10 +94,18 @@
 #define IRQ_2    0xC
 
 #define BASE_STATUS   (IRQ_START+0x0)
-#define BASE_ENTRY    (IRQ_START+0xE)
-#define BASE_ENABLE   (IRQ_START+0x26)
+#define BASE_ENTRY    (IRQ_START+0x10)
+#define BASE_ENABLE   (IRQ_START+0x28)
+#define BASE_EABASE   (IRQ_START+0x38)
+#define BASE_INTPRIO  (IRQ_START+0x40)
 
-#define NUM_OF_IRQ 7 //1 more (bogus) because of the missing 0x6 
+#define NB_INT        32
+
+#define NB_FIQ        3
+#define NB_IRQ        3
+
+#define NB_OF_REG     NB_FIQ+NB_IRQ
+
 #define REG_NUM(irq) (irq<16?0:irq<32?1:2)
 #define REAL_NUM(irq) (irq<16?irq:irq<32?irq-16:irq-32) //get the irq line number in the reg
 
@@ -168,6 +176,9 @@
 #define CLOCK_START   TI_REG_START+0x880
 #define CLOCK_END     TI_REG_START+0x890
 
+
+#define  MEM_CFG_START TI_REG_START+0xA00
+#define  MEM_CFG_STOP TI_REG_START+0xA56
 
 /********************** ECR      ****************************************/
 #define ECR_START   TI_REG_START+0x900
