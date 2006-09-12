@@ -95,8 +95,16 @@ ifeq ("$(TARGET_DEVICE)","GMINI402")
 	@dd if=$< of=$@ bs=2399744 seek=1 conv=notrunc 2> /dev/null
 	@dd if=$< of=cc_$@ bs=2245632 seek=1 conv=notrunc 2> /dev/null
 else
+ifeq ("$(TARGET_DEVICE)","AV4XX")
+%.avi: %.bin
+	@make -C tools/bin2exploit/ -s av400avi.tpl
+	@echo "[$@]"
+	@cp tools/bin2exploit/av400avi.tpl $@
+	@dd if=$< of=$@ bs=2882560 seek=1 conv=notrunc 2> /dev/null
+else
 %.avi:
 	@echo "END"
+endif
 endif
 
 clean:  clean-subdirs

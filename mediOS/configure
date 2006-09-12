@@ -91,7 +91,8 @@ if [ $CONFIGURE_TARGET_DEVICE = -1 ]
                         echo "3	AV1XX"
                         echo "4	JBMM"
                         echo "5	GMINI402"
-			echo -n "Choose 1, 2, 3, 4 or 5 [1]: "
+                        echo "6	AV4XX"
+			echo -n "Choose 1, 2, 3, 4, 5 or 6 [1]: "
 			read -e USERSELECTION
 			if [ "$USERSELECTION" == "" ]; then
 				CONFIGURE_TARGET_DEVICE="AV3XX"
@@ -110,6 +111,9 @@ if [ $CONFIGURE_TARGET_DEVICE = -1 ]
 				fi
                                 if [ $USERSELECTION == 5 ]; then
 					CONFIGURE_TARGET_DEVICE="GMINI402"
+				fi
+                                if [ $USERSELECTION == 6 ]; then
+					CONFIGURE_TARGET_DEVICE="AV4XX"
 				fi
 			fi
 		done
@@ -151,6 +155,14 @@ if [ $CONFIGURE_TARGET_DEVICE == "GMINI402" ]; then
             CONFIGURE_HAVE_EXT_MODULE="0"
             CONFIGURE_HAVE_FM_REMOTE="0"
             CONFIGURE_CHIP_TYPE="DM320"
+fi
+
+if [ $CONFIGURE_TARGET_DEVICE == "AV4XX" ]; then
+            CONFIGURE_HAVE_MAS_SOUND="0"
+            CONFIGURE_HAVE_AIC23_SOUND="1"     
+            CONFIGURE_HAVE_EXT_MODULE="0"
+            CONFIGURE_HAVE_FM_REMOTE="0"
+            CONFIGURE_CHIP_TYPE="DM270"
 fi
 
 # this section of the script asks all of the yes or no querys, they are of the following format:

@@ -211,7 +211,7 @@ void btn_processPress(int val)
                     }
 #endif
 
-                    //printk("BTN %d pressed\n",btn);
+                   //printk("BTN %d pressed\n",btn);
 #ifdef HAVE_FM_REMOTE
                 }
                 else

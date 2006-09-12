@@ -167,6 +167,8 @@ void kernel_start (void)
     print_boot_info();
     printk("[init] END\n");
 
+    
+    
 #ifdef BUILD_LIB
     do_bkpt();
     app_main(1,&stdalone);
@@ -176,7 +178,7 @@ void kernel_start (void)
 #if 0
    tst_fct();
 #endif
-
+   
     do_bkpt();
 
     shell_main();
