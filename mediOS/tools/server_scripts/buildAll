@@ -11,7 +11,7 @@ echo "" >> ${phpReportPath}${phpReportFile}
 
 
 # mediOS
-mediOS_arch="jbmm av1xx av3xx g4xx g402"
+mediOS_arch="jbmm av1xx av3xx g4xx g402 av4xx"
 
 echo "Cpy mediOS folder"
 cd ~/archopen_src
