@@ -22,5 +22,5 @@ void arch_osd_init(void)
 {
 	osd_setMainShift(SCREEN_LCD_SHIFT_X, SCREEN_LCD_SHIFT_Y);
 
-	outw(9,VIDEO_BASE+0x2C); // LCD VSync
+// 	outw(9,VIDEO_BASE+0x2C); // LCD VSync
 }
