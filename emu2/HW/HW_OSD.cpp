@@ -574,7 +574,7 @@ void HW_OSD::chk_access(uint32_t addr,uint32_t val,int size)
 {
 #ifdef HAS_LCD
     if((OSD_config_regs[2]&0x1) && addr>=OSD_offset_regs[2]
-            && addr <= (OSD_offset_regs[2]+SCREEN_WIDTH*SCREEN_HEIGHT*2)){
+            && addr <= (OSD_offset_regs[2]+OSD_width_regs[2]*32*OSD_info_regs[2].height)){
         uint32_t v=val;
         uint32_t a=addr-OSD_offset_regs[2];
         switch(size){ /* no break intended */
@@ -590,7 +590,7 @@ void HW_OSD::chk_access(uint32_t addr,uint32_t val,int size)
 
 #ifdef HAS_VID0
     else if ((OSD_config_regs[1]&0x1) && addr>=OSD_offset_regs[0]
-            && addr <= (OSD_offset_regs[0]+SCREEN_WIDTH*SCREEN_HEIGHT*4))
+            && addr <= (OSD_offset_regs[0]+OSD_width_regs[0]*8*OSD_info_regs[0].height))
             lcd->drawVidPix(addr-OSD_offset_regs[0],val);
 #endif
 #endif

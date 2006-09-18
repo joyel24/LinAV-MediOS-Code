@@ -34,6 +34,8 @@
 #define BTN_ON    0x8
 #define BTN_OFF   0x9
 #define BTN_OK    0xa
+#define BTN_SQUARE 0xb
+#define BTN_CROSS  0xc
 
 #define BTN_INIT_VAL  0x2
 
@@ -54,7 +56,7 @@ class HW_cpld:public HW_access {
         
         int do_cmd_btn(int btn);
         void cpld_print_state(void);
-        int btn_var[0xb];
+        int btn_var[0xd];
         
         HW_ON_OFF * ON_btn;
         HW_ON_OFF * OFF_btn;

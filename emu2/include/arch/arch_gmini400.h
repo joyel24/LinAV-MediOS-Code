@@ -42,12 +42,12 @@
 
 //#define HAS_VID0
 #define HAS_LCD
-//#define HAS_UART_XWIN
+#define HAS_UART_XWIN
 
 /************************************************************ initial state */
 
 #ifndef homebrew
-#define START_ADDR        SDRAM_START //original
+#define START_ADDR        0x110000 //original
 #else
 #define START_ADDR        0xC10000  //gmini400 homebrew;
 #endif
@@ -95,14 +95,14 @@
 
 #define BASE_STATUS   (IRQ_START+0x0)
 #define BASE_ENTRY    (IRQ_START+0x10)
-#define BASE_ENABLE   (IRQ_START+0x28)
+#define BASE_ENABLE   (IRQ_START+0x20)
 #define BASE_EABASE   (IRQ_START+0x38)
 #define BASE_INTPRIO  (IRQ_START+0x40)
 
 #define NB_INT        32
 
-#define NB_FIQ        3
-#define NB_IRQ        3
+#define NB_FIQ        4
+#define NB_IRQ        4
 
 #define NB_OF_REG     NB_FIQ+NB_IRQ
 
@@ -137,19 +137,20 @@
   "UKN", "UKN", "UKN", "UKN", "UKN", "UKN", "UKN", "UKN", \
 }
 
-#define GPIO_ON_NUM   0x00
-#define GPIO_MAS_EOD  0x01
-#define GPIO_MAS_Di   0x02
-#define GPIO_MAS_PW   0x03
+#define GPIO_MAS_EOD  0xff
+#define GPIO_MAS_Di   0xff
+#define GPIO_MAS_PW   0xff
+#define GPIO_MAS_PR   0xff
 
-#define GPIO_OFF_NUM  0x1C
-#define GPIO_MAS_PR   0x1F
+
+#define GPIO_ON_NUM   0x01
+#define GPIO_OFF_NUM  0x02
 
 #define GPIO_I2C_SDA  0x08
 #define GPIO_I2C_SCL  0x09
 
 #define GPIO_LCD                 0xff
-#define GPIO_VID_OUT_UART1_RX    0xff
+#define GPIO_VID_OUT_UART1_RX    0x12
 #define GPIO_SPDIF_UART1_TX      0xff
 
 /********************** I2C     ****************************************/
@@ -178,7 +179,7 @@
 
 
 #define  MEM_CFG_START TI_REG_START+0xA00
-#define  MEM_CFG_STOP TI_REG_START+0xA56
+#define  MEM_CFG_STOP TI_REG_START+0xA30
 
 /********************** ECR      ****************************************/
 #define ECR_START   TI_REG_START+0x900
@@ -193,7 +194,7 @@
 /********************** HW_30A24 ****************************************/
 
 /* this HW is used on the av for the usb/DC/HD status */
-#define HAS_HW_30A24
+//#define HAS_HW_30A24
 
 
 /********************** DMA      ****************************************/
@@ -224,5 +225,5 @@
 #define CPLD_PORT_OFFSET 0x00500000
 
 /********************** LCD      ****************************************/
-#define SCREEN_WIDTH  240
+#define SCREEN_WIDTH  220
 #define SCREEN_HEIGHT 176

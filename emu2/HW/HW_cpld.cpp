@@ -1,4 +1,4 @@
-/* 
+/*
 *   HW_cpld.cpp
 *
 *   AV3XX emulator
@@ -61,7 +61,7 @@ HW_cpld::HW_cpld(void):HW_access(CPLD_START,CPLD_END,"CPLD")
     
    
     /* btn init */
-    for(int k=0;k<0xb;k++)
+    for(int k=0;k<0xd;k++)
         btn_var[k]=0   ;
         
     ON_btn = new HW_ON_OFF(ON_GPIO); 
@@ -89,11 +89,11 @@ void HW_cpld::setONOFF(HW_gpio * gpio)
 uint32_t HW_cpld::read(uint32_t addr,int size)
 {
     uint32_t ret_val=0;
-    
+
     switch(addr)
     {
         case CPLD_START+CPLD_PORT_OFFSET+0x0:
-            ret_val=cpld_module_type; 
+            ret_val=cpld_module_type;
             DEBUG_HW(CPLD_HW_DEBUG,"CPLD0 - read, size %x: module connected : %x\n",size,ret_val);
             break;
         case CPLD_START+CPLD_PORT_OFFSET+0x100:
@@ -144,6 +144,26 @@ uint32_t HW_cpld::read(uint32_t addr,int size)
             DEBUG_HW(CPLDBTN_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
             break;
 #endif
+#ifdef Gmini400
+        case CPLD_START+0x600008:
+            BTN_FCT(btn_var[BTN_UP]     ,0x1)
+            BTN_FCT(btn_var[BTN_DOWN]   ,0x2)
+            BTN_FCT(btn_var[BTN_LEFT]   ,0x4)
+            BTN_FCT(btn_var[BTN_RIGHT]  ,0x8)
+            DEBUG_HW(CPLDBTN_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
+            break;
+        case CPLD_START+0x60000a:
+            BTN_FCT(btn_var[BTN_F1]     ,0x1)
+            BTN_FCT(btn_var[BTN_F2]     ,0x2)
+            BTN_FCT(btn_var[BTN_F3]     ,0x4)
+            DEBUG_HW(CPLDBTN_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
+            break;
+        case CPLD_START+0x60000c:
+            BTN_FCT(btn_var[BTN_SQUARE] ,0x1)
+            BTN_FCT(btn_var[BTN_CROSS]  ,0x2)
+            DEBUG_HW(CPLDBTN_HW_DEBUG,"CPLD - read buttons (@0x%08x), size %x => send %x\n",addr,size,ret_val);
+            break;
+#endif
         default:
             DEBUG_HW(CPLD_HW_DEBUG,"CPLD - read ERROR ukn addr: @0x%08x, size %x\n",addr,size);
             ret_val=0;
@@ -176,7 +196,9 @@ void HW_cpld::write(uint32_t addr,uint32_t val,int size)
             DEBUG_HW(CPLD_HW_DEBUG,"CPLD3 - write, size %x: %x (HD is %s)\n",size,val,(val&0x8)?"ON":"OFF");
             cpld3_val = val;
             hdd_on = val&0x8;
+#ifdef HAS_HW_30A24
             hw_30a24->HDD_power = hdd_on?1:0;
+#endif
             break;
         case CPLD_START+CPLD_PORT_OFFSET+0x680:
         case CPLD_START+CPLD_PORT_OFFSET+0x700:

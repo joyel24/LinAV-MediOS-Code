@@ -251,7 +251,17 @@ int HW_lcd::nxtEvent(int * config,uint32_t * addr)
                     printf("F3\n");
                     mem->hw_cpld->btn_var[BTN_F3]=val;
                     break;
-            }        
+                case XK_KP_Insert:
+                case XK_KP_0:
+                    printf("Square\n");
+                    mem->hw_cpld->btn_var[BTN_SQUARE]=val;
+                    break;
+                case XK_KP_Delete:
+                case XK_KP_Decimal:
+                    printf("Cross\n");
+                    mem->hw_cpld->btn_var[BTN_CROSS]=val;
+                    break;
+            }
             break;
     }
    }  
@@ -261,10 +271,14 @@ int HW_lcd::nxtEvent(int * config,uint32_t * addr)
 void HW_lcd::drawPix(uint32_t addr,uint32_t val)
 {
     int i,j;
-    
-    addr >>= (osd->OSD_config_regs[2] & 0xc00)==0?1:0;
-    i=(addr%SCREEN_WIDTH);
-    j=addr/SCREEN_WIDTH;
+    int w=osd->OSD_width_regs[2]*32;
+    int z=(osd->OSD_config_regs[2] & 0xc00)==0?1:0;
+
+    addr >>= z;
+    w >>= z;
+
+    i=addr%w;
+    j=addr/w;
     XSetForeground(display, gc, colorTab[val&0xFF]);
     XDrawPoint(display, window1, gc, i, j);
 }
@@ -273,10 +287,11 @@ void HW_lcd::drawVidPix(uint32_t addr,uint32_t val)
 {
 #ifdef HAS_VID0
     int i,j;
-    
+    int w=osd->OSD_width_regs[0]*8;
+
     addr >>= 2;
-    i=addr%SCREEN_WIDTH;
-    j=addr/SCREEN_WIDTH;
+    i=addr%w;
+    j=addr/w;
     XSetForeground(display, gc, getColor(val));
     XDrawPoint(display, window2, gc, i, j);
 #endif
@@ -291,24 +306,33 @@ void HW_lcd::updte_lcd(uint32_t base_addr,int type)
     int b=0;
     char data[4];
     uint32_t color;
+
+    int bz=(osd->OSD_config_regs[2] & 0xc00)==0?1:0;
+    int bw=osd->OSD_width_regs[2]*32;
+    int bh=osd->OSD_info_regs[2].height;
+    int vw=osd->OSD_width_regs[0]*8;
+    int vh=osd->OSD_info_regs[0].height;
+
+    bw >>= bz;
+
     lcd_update_cnt[type]++;
     if(type == LCD_BMAP)
     {
-        for(int j = 0 ; j < SCREEN_HEIGHT+1 ; j++)
-            for(int i = 0 ; i < SCREEN_WIDTH+1 ; i++)        
+        for(int j = 0 ; j < bh ; j++)
+            for(int i = 0 ; i < bw ; i++)
             {
-                color = colorTab[mem2->read(base_addr+(j*(SCREEN_WIDTH)+i)*((osd->OSD_config_regs[2] & 0xc00)==0?2:1),1)&0xFF];
+                color = colorTab[mem2->read(base_addr+(j*bw+i)*(bz+1),1)&0xFF];
                 XSetForeground(display, gc, color);
                 XDrawPoint(display, window1, gc, i, j);
             }
     }
-#ifdef HAS_VID0    
+#ifdef HAS_VID0
     else if(type == LCD_VID)
     {
-        for(int j = 0 ; j < SCREEN_HEIGHT+1 ; j++)
-            for(int i = 0 ; i < SCREEN_WIDTH+1 ; i++)        
+        for(int j = 0 ; j < vh ; j++)
+            for(int i = 0 ; i < vw ; i++)
             {
-                color = getColor(mem2->read(base_addr+(j*(SCREEN_WIDTH*4)+i*4),4));
+                color = getColor(mem2->read(base_addr+(j*(vw*4)+i*4),4));
                 XSetForeground(display, gc, color);
                 XDrawPoint(display, window2, gc, i, j);
             }
