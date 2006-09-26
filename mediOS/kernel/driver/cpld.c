@@ -37,6 +37,7 @@ void cpld_init(void)
     int version;
 
     cpld_doSelect();
+
     outw(cpld_portState[CPLD1],CPLD_PORT1);
     outw(cpld_portState[CPLD2],CPLD_PORT2);
     outw(cpld_portState[CPLD3],CPLD_PORT3);
@@ -67,6 +68,11 @@ void cpld_changeState(int cpld_port,int bit_num,int direction)
 int cpld_read(int cpld_port)
 {
     return inw(cpld_portArray[cpld_port]);
+}
+
+void cpld_write(int cpld_port,int value)
+{
+    outw(value,cpld_portArray[cpld_port]);
 }
 
 void cpld_select(int bit_num,int direction)

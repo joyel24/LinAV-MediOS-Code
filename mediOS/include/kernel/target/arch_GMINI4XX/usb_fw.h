@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/target/arch_GMINI4XX/usb_fw.h
 *
 *   MediOS project
@@ -19,10 +19,45 @@
 
 /** USB state **/
 
-#define USB_STATE                         0x30a24
-#define USB_enable()                      
-#define USB_disable()                     
 #define kusbIsConnected()                 (GIO_IS_SET(GIO_USB_CONNECTED))
+
+#define USB_enable(){                                      \
+                                                           \
+    ata_reset();                                           \
+                                                           \
+    mdelay(100);                                           \
+                                                           \
+    cpld_write(CPLD0,1);                                   \
+                                                           \
+    mdelay(10);                                            \
+                                                           \
+    CPLD_SET_PORT2(CPLD_FX2_SELECT);                       \
+    CPLD_CLEAR_PORT2(CPLD_FX2_WAKEUP);                     \
+    CPLD_SET_PORT2(CPLD_FX2_WAKEUP);                       \
+                                                           \
+    mdelay(10);                                            \
+                                                           \
+    CPLD_SET_PORT2(CPLD_FX2_PA6);                          \
+                                                           \
+}
+
+#define USB_disable(){                                     \
+                                                           \
+    CPLD_CLEAR_PORT2(CPLD_FX2_WAKEUP);                     \
+                                                           \
+    mdelay(10);                                            \
+                                                           \
+    CPLD_CLEAR_PORT2(CPLD_FX2_PA6);                        \
+                                                           \
+    mdelay(100);                                           \
+                                                           \
+    CPLD_CLEAR_PORT2(CPLD_FX2_SELECT);                     \
+                                                           \
+    cpld_write(CPLD0,3);                                   \
+                                                           \
+}
+
+/* no firewire on Gmini400 */
 #define kFWIsConnected()                  0
 #define FW_enable()                       
 #define FW_disable()                      

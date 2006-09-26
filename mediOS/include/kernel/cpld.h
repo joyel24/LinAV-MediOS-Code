@@ -30,12 +30,13 @@
 #define CPLD_SET_PORT3(bit_num)     cpld_changeState(CPLD3,bit_num,1)
 #define CPLD_CLEAR_PORT3(bit_num)   cpld_changeState(CPLD3,bit_num,0)
 
-extern void cpld_changeState   (int cpld_port,int bit_num,int direction);
-extern void cpld_select      (int bit_num,int direction);
-extern int  cpld_read        (int cpld_port);
-extern void cpld_doSelect(void);
-extern void cpld_init(void);
-extern int cpld_getVersion(void);
+void cpld_changeState   (int cpld_port,int bit_num,int direction);
+void cpld_select      (int bit_num,int direction);
+int  cpld_read        (int cpld_port);
+void cpld_write       (int cpld_port,int value);
+void cpld_doSelect(void);
+void cpld_init(void);
+int cpld_getVersion(void);
 int arch_cpld_getVersion(void);
 
 #endif
