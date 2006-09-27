@@ -1,5 +1,5 @@
 /*
-*   include/kernel/target/arch_GMINI4XX/cpld.h
+*   include/kernel/target/arch_AV4XX/cpld.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -22,8 +22,10 @@
 
 #define CPLD_PORT0_INIT        0xf
 #define CPLD_PORT1_INIT        0x7
-#define CPLD_PORT2_INIT        0x0
+#define CPLD_PORT2_INIT        0x2
 #define CPLD_PORT3_INIT        0xf /* or 0xc, whereas 0x4 and 0x7 changes the frequency of the aic */
+
+#define CPLD_PORT4_INIT        0x0
 
 /* PORT 0 */
 
@@ -34,6 +36,12 @@
 #define CPLD_LCD_POWER         0x2
 
 /* PORT 2*/
+
+#define CPLD_FX2_SELECT        0x0
+#define CPLD_FX2_RESET         0x1
+#define CPLD_FX2_WAKEUP        0x2
+#define CPLD_FX2_PA6           0x3
+
 
 /* PORT 3*/
 

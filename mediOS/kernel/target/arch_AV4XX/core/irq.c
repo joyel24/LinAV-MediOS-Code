@@ -1,5 +1,5 @@
 /*
-*   kernel/target/arch_G4XX/irq.c
+*   kernel/target/arch_AV4XX/irq.c
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)

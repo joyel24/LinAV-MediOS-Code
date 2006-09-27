@@ -1,5 +1,5 @@
 /*
-*   kernel/target/arch_GMINI4XX/buttons.c
+*   kernel/target/arch_AV4XX/buttons.c
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)

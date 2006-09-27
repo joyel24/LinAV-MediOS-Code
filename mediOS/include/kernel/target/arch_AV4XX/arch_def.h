@@ -1,5 +1,5 @@
 /*
- * include/kernel/target/gmini4xx_def.h
+ * include/kernel/AV4XX/arch_def.h
  *
  * mediOS project
  * Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -7,8 +7,8 @@
  * This file contains the hardware definitions of the AV3XX series machines
  */
 
-#ifndef __GMINI4XX_DEF_H
-#define __GMINI4XX_DEF_H
+#ifndef __AV4XX_DEF_H
+#define __AV4XX_DEF_H
 
 #include <sys_def/arch.h>
 
@@ -112,7 +112,7 @@
 #define CPLD_PORT1                        (CPLD_BASE+0x02)
 #define CPLD_PORT2                        (CPLD_BASE+0x04)
 #define CPLD_PORT3                        (CPLD_BASE+0x06)
-
+#define CPLD_PORT4                        (CPLD_BASE+0x08)
 /* video */
 
 #define VIDEO_BASE                        0x30800

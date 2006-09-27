@@ -1,5 +1,5 @@
 /*
-*   include/kernel/target/arch_AV3XX/buttons.h
+*   include/kernel/target/arch_AV4XX/buttons.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)

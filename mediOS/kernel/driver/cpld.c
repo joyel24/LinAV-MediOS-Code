@@ -17,19 +17,21 @@
 
 #define T_OUT_CPLD_SELECT 10000
 
-int cpld_portState[4]=
+int cpld_portState[5]=
 {
     CPLD_PORT0_INIT,
     CPLD_PORT1_INIT,
     CPLD_PORT2_INIT,
     CPLD_PORT3_INIT,
+    CPLD_PORT4_INIT,
 };
 
-int cpld_portArray[4] = {
+int cpld_portArray[5] = {
     CPLD_PORT0,
     CPLD_PORT1,
     CPLD_PORT2,
-    CPLD_PORT3
+    CPLD_PORT3,
+    CPLD_PORT4
 };
 
 void cpld_init(void)

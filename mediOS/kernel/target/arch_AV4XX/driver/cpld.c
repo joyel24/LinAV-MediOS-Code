@@ -1,5 +1,5 @@
 /*
-*   kernel/target/arch_GMINI4XX/cpld.c
+*   kernel/target/arch_AV4XX/cpld.c
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -17,6 +17,7 @@
 #include <kernel/cpld.h>
 
 int arch_cpld_getVersion(void){
+	printk("Real ver=%x\n",inw(0x02500008));
     return (cpld_read(CPLD0) & 0x000F);
 }
 

@@ -20,6 +20,7 @@
 #define CPLD1                  0x1
 #define CPLD2                  0x2
 #define CPLD3                  0x3
+#define CPLD4                  0x4
 
 #define CPLD_SET_PORT0(bit_num)     cpld_select(bit_num,1)
 #define CPLD_CLEAR_PORT0(bit_num)   cpld_select(bit_num,0)

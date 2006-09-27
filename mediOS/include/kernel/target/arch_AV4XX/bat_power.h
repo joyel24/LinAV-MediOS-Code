@@ -1,5 +1,5 @@
 /* 
-*   include/kernel/target/arch_GMINI4XX.bat_power.h
+*   include/kernel/target/arch_AV4XX/bat_power.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)

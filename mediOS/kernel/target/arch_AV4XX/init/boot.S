@@ -1,5 +1,5 @@
 /*
-*   kernel/target/arch/boot.S
+*   kernel/target/arch_AV4XX/boot.S
 *   Av400 boot
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -15,20 +15,9 @@ entry_code:
     mov r1,#3
     add r5,r5, r1, lsl #16
     add r5, r5, r1, lsl #8
-    @ r5 = 0x30300
     
     mov r1,#0x36
     strh r1,[r5,#2]
-
-    mov r0,#'h'
-    mov r1,#' '
-    strb r0,[r5]
-    strb r1,[r5]
-    strb r0,[r5]
-    strb r1,[r5]
-    strb r0,[r5]
-    
-  
     
     /*
     * cache init

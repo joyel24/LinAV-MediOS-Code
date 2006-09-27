@@ -1,5 +1,5 @@
 /*
-*   include/kernel/target/arch_GMINI4XX/lcd.h
+*   include/kernel/target/arch_AV4XX/lcd.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -23,11 +23,11 @@
 #define SCREEN_ORIGIN_X                   20
 #define SCREEN_ORIGIN_Y                   19
 
-#define SCREEN_LCD_SHIFT_X                121
+#define SCREEN_LCD_SHIFT_X                118
 #define SCREEN_LCD_SHIFT_Y                0
-#define SCREEN_PAL_SHIFT_X                121
+#define SCREEN_PAL_SHIFT_X                118
 #define SCREEN_PAL_SHIFT_Y                0
-#define SCREEN_NTSC_SHIFT_X               121
+#define SCREEN_NTSC_SHIFT_X               118
 #define SCREEN_NTSC_SHIFT_Y               0
 
 #define LCD_WIDTH SCREEN_REAL_WIDTH

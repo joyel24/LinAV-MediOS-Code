@@ -1,5 +1,5 @@
 /*
-*   include/kernel/target/arch_G4XX/irqs.h
+*   include/kernel/target/arch_AV4XX/irqs.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)

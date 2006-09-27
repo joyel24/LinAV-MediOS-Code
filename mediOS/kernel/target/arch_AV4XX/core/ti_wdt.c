@@ -1,5 +1,5 @@
 /*
-*   kernel/target/arch_GMINI4XX/ti_wdt.c
+*   kernel/target/arch_AV4XX/ti_wdt.c
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)

@@ -15,8 +15,12 @@ else
 if [ "$arch" == "g402" ]; then
 ext="avi"
 else
+if [ "$arch" == "av4xx" ]; then
+ext="avi"
+else
 echo "Error unsupported arch: $arch"
 exit
+fi
 fi
 fi
 fi

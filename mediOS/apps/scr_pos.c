@@ -13,7 +13,7 @@ int main_x,main_y,bmap_x,bmap_y;
 void redraw(void)
 {
     char txt[100];
-    gfx_fillRect(COLOR_WHITE,1,30,350,70);
+    gfx_fillRect(COLOR_WHITE,1,30,320,70);
     sprintf(txt, "main: (%x,%x)",main_x,main_y);
     gfx_putS(COLOR_BLACK, COLOR_WHITE, 5,30, txt);
     sprintf(txt, "bmap: (%x,%x)",bmap_x,bmap_y);
@@ -34,11 +34,14 @@ void app_main(int argc,char * * argv)
 
     int mode=0;
 
-    main_x=main_y=bmap_x=bmap_y=0;
+    main_x=20;
+    main_y=19;
+    bmap_x=121;
+    bmap_y=0;
 
 
     gfx_clearScreen(COLOR_WHITE);
-    gfx_drawRect(COLOR_BLUE,0,0,352,240);
+    gfx_drawRect(COLOR_BLUE,0,0,320,240);
 
     gfx_putS(COLOR_BLACK, COLOR_WHITE, 5,5, "Press OFF to exit");
     redraw();
@@ -57,12 +60,12 @@ void app_main(int argc,char * * argv)
                 mode=((mode==1)?0:1);
                 if(mode)
                 {
-                    gfx_fillRect(COLOR_WHITE,1,15,350,15);
+                    gfx_fillRect(COLOR_WHITE,1,15,310,15);
                     gfx_putS(COLOR_BLACK, COLOR_WHITE, 5,15, "Mod Bmap position");
                 }
                 else
                 {
-                    gfx_fillRect(COLOR_WHITE,1,15,350,15);
+                    gfx_fillRect(COLOR_WHITE,1,15,310,15);
                     gfx_putS(COLOR_BLACK, COLOR_WHITE, 5,15, "Mod Main config");
                 }
                 break;
@@ -102,11 +105,11 @@ void app_main(int argc,char * * argv)
             case BTN_RIGHT:
                 if(mode)
                 {
-                    if(bmap_x<352) bmap_x++;
+                    if(bmap_x<320) bmap_x++;
                 }
                 else
                 {
-                    if(main_y<352) main_x++;
+                    if(main_y<320) main_x++;
                 }
                 redraw();
                 break;

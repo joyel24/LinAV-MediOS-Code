@@ -1,5 +1,5 @@
 /*
-* kernel/target/gfx/gui/main-menu.c
+*   kernel/target/arch_AV4XX/mgui.cfg.c
 *
 * MediOS project
 * Copyright (c) 2005 by Christophe THOMAS
@@ -23,15 +23,15 @@ struct statusLine_data lineData = {
     x:0,y:0,
     w:SCREEN_REAL_WIDTH,
     bg_color:COLOR_LIGHT_BLUE,
-    bat_x:159,
+    bat_x:257,
     bat_y:2,
-    clk_x:187,
+    clk_x:287,
     clk_y:3,
     clk_color:COLOR_BLACK,
     has_date:0,
-    logo_x:0,
+    logo_x:3,
     logo_y:2,
-    ver_x:52,
+    ver_x:55,
     ver_y:5,
     ver_color:COLOR_DARK_BLUE,
     module_x:88,
