@@ -9,7 +9,8 @@
 .global entry_code
 entry_code:
     /* av4 init */
-
+    mov r7,pc
+    sub r7,r7,#8
     /* set UART0 to 115200 bauds */
     mov r5,#0
     mov r1,#3
@@ -62,7 +63,7 @@ entry_code:
     add r4,r4,r1,lsl #8
     @ r4 = 0x30500
     
-    mov r0, #0xef0000
+    mov r0, r7
     mov r1, #0x900000
 
     /* don't copy the .bss part */

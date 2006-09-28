@@ -112,7 +112,7 @@
 #define CPLD_PORT1                        (CPLD_BASE+0x02)
 #define CPLD_PORT2                        (CPLD_BASE+0x04)
 #define CPLD_PORT3                        (CPLD_BASE+0x06)
-
+#define CPLD_PORT4                        (CPLD_BASE+0x000)
 /* video */
 
 #define VIDEO_BASE                        0x30800

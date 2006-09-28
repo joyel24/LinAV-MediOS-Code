@@ -19,7 +19,7 @@
 #define CPLD_PORT1_INIT        0x0
 #define CPLD_PORT2_INIT        0x4
 #define CPLD_PORT3_INIT        0x8
-
+#define CPLD_PORT4_INIT        0x0
 /* PORT 0 */
 /*** HD / CF */
 #define CPLD_HD_CF             0x0
