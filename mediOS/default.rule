@@ -97,10 +97,11 @@ ifeq ("$(TARGET_DEVICE)","GMINI402")
 else
 ifeq ("$(TARGET_DEVICE)","AV4XX")
 %.avi: %.bin
-	@make -C tools/bin2exploit/ -s av400avi.tpl
+#	@make -C tools/bin2exploit/ -s av400avi.tpl
 	@echo "[$@]"
-	@cp tools/bin2exploit/av400avi.tpl $@
-	@dd if=$< of=$@ bs=2882560 seek=1 conv=notrunc 2> /dev/null
+#	@cp tools/bin2exploit/av400avi.tpl $@
+#	@dd if=$< of=$@ bs=2882560 seek=1 conv=notrunc 2> /dev/null
+	@cat tools/bin2exploit/av400avi2.hdr $< > $@
 else
 %.avi:
 	@echo "END"
