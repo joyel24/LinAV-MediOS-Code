@@ -59,10 +59,10 @@ __IRAM_DATA struct scan scan;
 #define WV (scan.wv)
 
 static byte patpix[4096][8][8];
-#ifdef GMINI4XX
+#if defined(GMINI4XX) || defined(GMINI402)
 __IRAM_DATA static byte patdirty[1024];
 #endif
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV4XX)
 static byte patdirty[1024];
 extern int ZoomX;
 #endif
@@ -644,11 +644,11 @@ __IRAM_CODE void lcd_refreshline(void)
 
 	if (fb.dirty) memset(fb.ptr, 0, fb.pitch * fb.h);
 	fb.dirty = 0;
- #ifdef AV3XX
+ #if defined(AV3XX) || defined(AV4XX)
   if(ZoomX) refresh_1_2x(vdest, BUF, PAL1, 160);
   else refresh_1(vdest, BUF, PAL1, 160);
  #endif
- #ifdef GMINI4XX
+ #if defined(GMINI4XX) || defined(GMINI402)
   refresh_1(vdest, BUF, PAL1, 160);
  #endif
 	vdest += fb.pitch;

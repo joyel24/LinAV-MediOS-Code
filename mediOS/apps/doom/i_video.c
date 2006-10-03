@@ -15,6 +15,11 @@
 // for more details.
 //
 // $Log$
+// Revision 1.11  2006/08/24 20:49:09  sfxgligli
+// - Gmini402: move kernel to sdram start, halved fiq rate, use 27Mhz clock for timers & uart
+// - Doom: preliminary Gmini402 support
+// - txt_viewer improvements
+//
 // Revision 1.10  2006/05/28 17:08:45  sfxgligli
 // aoDoom update (adding browser, PWADs support, optimisations,...)
 //
@@ -69,7 +74,7 @@ rcsid[] = "$Id$";
 
 #include "doomdef.h"
 
-#if defined(GMINI4XX) ||defined(GMINI402)
+#if defined(GMINI4XX) || defined(GMINI402)
 char button_to_key[2][NB_BUTTONS]=
   // ingame
  {{KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
@@ -96,7 +101,21 @@ char button_to_key[2][NB_BUTTONS]=
   KEY_ESCAPE,KEY_F11,
   KEY_ENTER,KEY_ESCAPE}};
 #endif
-#if defined(GMINI4XX) ||defined(GMINI402)
+#ifdef AV4XX
+  char button_to_key[2][NB_BUTTONS]=
+  // ingame
+ {{KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
+  KEY_RCTRL,KEY_RALT,KEY_RSHIFT,
+  ' ',KEY_F11,
+  KEY_F11,KEY_ESCAPE},
+  // menus
+  {KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
+  ' ','y',' ',
+  KEY_ESCAPE,KEY_F11,
+  KEY_ENTER,KEY_ESCAPE}};
+#endif
+
+#if defined(GMINI4XX) || defined(GMINI402)
 // 320px -> 220px clever resize of the HUD (thx to WireDDD for the idea)
 int hud_resize_table[REALSCREENWIDTH]={
 0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,
@@ -118,7 +137,7 @@ static char * offset2;
 int x_resize_lookup[REALSCREENWIDTH];
 char * y_resize_lookup[REALSCREENHEIGHT];
 
-#if defined(GMINI4XX) ||defined(GMINI402)
+#if defined(GMINI4XX) || defined(GMINI402)
 __IRAM_DATA char * hud_resize_lookup[REALSCREENWIDTH];
 
 void InitResizeLookups(){
@@ -268,7 +287,7 @@ void I_FinishUpdate (void)
   }
 
 
-#if defined(GMINI4XX) ||defined(GMINI402)
+#if defined(GMINI4XX) || defined(GMINI402)
   if(menuactive || (gamestate!=GS_LEVEL)){ // not playing?
     // full screen resize
     DoFullScreenResize();
@@ -283,7 +302,7 @@ void I_FinishUpdate (void)
     }
   }
 #endif
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV4XX)
     memcpy(offset2,offset1,SCREENWIDTH*REALSCREENHEIGHT);
 #endif
 }
@@ -332,7 +351,7 @@ void I_InitGraphics(void)
 
   gfx_planeSetSize(BMAP1,SCREENWIDTH,SCREENHEIGHT,8);
 
-#if defined(GMINI4XX) ||defined(GMINI402)
+#if defined(GMINI4XX) || defined(GMINI402)
   InitResizeLookups();
 #endif
 }

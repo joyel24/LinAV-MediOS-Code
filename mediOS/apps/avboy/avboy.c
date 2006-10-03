@@ -47,14 +47,14 @@
 #include "sound.h"
 #include "pcm.h"
 
-#ifdef GMINI4XX
+#if defined(GMINI4XX) || defined(GMINI402)
 #define LCD_WIDTH 220
 #define LCD_HEIGHT 176
 #define X_OFFSET 0x09
 #define Y_OFFSET 0x09
 #endif
 
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV4XX)
 #define LCD_WIDTH 320
 #define LCD_HEIGHT 240
 #define X_OFFSET 0x14
@@ -68,7 +68,7 @@
 
 #define OSD_BITMAP1_CONFIG  OSD_COMPONENT_ENABLE | OSD_BITMAP_8BIT | OSD_BITMAP_MERGEBACK | OSD_BITMAP_A7 | OSD_BITMAP_ZX1 | OSD_BITMAP_RAMCLUT
 
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV4XX)
 int bt_UP = BTMASK_UP;
 int bt_DOWN = BTMASK_DOWN;
 int bt_LEFT = BTMASK_LEFT;
@@ -235,7 +235,7 @@ int doevents(void)
 
     if (pressed)
     {
-#ifdef GMINI4XX
+#if defined(GMINI4XX) || defined(GMINI402)
         if(pressed & BTMASK_UP)     pad_press(PAD_UP);
         if(pressed & BTMASK_DOWN)   pad_press(PAD_DOWN);
         if(pressed & BTMASK_LEFT)   pad_press(PAD_LEFT);
@@ -249,7 +249,7 @@ int doevents(void)
         if(pressed & BTMASK_F3)  pad_press(PAD_SELECT);
         if(pressed & BTMASK_F1) {if (do_user_menu() == USER_MENU_QUIT)
 #endif
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV4XX)
         if(pressed & bt_UP)     pad_press(PAD_UP);
         if(pressed & bt_DOWN)   pad_press(PAD_DOWN);
         if(pressed & bt_LEFT)   pad_press(PAD_LEFT);
@@ -265,7 +265,7 @@ int doevents(void)
 #endif
         {
             cleanup();
-#ifdef GMINI4XX
+#ifdef STDALONE
             reload_firmware();
 #endif
 #ifdef AV3XX
@@ -278,7 +278,7 @@ int doevents(void)
     if (released)
     {
 
-#ifdef GMINI4XX
+#if defined(GMINI4XX) || defined(GMINI402)
         if(released & BTMASK_UP)     pad_release(PAD_UP);
         if(released & BTMASK_DOWN)   pad_release(PAD_DOWN);
         if(released & BTMASK_LEFT)   pad_release(PAD_LEFT);
@@ -289,7 +289,7 @@ int doevents(void)
         if(released & BTMASK_BTN3)  pad_release(PAD_SELECT);
 #endif
 
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV4XX)
         if(released & bt_UP)     pad_release(PAD_UP);
         if(released & bt_DOWN)   pad_release(PAD_DOWN);
         if(released & bt_LEFT)   pad_release(PAD_LEFT);

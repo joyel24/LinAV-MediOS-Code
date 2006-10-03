@@ -39,14 +39,14 @@
 
 #define USER_MENU_QUIT -2
 
-#ifdef GMINI4XX
+#if defined(GMINI4XX) || defined(GMINI402)
 #define LCD_WIDTH 220
 #define LCD_HEIGHT 176
 #define X_OFFSET 0
 #define Y_OFFSET 0
 #endif
 
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV4XX)
 #define LCD_WIDTH 320
 #define LCD_HEIGHT 240
 #define X_OFFSET 0x14
@@ -65,7 +65,7 @@ int MENU_X=10;
 
 //int SDRFreq = 0;
 
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV4XX)
 extern int bt_UP;
 extern int bt_DOWN;
 extern int bt_LEFT;
@@ -156,7 +156,7 @@ static const char *opt_menu[] = {
 
 #define OPT2_MENU_TITLE "More Options"
 typedef enum {
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV4XX)
   OM2_ITEM_ZMX,
   OM2_ITEM_ROT,
 #endif
@@ -451,7 +451,7 @@ static void do_opt2_menu(void) {
   num_items = sizeof(opt2_menu) / sizeof(char*);
   mi = 0;
 //  snprintf((char *)opt2_menu[0], 17, "Overclock SDR  %1d", SDRFreq);
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV4XX)
   snprintf((char *)opt2_menu[1], 17, "Rotate Scr.    %1d", RotScreen);
   snprintf((char *)opt2_menu[0], 17, "Zoom X       %s", (ZoomX ? " ON" : "OFF"));
 #endif
@@ -478,7 +478,7 @@ static void do_opt2_menu(void) {
         snprintf((char *)opt2_menu[0], 17, "Overclock SDR  %1d", SDRFreq);
         (*(volatile unsigned short *)(0x30884))=0x8031;
         break;*/
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV4XX)
       case OM2_ITEM_ZMX:
         if(!RotScreen) {
            ZoomX=!ZoomX;

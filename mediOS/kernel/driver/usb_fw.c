@@ -14,6 +14,7 @@
 #include <kernel/evt.h>
 #include <kernel/timer.h>
 #include <kernel/ata.h>
+#include <kernel/delay.h>
 
 #include <sys_def/stddef.h>
 

@@ -41,12 +41,12 @@
 
 #define ROOTFOLDER "/doom/"
 
-#if defined(GMINI4XX) ||defined(GMINI402)
+#if defined(GMINI4XX) || defined(GMINI402)
 #define REALSCREENWIDTH 224
 #define REALSCREENHEIGHT 176
 #endif
 
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV4XX)
 #define REALSCREENWIDTH 320
 #define REALSCREENHEIGHT 200
 #endif
