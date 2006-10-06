@@ -22,8 +22,11 @@
 
 #define PIECE_DIM 30
 #define CURSORFRAME 2
-#define X_OFFSET 80
-#define Y_OFFSET 50
+
+int arch;
+int x_offset,y_offset;
+int screen_height;
+int screen_width;
 
 /* the cursor coordinates */
 int x=0,y=0;
@@ -599,7 +602,11 @@ void showTurns()
 
     gfx_fontSet(STD8X13);
     sprintf(tmp,"Turns: %d", turns);
-    gfx_putS(COLOR_BLACK, COLOR_GREEN, 105,195, tmp);
+    if(y_offset<30){
+        gfx_putS(COLOR_BLACK, COLOR_GREEN, (screen_width-9*8)/2,screen_height-13-9, tmp);
+    }else{
+        gfx_putS(COLOR_BLACK, COLOR_GREEN, (screen_width-9*8)/2,screen_height-(y_offset+13)/2, tmp);
+    }
     gfx_fontSet(STD6X9);
 }
 
@@ -745,7 +752,7 @@ void init(void){
     srand(tmr_getTick());
 
     gfx_fontSet(STD8X13);
-    gfx_putS(COLOR_BLACK, COLOR_WHITE, 50,80, "Generating matrix...");
+    gfx_putS(COLOR_BLACK, COLOR_WHITE, (screen_width-20*8)/2, (screen_height-13)/2, "Generating matrix...");
     gfx_fontSet(STD6X9);
 
     x = 0;
@@ -757,12 +764,11 @@ void init(void){
     gfx_clearScreen(COLOR_GREEN);
 
     gfx_fontSet(STD8X13);
-    gfx_putS(COLOR_WHITE, COLOR_GREEN, 50,5, "Sliding Puzzle by Schoki");
+    gfx_putS(COLOR_WHITE, COLOR_GREEN, (screen_width-24*8)/2,5, "Sliding Puzzle by Schoki");
     gfx_fontSet(STD6X9);
 
 
-    gfx_putS(COLOR_BLACK, COLOR_GREEN, 271,13, "New game");
-    gfx_putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
+    gfx_putS(COLOR_BLACK, COLOR_GREEN, 1,screen_height-9, "[ON] New game, [OFF] Quit");
 
     displayField();
 }
@@ -790,9 +796,9 @@ void eventHandlerLoop(void)
 			case BTN_OFF:
 				stop=1;
 				break;
-	
-					/* move cursor left */
-			case BTN_LEFT:
+
+					/* move cursor right */
+			case BTN_RIGHT:
 				if(x-1 >= 0)
 				{
 					x--;
@@ -805,9 +811,9 @@ void eventHandlerLoop(void)
 					   endOfGame();
 				}
 				break;
-	
-				/* move cursor right */
-				case BTN_RIGHT:
+
+				/* move cursor left */
+				case BTN_LEFT:
 					if(x+1 < width)
 					{
 						x++;
@@ -820,9 +826,9 @@ void eventHandlerLoop(void)
 						   endOfGame();
 					}
 					break;
-	
-					/* move cursor down */
-			case BTN_DOWN:
+
+					/* move cursor up */
+			case BTN_UP:
 				if(y+1 < height)
 				{
 					y++;
@@ -835,9 +841,9 @@ void eventHandlerLoop(void)
 					   endOfGame();
 				}
 				break;
-	
-					/* move cursor up */
-			case BTN_UP:
+
+					/* move cursor down */
+			case BTN_DOWN:
 				if(y-1 >= 0)
 				{
 					y--;
@@ -850,21 +856,11 @@ void eventHandlerLoop(void)
 					   endOfGame();
 				}
 				break;
-	
-			case BTN_F2:
-				break;
-	
-					/* toggle flag under cursor */
-			case BTN_F1:	
-				break;
-	
+
 			case BTN_ON: // new game
 				gfx_clearScreen(COLOR_GREEN);
 				init();
 				displayField();
-				break;
-
-			case BTN_F3: // settings
 				break;
 		}
     }
@@ -881,49 +877,59 @@ void displayField()
 			for(j=0;j<width;j++)
 			{
                 if(field[i][j] == 1)
-                    gfx_drawBitmap (&pair1B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair1B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 2)
-                    gfx_drawBitmap (&pair2B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair2B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 3)
-                    gfx_drawBitmap (&pair3B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair3B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 4)
-                    gfx_drawBitmap (&pair4B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair4B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 5)
-                    gfx_drawBitmap (&pair5B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair5B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 6)
-                    gfx_drawBitmap (&pair6B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair6B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 7)
-                    gfx_drawBitmap (&pair7B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair7B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 8)
-                    gfx_drawBitmap (&pair8B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair8B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 9)
-                    gfx_drawBitmap (&pair9B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair9B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 10)
-                    gfx_drawBitmap (&pair10B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair10B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 11)
-                    gfx_drawBitmap (&pair11B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair11B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 12)
-                    gfx_drawBitmap (&pair12B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair12B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 13)
-                    gfx_drawBitmap (&pair13B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair13B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 14)
-                    gfx_drawBitmap (&pair14B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair14B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
                 else if(field[i][j] == 15)
-                    gfx_drawBitmap (&pair15B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair15B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
 				else
-                    gfx_drawBitmap (&pair0B, X_OFFSET+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),Y_OFFSET+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
+                    gfx_drawBitmap (&pair0B, x_offset+CURSORFRAME+j*(PIECE_DIM+CURSORFRAME),y_offset+CURSORFRAME+i*(PIECE_DIM+CURSORFRAME));
 			}
 	}
+}
+
+void arch_init(){
+    arch=getArch();
+	getResolution(&screen_width,&screen_height);
+
+    x_offset=(screen_width-PIECE_DIM*4-4)/2;
+    y_offset=(screen_height-PIECE_DIM*4-4)/2;
 }
 
 /* plugin entry point */
 void app_main(int argc,char * * argv)
 {
     /* plugin init */
-    
+
     gfx_clearScreen(COLOR_GREEN);
 
     gfx_fontSet(STD6X9);
+
+    arch_init();
 
     init();
 

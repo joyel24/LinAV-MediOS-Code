@@ -29,11 +29,12 @@
 #define DIR_DOWN  2
 #define DIR_LEFT  3
 
-#define MAX_X 80
-#define MAX_Y 56
+#define STATUS_Y (screenHeight-fontHeight)
 
+int screenWidth,screenHeight,fontHeight,arch;
+int maxX,maxY;
 
-static int board[MAX_X][MAX_Y], snakelength;
+static int board[100][100], snakelength;
 static unsigned int score=0;
 static int dir,frames,apple,level=1;
 int mode=1;
@@ -61,7 +62,7 @@ void collision(int x, int y)
             collision_done=1;
             break;
     }
-    if(x==MAX_X || x<0 || y==MAX_Y || y<0)
+    if(x==maxX || x<0 || y==maxY || y<0)
     {
         collision_done=1;
     }
@@ -92,9 +93,9 @@ void move_head(int x, int y)
 void frame(void)
 {
     int x,y,head=0;
-    for (x=0; x<MAX_X; x++)
+    for (x=0; x<maxX; x++)
     {
-        for (y=0; y<MAX_Y; y++)
+        for (y=0; y<maxY; y++)
         {
             switch(board[x][y])
             {
@@ -130,9 +131,9 @@ void redraw(void)
 
     gfx_clearScreen(COLOR_BLACK);
 
-    for(x=0; x<MAX_X; x++)
+    for(x=0; x<maxX; x++)
     {
-        for(y=0; y<MAX_Y; y++)
+        for(y=0; y<maxY; y++)
         {
             switch (board[x][y])
             {
@@ -193,8 +194,8 @@ void game(void)
             do
             {
                 srand(tmr_getTick());
-                x=rand() % MAX_X;
-                y=rand() % MAX_Y;
+                x=rand() % maxX;
+                y=rand() % maxY;
             } while (board[x][y]);
             apple=1;
             board[x][y]=-1;
@@ -207,12 +208,9 @@ void game(void)
     }
 
     sprintf(score_s,"Current score: %04d",score);
-    gfx_putS(COLOR_WHITE, COLOR_BLACK, 2, 226, score_s);
+    gfx_putS(COLOR_WHITE, COLOR_BLACK, 2, STATUS_Y, score_s);
 
-    /* no sleep() */
-    while(wait < delay)
-        wait++;
-    wait = 0;
+    mdelay(delay);
 }
 
 int game_init(void)
@@ -224,8 +222,8 @@ int game_init(void)
     int evt;
     /*char phscore[20];*/
 
-    for (x=0; x<MAX_X; x++)
-        for (y=0; y<MAX_Y; y++)
+    for (x=0; x<maxX; x++)
+        for (y=0; y<maxY; y++)
             board[x][y]=0;
 
     apple=0;
@@ -242,22 +240,22 @@ int game_init(void)
     gfx_putS(COLOR_WHITE, COLOR_BLACK, 2, 115, "Press [OFF] to quit plugin");
     gfx_putS(COLOR_WHITE, COLOR_BLACK, 2, 130, "Press [ON] to start/pause");
     sprintf(score_s,"Score: %04d",score);
-    gfx_putS(COLOR_WHITE, COLOR_BLACK, 2, 226, score_s);
+    gfx_putS(COLOR_WHITE, COLOR_BLACK, 2, STATUS_Y, score_s);
     
     while(1)
     {
         
         if(redraw)
-        {    
+        {
             sprintf(plevel,"Current Level: %02d",level);    
             gfx_putS(COLOR_WHITE, COLOR_BLACK, 2, 10, plevel);
             redraw=0;
         }
         
-        evt=evt_getStatus(evt_handler);        
+        evt=evt_getStatus(evt_handler);
         if(evt==NO_EVENT)
             continue;
-        
+
         switch(evt)
         {
             case BTN_OFF:
@@ -265,8 +263,8 @@ int game_init(void)
                     
             case BTN_ON:
                     gfx_clearScreen(COLOR_BLACK);
-                    gfx_drawLine(COLOR_WHITE, 0, 224, 320, 224);
-                    delay = (11-level)*2000;
+                    gfx_drawLine(COLOR_WHITE, 0, STATUS_Y-1, screenWidth, STATUS_Y-1);
+                    delay = (11-level)*15;
                     score=0;
                     return 1;
             case BTN_UP:                    
@@ -286,7 +284,7 @@ int game_init(void)
                     }
                     else
                         level=10;
-                    break;    
+                    break;
             case BTN_RIGHT:
                     if(level<10)
                     {
@@ -336,7 +334,7 @@ void eventHandlerLoop(void)
                         break;
                     }
                     gfx_clearScreen(COLOR_BLACK);
-                    gfx_drawLine(COLOR_WHITE, 0, 224, 320, 224);
+                    gfx_drawLine(COLOR_WHITE, 0, STATUS_Y-1, screenWidth, STATUS_Y-1);
                     break;
                 case BTN_UP:
                     if (dir!=2) dir=0;
@@ -365,10 +363,28 @@ void eventHandlerLoop(void)
 
 
 
+void arch_init(){
+    arch=getArch();
+    getResolution(&screenWidth,&screenHeight);
+
+    if(screenWidth>=320){
+        gfx_fontSet(STD7X13);
+        fontHeight=13;
+    }else{
+        gfx_fontSet(STD6X9);
+        fontHeight=9;
+    }
+
+    maxX=screenWidth/4;
+    maxY=(STATUS_Y-1)/4;
+}
+
 void app_main(int argc,char * * argv)
 {
     gfx_clearScreen(COLOR_BLACK); /* clear the LCD to black */
-    gfx_fontSet(STD7X13);
+
+    arch_init();
+
     evt_handler=evt_getHandler(BTN_CLASS);
     if(game_init())
         eventHandlerLoop();

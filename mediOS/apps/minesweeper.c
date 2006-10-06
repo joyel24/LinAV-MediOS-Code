@@ -199,10 +199,12 @@ typedef struct tile_s {
 /* could be variable if malloc worked in the API :) */
 int height;
 int width ;
+int arch;
 int screen_height;
 int screen_width;
+bool right_menu;
 
-#define MINE_FIELD(I,J) minefield[(I)*height+(J)]
+#define MINE_FIELD(I,J) minefield[(I)*width+(J)]
 
 int settingParam = 0;
 
@@ -371,11 +373,15 @@ void minesweeper_init(void){
 
     srand(tmr_getTick());
 
-    gfx_putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
-    gfx_putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
-    gfx_putS(COLOR_BLACK, COLOR_GREEN, 271,152, "Discover");
-    gfx_putS(COLOR_BLACK, COLOR_GREEN, 271,180, "Set Flag");
-    gfx_putS(COLOR_BLACK, COLOR_GREEN, 271,210, "Settings");
+    if(right_menu){
+        gfx_putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
+        gfx_putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
+        gfx_putS(COLOR_BLACK, COLOR_GREEN, 271,152, "Discover");
+        gfx_putS(COLOR_BLACK, COLOR_GREEN, 271,180, "Set Flag");
+        gfx_putS(COLOR_BLACK, COLOR_GREEN, 271,210, "Settings");
+    }else{
+        gfx_putS(COLOR_BLACK, COLOR_GREEN, screen_width-13*6,screen_height-9, "[F3] Settings");
+    }
 
     for(i=0;i<height;i++){
         for(j=0;j<width;j++){
@@ -400,9 +406,13 @@ void printNumberOfMines(void)
             }
         }
 
-        gfx_fillRect(COLOR_GREEN, 265,79, 54, 15);
-        sprintf(tmp,"%d Mines", mine_num-tiles_left);
-        gfx_putS(COLOR_WHITE, COLOR_GREEN, 266,80, tmp);
+        sprintf(tmp,"%d Mines ", mine_num-tiles_left);
+        if(right_menu){
+            gfx_fillRect(COLOR_GREEN, 265,79, 54, 15);
+            gfx_putS(COLOR_WHITE, COLOR_GREEN, 266,80, tmp);
+        }else{
+            gfx_putS(COLOR_WHITE, COLOR_GREEN, 1,screen_height-9, tmp);
+        }
      }
 }
 
@@ -523,7 +533,11 @@ void eventHandlerLoop(void)
 						break;
 	
 						/* discover a tile (and it's neighbors if .neighbors == 0) */
+					case BTN_1:
 					case BTN_F1:
+                        // BTN_1=joypress on av3xx, bad button
+                        if(arch==AV3XX_ARCH && evt==BTN_1) break;
+
 						if(MINE_FIELD(y,x).flag) break;
 						/* we put the mines on the first "click" so that you don't */
 						/* lose on the first "click" */
@@ -534,10 +548,8 @@ void eventHandlerLoop(void)
 							GameMode = 1;
 							x=0;y=0;
 							gfx_clearScreen(COLOR_GREEN);
-							gfx_putS(COLOR_BLACK, COLOR_GREEN, 120, 100, "You lose!");
-							gfx_putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
-							gfx_putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
-#warning we had return 1 here
+							gfx_putS(COLOR_BLACK, COLOR_GREEN, (screen_width-9*6)/2,screen_height/2-5, "You lose!");
+							gfx_putS(COLOR_BLACK, COLOR_GREEN, 1,screen_height-9, "[ON] New game, [OFF] Quit");
 							break;
 						}
 						tiles_left = 0;
@@ -551,33 +563,32 @@ void eventHandlerLoop(void)
 							GameMode = 1;
 							x=0;y=0;
 							gfx_clearScreen(COLOR_GREEN);
-							gfx_putS(COLOR_BLACK, COLOR_GREEN, 120, 100, "You win!");
-							gfx_putS(COLOR_BLACK, COLOR_GREEN, 271,17, "New game");
-							gfx_putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
-#warning we had return 1 here
+							gfx_putS(COLOR_BLACK, COLOR_GREEN, (screen_width-9*6)/2,screen_height/2-5, "You win!");
+							gfx_putS(COLOR_BLACK, COLOR_GREEN, 1,screen_height-9, "[ON] New game, [OFF] Quit");
 							break;
 						}
-	
+
 						displayMineField();
 						setCursor(0);
 						break;
-	
+
 						/* toggle flag under cursor */
+					case BTN_2:
 					case BTN_F2:
 						MINE_FIELD(y,x).flag = (MINE_FIELD(y,x).flag + 1)%2;
 						displayMineField();
 						break;
-	
+
 					case BTN_ON: // new game
 						gfx_clearScreen(COLOR_GREEN);
 						minesweeper_init();
 						displayMineField();
 						setCursor(0);
 						break;
-	
+
 					case BTN_F3: // settings
 						gfx_clearScreen(COLOR_GREEN);
-						gfx_putS(COLOR_BLACK, COLOR_GREEN, 295,47, "Quit");
+						gfx_putS(COLOR_BLACK, COLOR_GREEN, 1,screen_height-9, "[OFF] Quit");
 						GameMode = 2;
 						init_settings_screen();
 						break;
@@ -653,7 +664,7 @@ void eventHandlerLoop(void)
 			   case BTN_RIGHT:
 				   if(settingParam == 0)
 					{
-					   if(width < (screen_width-50)/PIECE_DIM)
+					   if(width < (screen_width-((right_menu)?50:0))/PIECE_DIM)
 						{
 					  width++;
 					  RefreshSettings();
@@ -661,7 +672,7 @@ void eventHandlerLoop(void)
 					}
 					else if(settingParam == 1)
 					{
-					   if(height < (screen_height/PIECE_DIM))
+					   if(height < (screen_height-((right_menu)?0:8))/PIECE_DIM)
 						{
 					  height++;
 					  RefreshSettings();
@@ -750,6 +761,22 @@ void displayMineField()
    printNumberOfMines();
 }
 
+void arch_init(){
+    arch=getArch();
+	getResolution(&screen_width,&screen_height);
+	
+    if(screen_width>=320){
+        height = screen_height/PIECE_DIM;
+    	width = (screen_width-50)/PIECE_DIM;
+        right_menu=true;
+    }else{
+        height = (screen_height-8)/PIECE_DIM;
+    	width = screen_width/PIECE_DIM;
+        right_menu=false;
+    }
+
+}
+
 /* plugin entry point */
 void app_main(int argc,char * * argv)
 {
@@ -759,12 +786,10 @@ void app_main(int argc,char * * argv)
     /* use standard font */
     gfx_fontSet(STD6X9);
 
-	getResolution(&screen_width,&screen_height);
-	height = screen_height/PIECE_DIM;
-	width = (screen_width-50)/PIECE_DIM;
-	
+    arch_init();
+
 	minefield = (tile*)malloc(sizeof(tile)*height*width);
-    
+
 	minesweeper_init();
     displayMineField();
     setCursor(0);

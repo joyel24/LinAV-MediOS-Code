@@ -62,18 +62,46 @@ int  # getArch       # void
 void # getResolution # int * width,int * height
 
 #k_inc#kernel/libfloat.h
-long         # float_modsi3  # long a, long b
-long         # float_umodsi3 # long a, long b
-long         # float_divsi3  # long a, long b
-long         # float_udivsi3 # long a, long b
-unsigned int # float_divdi3  # unsigned int a, unsigned int b
-float        # float_floatsisf # long a
-float        # float_divsf3    # float a, float b
-float        # float_addsf3    # float a, float b
-float        # float_mulsf3    # float a, float b
-float        # float_subsf3    # float a, float b
-int          # float_fixsfsi   # float a
-int          # float_nesf2     # float a, float b
+long # float_modsi3# long a, long b
+long # float_umodsi3# long a, long b
+long # float_divsi3# long a, long b
+long # float_udivsi3# long a, long b
+unsigned int # float_divdi3# unsigned int a, unsigned int b
+
+float # float_addsf3 # float a, float b
+float # float_subsf3 # float a, float b
+float # float_mulsf3 # float a, float b
+float # float_divsf3 # float a, float b
+double # float_floatsidf # register long a
+double # float_floatdidf # register long long a
+float # float_floatsisf # register long  a
+float # float_floatdisf # register long long  a
+float # float_negsf2 # float a
+double # float_negdf2 # double a
+double # float_extendsfdf2 # float a
+float # float_truncdfsf2 # double a
+long # float_fixsfsi # float a
+long # float_fixdfsi # double a
+long long # float_fixdfdi # double a
+unsigned long # float_fixunsdfsi # double a
+unsigned long long # float_fixunsdfdi # double a
+double # float_adddf3 # double a, double b
+double # float_subdf3 # double a, double b
+double # float_muldf3 # double a, double b
+double # float_divdf3 # double a, double b
+int # float_gtdf2 # double a, double b
+int # float_gedf2 # double a, double b
+int # float_ltdf2 # double a, double b
+int # float_ledf2 # double a, double b
+int # float_eqdf2 # double a, double b
+int # float_nedf2 # double a, double b
+int # float_gtsf2 # float a, float b
+int # float_gesf2 # float a, float b
+int # float_ltsf2 # float a, float b
+int # float_lesf2 # float a, float b
+int # float_eqsf2 # float a, float b
+int # float_nesf2 # float a, float b
+
 #k_inc#kernel/stdfs.h
 #api_inc#sys_def/stdfs.h
 int            # open      # const char* pathname, int flags

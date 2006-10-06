@@ -24,17 +24,17 @@ int i = 0;
 int j = 0;
 int num = 0;
 int eqPressed = 0;
-float inputnum = 0;
+double inputnum = 0;
 int seltonum[16] = {7,8,9,10,4,5,6,11,1,2,3,12,0,13,14,15};
 int oper = 0;
-float left = 0;
-float outputnum = 0;
-char ingfx_putStr[30];
-char outgfx_putStr[30];
+double left = 0;
+double outputnum = 0;
+char ingfx_putStr[256];
+char outgfx_putStr[256];
 
 void initbackground(){
 	gfx_clearScreen(COLOR_BLUE);
-	
+
 	i=0;
 	j=0;
 	int tmp;
@@ -60,6 +60,7 @@ void initbackground(){
 	gfx_getStringSize("by SquidWard",&w,&h2);
 	gfx_putS(COLOR_WHITE,COLOR_BLUE,(LCD_WIDTH-w)/2,h,"by SquidWard");
 }
+
 void initbar(){
 	gfx_fillRect(COLOR_WHITE,BAR_X,BAR_Y,BAR_WIDTH,BAR_HEIGTH);
 	gfx_drawLine(COLOR_LIGHT_GRAY,BAR_X,BAR_Y+20,BAR_X+BAR_WIDTH,BAR_Y+20);
@@ -68,13 +69,15 @@ void initbar(){
 	gfx_getStringSize("= ",&w,&h);
 	gfx_putS(COLOR_BLACK,COLOR_WHITE,BAR_X+5,BAR_Y+20+(20-h)/2,"= ");
 	}
-void initkeypad(){
+
+void initkeypad(int clear){
 
 	//gfx_fillRect         (unsigned int color, int x, int y, int width, int height);
 	//Clearing field...
-	gfx_fillRect(COLOR_WHITE,KEYPAD_X,KEYPAD_Y,KEYPAD_WIDTH,KEYPAD_HEIGTH);
-	gfx_drawRect(COLOR_BLACK,KEYPAD_X,KEYPAD_Y,KEYPAD_WIDTH,KEYPAD_HEIGTH);
-	gfx_drawRect(COLOR_BLACK,KEYPAD_X-1,KEYPAD_Y-1,KEYPAD_WIDTH+2,KEYPAD_HEIGTH+2);
+	if(clear) gfx_fillRect(COLOR_WHITE,KEYPAD_X,KEYPAD_Y,KEYPAD_WIDTH,KEYPAD_HEIGTH);
+
+	gfx_drawRect(COLOR_BLACK,KEYPAD_X,KEYPAD_Y,KEYPAD_WIDTH,KEYPAD_HEIGTH+1);
+	gfx_drawRect(COLOR_BLACK,KEYPAD_X-1,KEYPAD_Y-1,KEYPAD_WIDTH+2,KEYPAD_HEIGTH+3);
 
 	i=0;
 	while(i<6){
@@ -86,102 +89,20 @@ void initkeypad(){
 		gfx_drawLine(COLOR_BLACK,KEYPAD_X,KEYPAD_Y+20*i,KEYPAD_X+KEYPAD_WIDTH-20,KEYPAD_Y+20*i);
 		i++;
 	}
+
 	int x=0;
-	int y=0;
-	/* DOESNT WORK -> DONT KNOW WHY
 	while(x<4){
+    	int y=0;
 		while(y<4){
-			gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-			gfx_drawRect(COLOR_GREY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-			gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+3,KEYPAD_Y+20*y+3,20-6,20-6);
+        	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-1,20-1);
+        	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-3,20-3);
 			y++;
 		}
 		x++;
-	}*/
-	x=0;
-	y=0;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
+	}
 
-	x=1;
-	y=0;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=2;
-	y=0;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=3;
-	y=0;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=0;
-	y=1;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=1;
-	y=1;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=2;
-	y=1;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=3;
-	y=1;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=0;
-	y=2;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=1;
-	y=2;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=2;
-	y=2;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=3;
-	y=2;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=0;
-	y=3;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=1;
-	y=3;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=2;
-	y=3;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-	x=3;
-	y=3;
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+20*x+1,KEYPAD_Y+20*y+1,20-2,20-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+20*x+2,KEYPAD_Y+20*y+2,20-4,20-4);
-
-
-
-	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+80+1,KEYPAD_Y+1,20-2,80-2);
-	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+80+2,KEYPAD_Y+2,20-4,80-4);
+	gfx_drawRect(COLOR_DARK_GREY,KEYPAD_X+80+1,KEYPAD_Y+1,20-2,80-1);
+	gfx_drawRect(COLOR_LIGHT_GRAY,KEYPAD_X+80+2,KEYPAD_Y+2,20-4,80-3);
 
 	w=5;
 	h=12;
@@ -203,8 +124,10 @@ void initkeypad(){
 	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+60+(20-w)/2,KEYPAD_Y+60+(20-h)/2,43);
 	gfx_putC(COLOR_BLACK,COLOR_WHITE,KEYPAD_X+80+(20-w)/2,KEYPAD_Y+(KEYPAD_HEIGTH-h)/2,61);
 }
+
 void drawselected(int selected){
-	initkeypad();
+	initkeypad(0);
+
 	switch(selected){
 		/*Keypad:
 		00|01|02|03|  |
@@ -288,7 +211,7 @@ void drawselected(int selected){
 	}
 }
 void reactoninput(int sel){
-	float tmpfloat;
+	double tmpfloat;
 	char tmpstr[30];
 	switch(sel){
 		case 0://Digit Pressed
@@ -376,15 +299,17 @@ void reactoninput(int sel){
 				outputnum=left+inputnum;
 				break;
 			}
+			printf("%f\n",outputnum);
+
 			eqPressed=1;
 			left = outputnum;
 			long int leftpart,fracpart;
 			leftpart = (int)outputnum;
 			tmpfloat = outputnum-leftpart;
-			tmpfloat = 100000*tmpfloat+100000;
+			tmpfloat = 1000000000*tmpfloat+1000000000;
 			fracpart = (int)tmpfloat;
 			i=1;
-			while(i<6){
+			while(i<10){
 				if(fracpart==(10*(fracpart/10))){
 					fracpart = fracpart/10;
 				}
@@ -418,10 +343,11 @@ void reactoninput(int sel){
 		eqPressed=0;
 		weigth = 1;
 		outputnum = 0;
-		initbackground();
 
+		initbackground();
 		initbar();
-	
+    	initkeypad(1);
+
 		strcpy(ingfx_putStr,"\0");
 		strcpy(outgfx_putStr,"\0");
 		gfx_getStringSize(ingfx_putStr,&w,&h);
@@ -472,7 +398,7 @@ void react(int but){
 							}
 							drawselected(sel);
 							break;
-						case 5: //square
+						case 5: //action
 							reactoninput(sel);
 							break;
 						case 6: //cross
@@ -482,23 +408,20 @@ void react(int but){
 
 							break;
 					}
-	i=0;
-	while(i<1000000){
-		i++;
-	}
-	i=0;
 }
 void app_main(int argc,char ** argv)
 {
-    
-    printf("\nIn othello\n");
-    
-    gfx_openGraphics();
-	
-	initbackground();
+    int stop_othello=0;
+    int eventHandler,event;
 
+    printf("\nIn gcalc\n");
+
+    gfx_openGraphics();
+
+	initbackground();
 	initbar();
-	
+	initkeypad(1);
+
 	strcpy(ingfx_putStr,"\0");
 	strcpy(outgfx_putStr,"\0");
 	gfx_getStringSize(ingfx_putStr,&w,&h);
@@ -515,56 +438,42 @@ void app_main(int argc,char ** argv)
 	outputnum = 0;
 	drawselected(sel);
 
-    int stop_othello=0;
+    eventHandler = evt_getHandler(BTN_CLASS);
+
     printf("\nbefore loop\n");
-    
-//FIXME: variables related to the workaround for the broken get_evt() on the gmini
-    int oldbutton;
-    int newbutton;
-    oldbutton = 0;
-	//char debugtxt[10];
-    while(!stop_othello)
-    {
-//FIXME: get_evt() never returns on the gmini so until it is fixed this work around is needed.
-        newbutton = btn_readState();
-				if(newbutton != oldbutton)
-				{
-					switch(newbutton)
-					{
-						case 0x0001: //up
-							react(1);
-							break;
-						case 0x0004: //left
-							react(2);
-							break;
-						case 0x0002: //down
-							react(3);
-							break;
-						case 0x0008: //right
-							react(4);
-							break;
-						case 0x0080: //square
-							react(5);
-							i=0;
-							while(i<1000000){
-							i++;
-							}
-							i=0;
-							break;
-						case 0x0100: //cross
-							react(6);
-							break;
-						case 0x0200: //on
-							react(7);
-							break;
-						case 0x0400: //off
-							stop_othello=1;
-							break;
-					}
-				}
-				oldbutton = newbutton;
+
+    while(!stop_othello){
+        event=evt_getStatus(eventHandler);
+        if (!event) continue; // no new events
+
+        switch(event){
+            case BTN_UP:
+    			react(1);
+				break;
+            case BTN_DOWN:
+    			react(3);
+				break;
+            case BTN_LEFT:
+    			react(2);
+				break;
+            case BTN_RIGHT:
+    			react(4);
+				break;
+            case BTN_ON:
+            case BTN_1:
+            case BTN_F1:
+    			react(5);
+				break;
+            case BTN_OFF:
+    			stop_othello=1;
+				break;
+        }
     }
+
     printf("\nafter loop\n");
-    printf("\nout othello\n");
-    
+
+    evt_freeHandler(eventHandler);
+
+    printf("\nout gcalc\n");
+
 }
