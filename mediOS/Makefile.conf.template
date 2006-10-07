@@ -10,6 +10,8 @@ ASFLAGS  += --defsym $(TARGET_DEVICE)=1 --defsym $(CHIP_TYPE)=1 -I$(MEDIOS_SRC_P
 
 BUILD_DIR = $(MEDIOS_SRC_PATH)/kernel/build
 
+GCCFLAGS += -D$(BUILD_TYPE)
+
 ifeq ($(HAVE_CONSOLE),1)
 	GCCFLAGS += -DHAVE_CONSOLE
 endif

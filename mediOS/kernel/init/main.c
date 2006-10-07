@@ -64,6 +64,10 @@
 #include <kernel/stdfs.h>
 #include <kernel/vfs.h>
 
+#ifdef SIMPLE_LOADER
+#include <kernel/bin_load.h>
+#endif
+
 #ifdef BUILD_LIB
 extern int app_main(int argc, char * argv[]);
 #endif
@@ -77,31 +81,6 @@ void print_boot_info(void)
     tmr_print();
 }
 
-#include <kernel/evt.h>
-#include <kernel/icons.h>
-#include <kernel/graphics.h>
-void tst_fct(void)
-{
-    int i;
-    BITMAP * b;
-
-    gfx_openGraphics();
-    gfx_clearScreen(COLOR_BLUE);
-
-    b=&icon_load("browser_icon.ico")->bmap_data;
-
-    for(i=0;i<170;i++){
-        gfx_clearScreen(COLOR_BLUE);
-        gfx_drawResizedBitmap(b,5,5,i,i,RESIZE_INTEGER);
-        gfx_drawRect(COLOR_RED,5,5,i,i);
-
-        mdelay(200);
-
-        if(btn_readState()) return;
-    }
-
-}
-
 void kernel_start (void)
 {
 #ifdef BUILD_LIB
@@ -110,8 +89,10 @@ void kernel_start (void)
 
     /* malloc of max space in SDRAM */
     mem_addPool((void*)MALLOC_START,MALLOC_SIZE);
-
+#ifdef STD_MEDIOS
     gfx_init();
+#endif
+
 #ifdef HAVE_CONSOLE
     con_init();
     con_screenSwitch();
@@ -142,12 +123,18 @@ void kernel_start (void)
 #ifdef HAVE_EVT
     evt_init();
 #endif
+#ifdef STD_MEDIOS
     btn_init();
+#endif
 #ifdef CHK_BAT_POWER
     init_power();
 #endif
+#ifdef STD_MEDIOS
     init_rtc();
+#endif
+#ifdef CHK_USB_FW
     init_usb_fw();
+#endif
 #ifdef HAVE_FM_REMOTE
     init_fm_remote();
 #endif
@@ -159,30 +146,30 @@ void kernel_start (void)
     ata_init();
     vfs_init();
     disk_init();
+#ifdef STD_MEDIOS
     sound_init();
+#endif
     /* enable the IRQ */
     printk("[init] about to enable INT\n");
     __sti();
     printk("[init] ------------ drivers done\n");
     print_boot_info();
     printk("[init] END\n");
-
-    
+  
     
 #ifdef BUILD_LIB
     do_bkpt();
     app_main(1,&stdalone);
     reload_firmware();
 #endif
-
-#if 0
-   tst_fct();
-#endif
    
     do_bkpt();
-
+    
+#ifdef SIMPLE_LOADER
+loadBin("/medios.bin");
+#else
     shell_main();
-
+#endif
     /* should we launch HALT */
     printk("[init] error: back to main()\n");
     for(;;);

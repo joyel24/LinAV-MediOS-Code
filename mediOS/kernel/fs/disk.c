@@ -205,7 +205,7 @@ struct hd_info_s * disk_setup(int drive)
     /* identify disk */
     if(ata_rwData(drive,0,sector,1,ATA_DO_IDENT,ATA_WITH_DMA)<0)
         goto main_exit;        
-    
+   
     strncpy(disk_info->serial, &sector[20], 20);
     dd_swapChar(disk_info->serial,20);
     dd_findEnd(disk_info->serial,20);
@@ -228,6 +228,7 @@ struct hd_info_s * disk_setup(int drive)
     if(ata_rwData(drive,0,sector,1,ATA_DO_READ,ATA_WITH_DMA)<0) /* read 1 sector at LBA 0 */
         goto main_exit;
 
+        
     /* check that the boot sector is initialized */
     if ( (sector[510] != 0x55) ||
          (sector[511] != 0xaa)) {

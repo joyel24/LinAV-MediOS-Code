@@ -13,6 +13,8 @@
 #include <sys_def/arch.h>
 
 #define SDRAM_START       0x0900000
+#define EXPLOIT_START     0x1000000
+// RQ: exploit is at 0xDA0000 at end of avi load
 #define SDRAM_END         0x1900000
 
 #define IRAM_SIZE         0x8000

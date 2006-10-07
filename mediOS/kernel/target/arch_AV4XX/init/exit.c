@@ -71,7 +71,7 @@ __attribute__((section(".fwuncomp_code"))) void arch_reload_firmware(void){
 
     // disable interrupts
     cli();
-
+#ifdef STD_MEDIOS
     // show something on the screen (black screen for now)
     gfx_openGraphics();
 
@@ -88,7 +88,7 @@ __attribute__((section(".fwuncomp_code"))) void arch_reload_firmware(void){
 
     gfx_clearScreen(COLOR_ROM_BLACK);
     gfx_planeShow(BMAP1);
-
+#endif
     // set default clock parameters (not reinitialized by the firmware)
     clkc_setClockParameters(CLK_ARM,15,2,2);
     clkc_setClockParameters(CLK_SDRAM,15,2,2);

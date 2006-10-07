@@ -23,6 +23,16 @@
     #define SOUND_USE_AIC23
 #endif
 
+#ifdef AV4XX
+    //#define GMINI_OVERCLOCKING
+
+    #define SCREEN_USE_DSP
+    //#define SCREEN_USE_RESIZE
+
+    #define SOUND_USE_DSP
+    #define SOUND_USE_AIC23
+#endif
+
 #define AONES_PATH "/aoNES/"
 #define SAVES_PATH "/aoNES/saves/"
 #define CFG_FILE_PATH "/aoNES/aoNES.cfg"

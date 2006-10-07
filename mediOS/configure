@@ -40,6 +40,39 @@ fi
 return $CONFIGURE_OPTION
 }
 
+function CONFIG_QUERY_MULTI {
+CONFIGURE_OPTION=$1
+CONFIGURE_CHOICE_LIST=$2
+if [ $CONFIGURE_OPTION = -1 ]
+	then
+		USERSELECTION=""
+		while [ $CONFIGURE_OPTION == -1 ]; do
+			echo "-----------------------------------------"
+			echo ""
+			if [ ! $USERSELECTION == "" ]; then
+				echo -n "'$USERSELECTION' is not a valid selection. "
+			fi
+			echo "$3"
+			STR_ITEM="Choose"
+			I=1
+			for item in $CONFIGURE_CHOICE_LIST; do
+				echo "$I: $item"
+				STR_ITEM="$STR_ITEM $I"
+				I=$(($I+1))
+			done
+			echo -n $STR_ITEM "[$4]: "
+			read -e USERSELECTION
+						
+			if [ "$USERSELECTION" == "" ]; then
+				CONFIGURE_OPTION=$4
+			else
+				CONFIGURE_OPTION=$USERSELECTION				
+			fi
+		done
+fi
+return $CONFIGURE_OPTION
+}
+
 
 # check if the file this script generates exists so we don't overwrite something
 if [ -f "./Makefile.conf" ]
@@ -74,100 +107,108 @@ CONFIGURE_HAVE_CMD_LINE=-1
 CONFIGURE_HAVE_EVT=-1
 CONFIGURE_HAVE_CONSOLE=-1
 CONFIGURE_HAVE_DBUG=-1
+CONFIGURE_BUILD_TYPE=-1
 
 # this is the first configuration question, AV3XX, GMINI4XX, AV1XX or JBMM
-if [ $CONFIGURE_TARGET_DEVICE = -1 ]
-	then
-		USERSELECTION=""
-		while [ $CONFIGURE_TARGET_DEVICE = -1 ]; do
-			echo "-----------------------------------------"
-			echo ""
-			if [ ! $USERSELECTION = "" ]; then
-				echo -n "'$USERSELECTION' is not a valid selection. "
-			fi
-			echo "Please pick a target device"
-			echo "1	AV3XX"
-			echo "2	GMINI4XX"
-                        echo "3	AV1XX"
-                        echo "4	JBMM"
-                        echo "5	GMINI402"
-                        echo "6	AV4XX"
-			echo -n "Choose 1, 2, 3, 4, 5 or 6 [1]: "
-			read -e USERSELECTION
-			if [ "$USERSELECTION" == "" ]; then
-				CONFIGURE_TARGET_DEVICE="AV3XX"
-			else
-				if [ $USERSELECTION == 1 ]; then
-					CONFIGURE_TARGET_DEVICE="AV3XX"                            
-				fi
-				if [ $USERSELECTION == 2 ]; then
-					CONFIGURE_TARGET_DEVICE="GMINI4XX"
-				fi
-                                if [ $USERSELECTION == 3 ]; then
-					CONFIGURE_TARGET_DEVICE="AV1XX"
-				fi
-                                if [ $USERSELECTION == 4 ]; then
-					CONFIGURE_TARGET_DEVICE="JBMM"
-				fi
-                                if [ $USERSELECTION == 5 ]; then
-					CONFIGURE_TARGET_DEVICE="GMINI402"
-				fi
-                                if [ $USERSELECTION == 6 ]; then
-					CONFIGURE_TARGET_DEVICE="AV4XX"
-				fi
-			fi
-		done
-fi
 
-if [ $CONFIGURE_TARGET_DEVICE == "AV3XX" ]; then
+CONFIG_QUERY_MULTI $CONFIGURE_TARGET_DEVICE "AV3XX GMINI4XX AV1XX JBMM GMINI402 AV4XX" "Please pick a target device" "1"
+CONFIGURE_TARGET_DEVICE=$?
+
+TARGET_OK=0
+
+if [ $CONFIGURE_TARGET_DEVICE == "1" ]; then
+	    CONFIGURE_TARGET_DEVICE="AV3XX"
             CONFIGURE_HAVE_MAS_SOUND="1"
             CONFIGURE_HAVE_AIC23_SOUND="0" 
             CONFIGURE_CHIP_TYPE="DSC25"
             CONFIGURE_HAVE_DBUG="1"
+	    CONFIGURE_BUILD_TYPE="0"
+	    TARGET_OK=1
 fi
 
-if [ $CONFIGURE_TARGET_DEVICE == "GMINI4XX" ]; then
-            CONFIGURE_HAVE_MAS_SOUND="0"
+if [ $CONFIGURE_TARGET_DEVICE == "2" ]; then
+            CONFIGURE_TARGET_DEVICE="GMINI4XX"
+	    CONFIGURE_HAVE_MAS_SOUND="0"
             CONFIGURE_HAVE_AIC23_SOUND="1"     
             CONFIGURE_HAVE_EXT_MODULE="0"
             CONFIGURE_HAVE_FM_REMOTE="0"
             CONFIGURE_CHIP_TYPE="DM270"
+	    CONFIGURE_BUILD_TYPE="0"
+	    TARGET_OK=1
 fi
 
-if [ $CONFIGURE_TARGET_DEVICE == "AV1XX" ]; then
-            CONFIGURE_HAVE_MAS_SOUND="1"
+if [ $CONFIGURE_TARGET_DEVICE == "3" ]; then
+            CONFIGURE_TARGET_DEVICE="AV1XX"
+	    CONFIGURE_HAVE_MAS_SOUND="1"
             CONFIGURE_HAVE_AIC23_SOUND="0" 
             CONFIGURE_CHIP_TYPE="DSC25"    
             CONFIGURE_HAVE_DBUG="1"
+	    CONFIGURE_BUILD_TYPE="0"
+	    TARGET_OK=1
 fi
 
-if [ $CONFIGURE_TARGET_DEVICE == "JBMM" ]; then
-            CONFIGURE_HAVE_MAS_SOUND="0"
+if [ $CONFIGURE_TARGET_DEVICE == "4" ]; then
+            CONFIGURE_TARGET_DEVICE="JBMM"
+	    CONFIGURE_HAVE_MAS_SOUND="0"
             CONFIGURE_HAVE_AIC23_SOUND="0"
             CONFIGURE_CHIP_TYPE="DSC21"
             CONFIGURE_HAVE_CONSOLE="0"
             CONFIGURE_HAVE_DBUG="1"
+	    CONFIGURE_BUILD_TYPE="0"
+	    TARGET_OK=1
 fi
 
-if [ $CONFIGURE_TARGET_DEVICE == "GMINI402" ]; then
-            CONFIGURE_HAVE_MAS_SOUND="0"
+if [ $CONFIGURE_TARGET_DEVICE == "5" ]; then
+            CONFIGURE_TARGET_DEVICE="GMINI402"
+	    CONFIGURE_HAVE_MAS_SOUND="0"
             CONFIGURE_HAVE_AIC23_SOUND="1"     
             CONFIGURE_HAVE_EXT_MODULE="0"
             CONFIGURE_HAVE_FM_REMOTE="0"
             CONFIGURE_CHIP_TYPE="DM320"
+	    CONFIGURE_BUILD_TYPE="0"
+	    TARGET_OK=1
 fi
 
-if [ $CONFIGURE_TARGET_DEVICE == "AV4XX" ]; then
-            CONFIGURE_HAVE_MAS_SOUND="0"
+if [ $CONFIGURE_TARGET_DEVICE == "6" ]; then
+            CONFIGURE_TARGET_DEVICE="AV4XX"
+	    CONFIGURE_HAVE_MAS_SOUND="0"
             CONFIGURE_HAVE_AIC23_SOUND="1"     
             CONFIGURE_HAVE_EXT_MODULE="0"
             CONFIGURE_HAVE_FM_REMOTE="0"
             CONFIGURE_CHIP_TYPE="DM270"
+	    TARGET_OK=1
 fi
+
+if [ $TARGET_OK == 0 ]; then
+	echo ""
+	echo "Bad value for target"
+	exit
+fi
+
+echo "Configuring for $CONFIGURE_TARGET_DEVICE"
 
 # this section of the script asks all of the yes or no querys, they are of the following format:
 # CONFIG_QUERY_YN $variable_to_set "question to ask" "default answer"
 # variable_to_set=$?
+
+CONFIG_QUERY_MULTI $CONFIGURE_BUILD_TYPE "Standard_medios Simple_loader" "Please choose target build" "1"
+CONFIGURE_BUILD_TYPE=$?
+
+if [ $CONFIGURE_BUILD_TYPE == "2" ]; then
+	CONFIGURE_BUILD_TYPE=SIMPLE_LOADER
+	CONFIGURE_HAVE_MAS_SOUND="0"
+        CONFIGURE_HAVE_AIC23_SOUND="0"     
+        CONFIGURE_HAVE_EXT_MODULE="0"
+        CONFIGURE_HAVE_FM_REMOTE="0"
+	CONFIGURE_CHK_BAT_POWER="0"
+	CONFIGURE_CHK_USB_FW="0"
+	CONFIGURE_HAVE_DBUG="0"
+	CONFIGURE_HAVE_CMD_LINE="0"
+	CONFIGURE_HAVE_EVT="0"
+	CONFIGURE_HAVE_CONSOLE="0"
+else
+	CONFIGURE_BUILD_TYPE=STD_MEDIOS
+fi
 
 CONFIG_QUERY_YN $CONFIGURE_HAVE_DBUG "Build with emu2 breakpoints support? (disable this on Gmini402)" "n"
 CONFIGURE_HAVE_DBUG=$?
@@ -217,6 +258,10 @@ echo "HAVE_DVR = $CONFIGURE_HAVE_DVR" >> ./Makefile.conf
 echo "HAVE_CONSOLE = $CONFIGURE_HAVE_CONSOLE" >> ./Makefile.conf
 echo "CHIP_TYPE = $CONFIGURE_CHIP_TYPE" >> ./Makefile.conf
 echo "HAVE_DBUG = $CONFIGURE_HAVE_DBUG" >> ./Makefile.conf
+
+echo "" >> ./Makefile.conf
+echo "BUILD_TYPE = $CONFIGURE_BUILD_TYPE"  >> ./Makefile.conf
+echo "" >> ./Makefile.conf
 
 #append our template to Makefile.conf
 echo "#" >> ./Makefile.conf

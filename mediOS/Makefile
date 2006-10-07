@@ -23,10 +23,10 @@ medios: medios.bin medios.wav medios.avi
 medios.bin: incdir mk_api_file subdirs
 	@echo '-----   Linking medios.bin 1/2'
 	@chmod 777 ./tools/lds_files/create_lds
-	@./tools/lds_files/create_lds init
+	@./tools/lds_files/create_lds init $(BUILD_TYPE)
 	@$(LD) -N -Tmedios.lds -o medios.elf $(KERNEL_OBJS) $(LDFLAGS) -Map medios.map
 	@echo '-----   Linking medios.bin 2/2'
-	@./tools/lds_files/create_lds final
+	@./tools/lds_files/create_lds final $(BUILD_TYPE)
 	@$(LD) -N -Tmedios.lds -o medios.elf $(KERNEL_OBJS) $(LDFLAGS) -Map medios.map
 	@$(OBJCOPY) -O binary medios.elf medios.bin
 

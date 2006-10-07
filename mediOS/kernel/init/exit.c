@@ -24,10 +24,10 @@ void halt_device(void)
 {
     powering_off=1;
     printk("[exit] device halt\n");
-
+#ifdef CHK_USB_FW
     if(kusb_fw_status)
         disableUsbFw();
-        
+#endif        
     arch_HaltMsg();
     
     ata_stopHD(ATA_FORCE_STOP); /* we need to call halt_hd later to unmount all partitions */

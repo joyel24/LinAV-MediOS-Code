@@ -8,6 +8,8 @@ function get_data {
 	cur_txt=`cat $include_file | grep $1 | awk '{print $3}'`
 }
 
+echo "Creating lds : $1 $2"
+
 dest_file="medios.lds"
 map_file="medios.map"
 include_file="include/kernel/target/arch/arch_def.h"
@@ -19,6 +21,14 @@ fi
 
 get_data SDRAM_START
 dram_start=$cur_txt
+
+if [ $2 = "SIMPLE_LOADER" ]; then
+get_data EXPLOIT_START
+else
+get_data SDRAM_START
+fi
+
+code_start=$cur_txt
 dram_len=0x01000000
 iram_start=0x00000004
 get_data IRAM_SIZE
@@ -38,6 +48,7 @@ iram_len=$cur_txt
 
 cat ${template} | sed > $dest_file \
  -e "s,@DRAM_START@,${dram_start},g" \
+ -e "s,@CODE_START@,${code_start},g" \
  -e "s,@DRAM_LEN@,${dram_len},g" \
  -e "s,@IRAM_START@,${iram_start},g" \
  -e "s,@IRAM_LEN@,${iram_len},g" \

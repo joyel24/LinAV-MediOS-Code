@@ -46,6 +46,11 @@ extern struct tmr_s hd_timer;
 int ata_stopping = 0;
 struct tmr_s ataStop_tmr;
 
+#ifndef CHK_BAT_POWER
+#define hd_launchTimer()
+int hd_sleep_state=0;
+#endif
+
 #define CALC_BASE(ADDR)     (((unsigned int)(ADDR))-SDRAM_START)
 
 #define ATA_SELECT_DRIVE(DRIVE)   ({ \
@@ -70,7 +75,11 @@ int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_
     void * buffer=data;
 
     /* use a temporary buffer for unaligned read or writes */
-    if (unaligned) buffer=ata_sectorBuffer;
+    if (unaligned)
+    {
+        printk("Unaligned using %x\n",ata_sectorBuffer);
+        buffer=ata_sectorBuffer;
+    }
 
     /* select the right drive */
     ATA_SELECT_DRIVE(drive);
@@ -238,7 +247,9 @@ void ata_stopHD(int mode)
 void ata_stopHDEnd(void)
 {
     ata_powerDownHD();
+#ifdef CHK_BAT_POWER
     tmr_stop(&hd_timer);
+#endif
     hd_sleep_state=1;
     ata_stopping = 0;
     printk("[ide sleep] end\n");
@@ -333,12 +344,12 @@ void ata_stopTmrFct(void)
 void ata_init(void)
 {
     ata_stopping = 0;
-
+#ifdef STD_MEDIOS
     tmr_setup(&ataStop_tmr,"ata Stop");
     ataStop_tmr.action   = ata_stopTmrFct;
     ataStop_tmr.freeRun  = 1;
     ataStop_tmr.stdDelay = 1; /* 1 tick delay */
-        
+#endif        
     ata_reset();
     printk("[ATA init] done\n");
 }

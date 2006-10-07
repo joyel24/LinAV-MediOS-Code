@@ -19,7 +19,14 @@ entry_code:
     
     mov r1,#0x36
     strh r1,[r5,#2]
-    
+    mov r1,#'A'
+    mov r2,#' '
+    strh r1,[r5]
+    strh r2,[r5]
+    strh r1,[r5]
+    strh r2,[r5]
+    strh r1,[r5]
+    strh r2,[r5]
     /*
     * cache init
     */
@@ -64,8 +71,8 @@ entry_code:
     @ r4 = 0x30500
     
     mov r0, r7
-    mov r1, #0x900000
-
+    ldr r1, __code_start_ptr
+    
     /* don't copy the .bss part */
     ldr r2, __real_iram_start_ptr
     ldr r5, __iram_end_ptr
@@ -89,12 +96,13 @@ entry_code:
         subs r2, r2, #32
         bhi mv_sdram_loop
 
-    b kernel_entry
+    ldr pc,=kernel_entry
 
 __real_iram_start_ptr: .word _real_iram_start
 __iram_start_ptr:      .word _iram_start
 __iram_end_ptr:        .word _iram_end
 __sdend_start_ptr:     .word _sdend_start
 __sdend_end_ptr:       .word _sdend_end
+__code_start_ptr:      .word _code_start
 
 .pool

@@ -8,8 +8,9 @@ MEMORY
 
 SECTIONS
 {
-    .text :
+    .text @CODE_START@:
     {
+        _code_start = .;
         *(.text.init.arch)
         *(.text.init)
         *(.text)
@@ -40,7 +41,7 @@ SECTIONS
         _iram_end = .;
     } > IRAM
 
-    .sdend ADDR(.text)+@DRAM_LEN@-@END_DRAM_SIZE@ : AT ( _real_iram_start + SIZEOF(.iram) )
+    .sdend @DRAM_START@+@DRAM_LEN@-@END_DRAM_SIZE@ : AT ( _real_iram_start + SIZEOF(.iram) )
     {
         _sdend_start = .;
         *(.fwuncomp_code)
