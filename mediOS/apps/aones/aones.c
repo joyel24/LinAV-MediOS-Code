@@ -305,10 +305,10 @@ void display_tvOutSet(){
         default:
         case 0: // Off
             mode=VIDENC_MODE_LCD;
-            x=-8;
-            y=-2;
-            w=224;
-            h=176;
+            x=NES_LCD_X;
+            y=NES_LCD_Y;
+            w=NES_LCD_W;
+            h=NES_LCD_H;
             gx=0;
             gy=0;
             getResolution(&gw,&gh);
@@ -484,20 +484,20 @@ long emu_joypad1State(){
         bt=btn_readState();
 
         if (Vnes.var.padmode==0){
-            if(bt & BTMASK_UP) state|=0x10;
-            if(bt & BTMASK_DOWN) state|=0x20;
-            if(bt & BTMASK_LEFT) state|=0x40;
-            if(bt & BTMASK_RIGHT) state|=0x80;
+            if(bt & NES_BTN_UP) state|=0x10;
+            if(bt & NES_BTN_DOWN) state|=0x20;
+            if(bt & NES_BTN_LEFT) state|=0x40;
+            if(bt & NES_BTN_RIGHT) state|=0x80;
 
             if (buttonsSwap){
-                if(bt & BTMASK_BTN1) state|=2;
-                if(bt & BTMASK_BTN2) state|=1;
+                if(bt & NES_BTN_A) state|=2;
+                if(bt & NES_BTN_B) state|=1;
             }else{
-                if(bt & BTMASK_BTN1) state|=1;
-                if(bt & BTMASK_BTN2) state|=2;
+                if(bt & NES_BTN_A) state|=1;
+                if(bt & NES_BTN_B) state|=2;
             }
 
-            if(bt & BTMASK_F3){
+            if(bt & NES_BTN_MOD_AB){
                 switch(f3Use){
                     case 0: //A+B
                         state|=3;
@@ -527,8 +527,8 @@ long emu_joypad1State(){
             }
         }
 
-        if(bt & BTMASK_ON) state|=8;
-        if(bt & BTMASK_F2) state|=4;
+        if(bt & NES_BTN_START) state|=8;
+        if(bt & NES_BTN_SELECT) state|=4;
     }
 
     state|=0x10000;           //1player signature
@@ -549,7 +549,7 @@ int emu_processIngameKeys()
 
   bt=btn_readState();
 
-  if (bt & BTMASK_F1)
+  if (bt & NES_BTN_INGAME_MENU)
   {
      snd_pause();
 
@@ -562,7 +562,7 @@ int emu_processIngameKeys()
      snd_unPause();
   }
 
-  if (bt & BTMASK_OFF)
+  if (bt & NES_BTN_HALT)
   {
      return 1;
   }

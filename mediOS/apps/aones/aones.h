@@ -12,6 +12,25 @@
 
     #define SOUND_USE_DSP
     #define SOUND_USE_AIC23
+    
+    #define NES_BTN_UP      BTMASK_UP
+    #define NES_BTN_DOWN    BTMASK_DOWN
+    #define NES_BTN_RIGHT   BTMASK_RIGHT
+    #define NES_BTN_LEFT    BTMASK_LEFT
+    #define NES_BTN_A       BTMASK_BTN1
+    #define NES_BTN_B       BTMASK_BTN2
+    #define NES_BTN_MOD_AB  BTMASK_F3
+    
+    #define NES_BTN_INGAME_MENU   BTMASK_F1
+    #define NES_BTN_HALT          BTMASK_OFF
+    #define NES_BTN_START         BTMASK_ON
+    #define NES_BTN_SELECT        BTMASK_F2
+    
+    #define NES_LCD_X -8
+    #define NES_LCD_Y -2
+    #define NES_LCD_W 224
+    #define NES_LCD_H 176  
+    
 #endif
 
 #ifdef GMINI402
@@ -21,6 +40,25 @@
 
     #define SOUND_USE_DSP
     #define SOUND_USE_AIC23
+    
+    #define NES_BTN_UP      BTMASK_UP
+    #define NES_BTN_DOWN    BTMASK_DOWN
+    #define NES_BTN_RIGHT   BTMASK_RIGHT
+    #define NES_BTN_LEFT    BTMASK_LEFT
+    #define NES_BTN_A       BTMASK_BTN1
+    #define NES_BTN_B       BTMASK_BTN2
+    #define NES_BTN_MOD_AB  BTMASK_F3
+    
+    #define NES_BTN_INGAME_MENU   BTMASK_F1
+    #define NES_BTN_HALT          BTMASK_OFF
+    #define NES_BTN_START         BTMASK_ON
+    #define NES_BTN_SELECT        BTMASK_F2
+    
+    #define NES_LCD_X -8
+    #define NES_LCD_Y -2
+    #define NES_LCD_W 224
+    #define NES_LCD_H 176 
+    
 #endif
 
 #ifdef AV4XX
@@ -31,6 +69,26 @@
 
     #define SOUND_USE_DSP
     #define SOUND_USE_AIC23
+    
+    #define NES_BTN_UP      BTMASK_UP
+    #define NES_BTN_DOWN    BTMASK_DOWN
+    #define NES_BTN_RIGHT   BTMASK_RIGHT
+    #define NES_BTN_LEFT    BTMASK_LEFT
+    
+    #define NES_BTN_A       BTMASK_ON
+    #define NES_BTN_B       BTMASK_OFF
+    #define NES_BTN_MOD_AB  0x0
+    
+    #define NES_BTN_INGAME_MENU   BTMASK_BTN1
+    #define NES_BTN_HALT          BTMASK_F3
+    #define NES_BTN_START         BTMASK_F1
+    #define NES_BTN_SELECT        BTMASK_F2
+    
+    #define NES_LCD_X 0
+    #define NES_LCD_Y 0
+    #define NES_LCD_W 320
+    #define NES_LCD_H 240 
+    
 #endif
 
 #define AONES_PATH "/aoNES/"
