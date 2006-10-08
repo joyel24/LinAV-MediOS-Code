@@ -17,9 +17,23 @@ mk_api_file:
 
 incdir:
 	@make -C include/kernel/target --no-print-directory incdir
+        
 
+ifeq ("$(TARGET_DEVICE)","AV4XX")        
+%Loader: BUILD_TYPE = SIMPLE_LOADER
+%Loader: LOADBIN=$(subst Loader,,$@)
+export BUILD_TYPE LOADBIN
+%Loader:
+	@make -C ./ medios
+	@mv -f medios.avi ${LOADBIN}.avi
+	@rm -f medios.bin
+else
+%Loader:
+	echo "No loader needed"
+endif
+        
 medios: medios.bin medios.wav medios.avi
-
+        
 medios.bin: incdir mk_api_file subdirs
 	@echo '-----   Linking medios.bin 1/2'
 	@chmod 777 ./tools/lds_files/create_lds

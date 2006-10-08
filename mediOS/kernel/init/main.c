@@ -166,7 +166,12 @@ void kernel_start (void)
     do_bkpt();
     
 #ifdef SIMPLE_LOADER
+#ifdef LOADBIN
+#warning using LOADBIN
+loadBin(LOADBIN);
+#else
 loadBin("/medios.bin");
+#endif
 #else
     shell_main();
 #endif

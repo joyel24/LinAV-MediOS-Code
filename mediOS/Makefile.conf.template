@@ -1,5 +1,53 @@
+####################################### 
+# Makefile - main config
+# Autogen by config tool
+#######################################
+
 GCCFLAGS = -Wall  -nostdlib -fno-builtin  -mcpu=arm7tdmi -O2
 ASFLAGS = -mfpu=softfpa
+
+#
+# config option choosen :
+#
+
+TARGET_DEVICE = %CONFIGURE_TARGET_DEVICE%
+CHK_BAT_POWER = %CONFIGURE_CHK_BAT_POWER%
+CHK_USB_FW = %CONFIGURE_CHK_USB_FW%
+HAVE_EXT_MODULE = %CONFIGURE_HAVE_EXT_MODULE%
+HAVE_FM_REMOTE = %CONFIGURE_HAVE_FM_REMOTE%
+HAVE_MAS_SOUND = %CONFIGURE_HAVE_MAS_SOUND%
+HAVE_AIC23_SOUND = %CONFIGURE_HAVE_AIC23_SOUND%
+HAVE_CMD_LINE = %CONFIGURE_HAVE_CMD_LINE%
+HAVE_EVT = %CONFIGURE_HAVE_EVT%
+HAVE_DVR = %CONFIGURE_HAVE_DVR%
+HAVE_CONSOLE = %CONFIGURE_HAVE_CONSOLE%
+CHIP_TYPE = %CONFIGURE_CHIP_TYPE%
+HAVE_DBUG = %CONFIGURE_HAVE_DBUG%
+
+ifdef BUILD_TYPE
+#force config if not building standard medios
+ifeq ("$(BUILD_TYPE)","SIMPLE_LOADER")
+CHK_BAT_POWER = "0"
+CHK_USB_FW = "0"
+HAVE_EXT_MODULE = "0"
+HAVE_FM_REMOTE = "0"
+HAVE_MAS_SOUND = "0"
+HAVE_AIC23_SOUND = "0"
+HAVE_CMD_LINE = "0"
+HAVE_EVT = "0"
+HAVE_CONSOLE = "0"
+HAVE_DBUG = "0"
+ifdef LOADBIN
+GCCFLAGS += -DLOADBIN=\"/$(LOADBIN).bin\"
+endif
+
+else
+BUILD_TYPE=%CONFIGURE_BUILD_TYPE%
+endif
+
+#
+# Makefile core
+#
 
 ifeq ("$(TARGET_DEVICE)","JBMM")
 GCCFLAGS += -mlong-calls 

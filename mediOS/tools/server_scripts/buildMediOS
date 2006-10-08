@@ -42,8 +42,17 @@ make clean 2>&1 > /dev/null
 
 buildAndReport ${makeResult} ${reportFile} ${phpReport} ${arch}
 
+if [ "$arch" == "av4xx" ]; then
+mkdir -p tmp
+cp -f medios.bin tmp
+make clean 2>&1 > /dev/null
+make mediosLoader 2>&1 > /dev/null
+cp -f tmp/medios.bin ./
+rm -Rf tmp
+fi
+
 #zipping bin
-zip -9 ${zipFile} medios.${ext}
+zip -9 ${zipFile} medios.${ext} medios.bin
 if [ "$arch" == "g402" ]; then
 zip -9 cc_${zipFile} cc_medios.${ext}
 fi
