@@ -40,6 +40,7 @@ HAVE_DBUG = "0"
 ifdef LOADBIN
 GCCFLAGS += -DLOADBIN=\"/$(LOADBIN).bin\"
 endif
+endif
 
 else
 BUILD_TYPE=%CONFIGURE_BUILD_TYPE%

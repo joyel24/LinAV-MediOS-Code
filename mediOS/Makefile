@@ -25,7 +25,7 @@ ifeq ("$(TARGET_DEVICE)","AV4XX")
 export BUILD_TYPE LOADBIN
 %Loader:
 	@make -C ./ medios
-	@mv -f medios.avi ${LOADBIN}.avi
+	@if [ "${LOADBIN}" != "medios" ]; then mv -f medios.avi ${LOADBIN}.avi; fi
 	@rm -f medios.bin
 else
 %Loader:
