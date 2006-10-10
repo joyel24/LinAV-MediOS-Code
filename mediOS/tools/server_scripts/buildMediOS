@@ -1,10 +1,19 @@
 # compilation script for mediOS
 
 curDate=`date +"%Y%m%d"`
+
+if [ "$1" == "dummy" ]; then
+arch=$2
+phpReport="/home/thomas/tmp/dummyReport.log"
+savPath="/home/thomas/tmp"
+else
 arch=$1
 phpReport=$2
-reportFile="report_medios_${arch}_${curDate}.log"
 savPath=$3
+fi
+
+reportFile="report_medios_${arch}_${curDate}.log"
+
 
 if [ "$arch" == "av3xx" ] || [ "$arch" == "av1xx" ] || [ "$arch" == "jbmm" ]; then
 ext="bin"
@@ -33,7 +42,7 @@ reportFile="${arch}_reportMedios_${curDate}.log"
 
 cd ~/archopen_src/build/mediOS
 
-cp -f ../$1.conf ./Makefile.conf
+cp -f ../${arch}.conf ./Makefile.conf
 
 make incdir
 make mk_api_file

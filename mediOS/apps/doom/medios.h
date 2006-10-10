@@ -63,7 +63,8 @@ extern void app_exit();
 
 
 // buttons
-
+#if defined(GMINI4XX) || defined(GMINI402) || defined(AV3XX)
+#if defined(GMINI4XX) || defined(GMINI402) || defined(AV3XX)
 #define BUTTON_UP     0
 #define BUTTON_DOWN   1
 #define BUTTON_LEFT   2
@@ -78,6 +79,27 @@ extern void app_exit();
 
 #undef  NB_BUTTONS
 #define NB_BUTTONS    11
+#endif
+
+
+#if defined(AV4XX)
+#define BUTTON_UP     0
+#define BUTTON_DOWN   1
+#define BUTTON_LEFT   2
+#define BUTTON_RIGHT  3
+#define BUTTON_MENU1  9
+#define BUTTON_MENU2  5
+#define BUTTON_MENU3  10
+#define BUTTON_SQUARE 4
+#define BUTTON_CROSS  8
+#define BUTTON_ON     7
+#define BUTTON_OFF    6
+
+#undef  NB_BUTTONS
+#define NB_BUTTONS    11
+#endif
+
+
 
 int access(char *file, int mode);
 
