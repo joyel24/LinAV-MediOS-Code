@@ -411,7 +411,7 @@ void react(int but){
 }
 void app_main(int argc,char ** argv)
 {
-    int stop_othello=0;
+    int stop=0;
     int eventHandler,event;
 
     printf("\nIn gcalc\n");
@@ -442,7 +442,7 @@ void app_main(int argc,char ** argv)
 
     printf("\nbefore loop\n");
 
-    while(!stop_othello){
+    while(!stop){
         event=evt_getStatus(eventHandler);
         if (!event) continue; // no new events
 
@@ -465,7 +465,7 @@ void app_main(int argc,char ** argv)
     			react(5);
 				break;
             case BTN_OFF:
-    			stop_othello=1;
+    			stop=1;
 				break;
         }
     }

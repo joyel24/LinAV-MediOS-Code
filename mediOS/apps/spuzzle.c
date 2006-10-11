@@ -590,7 +590,7 @@ void delay(int value)
 void endOfGame()
 {
     gfx_fontSet(STD8X13);
-    gfx_putS(COLOR_BLACK, COLOR_WHITE, 70,90, "!!! Y O U  W I N !!!");
+    gfx_putS(COLOR_BLACK, COLOR_WHITE, (screen_width-20*8)/2, (screen_height-13)/2, "!!! Y O U  W I N !!!");
     gfx_fontSet(STD6X9);
 }
 

@@ -16,6 +16,7 @@ void  # free     # void *buf
 
 #k_inc#kernel/timer.h
 unsigned int # tmr_getTick   # void
+unsigned int # tmr_getMicroTick   # void
 
 #k_inc#kernel/rtc.h
 #api_inc#sys_def/time.h
