@@ -61,7 +61,6 @@ void gui_init(){
     iniBrowser();
     browser=browser_NewBrowse();
     browser->mode=MODE_STRING;
-    strcpy(browser->path,"/aones/roms");
     gui_browserNeedInit=true;
 
     // menuList
