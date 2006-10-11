@@ -15,6 +15,15 @@
 // for more details.
 //
 // $Log$
+// Revision 1.8  2006/10/11 03:42:30  opeos
+// Now the WAD files was stored in /doom
+// the explorer goes here automatically
+//thanks to GliGli for the solution
+
+// Revision 1.7  2006/08/19 08:42:30  oxygen77
+// small bugfix in Makefiles
+// adding 1 missing fction in api
+//
 // Revision 1.6  2006/07/12 17:13:01  sfxgligli
 // - widget system
 // - new cfg file parser
@@ -152,7 +161,7 @@ int app_main(){
 
     WelcomeScreen();
     
-    if (browser_simpleBrowse("/",wadname)!=MED_OK) app_exit(true);
+    if (browser_simpleBrowse("/doom",wadname)!=MED_OK) app_exit(true);
     strlwr(wadname);
 
     if(!IsPWAD(wadname)){
@@ -166,7 +175,7 @@ int app_main(){
 
         PWADScreen();
 
-        if (browser_simpleBrowse("/",wadname)!=MED_OK) app_exit(true);
+        if (browser_simpleBrowse("/doom",wadname)!=MED_OK) app_exit(true);
         strlwr(wadname);
 
         modifiedgame = true;

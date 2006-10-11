@@ -64,7 +64,6 @@ extern void app_exit();
 
 // buttons
 #if defined(GMINI4XX) || defined(GMINI402) || defined(AV3XX)
-#if defined(GMINI4XX) || defined(GMINI402) || defined(AV3XX)
 #define BUTTON_UP     0
 #define BUTTON_DOWN   1
 #define BUTTON_LEFT   2

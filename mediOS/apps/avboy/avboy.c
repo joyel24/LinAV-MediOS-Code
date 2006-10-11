@@ -68,7 +68,7 @@
 
 #define OSD_BITMAP1_CONFIG  OSD_COMPONENT_ENABLE | OSD_BITMAP_8BIT | OSD_BITMAP_MERGEBACK | OSD_BITMAP_A7 | OSD_BITMAP_ZX1 | OSD_BITMAP_RAMCLUT
 
-#if defined(AV3XX) || defined(AV4XX)
+#if defined(AV3XX)
 int bt_UP = BTMASK_UP;
 int bt_DOWN = BTMASK_DOWN;
 int bt_LEFT = BTMASK_LEFT;
@@ -78,6 +78,18 @@ int bt_B = BTMASK_F1;
 int bt_START = BTMASK_ON;
 int bt_SELECT = BTMASK_F3;
 int bt_MENU = BTMASK_OFF;
+#endif
+
+#if defined(AV4XX)
+int bt_UP = BTMASK_UP;
+int bt_DOWN = BTMASK_DOWN;
+int bt_LEFT = BTMASK_LEFT;
+int bt_RIGHT = BTMASK_RIGHT;
+int bt_A = BTMASK_BTN1;
+int bt_B = BTMASK_ON;
+int bt_START = BTMASK_F1;
+int bt_SELECT = BTMASK_OFF;
+int bt_MENU = BTMASK_F2;
 #endif
 
 unsigned long OSD_BITMAP1_ADDRESS;

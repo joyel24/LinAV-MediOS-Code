@@ -65,7 +65,7 @@
     //#define GMINI_OVERCLOCKING
 
     #define SCREEN_USE_DSP
-    //#define SCREEN_USE_RESIZE
+    #define SCREEN_USE_RESIZE
 
     #define SOUND_USE_DSP
     #define SOUND_USE_AIC23
