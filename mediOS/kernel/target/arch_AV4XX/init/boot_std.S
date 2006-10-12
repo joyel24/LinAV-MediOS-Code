@@ -8,6 +8,8 @@
 .section ".text.init.arch"
 .global entry_code
 entry_code:
-    /* no specific init for av1xx*/
+    /* av4xx init : we should re-enable cache */   
+    
+    /* call main init*/
     b kernel_entry
     

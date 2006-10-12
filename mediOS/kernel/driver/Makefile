@@ -22,6 +22,13 @@ ifeq ("$(CHIP_TYPE)","DSC25")
 	SRC += clkc_DSC25.c
 endif
 
+ifeq ("$(TARGET_DEVICE)","AV3XX")
+	SRC += tsc2003.c
+endif
+
+ifeq ("$(TARGET_DEVICE)","AV4XX")
+	SRC += tsc2003.c
+endif
 
 ifeq ($(HAVE_EXT_MODULE),1)
 	SRC += ext_module.c dvr_module.c ir_remote.c cf_module.c

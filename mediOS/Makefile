@@ -49,7 +49,7 @@ medios_lib: incdir mk_api_file
 
 aoboy: APP_NAME = avboy
 aoboy: do_build_app
-
+        
 doom: APP_NAME = doom
 doom: do_build_app
 

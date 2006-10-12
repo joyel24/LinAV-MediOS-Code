@@ -23,8 +23,9 @@
 #define POWER_CONNECTED                   (GIO_IS_SET(GIO_POWER_CONNECTED))
 
 /** Bat level **/
-
-#define GET_BAT_LEVEL                     0
+#include <kernel/cpld.h>
+#include <kernel/tsc2003.h>
+#define GET_BAT_LEVEL                     (CPLD_VER==0x5?0:tsc2003getVal(CMD_BAT0|INTERNAL_ON))
 
 
 #endif

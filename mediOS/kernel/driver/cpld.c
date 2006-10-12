@@ -34,9 +34,11 @@ int cpld_portArray[5] = {
     CPLD_PORT4
 };
 
+int CPLD_VER;
+
 void cpld_init(void)
 {
-    int version;
+    
 
     cpld_doSelect();
 
@@ -44,10 +46,10 @@ void cpld_init(void)
     outw(cpld_portState[CPLD2],CPLD_PORT2);
     outw(cpld_portState[CPLD3],CPLD_PORT3);
 
-    version=cpld_getVersion();
+    CPLD_VER=cpld_getVersion();
 
     /* everything is ok */
-    printk("[init] CPLD Ver:0x%x\n",version);
+    printk("[init] CPLD Ver:0x%x\n",CPLD_VER);
 }
 
 void cpld_changeState(int cpld_port,int bit_num,int direction)

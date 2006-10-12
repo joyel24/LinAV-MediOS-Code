@@ -81,6 +81,67 @@ void print_boot_info(void)
     tmr_print();
 }
 
+#ifdef STD_MEDIOS
+#include <kernel/lcd.h>
+void test_fct(void)
+{
+    int evt;
+    int evt_handler=evt_getHandler(BTN_CLASS);
+    if(evt_handler<0)             /* we need a proper error handling in api */
+    {
+        printf("[main test] can't register to evt\n");
+        return;
+    }
+    
+    while(1)
+    {
+        evt=evt_getStatus(evt_handler);
+        /*while(!stop)
+        {
+            evt=evt_getStatus(evt_handler);
+            switch(evt)
+            {
+                case BTN_LEFT:
+                    GIO_DIRECTION(gio_n,GIO_OUT);
+                    GIO_SET(gio_n);
+                    printk("GIO %d SET\n",gio_n);
+                    break;
+                case BTN_RIGHT:
+                    GIO_DIRECTION(gio_n,GIO_OUT);
+                    GIO_CLEAR(gio_n);
+                    printk("GIO %d CLEAR\n",gio_n);
+                    break;
+                case BTN_UP:
+                    if(gio_n<40)
+                        gio_n++;
+                    printk("Cur gio = %d\n",gio_n); 
+                    break;
+                case BTN_DOWN:
+                    if(gio_n>0)
+                        gio_n--;
+                    printk("Cur gio = %d\n",gio_n); 
+                    break;
+                case BTN_OFF:
+                    stop=1;
+                    break;
+            }
+        }*/
+        if(evt==BTN_LEFT)
+        {
+            lcd_ON();
+            printk("LCD ON\n");
+        }
+        else if (evt==BTN_RIGHT)
+        {
+            lcd_OFF();
+            printk("LCD OFF\n");
+        }
+        else if (evt==BTN_OFF)
+            break;
+    }
+}
+#endif
+
 void kernel_start (void)
 {
 #ifdef BUILD_LIB
@@ -107,6 +168,8 @@ void kernel_start (void)
         (unsigned int)MALLOC_START,
         (unsigned int)MALLOC_SIZE);
 
+    printk("Chip rev : %x\n",inw(BUS_REVR));
+        
     /* init the watchdog timer */
     wdt_init();
     /* init the irq */
@@ -156,6 +219,10 @@ void kernel_start (void)
     print_boot_info();
     printk("[init] END\n");
   
+#if 0
+    test_fct();
+#endif
+    
     
 #ifdef BUILD_LIB
     do_bkpt();

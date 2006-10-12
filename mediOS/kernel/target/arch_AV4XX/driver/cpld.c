@@ -17,7 +17,6 @@
 #include <kernel/cpld.h>
 
 int arch_cpld_getVersion(void){
-	printk("Real ver=%x\n",inw(0x02500008));
-    return (cpld_read(CPLD0) & 0x000F);
+    return (cpld_read(CPLD4) & 0x000F);
 }
 

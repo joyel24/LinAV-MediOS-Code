@@ -13,7 +13,7 @@
 #include <sys_def/arch.h>
 
 #define SDRAM_START       0x0900000
-#define EXPLOIT_START     0x1000000
+#define EXPLOIT_START     0x0DA0000
 // RQ: exploit is at 0xDA0000 at end of avi load
 #define SDRAM_END         0x1900000
 
@@ -35,6 +35,11 @@
 /* DEBUG */
 #define DEBUG_UART                        UART_0
 #define CMD_LINE_UART                     UART_0
+
+#define BUS_ECR                           0x30900
+#define BUS_EBYTER                        0x30902
+#define BUS_EBITR                         0x30904
+#define BUS_REVR                          0x30906
 
 /* Interrupts */
 

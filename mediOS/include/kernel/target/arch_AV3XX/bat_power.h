@@ -15,7 +15,7 @@
 
 #include <kernel/io.h>
 
-#include <kernel/target/arch/tsc2003.h>
+#include <kernel/tsc2003.h>
 
 /** power state **/
 

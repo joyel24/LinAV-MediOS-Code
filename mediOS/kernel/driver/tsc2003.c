@@ -13,7 +13,7 @@
 #include <kernel/kernel.h>
 #include <kernel/hardware.h>
 #include <kernel/i2c.h>
-#include <kernel/target/arch/tsc2003.h>
+#include <kernel/tsc2003.h>
 
 
 int tsc2003getVal(char cmdN)

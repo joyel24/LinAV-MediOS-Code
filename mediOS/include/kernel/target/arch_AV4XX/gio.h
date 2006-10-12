@@ -51,6 +51,6 @@
 
 #define GIO_IR        0xff
 
-#define GIO_LCD_BACKLIGHT 0xFF
+#define GIO_LCD_BL_AV4100 0x1e
 
 #endif

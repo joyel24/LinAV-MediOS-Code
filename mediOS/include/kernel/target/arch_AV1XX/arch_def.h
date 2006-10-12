@@ -34,6 +34,11 @@
 #define DEBUG_UART              UART_1
 #define CMD_LINE_UART           UART_1
 
+#define BUS_ECR                           0x30900
+#define BUS_EBYTER                        0x30902
+#define BUS_EBITR                         0x30904
+#define BUS_REVR                          0x30906
+
 /* Interrupts */
 
 #define INTC_BASE                         0x00030500

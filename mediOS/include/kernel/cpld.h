@@ -16,6 +16,8 @@
 #include <kernel/hardware.h>
 #include <kernel/target/arch/cpld.h>
 
+extern int CPLD_VER;
+
 #define CPLD0                  0x0
 #define CPLD1                  0x1
 #define CPLD2                  0x2
