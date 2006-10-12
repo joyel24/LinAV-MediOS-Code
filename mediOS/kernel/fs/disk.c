@@ -161,7 +161,15 @@ void disk_init(void)
         printk("Error init main disk\n");
         return;
     }
-        
+    
+#warning quick hack for partition less HDD
+    if(!drive_info[HD_DRIVE]->partition_list[0].active)
+    {
+        printk("No active partition => load 0\n");
+        drive_info[HD_DRIVE]->partition_list[0].active=1;
+        drive_info[HD_DRIVE]->partition_list[0].start=0;
+    } 
+    
     /* mount root partition */
     vfs_mount(MOUNT_DISK_PARAM(HD_DRIVE));
 
@@ -242,18 +250,20 @@ struct hd_info_s * disk_setup(int drive)
         part_info[i].type  = ptr[4];
         part_info[i].start = BYTES2INT32(ptr, 8);
         part_info[i].size  = BYTES2INT32(ptr, 12);
-
+        part_info[i].active = 0;
         j=0;
         while(j<9 && fatId[j]!=part_info[i].type) j++;
 
         if(j<9)
-                strcpy(part_info[i].strType,fatStr[j]);
-        else
-                printk("Error: partition type not supported: %x\n",part_info[i].type);
-
-        printk("\tPart%d: start=%08x, size=%08x, type:%s (%02x)\n",i,
+        {
+            part_info[i].active = 1;
+            strcpy(part_info[i].strType,fatStr[j]);
+            printk("\tPart%d: start=%08x, size=%08x, type:%s (%02x)\n",i,
                 part_info[i].start,part_info[i].size,
                 part_info[i].strType,part_info[i].type);
+        }
+        else        
+                printk("Error: partition type not supported: %x\n",part_info[i].type);
 
         /* extended? */
         if ( part_info[i].type == 5 ) {

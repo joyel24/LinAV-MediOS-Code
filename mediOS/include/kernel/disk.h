@@ -42,6 +42,7 @@ struct partition_info {
     int size;
     int type;
     char strType[20];
+    int active;
 };
 
 struct hd_info_s {
