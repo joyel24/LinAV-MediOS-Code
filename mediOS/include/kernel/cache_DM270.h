@@ -26,8 +26,15 @@
 #define CACHE_STP_CLEAR                 0x0002
 #define CACHE_STP_4WORDS                0x0100
 
-#define CACHE_DISABLE() {                                                      \
-    outw(CACHE_STP_DISABLE,CACHE_SETUP);                                       \
+#define CACHE_STATUS_CODE               CACHE_STP_ENABLE
+#define CACHE_STATUS_DATA               0
+
+#define CACHE_CLEAN() {}
+
+#define CACHE_DISABLE(mode) {                                                  \
+    if(mode&CACHE_CODE){                                                       \
+        outw(CACHE_STP_DISABLE,CACHE_SETUP);                                   \
+    }                                                                          \
 }
 
 #define CACHE_ENABLE(mode) {                                                   \
@@ -41,6 +48,10 @@
         outw(CACHE_STP_CLEAR,CACHE_SETUP);                                     \
         while(inw(CACHE_SETUP)&CACHE_STP_CLEAR) /* wait */;                    \
     }                                                                          \
+}
+
+#define CACHE_STATUS(status) {                                                 \
+    status=inw(CACHE_SETUP);                                                   \
 }
 
 #endif

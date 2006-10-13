@@ -13,14 +13,14 @@
 #include <sys_def/arch.h>
 
 #define SDRAM_START       0x0900000
-#define SDRAM_END         0x18F0000
+#define SDRAM_END         0x18F0000 //HACK: archos MMU config data lies between 0x18F0000 and 0x1900000
 
 #define IRAM_SIZE         0x4000
 
 #define MALLOC_START  ((((unsigned int)&_end_kernel) & 0xFFFFF000)+0x1000)
-#define MALLOC_SIZE   (SDRAM_END-MALLOC_START)
+#define MALLOC_SIZE   (((unsigned int)&_sdend_start)-MALLOC_START)
 
-#define CONFIG_ARM_CLK 100000000
+#define CONFIG_ARM_CLK 101250000
 #define CONFIG_EXT_CLK 27000000
 
 #define CURRENT_ARCH  GMINI402_ARCH

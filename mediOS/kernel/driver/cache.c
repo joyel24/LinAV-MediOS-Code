@@ -12,14 +12,38 @@
 
 #include <kernel/cache.h>
 
-void cache_enable(int mode){
-    CACHE_DISABLE();
-    CACHE_ENABLE(mode);
+void cache_clean(){
+    CACHE_CLEAN();
+}
+
+void cache_enable(int mode, bool enable){
+    if(enable){
+        CACHE_ENABLE(mode);
+    }else{
+        // clean DCache before disabling it so data is written back to memory
+        if (mode&CACHE_DATA){
+            CACHE_CLEAN();
+        }
+
+        CACHE_DISABLE(mode);
+    }
 }
 
 void cache_invalidate(int mode){
-    CACHE_DISABLE();
+    // clean DCache before invalidating it so data is written back to memory
+    if (mode&CACHE_DATA){
+        CACHE_CLEAN();
+    }
+
     CACHE_INVALIDATE(mode);
-    CACHE_ENABLE(CACHE_ALL);
+}
+
+bool cache_enabled(int mode){
+    int status;
+
+    CACHE_STATUS(status);
+
+    return ((mode&CACHE_CODE) && (status&CACHE_STATUS_CODE)) ||
+           ((mode&CACHE_DATA) && (status&CACHE_STATUS_DATA));
 }
 

@@ -16,8 +16,9 @@
 #include <kernel/hardware.h>
 #include <kernel/kernel.h>
 #include <kernel/osd.h>
+#include <kernel/lcd.h>
 
 void arch_osd_init(void)
 {
-	osd_setMainShift(266, 32);
+	osd_setMainShift(SCREEN_LCD_SHIFT_X, SCREEN_LCD_SHIFT_Y);
 }

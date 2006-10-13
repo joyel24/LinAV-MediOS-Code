@@ -18,6 +18,7 @@
 #include <kernel/kernel.h>
 #include <kernel/malloc.h>
 #include <kernel/hardware.h>
+#include <kernel/cache.h>
 
 #include <kernel/lcd.h>
 #include <kernel/graphics.h>
@@ -112,6 +113,14 @@ static void con_drawLine(int start,int end, int y){
 }
 
 static void con_drawScroll(int start,int end,int delta){
+
+#ifdef DM320
+  //HACK: for some reason, DM320 DCache doesn't like memcpy() scrolls
+  //      so I disable it while scrolling for now. (see graphics_8_DSC25.c too)
+  bool dcache=cache_enabled(CACHE_DATA);
+  if (dcache) cache_enable(CACHE_DATA,false);
+#endif
+
   // copy the block of pixels
   if (delta<=0){
     memcpy(&con_gfxBuffer[(start+delta)*SCREEN_WIDTH],&con_gfxBuffer[start*SCREEN_WIDTH],(end-start)*SCREEN_WIDTH);
@@ -121,6 +130,12 @@ static void con_drawScroll(int start,int end,int delta){
       memcpy(&con_gfxBuffer[(i+delta)*SCREEN_WIDTH],&con_gfxBuffer[i*SCREEN_WIDTH],SCREEN_WIDTH);
     }
   }
+
+#ifdef DM320
+  // restore cache
+  if (dcache) cache_enable(CACHE_DATA,true);
+#endif
+
 }
 
 void con_screenUpdate(){

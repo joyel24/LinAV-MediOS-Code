@@ -16,13 +16,38 @@
 
 #include <kernel/cache.h>
 
-#define CACHE_DISABLE() {                                  \
+#define CACHE_STATUS_CODE               0x00001000
+#define CACHE_STATUS_DATA               0x00000004
+
+#define CACHE_CLEAN() {                                   \
     asm("                              \n\
-        mrc p15,0,r0,c1,c0,0           \n\
-        ldr r1,=0xFFFFEFFB             \n\
-        and r0,r0,r1                   \n\
-        mcr p15,0,r0,c1,c0,0           \n\
-    ":::"r0","r1");                                        \
+        /* test and clean DCache*/     \n\
+        1:                             \n\
+            mrc	p15,0,r15,c7,c10,3     \n\
+            bne 1b                     \n\
+        /* drain write buffer */       \n\
+        mov r0,#0x0                    \n\
+        mcr	p15,0,r0,c7,c10,4          \n\
+    ":::"cc","r0","r15");                                  \
+}
+
+#define CACHE_DISABLE(mode) {                              \
+    if(mode&CACHE_CODE){                                   \
+        asm("                              \n\
+            mrc p15,0,r0,c1,c0,0           \n\
+            ldr r1,=0xFFFFEFFF             \n\
+            and r0,r0,r1                   \n\
+            mcr p15,0,r0,c1,c0,0           \n\
+        ":::"r0","r1");                                    \
+    }                                                      \
+    if(mode&CACHE_DATA){                                   \
+        asm("                              \n\
+            mrc p15,0,r0,c1,c0,0           \n\
+            ldr r1,=0xFFFFFFFB             \n\
+            and r0,r0,r1                   \n\
+            mcr p15,0,r0,c1,c0,0           \n\
+        ":::"r0","r1");                                    \
+    }                                                      \
 }
 
 #define CACHE_ENABLE(mode) {                               \
@@ -65,6 +90,12 @@
             ":::"r0");                                     \
             break;                                         \
     }                                                      \
+}
+
+#define CACHE_STATUS(status) {                             \
+    asm("                              \n\
+        mrc p15,0,%0,c1,c0,0           \n\
+    ":"=r" (status));                                      \
 }
 
 #endif

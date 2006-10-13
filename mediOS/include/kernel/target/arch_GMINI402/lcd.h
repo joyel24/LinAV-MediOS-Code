@@ -1,5 +1,5 @@
 /*
-*   include/kernel/target/arch_GMINI4XX/lcd.h
+*   include/kernel/target/arch_GMINI402/lcd.h
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -13,6 +13,8 @@
 #ifndef __ARCH_LCD_H
 #define __ARCH_LCD_H
 
+#include <kernel/clkc.h>
+
 #define LCD_BACK_LIGHT                    0x0
 
 #define SCREEN_WIDTH                      224
@@ -23,9 +25,9 @@
 
 #define SCREEN_LCD_SHIFT_X                266
 #define SCREEN_LCD_SHIFT_Y                32
-#define SCREEN_PAL_SHIFT_X                134
-#define SCREEN_PAL_SHIFT_Y                15
-#define SCREEN_NTSC_SHIFT_X               100
+#define SCREEN_PAL_SHIFT_X                132
+#define SCREEN_PAL_SHIFT_Y                16
+#define SCREEN_NTSC_SHIFT_X               122
 #define SCREEN_NTSC_SHIFT_Y               11
 
 #define LCD_WIDTH SCREEN_REAL_WIDTH
@@ -42,7 +44,8 @@
 
 #define OSD_CON_BMAP_CFG    OSD_BITMAP_ZX1 | OSD_BITMAP_8BIT | COLOR_TRSP << OSD_BITMAP_A_SHIFT
 
-#define lcd_ON()
-#define lcd_OFF()
+// only backlight off for now
+#define lcd_ON() {outw(0xffff,CLKC_PWM0_HIGH);}
+#define lcd_OFF() {outw(0x0000,CLKC_PWM0_HIGH);}
 
 #endif

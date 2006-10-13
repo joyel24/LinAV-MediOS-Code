@@ -88,12 +88,9 @@ endif
 ifeq ("$(TARGET_DEVICE)","GMINI402")        
 %.avi: %.bin
 	@make -C tools/bin2exploit/ -s 402fw1311avi.tpl
-	@make -C tools/bin2exploit/ -s 402ccfw1311avi.tpl
 	@echo "[$@]"
 	@cp tools/bin2exploit/402fw1311avi.tpl $@
-	@cp tools/bin2exploit/402ccfw1311avi.tpl cc_$@
 	@dd if=$< of=$@ bs=2399744 seek=1 conv=notrunc 2> /dev/null
-	@dd if=$< of=cc_$@ bs=2245632 seek=1 conv=notrunc 2> /dev/null
 else
 ifeq ("$(TARGET_DEVICE)","AV4XX")
 ifeq ("$(BUILD_TYPE)","SIMPLE_LOADER")

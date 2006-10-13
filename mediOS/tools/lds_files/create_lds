@@ -5,7 +5,7 @@ function conv_hexa {
 }
 
 function get_data {
-	cur_txt=`cat $include_file | grep $1 | awk '{print $3}'`
+	cur_txt=`cat $include_file | grep -m1 $1 | awk '{print $3}'`
 }
 
 echo "Creating lds : $1 $2"
@@ -22,6 +22,10 @@ fi
 get_data SDRAM_START
 dram_start=$cur_txt
 
+get_data SDRAM_END
+dram_end=$cur_txt
+
+
 if [ $2 = "SIMPLE_LOADER" ]; then
 get_data EXPLOIT_START
 else
@@ -29,7 +33,11 @@ get_data SDRAM_START
 fi
 
 code_start=$cur_txt
-dram_len=0x01000000
+
+dram_len=$(($dram_end-$dram_start))
+conv_hexa $dram_len
+dram_len=$cur_txt
+
 iram_start=0x00000004
 get_data IRAM_SIZE
 real_iram_len=$cur_txt

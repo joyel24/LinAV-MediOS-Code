@@ -28,14 +28,22 @@
     #include <kernel/cache_DM320.h>
 #elif defined(DSC25) || defined(DSC21)
     // no cache on these chips
+    
+    #define CACHE_STATUS_CODE 0
+    #define CACHE_STATUS_DATA 0
+
+    #define CACHE_CLEAN() {}
     #define CACHE_DISABLE() {}
     #define CACHE_ENABLE(mode) {}
     #define CACHE_INVALIDATE(mode) {}
+    #define CACHE_STATUS(status) {status=0}
 #else
     #error NO CHIP defined
 #endif
 
-void cache_enable(int mode);
+void cache_clean();
+void cache_enable(int mode, bool enable);
 void cache_invalidate(int mode);
+bool cache_enabled(int mode);
 
 #endif

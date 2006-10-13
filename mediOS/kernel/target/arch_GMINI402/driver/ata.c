@@ -1,5 +1,5 @@
 /*
-*   kernel/target/arch_GMINI4XX/ata.c
+*   kernel/target/arch_GMINI402/ata.c
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -22,14 +22,11 @@ void arch_ata_resetHD(void)
 {
     CPLD_CLEAR_PORT1(CPLD_HD_RESET);
     CPLD_SET_PORT1(CPLD_HD_RESET);
-    /**((unsigned short *)(0x40400002))&=0xfffd;
-    *((unsigned short *)(0x40400002))|=0x2;*/
 }
 
 void arch_ata_powerUpHD(void)
 {
     CPLD_SET_PORT1(CPLD_HD_POWER); /* powering up HD */
-    /**((unsigned short *)(0x40400002))|=0x1;*/
 }
 
 void arch_ata_powerDownHD(void)
@@ -39,23 +36,16 @@ void arch_ata_powerDownHD(void)
 
 void arch_ata_selectHD(void)
 {
-     //arch_ata_resetHD();
 }
 
 void arch_ata_selectCF(void)
 {
-     //arch_ata_resetHD();
 }
 
 
 void arch_ata_init(void)
 {
-     /*arch_ata_powerDownHD();
-     mdelay(20000);
      arch_ata_powerUpHD();
-     mdelay(20000);
-     arch_ata_resetHD();
-     mdelay(20000);*/
      arch_ata_resetHD();
 }
 

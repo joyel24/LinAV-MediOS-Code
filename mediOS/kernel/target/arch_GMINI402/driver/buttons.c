@@ -1,5 +1,5 @@
 /*
-*   kernel/target/arch_GMINI4XX/buttons.c
+*   kernel/target/arch_GMINI402/buttons.c
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -42,35 +42,23 @@ int arch_btn_readHardware(void){
     int val;
     int i,dir,fn,bt;
 
-    /*if(cpld_getVersion()==5){*/
-
-      GIO_DIRECTION(GIO_BTN_SELECT_UDLR,GIO_OUT);
-      GIO_CLEAR(GIO_BTN_SELECT_UDLR);
-      for(i=0;i<256;++i); // delay (keyboard hardware is too slow to read directly)
-      dir = (inw(GIO_BITSET1) & 0xF0) >> 4;
-      GIO_DIRECTION(GIO_BTN_SELECT_UDLR,GIO_IN);
-
-      GIO_DIRECTION(GIO_BTN_SELECT_FN,GIO_OUT);
-      GIO_CLEAR(GIO_BTN_SELECT_FN);
-      for(i=0;i<256;++i); // delay (keyboard hardware is too slow to read directly)
-      fn = (inw(GIO_BITSET1) & 0x70) >> 4;
-      GIO_DIRECTION(GIO_BTN_SELECT_FN,GIO_IN);
-
-      GIO_DIRECTION(GIO_BTN_SELECT_SQCR,GIO_OUT);
-      GIO_CLEAR(GIO_BTN_SELECT_SQCR);
-      for(i=0;i<256;++i); // delay (keyboard hardware is too slow to read directly)
-      bt = (inw(GIO_BITSET1) & 0x30) >> 4;
-      GIO_DIRECTION(GIO_BTN_SELECT_SQCR,GIO_IN);
-
-    /*}else{
-
-      dir = inb(BUTTON_PORT0)&0xf;
-      for(i=0;i<16;++i); // delay
-      fn = inb(BUTTON_PORT1)&0x7;
-      for(i=0;i<16;++i); // delay
-      bt = inb(BUTTON_PORT2)&0x3;
-
-    }*/
+    GIO_DIRECTION(GIO_BTN_SELECT_UDLR,GIO_OUT);
+    GIO_CLEAR(GIO_BTN_SELECT_UDLR);
+    for(i=0;i<256;++i); // delay (keyboard hardware is too slow to read directly)
+    dir = (inw(GIO_BITSET1) & 0xF0) >> 4;
+    GIO_DIRECTION(GIO_BTN_SELECT_UDLR,GIO_IN);
+    
+    GIO_DIRECTION(GIO_BTN_SELECT_FN,GIO_OUT);
+    GIO_CLEAR(GIO_BTN_SELECT_FN);
+    for(i=0;i<256;++i); // delay (keyboard hardware is too slow to read directly)
+    fn = (inw(GIO_BITSET1) & 0x70) >> 4;
+    GIO_DIRECTION(GIO_BTN_SELECT_FN,GIO_IN);
+    
+    GIO_DIRECTION(GIO_BTN_SELECT_SQCR,GIO_OUT);
+    GIO_CLEAR(GIO_BTN_SELECT_SQCR);
+    for(i=0;i<256;++i); // delay (keyboard hardware is too slow to read directly)
+    bt = (inw(GIO_BITSET1) & 0x30) >> 4;
+    GIO_DIRECTION(GIO_BTN_SELECT_SQCR,GIO_IN);
 
     val=(dir | bt << 8 | fn << 4);
 

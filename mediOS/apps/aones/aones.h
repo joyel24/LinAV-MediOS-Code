@@ -53,9 +53,9 @@
     #define NES_BTN_HALT          BTMASK_OFF
     #define NES_BTN_START         BTMASK_ON
     #define NES_BTN_SELECT        BTMASK_F2
-    
-    #define NES_LCD_X -8
-    #define NES_LCD_Y -2
+
+    #define NES_LCD_X -6
+    #define NES_LCD_Y 0
     #define NES_LCD_W 224
     #define NES_LCD_H 176 
     

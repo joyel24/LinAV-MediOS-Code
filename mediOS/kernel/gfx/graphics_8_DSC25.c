@@ -12,6 +12,7 @@
 #include <kernel/kernel.h>
 #include <kernel/io.h>
 #include <sys_def/string.h>
+#include <kernel/cache.h>
 
 #include <kernel/graphics.h>
 
@@ -224,6 +225,13 @@ void graphics8_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, i
 
     unsigned char *src,*dest;
 
+#ifdef DM320
+    //HACK: for some reason, DM320 DCache doesn't like memcpy() scrolls
+    //      so I disable it while scrolling for now. (see console.c too)
+    bool dcache=cache_enabled(CACHE_DATA);
+    if (dcache) cache_enable(CACHE_DATA,false);
+#endif
+
     if(scroll == 0)
         return;
         
@@ -259,6 +267,11 @@ void graphics8_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, i
     
     }   
     
+#ifdef DM320
+    // restore cache
+    if (dcache) cache_enable(CACHE_DATA,true);
+#endif
+
 }
 
 void graphics8_ScrollWindowHoriz(unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT, struct graphicsBuffer * buff)
