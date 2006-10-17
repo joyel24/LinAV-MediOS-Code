@@ -598,8 +598,6 @@ void showTurns()
 {
     char tmp[30];
 
-    gfx_fillRect(COLOR_GREEN, 104,194,95,13);
-
     gfx_fontSet(STD8X13);
     sprintf(tmp,"Turns: %d", turns);
     if(y_offset<30){

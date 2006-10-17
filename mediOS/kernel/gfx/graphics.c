@@ -35,10 +35,33 @@
 
 #define STRING_MAXSIZE 200
 
-#define tstXY(x,y)  {if(x>SCREEN_WIDTH) return 0; if(x<0) return 0; if(y>SCREEN_HEIGHT) return 0; if(y<0) return 0;}
-#define tstWH(x,y,w,h)  {if(x+w>SCREEN_WIDTH)return 0; if(x+w<0) return 0; if(y+h>SCREEN_HEIGHT) return 0; if(y+h<0) return 0;}
+#define GFX_CHECK_COORDINATES
 
-//#define abs(val)    (val<0?-val:val)
+
+#ifdef GFX_CHECK_COORDINATES
+
+#define PIXEL_COORD_CHECK(x,y,type){                                           \
+    if(x<0 || y<0 ||                                                           \
+      x>=buffers[current_plane]->width || y>=buffers[current_plane]->height){  \
+        printk("[gfx] "type" with bad coordinates! x=%d y=%d\n",x,y);          \
+        return;                                                                \
+    }                                                                          \
+}
+
+#define RECT_COORD_CHECK(x,y,w,h,type){                                        \
+    if(x<0 || y<0 ||                                                           \
+      (x+w)>buffers[current_plane]->width || (y+h)>buffers[current_plane]->height){      \
+        printk("[gfx] "type" with bad coordinates! x=%d y=%d w=%d h=%d\n",x,y,w,h);      \
+        return;                                                                \
+    }                                                                          \
+}
+
+#else
+
+#define PIXEL_COORD_CHECK(x,y,type)
+#define RECT_COORD_CHECK(x,y,w,h,type)
+
+#endif
 
 char screen_BMAP1[SCREEN_WIDTH*SCREEN_HEIGHT+40];
 char screen_BMAP2[SCREEN_WIDTH*SCREEN_HEIGHT+40];
@@ -458,6 +481,8 @@ void gfx_clearScreen(unsigned int color)
 }
 void gfx_drawPixel(unsigned int color,int x, int y)
 {
+    PIXEL_COORD_CHECK(x,y,"drawPixel");
+
     buffers[current_plane]->gops->drawPixel(color,x,y,buffers[current_plane]);
 }
 
@@ -468,22 +493,34 @@ unsigned int gfx_readPixel(int x, int y)
 
 void gfx_drawRect(unsigned int color, int x, int y, int width, int height)
 {
-     buffers[current_plane]->gops->drawRect(color,x,y,width,height,buffers[current_plane]);
+    RECT_COORD_CHECK(x,y,width,height,"drawRect");
+
+    buffers[current_plane]->gops->drawRect(color,x,y,width,height,buffers[current_plane]);
 }
 
 void gfx_fillRect(unsigned int color, int x, int y, int width, int height)
 {
+    RECT_COORD_CHECK(x,y,width,height,"fillRect");
+
     buffers[current_plane]->gops->fillRect(color,x,y,width,height,buffers[current_plane]);
 }
 
 void gfx_drawLine(unsigned int color, int x1, int y1, int x2, int y2)
 {
+    PIXEL_COORD_CHECK(x1,y1,"drawLine");
+    PIXEL_COORD_CHECK(x2,y2,"drawLine");
+
     gfx_kdrawLine(color,x1,y1,x2,y2,buffers[current_plane]);
 }
 
 void gfx_putS(unsigned int color, unsigned int bg_color, int x, int y, unsigned char *s)
 {
-    buffers[current_plane]->gops->drawString(fnt_fontFromId(current_font),color,bg_color,
+    FONT fnt=fnt_fontFromId(current_font);
+
+    // does not check string length, but it's checked in the gop
+    RECT_COORD_CHECK(x,y,fnt->width,fnt->height,"putS");
+
+    buffers[current_plane]->gops->drawString(fnt,color,bg_color,
                             x,y,s,buffers[current_plane]);
 }
 
@@ -494,7 +531,7 @@ void gfx_getStringSize(unsigned char *str, int *w, int *h)
         if(w) *w=0;
         if(h) *h=0;
     }
-    
+
     if(w)
     {
         *w=0;
@@ -507,7 +544,11 @@ void gfx_getStringSize(unsigned char *str, int *w, int *h)
 
 void gfx_putC(unsigned int color, unsigned int bg_color, int x, int y, unsigned char s)
 {
-    buffers[current_plane]->gops->drawChar(fnt_fontFromId(current_font),color,bg_color,
+    FONT fnt=fnt_fontFromId(current_font);
+
+    RECT_COORD_CHECK(x,y,fnt->width,fnt->height,"putC");
+
+    buffers[current_plane]->gops->drawChar(fnt,color,bg_color,
                             x,y,s,buffers[current_plane]);
 }
 
@@ -521,6 +562,8 @@ void gfx_drawBitmap(BITMAP * bitmap, int x, int y)
 {
     if(!bitmap->data) return;
 
+    RECT_COORD_CHECK(x,y,bitmap->width,bitmap->height,"drawBitmap");
+
     buffers[current_plane]->gops->drawBITMAP(bitmap,-1, // no trsp atm
                                 x,y,buffers[current_plane]);
 }
@@ -529,6 +572,8 @@ void gfx_drawResizedBitmap (BITMAP * bitmap, int x, int y,int width, int height,
     int xp,yp,xinc,yinc;
 
     if(!bitmap->data || !width || !height) return;
+
+    RECT_COORD_CHECK(x,y,width,height,"drawResizedBitmap");
 
     xinc=(bitmap->width<<16)/width;
     yinc=(bitmap->height<<16)/height;
@@ -544,7 +589,7 @@ void gfx_drawResizedBitmap (BITMAP * bitmap, int x, int y,int width, int height,
             yinc=xinc;
         }
     }
-    
+
     if(mode==RESIZE_INTEGER)
     {
         if(xinc>=0x10000)
@@ -579,12 +624,16 @@ void gfx_drawResizedBitmap (BITMAP * bitmap, int x, int y,int width, int height,
 
 void gfx_scrollWindowVert(unsigned int bgColor, int x, int y, int width, int height, int scroll, int UP)
 {
+    RECT_COORD_CHECK(x,y,width,height,"scrollWindowVert");
+
     buffers[current_plane]->gops->scrollWindowVert(bgColor,x,y,width,height,
                                 scroll,UP,buffers[current_plane]);
 }
 
 void gfx_scrollWindowHoriz(unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT)
 {
+    RECT_COORD_CHECK(x,y,width,height,"scrollWindowHoriz");
+
     buffers[current_plane]->gops->scrollWindowHoriz(bgColor,x,y,width,height,
                                 scroll,RIGHT,buffers[current_plane]);
 }

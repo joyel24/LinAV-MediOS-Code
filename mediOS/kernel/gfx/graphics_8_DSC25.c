@@ -393,7 +393,9 @@ void graphics8_DrawString(struct graphicsFont * font, unsigned int color,unsigne
     unsigned char * org=getOffset(x,y,buff,unsigned char);
     unsigned char * dest;
     unsigned int palette[2]={bg_color,color};
-    while(*s)
+    unsigned char * line_end=(getOffset(buff->width,y,buff,unsigned char))-font->width;
+
+    while(*s && org<line_end)
     {
         src=font->table[(int)*s];
         dest=org;
@@ -413,7 +415,7 @@ void graphics8_DrawString(struct graphicsFont * font, unsigned int color,unsigne
                     k++;
                 }
             }
-                
+
             dest+=buff->width;
             src+=font->bpline;
         }

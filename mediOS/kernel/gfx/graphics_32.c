@@ -128,7 +128,7 @@ void graphics32_DrawHorizLine(unsigned int color, int width,unsigned int * offse
 }
 
 void graphics32_DrawSprite(unsigned int * palette,SPRITE * sprite, unsigned int trsp, int x, int y, struct graphicsBuffer * buff)
-{    
+{
     int i,j,index;
     unsigned int * dest=getOffset(x,y,buff,unsigned int);
     unsigned int * src=(unsigned int*)sprite->data;
@@ -348,7 +348,7 @@ void graphics32_DrawChar(struct graphicsFont * font, unsigned int color, unsigne
     
     unsigned char * src=font->table[(int)c];
     unsigned int * dest=getOffset(x,y,buff,unsigned int);
-    
+
     unsigned int palette[2]={bg_color,color};
     
     if(src!=0) 
@@ -430,7 +430,7 @@ void graphics32_DrawString(struct graphicsFont * font, unsigned int color, unsig
         dest+=buff->width;
     }     
     #endif
-    while(*s)
+    while(*s && x<(buff->width-font->width))
     {
         graphics32_DrawChar(font,color,bg_color,x,y, *s, buff);
         x+=font->width;
