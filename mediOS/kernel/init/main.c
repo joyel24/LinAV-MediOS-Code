@@ -64,6 +64,8 @@
 #include <kernel/stdfs.h>
 #include <kernel/vfs.h>
 
+#include <kernel/thread.h>
+
 #ifdef SIMPLE_LOADER
 #include <kernel/bin_load.h>
 #endif
@@ -81,6 +83,8 @@ void print_boot_info(void)
     tmr_print();
 }
 
+void kernel_thread(void);
+
 #ifdef STD_MEDIOS
 #include <kernel/lcd.h>
 void test_fct(void)
@@ -92,7 +96,7 @@ void test_fct(void)
         printf("[main test] can't register to evt\n");
         return;
     }
-    
+
     while(1)
     {
         evt=evt_getStatus(evt_handler);
@@ -114,12 +118,12 @@ void test_fct(void)
                 case BTN_UP:
                     if(gio_n<40)
                         gio_n++;
-                    printk("Cur gio = %d\n",gio_n); 
+                    printk("Cur gio = %d\n",gio_n);
                     break;
                 case BTN_DOWN:
                     if(gio_n>0)
                         gio_n--;
-                    printk("Cur gio = %d\n",gio_n); 
+                    printk("Cur gio = %d\n",gio_n);
                     break;
                 case BTN_OFF:
                     stop=1;
@@ -141,6 +145,29 @@ void test_fct(void)
     }
 }
 #endif
+
+extern THREAD_INFO * threadCurrent;
+
+void testThread1()
+{
+    int i;
+    while(1)
+    {
+        uart_out('1',0);
+        for(i=0;i<10000;i++) /*nothing*/;
+    }
+}
+
+void testThread2()
+{
+    int i;
+    while(1)
+    {
+        uart_out('2',0);
+        for(i=0;i<10000;i++) /*nothing*/;
+    }
+}
+
 
 void kernel_start (void)
 {
@@ -169,7 +196,7 @@ void kernel_start (void)
         (unsigned int)MALLOC_SIZE);
 
     printk("Chip rev : %x\n",inw(BUS_REVR));
-        
+
     /* init the watchdog timer */
     wdt_init();
     /* init the irq */
@@ -180,6 +207,7 @@ void kernel_start (void)
     /* driver init */
     uart_init();
     cpld_init();
+    lcd_init;
 #ifdef HAVE_CMD_LINE
     init_cmd_line();
 #endif
@@ -212,26 +240,41 @@ void kernel_start (void)
 #ifdef STD_MEDIOS
     sound_init();
 #endif
-    /* enable the IRQ */
-    printk("[init] about to enable INT\n");
-    __sti();
     printk("[init] ------------ drivers done\n");
+    
+    /*init thread before irq enable*/
+    thread_init(kernel_thread);
+    /* Err */
+    printk("[init] error: back to main(), SYS thread not started\n");
+    for(;;);
+}
+
+void kernel_thread(void)
+{  
+    THREAD_INFO * ptr1,* ptr2;
+    
+    printk("[SYS thread] starting\n");
+    
+    /*thread_create(&ptr1,(void*)testThread1,"Thread 1");
+    thread_create(&ptr2,(void*)testThread2,"Thread 2");
+    thread_insert(ptr1);
+    thread_insert(ptr2);*/
+
     print_boot_info();
-    printk("[init] END\n");
-  
+
 #if 0
     test_fct();
 #endif
-    
-    
+
+
 #ifdef BUILD_LIB
     do_bkpt();
     app_main(1,&stdalone);
     reload_firmware();
 #endif
-   
+
     do_bkpt();
-    
+
 #ifdef SIMPLE_LOADER
 #ifdef LOADBIN
 #warning using LOADBIN
@@ -243,6 +286,6 @@ loadBin("/medios.bin");
     shell_main();
 #endif
     /* should we launch HALT */
-    printk("[init] error: back to main()\n");
+    printk("[SYS thread] error: back to main()\n");
     for(;;);
 }

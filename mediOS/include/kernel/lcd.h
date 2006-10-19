@@ -14,4 +14,8 @@
 
 #include <kernel/target/arch/lcd.h>
 
+#ifndef lcd_init
+#define lcd_init
+#endif
+
 #endif

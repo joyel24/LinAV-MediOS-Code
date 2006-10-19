@@ -1,10 +1,10 @@
 include $(MEDIOS_SRC_PATH)/Makefile.conf
 
 ifeq ("$(BUILD_TYPE)","SIMPLE_LOADER")
-SRC = irq.c malloc.c pipes.c printk.c timer.c trap_fct.c uart.c ti_wdt.c kdelay.c kernel.c delay.S trap.S
+SRC = irq.c malloc.c pipes.c printk.c timer.c trap_fct.c uart.c ti_wdt.c kdelay.c kernel.c delay.S trap.S thread.c
 else
 SRC = dsp.c irq.c malloc.c pipes.c printk.c timer.c trap_fct.c uart.c ti_wdt.c swi.c kdelay.c kernel.c libfloat.c \
-    delay.S trap.S
+    delay.S trap.S thread.c
 endif
 
 ifeq ($(HAVE_CMD_LINE),1)

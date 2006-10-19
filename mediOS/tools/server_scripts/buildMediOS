@@ -62,14 +62,14 @@ fi
 
 #zipping bin
 zip -9 ${zipFile} medios.${ext} medios.bin
-if [ "$arch" == "g402" ]; then
-zip -9 cc_${zipFile} cc_medios.${ext} medios.bin
-fi
+#if [ "$arch" == "g402" ]; then
+#zip -9 cc_${zipFile} cc_medios.${ext} medios.bin
+#fi
 
 # ok everything is ready we can send
 mvFtp $reportFile $makeResult $zipFile
 cp -f $reportFile $makeResult $zipFile $savPath
-if [ "$arch" == "g402" ]; then
-mvFtp cc_$zipFile
-cp -f cc_$zipFile $savPath
-fi
+#if [ "$arch" == "g402" ]; then
+#mvFtp cc_$zipFile
+#cp -f cc_$zipFile $savPath
+#fi

@@ -106,63 +106,29 @@ trap_irq:
     @
     @ save mode specific registers
     @
-    ldr    r13, .LCsirq
-    sub    lr, lr, #4
-    str    lr, [r13]                @ save lr_IRQ
-    mrs    lr, spsr
-    str    lr, [r13, #4]            @ save spsr_IRQ
-    @
-    @ now branch to the relevent MODE handling routine
-    @
-    mrs    r13, cpsr            @ switch to correct mode
-    bic    r13, r13, #0x3f      @ preserve F bits (VP do not preserve T bit ! => 3F)
-    orr    r13, r13, #0x1f      @ 0x1F for SYS_32,   0x13 for SVC_32
-    orr    r13, r13, #0x80
-    msr    cpsr_c, r13          @ switch to correct mode
+    ldr    sp, .LCsirq
+    stmia  sp, {r0-r2}
+    mrs    r2, spsr 
+    sub    r1, lr, #4            @ save where we came from
+    @ switch to SYS mode in order to save thread regs
+    msr    cpsr_c, #0xDF
+       
+    ldr    r0, threadCurrent
+    add    r0, r0, #68
+    stmdb  r0!, {r1}             @ PC
+    stmdb  r0!, {r3-r12,sp,lr}   @ other regs    
+    @ switching to SVC mode enabling FIQ
+    msr    cpsr_c, #0x93    
+    @ store remaining regs: R0, R1 and CPSR   
+    mov    r4, r2
+    mov    r5, r0                @ saving ptr on reg struct 
+    ldr    r3, .LCsirq           @ r3 points on saved R0, R1        
+    ldmia  r3, {r0-r2}    
+    stmdb  r5!, {r0,r1,r2}
+    stmdb  r5!, {r4}
+    @ r5 points on reg struct
+    add    r5,r2,#8
     
-    
-    
-    @
-    @ now real irq handler
-    @
-    sub     sp, sp, #68
-    stmia   sp, {r0 - r12}			@ save r0 - r12
-    ldr     r7, .LCsirq
-    add     r5, sp, #68
-    ldmia   r7, {r7,r8}
-    add     r4, sp, #52
-    mov     r6, lr
-    stmia   r4, {r5, r6, r7, r8}	@ save sp_SVC, lr_SVC, pc, cpsr
-    mov     r0, sp
-    add     sp, sp, #68
-    mrs     r1, cpsr
-    bic     r1, r1, #0x3f      @ preserve F bits (VP do not preserve T bit ! => 3F)
-    orr     r1, r1, #0x13      @ 0x1F for SYS_32,   0x13 for SVC_32
-    orr     r1, r1, #0x80
-    msr     cpsr_c, r1          @ switch to correct mode
-    mov     sp, r0
-    ldr     r7, .LCsirq
-    str     sp, [r7]
-
-/*__irq_loop:
-    ldr    R2, =irq_entry
-    ldrh   R3, [R2,#2]
-    ldrh   R2, [R2]
-    orr    R4, R2, R3, LSL #16
-    @ R2 points on the bloc  
-    @ read whole bloc
-    ldmia  R4, {R0-R3}
-    cmp    R3, #0
-    beq    __exit_irq_loop   @ if handler = 0 => no handler
-    @ now ack the INT
-    strh   R1, [R2]   
-    mov    R1, SP            @ get reg stucture
-    adr    LR, __irq_loop
-    mov    PC, R3            @ branch to handler 
-__exit_irq_loop:*/
-
-    
-
 __irq_loop:
 .ifdef DSC21
     ldr    R2, =0x305c0
@@ -204,28 +170,41 @@ __irq_loop:
 
     @ now ack the INT
     strh   R1, [R2]   
-    mov    R1, SP            @ get reg stucture
-    adr    LR, __irq_loop
+    mov    R1, r5            @ get reg stucture
+    adr    LR, __irq_loop    
     mov    PC, R3            @ branch to handler 
-@     mov r1, r2
-@     mov r0, r4
-@     bl   irq_tstprint
 __exit_irq_loop:
-  
+    
+    bl     thread_nxt
 
-    ldr     r7, .LCsirq
-    ldr     sp, [r7]
-    ldr     r0, [sp, #64]    @ irqs are already disabled
-    msr     spsr, r0
-    ldmia   sp, {r0 - pc}^   @ load r0 - pc, cpsr
+.global thread_loadContext
+thread_loadContext:
+@ going to SVC mode without INT
+    
+    msr    cpsr_c, #0xD3
+    ldr    r0, threadCurrent
+    ldmia  r0!,{r1}
+    msr    spsr, r1    @ put back spsr to correct value
+    add    lr, r0, #60
+    @ moving to SYS without INT
+    msr    cpsr_c, #0xDF     
+    ldmia  r0, {r0 - lr}          @ load r0 - lr
+    @ going back to SVC without INT
+    msr    cpsr_c, #0xD3
+    ldmia  lr,{pc}^
+    
 
-@.align 5
+.align 5
 .LCsirq:	 .word __temp_irq
 
 .global __temp_irq
-__temp_irq: .word	0  @ saved lr_irq
-            .word	0  @ saved spsr_irq
-            .word	-1 @ old_r0
+__temp_irq: .long	0  @ saved lr_irq
+            .long	0  @ saved spsr_irq
+            .long	-1 @ old_r0
+            
+.align 5
+.global threadCurrent
+threadCurrent: .byte 0, 0, 0, 0
 
                
 .align  8
