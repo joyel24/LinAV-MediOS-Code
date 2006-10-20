@@ -171,9 +171,7 @@ void testThread2()
 
 void kernel_start (void)
 {
-#ifdef BUILD_LIB
-    char * stdalone="STDALONE";
-#endif
+
 
     /* malloc of max space in SDRAM */
     mem_addPool((void*)MALLOC_START,MALLOC_SIZE);
@@ -251,6 +249,10 @@ void kernel_start (void)
 
 void kernel_thread(void)
 {  
+#ifdef BUILD_LIB
+    char * stdalone="STDALONE";
+#endif
+
     THREAD_INFO * ptr1,* ptr2;
     
     printk("[SYS thread] starting\n");
