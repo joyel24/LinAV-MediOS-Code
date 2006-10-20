@@ -68,6 +68,8 @@
 
 #ifdef SIMPLE_LOADER
 #include <kernel/bin_load.h>
+#else
+#include <kernel/lcd.h>
 #endif
 
 #ifdef BUILD_LIB
@@ -87,6 +89,7 @@ void kernel_thread(void);
 
 #ifdef STD_MEDIOS
 #include <kernel/lcd.h>
+
 void test_fct(void)
 {
     int evt;
@@ -205,7 +208,10 @@ void kernel_start (void)
     /* driver init */
     uart_init();
     cpld_init();
+#ifdef STD_MEDIOS
     lcd_init;
+#endif
+
 #ifdef HAVE_CMD_LINE
     init_cmd_line();
 #endif
