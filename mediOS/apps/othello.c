@@ -475,7 +475,12 @@ void iniCursorPos()
             break;
 
         case BTN_1:
-        case BTN_F1:
+#ifdef AV4XX
+                case BTN_ON:
+#endif
+#ifndef AV4XX
+                case BTN_F1:
+#endif
             // BTN_1=joypress on av3xx, bad button
             if(arch==AV3XX_ARCH && evt==BTN_1) break;
 
@@ -507,7 +512,12 @@ void iniCursorPos()
             stop_othello=1;
             break;
 
-        case BTN_ON:
+#ifdef AV4XX
+                case BTN_F1:
+#endif
+#ifndef AV4XX
+                case BTN_ON:
+#endif
             iniBoard();
             computeAllowed(allowedHuman,HUMAN);
             redraw();

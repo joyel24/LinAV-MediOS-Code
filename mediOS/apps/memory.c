@@ -1373,8 +1373,12 @@ void eventHandlerLoop(void)
 						break;
 	
 						/* toggle flag under cursor */
-					case BTN_F1:
-	
+#ifdef AV4XX
+                case BTN_ON:
+#endif
+#ifndef AV4XX
+                case BTN_F1:
+#endif	
 						test = testField(); // gibt es schon ein anderes auf test gesetzes Feld ?
 	
 						if( ((test.x != x) || (test.y != y)) && (field[y][x].known == 0) ) // wurde 2 mal das gleiche Feld angeklickt ? Das aktuelle Feld darf auch noch nicht aufgedeckt sein !
@@ -1424,8 +1428,13 @@ void eventHandlerLoop(void)
 							}
 						}
 						break;
-	
-					case BTN_ON: // new game
+// new game
+#ifdef AV4XX
+                case BTN_F1:
+#endif
+#ifndef AV4XX
+                case BTN_ON:
+#endif
 						gfx_clearScreen(COLOR_GREEN);
 						init();
 						displayField(0);

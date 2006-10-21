@@ -621,7 +621,12 @@ void eventHandlerLoop(void)
                     break;
 
                     /* toggle flag under cursor */
+#ifdef AV4XX
+                case BTN_ON:
+#endif
+#ifndef AV4XX
                 case BTN_F1:
+#endif
                     ch = check();
                     if(ch == 0)
                     {
@@ -651,8 +656,13 @@ void eventHandlerLoop(void)
 						end=1;
                     }
                     break;
-
-                case BTN_ON: // new game
+// new game
+#ifdef AV4XX
+                case BTN_F1:
+#endif
+#ifndef AV4XX
+                case BTN_ON:
+#endif 
                     gfx_clearScreen(COLOR_GREEN);
                     init();
                     break;

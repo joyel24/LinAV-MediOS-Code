@@ -64,7 +64,12 @@ void processEvt(int event)
 
         switch (event)
         {
-            case BTN_ON:
+#ifdef AV4XX
+                case BTN_F2:
+#endif
+#ifndef AV4XX
+                case BTN_ON:
+#endif
                 bPause=0;
                 break;
             case BTN_OFF:
@@ -76,6 +81,9 @@ void processEvt(int event)
 
         switch (event)
         {
+#ifdef AV4XX
+            case BTN_ON:
+#endif
             case BTN_1:
             case BTN_UP:
                 TurnClusterRight();
@@ -99,7 +107,12 @@ void processEvt(int event)
                 NewCluster();   /* ... and create new one */
                 break;
 
-            case BTN_ON:
+#ifdef AV4XX
+                case BTN_F2:
+#endif
+#ifndef AV4XX
+                case BTN_ON:
+#endif
                 bPause=1;
                 break;
             case BTN_OFF:
