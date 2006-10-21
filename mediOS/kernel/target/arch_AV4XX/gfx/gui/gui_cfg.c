@@ -34,10 +34,10 @@ struct statusLine_data lineData = {
     ver_x:55,
     ver_y:5,
     ver_color:COLOR_DARK_BLUE,
-    module_x:88,
+    module_x:203,
     module_y:4,
-    pwr_x:142,
+    pwr_x:218,
     pwr_y:4,
-    usb_x:123,
+    usb_x:237,
     usb_y:4
 };
