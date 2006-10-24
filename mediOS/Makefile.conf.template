@@ -3,7 +3,7 @@
 # Autogen by config tool
 #######################################
 
-GCCFLAGS = -Wall  -nostdlib -fno-builtin  -mcpu=arm7tdmi -O2
+GCCFLAGS = -Wall  -nostdlib -fno-builtin -O2
 ASFLAGS = -mfpu=softfpa
 
 #
@@ -32,8 +32,16 @@ ifeq ("$(TARGET_DEVICE)","JBMM")
 GCCFLAGS += -mlong-calls 
 endif
 
+ifeq ("$(CHIP_TYPE)","DM320")
+GCCFLAGS += -mcpu=arm920t
+else
+GCCFLAGS += -mcpu=arm7tdmi
+endif
+
 GCCFLAGS += -D$(TARGET_DEVICE) -D$(CHIP_TYPE) -I$(MEDIOS_SRC_PATH)/include --pipe
 ASFLAGS  += --defsym $(TARGET_DEVICE)=1 --defsym $(CHIP_TYPE)=1 -I$(MEDIOS_SRC_PATH)/include
+
+LDFLAGS =  -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lfloat -lm -lgcc
 
 BUILD_DIR = $(MEDIOS_SRC_PATH)/kernel/build
 
@@ -78,10 +86,6 @@ endif
 ifeq ($(HAVE_CMD_LINE),1)
 	GCCFLAGS += -DHAVE_CMD_LINE
 endif
-
-#ifeq ($(HAVE_DEBUG_ON_SCREEN),1)
-#	GCCFLAGS += -DHAVE_DEBUG_ON_SCREEN
-#endif
 
 ifeq ($(HAVE_EVT),1)
 	GCCFLAGS += -DHAVE_EVT

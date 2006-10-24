@@ -1,10 +1,5 @@
 include Makefile.conf
 
-#LDFLAGS =  -L/usr/local/cross-tools/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lfloat -lgcc
-LDFLAGS =  -L/usr/local/toolchain_arm_nofpu/arm-linux-uclibc/lib/ -lfloat -lm -lgcc
-#LDFLAGS =  -L/usr/local/toolchain_arm_gcc402/lib/ -L/usr/local/toolchain_arm_gcc402/lib/gcc/arm-elf/4.0.2/ -lfloat -lgcc
-#LDFLAGS = -L/home/christophe/gcc-3.3.x/toolchain_arm_nofpu/arm-linux/lib/ -lgcc
-
 SUBDIRS = kernel
 KERNEL_OBJS = kernel/build/*.o kernel/target/arch_$(TARGET_DEVICE)/build/*.o
 
