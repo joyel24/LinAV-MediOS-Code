@@ -1,10 +1,6 @@
 include $(MEDIOS_SRC_PATH)/Makefile.conf
 
-ifeq ("$(BUILD_TYPE)","SIMPLE_LOADER")
-SRC = ata.c cpld.c clkc.c cache.c
-else
 SRC = ata.c cpld.c i2c.c rtc.c buttons.c usb_fw.c bat_power.c clkc.c cache.c
-endif
 
 ifeq ("$(CHIP_TYPE)","DM270")
 	SRC += clkc_DM270.c
@@ -22,14 +18,12 @@ ifeq ("$(CHIP_TYPE)","DSC25")
 	SRC += clkc_DSC25.c
 endif
 
-ifeq ("$(BUILD_TYPE)","STD_MEDIOS")
 ifeq ("$(TARGET_DEVICE)","AV3XX")
 	SRC += tsc2003.c
 endif
 
 ifeq ("$(TARGET_DEVICE)","AV4XX")
 	SRC += tsc2003.c
-endif
 endif
 
 ifeq ($(HAVE_EXT_MODULE),1)

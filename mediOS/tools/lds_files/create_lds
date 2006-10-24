@@ -8,7 +8,7 @@ function get_data {
 	cur_txt=`cat $include_file | grep -m1 $1 | awk '{print $3}'`
 }
 
-echo "Creating lds : $1 $2"
+echo "Creating lds : $1"
 
 dest_file="medios.lds"
 map_file="medios.map"
@@ -26,11 +26,8 @@ get_data SDRAM_END
 dram_end=$cur_txt
 
 
-if [ $2 = "SIMPLE_LOADER" ]; then
-get_data EXPLOIT_START
-else
+
 get_data SDRAM_START
-fi
 
 code_start=$cur_txt
 

@@ -107,7 +107,6 @@ CONFIGURE_HAVE_CMD_LINE=-1
 CONFIGURE_HAVE_EVT=-1
 CONFIGURE_HAVE_CONSOLE=-1
 CONFIGURE_HAVE_DBUG=-1
-CONFIGURE_BUILD_TYPE=-1
 
 # this is the first configuration question, AV3XX, GMINI4XX, AV1XX or JBMM
 
@@ -122,7 +121,6 @@ if [ $CONFIGURE_TARGET_DEVICE == "1" ]; then
             CONFIGURE_HAVE_AIC23_SOUND="0" 
             CONFIGURE_CHIP_TYPE="DSC25"
             CONFIGURE_HAVE_DBUG="1"
-	    CONFIGURE_BUILD_TYPE="0"
 	    TARGET_OK=1
 fi
 
@@ -133,7 +131,6 @@ if [ $CONFIGURE_TARGET_DEVICE == "2" ]; then
             CONFIGURE_HAVE_EXT_MODULE="0"
             CONFIGURE_HAVE_FM_REMOTE="0"
             CONFIGURE_CHIP_TYPE="DM270"
-	    CONFIGURE_BUILD_TYPE="0"
 	    TARGET_OK=1
 fi
 
@@ -143,7 +140,6 @@ if [ $CONFIGURE_TARGET_DEVICE == "3" ]; then
             CONFIGURE_HAVE_AIC23_SOUND="0" 
             CONFIGURE_CHIP_TYPE="DSC25"    
             CONFIGURE_HAVE_DBUG="1"
-	    CONFIGURE_BUILD_TYPE="0"
 	    TARGET_OK=1
 fi
 
@@ -154,7 +150,6 @@ if [ $CONFIGURE_TARGET_DEVICE == "4" ]; then
             CONFIGURE_CHIP_TYPE="DSC21"
             CONFIGURE_HAVE_CONSOLE="0"
             CONFIGURE_HAVE_DBUG="1"
-	    CONFIGURE_BUILD_TYPE="0"
 	    TARGET_OK=1
 fi
 
@@ -165,7 +160,6 @@ if [ $CONFIGURE_TARGET_DEVICE == "5" ]; then
             CONFIGURE_HAVE_EXT_MODULE="0"
             CONFIGURE_HAVE_FM_REMOTE="0"
             CONFIGURE_CHIP_TYPE="DM320"
-	    CONFIGURE_BUILD_TYPE="0"
 	    TARGET_OK=1
 fi
 
@@ -190,25 +184,6 @@ echo "Configuring for $CONFIGURE_TARGET_DEVICE"
 # this section of the script asks all of the yes or no querys, they are of the following format:
 # CONFIG_QUERY_YN $variable_to_set "question to ask" "default answer"
 # variable_to_set=$?
-
-CONFIG_QUERY_MULTI $CONFIGURE_BUILD_TYPE "Standard_medios Simple_loader" "Please choose target build" "1"
-CONFIGURE_BUILD_TYPE=$?
-
-if [ $CONFIGURE_BUILD_TYPE == "2" ]; then
-	CONFIGURE_BUILD_TYPE=SIMPLE_LOADER
-	CONFIGURE_HAVE_MAS_SOUND="0"
-        CONFIGURE_HAVE_AIC23_SOUND="0"     
-        CONFIGURE_HAVE_EXT_MODULE="0"
-        CONFIGURE_HAVE_FM_REMOTE="0"
-	CONFIGURE_CHK_BAT_POWER="0"
-	CONFIGURE_CHK_USB_FW="0"
-	CONFIGURE_HAVE_DBUG="0"
-	CONFIGURE_HAVE_CMD_LINE="0"
-	CONFIGURE_HAVE_EVT="0"
-	CONFIGURE_HAVE_CONSOLE="0"
-else
-	CONFIGURE_BUILD_TYPE=STD_MEDIOS
-fi
 
 CONFIG_QUERY_YN $CONFIGURE_HAVE_DBUG "Build with emu2 breakpoints support? (disable this on Gmini402)" "n"
 CONFIGURE_HAVE_DBUG=$?
@@ -254,8 +229,7 @@ cat ./Makefile.conf.template | sed > ./Makefile.conf \
  -e "s,%CONFIGURE_HAVE_DVR%,${CONFIGURE_HAVE_DVR},g" \
  -e "s,%CONFIGURE_HAVE_CONSOLE%,${CONFIGURE_HAVE_CONSOLE},g" \
  -e "s,%CONFIGURE_CHIP_TYPE%,${CONFIGURE_CHIP_TYPE},g" \
- -e "s,%CONFIGURE_HAVE_DBUG%,${CONFIGURE_HAVE_DBUG},g" \
- -e "s,%CONFIGURE_BUILD_TYPE%,${CONFIGURE_BUILD_TYPE},g"
+ -e "s,%CONFIGURE_HAVE_DBUG%,${CONFIGURE_HAVE_DBUG},g"
 
 #did everything work?
 if [ -f "./Makefile.conf" ]; then

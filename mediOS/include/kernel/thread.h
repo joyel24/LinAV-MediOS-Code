@@ -24,8 +24,12 @@ typedef struct thread_info {
     unsigned long regs[17];
     unsigned int * stackMalloc;
     unsigned int stackSize;
+    
+    /* thread info */
     char name[THREAD_NAME_SIZE];
-
+    int pid;
+    
+    
     /* linkage */
     struct thread_info * nxt;
     struct thread_info * prev;
@@ -33,6 +37,8 @@ typedef struct thread_info {
 
 MED_RET_T thread_init(void(*)(void));
 void thread_loadContext(void);
+void thread_print(void);
+void thread_nxt(void);
 
 MED_RET_T thread_create(THREAD_INFO ** ret_thread,void * entry,char * name);
 MED_RET_T thread_insert(THREAD_INFO * thread);

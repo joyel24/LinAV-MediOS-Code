@@ -24,28 +24,6 @@ HAVE_CONSOLE = %CONFIGURE_HAVE_CONSOLE%
 CHIP_TYPE = %CONFIGURE_CHIP_TYPE%
 HAVE_DBUG = %CONFIGURE_HAVE_DBUG%
 
-ifdef BUILD_TYPE
-#force config if not building standard medios
-ifeq ("$(BUILD_TYPE)","SIMPLE_LOADER")
-CHK_BAT_POWER = "0"
-CHK_USB_FW = "0"
-HAVE_EXT_MODULE = "0"
-HAVE_FM_REMOTE = "0"
-HAVE_MAS_SOUND = "0"
-HAVE_AIC23_SOUND = "0"
-HAVE_CMD_LINE = "0"
-HAVE_EVT = "0"
-HAVE_CONSOLE = "0"
-HAVE_DBUG = "0"
-ifdef LOADBIN
-GCCFLAGS += -DLOADBIN=\"/$(LOADBIN).bin\"
-endif
-endif
-
-else
-BUILD_TYPE=%CONFIGURE_BUILD_TYPE%
-endif
-
 #
 # Makefile core
 #
@@ -58,8 +36,6 @@ GCCFLAGS += -D$(TARGET_DEVICE) -D$(CHIP_TYPE) -I$(MEDIOS_SRC_PATH)/include --pip
 ASFLAGS  += --defsym $(TARGET_DEVICE)=1 --defsym $(CHIP_TYPE)=1 -I$(MEDIOS_SRC_PATH)/include
 
 BUILD_DIR = $(MEDIOS_SRC_PATH)/kernel/build
-
-GCCFLAGS += -D$(BUILD_TYPE)
 
 ifeq ($(HAVE_CONSOLE),1)
 	GCCFLAGS += -DHAVE_CONSOLE

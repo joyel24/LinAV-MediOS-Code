@@ -66,11 +66,7 @@
 
 #include <kernel/thread.h>
 
-#ifdef SIMPLE_LOADER
-#include <kernel/bin_load.h>
-#else
 #include <kernel/lcd.h>
-#endif
 
 #ifdef BUILD_LIB
 extern int app_main(int argc, char * argv[]);
@@ -83,81 +79,21 @@ void print_boot_info(void)
     printk("SP: %08x\n",get_sp());
     irq_print();
     tmr_print();
+    thread_print();
 }
 
 void kernel_thread(void);
-
-#ifdef STD_MEDIOS
-#include <kernel/lcd.h>
-
-void test_fct(void)
-{
-    int evt;
-    int evt_handler=evt_getHandler(BTN_CLASS);
-    if(evt_handler<0)             /* we need a proper error handling in api */
-    {
-        printf("[main test] can't register to evt\n");
-        return;
-    }
-
-    while(1)
-    {
-        evt=evt_getStatus(evt_handler);
-        /*while(!stop)
-        {
-            evt=evt_getStatus(evt_handler);
-            switch(evt)
-            {
-                case BTN_LEFT:
-                    GIO_DIRECTION(gio_n,GIO_OUT);
-                    GIO_SET(gio_n);
-                    printk("GIO %d SET\n",gio_n);
-                    break;
-                case BTN_RIGHT:
-                    GIO_DIRECTION(gio_n,GIO_OUT);
-                    GIO_CLEAR(gio_n);
-                    printk("GIO %d CLEAR\n",gio_n);
-                    break;
-                case BTN_UP:
-                    if(gio_n<40)
-                        gio_n++;
-                    printk("Cur gio = %d\n",gio_n);
-                    break;
-                case BTN_DOWN:
-                    if(gio_n>0)
-                        gio_n--;
-                    printk("Cur gio = %d\n",gio_n);
-                    break;
-                case BTN_OFF:
-                    stop=1;
-                    break;
-            }
-        }*/
-        if(evt==BTN_LEFT)
-        {
-            lcd_ON();
-            printk("LCD ON\n");
-        }
-        else if (evt==BTN_RIGHT)
-        {
-            lcd_OFF();
-            printk("LCD OFF\n");
-        }
-        else if (evt==BTN_OFF)
-            break;
-    }
-}
-#endif
 
 extern THREAD_INFO * threadCurrent;
 
 void testThread1()
 {
-    int i;
-    while(1)
+    int i,k=0;
+    while(k<10)
     {
         uart_out('1',0);
-        for(i=0;i<10000;i++) /*nothing*/;
+        for(i=0;i<1000000;i++) /*nothing*/;
+        k++;
     }
 }
 
@@ -167,20 +103,17 @@ void testThread2()
     while(1)
     {
         uart_out('2',0);
-        for(i=0;i<10000;i++) /*nothing*/;
+        for(i=0;i<100000;i++) /*nothing*/;
     }
 }
 
 
 void kernel_start (void)
 {
-
-
-    /* malloc of max space in SDRAM */
+   /* malloc of max space in SDRAM */
     mem_addPool((void*)MALLOC_START,MALLOC_SIZE);
-#ifdef STD_MEDIOS
+
     gfx_init();
-#endif
 
 #ifdef HAVE_CONSOLE
     con_init();
@@ -208,9 +141,8 @@ void kernel_start (void)
     /* driver init */
     uart_init();
     cpld_init();
-#ifdef STD_MEDIOS
+    
     lcd_init;
-#endif
 
 #ifdef HAVE_CMD_LINE
     init_cmd_line();
@@ -218,15 +150,11 @@ void kernel_start (void)
 #ifdef HAVE_EVT
     evt_init();
 #endif
-#ifdef STD_MEDIOS
     btn_init();
-#endif
 #ifdef CHK_BAT_POWER
     init_power();
 #endif
-#ifdef STD_MEDIOS
     init_rtc();
-#endif
 #ifdef CHK_USB_FW
     init_usb_fw();
 #endif
@@ -241,9 +169,8 @@ void kernel_start (void)
     ata_init();
     vfs_init();
     disk_init();
-#ifdef STD_MEDIOS
+    
     sound_init();
-#endif
     printk("[init] ------------ drivers done\n");
     
     /*init thread before irq enable*/
@@ -258,41 +185,17 @@ void kernel_thread(void)
 #ifdef BUILD_LIB
     char * stdalone="STDALONE";
 #endif
-
-    THREAD_INFO * ptr1,* ptr2;
     
     printk("[SYS thread] starting\n");
-    
-    /*thread_create(&ptr1,(void*)testThread1,"Thread 1");
-    thread_create(&ptr2,(void*)testThread2,"Thread 2");
-    thread_insert(ptr1);
-    thread_insert(ptr2);*/
-
     print_boot_info();
 
-#if 0
-    test_fct();
-#endif
-
-
 #ifdef BUILD_LIB
-    do_bkpt();
     app_main(1,&stdalone);
     reload_firmware();
 #endif
-
-    do_bkpt();
-
-#ifdef SIMPLE_LOADER
-#ifdef LOADBIN
-#warning using LOADBIN
-loadBin(LOADBIN);
-#else
-loadBin("/medios.bin");
-#endif
-#else
+    
     shell_main();
-#endif
+
     /* should we launch HALT */
     printk("[SYS thread] error: back to main()\n");
     for(;;);

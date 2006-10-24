@@ -26,6 +26,7 @@
 #include <kernel/bat_power.h>
 #include <kernel/ata.h>
 #include <kernel/exit.h>
+#include <kernel/thread.h>
 
 unsigned long tick __IRAM_DATA;
 
@@ -56,7 +57,9 @@ __IRAM_CODE void tmr_intAction(int irq,struct pt_regs * regs)
             }                
         }
         ptr=ptr->nxt;
-    }    
+    }  
+    /* calling thread switch */
+    thread_nxt();
 }
 
 unsigned int tmr_getTick(void)

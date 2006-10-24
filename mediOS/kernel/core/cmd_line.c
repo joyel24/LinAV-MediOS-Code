@@ -23,7 +23,7 @@
 #include <kernel/malloc.h>
 
 #include <kernel/cmd_line.h>
-
+#include <kernel/thread.h>
 #include <kernel/exit.h>
 
 #define MAX_CMD_LEN     100
@@ -93,6 +93,12 @@ struct cmd_line_s cmd_tab[] = {
         help_str   : "Writes a value to memory, usage: out address size value",
         cmd_action : do_out,
         nb_args    : 3
+    },
+    {
+        cmd        : "ps",
+        help_str   : "List threads",
+        cmd_action : do_ps,
+        nb_args    : 0
     },
     /* this has to be the last entry */
     {
@@ -415,4 +421,9 @@ void do_out (unsigned char ** params)
             printk("Size should be 1, 2 or 4\n");
             return;
     }
+}
+
+void do_ps (unsigned char ** params)
+{
+    thread_print();
 }

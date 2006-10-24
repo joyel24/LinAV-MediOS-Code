@@ -16,14 +16,6 @@
 
 char trap_stack[1024];
 
-#ifdef SIMPLE_LOADER
-void swi_handler(void)
-{
-    uart_outString("[INT] SWI !!\n",DEBUG_UART);
-}
-#endif
-
-
 void do_trap_undef(void)
 {
     uart_outString("[INT] UNDEF !!\n",DEBUG_UART);

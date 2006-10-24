@@ -175,7 +175,8 @@ __irq_loop:
     mov    PC, R3            @ branch to handler 
 __exit_irq_loop:
     
-    bl     thread_nxt
+    @ no need to do it here as we switch only on tick INT
+    @bl     thread_nxt
 
 .global thread_loadContext
 thread_loadContext:

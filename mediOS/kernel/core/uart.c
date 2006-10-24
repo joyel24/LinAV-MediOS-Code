@@ -92,12 +92,11 @@ void uart_init(void)
     UART_1_Pipe=&UART_PIPES[1];
 
     UART_0_Pipe->nOUT = UART_0_Pipe->nIN = 0;
-    UART_1_Pipe->nOUT = UART_1_Pipe->nIN = 0;
-    
-#ifdef STD_MEDIOS
+    UART_1_Pipe->nOUT = UART_1_Pipe->nIN = 0;  
+
     irq_enable(IRQ_UART0);
     irq_enable(IRQ_UART1);
-#endif
+
     arch_uart_init();
     
     printk("[init] uart\n");

@@ -22,10 +22,15 @@
 extern THREAD_INFO * threadCurrent;
 void thread_exit(void);
 
+int pid;
+
 MED_RET_T thread_init(void(*fct)(void))
 {
     THREAD_INFO * sysThread = (THREAD_INFO*)malloc(sizeof(THREAD_INFO));
     int i;
+    
+    pid=0;
+    
     /* creating initial thread */
     if(!sysThread)
     {
@@ -39,7 +44,7 @@ MED_RET_T thread_init(void(*fct)(void))
     sysThread->stackMalloc=NULL;
     strcpy(sysThread->name,"KERNEL");
     sysThread->stackSize=0;
-
+    sysThread->pid=pid++;
     sysThread->regs[0]=(unsigned long)THREAD_SYSINIT_CPSR; //CPSR
     for(i=0;i<=12;i++)
         sysThread->regs[i+1]=(unsigned long)(i|(i<<8)|(i<<16)|(i<<24));
@@ -64,6 +69,43 @@ MED_RET_T thread_init(void(*fct)(void))
 void thread_exit(void)
 {
     printk("Exit from %s\n",threadCurrent->name!=NULL?threadCurrent->name:"NO NAME");
+    __cli();
+    thread_remove(threadCurrent);
+    thread_print();
+    #warning need free for stack and struct here
+    thread_loadContext();
+}
+
+MED_RET_T thread_kill(int pid)
+{
+    /* searching the PID */
+    MED_RET_T ret_val=MED_OK;
+    THREAD_INFO * ptr=threadCurrent;
+    if(ptr)
+    {
+        /* searching the PID */
+        do
+        {
+            if(ptr->pid==pid)
+                break;
+            ptr=ptr->nxt;
+        } while(ptr!=threadCurrent);
+        /* have we found the thread ?*/
+        if(ptr->pid==pid)
+        {
+           /* __cli();
+            thread_remove(ptr);
+            thread_print();
+            #warning need free for stack and struct here
+            thread_loadContext();
+            __sti();*/
+        }
+        else
+            ret_val=-MED_ENOENT;
+    }
+    else
+        ret_val=-MED_EINVAL;
+    return ret_val;
 }
 
 MED_RET_T thread_create(THREAD_INFO ** ret_thread,void * entry,char * name)
@@ -92,6 +134,7 @@ MED_RET_T thread_create(THREAD_INFO ** ret_thread,void * entry,char * name)
 /* name */
     strncpy(newThread->name,name,THREAD_NAME_SIZE);
     newThread->name[THREAD_NAME_SIZE-1]=0;
+    newThread->pid=pid++;
 /* stack */
     newThread->stackSize=stackSize;
 
@@ -171,6 +214,21 @@ __IRAM_CODE void thread_nxt(void)
     threadCurrent=threadCurrent->nxt;    
 }
 
-
+void thread_print(void)
+{
+    THREAD_INFO * ptr=threadCurrent;
+    int i=0;
+    if(ptr)
+    {
+        printf("Thread list:\n");
+        do
+        {
+            printf("%d: %s - pid=%d\n",i++,ptr->name!=NULL?ptr->name:"NO Name",ptr->pid);
+            ptr=ptr->nxt;
+        } while(ptr!=threadCurrent);
+    }
+    else
+        printf("Thread list empty!!\n");
+}
 
 
