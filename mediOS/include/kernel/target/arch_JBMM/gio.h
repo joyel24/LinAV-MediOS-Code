@@ -35,7 +35,7 @@
 #define GIO_OFF_BTN   0x18
 
 //#define GIO_SPDIF     0x01
-#define GIO_VID_OUT   0xff
+#define GIO_VID_OUT   0x01
 
 //#define GIO_IR        0x06
 
