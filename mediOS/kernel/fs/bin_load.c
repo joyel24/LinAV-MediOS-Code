@@ -23,11 +23,20 @@
 
 #include <kernel/errors.h>
 
-void (*callBin)(void)=(void(*)(void))SDRAM_START;
+#include <kernel/cache.h>
+#include <kernel/io.h>
 
-int loadBin(char * path)
+#include <kernel/irq.h>
+
+__attribute__((section(".fwuncomp_code"))) int bin_load(char * path)
 {
+    void (*callBin)(void)=(void(*)(void))SDRAM_START;
     int fd,size,ret;
+
+    int i;
+    void * buf;
+    long long * src;
+    long long * dest;
 
     /* trying to open file */
     fd = open(path,ATTR_READ_ONLY);
@@ -38,11 +47,27 @@ int loadBin(char * path)
     }
 
     size=filesize(fd);
-    printk("File %s open, need to read %d bytes\n",size);
+    printk("File %s open, need to read %d bytes\n",path,size);
 
-    ret=read(fd,(char*)SDRAM_START,size);
+    buf=malloc(size);
+
+    ret=read(fd,buf,size);
     printk("Read %d bytes done\n",ret);
+
+    // copy data to sdram start
+    src=buf;
+    dest=(void*)SDRAM_START;
+    for(i=size/8;i>=0;--i){
+        *(dest++)=*(src++);
+    }
+
+    // take care of the cache (I directly use macros because functions are overwritten at this point)
+    CACHE_CLEAN();
+    CACHE_DISABLE(CACHE_ALL);
+    CACHE_INVALIDATE(CACHE_ALL);
+
     callBin();
+
     /* we should never get here !!!!!*/
     return MED_OK;
 }

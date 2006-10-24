@@ -13,6 +13,6 @@
 #ifndef __BINLOAD_H
 #define __BINLOAD_H
 
-int loadBin(char * path);
+int bin_load(char * path);
 
 #endif
