@@ -14,10 +14,11 @@ LDFLAGS = $(MEDIOS_SRC_PATH)/lib/*.o -L$(MEDIOS_SRC_PATH)/lib -lmedios --emit-re
 $(LIBS):
 	@make -C $(MEDIOS_SRC_PATH) --no-print-directory medios_lib
 
-all_med:
+all_med: bluecube
 	@for p in $(MED_LIST); do \
 		make $$p; \
 	done
+        
         
 %.med: %.o $(LIBS)
 	@$(LD) -o $@ $< $(LDFLAGS)

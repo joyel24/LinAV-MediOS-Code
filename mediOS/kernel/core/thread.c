@@ -73,6 +73,7 @@ void thread_exit(void)
     thread_remove(threadCurrent);
     thread_print();
     #warning need free for stack and struct here
+    
     thread_loadContext();
 }
 
@@ -107,7 +108,7 @@ MED_RET_T thread_kill(int pid)
         ret_val=-MED_EINVAL;
     return ret_val;
 }
-
+#warning we are using SYS for user tasks
 MED_RET_T thread_create(THREAD_INFO ** ret_thread,void * entry,char * name)
 {
     int stackSize=STACK_SIZE; /* maybe we'll need this as a param soon */
@@ -186,23 +187,34 @@ MED_RET_T thread_insert(THREAD_INFO * thread)
 MED_RET_T thread_remove(THREAD_INFO * thread)
 {
     if(!threadCurrent)
+    {
+        printk("No thread\n");
         return -MED_EINVAL;
+    }
 
     /* only one thread left */
     if(threadCurrent && threadCurrent->nxt==threadCurrent)
     {
+        printk("Last thread\n");
         thread->nxt=NULL;
         thread->prev=NULL;
         threadCurrent=NULL;
     }
     else
     {
+        printk("at least 1 thread left\n");
         if(threadCurrent==thread)
+        {
+            printk("Trying to remove cur thread\n");
             threadCurrent=thread->nxt;
+        }
         thread->prev->nxt=thread->nxt;
         thread->nxt->prev=thread->prev;
         thread->prev=NULL;
         thread->nxt=NULL;
+        
+        printk("rm= %x | cur = %x prev= %x nxt = %x\n", thread,threadCurrent , threadCurrent->prev,threadCurrent->nxt);
+               
     }
 
     return MED_OK;
@@ -211,6 +223,7 @@ MED_RET_T thread_remove(THREAD_INFO * thread)
 
 __IRAM_CODE void thread_nxt(void)
 {
+    uart_out('T',0);
     threadCurrent=threadCurrent->nxt;    
 }
 

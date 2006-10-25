@@ -9,7 +9,7 @@
 .global entry_code
 entry_code:
 
-   /* av4 init */   
+   /* av4 init */ 
     mov r7,pc
     sub r7,r7,#8
 

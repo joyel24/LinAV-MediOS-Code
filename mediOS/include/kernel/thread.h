@@ -17,7 +17,7 @@
 
 #define THREAD_NAME_SIZE  10
 #define STACK_SIZE        0x4000
-#define THREAD_INIT_CPSR  0x10
+#define THREAD_INIT_CPSR  0x1F
 #define THREAD_SYSINIT_CPSR 0x1F
 
 typedef struct thread_info {

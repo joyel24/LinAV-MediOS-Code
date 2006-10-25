@@ -10,6 +10,7 @@ TARGET = bluecube
 
 all: $(LIBS) do_build
 	@$(LD)  *.o -o $(TARGET).med $(LDFLAGS)
+	@cp -f $(TARGET).med ../
 
 $(LIBS):
 	@make -C $(MEDIOS_SRC_PATH) --no-print-directory medios_lib

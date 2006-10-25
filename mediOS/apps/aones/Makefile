@@ -10,7 +10,8 @@ SUBDIRS = n6502 mapper
 
 LIBS = ../../lib/libmedios.a
 
-LDFLAGS =  -nostdlib --emit-relocs -L../../lib -lmedios -lfloat -T$(TARGET_DEVICE)_aones.lds
+#LDFLAGS =  -nostdlib --emit-relocs -L../../lib -lmedios -lfloat -T$(TARGET_DEVICE)_aones.lds
+LDFLAGS =  -nostdlib --emit-relocs -L../../lib -lmedios -T$(TARGET_DEVICE)_aones.lds
 
 BUILD_DIR = build
 

@@ -95,6 +95,7 @@ void testThread1()
         for(i=0;i<1000000;i++) /*nothing*/;
         k++;
     }
+    printk("About to exit th1\n");
 }
 
 void testThread2()
@@ -185,10 +186,21 @@ void kernel_thread(void)
 #ifdef BUILD_LIB
     char * stdalone="STDALONE";
 #endif
-    
+  
     printk("[SYS thread] starting\n");
     print_boot_info();
-
+    
+    if(1)
+    {
+        THREAD_INFO * ptr_thread1;
+        THREAD_INFO * ptr_thread2;
+        thread_create(&ptr_thread1,testThread1,"Thread 1");
+        thread_create(&ptr_thread2,testThread2,"Thread 2");
+        thread_insert(ptr_thread1);
+        thread_insert(ptr_thread2);
+        thread_print();
+    }
+    
 #ifdef BUILD_LIB
     app_main(1,&stdalone);
     reload_firmware();
