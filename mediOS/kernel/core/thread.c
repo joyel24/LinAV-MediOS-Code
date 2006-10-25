@@ -94,12 +94,11 @@ MED_RET_T thread_kill(int pid)
         /* have we found the thread ?*/
         if(ptr->pid==pid)
         {
-           /* __cli();
+            __cli();
             thread_remove(ptr);
             thread_print();
             #warning need free for stack and struct here
             thread_loadContext();
-            __sti();*/
         }
         else
             ret_val=-MED_ENOENT;
@@ -108,7 +107,7 @@ MED_RET_T thread_kill(int pid)
         ret_val=-MED_EINVAL;
     return ret_val;
 }
-#warning we are using SYS for user tasks
+
 MED_RET_T thread_create(THREAD_INFO ** ret_thread,void * entry,char * name)
 {
     int stackSize=STACK_SIZE; /* maybe we'll need this as a param soon */
@@ -199,6 +198,7 @@ MED_RET_T thread_remove(THREAD_INFO * thread)
         thread->nxt=NULL;
         thread->prev=NULL;
         threadCurrent=NULL;
+        #warning what to do here => halt device ?
     }
     else
     {
@@ -223,7 +223,6 @@ MED_RET_T thread_remove(THREAD_INFO * thread)
 
 __IRAM_CODE void thread_nxt(void)
 {
-    uart_out('T',0);
     threadCurrent=threadCurrent->nxt;    
 }
 

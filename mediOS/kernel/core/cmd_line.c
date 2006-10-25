@@ -100,6 +100,12 @@ struct cmd_line_s cmd_tab[] = {
         cmd_action : do_ps,
         nb_args    : 0
     },
+    {
+        cmd        : "kill",
+        help_str   : "kill thread with given pid",
+        cmd_action : do_kill,
+        nb_args    : 1
+    },
     /* this has to be the last entry */
     {
         cmd        : NULL,
@@ -426,4 +432,14 @@ void do_out (unsigned char ** params)
 void do_ps (unsigned char ** params)
 {
     thread_print();
+}
+
+void do_kill (unsigned char ** params)
+{
+    int pid = atoi (params[0]);
+    MED_RET_T ret_val;
+    printk("Killing pid %d\n",pid);
+    ret_val=thread_kill(pid);
+    if(ret_val!=MED_OK)
+        printk("Error killing %d : %d\n",pid,-ret_val);
 }

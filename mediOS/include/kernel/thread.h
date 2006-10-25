@@ -43,5 +43,6 @@ void thread_nxt(void);
 MED_RET_T thread_create(THREAD_INFO ** ret_thread,void * entry,char * name);
 MED_RET_T thread_insert(THREAD_INFO * thread);
 MED_RET_T thread_remove(THREAD_INFO * thread);
+MED_RET_T thread_kill(int pid);
 
 #endif

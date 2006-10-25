@@ -35,6 +35,7 @@ void do_reg_print (unsigned char ** params);
 void do_in (unsigned char ** params);
 void do_out (unsigned char ** params);
 void do_ps (unsigned char ** params);
+void do_kill (unsigned char ** params);
 
 void init_cmd_line(void);
 

@@ -190,6 +190,7 @@ void kernel_thread(void)
     printk("[SYS thread] starting\n");
     print_boot_info();
     
+#if 0    
     if(1)
     {
         THREAD_INFO * ptr_thread1;
@@ -200,6 +201,7 @@ void kernel_thread(void)
         thread_insert(ptr_thread2);
         thread_print();
     }
+#endif
     
 #ifdef BUILD_LIB
     app_main(1,&stdalone);
