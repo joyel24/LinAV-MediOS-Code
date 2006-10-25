@@ -53,8 +53,6 @@ void main(){
 
 	libDsp_init(dspCom->chipNum);
 
-	{char s[50];sprintf(s,"_ cn=%d",dspCom->chipNum);debug(s);}
-
 	ibDma_reset();
 
 	// aic23
