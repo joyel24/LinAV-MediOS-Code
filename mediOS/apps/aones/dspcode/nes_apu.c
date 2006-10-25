@@ -533,7 +533,7 @@ inline void apu_dmcreload(dmc_t *chan)
       dspCom->sndDmcAddress=chan->address;
       dspCom->sndDmcLength=chan->dma_length/8;
       dspCom->sndDmcWantRead=1;
-      interruptARM();
+      armInt_trigger();
       while(dspCom->sndDmcWantRead);
 
       chan->prev_addr=chan->address;

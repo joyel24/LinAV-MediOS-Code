@@ -11,15 +11,17 @@ ioport unsigned short port7;
 ioport unsigned short port8;
 ioport unsigned short port9;
 
-void ibdma_start(unsigned long sdAddr,unsigned short sdOffset,
+void ibDma_start(unsigned long sdAddr,unsigned short sdOffset,
 				 unsigned short ibAddr, unsigned short ibOffset,
 				 unsigned short x,unsigned short y,
 				 short buffer, short direction, short byteToWord){
-	
+
+	int shift=0;
+
 	sdAddr=sdAddr/2;
 
-	port0=sdAddr/0x10000;	
-	port1=sdAddr%0x10000;	
+	port0=sdAddr/0x10000;
+	port1=sdAddr%0x10000;
 	port2=sdOffset/2;
 
 	port3=ibAddr;
@@ -28,17 +30,34 @@ void ibdma_start(unsigned long sdAddr,unsigned short sdOffset,
 	port5=x/2;
 	port6=y;
 
-	port8=0x03<<buffer;
-	port9=(byteToWord)?0x0004:0x0000;
+	switch(chip_num){
+		case 25:
+			shift=IB_DSC25_BUF_SHIFT;
+			break;
+		case 27:
+			shift=IB_DM270_BUF_SHIFT;
+			break;
+		case 32:
+			shift=IB_DM320_BUF_SHIFT;
+			break;
+	}
+
+	port8=0x03<<(buffer*shift);
+
+	if(chip_num>25){
+		port9=(byteToWord)?0x0004:0x0000;
+	}else{
+		port9=0x0000;
+	}
 
 	port7=(direction&0x0001)|0x0002;
 }
 
-short ibdma_pending(){
+short ibDma_pending(){
 	return (port7&0x0002)!=0;
 }
 
-void ibdma_reset(){
+void ibDma_reset(){
 	port8=0x0000;
 }
 

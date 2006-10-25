@@ -74,6 +74,8 @@ typedef struct _COFF_SCNHDR
 MED_RET_T dsp_loadProgramFromHDD (char* pszFilename);
 MED_RET_T dsp_loadProgramFromMemory (void* pCode, int nSize);
 
+int dsp_getChipNum();
+
 typedef void (*DSP_HANDLER)(void);
 
 extern DSP_HANDLER g_pDSPHandler;

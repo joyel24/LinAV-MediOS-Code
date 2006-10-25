@@ -16,6 +16,7 @@ WIDGETMENU advancedMenu;
 char * autoFire_items[]={"Off","A Button","B Button","Both A and B"};
 char * f3Use_items[]={"A+B","Sticky A","Sticky B"};
 char * tvOut_items[]={"Off","PAL","Stretched PAL","NTSC"};
+char * sndFilter_items[]={"Off","Lowpass","Weighted lp."};
 
 void menu_onClick(MENU m, WIDGETMENU_ITEM mi){
     int slot=standardMenu->getTrackbar(standardMenu,standardMenu->indexFromCaption(standardMenu,"Slot"))->value;
@@ -206,6 +207,15 @@ void gui_init(){
     mit->trackbar->value=113;
     advancedMenu->addItem(advancedMenu,mit);
 
+    mih=widgetMenuChooser_create();
+    mih->caption="Sound filter";
+    mih->cfgName="sound_filter";
+    mih->cfgStored=true;
+    mih->chooser->items=sndFilter_items;
+    mih->chooser->itemCount=3;
+    mih->chooser->index=0;
+    standardMenu->addItem(advancedMenu,mih);
+
     mi=widgetMenuItem_create();
     mi->caption="Overclocking:";
     mi->foreColor=GUI_TITLE_COLOR;
@@ -303,7 +313,7 @@ void gui_execute(){
 }
 
 void gui_applySettings(){
-    int vol,bl,cc;
+    int vol,bl,cc,sf;
 
     vol=standardMenu->getTrackbar(standardMenu,standardMenu->indexFromCaption(standardMenu,"Volume"))->value;
     bl=standardMenu->getTrackbar(standardMenu,standardMenu->indexFromCaption(standardMenu,"Backlight strength"))->value;
@@ -313,6 +323,7 @@ void gui_applySettings(){
     f3Use=standardMenu->getChooser(standardMenu,standardMenu->indexFromCaption(standardMenu,"F3 button use"))->index;
     frameSkip=advancedMenu->getTrackbar(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"Frameskip"))->value;
     cc=advancedMenu->getTrackbar(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"CPU cycles/line"))->value;
+    sf=standardMenu->getChooser(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"Sound filter"))->index;
     overclocking=advancedMenu->getCheckbox(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"Enable OC"))->checked;
     armFrequency=advancedMenu->getTrackbar(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"CPU frequency(Mhz)"))->value;
     dspFrequency=advancedMenu->getTrackbar(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"DSP frequency(Mhz)"))->value;
@@ -321,6 +332,11 @@ void gui_applySettings(){
 #ifdef SOUND_USE_AIC23
     aic23_setOutputVolume(vol+27,AIC23_CHANNEL_BOTH);
 #endif
+
+#ifdef SOUND_USE_DSP
+    dspCom->sndFilter=sf;
+#endif
+
     clk_overclock(true);
 #ifdef GMINI402
     outw((bl<<10)|0x03ff,CLKC_PWM0_HIGH); // Gmini402
@@ -329,6 +345,7 @@ void gui_applySettings(){
     outw((bl<<10)|0x03ff,CLKC_PWM1_HIGH); // Gmini400
 #endif
     if(!Vnes.var.CustomCpuCycle) Vnes.var.cpucycle=cc;
+
 }
 
 bool gui_browse(){

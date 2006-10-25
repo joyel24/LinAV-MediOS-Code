@@ -47,7 +47,7 @@ typedef struct {
 typedef volatile struct {
   // init
   uint16 armInitFinished;
-  uint16 port280Interrupt;
+  uint16 chipNum;
 
   // video buffers addresses ans status
   uint32 inBufAddr;
@@ -58,6 +58,9 @@ typedef volatile struct {
   // palette and line offsets
   uint16 pal[32];
   uint16 lineOffset[NES_PAL_HEIGHT];
+
+  // sound filter
+  uint16 sndFilter;
 
   // apu reset requests from arm
   uint16 sndWantApuReset;

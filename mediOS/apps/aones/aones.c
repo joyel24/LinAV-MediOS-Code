@@ -178,11 +178,8 @@ void dsp_init(){
 
     dspCom = (tDspCom *) DSP_RAM(*DSP_COM);
 
-#ifdef DM320
-    dspCom->port280Interrupt=1;
-#else
-    dspCom->port280Interrupt=0;
-#endif
+    dspCom->chipNum=dsp_getChipNum();
+
     dspCom->armInitFinished=1;
 };
 

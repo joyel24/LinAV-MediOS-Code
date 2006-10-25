@@ -7,7 +7,7 @@
 #include <csl_irq.h>
 #include <csl_dma.h>
 
-#include "ibdma.h"
+#include <libdsp.h>
 
 #include "../dspshared.h"
 #include "../nes_pal.h"
@@ -16,8 +16,6 @@
 // seems to be the best values for speed and sound quality
 #define CHUNK_HEIGHT 5
 #define SNDBUF_LENGTH 20
-
-//#define IDMA
 
 unsigned short sndBuf[SNDBUF_LENGTH];
 unsigned short sndBuf2[SNDBUF_LENGTH];
@@ -30,114 +28,18 @@ unsigned long outBuf2[NES_WIDTH*CHUNK_HEIGHT];
 
 unsigned long framePal[32];
 
-ioport unsigned short portFFFF;
-ioport unsigned short port280;
 tDspCom dspComBuffer;
 tDspCom * dspCom;
 
-Uint16 aicDmaEventID;
-
-extern void VECSTART(void);
-
-DMA_Handle aicDma;
-
-#ifdef IDMA
-DMA_Handle iDma;
-
-DMA_Config iDmaCfg = {
-    2 ,
-    DMA_DMMCR_RMK(
-		DMA_DMMCR_AUTOINIT_OFF,
-		DMA_DMMCR_DINM_OFF,
-		DMA_DMMCR_IMOD_FULL_ONLY,
-		DMA_DMMCR_CTMOD_MULTIFRAME,
-		DMA_DMMCR_SLAXS_ON,
-		DMA_DMMCR_SIND_POSTINC,
-		DMA_DMMCR_DMS_DATA,
-		DMA_DMMCR_DLAXS_OFF,
-		DMA_DMMCR_DIND_POSTINC,
-		DMA_DMMCR_DMD_DATA
-	),  
-	DMA_DMSFC_RMK(
-		DMA_DMSFC_DSYN_NONE,
-		DMA_DMSFC_DBLW_OFF,
-		DMA_DMSFC_FRAMECNT_OF(0)
-	),
-    (DMA_AdrPtr)IB_BUFA_ADDR, // source 
-    (DMA_AdrPtr)&inBuf, // dest
-    sizeof(inBuf)
-};
-#endif
-
-static MCBSP_Handle aicDataPort;
-
-MCBSP_Config aicDataPortCfg= {
-  0x0000,0x0200, /* SPCR : free running mode */
-  0x00A0,0x00A1, /* RCR  : 32 bit receive data length */  
-  0x00A0,0x00A0, /* XCR  : 32 bit transmit data length */            
-  0x0000,0x3000, /* SRGR 1 & 2 */
-  0x0000,0x0000, /* MCR  : single channel */
-  // VP : frame transmit polarity was wrong (bit 3 has to be cleared)
-  0x000E - 8,        /* PCR  : FSX, FSR active low, external FS/CLK source */
-  0x0000,
-  0x0000,
-  0x0000,
-  0x0000
-};  
-
-// direction : 1 dsp-->sdram, 0 sdram-->dsp
-int dma_dsp2sdram(void * dsp_addr, unsigned long sdram_addr,unsigned short length, short direction);
-int dma_pending();
-
 void debug(const char* msg);
-void interruptARM();
 void handleVideoBuffer();
 void doAicDma(unsigned short * buffer,unsigned short length);
-interrupt void aicDmaEnd(void);
+short aic23_callback(void * buffer);
 
 void main(){
 	short i;
 
     *DSP_COM=0;
-
-	CSL_init();
-	ibdma_reset();
-
-	// dmas
- 	aicDma = DMA_open(DMA_CHA3, DMA_OPEN_RESET);    
-    aicDmaEventID = DMA_getEventId(aicDma);      
-    DMA_FSET(DMPREC,INTOSEL,DMA_DMPREC_INTOSEL_CH2_CH3);
-
-#ifdef IDMA
-	iDma=DMA_open(DMA_CHA0,DMA_OPEN_RESET);
-	if(iDma==INV) return;
-#endif
-
-	// aic23
-	aicDataPort = MCBSP_open(MCBSP_PORT0, MCBSP_OPEN_RESET);
-	MCBSP_config(aicDataPort,&aicDataPortCfg);
-	MCBSP_start(aicDataPort,MCBSP_XMIT_START,0);
-
- 	// irqs
-    IRQ_globalDisable();
-    IRQ_plug(aicDmaEventID,&aicDmaEnd);
-	IRQ_clear(aicDmaEventID);
-    IRQ_enable(aicDmaEventID);
-    IRQ_globalEnable();
-    
-    // nes apu
- 	apu_create(SAMPLE_RATE, 60, 0, 16);
-    apu_setfilter(APU_FILTER_NONE);
-
-	// launch dma
-	sndBufNum=0;
-	memset(sndBuf,0,SNDBUF_LENGTH);
-	doAicDma(sndBuf,SNDBUF_LENGTH);
-
-	// palette : swap cb and cr
-	for(i=0;i<64;++i){
-		nes_pal[i]= (nes_pal[i]/0x10000) + (nes_pal[i]*0x10000);
-	}
 
     // dsp<>arm comm
     dspCom = &dspComBuffer;
@@ -147,8 +49,27 @@ void main(){
 	// wait for ARM to finish init
 	while(!dspCom->armInitFinished);
 
-	if (aicDma==INV) debug("AIC DMA NOK");
-	if (aicDataPort==INV) debug("Data Port NOK");
+	CSL_init();
+
+	libDsp_init(dspCom->chipNum);
+
+	{char s[50];sprintf(s,"_ cn=%d",dspCom->chipNum);debug(s);}
+
+	ibDma_reset();
+
+	// aic23
+	if (aic23_openPort()==INV) debug("Data Port NOK");
+	aic23_setupDma(SNDBUF_LENGTH,aic23_callback);	
+	aic23_startDma();
+
+    // nes apu
+ 	apu_create(SAMPLE_RATE, 60, 0, 16);
+    apu_setfilter(APU_FILTER_NONE);
+
+	// palette : swap cb and cr
+	for(i=0;i<64;++i){
+		nes_pal[i]= (nes_pal[i]/0x10000) + (nes_pal[i]*0x10000);
+	}
 
 	debug("DSP START");
 
@@ -159,7 +80,7 @@ void main(){
 			dspCom->inBufReady=0;
 #else
 #ifdef DSP_VID_PROFILE
-		    interruptARM();
+		    armInt_trigger();
 #endif
 			handleVideoBuffer();
 #endif
@@ -194,19 +115,14 @@ void handleVideoBuffer(){
 			outPtr=outBuf2;
 		}
 
-		ibdma_start(inSdAddr,NES_BUFFER_WIDTH*CHUNK_HEIGHT,
+		ibDma_start(inSdAddr,NES_BUFFER_WIDTH*CHUNK_HEIGHT,
 					0,NES_BUFFER_WIDTH*CHUNK_HEIGHT,
 					NES_BUFFER_WIDTH*CHUNK_HEIGHT,1,
 					IB_BUF_A,IB_DIR_SD2IB,1);
-		while(ibdma_pending());
-		ibdma_reset();
+		while(ibDma_pending());
+		ibDma_reset();
 
-#ifndef IDMA
-		memcpy(inBuf,IB_BUFA_ADDR,sizeof(inBuf));
-#else
-		DMA_config(iDma,&iDmaCfg);
-		DMA_start(iDma);
-#endif
+		memcpy(inBuf,IB_DM270_BUFA_ADDR,sizeof(inBuf));
 
 		for(j=0;j<CHUNK_HEIGHT;++j){
 			inPtr=inBuf+j*NES_BUFFER_WIDTH+dspCom->lineOffset[line];
@@ -217,16 +133,12 @@ void handleVideoBuffer(){
 			line++;
 		}
 
-#ifdef IDMA
-		while(DMA_getStatus(iDma));               
-#endif
-
-		while(dma_pending());
+		while(hpiDma_pending());
 		if (outBufNum==0){
-			dma_dsp2sdram(outBuf,outSdAddr,sizeof(outBuf)*2,1);
+			hpiDma_start(outSdAddr,outBuf,sizeof(outBuf)*2,HPI_DIR_DSP2SD);
 			outBufNum++;
 		}else{
-			dma_dsp2sdram(outBuf2,outSdAddr,sizeof(outBuf2)*2,1);
+			hpiDma_start(outSdAddr,outBuf2,sizeof(outBuf2)*2,HPI_DIR_DSP2SD);
 			outBufNum--;
 		}
 
@@ -235,54 +147,12 @@ void handleVideoBuffer(){
 	}
 	dspCom->inBufReady=0;
 	dspCom->outBufReady=1;
-    interruptARM();
+    armInt_trigger();
 }
 
-void doAicDma(unsigned short * buffer,unsigned short length){
-
-    /* Write configuration structure values to DMA control regs */ 
-    DMA_configArgs(
-	   aicDma,    
-	   1 ,                                  /* Priority */
-	   DMA_DMMCR_RMK(
-			 DMA_DMMCR_AUTOINIT_OFF,
-			 DMA_DMMCR_DINM_ON,
-			 DMA_DMMCR_IMOD_FULL_ONLY,
-			 0, /* not ABU */
-			 DMA_DMMCR_SLAXS_OFF,
-			 DMA_DMMCR_SIND_POSTINC,
-			 DMA_DMMCR_DMS_DATA,
-			 DMA_DMMCR_DLAXS_OFF,
-			 DMA_DMMCR_DIND_NOMOD,
-			 DMA_DMMCR_DMD_DATA
-			 ),                             /* DMMCR */
-	   DMA_DMSFC_RMK(
-			 DMA_DMSFC_DSYN_XEVT0,
-			 DMA_DMSFC_DBLW_ON,
-			 DMA_DMSFC_FRAMECNT_OF(0)
-			 ),                             /* DMSFC */ 
-	   (DMA_AdrPtr)(buffer+2),              /* DMSRC */
-	   (DMA_AdrPtr)MCBSP_ADDR(DXR20),       /* DMDST */
-	   (Uint16)(length-2)/2-1               /* DMCTR = buffsize */
-	);
-
-    while(!MCBSP_xrdy(aicDataPort));
-    MCBSP_write32(aicDataPort,*(long *)buffer);
-
-    /* Start DMA transfer */
-    DMA_start(aicDma);
-}
-
-interrupt void aicDmaEnd(void){
-	// send first buffer to aic
-	if (sndBufNum==0){
-		doAicDma(sndBuf,SNDBUF_LENGTH);
-		sndBufNum++;
-	}else{
-		doAicDma(sndBuf2,SNDBUF_LENGTH);
-		sndBufNum--;
-	}
-
+short aic23_callback(void * buffer){
+	apu_setfilter(dspCom->sndFilter);
+	
 	// handle pause & reset
 	dspCom->sndIsPaused=dspCom->sndWantPause;
 	if (dspCom->sndIsPaused) debug("sound paused");
@@ -302,12 +172,9 @@ interrupt void aicDmaEnd(void){
 
 	dspCom->sndStatusReg=apu_read(APU_SMASK);
 
-	// render second buffer
-	if (sndBufNum==0){
-		apu_process(sndBuf,SNDBUF_LENGTH/2);    	
-	}else{
-		apu_process(sndBuf2,SNDBUF_LENGTH/2);    	
-	}
+	apu_process(buffer,SNDBUF_LENGTH/2);    	
+
+	return 1;
 }
 
 void debug(const char* msg){
@@ -316,20 +183,7 @@ void debug(const char* msg){
 	strcpy((char*)dspCom->dbgMsg,msg);
 	dspCom->hasDbgMsg=1;
 
-    interruptARM();
+    armInt_trigger();
 
 	while(dspCom->hasDbgMsg);
-}
-
-void interruptARM(){
-	if (dspCom->port280Interrupt){
-		// Interrupt ARM
-		port280 |= 0x0008;
-	}else{
-		// Interrupt ARM
-		portFFFF |= 0x0001;
-
-		// Clear interrupt ARM
-		portFFFF &= 0xFFFE;
-	}
 }

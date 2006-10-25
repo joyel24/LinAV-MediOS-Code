@@ -157,3 +157,18 @@ DSP_HANDLER g_pDSPHandler = 0;//void (*g_pDSPHandler)(void) = 0;
 	if (g_pDSPHandler)
 		g_pDSPHandler ();
 }
+
+
+int dsp_getChipNum(){
+#if defined(DM270)
+    return 27;
+#elif defined(DM320)
+    return 32;
+#elif defined(DSC25)
+    return 25;
+#elif defined(DSC21)
+    return 21;
+#else
+    return 0;
+#endif
+}
