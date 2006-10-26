@@ -77,7 +77,6 @@ int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_
     /* use a temporary buffer for unaligned read or writes */
     if (unaligned)
     {
-        printk("Unaligned using %x\n",ata_sectorBuffer);
         buffer=ata_sectorBuffer;
     }
 

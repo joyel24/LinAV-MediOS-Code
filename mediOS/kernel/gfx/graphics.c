@@ -438,7 +438,7 @@ void gfx_planeSetSize(int vplane,int width,int height,int bitsPerPixel)
 void gfx_planeGetSize(int vplane,int * width,int * height,int * bitsPerPixel)
 {
     if(width)
-        *width=buffers[vplane]->real_width;
+        *width=buffers[vplane]->width;
     if(height)
         *height=buffers[vplane]->height;
     if(bitsPerPixel)
