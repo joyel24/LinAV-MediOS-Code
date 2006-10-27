@@ -265,7 +265,10 @@ __IRAM_CODE static void updateSoundParams(int handle, int volume, int seperation
    int rightvol;
    int leftvol;
    int slot = handle;
+#if 0
    int step = steptable[pitch];
+#endif
+
 #ifdef RANGECHECK
    if (handle>=NUM_CHANNELS)
       I_Error("I_UpdateSoundParams: handle out of range");
@@ -354,7 +357,6 @@ void I_SetSfxVolume(int volume)
    //  to the state variable used in
    //  the mixing.
    snd_SfxVolume = volume;
-   printf("vol=%d\n",volume);
 }
 
 // MUSIC API - dummy. Some code from DOS version.
@@ -568,9 +570,11 @@ void I_SubmitSound(void)
 
 void I_ShutdownSound(void)
 {
+#if defined(DM270) || defined(DM320)
     snd_close();
     dsp_reset();
     dsp_off();
+#endif
 }
 
 void I_InitSound()
@@ -596,8 +600,10 @@ void I_InitSound()
    for ( i = 0; i< MIXBUFFERSIZE; i++ )
       mixbuffer[i] = 0;
 
+#if defined(DM270) || defined(DM320)
    snd_init();
    dsp_init();
+#endif
 
    // Finished initialization.
    printf("I_InitSound: sound module ready\n");

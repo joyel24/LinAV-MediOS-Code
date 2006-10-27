@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.12  2006/10/03 14:25:12  sfxgligli
+// - AV4XX support in doom and aoboy thanks to Opeos
+// - missing include in usb_fw.c
+//
 // Revision 1.11  2006/08/24 20:49:09  sfxgligli
 // - Gmini402: move kernel to sdram start, halved fiq rate, use 27Mhz clock for timers & uart
 // - Doom: preliminary Gmini402 support
@@ -66,19 +70,30 @@ rcsid[] = "$Id$";
 #include "medios.h"
 
 #include "m_swap.h"
+#include "doomdef.h"
 #include "doomstat.h"
 #include "i_system.h"
 #include "v_video.h"
 #include "m_argv.h"
 #include "d_main.h"
+#include "i_video.h"
+#include "z_zone.h"
+#include "w_wad.h"
 
 #include "doomdef.h"
 
+int tvOut=0;
+int screen_initialX=0;
+int screen_initialY=0;
+
+__IRAM_DATA int realscreenwidth=0;
+__IRAM_DATA int realscreenheight=0;
+
 #if defined(GMINI4XX) || defined(GMINI402)
-char button_to_key[2][NB_BUTTONS]=
+char button_to_key[2][NB_DOOM_BUTTONS]=
   // ingame
  {{KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
-  KEY_F11,'1',KEY_RSHIFT,
+  'M','1',KEY_RSHIFT,
   KEY_RCTRL,KEY_RALT,
   ' ',KEY_ESCAPE},
   // menus
@@ -89,11 +104,11 @@ char button_to_key[2][NB_BUTTONS]=
 #endif
 
 #ifdef AV3XX
-  char button_to_key[2][NB_BUTTONS]=
+  char button_to_key[2][NB_DOOM_BUTTONS]=
   // ingame
  {{KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
   KEY_RCTRL,KEY_RALT,KEY_RSHIFT,
-  ' ',KEY_F11,
+  ' ','M',
   KEY_F11,KEY_ESCAPE},
   // menus
   {KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
@@ -102,11 +117,11 @@ char button_to_key[2][NB_BUTTONS]=
   KEY_ENTER,KEY_ESCAPE}};
 #endif
 #ifdef AV4XX
-  char button_to_key[2][NB_BUTTONS]=
+  char button_to_key[2][NB_DOOM_BUTTONS]=
   // ingame
  {{KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
   KEY_RCTRL,KEY_RALT,KEY_RSHIFT,
-  ' ',KEY_F11,
+  ' ','M',
   KEY_F11,KEY_ESCAPE},
   // menus
   {KEY_UPARROW,KEY_DOWNARROW,KEY_LEFTARROW,KEY_RIGHTARROW,
@@ -117,7 +132,7 @@ char button_to_key[2][NB_BUTTONS]=
 
 #if defined(GMINI4XX) || defined(GMINI402)
 // 320px -> 220px clever resize of the HUD (thx to WireDDD for the idea)
-int hud_resize_table[REALSCREENWIDTH]={
+int hud_resize_table[224]={
 0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,
 56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100,102,104,
 106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,
@@ -134,28 +149,28 @@ int hud_resize_table[REALSCREENWIDTH]={
 static char * offset1;
 static char * offset2;
 
-int x_resize_lookup[REALSCREENWIDTH];
-char * y_resize_lookup[REALSCREENHEIGHT];
+int x_resize_lookup[224];
+char * y_resize_lookup[176];
 
 #if defined(GMINI4XX) || defined(GMINI402)
-__IRAM_DATA char * hud_resize_lookup[REALSCREENWIDTH];
+__IRAM_DATA char * hud_resize_lookup[224];
 
 void InitResizeLookups(){
   int i;
 
-  for(i=0;i<REALSCREENHEIGHT;++i){
-    y_resize_lookup[i]=offset1+((i*SCREENHEIGHT)/REALSCREENHEIGHT)*SCREENWIDTH;
+  for(i=0;i<realscreenheight;++i){
+    y_resize_lookup[i]=offset1+((i*SCREENHEIGHT)/realscreenheight)*SCREENWIDTH;
   }
 
-  for(i=0;i<REALSCREENWIDTH;++i){
-    x_resize_lookup[i]=(i*SCREENWIDTH)/REALSCREENWIDTH;
+  for(i=0;i<realscreenwidth;++i){
+    x_resize_lookup[i]=(i*SCREENWIDTH)/realscreenwidth;
 
     if (i>0){
       x_resize_lookup[i-1]=x_resize_lookup[i]-x_resize_lookup[i-1];
     }
   }
 
-  for(i=0;i<REALSCREENWIDTH;++i){
+  for(i=0;i<realscreenwidth;++i){
     hud_resize_lookup[i]=offset1+(SCREENHEIGHT-SBARHEIGHT-1)*SCREENWIDTH+hud_resize_table[i];
   }
 }
@@ -166,12 +181,12 @@ void DoFullScreenResize(){
   char * op;
 
   op=offset2;
-  for(j=0;j<REALSCREENHEIGHT;++j){
+  for(j=0;j<realscreenheight;++j){
     ip=y_resize_lookup[j];
-    for(i=0;i<REALSCREENWIDTH;++i){
+    for(i=0;i<realscreenwidth;++i){
       *(op++)=*(ip+=x_resize_lookup[i]);
     }
-    op+=SCREENWIDTH-REALSCREENWIDTH;
+    op+=SCREENWIDTH-realscreenwidth;
   }
 }
 
@@ -185,15 +200,15 @@ __IRAM_CODE void DoHUDResize(){
   if (hud_resize_side==1){
     hud_resize_side=2;
     start=0;
-    end=REALSCREENWIDTH/2;
+    end=realscreenwidth/2;
   }else{
     hud_resize_side=1;
-    start=REALSCREENWIDTH/2;
-    end=REALSCREENWIDTH;
+    start=realscreenwidth/2;
+    end=realscreenwidth;
   }
 
 
-  op=offset2+start+(REALSCREENHEIGHT-SBARHEIGHT-1)*SCREENWIDTH;
+  op=offset2+start+(realscreenheight-SBARHEIGHT-1)*SCREENWIDTH;
   for(i=start;i<end;++i){
     ip=hud_resize_lookup[i];
     for(j=0;j<SBARHEIGHT;++j){
@@ -204,12 +219,71 @@ __IRAM_CODE void DoHUDResize(){
 }
 #endif
 
+void display_getRealSize(){
+#if defined(GMINI4XX) || defined(GMINI402)
+            realscreenwidth=224;
+            realscreenheight=176;
+#endif
+#if defined(AV3XX) || defined(AV4XX)
+            realscreenwidth=320;
+            realscreenheight=200;
+#endif
+}
+
+
+void display_tvOutSet(){
+    int x,y;
+    int mode;
+
+    switch(tvOut){
+        default:
+        case 0: // Off
+            mode=VIDENC_MODE_LCD;
+            x=0;
+            y=0;
+            display_getRealSize();
+            break;
+        case 1: // PAL
+            mode=VIDENC_MODE_PAL;
+            x=40;
+            y=42;
+            realscreenwidth=320;
+            realscreenheight=200;
+            break;
+        case 2: // NTSC
+            mode=VIDENC_MODE_NTSC;
+            x=40;
+            y=20;
+            realscreenwidth=320;
+            realscreenheight=200;
+            break;
+    }
+
+    gfx_planeSetPos(BMAP1,screen_initialX+x,screen_initialY+y);
+
+    videnc_setup(mode,false);
+}
+
 void DoButtonEvent(int button,bool released){
-  event_t event;
-  event.type = ev_keydown;
-  if (released) event.type=ev_keyup;
-  event.data1 = button_to_key[menuactive?1:0][button];
-  D_PostEvent(&event);
+  if(!released && button_to_key[0][button]=='M'){
+
+    // medios palette
+    osd_setEntirePalette(gui_pal,256);
+
+    gui_execute();
+    gui_applySettings();
+
+    // restore doom palette
+    I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
+
+  }else{
+    event_t event;
+    event.type = ev_keydown;
+    if (released) event.type=ev_keyup;
+    event.data1 = button_to_key[menuactive?1:0][button];
+
+    D_PostEvent(&event);
+  }
 }
 
 //
@@ -228,32 +302,31 @@ void I_StartTic (void)
 
 
   if (pressed){
-    if(pressed & BTMASK_UP)     DoButtonEvent(BUTTON_UP,false);
-    if(pressed & BTMASK_DOWN)   DoButtonEvent(BUTTON_DOWN,false);
-    if(pressed & BTMASK_LEFT)   DoButtonEvent(BUTTON_LEFT,false);
-    if(pressed & BTMASK_RIGHT)  DoButtonEvent(BUTTON_RIGHT,false);
-    if(pressed & BTMASK_F1)     DoButtonEvent(BUTTON_MENU1,false);
-    if(pressed & BTMASK_F2)     DoButtonEvent(BUTTON_MENU2,false);
-    if(pressed & BTMASK_F3)     DoButtonEvent(BUTTON_MENU3,false);
-    if(pressed & BTMASK_BTN1)   DoButtonEvent(BUTTON_SQUARE,false);
-    if(pressed & BTMASK_BTN2)   DoButtonEvent(BUTTON_CROSS,false);
-    if(pressed & BTMASK_ON)     DoButtonEvent(BUTTON_ON,false);
-    if(pressed & BTMASK_OFF)    DoButtonEvent(BUTTON_OFF,false);
+    if(pressed & BTMASK_UP)     DoButtonEvent(DOOM_BUTTON_UP,false);
+    if(pressed & BTMASK_DOWN)   DoButtonEvent(DOOM_BUTTON_DOWN,false);
+    if(pressed & BTMASK_LEFT)   DoButtonEvent(DOOM_BUTTON_LEFT,false);
+    if(pressed & BTMASK_RIGHT)  DoButtonEvent(DOOM_BUTTON_RIGHT,false);
+    if(pressed & BTMASK_F1)     DoButtonEvent(DOOM_BUTTON_MENU1,false);
+    if(pressed & BTMASK_F2)     DoButtonEvent(DOOM_BUTTON_MENU2,false);
+    if(pressed & BTMASK_F3)     DoButtonEvent(DOOM_BUTTON_MENU3,false);
+    if(pressed & BTMASK_BTN1)   DoButtonEvent(DOOM_BUTTON_1,false);
+    if(pressed & BTMASK_BTN2)   DoButtonEvent(DOOM_BUTTON_2,false);
+    if(pressed & BTMASK_ON)     DoButtonEvent(DOOM_BUTTON_ON,false);
+    if(pressed & BTMASK_OFF)    DoButtonEvent(DOOM_BUTTON_OFF,false);
   }
 
   if (released){
-    if(released & BTMASK_UP)    DoButtonEvent(BUTTON_UP,true);
-    if(released & BTMASK_DOWN)  DoButtonEvent(BUTTON_DOWN,true);
-    if(released & BTMASK_LEFT)  DoButtonEvent(BUTTON_LEFT,true);
-    if(released & BTMASK_RIGHT) DoButtonEvent(BUTTON_RIGHT,true);
-    if(released & BTMASK_F1)    DoButtonEvent(BUTTON_MENU1,true);
-    if(released & BTMASK_F2)    DoButtonEvent(BUTTON_MENU2,true);
-    if(released & BTMASK_F3)    DoButtonEvent(BUTTON_MENU3,true);
- //   if(released & BTMASK_ON)    DoButtonEvent(BUTTON_ON,true);
-    if(released & BTMASK_BTN1)  DoButtonEvent(BUTTON_SQUARE,true);
-    if(released & BTMASK_BTN2)  DoButtonEvent(BUTTON_CROSS,true);
-    if(released & BTMASK_ON)    DoButtonEvent(BUTTON_ON,true);
-    if(released & BTMASK_OFF)   DoButtonEvent(BUTTON_OFF,true);
+    if(released & BTMASK_UP)    DoButtonEvent(DOOM_BUTTON_UP,true);
+    if(released & BTMASK_DOWN)  DoButtonEvent(DOOM_BUTTON_DOWN,true);
+    if(released & BTMASK_LEFT)  DoButtonEvent(DOOM_BUTTON_LEFT,true);
+    if(released & BTMASK_RIGHT) DoButtonEvent(DOOM_BUTTON_RIGHT,true);
+    if(released & BTMASK_F1)    DoButtonEvent(DOOM_BUTTON_MENU1,true);
+    if(released & BTMASK_F2)    DoButtonEvent(DOOM_BUTTON_MENU2,true);
+    if(released & BTMASK_F3)    DoButtonEvent(DOOM_BUTTON_MENU3,true);
+    if(released & BTMASK_BTN1)  DoButtonEvent(DOOM_BUTTON_1,true);
+    if(released & BTMASK_BTN2)  DoButtonEvent(DOOM_BUTTON_2,true);
+    if(released & BTMASK_ON)    DoButtonEvent(DOOM_BUTTON_ON,true);
+    if(released & BTMASK_OFF)   DoButtonEvent(DOOM_BUTTON_OFF,true);
   }
 }
 
@@ -288,22 +361,26 @@ void I_FinishUpdate (void)
 
 
 #if defined(GMINI4XX) || defined(GMINI402)
-  if(menuactive || (gamestate!=GS_LEVEL)){ // not playing?
-    // full screen resize
-    DoFullScreenResize();
+  if(tvOut==0){
+      if(menuactive || (gamestate!=GS_LEVEL)){ // not playing?
+        // full screen resize
+        DoFullScreenResize();
+      }else{
+        if (viewheight<realscreenheight){ // not fullscreen?
+          // blit the 3d view and do a clever resize of the HUD
+          memcpy(offset2,offset1,SCREENWIDTH*(realscreenheight-SBARHEIGHT));
+          DoHUDResize();
+        }else{
+          // blit the 3d view
+          memcpy(offset2,offset1,SCREENWIDTH*realscreenheight);
+        }
+      }
   }else{
-    if (viewheight<REALSCREENHEIGHT){ // not fullscreen?
-      // blit the 3d view and do a clever resize of the HUD
-      memcpy(offset2,offset1,SCREENWIDTH*(REALSCREENHEIGHT-SBARHEIGHT));
-      DoHUDResize();
-    }else{
-      // blit the 3d view
-      memcpy(offset2,offset1,SCREENWIDTH*REALSCREENHEIGHT);
-    }
+    memcpy(offset2,offset1,SCREENWIDTH*SCREENHEIGHT);
   }
 #endif
 #if defined(AV3XX) || defined(AV4XX)
-    memcpy(offset2,offset1,SCREENWIDTH*REALSCREENHEIGHT);
+    memcpy(offset2,offset1,SCREENWIDTH*realscreenheight);
 #endif
 }
 
@@ -351,15 +428,21 @@ void I_InitGraphics(void)
 
   gfx_planeSetSize(BMAP1,SCREENWIDTH,SCREENHEIGHT,8);
 
+  gfx_planeGetPos(BMAP1,&screen_initialX,&screen_initialY);
+
 #if defined(GMINI4XX) || defined(GMINI402)
   InitResizeLookups();
 #endif
+
+  gui_init();
+  gui_applySettings();
 }
 
 
 void I_ShutdownGraphics(void)
 {
   gfx_closeGraphics();
+  gui_close();
 }
 
 void I_StartFrame (void)

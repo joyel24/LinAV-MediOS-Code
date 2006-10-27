@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.6  2006/06/19 16:36:30  sfxgligli
+// aoDoom update
+//
 // Revision 1.5  2006/05/28 17:08:45  sfxgligli
 // aoDoom update (adding browser, PWADs support, optimisations,...)
 //
@@ -88,6 +91,9 @@ extern int access(char *file, int mode);
 
 
 #include "d_main.h"
+
+extern int realscreenwidth;
+extern int realscreenheight;
 
 //
 // D-DoomLoop()
@@ -250,12 +256,12 @@ void D_Display (void)
             break;
         if (automapactive)
             AM_Drawer ();
-        if (wipe || (viewheight != REALSCREENHEIGHT && fullscreen) )
+        if (wipe || (viewheight != realscreenheight && fullscreen) )
             redrawsbar = true;
         if (inhelpscreensstate && !inhelpscreens)
             redrawsbar = true;              // just put away the help screen
-        ST_Drawer (viewheight == REALSCREENHEIGHT, redrawsbar );
-        fullscreen = viewheight == REALSCREENHEIGHT;
+        ST_Drawer (viewheight == realscreenheight, redrawsbar );
+        fullscreen = viewheight == realscreenheight;
         break;
 
       case GS_INTERMISSION:

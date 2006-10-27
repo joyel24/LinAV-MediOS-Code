@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.2  2006/05/28 17:08:45  sfxgligli
+// aoDoom update (adding browser, PWADs support, optimisations,...)
+//
 // Revision 1.1  2005/12/20 19:11:56  sfxgligli
 // - added Doom port
 // - Gmini400 buttons fix
@@ -46,6 +49,9 @@ rcsid[] = "$Id$";
 // State.
 #include "doomstat.h"
 
+
+extern int realscreenwidth;
+extern int realscreenheight;
 
 // ?
 #define MAXWIDTH			320
@@ -702,17 +708,17 @@ R_InitBuffer
     // Handle resize,
     //  e.g. smaller view windows
     //  with border and/or status bar.
-    viewwindowx = (REALSCREENWIDTH-width) >> 1;
+    viewwindowx = (realscreenwidth-width) >> 1;
 
     // Column offset. For windows.
     for (i=0 ; i<width ; i++)
 	columnofs[i] = viewwindowx + i;
 
     // Samw with base row offset.
-    if (width == REALSCREENWIDTH)
+    if (width == realscreenwidth)
 	viewwindowy = 0;
     else
-	viewwindowy = (REALSCREENHEIGHT-SBARHEIGHT-height) >> 1;
+	viewwindowy = (realscreenheight-SBARHEIGHT-height) >> 1;
 
     // Preclaculate all row offsets.
     for (i=0 ; i<height ; i++)
@@ -845,23 +851,23 @@ void R_DrawViewBorder (void)
     int		ofs;
     int		i;
 
-/*    if (viewheight == REALSCREENHEIGHT)
+/*    if (viewheight == realscreenheight)
 	return;*/
 
-    top = ((REALSCREENHEIGHT-SBARHEIGHT)-viewheight)/2;
+    top = ((realscreenheight-SBARHEIGHT)-viewheight)/2;
     side = (SCREENWIDTH-scaledviewwidth)/2;
 
-    if (scaledviewwidth != REALSCREENWIDTH){
+    if (scaledviewwidth != realscreenwidth){
       // copy top and one line of left side
       R_VideoErase (0, top*SCREENWIDTH+side);
     }
 
     // copy one line of right side and bottom
     ofs = (viewheight+top)*SCREENWIDTH-side;
-    R_VideoErase (ofs, (top+SCREENHEIGHT-REALSCREENHEIGHT)*SCREENWIDTH+side);
+    R_VideoErase (ofs, (top+SCREENHEIGHT-realscreenheight)*SCREENWIDTH+side);
 
     // copy sides using wraparound
-    ofs = top*SCREENWIDTH + scaledviewwidth+ (REALSCREENWIDTH-scaledviewwidth)/2;
+    ofs = top*SCREENWIDTH + scaledviewwidth+ (realscreenwidth-scaledviewwidth)/2;
     side <<= 1;
     for (i=1 ; i<=viewheight ; i++)
     {

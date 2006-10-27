@@ -4,6 +4,7 @@
 #include <stdarg.h>
 
 #include "dspshared.h"
+#include "doom_gui.h"
 
 #ifdef BUILD_STDALONE
     #include <kernel/graphics.h>
@@ -53,15 +54,7 @@
 
 #define ROOTFOLDER "/doom/"
 
-#if defined(GMINI4XX) || defined(GMINI402)
-#define REALSCREENWIDTH 224
-#define REALSCREENHEIGHT 176
-#endif
-
-#if defined(AV3XX) || defined(AV4XX)
-#define REALSCREENWIDTH 320
-#define REALSCREENHEIGHT 200
-#endif
+#define CFG_FILE_PATH "/doom/doom.cfg"
 
 #ifdef DM320
 #undef __IRAM_CODE
@@ -74,40 +67,40 @@ extern void app_exit();
 
 
 
-// buttons
+// DOOM_BUTTONs
 #if defined(GMINI4XX) || defined(GMINI402) || defined(AV3XX)
-#define BUTTON_UP     0
-#define BUTTON_DOWN   1
-#define BUTTON_LEFT   2
-#define BUTTON_RIGHT  3
-#define BUTTON_MENU1  4
-#define BUTTON_MENU2  5
-#define BUTTON_MENU3  6
-#define BUTTON_SQUARE 7
-#define BUTTON_CROSS  8
-#define BUTTON_ON     9
-#define BUTTON_OFF    10
+#define DOOM_BUTTON_UP     0
+#define DOOM_BUTTON_DOWN   1
+#define DOOM_BUTTON_LEFT   2
+#define DOOM_BUTTON_RIGHT  3
+#define DOOM_BUTTON_MENU1  4
+#define DOOM_BUTTON_MENU2  5
+#define DOOM_BUTTON_MENU3  6
+#define DOOM_BUTTON_1      7
+#define DOOM_BUTTON_2      8
+#define DOOM_BUTTON_ON     9
+#define DOOM_BUTTON_OFF    10
 
-#undef  NB_BUTTONS
-#define NB_BUTTONS    11
+#undef  NB_DOOM_BUTTONS
+#define NB_DOOM_BUTTONS    11
 #endif
 
 
 #if defined(AV4XX)
-#define BUTTON_UP     0
-#define BUTTON_DOWN   1
-#define BUTTON_LEFT   2
-#define BUTTON_RIGHT  3
-#define BUTTON_MENU1  9
-#define BUTTON_MENU2  5
-#define BUTTON_MENU3  10
-#define BUTTON_SQUARE 4
-#define BUTTON_CROSS  8
-#define BUTTON_ON     7
-#define BUTTON_OFF    6
+#define DOOM_BUTTON_UP     0
+#define DOOM_BUTTON_DOWN   1
+#define DOOM_BUTTON_LEFT   2
+#define DOOM_BUTTON_RIGHT  3
+#define DOOM_BUTTON_MENU1  9
+#define DOOM_BUTTON_MENU2  5
+#define DOOM_BUTTON_MENU3  10
+#define DOOM_BUTTON_1      4
+#define DOOM_BUTTON_2      8
+#define DOOM_BUTTON_ON     7
+#define DOOM_BUTTON_OFF    6
 
-#undef  NB_BUTTONS
-#define NB_BUTTONS    11
+#undef  NB_DOOM_BUTTONS
+#define NB_DOOM_BUTTONS    11
 #endif
 
 

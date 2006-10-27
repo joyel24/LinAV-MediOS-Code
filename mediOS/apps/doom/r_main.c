@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.3  2006/02/08 18:49:52  oxygen77
+// small bugfix from previous CI on Makfiles / build process
+//
 // Revision 1.2  2006/02/08 17:45:40  oxygen77
 // big cleanup in makefiles
 //
@@ -47,7 +50,8 @@ static const char rcsid[] = "$Id$";
 #include "r_sky.h"
 
 
-
+extern int realscreenwidth;
+extern int realscreenheight;
 
 
 // Fineangles in the SCREENWIDTH wide window.
@@ -548,15 +552,15 @@ void R_ExecuteSetViewSize (void)
 
     setsizeneeded = false;
 
-    if (setblocks*32 > REALSCREENWIDTH)
+    if (setblocks*32 > realscreenwidth)
     {
-	scaledviewwidth = REALSCREENWIDTH;
-	viewheight = REALSCREENHEIGHT;
+	scaledviewwidth = realscreenwidth;
+	viewheight = realscreenheight;
     }
     else
     {
 	scaledviewwidth = setblocks*32;
-	viewheight = (setblocks*206/10)&~7;
+	viewheight = (setblocks*32*(realscreenheight-SBARHEIGHT)/realscreenwidth)&~7;
     }
 
 	printf("%d %d\n",scaledviewwidth,viewheight);
@@ -588,10 +592,10 @@ void R_ExecuteSetViewSize (void)
     R_InitBuffer (scaledviewwidth, viewheight);
 
     R_InitTextureMapping ();
-    
+
     // psprite scales
-    pspritescale = FRACUNIT*viewwidth/REALSCREENWIDTH;
-    pspriteiscale = FRACUNIT*REALSCREENWIDTH/viewwidth;
+    pspritescale = FRACUNIT*viewwidth/realscreenwidth;
+    pspriteiscale = FRACUNIT*realscreenwidth/viewwidth;
 
     // thing clipping
     for (i=0 ; i<viewwidth ; i++)
@@ -618,7 +622,7 @@ void R_ExecuteSetViewSize (void)
 	startmap = ((LIGHTLEVELS-1-i)*2)*NUMCOLORMAPS/LIGHTLEVELS;
 	for (j=0 ; j<MAXLIGHTSCALE ; j++)
 	{
-	    level = startmap - j*REALSCREENWIDTH/(viewwidth<<detailshift)/DISTMAP;
+	    level = startmap - j*realscreenwidth/(viewwidth<<detailshift)/DISTMAP;
 	    
 	    if (level < 0)
 		level = 0;

@@ -102,7 +102,7 @@ void gui_init(){
     mih=widgetMenuChooser_create();
     mih->caption="TV out";
     mih->cfgName="tv_out";
-    mih->cfgStored=true;
+    mih->cfgStored=false;
     mih->chooser->items=tvOut_items;
     mih->chooser->itemCount=4;
     mih->chooser->index=0;

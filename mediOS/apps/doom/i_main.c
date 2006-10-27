@@ -15,6 +15,14 @@
 // for more details.
 //
 // $Log$
+// Revision 1.8  2006/10/11 21:48:27  opeos
+// improvement to aones config now explorer goes directly to /aones/roms
+// config to use-screen_resize for av4xx
+// bug correction for explorer goes directly to /doom
+// bug correction to ifdef in medos.h for doom
+// config button in aoboy for av4 similar to aones
+// thanks to GliGli and oxygen77 for the info.
+//
 // Revision 1.8  2006/10/11 03:42:30  opeos
 // Now the WAD files was stored in /doom
 // the explorer goes here automatically
@@ -63,6 +71,12 @@ rcsid[] = "$Id$";
 #include "m_argv.h"
 #include "d_main.h"
 
+extern int tvOut;
+extern int screen_initialX;
+extern int screen_initialY;
+extern void display_tvOutSet();
+extern void display_getRealSize();
+
 bool IsPWAD(char * name){
     char id[5];
     int f;
@@ -106,44 +120,6 @@ void MyIdentifyVersion(char * name){
     }
 }
 
-void WelcomeScreen(){
-    int y=0;
-
-    gfx_clearScreen(COLOR_WHITE);
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y,       "aoDoom v0.2");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "===========");
-
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=18,   "Keys:");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  D-Pad:  Move");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Square: Shoot");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Cross:  Strafe");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  On:     Activate");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F1:     Change gamma");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F2:     Change weapon");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F3:     Run");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off:    Menu");
-
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=18,   "Choose the WAD file you want to");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "play using the browser.");
-
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,REALSCREENHEIGHT-10,"Press a key to continue...");
-
-    while(btn_readState());
-    while(!btn_readState());
-};
-
-void PWADScreen(){
-    gfx_clearScreen(COLOR_WHITE);
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,0,       "You chose a PWAD (custom WAD)!");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,9,       "Now choose the corresponding");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,18,      "IWAD file (eg:doom2.wad)");
-
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,REALSCREENHEIGHT-10,"Press a key to continue...");
-
-    while(btn_readState());
-    while(!btn_readState());
-};
-
 int app_main(){
     char * wadname=malloc(MAX_PATH);
 
@@ -156,11 +132,14 @@ int app_main(){
     gfx_clearScreen(COLOR_WHITE);
     gfx_fontSet(STD6X9);
 
+    //needed to get real width&hheight right before launching doom code
+    display_getRealSize();
+
     icon_init();
     iniBrowser();
 
-    WelcomeScreen();
-    
+    gui_welcomeScreen();
+
     if (browser_simpleBrowse("/doom",wadname)!=MED_OK) app_exit(true);
     strlwr(wadname);
 
@@ -173,7 +152,7 @@ int app_main(){
 
         strcpy(pwadname,wadname);
 
-        PWADScreen();
+        gui_PWADScreen();
 
         if (browser_simpleBrowse("/doom",wadname)!=MED_OK) app_exit(true);
         strlwr(wadname);
