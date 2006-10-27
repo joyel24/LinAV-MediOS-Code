@@ -1,6 +1,6 @@
 include Makefile.conf
 
-SUBDIRS = kernel apps
+SUBDIRS = kernel
 KERNEL_OBJS = kernel/build/*.o kernel/target/arch_$(TARGET_DEVICE)/build/*.o
 
 export MEDIOS_SRC_PATH=$(shell pwd)
