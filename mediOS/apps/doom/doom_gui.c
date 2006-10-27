@@ -25,12 +25,22 @@ extern void display_tvOutSet();
 void clk_overclock(){
 // no DSC25/AV300 OC since I don't know the default parame
 #if defined(DM270) || defined(DM320)
+    int dspf;
+
     if(overclocking){
+        dspf=clkc_getClockFrequency(CLK_DSP);
+
+        // dsp freq must be >= arm freq
+        if(armFrequency*1000000>dspf){
+            clkc_setClockFrequency(CLK_DSP,armFrequency*1000000);
+        }
+
         clkc_setClockFrequency(CLK_ARM,armFrequency*1000000);
     }else{
         // default params
         clkc_setClockParameters(CLK_ARM,15,2,2);
         clkc_setClockParameters(CLK_ACCEL,15,2,1);
+        clkc_setClockParameters(CLK_DSP,9,1,2);
     }
 #endif
 };
