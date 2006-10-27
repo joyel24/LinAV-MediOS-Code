@@ -75,6 +75,7 @@ MED_RET_T dsp_loadProgramFromHDD (char* pszFilename);
 MED_RET_T dsp_loadProgramFromMemory (void* pCode, int nSize);
 
 int dsp_getChipNum();
+void dsp_write32(volatile void * p, unsigned long value);
 
 typedef void (*DSP_HANDLER)(void);
 

@@ -172,3 +172,10 @@ int dsp_getChipNum(){
     return 0;
 #endif
 }
+
+void dsp_write32(volatile void * p, unsigned long value)
+{
+    unsigned short * ptr = ( unsigned short *) p;
+    ptr[1] = value;
+    ptr[0] = value>>16;
+}

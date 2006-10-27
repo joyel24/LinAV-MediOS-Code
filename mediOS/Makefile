@@ -1,6 +1,6 @@
 include Makefile.conf
 
-SUBDIRS = kernel
+SUBDIRS = kernel apps
 KERNEL_OBJS = kernel/build/*.o kernel/target/arch_$(TARGET_DEVICE)/build/*.o
 
 export MEDIOS_SRC_PATH=$(shell pwd)
@@ -31,6 +31,7 @@ medios_lib: incdir mk_api_file
 aoboy: APP_NAME = avboy
 aoboy: do_build_app
         
+doom: LD_BIN_INC = apps/doom/dspcode/doom_dsp.out
 doom: APP_NAME = doom
 doom: do_build_app
 

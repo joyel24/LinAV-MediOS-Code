@@ -23,7 +23,8 @@ LDFLAGS =  -nostdlib --emit-relocs -L../../lib -lmedios -T$(TARGET_DEVICE)_doom.
 BUILD_DIR = build
 
 all: builddir $(LIBS) do_build
-	@$(LD) build/*.o ../../lib/*.o $(LDFLAGS) -o $(TARGET).med -Map doom.map
+	@$(LD) -b binary dspcode/doom_dsp.out -b elf32-littlearm \
+	 build/*.o ../../lib/*.o $(LDFLAGS) -o $(TARGET).med -Map doom.map
 	@rm -f .elf *.gdb *.elf2flt
 
 stdalone: GCCFLAGS += -DBUILD_STDALONE

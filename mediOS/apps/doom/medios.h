@@ -3,6 +3,8 @@
 
 #include <stdarg.h>
 
+#include "dspshared.h"
+
 #ifdef BUILD_STDALONE
     #include <kernel/graphics.h>
     #include <kernel/stdfs.h>
@@ -13,6 +15,16 @@
     #include <kernel/osd.h>
     #include <kernel/uart.h>
     #include <kernel/exit.h>
+    #include <kernel/dsp.h>
+    #include <kernel/aic23.h>
+    #include <kernel/clkc.h>
+    #include <kernel/resize.h>
+    #include <kernel/evt.h>
+    #include <kernel/bat_power.h>
+    #include <kernel/videnc.h>
+    #include <kernel/icons.h>
+    #include <kernel/widgetlist.h>
+    #include <kernel/widgetmenu.h>
     #include <sys_def/string.h>
     extern int gui_pal[256][3];
 #else

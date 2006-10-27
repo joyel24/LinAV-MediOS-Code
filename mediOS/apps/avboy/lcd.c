@@ -59,10 +59,10 @@ __IRAM_DATA struct scan scan;
 #define WV (scan.wv)
 
 static byte patpix[4096][8][8];
-#if defined(GMINI4XX) || defined(GMINI402)
+#if defined(GMINI4XX)
 __IRAM_DATA static byte patdirty[1024];
 #endif
-#if defined(AV3XX) || defined(AV4XX)
+#if defined(AV3XX) || defined(AV4XX) || defined(GMINI402)
 static byte patdirty[1024];
 extern int ZoomX;
 #endif

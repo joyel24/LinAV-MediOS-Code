@@ -1,4 +1,4 @@
-/* 
+/*
 *   apps/avboy/defs.h
 *
 *   MediOS project
@@ -47,6 +47,13 @@
 #else
 #define LO 1
 #define HI 0
+#endif
+
+#ifdef DM320
+    #undef __IRAM_CODE
+    #define __IRAM_CODE
+    #undef __IRAM_DATA
+    #define __IRAM_DATA
 #endif
 
 typedef unsigned char byte;

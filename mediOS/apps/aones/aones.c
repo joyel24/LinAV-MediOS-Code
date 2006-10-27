@@ -183,14 +183,6 @@ void dsp_init(){
     dspCom->armInitFinished=1;
 };
 
-
-void dsp_write32(volatile void * p, uint32 value)
-{
-    uint16 * ptr = (uint16 *) p;
-    ptr[1] = value;
-    ptr[0] = value>>16;
-}
-
 __IRAM_CODE void osd_interrupt(int irq,struct pt_regs * regs){
     vblankNum++;
 }

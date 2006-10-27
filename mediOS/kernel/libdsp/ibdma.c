@@ -10,6 +10,7 @@ ioport unsigned short port6;
 ioport unsigned short port7;
 ioport unsigned short port8;
 ioport unsigned short port9;
+ioport unsigned short portA;
 
 void ibDma_start(unsigned long sdAddr,unsigned short sdOffset,
 				 unsigned short ibAddr, unsigned short ibOffset,
@@ -44,8 +45,10 @@ void ibDma_start(unsigned long sdAddr,unsigned short sdOffset,
 
 	port8=0x03<<(buffer*shift);
 
-	if(chip_num>25){
+	if(chip_num==27){
 		port9=(byteToWord)?0x0004:0x0000;
+	}else if(chip_num>32){
+		portA=(byteToWord)?0x0004:0x0000;
 	}else{
 		port9=0x0000;
 	}

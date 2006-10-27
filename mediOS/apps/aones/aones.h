@@ -111,9 +111,6 @@ extern int armFrequency;
 extern int dspFrequency;
 extern int tvOut;
 
-
-void dsp_write32(volatile void * p, uint32 value);
-
 void clk_overclock(bool en);
 void emu_handleVideoBuffer();
 int emu_frameCompleted();
