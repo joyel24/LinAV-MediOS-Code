@@ -5,6 +5,7 @@
 #include "doomdef.h"
 #include "doomstat.h"
 #include "v_video.h"
+#include "d_main.h"
 
 int gui_eventHandler=0;
 bool gui_wantExit=false;
@@ -23,9 +24,13 @@ extern int tvOut;
 extern void display_tvOutSet();
 
 void clk_overclock(){
-// no DSC25/AV300 OC since I don't know the default parame
-#if defined(DM270) || defined(DM320)
+// AV400 seems to have problems with o/c
+#if defined(GMINI402) || defined(GMINI4XX)
     int dspf;
+
+    // mute sound during clock changes, fixes some crashes
+    while(dspCom->armBusy || dspCom->sndWantBuf) /* wait for ready */;
+    dspCom->armBusy=1;
 
     if(overclocking){
         dspf=clkc_getClockFrequency(CLK_DSP);
@@ -33,6 +38,7 @@ void clk_overclock(){
         // dsp freq must be >= arm freq
         if(armFrequency*1000000>dspf){
             clkc_setClockFrequency(CLK_DSP,armFrequency*1000000);
+            mdelay(10);
         }
 
         clkc_setClockFrequency(CLK_ARM,armFrequency*1000000);
@@ -42,8 +48,31 @@ void clk_overclock(){
         clkc_setClockParameters(CLK_ACCEL,15,2,1);
         clkc_setClockParameters(CLK_DSP,9,1,2);
     }
+
+    dspCom->armBusy=0;
 #endif
 };
+
+void menu_onClick(MENU m, WIDGETMENU_ITEM mi){
+    char * c;
+    event_t event;
+
+    if (m->indexOf(m,mi)>m->indexFromCaption(m,"Cheats:")){
+        printf("Cheat '%s' %s\n",mi->caption,mi->cfgName);
+
+        c=mi->cfgName;
+        while(*c){
+
+            event.type = ev_keydown;
+            event.data1 = *c;
+            D_PostEvent(&event);
+
+            c++;
+        }
+        
+        gui_wantExit=true;
+    }
+}
 
 void gui_init(){
     int sw,sh;
@@ -60,6 +89,7 @@ void gui_init(){
     menu=widgetMenu_create();
     menu->setRect(menu,0,0,sw,sh);
     menu->ownItems=true; // the menu will handle items destroy
+    menu->onClick=(MENU_CLICKEVENT)menu_onClick;
 
     mi=widgetMenuItem_create();
     mi->caption="Picture settings:";
@@ -116,11 +146,51 @@ void gui_init(){
     mit->trackbar->value=clkc_getClockFrequency(CLK_ARM)/1000000;
     menu->addItem(menu,mit);
 
+    mi=widgetMenuItem_create();
+    mi->caption="Cheats:";
+    mi->foreColor=GUI_TITLE_COLOR;
+    mi->canFocus=false;
+    mi->widgetWidth=0;
+    menu->addItem(menu,mi);
+
+    mi=widgetMenuItem_create();
+    mi->caption="God mode";
+    mi->cfgName="iddqd";
+    mi->widgetWidth=0;
+    menu->addItem(menu,mi);
+
+    mi=widgetMenuItem_create();
+    mi->caption="No clipping";
+    mi->cfgName="idclip";
+    mi->widgetWidth=0;
+    menu->addItem(menu,mi);
+
+    mi=widgetMenuItem_create();
+    mi->caption="Full ammo";
+    mi->cfgName="idfa";
+    mi->widgetWidth=0;
+    menu->addItem(menu,mi);
+
+    mi=widgetMenuItem_create();
+    mi->caption="Full ammo & keys";
+    mi->cfgName="idkfa";
+    mi->widgetWidth=0;
+    menu->addItem(menu,mi);
+
+    mi=widgetMenuItem_create();
+    mi->caption="Powerups";
+    mi->cfgName="idbehold";
+    mi->widgetWidth=0;
+    menu->addItem(menu,mi);
+
+
+    printf("Loading settings ...\n");
     menu->cfgLoad(menu,CFG_FILE_PATH);
 }
 
 
 void gui_close(){
+    printf("Saving settings ...\n");
     menu->cfgSave(menu,CFG_FILE_PATH);
 
     evt_freeHandler(gui_eventHandler);
@@ -128,6 +198,10 @@ void gui_close(){
 
 void gui_execute(){
     int event;
+
+    // mute sound in gui
+    while(dspCom->armBusy || dspCom->sndWantBuf) /* wait for ready */;
+    dspCom->armBusy=1;
 
     gui_wantExit=false;
 
@@ -146,6 +220,8 @@ void gui_execute(){
     }while(event!=BTN_OFF && !gui_wantExit);
 
     while(btn_readState()); // make sure no button is left pressed
+
+    dspCom->armBusy=0;
 }
 
 void gui_applySettings(){

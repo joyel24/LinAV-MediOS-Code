@@ -16,6 +16,9 @@
 //
 //
 // $Log$
+// Revision 1.6  2006/06/19 16:36:30  sfxgligli
+// aoDoom update
+//
 // Revision 1.5  2006/05/28 17:08:45  sfxgligli
 // aoDoom update (adding browser, PWADs support, optimisations,...)
 //
@@ -130,7 +133,7 @@ M_WriteFile
     int       handle;
     int		count;
 
-    handle = open ( name, O_WRONLY | O_CREAT);
+    handle = open ((char *)name, O_WRONLY | O_CREAT);
 
     if (handle < 0)
 	return false;
@@ -157,7 +160,7 @@ M_ReadFile
     int count, length;
     byte	*buf;
 
-    handle = open (name, O_RDONLY);
+    handle = open ((char *)name, O_RDONLY);
     if (handle < 0)
 	I_Error ("Couldn't read file %s", name);
 
@@ -272,6 +275,7 @@ default_t	defaults[] =
 
     {"usegamma",&usegamma, 0},
 
+#if 0
 #ifndef __BEOS__
     {"chatmacro0", (int *) &chat_macros[0], (int) HUSTR_CHATMACRO0 },
     {"chatmacro1", (int *) &chat_macros[1], (int) HUSTR_CHATMACRO1 },
@@ -283,6 +287,7 @@ default_t	defaults[] =
     {"chatmacro7", (int *) &chat_macros[7], (int) HUSTR_CHATMACRO7 },
     {"chatmacro8", (int *) &chat_macros[8], (int) HUSTR_CHATMACRO8 },
     {"chatmacro9", (int *) &chat_macros[9], (int) HUSTR_CHATMACRO9 }
+#endif
 #endif
 
 };
@@ -329,6 +334,7 @@ extern byte	scantokey[128];
 void M_LoadDefaults (void)
 {
     int		i;
+/* TODO
     int		len;
     int  	f;
     char	def[80];
@@ -336,6 +342,7 @@ void M_LoadDefaults (void)
     char*	newstring;
     int		parm;
     boolean	isstring;
+*/
 
     // set everything to base values
     numdefaults = sizeof(defaults)/sizeof(defaults[0]);

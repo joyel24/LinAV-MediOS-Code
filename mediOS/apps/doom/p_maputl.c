@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	Movement/collision utility functions,
@@ -111,8 +115,8 @@ P_BoxOnLineSide
 ( fixed_t*	tmbox,
   line_t*	ld )
 {
-    int		p1;
-    int		p2;
+    int		p1=0;
+    int		p2=0;
 	
     switch (ld->slopetype)
     {

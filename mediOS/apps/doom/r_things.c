@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	Refresh of things, i.e. objects represented by sprites.
@@ -788,7 +792,7 @@ __IRAM_CODE void R_SortVisSprites (void)
     int			i;
     int			count;
     vissprite_t*	ds;
-    vissprite_t*	best;
+    vissprite_t*	best=NULL;
     vissprite_t		unsorted;
     fixed_t		bestscale;
 

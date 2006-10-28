@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.7  2006/10/27 16:18:47  sfxgligli
+// doom: added ingame menu with tv out & oc options
+//
 // Revision 1.6  2006/06/19 16:36:30  sfxgligli
 // aoDoom update
 //
@@ -167,8 +170,10 @@ int             eventtail;
 //
 void D_PostEvent (event_t* ev)
 {
+    int tmp;
     events[eventhead] = *ev;
-    eventhead = (++eventhead)&(MAXEVENTS-1);
+    tmp = (++eventhead)&(MAXEVENTS-1);
+    eventhead = tmp;
 }
 
 

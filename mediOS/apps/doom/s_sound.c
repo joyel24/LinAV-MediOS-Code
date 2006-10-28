@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:  none
 //
@@ -650,7 +654,7 @@ S_ChangeMusic
 ( int			musicnum,
   int			looping )
 {
-    musicinfo_t*	music;
+    musicinfo_t*	music=NULL;
     char		namebuf[9];
 
     if ( (musicnum <= mus_None)

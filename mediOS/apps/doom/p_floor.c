@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
@@ -15,6 +15,10 @@
 // for more details.
 //
 // $Log$
+// Revision 1.1  2005/12/20 19:11:56  sfxgligli
+// - added Doom port
+// - Gmini400 buttons fix
+//
 //
 // DESCRIPTION:
 //	Floor animation: raising stairs.
@@ -467,8 +471,8 @@ EV_BuildStairs
 
     floormove_t*	floor;
     
-    fixed_t		stairsize;
-    fixed_t		speed;
+    fixed_t		stairsize=0;
+    fixed_t		speed=0;
 
     secnum = -1;
     rtn = 0;

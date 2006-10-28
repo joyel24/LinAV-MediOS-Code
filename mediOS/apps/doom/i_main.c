@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.9  2006/10/27 16:18:47  sfxgligli
+// doom: added ingame menu with tv out & oc options
+//
 // Revision 1.8  2006/10/11 21:48:27  opeos
 // improvement to aones config now explorer goes directly to /aones/roms
 // config to use-screen_resize for av4xx
@@ -71,10 +74,7 @@ rcsid[] = "$Id$";
 #include "m_argv.h"
 #include "d_main.h"
 
-extern int tvOut;
-extern int screen_initialX;
-extern int screen_initialY;
-extern void display_tvOutSet();
+extern void snd_close();
 extern void display_getRealSize();
 
 bool IsPWAD(char * name){
@@ -175,6 +175,7 @@ int app_main(){
 
 
 void app_exit(bool error){
+    snd_close();
     gfx_closeGraphics();
 
     if (error){

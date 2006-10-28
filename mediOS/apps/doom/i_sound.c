@@ -163,13 +163,17 @@ void dsp_init(){
 
 
 void snd_init(){
+#ifdef HAVE_AIC23_SOUND
     aic23_setSampleRate(SAMPLERATE);
     aic23_enableOutput(true);
     aic23_setOutputVolume(AIC23_MAX_OUTPUT_VOLUME,AIC23_CHANNEL_BOTH);
+#endif
 }
 
 void snd_close(){
+#ifdef HAVE_AIC23_SOUND
     aic23_enableOutput(false);
+#endif
 }
 
 //*****************************************************************************
@@ -403,7 +407,7 @@ __IRAM_CODE int I_StartSound(int id, int vol, int sep, int pitch, int priority)
    int channel=next_channel;
    next_channel=(next_channel+1)%NUM_CHANNELS;
 
-   while(dspCom->armBusy) /* wait for ready */;
+   while(dspCom->armBusy || dspCom->sndWantBuf) /* wait for ready */;
    dspCom->armBusy=1;
 
    // Returns a handle (not used).
@@ -570,11 +574,9 @@ void I_SubmitSound(void)
 
 void I_ShutdownSound(void)
 {
-#if defined(DM270) || defined(DM320)
     snd_close();
     dsp_reset();
     dsp_off();
-#endif
 }
 
 void I_InitSound()
@@ -600,8 +602,10 @@ void I_InitSound()
    for ( i = 0; i< MIXBUFFERSIZE; i++ )
       mixbuffer[i] = 0;
 
-#if defined(DM270) || defined(DM320)
    snd_init();
+
+// for now dsp only supports AIC23
+#ifdef HAVE_AIC23_SOUND
    dsp_init();
 #endif
 
