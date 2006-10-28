@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.13  2006/10/27 16:18:47  sfxgligli
+// doom: added ingame menu with tv out & oc options
+//
 // Revision 1.12  2006/10/03 14:25:12  sfxgligli
 // - AV4XX support in doom and aoboy thanks to Opeos
 // - missing include in usb_fw.c
@@ -296,10 +299,15 @@ void I_StartTic (void)
   int bt,pressed,released;
 
   bt=btn_readState();
+
+  //fix pressing f3+up+left sometimes triggers f1
+  if((bt & BTMASK_F3) && (bt & BTMASK_UP)){
+    bt&=~BTMASK_F1;
+  }
+
   pressed=bt & ~oldbt;
   released=~bt & oldbt;
   oldbt=bt;
-
 
   if (pressed){
     if(pressed & BTMASK_UP)     DoButtonEvent(DOOM_BUTTON_UP,false);

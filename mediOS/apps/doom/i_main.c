@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.10  2006/10/28 10:54:49  sfxgligli
+// doom: added cheats, fixed AV300 build, sound improvements, killed warnings
+//
 // Revision 1.9  2006/10/27 16:18:47  sfxgligli
 // doom: added ingame menu with tv out & oc options
 //
@@ -126,7 +129,14 @@ int app_main(){
     myargc = 0;
     myargv = NULL;
 
-    gfx_setEntirePalette(gui_pal,256);
+    // disable LCD & halt timer
+    set_timer_status(LCD_TIMER,TIMER_MODE_BAT,MODE_DISABLE);
+    set_timer_status(LCD_TIMER,TIMER_MODE_DC,MODE_DISABLE);
+    set_timer_status(HALT_TIMER,TIMER_MODE_BAT,MODE_DISABLE);
+    set_timer_status(HALT_TIMER,TIMER_MODE_DC,MODE_DISABLE);
+
+    // create dir if it doesn't exist
+    mkdir("/doom",-1);
 
     gfx_openGraphics();
     gfx_clearScreen(COLOR_WHITE);

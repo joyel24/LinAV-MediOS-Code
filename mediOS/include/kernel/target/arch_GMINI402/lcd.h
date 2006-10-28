@@ -24,7 +24,7 @@
 #define SCREEN_ORIGIN_Y                   8
 
 #define SCREEN_LCD_SHIFT_X                266
-#define SCREEN_LCD_SHIFT_Y                32
+#define SCREEN_LCD_SHIFT_Y                16
 #define SCREEN_PAL_SHIFT_X                132
 #define SCREEN_PAL_SHIFT_Y                16
 #define SCREEN_NTSC_SHIFT_X               122
