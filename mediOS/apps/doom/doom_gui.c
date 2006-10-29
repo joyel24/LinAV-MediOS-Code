@@ -248,9 +248,10 @@ void gui_welcomeScreen(){
     int y=0;
 
     gfx_clearScreen(COLOR_WHITE);
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y,       "aoDoom v0.2");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y,       "aoDoom v0.3");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "===========");
 
+#if defined(GMINI4XX) || defined(GMINI402)
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=18,   "Keys:");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  D-Pad:  Move");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Square: Shoot");
@@ -260,6 +261,29 @@ void gui_welcomeScreen(){
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F2:     Change weapon");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F3:     Run");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off:    Doom menu");
+#endif
+
+#if defined(AV3XX)
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=18,   "Keys:");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  D-Pad:    Move");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Joypress: Run");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F1:       Shoot, Ingame menu (while in doom menu)");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F2:       Strafe");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F3:       Change weapon");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  On:       Activate");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off:      Doom menu");
+#endif
+
+#if defined(AV4XX)
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=18,   "Keys:");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  D-Pad:  Move");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  LCD/TV: Shoot");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F1:     Doom menu, Ingame menu (while in doom menu)");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F2:     Strafe");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F3:     Change weapon");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  On:     Run");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off:    Activate");
+#endif
 
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=18,   "Choose the WAD file you want to");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "play using the browser.");

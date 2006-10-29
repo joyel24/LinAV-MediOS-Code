@@ -19,7 +19,6 @@
     #include <kernel/dsp.h>
     #include <kernel/aic23.h>
     #include <kernel/clkc.h>
-    #include <kernel/resize.h>
     #include <kernel/evt.h>
     #include <kernel/bat_power.h>
     #include <kernel/videnc.h>
@@ -63,12 +62,7 @@
 #define __IRAM_DATA
 #endif
 
-extern void app_exit();
-
-
-
-// DOOM_BUTTONs
-#if defined(GMINI4XX) || defined(GMINI402) || defined(AV3XX)
+// buttons
 #define DOOM_BUTTON_UP     0
 #define DOOM_BUTTON_DOWN   1
 #define DOOM_BUTTON_LEFT   2
@@ -81,32 +75,28 @@ extern void app_exit();
 #define DOOM_BUTTON_ON     9
 #define DOOM_BUTTON_OFF    10
 
-#undef  NB_DOOM_BUTTONS
 #define NB_DOOM_BUTTONS    11
-#endif
 
+// keys
+#define DOOM_KEY_UP         KEY_UPARROW
+#define DOOM_KEY_DOWN       KEY_DOWNARROW
+#define DOOM_KEY_LEFT       KEY_LEFTARROW
+#define DOOM_KEY_RIGHT      KEY_RIGHTARROW
+#define DOOM_KEY_SHOOT      KEY_RCTRL
+#define DOOM_KEY_STRAFE     KEY_RALT
+#define DOOM_KEY_RUN        KEY_RSHIFT
+#define DOOM_KEY_ACTIVATE   ' '
+#define DOOM_KEY_WEAPON     '1'
+#define DOOM_KEY_DOOMMENU   KEY_ESCAPE
+#define DOOM_KEY_INGAMEMENU 'M'
+#define DOOM_KEY_MENUOK     KEY_ENTER
+#define DOOM_KEY_MENUYES    'y'
+#define DOOM_KEY_NONE       '\0'
 
-#if defined(AV4XX)
-#define DOOM_BUTTON_UP     0
-#define DOOM_BUTTON_DOWN   1
-#define DOOM_BUTTON_LEFT   2
-#define DOOM_BUTTON_RIGHT  3
-#define DOOM_BUTTON_MENU1  9
-#define DOOM_BUTTON_MENU2  5
-#define DOOM_BUTTON_MENU3  10
-#define DOOM_BUTTON_1      4
-#define DOOM_BUTTON_2      8
-#define DOOM_BUTTON_ON     7
-#define DOOM_BUTTON_OFF    6
+extern void app_exit();
 
-#undef  NB_DOOM_BUTTONS
-#define NB_DOOM_BUTTONS    11
-#endif
-
-
-
+// stubs
 int access(char *file, int mode);
-
 int fprintf(int f,const char * s,...);
 int fscanf(int f,const char * s,...);
 void * getenv(const char * s);

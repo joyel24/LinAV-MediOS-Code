@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.5  2006/06/19 16:36:30  sfxgligli
+// aoDoom update
+//
 // Revision 1.4  2006/05/28 17:08:45  sfxgligli
 // aoDoom update (adding browser, PWADs support, optimisations,...)
 //
@@ -113,6 +116,7 @@ int numoverflows=0;
 int prevtime=0;
 int  I_GetTime (void)
 {
+#if 1
   int time;
   time=TMR_GET_CNT(TMR1);
 
@@ -121,6 +125,9 @@ int  I_GetTime (void)
   prevtime=time;
 
   return (numoverflows<<6)+(time>>10);
+#else
+  return tmr_getTick()/3;
+#endif
 }
 
 
@@ -130,11 +137,13 @@ int  I_GetTime (void)
 //
 void I_Init (void)
 {
+#if 1
   // init the timer
   TMR_SET_MODE(TMR_MODE_FREERUN,TMR1);
   TMR_SET_SCAL(753,TMR1);
   TMR_SET_DIV(65535,TMR1);
   TMR_SET_SEL(TMR_SEL_EXT,TMR1)
+#endif
 
   I_InitSound();
   //  I_InitGraphics();
