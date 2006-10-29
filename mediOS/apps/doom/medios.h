@@ -62,6 +62,10 @@
 #define __IRAM_DATA
 #endif
 
+#ifdef HAVE_AIC23_SOUND
+    #define SOUND_USE_DSP
+#endif
+
 // buttons
 #define DOOM_BUTTON_UP     0
 #define DOOM_BUTTON_DOWN   1

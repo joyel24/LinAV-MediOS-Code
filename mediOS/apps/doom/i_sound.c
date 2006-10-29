@@ -407,8 +407,10 @@ __IRAM_CODE int I_StartSound(int id, int vol, int sep, int pitch, int priority)
    int channel=next_channel;
    next_channel=(next_channel+1)%NUM_CHANNELS;
 
+#ifdef SOUND_USE_DSP
    while(dspCom->armBusy || dspCom->sndWantBuf) /* wait for ready */;
    dspCom->armBusy=1;
+#endif
 
    // Returns a handle (not used).
    handle = addsfx(id,channel);
@@ -419,7 +421,9 @@ __IRAM_CODE int I_StartSound(int id, int vol, int sep, int pitch, int priority)
 #endif
    updateSoundParams(handle, vol, sep, pitch);
 
+#ifdef SOUND_USE_DSP
    dspCom->armBusy=0;
+#endif
 
    return handle;
 }
@@ -575,8 +579,10 @@ void I_SubmitSound(void)
 void I_ShutdownSound(void)
 {
     snd_close();
+#ifdef SOUND_USE_DSP
     dsp_reset();
     dsp_off();
+#endif
 }
 
 void I_InitSound()
@@ -605,7 +611,7 @@ void I_InitSound()
    snd_init();
 
 // for now dsp only supports AIC23
-#ifdef HAVE_AIC23_SOUND
+#ifdef SOUND_USE_DSP
    dsp_init();
 #endif
 

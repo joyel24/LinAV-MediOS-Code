@@ -29,8 +29,10 @@ void clk_overclock(){
     int dspf;
 
     // mute sound during clock changes, fixes some crashes
+#ifdef SOUND_USE_DSP
     while(dspCom->armBusy || dspCom->sndWantBuf) /* wait for ready */;
     dspCom->armBusy=1;
+#endif
 
     if(overclocking){
         dspf=clkc_getClockFrequency(CLK_DSP);
@@ -49,7 +51,10 @@ void clk_overclock(){
         clkc_setClockParameters(CLK_DSP,9,1,2);
     }
 
+#ifdef SOUND_USE_DSP
     dspCom->armBusy=0;
+#endif
+
 #endif
 };
 
@@ -75,19 +80,21 @@ void menu_onClick(MENU m, WIDGETMENU_ITEM mi){
 }
 
 void gui_init(){
-    int sw,sh;
     WIDGETMENU_ITEM mi;
     WIDGETMENU_CHECKBOX mic;
     WIDGETMENU_TRACKBAR mit;
     WIDGETMENU_CHOOSER mih;
 
-    getResolution(&sw,&sh);
-
     gui_eventHandler = evt_getHandler(BTN_CLASS|GUI_CLASS);
 
     // menu
     menu=widgetMenu_create();
-    menu->setRect(menu,0,0,sw,sh);
+#if defined(GMINI4XX) || defined(GMINI402)
+    menu->setRect(menu,0,0,220,176);
+#endif
+#if defined(AV4XX) || defined(AV3XX)
+    menu->setRect(menu,0,0,320,200);
+#endif
     menu->ownItems=true; // the menu will handle items destroy
     menu->onClick=(MENU_CLICKEVENT)menu_onClick;
 
@@ -200,8 +207,10 @@ void gui_execute(){
     int event;
 
     // mute sound in gui
+#ifdef SOUND_USE_DSP
     while(dspCom->armBusy || dspCom->sndWantBuf) /* wait for ready */;
     dspCom->armBusy=1;
+#endif
 
     gui_wantExit=false;
 
@@ -221,7 +230,9 @@ void gui_execute(){
 
     while(btn_readState()); // make sure no button is left pressed
 
+#ifdef SOUND_USE_DSP
     dspCom->armBusy=0;
+#endif
 }
 
 void gui_applySettings(){
