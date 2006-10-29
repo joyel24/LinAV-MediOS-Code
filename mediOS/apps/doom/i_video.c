@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.15  2006/10/29 13:40:20  sfxgligli
+// -doom: buttons chages
+//
 // Revision 1.14  2006/10/28 14:47:25  sfxgligli
 // - doom: minor changes
 // - Gmini402: tweaked LCD sync (to avoid problems with palette)
@@ -272,7 +275,7 @@ void display_tvOutSet(){
 }
 
 void DoButtonEvent(int button,bool released){
-  if(!released && button_to_key[0][button]=='M'){
+  if(!released && button_to_key[menuactive?1:0][button]=='M'){
 
     // medios palette
     osd_setEntirePalette(gui_pal,256);
