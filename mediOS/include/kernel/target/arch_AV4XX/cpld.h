@@ -23,7 +23,7 @@
 #define CPLD_PORT0_INIT        0xf
 #define CPLD_PORT1_INIT        0x7
 #define CPLD_PORT2_INIT        0x2
-#define CPLD_PORT3_INIT        0xF 
+#define CPLD_PORT3_INIT        0xf 
 /* CPLD 3 or 0xc, whereas 0x4 and 0x7 changes the frequency of the aic
 or 0xD to enable HP */
 

@@ -106,6 +106,12 @@ struct cmd_line_s cmd_tab[] = {
         cmd_action : do_kill,
         nb_args    : 1
     },
+    {
+        cmd        : "threadState",
+        help_str   : "Enable/Disable a thread with given pid",
+        cmd_action : do_ThreadState,
+        nb_args    : 2
+    },
     /* this has to be the last entry */
     {
         cmd        : NULL,
@@ -442,4 +448,20 @@ void do_kill (unsigned char ** params)
     ret_val=thread_kill(pid);
     if(ret_val!=MED_OK)
         printk("Error killing %d : %d\n",pid,-ret_val);
+}
+
+void do_ThreadState (unsigned char ** params)
+{
+    int pid = atoi (params[0]);
+    int state = atoi (params[1]);
+    if(state)
+    {
+        printk("Enable thread %d\n",pid);
+        thread_enable(pid);
+    }
+    else
+    {
+        printk("Disable thread %d\n",pid);
+        thread_disable(pid);
+    }
 }

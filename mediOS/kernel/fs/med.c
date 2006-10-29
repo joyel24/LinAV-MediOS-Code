@@ -92,7 +92,7 @@ int med_loadParam(int argc,char**argv)
     
     int ret_val;
     
-    int (*run_med)(int argc,char**argv);
+    //int (*run_med)(int argc,char**argv);
     
     elf_hdr header;
     
@@ -366,7 +366,7 @@ int med_loadParam(int argc,char**argv)
                 else
                     DEBUG_MED("REL: %x of type %d \n",rel_data.r_offset,ELF32_R_TYPE(rel_data.r_info));
             }
-            printk("%d of type 1, %d were of type 2, %d were found, %d of other type\n",
+            DEBUG_MED("%d of type 1, %d were of type 2, %d were found, %d of other type\n",
                 res1,res,res2,section_list[i].rel->nb_ent-res-res1);
         }
     }
@@ -375,11 +375,11 @@ int med_loadParam(int argc,char**argv)
     for(k=0;k<header.e_shnum;k++) {
       //
       if (!strcmp(section_list[k].name, ".ctors")) {
- 	printk( "CTOR %d", k);
+ 	DEBUG_MED( "CTOR %d", k);
 	int j;
 	for (j=0; j<section_list[k].size; j+=4) {
 	  uint32_t * rout = *(uint32_t **)((section_list[k].addr)+j);
-	  printk("CTOR -->%p [%p [%08x]]\n", section_list[k].addr, rout, *rout);
+	  DEBUG_MED("CTOR -->%p [%p [%08x]]\n", section_list[k].addr, rout, *rout);
 	  ((void (*)(void))rout)();
 	}
       }
@@ -397,34 +397,36 @@ int med_loadParam(int argc,char**argv)
         goto exit_point3;
     }
     else
-        printk("entry point in section: %d\n",k);
+        DEBUG_MED("entry point in section: %d\n",k);
            
     close(fd);
          
-    printk("sdram  %x (@%x)\n",sdram_start,&sdram_start); 
-    printk("sections_name  %x(@%x)\n",sections_name,&sections_name);
-    printk("section_list  %x(@%x)\n",section_list,&section_list);
+    DEBUG_MED("sdram  %x (@%x)\n",sdram_start,&sdram_start); 
+    DEBUG_MED("sections_name  %x(@%x)\n",sections_name,&sections_name);
+    DEBUG_MED("section_list  %x(@%x)\n",section_list,&section_list);
     
-    run_med = (int (*)(int ,char**))entry;
+    // needed for direct call
+    //run_med = (int (*)(int ,char**))entry;
     
-    printk("calling app (entry %x)\n", run_med);      
     DEBUG_MED("calling app (entry %x)\n", run_med);
-
-    do_bkpt();
 
     /* invalidate caches */
     cache_invalidate(CACHE_ALL);
 
-    ret_val=run_med(argc,argv);
-
-    printk("back from app\n");
-    free_user();
-    free(sdram_start);
-    printk("sdram freed %x\n",sdram_start);
+    /* freeing tmp malloc/struct */
     free(sections_name);
-    printk("sections_name freed %x\n",sections_name);
     free(section_list);
-    printk("section_list freed %x\n",section_list);
+    
+    // needed for direct call
+    //ret_val=run_med(argc,argv);
+
+    thread_startMed(entry,sdram_start,strrchr(argv[0],'/')+1,argc,argv);
+    
+    printk("back from med\n");
+    
+    free_user();    
+    //free(sdram_start);
+    
     return ret_val;
 
 exit_point3:       

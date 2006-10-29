@@ -20,13 +20,15 @@ void badFctName(void)
 {
     printk("BAD fct \n");
 }
-
+    
 unsigned int swi_handler (
-	unsigned long nCmd,
+	unsigned long nParam1,
 	unsigned long nParam2,
-	unsigned long nParam3,
-	unsigned long nParam1)
+	unsigned long nParam3,        
+	unsigned long nCmd)
 {
+        //printk("%x %x %x\n",nParam1,nParam2,nParam3);
+        //do_bkpt();
         if(nCmd == nAPI_INIAPI)
         {
             int i=0;

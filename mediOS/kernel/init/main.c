@@ -72,7 +72,8 @@
 extern int app_main(int argc, char * argv[]);
 #endif
 
-unsigned int _iram_size = IRAM_SIZE;
+unsigned int _svc_IniStack = IRAM_SIZE;
+unsigned int _sys_IniStack = IRAM_SIZE-SVC_STACK_SIZE;
 
 void print_boot_info(void)
 {
@@ -126,19 +127,26 @@ void kernel_start (void)
     printk("Initial SP: %08x, kernel end: %08x, size in IRAM: %x/%x  Malloc start: %08x, size: %x\n",get_sp(),
         (unsigned int)&_end_kernel,
         (unsigned int)&_iram_end - (unsigned int)&_iram_start,
-        _iram_size,
+        IRAM_SIZE,
         (unsigned int)MALLOC_START,
         (unsigned int)MALLOC_SIZE);
 
     printk("Chip rev : %x\n",inw(BUS_REVR));
-
+    
+    if(thread_init(kernel_thread)!=MED_OK)
+    {
+        /* no KERNEL thread => loop */
+        printk("CAN'T BOOT\n");
+        while(1) ;
+    }
+    
     /* init the watchdog timer */
     wdt_init();
     /* init the irq */
     irq_init();
     /* init the tick timer */
     tmr_init();
-    printk("[init] ------------ kernel done\n");
+
     /* driver init */
     uart_init();
     cpld_init();
@@ -174,8 +182,9 @@ void kernel_start (void)
     sound_init();
     printk("[init] ------------ drivers done\n");
     
-    /*init thread before irq enable*/
-    thread_init(kernel_thread);
+    /*Load kernel thread to enable irq*/
+    thread_print();
+    thread_loadContext();
     /* Err */
     printk("[init] error: back to main(), SYS thread not started\n");
     for(;;);
@@ -189,7 +198,7 @@ void kernel_thread(void)
   
     printk("[SYS thread] starting\n");
     print_boot_info();
-    
+        
 #if 0    
     if(1)
     {

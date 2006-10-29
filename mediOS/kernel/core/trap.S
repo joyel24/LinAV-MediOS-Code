@@ -23,44 +23,53 @@ __trap_undef_ptr:  .word do_trap_undef
 
 @.align	5
 .global trap_swi
-trap_swi:
-   @// Determine SWI code...
-   stmdb sp!, {r0}
-   ldr r0,[lr,#-4]
-   bic r0,r0,#0xff000000
+trap_swi:  
+    stmdb  sp!, {r0-r3}
+    @ Determine SWI code : R3 = swi code
+    ldr    r3,[lr,#-4]
+    bic    r3,r3,#0xff000000    
+    mrs    r2, spsr              @ save thread CPSR
+    mov    r1, lr                @ save where we came from
+    @ switch to SYS mode in order to save thread regs
+    msr    cpsr_c, #0xDF
+       
+    ldr    r0, threadCurrent
+    add    r0, r0, #68
+    stmdb  r0!, {r1}             @ PC
+    stmdb  r0!, {r4-r12,sp,lr}   @ other regs    
+    @ switching to SVC mode with FIQ
+    msr    cpsr_c, #0x93    
+    @ store remaining regs: R0, R1 and CPSR   
+    mov    r4, r2
+    mov    r5, r0                @ saving ptr on reg struct 
+    mov    r6, r3                @ saving swi code
+    ldmia  sp!, {r0-r3}    
+    stmdb  r5!, {r0-r3}
+    stmdb  r5!, {r4}    
+    mov    r3,r6
 
-   @// Check for "yield" command...
-   @removed yielding
-   @cmp r0, #0
-   @beq yielding
+    @// Check for "yield" command...
+    cmp r3, #0
+    beq yielding
+    bl swi_handler
+    @custom loadContext: R0 changed to return val
+    msr    cpsr_c, #0xD3
+    ldr    r1, threadCurrent
+    ldmia  r1!,{r2}
+    msr    spsr, r2    @ put back spsr to correct value
+    add    lr, r1, #60
+    add    r1, r1, #4
+    @ moving to SYS without INT
+    msr    cpsr_c, #0xDF     
+    ldmia  r1, {r1 - lr}          @ load r0 - lr
+    @ going back to SVC without INT
+    msr    cpsr_c, #0xD3
+    ldmia  lr,{pc}^
+yielding:    
+    bl     thread_nxt
+    b      thread_loadContext
+   
 
-                    @// r0 contains command code...
-   ldmia sp!, {r3}  @// r3 contains first parameter...
-   mov r5, lr       @// r5 contains user mode return address...
-   mrs r4, spsr     @// r4 contains user state...
-   msr cpsr_all, r4 @// switching to user mode...
-
-@// HERE INTERRUPTS ALREADY ENABLED TO GET API CALL REENTRANCY
-
-   stmdb sp!, {r5, lr}
-   ldr r5, __trap_swi_ptr
-   mov lr, pc
-   bx  r5
- @   mov pc, r5
-   @bl kcswi_handler
-   ldmia sp!, {r5, lr}
-@   bx  r5
-   mov pc, r5       @// return to user code...
-
-
-@--------------------------------------------------------------
-@// Previous handler:
-@    stmfd  sp!,{lr}
-@    ldr    lr, __trap_swi_ptr
-@    bx     lr
-@    ldmfd  sp!,{lr}
-@    movs   pc, lr
-@.align 5
 __trap_swi_ptr:  .word swi_handler
 
 @.align	5
@@ -99,6 +108,8 @@ trap_addrexcptn_loop:
 @.align 5
 __trap_addrexcptn_ptr:  .word do_trap_addrexcptn
 
+
+
 .include "../../include/kernel/target/arch/trap_irq.inc"
 
 .global trap_irq
@@ -117,7 +128,7 @@ trap_irq:
     add    r0, r0, #68
     stmdb  r0!, {r1}             @ PC
     stmdb  r0!, {r3-r12,sp,lr}   @ other regs    
-    @ switching to SVC mode enabling FIQ
+    @ switching to SVC mode with FIQ
     msr    cpsr_c, #0x93    
     @ store remaining regs: R0, R1 and CPSR   
     mov    r4, r2

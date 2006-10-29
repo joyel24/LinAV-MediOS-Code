@@ -17,6 +17,18 @@ struct user_fct_t {
     unsigned int ptr;
 };
 
+#define swi_call(SWI_NUM)                \
+    ({                                   \
+        register long _r0 asm("r0");     \
+        asm volatile(                    \
+            "swi %0\n"                   \
+        :                                \
+        : "i"(SWI_NUM)                   \
+        : "memory");                     \
+        return (long) _r0;               \
+    })  
+
+#define nYIELD          0x0
 #define nAPI_INIAPI     0x1
 
 
