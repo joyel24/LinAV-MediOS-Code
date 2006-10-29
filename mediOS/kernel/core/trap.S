@@ -116,7 +116,9 @@ __trap_addrexcptn_ptr:  .word do_trap_addrexcptn
 trap_irq:
     @
     @ save mode specific registers
-    @
+    @ we need to use this small stack in order to save R0->R2
+    @ we can't just change the mode like in swi, because we would loose
+    @ spsr and lr !!!
     ldr    sp, .LCsirq
     stmia  sp, {r0-r2}
     mrs    r2, spsr 

@@ -16,7 +16,7 @@
 
 #include <sys_def/section_types.h>
 
-#define SVC_STACK_SIZE 0x500
+#define SVC_STACK_SIZE 0x200
 
 void printk(char *fmt, ...);
 int printf(__const char *fmt, ...);
