@@ -51,7 +51,13 @@ trap_swi:
     @// Check for "yield" command...
     cmp r3, #0
     beq yielding
+.ifdef DSC21
+    ldr r5, __trap_swi_ptr
+    mov lr, pc
+    bx  r5
+.else
     bl swi_handler
+.endif
     @custom loadContext: R0 changed to return val
     msr    cpsr_c, #0xD3
     ldr    r1, threadCurrent
