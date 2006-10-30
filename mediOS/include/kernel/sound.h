@@ -14,6 +14,7 @@
 #define __SOUND_K_H
 
 #include <kernel/playList.h>
+#include <kernel/target/arch/sound.h>
 
 typedef struct _SOUND_BUFFER
 {
@@ -50,6 +51,13 @@ void mixer_ctl(unsigned int cmd, int dir, void * arg);
 /********************* sound init               ***************************/
 void sound_init(void);
 
+#ifndef SPCKR_ON
+#define SPCKR_ON()
+#endif
+
+#ifndef SPCKR_OFF
+#define SPCKR_OFF()
+#endif
 
 #endif
 

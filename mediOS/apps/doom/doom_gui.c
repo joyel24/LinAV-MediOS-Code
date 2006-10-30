@@ -129,7 +129,13 @@ void gui_init(){
     mih->chooser->itemCount=3;
     mih->chooser->index=0;
     menu->addItem(menu,mih);
-
+#if defined(AV4XX)
+    mic=widgetMenuCheckbox_create();
+    mic->caption="Int Speacker";
+    mic->cfgStored=false;
+    mic->checkbox->caption="Enabled";
+    menu->addItem(menu,mic);
+#endif    
     mi=widgetMenuItem_create();
     mi->caption="Overclocking:";
     mi->foreColor=GUI_TITLE_COLOR;
@@ -243,6 +249,19 @@ void gui_applySettings(){
     tvOut=menu->getChooser(menu,menu->indexFromCaption(menu,"TV out"))->index;
     overclocking=menu->getCheckbox(menu,menu->indexFromCaption(menu,"Enable OC"))->checked;
     armFrequency=menu->getTrackbar(menu,menu->indexFromCaption(menu,"CPU frequency(Mhz)"))->value;
+    
+#ifdef AV4XX
+    if(menu->getCheckbox(menu,menu->indexFromCaption(menu,"Int Speacker"))->checked)
+    {
+        printk("Enable spkr\n");
+        SPCKR_ON();
+    }
+    else
+    {
+        printk("Disable spkr\n");
+        SPCKR_OFF();
+    }
+#endif
 
 #ifdef GMINI402
     outw((bl<<10)|0x03ff,CLKC_PWM0_HIGH); // Gmini402
