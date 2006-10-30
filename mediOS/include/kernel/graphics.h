@@ -25,6 +25,22 @@
     +y*buffer->width*((buffer->bitsPerPixel)>>3)*2     \
     +buffer->offset))
 
+#ifdef DM320
+
+    #define DISABLE_CACHE_START                            \
+        bool dcache=cache_enabled(CACHE_DATA);             \
+        if (dcache) cache_enable(CACHE_DATA,false);
+
+    #define DISABLE_CACHE_END                              \
+        if (dcache) cache_enable(CACHE_DATA,true);
+
+#else
+
+    #define DISABLE_CACHE_START
+    #define DISABLE_CACHE_END
+
+#endif
+
 struct graphicsBuffer {
     unsigned int  offset;                 // ->The data
     int           enable;

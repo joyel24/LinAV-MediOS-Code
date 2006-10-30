@@ -506,9 +506,30 @@ long emu_joypad1State(){
             }else{
                 prevF3Pressed=false;
             }
+            
+            if (stickyAPressed)
+            {
+            	if (bt & NES_BTN_B)
+            	{
+            		state &= 0xfffe;
+            	}
+            	else
+            	{
+            		state|=1;
+            	}
+            }
 
-            if (stickyAPressed) state|=1;
-            if (stickyBPressed) state|=2;
+            if (stickyBPressed)
+            {
+            	if (bt & NES_BTN_B)
+            	{
+            		state &= 0xfffd;
+            	}
+            	else
+            	{
+            	    state |= 2;
+            	}
+            }
 
             if (autoFire){
                 if (state&1 && autoFire&1 && !autoFirePressed) state&=0xfffe;

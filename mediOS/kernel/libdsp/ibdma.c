@@ -47,7 +47,7 @@ void ibDma_start(unsigned long sdAddr,unsigned short sdOffset,
 
 	if(chip_num==27){
 		port9=(byteToWord)?0x0004:0x0000;
-	}else if(chip_num>32){
+	}else if(chip_num>=32){
 		portA=(byteToWord)?0x0004:0x0000;
 	}else{
 		port9=0x0000;

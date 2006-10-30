@@ -67,7 +67,15 @@ void graphics8_DrawPixel(unsigned int color, int x, int y, struct graphicsBuffer
 
 unsigned int graphics8_ReadPixel(int x, int y, struct graphicsBuffer * buff)
 {
-    return inb(getOffset(x,y,buff,unsigned char));
+    unsigned int px;
+
+    DISABLE_CACHE_START
+
+    px=inb(getOffset(x,y,buff,unsigned char));
+
+    DISABLE_CACHE_END
+    
+    return px;
 }
 
 void graphics8_DrawRect(unsigned int color, int x, int y, int width, int height, struct graphicsBuffer * buff)
@@ -225,16 +233,11 @@ void graphics8_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, i
 
     unsigned char *src,*dest;
 
-#ifdef DM320
-    //HACK: for some reason, DM320 DCache doesn't like memcpy() scrolls
-    //      so I disable it while scrolling for now. (see console.c too)
-    bool dcache=cache_enabled(CACHE_DATA);
-    if (dcache) cache_enable(CACHE_DATA,false);
-#endif
+    DISABLE_CACHE_START
 
     if(scroll == 0)
         return;
-        
+
     src=getOffset(x,y,buff,unsigned char);
 
     if(UP)
@@ -249,14 +252,14 @@ void graphics8_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, i
         dest=src+height*buff->width;
         src=dest-scroll*buff->width;
     }
-    
+
     for(j=0;j<(height-scroll);j++)
     {
         memcpy(dest,src,width);
         dest=dest+inc*buff->width;
         src=src+inc*buff->width;
     }
-    
+
     if(bgColor!=-1)
     { // clear the freed zone
         for(j=0;j<scroll;j++)
@@ -264,14 +267,10 @@ void graphics8_ScrollWindowVert(unsigned int bgColor, int x, int y, int width, i
             graphics8_DrawHorizLine(bgColor,width,dest);
             dest+=inc*buff->width;
         }
-    
-    }   
-    
-#ifdef DM320
-    // restore cache
-    if (dcache) cache_enable(CACHE_DATA,true);
-#endif
 
+    }
+
+    DISABLE_CACHE_END
 }
 
 void graphics8_ScrollWindowHoriz(unsigned int bgColor, int x, int y, int width, int height, int scroll, int RIGHT, struct graphicsBuffer * buff)
