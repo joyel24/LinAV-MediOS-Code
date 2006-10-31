@@ -12,10 +12,21 @@
 #ifndef __LCD_H
 #define __LCD_H
 
+#include <sys_def/types.h>
 #include <kernel/target/arch/lcd.h>
 
-#ifndef lcd_init
-#define lcd_init
-#endif
+#define LCD_MAX_BRIGHTNESS 100
+
+void lcd_init();
+void lcd_enable();
+void lcd_disable();
+bool lcd_enabled();
+void lcd_setBrightness(int br);
+int lcd_getBrightness();
+
+void arch_lcd_init();
+void arch_lcd_enable();
+void arch_lcd_disable();
+void arch_lcd_setBrigthness(int br);
 
 #endif

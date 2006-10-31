@@ -46,19 +46,4 @@
 
 #define OSD_CON_BMAP_CFG    0x68
 
-#if 0
-#define lcd_ON() { \
-    CPLD_SET_PORT2(CPLD_LCD); \
-    GIO_CLEAR(GIO_LCD_BACKLIGHT); \
-}
-
-#define lcd_OFF() { \
-    CPLD_CLEAR_PORT2(CPLD_LCD); \
-    GIO_SET(GIO_LCD_BACKLIGHT); \
-}
-#endif
-
-#define lcd_ON()
-#define lcd_OFF()
-
 #endif

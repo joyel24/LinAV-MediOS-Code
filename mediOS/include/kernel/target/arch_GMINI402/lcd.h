@@ -44,8 +44,4 @@
 
 #define OSD_CON_BMAP_CFG    OSD_BITMAP_ZX1 | OSD_BITMAP_8BIT | COLOR_TRSP << OSD_BITMAP_A_SHIFT
 
-// only backlight off for now
-#define lcd_ON() {outw(0xffff,CLKC_PWM0_HIGH);}
-#define lcd_OFF() {outw(0x0000,CLKC_PWM0_HIGH);}
-
 #endif

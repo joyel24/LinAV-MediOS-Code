@@ -509,7 +509,7 @@ long emu_joypad1State(){
             
             if (stickyAPressed)
             {
-            	if (bt & NES_BTN_B)
+            	if (bt & NES_BTN_A)
             	{
             		state &= 0xfffe;
             	}

@@ -574,8 +574,8 @@ void welcome_screen(){
 
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=18,   "Ingame keys:");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  D-Pad:     Move");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  On/Btn1: Select/write number");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off/Btn2: Deselect/menu");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  On/Btn1:   Select/write number");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off/Btn2:  Deselect/menu");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F3:        Write helper");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F2:        Clear number/helper");
 

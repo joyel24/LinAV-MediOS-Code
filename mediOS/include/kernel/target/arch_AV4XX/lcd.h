@@ -46,38 +46,4 @@
 
 #define OSD_CON_BMAP_CFG    OSD_BITMAP_ZX1 | OSD_BITMAP_8BIT | COLOR_TRSP << OSD_BITMAP_A_SHIFT
 
-#define lcd_init  { \
-if(CPLD_VER==0x2)  \
-{                  \
-    GIO_DIRECTION(GIO_LCD_BL_AV4100,GIO_OUT); \
-    GIO_SET(GIO_LCD_BL_AV4100); \
-} \
-}
-
-// only backlight off for now
-#define lcd_ON() { \
-if(CPLD_VER==0x5)  \
-{                  \
-    outw(0xffff,CLKC_PWM1_HIGH); \
-}                  \
-else               \
-{                  \
-    GIO_DIRECTION(GIO_LCD_BL_AV4100,GIO_OUT); \
-    GIO_SET(GIO_LCD_BL_AV4100); \
-} \
-}
-
-#define lcd_OFF() { \
-if(CPLD_VER==0x5)  \
-{                  \
-    outw(0x0000,CLKC_PWM1_HIGH); \
-}                  \
-else               \
-{                  \
-    GIO_DIRECTION(GIO_LCD_BL_AV4100,GIO_OUT); \
-    GIO_CLEAR(GIO_LCD_BL_AV4100); \
-} \
-}
-
-
 #endif

@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/kernel/bat_power.h
 *
 *   MediOS project
@@ -37,23 +37,11 @@ int get_timer_status_freq(int timer_type, int power_mode,int type);
 int DC_isConnected(void);
 int batLevel(void);
 
-void lcd_setBrightness(int val);
-int  lcd_getBrightness(void);
-
 extern int kpwrState;
 void process_DC_change(void);
 
 void pw_cableChk(void);
 
-#define lcd_off()           lcd_set_state(0)
-#define lcd_on()            lcd_set_state(1)
-
-void lcd_set_state(int state);
-int  lcd_get_state(void);
-/*
-void lcd_off(void);
-void lcd_on(void);
-*/
 void lcd_launchTimer(void);
 void lcd_timer_action(void);
 

@@ -95,8 +95,8 @@ void gui_init(){
     mit->caption="Backlight strength";
     mit->cfgStored=true;
     mit->cfgName="backlight";
-    mit->trackbar->maximum=63;
-    mit->trackbar->value=63;
+    mit->trackbar->maximum=100;
+    mit->trackbar->value=100;
     standardMenu->addItem(standardMenu,mit);
 
     mih=widgetMenuChooser_create();
@@ -338,12 +338,9 @@ void gui_applySettings(){
 #endif
 
     clk_overclock(true);
-#ifdef GMINI402
-    outw((bl<<10)|0x03ff,CLKC_PWM0_HIGH); // Gmini402
-#endif
-#ifdef GMINI4XX
-    outw((bl<<10)|0x03ff,CLKC_PWM1_HIGH); // Gmini400
-#endif
+
+    lcd_setBrightness(bl);
+
     if(!Vnes.var.CustomCpuCycle) Vnes.var.cpucycle=cc;
 
 }

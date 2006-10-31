@@ -1,6 +1,6 @@
 include $(MEDIOS_SRC_PATH)/Makefile.conf
 
-SRC = ata.c buttons.c cpld.c
+SRC = ata.c buttons.c cpld.c lcd.c
 
 BUILD_DIR = ../build
 

@@ -23,6 +23,7 @@
 
 //#include <kernel/hw_chk.h>
 #include <kernel/bat_power.h>
+#include <kernel/lcd.h>
 
 #include <kernel/buttons.h>
 
@@ -84,7 +85,7 @@ __IRAM_CODE void btn_chkPress(void)
         
     if(btn_state!=0x0)
     {
-        if(lcd_get_state()==0)
+        if(!lcd_enabled())
         {
             lcd_keyPress();
             halt_launchTimer();
@@ -163,7 +164,7 @@ void btn_processPress(int val)
                             mx_press[btn] = current_repeatParam->init_delay;
                     }
 #if 0
-                    if(lcd_get_state()==0)
+                    if(!lcd_enabled())
                     {
                         /* the lcd is off => turn on and discard the event */
                         lcd_keyPress();

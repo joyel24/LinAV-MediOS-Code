@@ -43,14 +43,4 @@
 
 #define OSD_CON_BMAP_CFG    OSD_BITMAP_ZX2 | OSD_BITMAP_ZY1 | OSD_BITMAP_8BIT | OSD_BITMAP_0TRANS
 
-#define lcd_ON() { \
-    CPLD_SET_PORT2(CPLD_LCD); \
-    GIO_CLEAR(GIO_LCD_BACKLIGHT); \
-}
-
-#define lcd_OFF() { \
-    CPLD_CLEAR_PORT2(CPLD_LCD); \
-    GIO_SET(GIO_LCD_BACKLIGHT); \
-}
-
 #endif

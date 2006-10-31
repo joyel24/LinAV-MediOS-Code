@@ -23,12 +23,10 @@
 #include <kernel/fm_remote.h>
 
 #include <kernel/bat_power.h>
-#include <kernel/target/arch/lcd.h>
+#include <kernel/lcd.h>
 
 #include <sys_def/stddef.h>
 
-int lcd_state=1;
-int lcd_bright=10;
 int lcd_timer_used[2]={1,0};
 int lcd_freq_rep[2]={LCD_FREQ_DEFAULT_0,LCD_FREQ_DEFAULT_1};
 struct tmr_s lcdOnOff_timer;
@@ -43,16 +41,6 @@ int hd_sleep_state=0;
 struct tmr_s hd_timer;
 
 struct tmr_s pwrCableChk_tmr;
-
-void lcd_setBrightness(int val)
-{
-    lcd_bright = val;
-}
-
-int lcd_getBrightness(void)
-{
-    return lcd_bright;
-}
 
 void set_timer_status_freq(int timer_type, int power_mode, int val,int type)
 {
@@ -75,14 +63,14 @@ void set_timer_status_freq(int timer_type, int power_mode, int val,int type)
         default:
             return;
     }
-    
+
     if(power_mode!=TIMER_MODE_BAT && power_mode!=TIMER_MODE_DC)
         return;
-    
+
     if(type == 1)
     {
         if(val!=MODE_ENABLE &&val!=MODE_DISABLE)
-            return;        
+            return;
         timer_status[power_mode] = val;
     }
     else
@@ -122,10 +110,10 @@ int get_timer_status_freq(int timer_type, int power_mode,int type)
         default:
             return -1;
     }
-    
+
     if(power_mode!=TIMER_MODE_BAT && power_mode!=TIMER_MODE_DC)
         return -1;
-    
+
     if(type==1)
     {
         return timer_status[power_mode] ;
@@ -133,7 +121,7 @@ int get_timer_status_freq(int timer_type, int power_mode,int type)
     else
     {
         return timer_freq[power_mode] ;
-    }    
+    }
 }
 
 int get_timer_status(int timer_type, int power_mode)
@@ -146,33 +134,10 @@ int get_timer_delay(int timer_type, int power_mode)
     return get_timer_status_freq(timer_type,power_mode,0);
 }
 
-void lcd_set_state(int state)
-{
-    if(state!=lcd_get_state())
-    {
-        lcd_state=state;
-        if(state) /* turn on */
-        {
-            lcd_ON();
-            printk("[power] Turning on lcd\n");
-        }
-        else
-        {
-            lcd_OFF();
-            printk("[power] Turning off lcd\n");
-        }
-   }
-}
-
-int lcd_get_state(void)
-{
-    return lcd_state;
-}
-
 void lcd_launchTimer(void)
 {
     int num=getCurrentTimer();
-    if(lcd_freq_rep[num]!=0 && lcd_timer_used[num] && lcd_state)
+    if(lcd_freq_rep[num]!=0 && lcd_timer_used[num] && lcd_enabled())
     {
         lcdOnOff_timer.expires = tick + (lcd_freq_rep[num]*HZ); /* lcd_freq_rep in sec */
         tmr_start(&lcdOnOff_timer);
@@ -184,7 +149,7 @@ void lcd_timer_action(void)
     int num=getCurrentTimer();
     if(lcd_timer_used[num])
     {
-        lcd_off();
+        lcd_disable();
 #ifdef HAVE_FM_REMOTE
         if(FM_is_connected())
             FM_lightsOFF();
@@ -214,16 +179,12 @@ void halt_timer_action(void)
 
 void lcd_keyPress(void)
 {
-    //int num=getCurrentTimer();
-    /*if(lcd_timer_used[num])
-    {*/
-        lcd_on();
+    lcd_enable();
 #ifdef HAVE_FM_REMOTE
-        if(FM_is_connected())
-            FM_lightsON();
+    if(FM_is_connected())
+        FM_lightsON();
 #endif
-        lcd_launchTimer();        
-    //}
+    lcd_launchTimer();
 }
 
 void hd_launchTimer(void)
@@ -245,7 +206,7 @@ void hd_timer_fct(void)
     {
         ata_stopHD(ATA_DELAY_STOP);
     }
-  
+
     if(kusb_fw_status)
         hd_launchTimer(); // we have enable the usb => keep the timer running
 
@@ -335,15 +296,13 @@ void init_power(void)
     halt_timer.action = halt_timer_action;
     tmr_setup(&hd_timer,"HD");
     hd_timer.action = hd_timer_fct;
-    
+
     tmr_setup(&pwrCableChk_tmr,"Power Cable chk");
     pwrCableChk_tmr.action = pw_cableChk;
     pwrCableChk_tmr.freeRun = 1;
     pwrCableChk_tmr.stdDelay=1*HZ; /* 1s period */
     tmr_start(&pwrCableChk_tmr);
-    
-    lcd_state=1;
-    lcd_bright=10;
+
     lcd_timer_used[0]=1;
     lcd_timer_used[1]=0;
     lcd_freq_rep[0]=LCD_FREQ_DEFAULT_0;
@@ -359,12 +318,12 @@ void init_power(void)
     hd_timer_used[0]=1;
     hd_timer_used[1]=1;
     hd_sleep_state=0;
-    
+
     halt_launchTimer();
     lcd_launchTimer();
     hd_launchTimer();
 
-    kpwrState=POWER_CONNECTED; 
-    
+    kpwrState=POWER_CONNECTED;
+
     printk("[init] power : Bat level: %x, DC %s connected\n",GET_BAT_LEVEL,kpwrState==0?"not":"is");
 }

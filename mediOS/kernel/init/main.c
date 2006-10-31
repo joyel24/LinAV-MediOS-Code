@@ -151,7 +151,7 @@ void kernel_start (void)
     uart_init();
     cpld_init();
     
-    lcd_init;
+    lcd_init();
 
 #ifdef HAVE_CMD_LINE
     init_cmd_line();

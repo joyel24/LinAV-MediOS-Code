@@ -34,7 +34,9 @@ int  # get_timer_status  # int timer_type, int power_mode
 int  # get_timer_delay   # int timer_type, int power_mode
 int  # DC_isConnected    # void
 int  # batLevel          # void
-void # lcd_setBrightness # int val
+
+#k_inc#kernel/lcd.h
+void # lcd_setBrightness # int br
 int  # lcd_getBrightness # void
 
 #k_inc#kernel/usb_fw.h
