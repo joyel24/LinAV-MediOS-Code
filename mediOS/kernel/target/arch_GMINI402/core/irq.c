@@ -23,7 +23,7 @@
 #include <kernel/uart.h>
 #include <kernel/ata.h>
 
-__IRAM_DATA struct irq_data_s irq_table[] = {
+struct irq_data_s irq_table[] = {
     {
         irq     : IRQ_UART0,
         action  : uart_intAction,

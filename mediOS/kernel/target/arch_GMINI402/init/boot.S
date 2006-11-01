@@ -11,7 +11,7 @@ entry_code:
     /* get starting address */
     mov r7,pc
     sub r7,r7,#8
-    
+
     /* set UART0 to 115200 bauds */
     ldr r5,=0x30302
     mov r1,#0x36
@@ -19,7 +19,7 @@ entry_code:
 
     /* Disable IRQ+FIQ and set SYS mode */
     msr cpsr_c, #0xDF
-    
+
     /* disable caches & mmu */
     mrc p15,0,r0,c1,c0,0
     ldr r1,=0xFFFFEFF8
@@ -35,12 +35,45 @@ entry_code:
     mov r0,#0x0
     mcr p15,0,r0,c7,c7,0 /* invalidate caches */
     mcr	p15,0,r0,c7,c10,4 /* drain WB */
+    mcr	p15,0,r0,c8,c5,0 /* invalidate TLBs */
+    mcr	p15,0,r0,c8,c6,0 /* invalidate TLBs */
     mcr	p15,0,r0,c8,c7,0 /* invalidate TLBs */
 
     nop
     nop
     nop
     nop
+
+    /* disable TCMs (needed, so they don't conflict with cache for iram) */
+    mov r0,#0
+    mcr p15,0,r0,c9,c1,0
+    mcr p15,0,r0,c9,c1,1
+
+    /* configure mmu so iram is cached (archos sucks) */
+      /* setup a second level descriptor for range 0-1M */
+    ldr r0,=0x18fb000 /* my coarse table base address */
+    ldr r1,=0x0ff1    /* = coarse table, uncached unbuffered, full access */
+    ldr r2,=0x0ffd    /* = coarse table, cached buffered, full access */
+    mov r6,#0
+
+    mov r3,#16
+    mmu_loop:
+        mov r4,#16
+        mmu_loop2:
+            cmp r3,#16
+            orreq r5,r6,r2
+            orrne r5,r6,r1
+            str r5,[r0],#4
+            subs r4,r4,#1
+            bne mmu_loop2
+        add r6,r6,#0x10000
+        subs r3,r3,#1
+        bne mmu_loop
+
+      /* update first level descriptor */
+    ldr r0,=0x18fc000
+    ldr r1,=0x18fb011 /* = coarse table, located at 0x18fb000 */
+    str r1,[r0]
 
     /* re-enable caches & mmu */
     mrc p15,0,r0,c1,c0,0

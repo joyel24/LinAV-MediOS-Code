@@ -151,14 +151,6 @@ MED_RET_T dsp_loadProgramFromMemory (void* pDSPCode, int nSize)
 	return MED_OK;
 }
 
-DSP_HANDLER g_pDSPHandler = 0;//void (*g_pDSPHandler)(void) = 0;
-/*__IRAM_CODE*/ void c54_dsp_interrupt (int irq,struct pt_regs * regs)
-{
-	if (g_pDSPHandler)
-		g_pDSPHandler ();
-}
-
-
 int dsp_getChipNum(){
 #if defined(DM270)
     return 27;
