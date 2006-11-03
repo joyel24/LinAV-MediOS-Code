@@ -70,7 +70,7 @@ int osdLookupOffsetLO[6] = {    OSD_SDRAM_OFF_LO_VID0   , 0 ,
 
 int osd_RGB2Packed(int r, int g, int b)
 {
-	return  ((RGB2Cr(r,g,b) << 16) | (RGB2Y(r,g,b) << 8) | RGB2Cb(r,g,b));
+	return  ((RGB2Y(r,g,b) << 24) | (RGB2Cr(r,g,b) << 16) | (RGB2Y(r,g,b) << 8) | RGB2Cb(r,g,b));
 }
 
 void osd_setCursor2Bitmap (int index, int data)

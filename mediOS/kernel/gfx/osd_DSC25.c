@@ -29,7 +29,7 @@ int OSD_OFF_HI_SHIFT[4] = {0,8,0,8};
 
 int osd_RGB2Packed(int r, int g, int b)
 {
-	return  ((RGB2Cr(r,g,b) << 16) | (RGB2Y(r,g,b) << 8) | RGB2Cb(r,g,b));
+	return  ((RGB2Y(r,g,b) << 24) | (RGB2Cr(r,g,b) << 16) | (RGB2Y(r,g,b) << 8) | RGB2Cb(r,g,b));
 }
 
 void osd_setCursor2Bitmap (int index, int data)

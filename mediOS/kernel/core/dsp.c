@@ -89,8 +89,8 @@ MED_RET_T dsp_loadProgramFromMemory (void* pDSPCode, int nSize)
 	printk ("[dsp] Loading program into dsp...\n");
 
 	dsp_on ();
-	dsp_clear ();
 	dsp_reset ();
+	dsp_clear ();
 
 	COFF_FILHDR* phdr = (COFF_FILHDR*)pDSPCode;
 	printk ("[dsp] %i sections found...\r\n", phdr->f_nscns);
