@@ -9,9 +9,8 @@
 #api_inc#kernel/errors.h
 
 #k_inc#kernel/malloc.h
-#api_inc#sys_def/malloc.h
-void* # do_malloc   # long size, int user_flag
-void* # do_realloc  # void *buffer, long newsize, int user_flag
+void* # malloc   # long size
+void* # realloc  # void *buffer, long newsize
 void  # free     # void *buf
 
 #k_inc#kernel/timer.h

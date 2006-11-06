@@ -37,6 +37,7 @@ void do_out (unsigned char ** params);
 void do_ps (unsigned char ** params);
 void do_kill (unsigned char ** params);
 void do_ThreadState (unsigned char ** params);
+void do_ThreadInfo (unsigned char ** params);
 
 void init_cmd_line(void);
 

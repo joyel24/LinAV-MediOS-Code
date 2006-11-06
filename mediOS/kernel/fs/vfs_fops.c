@@ -91,7 +91,7 @@ int open(char * name,int flags)
                 printk("File not existing, and can't create beacuse folder also absent (%s)\n",name);
                 return -MED_ENOMEM;
             }
-            new_node = (struct  vfs_node *)malloc(sizeof(struct  vfs_node));
+            new_node = (struct  vfs_node *)kmalloc(sizeof(struct  vfs_node));
             if(!new_node)
             {
                 printk("Error can't create new node, not enough mem\n");

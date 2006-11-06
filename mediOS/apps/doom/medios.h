@@ -30,7 +30,6 @@
     extern int gui_pal[256][3];
 #else
     #include <api.h>
-    #include <sys_def/malloc.h>
     #include <sys_def/stddef.h>
     #include <kernel/gui_pal.h>
 #endif

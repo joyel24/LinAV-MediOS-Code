@@ -13,20 +13,47 @@
 #ifndef __MALLOC_H
 #define __MALLOC_H
 
-#include <sys_def/malloc.h>
+#include <kernel/thread.h>
+
+void  mem_init     (void * start,unsigned int len);
 
 void  mem_addPool  (void *buffer, unsigned int len);
 
-void* do_malloc    (unsigned int size,int user_flag);
+void* malloc       (unsigned int size);
+void* kmalloc      (unsigned int size);
 
-void* do_realloc   (void *buffer, unsigned int newsize,int user_flag);
-
+void* realloc      (void *buffer, unsigned int newsize);
+void* krealloc     (void *buffer, unsigned int newsize);
+           
 void  free         (void *buf);
-void free_user     (void);
+void  kfree        (void * buf);
 
-void mem_stat      (unsigned int *curalloc_user, unsigned int *curalloc_kernel,
-            unsigned int *totfree,unsigned int *maxfree);
-void mem_printStat(void);
+void mem_stat      (unsigned int *curalloc,unsigned int *totfree,unsigned int *maxfree);
+void mem_printStat (void);
 void mem_freeList  (void);
+
+/* internal struct */
+
+/* Queue links */
+struct qlinks {
+    struct bhead *nxt;        /* Forward link */
+    struct bhead *prev;       /* Backward link */
+};
+
+/* Header in allocated and free buffers */
+struct bhead {
+    int size;
+    struct qlinks blist;
+    struct qlinks free_list;
+    THREAD_LINKS
+    //THREAD_LIST __thread_list;int __thread_pid;
+};
+
+void mem_printItem (struct bhead * ptr);
+
+void internalFree(struct bhead * b);
+void * internalMalloc(unsigned int  requested_size,int isKernel);
+void * internalRealloc(void *buf,unsigned int size,int isKernel);
+
 #endif
 

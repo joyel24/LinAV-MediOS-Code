@@ -117,7 +117,7 @@ MED_RET_T vfs_mount(char * mount_path,int drive, int partition_num)
         return ret_val;
     }
     
-    mountPoint = (struct vfs_mountPoint *)malloc(sizeof(struct vfs_mountPoint));
+    mountPoint = (struct vfs_mountPoint *)kmalloc(sizeof(struct vfs_mountPoint));
     if(!mountPoint)
     {
         #warning we should also clean root_node !!!
@@ -137,13 +137,13 @@ MED_RET_T vfs_mount(char * mount_path,int drive, int partition_num)
     {
         
         root_node->name.length=strlen(mount_path);
-        root_node->name.str=malloc(root_node->name.length+1);
+        root_node->name.str=kmalloc(root_node->name.length+1);
         strcpy(root_node->name.str,mount_path);
         root_mountPoint=mountPoint;
     }
     else
     {
-        mount_str=malloc(VFS_Name.length+1);
+        mount_str=kmalloc(VFS_Name.length+1);
         vfs_pathNameDup(&VFS_Name,&root_node->name,mount_str);        
         vfs_nodeAddChild(res,root_node);
         #warning we should also add . and .. folder in non root-dir mount point

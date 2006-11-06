@@ -32,7 +32,6 @@
 #include <sys_def/random.h>
 #else
 #include <api.h>
-#include <sys_def/malloc.h>
 #endif
 
 #include <sys_def/section_types.h>

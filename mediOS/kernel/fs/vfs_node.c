@@ -67,7 +67,7 @@ MED_RET_T vfs_nodeInitChild(struct vfs_mountPoint * mount_point,
     if(name && name->length>0)
     {
         VFS_PRINT("[vfs_nodeInitChild] name=|%s|len=%d\n",name->str,name->length);
-        node->name.str = (char*)malloc(name->length+1);
+        node->name.str = (char*)kmalloc(name->length+1);
         if(!node->name.str)
             return -MED_ENOMEM;
         memcpy(node->name.str,name->str,name->length+1);

@@ -20,12 +20,15 @@
 #include <kernel/thread.h>
 #include <kernel/swi.h>
 
-extern THREAD_INFO * threadCurrent;
+#include <kernel/malloc.h>
+
 void thread_exit(void);
 
 int pid;
 THREAD_INFO * sysThread ;
 THREAD_INFO * idleThread ;
+
+THREAD_RES ini_ressources[THREAD_NB_RES];
 
 /***********************************
 * Idle thread fct
@@ -52,7 +55,7 @@ MED_RET_T thread_init(void(*fct)(void))
     /* creating initial thread */
     
     retval=thread_create(&sysThread,(void*)fct,(void*)thread_exit,NULL,(void*)IRAM_SIZE-SVC_STACK_SIZE,0,
-        "KERNEL",NULL,NULL);
+        "KERNEL",(unsigned long)NULL,(unsigned long)NULL);
     
     if(retval<0)
     {
@@ -64,7 +67,8 @@ MED_RET_T thread_init(void(*fct)(void))
     
     sysThread->enable=1;
     
-    retval=thread_create(&idleThread,(void*)thread_idleFct,(void*)thread_exit,NULL,NULL,0x100,"IDLE",NULL,NULL);
+    retval=thread_create(&idleThread,(void*)thread_idleFct,(void*)thread_exit,NULL,NULL,0x100,"IDLE",
+        (unsigned long)NULL,(unsigned long)NULL);
     if(retval<0)
     {
         printk("Error creating IDLE thread (error code = %d\n",-retval);
@@ -82,7 +86,7 @@ MED_RET_T thread_init(void(*fct)(void))
 /***********************************
 * Init of med thread
 * Create struct
-* disable KERNEL thred
+* disable KERNEL thread
 * yield
 ***********************************/
 void thread_startMed(void * entry_fct,void * code_malloc,char * name,int argc,char ** argv)
@@ -99,6 +103,24 @@ void thread_startMed(void * entry_fct,void * code_malloc,char * name,int argc,ch
 }
 
 /***********************************
+* Init of simple thread
+* Create struct
+* "enable" is used to enable/disable
+* thread once created
+***********************************/
+int thread_startFct(THREAD_INFO ** ret_thread,void * entry_fct,char * name,int enable)
+{
+    THREAD_INFO * fct_thread;
+    int pid=thread_create(&fct_thread,entry_fct,(void*)thread_exit,0,NULL,0,name,
+        0,(unsigned long)NULL);
+    printk("Fct thread created with pid %d\n",pid);
+    if(ret_thread)
+        *ret_thread=fct_thread;
+    fct_thread->enable=enable;
+    return pid;
+}
+
+/***********************************
 * Main create and init new thread
 * also create its stack if needed
 * on error returns a MED_RET <0
@@ -110,7 +132,7 @@ int thread_create(THREAD_INFO ** ret_thread,void * entry_fct,void * exit_fct,
     int i;
 
     /* Malloc thread struct */
-    THREAD_INFO * newThread = (THREAD_INFO*)malloc(sizeof(THREAD_INFO));
+    THREAD_INFO * newThread = (THREAD_INFO*)kmalloc(sizeof(THREAD_INFO));
     if(!newThread)
     {
         printk("No mem left for task: %s\n",name!=NULL?name:"NO NAME");
@@ -118,12 +140,16 @@ int thread_create(THREAD_INFO ** ret_thread,void * entry_fct,void * exit_fct,
     }
     /* Clear thread struct content */
     memset(newThread,0,sizeof(THREAD_INFO));
+    /* init ressources array */
+    for(i=0;i<THREAD_NB_RES;i++)
+        memcpy(&newThread->ressources[i],&ini_ressources[i],sizeof(struct thread_ressource));
+    
     /* Malloc stack */
     if(!stack_top)
     {
         if(stack_size==0)
             stack_size=STACK_SIZE;
-        newThread->stackMalloc=(unsigned int *)malloc(stack_size);
+        newThread->stackMalloc=(unsigned int *)kmalloc(stack_size);
         stack_top = (void*)(((unsigned long)(newThread->stackMalloc))+stack_size-4);
         if(!newThread->stackMalloc)
         {
@@ -329,6 +355,7 @@ MED_RET_T thread_kill(int pid)
 void thread_doKill(THREAD_INFO * thread)
 {
     THREAD_INFO * ptr;
+    int i;
     if(thread == idleThread)
     {
         printk("Error trying to kill idle thread\n");
@@ -336,15 +363,19 @@ void thread_doKill(THREAD_INFO * thread)
     }
     __cli();
     ptr=threadCurrent;
-    thread_remove(thread);
+    thread_remove(thread);  
+    
+    for(i=0;i<THREAD_NB_RES;i++)
+        thread_listFree(thread,i);
+            
     if(thread->stackMalloc)
-        free(thread->stackMalloc);
+        kfree(thread->stackMalloc);
     if(thread->codeMalloc)
     {
-        free(thread->codeMalloc);
+        kfree(thread->codeMalloc);
         sysThread->enable=1; /* be sure to enable KERNEL thread */
-    }   
-    free(thread);
+    }
+    kfree(thread);
     if(thread==ptr)
     {
         thread_nxt();
@@ -392,7 +423,7 @@ __IRAM_CODE void thread_nxt(void)
 /***********************************
 * Prints the list of know thread
 ***********************************/
-void thread_print(void)
+void thread_ps(void)
 {
     THREAD_INFO * ptr=threadCurrent;
 
@@ -410,4 +441,170 @@ void thread_print(void)
         printk("Thread list empty!!\n");
 }
 
+/***********************************
+* Init of a dummy ressource item
+* defaulting pid to -1
+***********************************/
+void thread_listIni(THREAD_LIST * ptr)
+{
+    ptr->nxt=NULL;
+    ptr->prev=NULL;
+    ptr->pid=-1;
+}
+
+/***********************************
+* Remove ressource item from its list
+* trying curThread or PID thread
+***********************************/
+MED_RET_T thread_listRm(THREAD_LIST * ptr,int res_id,int force)
+{
+    if(ptr->pid == -1) /* is it a dummy item ? */
+    {
+        if(!threadCurrent)
+        {
+            /* nothing to do as no thread exist */
+            return MED_OK;
+        }
+                
+        if( threadCurrent->pid == 0 || force)
+        {
+            /* ok KERNEL thread is allowed to do this */            
+            return MED_OK;
+        }
+        else
+        {
+            /* error as we are not SYS or trying to force */
+            return -MED_EINVAL;
+        }
+    }
+    
+    if(threadCurrent)
+    {
+        /* we have a current thread */
+        THREAD_INFO * threadPtr;
+        if(threadCurrent->pid!=ptr->pid)
+        {
+            /* cur thread pid <> item pid */
+            if( threadCurrent->pid == 0 || force)
+            {
+                /* ok KERNEL thread is allowed to do this */
+                /* trying to find thread struct using PID==0 */
+                threadPtr=thread_findPid(0);
+                if(!threadPtr)
+                {
+                    /* can't find a thread with this PID */                    
+                    return -MED_EINVAL;
+                }
+            }
+            else
+            {
+                /* not SYS nor force => not allowed to remove mem */
+                printk("[THREAD LIST] RM failed, res= %d, pid is diff from current\n",res_id);
+                return -MED_EINVAL;
+            }
+        }
+        else /* using cur thread */
+            threadPtr = threadCurrent;
+            
+        if(threadPtr->ressources[res_id].head_list == ptr)
+        {
+            /* trying to rm head */
+            threadPtr->ressources[res_id].head_list = threadPtr->ressources[res_id].head_list->nxt;
+            if(threadPtr->ressources[res_id].head_list)
+                threadPtr->ressources[res_id].head_list->prev=NULL;
+        }
+        else
+        {
+            /* removing somewhere else */
+            ptr->prev->nxt=ptr->nxt;
+            if(ptr->nxt)
+                ptr->nxt->prev=ptr->prev;
+        }
+    }
+    return MED_OK;
+}
+
+/***********************************
+* Add ressource item to cur thread 
+* list
+***********************************/
+void thread_listAdd(THREAD_LIST * ptr,int res_id,int force)
+{
+    if(threadCurrent)
+    {
+        THREAD_INFO * threadPtr;
+        /* we have a cur thread */
+        /* inserting it at the head of list */        
+        if(force)
+        {
+            /* using SYS thread => need to find PID 0*/
+            threadPtr=thread_findPid(0);
+            if(!threadPtr)
+            {
+                /* can't find SYS thread */
+                ptr->pid=-1;
+                ptr->nxt=ptr->prev=NULL;
+                return;
+            }
+        }
+        else
+            threadPtr=threadCurrent;
+        
+        ptr->pid=threadPtr->pid;
+        ptr->prev=NULL;
+        ptr->nxt=threadPtr->ressources[res_id].head_list;
+        if(ptr->nxt)
+            ptr->nxt->prev=ptr;
+        threadPtr->ressources[res_id].head_list=ptr;
+    }
+    else
+    {
+        /* no thread */
+        ptr->pid=-1;
+        ptr->nxt=ptr->prev=NULL;
+    }
+}
+
+/***********************************
+* freeing all alloc buffer of thread
+***********************************/
+void thread_listFree(THREAD_INFO * thread,int res_id)
+{   
+    THREAD_LIST * ptr;
+    for(ptr=thread->ressources[res_id].head_list;ptr!=NULL;ptr=ptr->nxt)
+    {
+        thread->ressources[res_id].clean_fct((void*)((unsigned int)ptr-thread->ressources[res_id].offset));
+    }
+}
+
+/***********************************
+* Print list of item of res_id for 
+* a given thread
+***********************************/
+void thread_listPrintPtr(int res_id,THREAD_INFO * thread)
+{
+    THREAD_LIST * ptr;
+    printk("Item for pid=%d, res=%d\n",thread->pid,res_id);
+    for(ptr=thread->ressources[res_id].head_list;ptr!=NULL;ptr=ptr->nxt)
+        thread->ressources[res_id].print_fct((void*)((unsigned int)ptr-thread->ressources[res_id].offset));
+}
+
+/***********************************
+* Print list of item of res_id for 
+* all thread in the ring
+***********************************/
+void thread_listPrintAll(int res_id)
+{
+    THREAD_INFO * threadHead,*ptr;
+    threadHead=ptr=threadCurrent;
+    if(ptr!=NULL)
+    {
+        do
+        {
+            //if(ptr->pid!=0)
+                thread_listPrintPtr(res_id,ptr);
+            ptr=ptr->nxt;
+        } while(ptr!=threadHead);
+    }    
+}
 

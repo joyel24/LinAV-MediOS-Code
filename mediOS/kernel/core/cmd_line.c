@@ -112,6 +112,12 @@ struct cmd_line_s cmd_tab[] = {
         cmd_action : do_ThreadState,
         nb_args    : 2
     },
+    {
+        cmd        : "threadInfo",
+        help_str   : "Prints info on a thread with given pid",
+        cmd_action : do_ThreadInfo,
+        nb_args    : 1
+    },
     /* this has to be the last entry */
     {
         cmd        : NULL,
@@ -294,8 +300,8 @@ void init_cmd_line(void)
     char c;
     cur_pos=0;
     
-    arg_list = (unsigned char**)malloc(sizeof(unsigned char*)*MAX_ARGS);
-    cur_cmd = (unsigned char*)malloc(sizeof(unsigned char)*MAX_CMD_LEN);
+    arg_list = (unsigned char**)kmalloc(sizeof(unsigned char*)*MAX_ARGS);
+    cur_cmd = (unsigned char*)kmalloc(sizeof(unsigned char)*MAX_CMD_LEN);
     
     cur_cmd[0]='\0';
 
@@ -324,9 +330,7 @@ void do_help(unsigned char ** params)
 
 void do_mem (unsigned char ** params)
 {
-    unsigned int nAlloc_u, nAlloc_k,nFree,MaxFree;
-    mem_stat (&nAlloc_u, &nAlloc_k,&nFree,&MaxFree);
-    printk("Free memory: %x - Alloc: user: %x kernel: %x\n", nFree , nAlloc_u, nAlloc_k);
+    mem_printStat();
 }
 
 void do_run (unsigned char ** params)
@@ -437,7 +441,7 @@ void do_out (unsigned char ** params)
 
 void do_ps (unsigned char ** params)
 {
-    thread_print();
+    thread_ps();
 }
 
 void do_kill (unsigned char ** params)
@@ -463,5 +467,24 @@ void do_ThreadState (unsigned char ** params)
     {
         printk("Disable thread %d\n",pid);
         thread_disable(pid);
+    }
+}
+
+void do_ThreadInfo (unsigned char ** params)
+{
+    int pid = atoi (params[0]);
+    int i;
+    THREAD_INFO * ptr=thread_findPid(pid);
+    if(!ptr)
+    {
+        printk("thread with pid %d not found\n",pid);
+    }
+    else
+    {
+        for(i=0;i<THREAD_NB_RES;i++)
+        {
+            printk("Res %d\n",i);
+            thread_listPrintPtr(i,ptr);
+        }
     }
 }

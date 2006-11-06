@@ -557,7 +557,7 @@ void app_main(int argc, char ** argv)
     int evt_handler;
 
     gfx_openGraphics();
-
+    
     gfx_clearScreen(COLOR_WHITE);
 
     gfx_fontSet(STD8X13);

@@ -49,7 +49,7 @@ __attribute__((section(".fwuncomp_code"))) int bin_load(char * path)
     size=filesize(fd);
     printk("File %s open, need to read %d bytes\n",path,size);
 
-    buf=malloc(size);
+    buf=kmalloc(size);
 
     ret=read(fd,buf,size);
     printk("Read %d bytes done\n",ret);

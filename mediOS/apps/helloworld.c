@@ -1,5 +1,5 @@
 /*
-*   include/sys_def/malloc.h
+*   helloworld.c
 *
 *   MediOS project
 *   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
@@ -8,21 +8,16 @@
 * See the file COPYING in the source tree root for full license agreement.
 * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 * KIND, either express of implied.
-*
-*
 */
 
-#ifndef __SYS_DEF_MALLOC_H
-#define __SYS_DEF_MALLOC_H
+#include <api.h>
 
-void* malloc       (unsigned int size);
-
-void* realloc      (void *buffer, unsigned int newsize);
-
-/* defined in kernel/malloc.h because already defined in api.h
-for apps
- void  free         (void *buf);
- */
-
-
-#endif
+void app_main(int argc,char * * argv)
+{
+    gfx_clearScreen(COLOR_BLACK);
+    
+    gfx_putS(COLOR_BLUE,COLOR_BLACK,10,10,"Hello world");
+    
+    mdelay(1000);
+    
+}

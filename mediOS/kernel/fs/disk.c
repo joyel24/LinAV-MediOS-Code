@@ -196,16 +196,16 @@ void disk_addCF(void)
 struct hd_info_s * disk_setup(int drive)
 {
     int i,j;
-    unsigned char * sector=(unsigned char *)malloc(sizeof(unsigned char)*SECTOR_SIZE);
+    unsigned char * sector=(unsigned char *)kmalloc(sizeof(unsigned char)*SECTOR_SIZE);
     
     if(!sector)
         return NULL;
     
-    struct hd_info_s * disk_info = (struct hd_info_s *)malloc(sizeof(struct hd_info_s));
+    struct hd_info_s * disk_info = (struct hd_info_s *)kmalloc(sizeof(struct hd_info_s));
     if(!disk_info)
         goto exit_error1;
     /* let's assume we have only 4 partitions */
-    struct partition_info * part_info = (struct partition_info *)malloc(4*sizeof(struct partition_info));
+    struct partition_info * part_info = (struct partition_info *)kmalloc(4*sizeof(struct partition_info));
     if(!part_info)
         goto exit_error2;
     disk_info->partition_list=part_info;

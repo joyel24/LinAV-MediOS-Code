@@ -112,13 +112,14 @@ int med_loadParam(int argc,char**argv)
     int first_iram=-1;
     
     unsigned int diff;
-    
+   
     if(argc<1)
     {
         
         return -MED_EINVAL;
     }   
     fd = open(argv[0],O_RDONLY);
+    
     if(fd<0)
     {
         printk("[load_med] Can't open file %s\n",argv[0]);
@@ -272,15 +273,16 @@ int med_loadParam(int argc,char**argv)
         goto exit_point2;
     }
     else
-        printk("buffer in SDRAM created; size: %x, start:%x\n",sdram_size,sdram_start);
+        DEBUG_MED("buffer in SDRAM created; size: %x, start:%x\n",sdram_size,sdram_start);
     
     /* loading sections in mem */
     
     for(i=0;i<header.e_shnum;i++)
     {
+        
         if(section_list[i].type == MED_DISCARD || section_list[i].type == MED_REL)
         {
-            printk("[%d] %s not loaded (size=0x%x)\n",i,section_list[i].name,section_list[i].size);
+            DEBUG_MED("[%d] %s not loaded (size=0x%x)\n",i,section_list[i].name,section_list[i].size);
             continue;
         }
         
@@ -305,14 +307,16 @@ int med_loadParam(int argc,char**argv)
         {
             /* clearing bss */
             memset(section_list[i].addr,0,section_list[i].size);
-            printk("[%d] %s created at 0x%x and cleared (size=0x%x)\n",i,section_list[i].name,section_list[i].addr,section_list[i].size);
+            DEBUG_MED("[%d] %s created at 0x%x and cleared (size=0x%x)\n",i,section_list[i].name,
+                section_list[i].addr,section_list[i].size);
         }
         else
         {
             /* loading section from disk */
             lseek (fd,section_list[i].offset,SEEK_SET);
             res = read(fd,(void*)section_list[i].addr,section_list[i].size);
-            printk("[%d] %s load at 0x%x, read %x/%x\n",i,section_list[i].name,section_list[i].addr,res,section_list[i].size);
+            DEBUG_MED("[%d] %s load at 0x%x, read %x/%x\n",i,section_list[i].name,
+                section_list[i].addr,res,section_list[i].size);
         }           
         
     }
@@ -327,7 +331,8 @@ int med_loadParam(int argc,char**argv)
             uint32_t addr;
             uint32_t content;
             res=0;res2=0;res1=0;
-            printk("we'll have to process %d relocs for %s - \n",section_list[i].rel->nb_ent,section_list[i].rel->name);
+            DEBUG_MED("we'll have to process %d relocs for %s - \n",section_list[i].rel->nb_ent,
+                section_list[i].rel->name);
             for(j=0;j<section_list[i].rel->nb_ent;j++)
             {
                 lseek(fd,section_list[i].rel->offset+j*sizeof(rel_entry),SEEK_SET);
@@ -350,7 +355,8 @@ int med_loadParam(int argc,char**argv)
                             outl(content-section_list[k].vaddr+(uint32_t)section_list[k].addr,addr);
                             res2++;
                             found=1;
-                            DEBUG_MED("REL: from %x(%x), data %x changed to %x (in section %d start: %x(%x))\n",rel_data.r_offset,addr,content,
+                            DEBUG_MED("REL: from %x(%x), data %x changed to %x (in section %d start: %x(%x))\n",
+                                rel_data.r_offset,addr,content,
                                 content-section_list[k].vaddr+(uint32_t)section_list[k].addr,k,
                                 section_list[k].vaddr,
                                 (uint32_t)section_list[k].addr);
@@ -405,10 +411,7 @@ int med_loadParam(int argc,char**argv)
     DEBUG_MED("sections_name  %x(@%x)\n",sections_name,&sections_name);
     DEBUG_MED("section_list  %x(@%x)\n",section_list,&section_list);
     
-    // needed for direct call
-    //run_med = (int (*)(int ,char**))entry;
-    
-    DEBUG_MED("calling app (entry %x)\n", run_med);
+//    DEBUG_MED("calling app (entry %x)\n", run_med);
 
     /* invalidate caches */
     cache_invalidate(CACHE_ALL);
@@ -417,15 +420,11 @@ int med_loadParam(int argc,char**argv)
     free(sections_name);
     free(section_list);
     
-    // needed for direct call
-    //ret_val=run_med(argc,argv);
-
     thread_startMed(entry,sdram_start,strrchr(argv[0],'/')+1,argc,argv);
     
-    printk("back from med\n");
-    
-    free_user();    
     //free(sdram_start);
+        
+    printk("back from med\n");
     
     return ret_val;
 

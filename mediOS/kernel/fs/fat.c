@@ -44,7 +44,7 @@ int fat_mount(int drive,unsigned int startsector,struct vfs_node ** mounted_root
     struct vfs_node * root_node;
     struct fat_entry * dir_entry;
 
-    fat_bpb = (struct bpb*)malloc(sizeof(struct bpb));
+    fat_bpb = (struct bpb*)kmalloc(sizeof(struct bpb));
 
     if(!fat_bpb)
     {
@@ -57,7 +57,7 @@ int fat_mount(int drive,unsigned int startsector,struct vfs_node ** mounted_root
     if(ret_val!=MED_OK)
         goto root_node_err;
 
-    root_node = (struct vfs_node *)malloc(sizeof(struct vfs_node));
+    root_node = (struct vfs_node *)kmalloc(sizeof(struct vfs_node));
     if(!root_node)
     {
         ret_val = -MED_ENOMEM;
@@ -69,7 +69,7 @@ int fat_mount(int drive,unsigned int startsector,struct vfs_node ** mounted_root
     root_node->storage_location = fat_bpb->bpb_rootclus;
     root_node->type=VFS_TYPE_DIR;
     
-    dir_entry = (struct fat_entry *)malloc(sizeof(struct fat_entry ));
+    dir_entry = (struct fat_entry *)kmalloc(sizeof(struct fat_entry ));
     if(!dir_entry)
     {
         ret_val = -MED_ENOMEM;
@@ -892,7 +892,7 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
     
     while(1)
     {
-        new_node = (struct vfs_node *)malloc(sizeof(struct vfs_node));
+        new_node = (struct vfs_node *)kmalloc(sizeof(struct vfs_node));
         if(!new_node)
         {
             printk("[fat_loadDir] Error malloc for new_node\n");
@@ -901,7 +901,7 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
 
         memset(new_node,0,sizeof(struct vfs_node));
 
-        new_entry = (struct fat_entry *)malloc(sizeof(struct fat_entry ));
+        new_entry = (struct fat_entry *)kmalloc(sizeof(struct fat_entry ));
         if(!new_entry)
         {
             printk("[fat_loadDir] Error malloc for new_entry\n");
@@ -1120,7 +1120,7 @@ MED_RET_T fat_createFile(const char* name,
     MED_RET_T ret_val;
 
     /* need to create struct for file */
-    struct fat_entry * new_file = (struct fat_entry *)malloc(sizeof(struct fat_entry));
+    struct fat_entry * new_file = (struct fat_entry *)kmalloc(sizeof(struct fat_entry));
 
     if(!new_file)
     {
@@ -1428,7 +1428,7 @@ MED_RET_T fat_createDir(struct vfs_pathname *  name,DIR * dir)
     VFS_PRINT("[fat_createDir] start\n");
 
     /* create fat struct for new folder */
-    new_dir = (struct fat_entry *)malloc(sizeof(struct fat_entry));
+    new_dir = (struct fat_entry *)kmalloc(sizeof(struct fat_entry));
     if(!new_dir)
     {
         printk("[fat_createDir] no mem left to create fat_entry\n");
@@ -1439,7 +1439,7 @@ MED_RET_T fat_createDir(struct vfs_pathname *  name,DIR * dir)
     VFS_PRINT("[fat_createDir] new_dir\n");
 
     /* create new node */
-    new_node = (struct vfs_node*)malloc(sizeof(struct vfs_node));
+    new_node = (struct vfs_node*)kmalloc(sizeof(struct vfs_node));
     if(!new_dir)
     {
         printk("[fat_createDir] no mem left to create node\n");
@@ -1454,7 +1454,7 @@ MED_RET_T fat_createDir(struct vfs_pathname *  name,DIR * dir)
     VFS_PRINT("[fat_createDir] new_node\n");
     
     /* create . (dot) node */
-    dot_node = (struct vfs_node*)malloc(sizeof(struct vfs_node));
+    dot_node = (struct vfs_node*)kmalloc(sizeof(struct vfs_node));
     if(!dot_node)
     {
         printk("[fat_createDir] no mem left to create node\n");
@@ -1464,7 +1464,7 @@ MED_RET_T fat_createDir(struct vfs_pathname *  name,DIR * dir)
     dot_name.length = 1;
     dot_name.str=".";
     vfs_nodeInitChild(new_node->mount_point,new_node,&dot_name,dot_node,VFS_TYPE_DIR);
-    dot_dir = (struct fat_entry*)malloc(sizeof(struct fat_entry));
+    dot_dir = (struct fat_entry*)kmalloc(sizeof(struct fat_entry));
     memset(dot_dir, 0, sizeof(struct fat_entry));
     dot_node->custom_data = dot_dir;
     dot_dir->fat_bpb=fat_bpb;
@@ -1473,7 +1473,7 @@ MED_RET_T fat_createDir(struct vfs_pathname *  name,DIR * dir)
     VFS_PRINT("[fat_createDir] dot_node\n");
     
     /* create .. (dotdot) node */
-    dotdot_node = (struct vfs_node*)malloc(sizeof(struct vfs_node));
+    dotdot_node = (struct vfs_node*)kmalloc(sizeof(struct vfs_node));
     if(!dotdot_node)
     {
         printk("[fat_createDir] no mem left to create node\n");
@@ -1484,7 +1484,7 @@ MED_RET_T fat_createDir(struct vfs_pathname *  name,DIR * dir)
     dot_name.length = 2;
     dot_name.str="..";
     vfs_nodeInitChild(new_node->mount_point,new_node,&dot_name,dotdot_node,VFS_TYPE_DIR);
-    dotdot_dir = (struct fat_entry*)malloc(sizeof(struct fat_entry));
+    dotdot_dir = (struct fat_entry*)kmalloc(sizeof(struct fat_entry));
     memset(dotdot_dir, 0, sizeof(struct fat_entry));
     dotdot_node->custom_data = dotdot_dir;
     dotdot_dir->fat_bpb=fat_bpb;
@@ -1606,7 +1606,7 @@ MED_RET_T fat_mvFileDir(struct vfs_node * opened_file,struct vfs_node * dir,stru
     struct fat_entry* parentDir = (struct fat_entry*)dir->custom_data;
     struct bpb* fat_bpb = parentDir->fat_bpb;
 #warning we need to do some extra check if drive is different    
-    new_node = (struct vfs_node *)malloc(sizeof(struct vfs_node));
+    new_node = (struct vfs_node *)kmalloc(sizeof(struct vfs_node));
     if(!new_node)
     {
         printk("[fat_mvFileDir] no mem left for new node\n");
@@ -1618,7 +1618,7 @@ MED_RET_T fat_mvFileDir(struct vfs_node * opened_file,struct vfs_node * dir,stru
     new_node->opened=0;    
     vfs_nodeInitChild(dir->mount_point,dir,newName,new_node,opened_file->type);
     new_node->ref_cnt=opened_file->ref_cnt-1;
-    new_entry = (struct fat_entry *)malloc(sizeof(struct fat_entry));
+    new_entry = (struct fat_entry *)kmalloc(sizeof(struct fat_entry));
     if(!new_entry)
     {
         printk("[fat_mvFileDir] no mem left for new entry\n");

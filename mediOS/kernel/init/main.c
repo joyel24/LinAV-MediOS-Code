@@ -80,40 +80,33 @@ void print_boot_info(void)
     printk("SP: %08x\n",get_sp());
     irq_print();
     tmr_print();
-    thread_print();
+    thread_ps();
 }
 
 void kernel_thread(void);
 
 extern THREAD_INFO * threadCurrent;
-
+/*
 void testThread1()
 {
-    int i,k=0;
-    while(k<10)
-    {
-        uart_out('1',0);
-        for(i=0;i<1000000;i++) /*nothing*/;
-        k++;
-    }
+    malloc(0x100);    
     printk("About to exit th1\n");
 }
 
 void testThread2()
 {
-    int i;
-    while(1)
-    {
-        uart_out('2',0);
-        for(i=0;i<100000;i++) /*nothing*/;
-    }
+    kmalloc(0x100);    
+    printk("About to exit th2\n");
 }
-
+*/
 
 void kernel_start (void)
 {
+   /* sanity init */
+    threadCurrent=NULL;
    /* malloc of max space in SDRAM */
-    mem_addPool((void*)MALLOC_START,MALLOC_SIZE);
+   
+    mem_init((void*)MALLOC_START,MALLOC_SIZE);
 
     gfx_init();
 
@@ -183,7 +176,6 @@ void kernel_start (void)
     printk("[init] ------------ drivers done\n");
     
     /*Load kernel thread to enable irq*/
-    thread_print();
     thread_loadContext();
     /* Err */
     printk("[init] error: back to main(), SYS thread not started\n");
@@ -200,16 +192,11 @@ void kernel_thread(void)
     print_boot_info();
         
 #if 0    
-    if(1)
-    {
         THREAD_INFO * ptr_thread1;
         THREAD_INFO * ptr_thread2;
-        thread_create(&ptr_thread1,testThread1,"Thread 1");
-        thread_create(&ptr_thread2,testThread2,"Thread 2");
-        thread_insert(ptr_thread1);
-        thread_insert(ptr_thread2);
-        thread_print();
-    }
+        
+        thread_startFct(&ptr_thread1,testThread1,"Thread 1",THREAD_DISABLE);
+        thread_startFct(&ptr_thread2,testThread2,"Thread 2",THREAD_DISABLE);
 #endif
     
 #ifdef BUILD_LIB

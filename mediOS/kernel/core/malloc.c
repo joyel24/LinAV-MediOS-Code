@@ -22,20 +22,6 @@
 #define MemSize     int
 #define SizeQuant   4
 
-/* Queue links */
-struct qlinks {
-    struct bhead *nxt;        /* Forward link */
-    struct bhead *prev;       /* Backward link */
-};
-
-/* Header in allocated and free buffers */
-struct bhead {
-    int size;
-    int user_space;
-    struct qlinks blist;
-    struct qlinks free_list;
-};
-
 #define BH(p)   ((struct bhead *) (p))
 
 struct bhead *  pool_start;
@@ -43,13 +29,19 @@ struct bhead *  first_free;
 
 unsigned int totalloc = 0;
 
-void * malloc(unsigned int  requested_size)
+/*  malloc  --  Allocate a buffer.  */
+
+void * malloc(unsigned int  size)
 {
-   return do_malloc(requested_size,0);
+    return internalMalloc(size,THREAD_NO_FORCE);
 }
 
-/*  malloc  --  Allocate a buffer.  */
-void * do_malloc(unsigned int  requested_size,int user_flag)
+void * kmalloc(unsigned int  size)
+{
+    return internalMalloc(size,THREAD_FORCE);
+}
+
+void * internalMalloc(unsigned int  requested_size,int isKernel)
 {
     unsigned int  size = requested_size;
     struct bhead *b;
@@ -77,11 +69,14 @@ void * do_malloc(unsigned int  requested_size,int user_flag)
                     b_alloc->blist.nxt->blist.prev=b_alloc;
                 b->blist.nxt=b_alloc;
                 b_alloc->blist.prev=b;
-                b_alloc->user_space = user_flag;
 
+                /* adding this new malloc to the list of current thread */
+                thread_listAdd(THREAD_PTR_2_LIST(b_alloc),MEM_RESSOURCE,isKernel);
+                
                 totalloc += size;
 
                 buf = (void *) ((((char *) b_alloc) + sizeof(struct bhead)));
+                //printk("malloc: %x\n",buf);
                 return buf;
             }
             else
@@ -101,9 +96,11 @@ void * do_malloc(unsigned int  requested_size,int user_flag)
                 /*nothing to be done for std linkage*/
                 totalloc += b->size;
                 b->size = -b->size;
-                b->user_space = user_flag;
-
+                
+                thread_listAdd(THREAD_PTR_2_LIST(b),MEM_RESSOURCE,isKernel);
+                
                 buf =  (void *) ((((char *) b) + sizeof(struct bhead)));
+                //printk("malloc: %x\n",buf);
                 return buf;
             }
         }
@@ -119,22 +116,22 @@ void * do_malloc(unsigned int  requested_size,int user_flag)
            enhanced to allow the buffer to grow into adjacent free
            blocks and to avoid moving data unnecessarily.  */
 
-void * user_realloc(void *buf,unsigned int requested_size)
+void * realloc(void *buf,unsigned int size)
 {
-   return do_realloc(buf,requested_size,1);
+    return internalRealloc(buf,size,0);
 }
 
-void * realloc(void *buf,unsigned int requested_size)
+void * krealloc(void *buf,unsigned int size)
 {
-   return do_realloc(buf,requested_size,0);
+    return internalRealloc(buf,size,1);
 }
-
-void * do_realloc(void *buf,unsigned int size,int user_flag)
+           
+void * internalRealloc(void *buf,unsigned int size,int isKernel)
 {
     void *nbuf;
     unsigned int osize; /* Old size of buffer */
     struct bhead *b;
-    if ((nbuf = do_malloc(size,user_flag)) == NULL) /* Acquire new buffer */
+    if ((nbuf = internalMalloc(size,isKernel)) == NULL) /* Acquire new buffer */
         return NULL;
 
     if (buf == NULL)
@@ -231,6 +228,21 @@ insert AFTER START block */
 void free(void *buf)
 {
     struct bhead * b = BH(((char *) buf) - sizeof(struct bhead));
+    if(thread_listRm(THREAD_PTR_2_LIST(b),MEM_RESSOURCE,THREAD_NO_FORCE)==MED_OK)
+    /* doing real free only if allowed to */
+        internalFree(b);
+}
+
+void kfree(void * buf)
+{
+    struct bhead * b = BH(((char *) buf) - sizeof(struct bhead));
+    thread_listRm(THREAD_PTR_2_LIST(b),MEM_RESSOURCE,THREAD_FORCE);
+    /* forcing and we don't care of the result */
+    internalFree(b);
+}
+
+void internalFree(struct bhead * b)
+{
     struct bhead * b_prev;
     struct bhead * b_nxt;
     /* Buffer size must be negative, indicating that the buffer is allocated. */
@@ -239,6 +251,8 @@ void free(void *buf)
 
     b->size = - b->size;
 
+    //printk("Free: %x/%x\n",b,(unsigned long)((((char *) b) + sizeof(struct bhead))));
+    
     totalloc -= b->size;
 
     /* If the back link is nonzero, the previous buffer is free.  */
@@ -251,42 +265,19 @@ void free(void *buf)
         if(b_nxt && b_nxt->size>=0)
         {
             /* merge the 3 blocks */
-            //printk("merge 3\n");
             MERGE_BLOCK(b_prev,b);
             MERGE_BLOCK(b_prev,b_nxt);
-#if 0            
-            /* link to next free */
-            if(b_nxt->free_list.nxt && b_nxt->free_list.nxt->size > b_prev->size)
-            {
-                REMOVE_FREE(b_prev);
-                REMOVE_FREE(b_nxt);
-                b_nxt=b_nxt->free_list.nxt;
-                INSERT_FREE_W_START(b_prev,b_nxt);
-            }
-            else
-                REMOVE_FREE(b_nxt);
-#else
             REMOVE_FREE(b_prev);
             REMOVE_FREE(b_nxt);
-            INSERT_FREE(b_prev);
-#endif     
+            INSERT_FREE(b_prev);    
                     
         }
         else
         {
             /* only merge 2 blocks */
-            //printk("merge 2: prev - cur\n");
             MERGE_BLOCK(b_prev,b);
-#if 0
-            if(b_nxt && b_nxt->size>b_prev->size)
-            {
-                REMOVE_FREE(b_prev);
-                INSERT_FREE_W_START(b_prev,b_nxt);
-            }
-#else
             REMOVE_FREE(b_prev);
             INSERT_FREE(b_prev);
-#endif
         }
     }
     else
@@ -300,22 +291,9 @@ void free(void *buf)
         if(b_nxt && b_nxt->size>=0)
         {
             /* merge the 2 blocks */
-            //printk("merge 2: cur - nxt\n");
             MERGE_BLOCK(b,b_nxt);
-#if 0
-            if(b_nxt->free_list.nxt && b_nxt->free_list.nxt->size < b->size)
-            {
-                REMOVE_FREE(b_nxt);
-                b_nxt=b_nxt->free_list.nxt;
-                INSERT_FREE_W_START(b,b_nxt);
-            }
-            else
-                MERGE_FREE(b,b_nxt);
-#else
             REMOVE_FREE(b_nxt);
             INSERT_FREE(b);
-#endif
-
         }
         else
         {
@@ -325,26 +303,14 @@ void free(void *buf)
     }
 }
 
-void free_user(void)
+/*  BPOOL  --  Add a region of memory to the buffer pool.  */
+
+void mem_init(void * start,unsigned int len)
 {
-    struct bhead *b = pool_start;
-    unsigned int tot_free=0;
-    int nb=0;
-    while(b!=NULL)
-    {
-        if(b->size<0 && b->user_space)
-        {
-            printk("%d: Freeing @%x, size=%x\n",nb,b,-b->size);
-            nb++;
-            tot_free-=b->size;
-            free((void *) ((((char *) b) + sizeof(struct bhead))));
-        }
-        b=b->blist.nxt;
-    }
-    printk("Have free %d user buffer tot size =%x\n",nb,tot_free);
+    mem_addPool(start,len);
+    THREAD_INIT_RES(struct bhead,internalFree,MEM_RESSOURCE,mem_printItem);
 }
 
-/*  BPOOL  --  Add a region of memory to the buffer pool.  */
 void mem_addPool(void *buf,unsigned int len)
 {
     struct bhead *b = BH(buf);
@@ -353,33 +319,48 @@ void mem_addPool(void *buf,unsigned int len)
     pool_start = b;
 
     b->size=len;
-    b->user_space=0;
     b->blist.nxt=b->blist.prev=NULL;
     b->free_list.nxt=b->free_list.prev=NULL;
+    thread_listIni(THREAD_PTR_2_LIST(b));
+}
+
+void printExtra(void)
+{
+    struct bhead *b = pool_start;
+    while (b != NULL)
+    {
+        if(b->size<0 && b->__thread_list.pid==-1)
+        {
+            mem_printItem(b);
+        }
+        b = b->blist.nxt;
+    }
 }
 
 void mem_printStat(void)
 {
-    unsigned int curalloc_user,curalloc_kernel,totfree, maxfree;
-    mem_stat(&curalloc_user,&curalloc_kernel,&totfree,&maxfree);
-    printk("Free: %x | alloc USER: %x, kernel: %x | biggest free block: %x\n",
-        totfree,curalloc_user,curalloc_kernel,maxfree);
+    unsigned int curalloc,totfree, maxfree;
+    mem_stat(&curalloc,&totfree,&maxfree);
+    printk("Free: %x | alloc %x | biggest free block: %x\n",
+        totfree,curalloc,maxfree);
+    mem_freeList();
+    printk("Thread buffer:\n");
+    thread_listPrintAll(MEM_RESSOURCE);
+    printk("Extra buffer(pid=-1)\n");
+    printExtra();
 }
 
 
-void mem_stat(unsigned int *curalloc_user, unsigned int *curalloc_kernel,
+void mem_stat(unsigned int *curalloc, 
             unsigned int *totfree, unsigned int *maxfree)
 {
     struct bhead *b = pool_start;
     int nb=0;
     *totfree = 0;
-    *curalloc_user = 0;
-    *curalloc_kernel = 0;
+    *curalloc = 0;
     *maxfree = -1;
     while (b != NULL)
     {
-        printk("%d: buffer @ %x %s/%s, size = %x\n",nb,b,b->size>=0?"free":"alloc",
-            b->user_space?"user":"kernel",b->size>=0?b->size:-b->size);
         nb++;
         if(b->size>=0)
         {
@@ -389,18 +370,11 @@ void mem_stat(unsigned int *curalloc_user, unsigned int *curalloc_kernel,
         }
         else
         {
-            if(b->user_space)
-                *curalloc_user-= b->size;
-            else
-                *curalloc_kernel-= b->size;
+            *curalloc-= b->size;
         }
 
         b = b->blist.nxt;
     }
-    printk("Buff start: %x first_free: %x nb alloc: %x tot=%x free=%x alloc user=%x kernel=%x\n",
-        pool_start,first_free,nb,totalloc,*totfree,*curalloc_user,*curalloc_kernel);
-        
-    mem_freeList();
 }
 
 void mem_freeList(void)
@@ -413,4 +387,9 @@ void mem_freeList(void)
         printk("%d: buffer @ %x (%s) size = %x\n",nb++,b,b->size>=0?"free":"alloc",b->size>=0?b->size:-b->size);
         b = b->free_list.nxt;
     }
+}
+
+void mem_printItem(struct bhead * ptr)
+{
+    printk("Buffer: %x size = %x\n",(unsigned long)((((char *) ptr) + sizeof(struct bhead))),-ptr->size);
 }

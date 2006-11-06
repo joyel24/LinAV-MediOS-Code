@@ -74,7 +74,7 @@ void aic23_setupDma(unsigned short len,short(*callback)(void*)){
 	//alloc both buffers
 	if(aic23_sndBuf!=NULL) free(aic23_sndBuf);
 	if(aic23_sndBuf2!=NULL) free(aic23_sndBuf2);
-    aic23_sndBuf=malloc(len);
+        aic23_sndBuf=malloc(len);
 	aic23_sndBuf2=malloc(len);
 	memset(aic23_sndBuf,0,len);
 	memset(aic23_sndBuf2,0,len);

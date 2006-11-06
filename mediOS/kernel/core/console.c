@@ -286,7 +286,7 @@ void con_write(char * text, char color){
 
 void con_init(){
   // allocate framebuffer
-  con_gfxBuffer=malloc(SCREEN_WIDTH*SCREEN_HEIGHT+64);
+  con_gfxBuffer=kmalloc(SCREEN_WIDTH*SCREEN_HEIGHT+64);
   con_gfxBuffer=(char*)(((unsigned int)con_gfxBuffer+32)&0xffffffe0);
 
   // init struct
