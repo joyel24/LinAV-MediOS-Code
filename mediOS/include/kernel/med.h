@@ -15,6 +15,7 @@
 #define __MED_H
 
 #include <kernel/kernel.h>
+#include <kernel/errors.h>
 #include <sys_def/types.h>
 
 #define ELF32_R_SYM(i)	  ((i)>>8)
@@ -79,7 +80,7 @@ typedef struct __section_t {
     struct __section_t *   rel;
 } section_t;
 
-int med_load(char * file_name);
-int med_loadParam(int argc,char**argv);
+MED_RET_T med_load(char * file_name);
+MED_RET_T med_loadParam(int argc,char**argv);
 
 #endif

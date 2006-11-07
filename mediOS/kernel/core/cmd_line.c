@@ -481,10 +481,14 @@ void do_ThreadInfo (unsigned char ** params)
     }
     else
     {
-        for(i=0;i<THREAD_NB_RES;i++)
+        thread_printInfo(ptr);
+        if(pid!=0)
         {
-            printk("Res %d\n",i);
-            thread_listPrintPtr(i,ptr);
+            for(i=0;i<THREAD_NB_RES;i++)
+            {
+                printk("Res %d\n",i);
+                thread_listPrintPtr(i,ptr);
+            }
         }
     }
 }

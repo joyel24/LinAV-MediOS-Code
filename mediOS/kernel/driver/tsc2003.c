@@ -63,11 +63,11 @@ int tsc2003getVal(char cmdN)
 
         res = (((batVal[0] << 4)&0x0FF0) | ((batVal[1]>>4)&0x000F));
         
-        printk("bat = %x",res);
+        //printk("bat = %x",res);
         
         res = (res-0x490)/0x44;
         
-        printk(" => %d\n",res);
+        //printk(" => %d\n",res);
 	return res;
 }
 

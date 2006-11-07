@@ -25,6 +25,9 @@
 #define THREAD_DISABLE  0
 #define THREAD_ENABLE   1
 
+#define THREAD_USE_SYS_STACK   1
+#define THREAD_USE_OTHER_STACK 0
+
 #define MEM_RESSOURCE 0
 #define THREAD_NB_RES 1
 
@@ -45,15 +48,17 @@ extern THREAD_RES ini_ressources[THREAD_NB_RES];
 
 typedef struct thread_info {
     unsigned long regs[17];
-    unsigned int * stackMalloc; /* NULL if stack is not malloc eg stack in iram*/
-    unsigned int stackSize;
+    unsigned int * stackBottom; /* NULL if stack is not malloc and not SYS*/
     unsigned int * codeMalloc; /* NULL if code is part of medios, !NULL for med*/
+    unsigned int * saveStack;
+    unsigned int stackSize;
     /* thread info */
     char name[THREAD_NAME_SIZE];
     int pid;
     
     /* flags */
     int enable;
+    int useSysStack;
     
     /* linkage */
     struct thread_info * nxt;
@@ -92,11 +97,12 @@ MED_RET_T thread_disable(int pid);
 
 unsigned long yield(void);
 
-void thread_startMed(void * entry_fct,void * code_malloc,char * name,int argc,char ** argv);
+void thread_startMed(void * entry_fct,void * code_malloc,void * iram_top,char * name,int argc,char ** argv);
 int thread_startFct(THREAD_INFO ** ret_thread,void * entry_fct,char * name,int enable);
 
 int thread_create(THREAD_INFO ** ret_thread,void * entry_fct,void * exit_fct,
-    void * code_malloc,void * stack_top,int stack_size,char * name,unsigned long arg1,unsigned long arg2);
+    void * code_malloc,void * stack_top,unsigned stack_size,int useSysStack,
+    void * stack_bottom,char * name,unsigned long arg1,unsigned long arg2);
 MED_RET_T thread_insert(THREAD_INFO * thread);
 MED_RET_T thread_remove(THREAD_INFO * thread);
 MED_RET_T thread_kill(int pid);
@@ -107,5 +113,6 @@ void thread_medExit(void);
 void thread_listPrintAll(int res_id);
 void thread_listPrintPtr(int res_id,THREAD_INFO * thread);
 void thread_ps(void);
+void thread_printInfo(THREAD_INFO * thread);
 
 #endif

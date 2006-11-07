@@ -30,6 +30,8 @@ trap_swi:
     bic    r3,r3,#0xff000000    
     mrs    r2, spsr              @ save thread CPSR
     mov    r1, lr                @ save where we came from
+    cmp    r3, #2                @ SWI 1 special yield with no curThread sav
+    beq    yielding
     @ switch to SYS mode in order to save thread regs
     msr    cpsr_c, #0xDF
        

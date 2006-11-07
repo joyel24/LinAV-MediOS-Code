@@ -81,16 +81,16 @@ int test_section(char * name,char ** name_list)
     return res;
 }
 
-int med_load(char * file_name)
+MED_RET_T med_load(char * file_name)
 {
     return med_loadParam(1,&file_name);
 }
 
-int med_loadParam(int argc,char**argv)
+MED_RET_T med_loadParam(int argc,char**argv)
 {
     int fd,ret,i,j,k,res,res2,res1;
     
-    int ret_val;
+    MED_RET_T ret_val=MED_OK;
     
     //int (*run_med)(int argc,char**argv);
     
@@ -262,7 +262,7 @@ int med_loadParam(int argc,char**argv)
     }
     
     iram_ptr=CORE_START;
-    DEBUG_MED("Iram strat: %x\n",iram_ptr);
+    DEBUG_MED("Iram start: %x, size= %x\n",iram_ptr,iram_size);
     
     sdram_ptr = sdram_start = (char*)malloc(sdram_size);
     
@@ -355,22 +355,22 @@ int med_loadParam(int argc,char**argv)
                             outl(content-section_list[k].vaddr+(uint32_t)section_list[k].addr,addr);
                             res2++;
                             found=1;
-                            DEBUG_MED("REL: from %x(%x), data %x changed to %x (in section %d start: %x(%x))\n",
+                            /*DEBUG_MED("REL: from %x(%x), data %x changed to %x (in section %d start: %x(%x))\n",
                                 rel_data.r_offset,addr,content,
                                 content-section_list[k].vaddr+(uint32_t)section_list[k].addr,k,
                                 section_list[k].vaddr,
-                                (uint32_t)section_list[k].addr);
+                                (uint32_t)section_list[k].addr);*/
                         }    
                     }     
-                    if(!found)
-                        DEBUG_MED("REL: from %x(%x), data %x NOT FOUND\n",rel_data.r_offset,addr,content);
+                    /*if(!found)
+                        DEBUG_MED("REL: from %x(%x), data %x NOT FOUND\n",rel_data.r_offset,addr,content);*/
                 }
                 else if(ELF32_R_TYPE(rel_data.r_info)==1)
                 {
                     res1++;
                 }
-                else
-                    DEBUG_MED("REL: %x of type %d \n",rel_data.r_offset,ELF32_R_TYPE(rel_data.r_info));
+                /*else
+                    DEBUG_MED("REL: %x of type %d \n",rel_data.r_offset,ELF32_R_TYPE(rel_data.r_info));*/
             }
             DEBUG_MED("%d of type 1, %d were of type 2, %d were found, %d of other type\n",
                 res1,res,res2,section_list[i].rel->nb_ent-res-res1);
@@ -420,7 +420,7 @@ int med_loadParam(int argc,char**argv)
     free(sections_name);
     free(section_list);
     
-    thread_startMed(entry,sdram_start,strrchr(argv[0],'/')+1,argc,argv);
+    thread_startMed((void*)entry,sdram_start,(void*)iram_ptr,strrchr(argv[0],'/')+1,argc,argv);
     
     //free(sdram_start);
         
