@@ -1,7 +1,6 @@
 #ifndef __MEDIOS_H
 #define __MEDIOS_H
 
-#include "datatypes.h"
 #include "dspshared.h"
 
 //#ifdef BUILD_STDALONE
@@ -25,7 +24,9 @@
     #include <kernel/icons.h>
     #include <kernel/widgetlist.h>
     #include <kernel/widgetmenu.h>
+    #include <kernel/cache.h>
     #include <kernel/lcd.h>
+    extern int gui_pal[256][3];
 #else
     #include <api.h>
 #endif
@@ -44,15 +45,12 @@
 #include <sys_def/timer.h>
 #include <sys_def/font.h>
 #include <sys_def/colordef.h>
-#define F_HANDLE int
-
-#define DEBUGS printf
 
 #ifdef DM320
-    #undef __IRAM_CODE
-    #define __IRAM_CODE
-    #undef __IRAM_DATA
-    #define __IRAM_DATA
+#undef __IRAM_CODE
+#define __IRAM_CODE
+#undef __IRAM_DATA
+#define __IRAM_DATA
 #endif
 
 #endif

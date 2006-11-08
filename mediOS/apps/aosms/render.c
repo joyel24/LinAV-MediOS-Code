@@ -8,10 +8,7 @@ void (*render_bg)(int line);
 __IRAM_DATA uint8 *linebuf;
 
 /* Internal buffer for drawing non 8-bit displays */
-uint8 internal_buffer[0x100];
-
-/* Precalculated pixel table */
-__IRAM_DATA uint16 pixel[PALETTE_SIZE];
+__IRAM_DATA uint8 internal_buffer[0x110];
 
 /* Pattern cache */
 //uint8 cache[0x20000];
@@ -49,7 +46,6 @@ __IRAM_DATA int vp_hend;
 /* Macros to access memory 32-bits at a time (from MAME's drawgfx.c) */
 
 #ifdef ALIGN_DWORD
-/*
 static inline uint32 read_dword(void *address)
 {
     if ((uint32)address & 3)
@@ -69,7 +65,6 @@ static inline uint32 read_dword(void *address)
 	else
         return *(uint32 *)address;
 }
-*/
 
 static inline void write_dword(void *address, uint32 data)
 {
@@ -98,9 +93,9 @@ static inline void write_dword(void *address, uint32 data)
 }
 #else
 #define write_dword(address,data) *(uint32 *)address=data
+#define read_dword(address) *(uint32 *)address
 #endif
 
-#define read_dword(address) *(uint32 *)address
 
 /****************************************************************************/
 
@@ -109,23 +104,9 @@ static inline void write_dword(void *address, uint32 data)
 void render_init(void)
 {
     int bx, sx, b, s, bp, bf, sf, c;
-    
+
     cache=malloc(0x20000);
-    if(!cache)
-    {
-        printf("Can't allocate cache\n");        
-    }
-    else
-        printf("Cache at 0x%x\n",cache); 
     lut=malloc(0x10000);
-    if(!lut)
-    {
-        printf("Can't allocate lut\n");        
-    }
-    else
-        printf("lut at 0x%x\n",lut);
-        
-    
 
     /* Generate 64k of data for the look up table */
     for(bx = 0; bx < 0x100; bx += 1)
@@ -173,6 +154,8 @@ void render_reset(void)
 {
     int i;
 
+    memset(internal_buffer, 0, sizeof(internal_buffer));
+
     /* Clear display bitmap */
     memset(bitmap.data, 0, bitmap.pitch * bitmap.height);
 
@@ -185,10 +168,9 @@ void render_reset(void)
     /* Invalidate pattern cache */
     is_vram_dirty = 1;
     memset(vram_dirty, 1, 0x200);
-    memset(cache, 0, 0x20000);
+    memset(cache, 0, sizeof(cache));
 
     /* Set up viewport size */
-
     if(IS_GG)
     {
         vp_vstart = 24;
@@ -208,17 +190,21 @@ void render_reset(void)
     render_bg = IS_GG ? render_bg_gg : render_bg_sms;
 }
 
+extern void convert_line(register char * outbuf,register char * inbuf,register unsigned long * pal);
 
 /* Draw a line of the display */
 __IRAM_CODE void render_line(int line)
 {
+    int hscroll = ((vdp.reg[0] & 0x40) && (line < 0x10)) ? 0 : vdp.reg[8];
+
     /* Ensure we're within the viewport range */
     if((line < vp_vstart) || (line >= vp_vend)) return;
 
     /* Point to current line in output buffer */
 //    linebuf = (bitmap.depth == 8) ? &bitmap.data[(line * bitmap.pitch)] : &internal_buffer[0];
-    //linebuf = &bitmap.data[line<<8];
-linebuf = &bitmap.data[line* bitmap.pitch];
+//    linebuf = &bitmap.data[line<<8];
+    linebuf=&internal_buffer[8];
+
     /* Update pattern cache */
     update_cache();
 
@@ -232,6 +218,8 @@ linebuf = &bitmap.data[line* bitmap.pitch];
         /* Draw background */
         render_bg(line);
 
+        linebuf-=hscroll&7;
+
         /* Draw sprites */
         render_obj(line);
 
@@ -242,7 +230,7 @@ linebuf = &bitmap.data[line* bitmap.pitch];
         }
     }
 
-//    if(bitmap.depth != 8) remap_8_to_16(line);
+    convert_line(&bitmap.data[line<<10],linebuf,&bitmap.pal.ycbcr[0]);
 }
 
 
@@ -252,7 +240,7 @@ __IRAM_CODE void render_bg_sms(int line)
     int locked = 0;
     int v_line = (line + vdp.reg[9]) % 224;
     int v_row  = (v_line & 7) << 3;
-    int hscroll = ((vdp.reg[0] & 0x40) && (line < 0x10)) ? 0 : (0x100 - vdp.reg[8]);
+    int hscroll = ((vdp.reg[0] & 0x40) && (line < 0x10)) ? 0 : (0x100 - (vdp.reg[8]&0xf8));
     int column = vp_hstart;
     uint16 attr;
     uint16 *nt = (uint16 *)&vdp_vram[vdp.ntab + ((v_line >> 3) << 6)];
@@ -262,6 +250,7 @@ __IRAM_CODE void render_bg_sms(int line)
     uint32 *cache_ptr;
     uint32 *linebuf_ptr = (uint32 *)&linebuf[0 - shift];
 
+#if 0
     /* Draw first column (clipped) */
     if(shift)
     {
@@ -282,6 +271,7 @@ __IRAM_CODE void render_bg_sms(int line)
 
         column += 1;
     }
+#endif
 
     /* Draw a line of the background */
     for(; column < vp_hend; column += 1)
@@ -313,6 +303,7 @@ __IRAM_CODE void render_bg_sms(int line)
         write_dword( &linebuf_ptr[(column << 1) | (1)], read_dword( &cache_ptr[1] ) | (atex_mask));
     }
 
+#if 0
     /* Draw last column (clipped) */
     if(shift)
     {
@@ -333,6 +324,7 @@ __IRAM_CODE void render_bg_sms(int line)
             p[x] = ((c) | (a));
         }
     }
+#endif
 }
 
 
@@ -341,7 +333,7 @@ __IRAM_CODE void render_bg_gg(int line)
 {
     int v_line = (line + vdp.reg[9]) % 224;
     int v_row  = (v_line & 7) << 3;
-    int hscroll = (0x100 - vdp.reg[8]);
+    int hscroll = (0x100 - (vdp.reg[8]&0xf8));
     int column;
     uint16 attr;
     uint16 *nt = (uint16 *)&vdp_vram[vdp.ntab + ((v_line >> 3) << 6)];
@@ -351,7 +343,7 @@ __IRAM_CODE void render_bg_gg(int line)
     uint32 *linebuf_ptr = (uint32 *)&linebuf[0 - (hscroll & 7)];
 
     /* Draw a line of the background */
-    for(column = vp_hstart; column <= vp_hend; column += 1)
+    for(column = vp_hstart-1; column < vp_hend; column += 1)
     {
         /* Get name table attribute word */
         attr = nt[(column + nt_scroll) & 0x1F];
@@ -425,7 +417,7 @@ __IRAM_CODE void render_obj(int line)
 
             /* Sprite X position */
             int xp = st[0x80 + (i << 1)];
-            
+
             //gligli: don't draw sprites outside of screen
             if(xp<linestart || xp>lineend) continue;
 
@@ -436,7 +428,7 @@ __IRAM_CODE void render_obj(int line)
             count += 1;
 
             /* Too many sprites on this line ? */
-            if((vdp.limit) && (count == 9)) return;
+            //if((vdp.limit) && (count == 9)) return;
 
             /* X position shift */
             if(vdp.reg[0] & 0x08) xp -= 8;
@@ -565,6 +557,7 @@ __IRAM_CODE void update_cache(void)
 __IRAM_CODE void palette_sync(int index)
 {
     int r, g, b;
+    unsigned long ycbcr;
 
     if(IS_GG)
     {
@@ -582,28 +575,15 @@ __IRAM_CODE void palette_sync(int index)
     bitmap.pal.color[index][0] = r;
     bitmap.pal.color[index][1] = g;
     bitmap.pal.color[index][2] = b;
-
-    pixel[index] = MAKE_PIXEL(r, g, b);
+    
+    ycbcr=osd_RGB2Packed(r,g,b);
+    
+    bitmap.pal.ycbcr[index]=ycbcr;
+    bitmap.pal.ycbcr[index+0x20]=ycbcr;
+    bitmap.pal.ycbcr[index+0x40]=ycbcr;
 
     bitmap.pal.dirty[index] = bitmap.pal.update = 1;
 }
-
-
-void remap_8_to_16(int line)
-{
-    int i;
-    int length = BMP_WIDTH;
-    int ofs = BMP_X_OFFSET;
-    uint16 *p = (uint16 *)&bitmap.data[(line * bitmap.pitch) + (ofs << 1)];
-
-    for(i = 0; i < length; i += 1)
-    {
-        p[i] = pixel[(internal_buffer[(ofs + i)] & PIXEL_MASK)];
-    }
-}
-
-
-
 
 
 

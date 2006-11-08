@@ -46,4 +46,8 @@ aones: LD_BIN_INC = apps/aones/dspcode/aones_dsp.out
 aones: APP_NAME = aones
 aones: do_build_app
 
+aosms: LD_BIN_INC = apps/aosms/dspcode/aosms_dsp.out
+aosms: APP_NAME = aosms
+aosms: do_build_app
+
 include default.rule

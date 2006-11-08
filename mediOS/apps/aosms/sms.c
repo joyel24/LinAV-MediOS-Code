@@ -1,4 +1,8 @@
+
 #include "shared.h"
+
+__IRAM_DATA unsigned char *cpu_readmap[8];
+__IRAM_DATA unsigned char *cpu_writemap[8];
 
 /* SMS context */
 __IRAM_DATA t_sms sms;
@@ -9,7 +13,6 @@ __IRAM_CODE void sms_frame(int skip_render)
     /* Take care of hard resets */
     if(input.system & INPUT_HARD_RESET)
     {
-        printf("reset from sms_frame\n");
         system_reset();
     }
 
@@ -20,8 +23,12 @@ __IRAM_CODE void sms_frame(int skip_render)
         {
             sms.paused = 1;
 
+#ifdef ASM_CPU
+            Z80_Cause_Interrupt(Z80_NMI_INT);
+#else
             z80_set_nmi_line(ASSERT_LINE);
             z80_set_nmi_line(CLEAR_LINE);
+#endif
         }
     }
     else
@@ -29,6 +36,7 @@ __IRAM_CODE void sms_frame(int skip_render)
          sms.paused = 0;
     }
 
+    
     for(vdp.line = 0; vdp.line < 262; vdp.line += 1)
     {
         /* Handle VDP line events */
@@ -38,18 +46,20 @@ __IRAM_CODE void sms_frame(int skip_render)
         if(!skip_render) render_line(vdp.line);
 
         /* Run the Z80 for a line */
+#ifdef ASM_CPU
+        Z80_Execute(sms.cyclesperline);
+#else
         z80_execute(sms.cyclesperline);
+#endif
     }
 }
 
 
 void sms_init(void)
 {
-/*    sms_ram=bget(0x2000);
-    sms_dummy=bget(0x2000);
-    sms_sram=bget(0x8000);*/
-
     cpu_reset();
+
+    memset(sms_sram, 0, 0x8000);
 
     sms_reset();
 }
@@ -60,9 +70,8 @@ void sms_reset(void)
     /* Clear SMS context */
     memset(sms_dummy, 0, 0x2000);
     memset(sms_ram, 0, 0x2000);
-    memset(sms_sram, 0, 0x8000);
     sms.paused = sms.save = sms.port_3F = sms.port_F2 = sms.irq = 0x00;
-//    *PSG_STEREO = 0xFF;
+    dspCom->psgStereo = 0xFF;
 
     /* Load memory maps with default values */
     cpu_readmap[0] = cart.rom + 0x0000;
@@ -93,10 +102,20 @@ void sms_reset(void)
 /* Reset Z80 emulator */
 void cpu_reset(void)
 {
+#ifdef ASM_CPU
+    Z80_Reset(NULL);
+#else
     z80_reset(0);
     z80_set_irq_callback(sms_irq_callback);
+#endif
 }
 
+
+/* Write to memory */
+__IRAM_CODE int cpu_readmem16(int address)
+{
+    return cpu_readmap[address >> 13][address & 0x1FFF];
+}
 
 /* Write to memory */
 __IRAM_CODE void cpu_writemem16(int address, int data)
@@ -109,6 +128,8 @@ __IRAM_CODE void cpu_writemem16(int address, int data)
 /* Write to an I/O port */
 __IRAM_CODE void cpu_writeport(int port, int data)
 {
+//    printf("write %0.4x=%0.4x\n",port,data);
+
     switch(port & 0xFF)
     {
         case 0x01: /* GG SIO */
@@ -119,15 +140,14 @@ __IRAM_CODE void cpu_writeport(int port, int data)
             break;
 
         case 0x06: /* GG STEREO */
-            //*PSG_STEREO = (data & 0xFF);
+            dspCom->psgStereo = (data & 0xFF);
             break;
 
         case 0x7E: /* SN76489 PSG */
         case 0x7F:
-            //*PSG_ENABLED=1;
-            //while(*PSG_MODIFIED); // waiting for the DSP to process the previous byte
-            //*PSG_DATA=data;
-            //*PSG_MODIFIED=1;
+            dspCom->psgEnabled=1;
+            dspCom->psgQueue[dspCom->psgHead]=data;
+            dspCom->psgHead=(dspCom->psgHead+1)&PSGQUEUE_MASK;
             break;
 
         case 0xBE: /* VDP DATA */
@@ -159,6 +179,8 @@ __IRAM_CODE void cpu_writeport(int port, int data)
 __IRAM_CODE int cpu_readport(int port)
 {
     uint8 temp = 0xFF;
+
+//    printf("read %0.4x\n",port);
 
     switch(port & 0xFF)
     {

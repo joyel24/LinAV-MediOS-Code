@@ -71,7 +71,7 @@ void vdp_init(void)
 void vdp_reset(void)
 {
     memset(&vdp, 0, sizeof(t_vdp));
-    vdp.limit = 1;
+    vdp.limit = 0;
 }
 
 
@@ -141,7 +141,11 @@ __IRAM_CODE int vdp_ctrl_r(void)
     if(sms.irq == 1)
     {
         sms.irq = 0;
+#ifdef ASM_CPU
+        Z80_Clear_Pending_Interrupts();
+#else
         z80_set_irq_line(0, CLEAR_LINE);
+#endif
     }
 
     /* Return the old status flags */
@@ -245,7 +249,11 @@ __IRAM_CODE void vdp_run(void)
         if((vdp.status & 0x40) && (vdp.reg[0] & 0x10))
         {
             sms.irq = 1;
+#ifdef ASM_CPU
+            Z80_Cause_Interrupt(0);
+#else
             z80_set_irq_line(0, ASSERT_LINE);
+#endif
         }
     }
     else
@@ -255,7 +263,11 @@ __IRAM_CODE void vdp_run(void)
         if((vdp.line < 0xE0) && (vdp.status & 0x80) && (vdp.reg[1] & 0x20))
         {
             sms.irq = 1;
+#ifdef ASM_CPU
+            Z80_Cause_Interrupt(0);
+#else
             z80_set_irq_line(0, ASSERT_LINE);
+#endif
         }
     }
 }
@@ -269,6 +281,14 @@ __IRAM_CODE uint8 vdp_vcounter_r(void)
 
 __IRAM_CODE uint8 vdp_hcounter_r(void)
 {
-    int pixel = (((z80_ICount % CYCLES_PER_LINE) / 4) * 3) * 2;
+    int count;
+
+#ifdef ASM_CPU
+    count=Z80_ICount;
+#else
+    count=z80_ICount;
+#endif
+
+    int pixel = (((count % CYCLES_PER_LINE) / 4) * 3) * 2;
     return (hcnt[((pixel >> 1) & 0x1FF)]);
 }

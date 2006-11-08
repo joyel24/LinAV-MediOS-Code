@@ -66,9 +66,9 @@ typedef struct {
 /* 44 */    Z80_DaisyChain irq[Z80_MAXDAISY];
 /* 84 */    int     (*irq_callback)(int irqline);
 /* 88 */    int     extra_cycles;       /* extra cycles for interrupts */
-}   Z80_Regs;
+}   c_Z80_Regs;
 
-__IRAM_DATA extern Z80_Regs *Z80_Context;
+__IRAM_DATA extern c_Z80_Regs *c_Z80_Context;
 __IRAM_DATA extern int after_EI;
 __IRAM_DATA extern unsigned char *cpu_readmap[8];
 __IRAM_DATA extern unsigned char *cpu_writemap[8];

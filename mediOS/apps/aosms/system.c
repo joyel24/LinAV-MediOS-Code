@@ -21,7 +21,6 @@
 
 __IRAM_DATA t_bitmap bitmap;
 t_cart cart;
-t_snd snd;
 __IRAM_DATA t_input input;
 
 struct
@@ -40,9 +39,6 @@ void system_init(int rate)
     /* Initialize the look-up tables and related data */
     render_init();
 
-    /* Enable sound emulation if the sample rate was specified */
-    audio_init(rate);
-
     /* Don't save SRAM by default */
     sms.save = 0;
 
@@ -50,63 +46,22 @@ void system_init(int rate)
     memset(&input, 0, sizeof(t_input));
 }
 
-void audio_init(int rate)
-{
-    /* Clear sound context */
-    memset(&snd, 0, sizeof(t_snd));
-
-    /* Reset logging data */
-    snd.log = 0;
-    snd.callback = NULL;
-
-    /* Oops.. sound is disabled */
-    if(!rate) return;
-
-    /* Calculate buffer size in samples */
-    snd.bufsize = (rate / 60);
-
-    /* Sound output */
-    snd.buffer[0] = (signed short int *)malloc(snd.bufsize * 2);
-    snd.buffer[1] = (signed short int *)malloc(snd.bufsize * 2);
-    if(!snd.buffer[0] || !snd.buffer[1]) return;
-    memset(snd.buffer[0], 0, snd.bufsize * 2);
-    memset(snd.buffer[1], 0, snd.bufsize * 2);
-
-    /* YM2413 sound stream */
-    snd.fm_buffer = (signed short int *)malloc(snd.bufsize * 2);
-    if(!snd.fm_buffer) return;
-    memset(snd.fm_buffer, 0, snd.bufsize * 2);
-
-    /* SN76489 sound stream */
-    snd.psg_buffer[0] = (signed short int *)malloc(snd.bufsize * 2);
-    snd.psg_buffer[1] = (signed short int *)malloc(snd.bufsize * 2);
-    if(!snd.psg_buffer[0] || !snd.psg_buffer[1]) return;
-    memset(snd.psg_buffer[0], 0, snd.bufsize * 2);
-    memset(snd.psg_buffer[1], 0, snd.bufsize * 2);
-
-    /* Inform other functions that we can use sound */
-    snd.enabled = 1;
-}
-
-
 void system_shutdown(void)
 {
-    printf("sys shutdown\n");
 }
 
 
 void system_reset(void)
 {
-    printf("sys reset\n");
     cpu_reset();
     vdp_reset();
     sms_reset();
     render_reset();
 }
 
+
 void system_save_state(int fd)
 {
-    printf("sys save state\n");
     /* Save VDP context */
     write(fd,&vdp, sizeof(t_vdp));
     write(fd,vdp_vram,sizeof(vdp_vram));
@@ -118,8 +73,12 @@ void system_save_state(int fd)
     write(fd,sms_sram,sizeof(sms_sram));
 
     /* Save Z80 context */
-    write(fd,Z80_Context, sizeof(Z80_Regs));
+#ifdef ASM_CPU
+    write(fd,&Z80, sizeof(Z80_Regs));
+#else
+    write(fd,c_Z80_Context, sizeof(c_Z80_Regs));
     write(fd,&after_EI, sizeof(int));
+#endif
 
     /* Save YM2413 registers */
     write(fd,&ym2413.reg[0], 0x40);
@@ -133,7 +92,7 @@ void system_load_state(int fd)
 {
     int i;
     uint8 reg[0x40];
-    printf("sys load state\n");
+
     /* Initialize everything */
     cpu_reset();
     system_reset();
@@ -149,8 +108,13 @@ void system_load_state(int fd)
     read(fd,sms_sram,sizeof(sms_sram));
 
     /* Load Z80 context */
-    read(fd,Z80_Context, sizeof(Z80_Regs));
+#ifdef ASM_CPU
+    read(fd,&Z80, sizeof(Z80_Regs));
+    Z80_initFctPtrsAndRebase(); //DRZ80 saves a lot of binary code dependent stuff, regenerate it
+#else
+    read(fd,c_Z80_Context, sizeof(c_Z80_Regs));
     read(fd,&after_EI, sizeof(int));
+#endif
 
     /* Load YM2413 registers */
     read(fd,reg, 0x40);
@@ -159,7 +123,10 @@ void system_load_state(int fd)
 //    read(fd,&sn[0], sizeof(t_SN76496));
 
     /* Restore callbacks */
+#ifdef ASM_CPU
+#else
     z80_set_irq_callback(sms_irq_callback);
+#endif
 
     cpu_readmap[0] = cart.rom + 0x0000; /* 0000-3FFF */
     cpu_readmap[1] = cart.rom + 0x2000;

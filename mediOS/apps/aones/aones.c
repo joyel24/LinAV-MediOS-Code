@@ -507,27 +507,19 @@ long emu_joypad1State(){
                 prevF3Pressed=false;
             }
             
-            if (stickyAPressed)
-            {
-            	if (bt & NES_BTN_A)
-            	{
-            		state &= 0xfffe;
-            	}
-            	else
-            	{
+            if (stickyAPressed){
+            	if (state&1){
+            		state&=~1;
+            	}else{
             		state|=1;
             	}
             }
 
-            if (stickyBPressed)
-            {
-            	if (bt & NES_BTN_B)
-            	{
-            		state &= 0xfffd;
-            	}
-            	else
-            	{
-            	    state |= 2;
+            if (stickyBPressed){
+            	if (state&2){
+            		state&=~2;
+            	}else{
+            	    state|=2;
             	}
             }
 

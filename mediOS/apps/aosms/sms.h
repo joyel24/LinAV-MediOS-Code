@@ -38,4 +38,13 @@ int  sms_irq_callback(int param);
 void sms_mapper_w(int address, int data);
 void cpu_reset(void);
 
+void cpu_writemem16(int address, int data);
+void cpu_writeport(int port, int data);
+int cpu_readport(int port);
+int cpu_readmem16(int address);
+
+__IRAM_DATA extern unsigned char *cpu_readmap[8];
+__IRAM_DATA extern unsigned char *cpu_writemap[8];
+
+
 #endif /* _SMS_H_ */

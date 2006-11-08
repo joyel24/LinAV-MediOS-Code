@@ -12,8 +12,10 @@
 #define NES_PAL_HEIGHT 240
 #define NES_NTSC_HEIGHT 224
 
+#ifdef DSPCODE
 #define LCD_WIDTH 224
 #define LCD_HEIGHT 176
+#endif
 
 // offset of the area of our control variables in the dsp
 // only 2 bytes space required, the rest will be dynamically set
