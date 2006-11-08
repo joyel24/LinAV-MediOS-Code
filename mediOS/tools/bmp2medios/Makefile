@@ -1,0 +1,1 @@
+all: bmp2medios
