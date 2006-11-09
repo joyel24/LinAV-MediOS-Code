@@ -44,6 +44,10 @@ void resize_setup(int inAddr,int inBufWidth,int inWidth,int inHeight,int outAddr
     
     realWidth=(outWidth*hrsz)/PREVIEW_RESIZE_RATIO;
     realHeight=(outHeight*vrsz)/PREVIEW_RESIZE_RATIO;
+    
+    if(outWidth>inWidth){
+        realWidth++;
+    }
 
     // setup CCD controller
     outw(0,CCDC_ENABLE);

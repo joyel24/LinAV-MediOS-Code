@@ -268,18 +268,8 @@ void screen_init(){
         }
 
         if(cart.type==TYPE_GG){
-            int resize_fix=0;
-
-            //HACK: weird resize bug with 320px->640px, use another ratio
-#ifdef DM320
-            resize_fix=4;
-#endif
-#ifdef DM270
-            resize_fix=16;
-#endif
-
             resize_setup((long)framebuffer+(SMS_HEIGHT-GG_HEIGHT+1)/2*SMS_WIDTH*4+(SMS_WIDTH-GG_WIDTH)/2*4,
-                         SMS_WIDTH*2,(GG_WIDTH+resize_fix)*2,GG_HEIGHT,
+                         SMS_WIDTH*2,GG_WIDTH*2,GG_HEIGHT,
                          (long)vidplane,
                          w*2,h);
         }else{
@@ -545,6 +535,12 @@ int app_main(){
     dsp_init();
     emu_init();
     gui_init();
+
+    // disable LCD & halt timer
+    set_timer_status(LCD_TIMER,TIMER_MODE_BAT,MODE_DISABLE);
+    set_timer_status(LCD_TIMER,TIMER_MODE_DC,MODE_DISABLE);
+    set_timer_status(HALT_TIMER,TIMER_MODE_BAT,MODE_DISABLE);
+    set_timer_status(HALT_TIMER,TIMER_MODE_DC,MODE_DISABLE);
 
     // create dirs if they don't exist
     mkdir(AOSMS_PATH,-1);
