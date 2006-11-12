@@ -61,6 +61,8 @@
 
 #ifdef AV4XX
 
+    #define ENABLE_OVERCLOCKING
+
     #define SMS_BTN_1             BTMASK_BTN1
     #define SMS_BTN_2             BTMASK_ON
     #define SMS_BTN_MOD_12        0

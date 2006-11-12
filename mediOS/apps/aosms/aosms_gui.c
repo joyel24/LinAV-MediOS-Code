@@ -127,6 +127,14 @@ void gui_init(){
     mih->chooser->index=0;
     standardMenu->addItem(standardMenu,mih);
 
+    #if defined(AV4XX)
+    mic=widgetMenuCheckbox_create();
+    mic->caption="Int Speacker";
+    mic->cfgStored=false;
+    mic->checkbox->caption="Enabled";
+    standardMenu->addItem(standardMenu,mic);
+		#endif    
+
     mi=widgetMenuItem_create();
     mi->caption="Buttons:";
     mi->foreColor=GUI_TITLE_COLOR;
@@ -336,6 +344,19 @@ void gui_applySettings(){
     overclocking=advancedMenu->getCheckbox(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"Enable OC"))->checked;
     armFrequency=advancedMenu->getTrackbar(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"CPU frequency(Mhz)"))->value;
 
+#ifdef AV4XX
+	  if(standardMenu->getCheckbox(standardMenu,standardMenu->indexFromCaption(standardMenu,"Int Speacker"))->checked)
+    {
+        printk("Enable spkr\n");
+        SPCKR_ON();
+    }
+    else
+    {
+        printk("Disable spkr\n");
+        SPCKR_OFF();
+    }
+#endif
+
     screen_init();
     codec_setVolume(vol);
     lcd_setBrightness(bl);
@@ -387,6 +408,17 @@ void gui_welcomeScreen(){
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F1:     Open menu");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F2:     Reset");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F3:     Customizable button");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off:    Go to browser");
+#endif
+
+#if defined(AV4XX)
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=18,   "Ingame keys:");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  D-Pad:  Move");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Lcd sw: Square");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  On:     Cross");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F1:     Open menu");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F2:     Reset");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F3:     SMS pause/GG ptart");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off:    Go to browser");
 #endif
 

@@ -19,6 +19,7 @@
     #include <kernel/clkc.h>
     #include <kernel/resize.h>
     #include <kernel/evt.h>
+    #include <kernel/sound.h>
     #include <kernel/bat_power.h>
     #include <kernel/videnc.h>
     #include <kernel/icons.h>
