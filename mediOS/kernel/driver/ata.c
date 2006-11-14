@@ -115,10 +115,10 @@ int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_
     use_dma=ATA_NO_DMA;
 #endif
 
-    
+
     if(((unsigned int)(data) < SDRAM_START) && use_dma==ATA_WITH_DMA)
     {
-        //printk("Destination buffer not in SDRAM => no DMA\n");    
+        //printk("Destination buffer not in SDRAM => no DMA\n");
         use_dma=ATA_NO_DMA;
     }
 
@@ -137,16 +137,16 @@ int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_
         {
             if( DMA_RUNNING )
             {
-                printk("Error dma is still running\n");    
+                printk("Error dma is still running\n");
                 return -1;
             }
 
             if((unsigned int)(data) < SDRAM_START)
             {
-                printk("Error buffer not in SDRAM\n");    
+                printk("Error buffer not in SDRAM\n");
                 return -2;
             }
-           
+
             if(cmd == ATA_DO_READ || cmd == ATA_DO_IDENT)
             {
                 DMA_SET_SRC(DMA_ATA_ADDRESS);
@@ -240,7 +240,7 @@ void ata_stopHD(int mode)
         ata_stopping = 1;
         tmr_start(&ataStop_tmr);
     }
-    
+
 }
 
 void ata_stopHDEnd(void)
@@ -322,10 +322,10 @@ void ata_selectCF(void)
 void ata_stopTmrFct(void)
 {
     int __status;
-    
+
     if(!ata_stopping)
         tmr_stop(&ataStop_tmr);
-    
+
     if(ata_stopping)
     {
         ata_stopping++;
@@ -348,7 +348,7 @@ void ata_init(void)
     ataStop_tmr.action   = ata_stopTmrFct;
     ataStop_tmr.freeRun  = 1;
     ataStop_tmr.stdDelay = 1; /* 1 tick delay */
-       
+
     ata_reset();
     printk("[ATA init] done\n");
 }
@@ -360,6 +360,6 @@ void ata_reset(void)
 
 void ide_intAction(int irq,struct pt_regs * regs)
 {
-    arch_ide_intAction(irq,regs);
+    //arch_ide_intAction(irq,regs);
 }
 

@@ -118,6 +118,12 @@ struct cmd_line_s cmd_tab[] = {
         cmd_action : do_ThreadInfo,
         nb_args    : 1
     },
+    {
+        cmd        : "threadNice",
+        help_str   : "Set thread priority for given pid",
+        cmd_action : do_ThreadNice,
+        nb_args    : 2
+    },
     /* this has to be the last entry */
     {
         cmd        : NULL,
@@ -137,7 +143,7 @@ struct cmd_line_s cmd_tab[] = {
             if(CMD_TAB[__v].cmd!=NULL) __w=&CMD_TAB[__v];                                 \
             __w;                                                                           \
         })
-        
+
 unsigned char * cur_cmd;
 int cur_pos;
 
@@ -187,7 +193,7 @@ void cmd_line_INT(int irq_num,struct pt_regs * regs)
                                         break;
                                     case 0x44:
                                         printk("\nLEFT\n");
-                                        break;                                    
+                                        break;
                                 }*/
                             }
                         }
@@ -203,7 +209,7 @@ void cmd_line_INT(int irq_num,struct pt_regs * regs)
                     }
                     break;
                 default:
-                    break;                    
+                    break;
             }
         }
 
@@ -216,11 +222,11 @@ void cmd_line_INT(int irq_num,struct pt_regs * regs)
 }
 
 void process_cmd(struct pt_regs * regs)
-{        
-    int nb_args=0;    
+{
+    int nb_args=0;
     struct cmd_line_s * cmd_line;
     unsigned  char * ptr;
-    
+
     cur_regs = regs;
 
     if(cur_pos==1)
@@ -232,9 +238,9 @@ void process_cmd(struct pt_regs * regs)
         /* processing the cmd */
         RM_HEAD_SPC(cur_cmd);
 
-        /* let's find the cmd name */                
+        /* let's find the cmd name */
         ptr=FIND_NXT_TOKEN(cur_cmd);
-        
+
         if(!*ptr)   /* cmd with no args */
         {
             cmd_line=FIND_CMD_LINE(cur_cmd,cmd_tab);
@@ -245,7 +251,7 @@ void process_cmd(struct pt_regs * regs)
                 cur_pos=0;
                 printk(MEDIOS_PROMPT);
                 return;
-            }                    
+            }
         }
         else
         {
@@ -259,7 +265,7 @@ void process_cmd(struct pt_regs * regs)
                 printk(MEDIOS_PROMPT);
                 return;
             }
-            
+
             cur_cmd = ptr+1;
             /* parse args */
             while(*cur_cmd)
@@ -274,21 +280,21 @@ void process_cmd(struct pt_regs * regs)
                     {
                         *cur_cmd='\0';
                         cur_cmd++;
-                    }                         
+                    }
                 }
-            }            
+            }
         }
-        
+
         /* launch the cmd if we have enough params */
         if(nb_args>=cmd_line->nb_args)
             cmd_line->cmd_action(arg_list);
         else
             printk("%s need more args:\n%s\n",cmd_line->cmd,cmd_line->help_str);
-        
+
         /* put back the prompt */
         printk(MEDIOS_PROMPT);
     }
-            
+
     /* Ready to get a new cmd */
     cur_cmd[0]='\0';
     cur_pos=0;
@@ -299,24 +305,24 @@ void init_cmd_line(void)
 {
     char c;
     cur_pos=0;
-    
+
     arg_list = (unsigned char**)kmalloc(sizeof(unsigned char*)*MAX_ARGS);
     cur_cmd = (unsigned char*)kmalloc(sizeof(unsigned char)*MAX_CMD_LEN);
-    
+
     cur_cmd[0]='\0';
 
     uart_need(CMD_LINE_UART);
-    
+
     irq_changeHandler(CMD_LINE_UART==UART_0?IRQ_UART0:IRQ_UART1,cmd_line_INT);
         /* clear uart1 buffer in */
     while(uart_in(&c,UART_1)) /*nothing*/;
-    
+
     if(!arg_list)
     {
         printk("[init] cmd line, can't allocate memory for args\n");
         return;
     }
-          
+
     printk("[init] cmd line\n");
 }
 
@@ -357,7 +363,7 @@ void print_handler_info (unsigned char ** params)
 void do_reg_print (unsigned char ** params)
 {
     int i=0,j=0;
-    
+
     for(i=0;i<13;i++)
     {
          printk("R%02d=0x%08x ",i,cur_regs->uregs[i]);
@@ -489,6 +495,29 @@ void do_ThreadInfo (unsigned char ** params)
                 printk("Res %d\n",i);
                 thread_listPrintPtr(i,ptr);
             }
+        }
+    }
+}
+void do_ThreadNice (unsigned char ** params)
+{
+    int pid = atoi (params[0]);
+    int prio = atoi (params[0]);
+
+    THREAD_INFO * ptr=thread_findPid(pid);
+    if(!ptr)
+    {
+        printk("thread with pid %d not found\n",pid);
+    }
+    else
+    {
+        thread_printInfo(ptr);
+        if(thread_nice(ptr,prio)==MED_OK)
+        {
+            printk("Priority %d set for PID=%d\n",prio,pid);
+        }
+        else
+        {
+            printk("Bad priority %d\n",prio);
         }
     }
 }

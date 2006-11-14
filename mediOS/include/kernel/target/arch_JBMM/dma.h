@@ -13,11 +13,23 @@
 #ifndef __DMA_ARCH_H
 #define __DMA_ARCH_H
 
-#define NO_DMA
+//#define NO_DMA
 
-#define DMA_SDRAM          0x5
-#define DMA_ATA            0x1
 
-#define DMA_ATA_ADDRESS    0x10400000
+#define DMA_SDRAM          0x1
+#define DMA_ATA            0x0
+
+#define DMA_SET_DEV(src,dest) {if(src==1) outw(1,DMA_DEV_SEL); else outw(0,DMA_DEV_SEL);}
+
+#define DMA_ATA_ADDRESS    0x04000800
+
+#define DMA_SRC_HI         (DMA_BASE+0x08)
+#define DMA_SRC_LO         (DMA_BASE+0x06)
+#define DMA_DEST_HI        (DMA_BASE+0x0C)
+#define DMA_DEST_LO        (DMA_BASE+0x0A)
+#define DMA_SIZE           (DMA_BASE+0x04)
+#define DMA_DEV_SEL        (DMA_BASE+0x02)
+#define DMA_START          (DMA_BASE+0x00)
+#define DMA_STATE          (DMA_BASE+0x0E)
 
 #endif

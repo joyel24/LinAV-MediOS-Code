@@ -52,16 +52,16 @@ void thread_idleFct(void)
 ***********************************/
 MED_RET_T thread_init(void(*fct)(void))
 {
-    int retval;  
-    
-    /* global var */  
+    int retval;
+
+    /* global var */
     pid=0;
     threadCurrent = sysThread = idleThread = NULL;
     /* creating initial thread */
-    
+
     retval=thread_create(&sysThread,(void*)fct,(void*)thread_exit,NULL,NULL,0,THREAD_USE_SYS_STACK,
-        SYS_STACK_BTM,"KERNEL",(unsigned long)NULL,(unsigned long)NULL);
-    
+        SYS_STACK_BTM,PRIO_HIGH,"KERNEL",(unsigned long)NULL,(unsigned long)NULL);
+
     if(retval<0)
     {
         printk("Error creating KERNEL thread (error code = %d\n",-retval);
@@ -69,13 +69,13 @@ MED_RET_T thread_init(void(*fct)(void))
     }
     else
         printk("KERNEL thread created with pid %d\n",retval);
-    
+
     threadSysStack=sysThread;
-        
+
     sysThread->enable=1;
-    
+
     retval=thread_create(&idleThread,(void*)thread_idleFct,(void*)thread_exit,NULL,NULL,0x100,THREAD_USE_OTHER_STACK,
-        NULL,"IDLE",(unsigned long)NULL,(unsigned long)NULL);
+        NULL,PRIO_HIGH,"IDLE",(unsigned long)NULL,(unsigned long)NULL);
     if(retval<0)
     {
         printk("Error creating IDLE thread (error code = %d\n",-retval);
@@ -83,10 +83,10 @@ MED_RET_T thread_init(void(*fct)(void))
     }
     else
         printk("Idle thread created with pid %d\n",retval);
-        
+
     /* idleThread is disable*/
     idleThread->enable=0;
-       
+
     return MED_OK;
 }
 
@@ -106,7 +106,7 @@ void thread_startMed(void * entry_fct,void * code_malloc,void * iram_top,char * 
 {
     THREAD_INFO * med_thread;
     int pid=thread_create(&med_thread,entry_fct,(void*)thread_exit,code_malloc,NULL,0,THREAD_USE_SYS_STACK,
-        iram_top,name,(unsigned long)argc,(unsigned long)argv);
+        iram_top,PRIO_HIGH,name,(unsigned long)argc,(unsigned long)argv);
     printk("MED thread created with pid %d\n",pid);
     __cli();
     sysThread->enable=0;
@@ -121,10 +121,10 @@ void thread_startMed(void * entry_fct,void * code_malloc,void * iram_top,char * 
 * "enable" is used to enable/disable
 * thread once created
 ***********************************/
-int thread_startFct(THREAD_INFO ** ret_thread,void * entry_fct,char * name,int enable)
+int thread_startFct(THREAD_INFO ** ret_thread,void * entry_fct,char * name,int enable,int prio)
 {
     THREAD_INFO * fct_thread;
-    int pid=thread_create(&fct_thread,entry_fct,(void*)thread_exit,0,NULL,0,THREAD_USE_OTHER_STACK,NULL,name,
+    int pid=thread_create(&fct_thread,entry_fct,(void*)thread_exit,0,NULL,0,THREAD_USE_OTHER_STACK,NULL,prio,name,
         0,(unsigned long)NULL);
     printk("Fct thread created with pid %d\n",pid);
     if(ret_thread)
@@ -141,7 +141,7 @@ int thread_startFct(THREAD_INFO ** ret_thread,void * entry_fct,char * name,int e
 ***********************************/
 int thread_create(THREAD_INFO ** ret_thread,void * entry_fct,void * exit_fct,
     void * code_malloc,void * stack_top,unsigned int stack_size,int useSysStack,
-    void * stack_bottom,char * name,unsigned long arg1,unsigned long arg2)
+    void * stack_bottom,int prio,char * name,unsigned long arg1,unsigned long arg2)
 {
     int i;
 
@@ -157,9 +157,11 @@ int thread_create(THREAD_INFO ** ret_thread,void * entry_fct,void * exit_fct,
     /* init ressources array */
     for(i=0;i<THREAD_NB_RES;i++)
         memcpy(&newThread->ressources[i],&ini_ressources[i],sizeof(struct thread_ressource));
-    
+
     newThread->useSysStack=useSysStack;
-        
+    newThread->priority=prio;
+    newThread->idleCnt=0;
+
     /* Malloc stack */
     if(useSysStack)
     {
@@ -176,7 +178,7 @@ int thread_create(THREAD_INFO ** ret_thread,void * entry_fct,void * exit_fct,
         printk("Save stack malloc, size = %x\n",stack_size);
     }
     else
-    {    
+    {
         if(!stack_top)
         {
             if(stack_size==0)
@@ -242,16 +244,16 @@ MED_RET_T thread_insert(THREAD_INFO * thread)
 {
     THREAD_INFO * nxt;
     int needIrqEnable=0;
-    
+
     if(!thread)
         return -MED_EINVAL;
-        
+
     if(irq_globalEnabled())
-    {        
+    {
         __cli();
         needIrqEnable=1;
     }
-    
+
     if(!threadCurrent)
     {
         threadCurrent=thread;
@@ -265,11 +267,11 @@ MED_RET_T thread_insert(THREAD_INFO * thread)
         thread->nxt=nxt;
         nxt->prev=thread;
         thread->prev=threadCurrent;
-    }   
-     
+    }
+
     if(needIrqEnable)
         __sti();
-        
+
     return MED_OK;
 }
 
@@ -298,7 +300,7 @@ MED_RET_T thread_remove(THREAD_INFO * thread)
         thread->prev->nxt=thread->nxt;
         thread->nxt->prev=thread->prev;
         thread->prev=NULL;
-        thread->nxt=NULL;        
+        thread->nxt=NULL;
     }
 
     return MED_OK;
@@ -313,7 +315,7 @@ Exit/Kill functions
 
 /***********************************
 * Common exit function of thread
-* when a thread starts its return 
+* when a thread starts its return
 * address is this function
 ***********************************/
 void thread_exit(void)
@@ -340,22 +342,22 @@ MED_RET_T thread_kill(int pid)
 * Kills a thread from the pointeur
 * to thread struct
 ***********************************/
-void thread_doKill(THREAD_INFO * thread)
+int thread_doKill(THREAD_INFO * thread)
 {
     THREAD_INFO * ptr;
     int i;
     if(thread == idleThread)
     {
         printk("Error trying to kill idle thread\n");
-        return;
+        return 0;
     }
     __cli();
     ptr=threadCurrent;
-    thread_remove(thread);  
-    
+    thread_remove(thread);
+
     for(i=0;i<THREAD_NB_RES;i++)
         thread_listFree(thread,i);
-            
+
     if(thread->stackBottom && !thread->useSysStack)
         kfree(thread->stackBottom);
     if(thread->useSysStack)
@@ -371,6 +373,7 @@ void thread_doKill(THREAD_INFO * thread)
     {
         swi_call(nTHREAD_NXT);
     }
+    return 0; /* dummy return only here because swi_cause is a macro with a return*/
 }
 
 /***********************************************************************************
@@ -380,7 +383,7 @@ State related functions
 ***********************************************************************************/
 
 /***********************************
-* Enable a thread 
+* Enable a thread
 ***********************************/
 MED_RET_T thread_enable(int pid)
 {
@@ -392,12 +395,12 @@ MED_RET_T thread_enable(int pid)
     }
     __cli();
     ptr->enable=1;
-    __sti();   
+    __sti();
     return MED_OK;
 }
 
 /***********************************
-* Disable a thread 
+* Disable a thread
 ***********************************/
 MED_RET_T thread_disable(int pid)
 {
@@ -409,7 +412,19 @@ MED_RET_T thread_disable(int pid)
     }
     __cli();
     ptr->enable=0;
-    __sti();    
+    __sti();
+    return MED_OK;
+}
+
+/***********************************
+* Set priority of a thread
+***********************************/
+MED_RET_T thread_nice(THREAD_INFO * ptr,int prio)
+{
+    if(prio>=0 && prio <= THREAD_MAX_PRIO)
+        ptr->priority=prio;
+    else
+        return -MED_EINVAL;
     return MED_OK;
 }
 
@@ -434,27 +449,67 @@ unsigned long yield(void)
 __IRAM_CODE void thread_nxt(void)
 {
     THREAD_INFO * ptr=threadCurrent;
-    
+    int topScore=0;
+    THREAD_INFO * topThread=NULL;
+    int has_top=0;
+
     idleThread->enable=0;
-    
+
     if(threadCurrent==NULL)
     {
         printk("No thread in ring\n");
         printk("Let's loop\n");
         while(1)/*NOTHING*/;
     }
-        
+
+    threadCurrent->idleCnt = 0;
+
+/*****************************************
+Prio system: process the whole task ring
+Consider only enable thread
+-> nxt thread is the one with highest score: current formula: idleCnt-Prio
+    * first: run thread that has wait enough
+    * second: in thread that could still wait take the one closer to its allowed wait
+-> all enale thread get idleCnt incremented
+-> nxt thread get tickCnt incremented
+RQ: idleThread never considered as it is always disable here
+
+******************************************/
     do
     {
-        threadCurrent=threadCurrent->nxt;
-    } while(!threadCurrent->enable && ptr != threadCurrent);
-    
-    if(ptr == threadCurrent && !ptr->enable)
+        if(ptr->enable)
+        {
+            if(!has_top)
+            {
+                has_top=1;
+                topScore=COMPUTE_SCORE(ptr);
+                topThread=ptr;
+            }
+            else
+            {
+                if(topScore<=COMPUTE_SCORE(ptr))
+                {
+                    topScore=COMPUTE_SCORE(ptr);
+                    topThread=ptr;
+                }
+            }
+            ptr->idleCnt++;
+        }
+        ptr=ptr->nxt;
+    } while(ptr != threadCurrent);
+
+    if(!has_top)   /* no thread found */
     {
         threadCurrent = idleThread;
         idleThread->enable=1;
+        idleThread->tickCnt++;
     }
-    
+    else
+    {
+        topThread->tickCnt++;
+        threadCurrent = topThread;
+    }
+
     if(threadSysStack != threadCurrent && threadSysStack->useSysStack == 1 && threadCurrent->useSysStack == 1)
     {
         /* saving prev sys stack */
@@ -462,13 +517,13 @@ __IRAM_CODE void thread_nxt(void)
         memcpy(threadCurrent->stackBottom,threadCurrent->saveStack,threadCurrent->stackSize);
         threadSysStack=threadCurrent;
     }
-    
+
     if(threadSysStack==NULL && threadCurrent->useSysStack == 1)
     {
         memcpy(threadCurrent->stackBottom,threadCurrent->saveStack,threadCurrent->stackSize);
         threadSysStack=threadCurrent;
     }
-    
+
 }
 
 /***********************************************************************************
@@ -501,10 +556,10 @@ MED_RET_T thread_listRm(THREAD_LIST * ptr,int res_id,int force)
             /* nothing to do as no thread exist */
             return MED_OK;
         }
-                
+
         if( threadCurrent->pid == 0 || force)
         {
-            /* ok KERNEL thread is allowed to do this */            
+            /* ok KERNEL thread is allowed to do this */
             return MED_OK;
         }
         else
@@ -513,7 +568,7 @@ MED_RET_T thread_listRm(THREAD_LIST * ptr,int res_id,int force)
             return -MED_EINVAL;
         }
     }
-    
+
     if(threadCurrent)
     {
         /* we have a current thread */
@@ -528,7 +583,7 @@ MED_RET_T thread_listRm(THREAD_LIST * ptr,int res_id,int force)
                 threadPtr=thread_findPid(0);
                 if(!threadPtr)
                 {
-                    /* can't find a thread with this PID */                    
+                    /* can't find a thread with this PID */
                     return -MED_EINVAL;
                 }
             }
@@ -541,7 +596,7 @@ MED_RET_T thread_listRm(THREAD_LIST * ptr,int res_id,int force)
         }
         else /* using cur thread */
             threadPtr = threadCurrent;
-            
+
         if(threadPtr->ressources[res_id].head_list == ptr)
         {
             /* trying to rm head */
@@ -561,7 +616,7 @@ MED_RET_T thread_listRm(THREAD_LIST * ptr,int res_id,int force)
 }
 
 /***********************************
-* Add ressource item to cur thread 
+* Add ressource item to cur thread
 * list
 ***********************************/
 void thread_listAdd(THREAD_LIST * ptr,int res_id,int force)
@@ -570,7 +625,7 @@ void thread_listAdd(THREAD_LIST * ptr,int res_id,int force)
     {
         THREAD_INFO * threadPtr;
         /* we have a cur thread */
-        /* inserting it at the head of list */        
+        /* inserting it at the head of list */
         if(force)
         {
             /* using SYS thread => need to find PID 0*/
@@ -585,7 +640,7 @@ void thread_listAdd(THREAD_LIST * ptr,int res_id,int force)
         }
         else
             threadPtr=threadCurrent;
-        
+
         ptr->pid=threadPtr->pid;
         ptr->prev=NULL;
         ptr->nxt=threadPtr->ressources[res_id].head_list;
@@ -605,7 +660,7 @@ void thread_listAdd(THREAD_LIST * ptr,int res_id,int force)
 * freeing all alloc buffer of thread
 ***********************************/
 void thread_listFree(THREAD_INFO * thread,int res_id)
-{   
+{
     THREAD_LIST * ptr;
     for(ptr=thread->ressources[res_id].head_list;ptr!=NULL;ptr=ptr->nxt)
     {
@@ -624,15 +679,15 @@ Printing functions
 ***********************************/
 void thread_ps(void)
 {
-    THREAD_INFO * ptr=threadCurrent;
-
+    THREAD_INFO * ptr;
+    ptr=threadCurrent;
     if(ptr)
     {
         printk("Thread list:\n");
         do
         {
-            printk("%s - pid %d - %s\n",ptr->name!=NULL?ptr->name:"NO Name",ptr->pid,
-            ptr->enable?"enable":"disable");
+            printk("%s - pid %d - %s - Tick cnt %d\n",ptr->name!=NULL?ptr->name:"NO Name",ptr->pid,
+            ptr->enable?"enable":"disable",ptr->tickCnt);
             ptr=ptr->nxt;
         } while(ptr!=threadCurrent);
     }
@@ -642,7 +697,7 @@ void thread_ps(void)
 
 
 /***********************************
-* Print list of item of res_id for 
+* Print list of item of res_id for
 * a given thread
 ***********************************/
 void thread_listPrintPtr(int res_id,THREAD_INFO * thread)
@@ -654,7 +709,7 @@ void thread_listPrintPtr(int res_id,THREAD_INFO * thread)
 }
 
 /***********************************
-* Print list of item of res_id for 
+* Print list of item of res_id for
 * all thread in the ring
 ***********************************/
 void thread_listPrintAll(int res_id)
@@ -669,7 +724,7 @@ void thread_listPrintAll(int res_id)
                 thread_listPrintPtr(res_id,ptr);
             ptr=ptr->nxt;
         } while(ptr!=threadHead);
-    }    
+    }
 }
 
 /***********************************
@@ -680,6 +735,7 @@ void thread_printInfo(THREAD_INFO * thread)
     if(thread)
     {
         printk("Pid: %d : %s is %s\n",thread->pid,thread->name,thread->enable?"Enable":"Disable");
+        printk("Tick cnt=%d,\n",thread->tickCnt);
         if(thread->useSysStack)
         {
             printk("Stack is SYS iram stack (bottom=%x, save=%x, size=%x)\n",thread->stackBottom,
@@ -720,7 +776,7 @@ helper functions
 ***********************************************************************************/
 
 /***********************************
-* Find thread struct from pid 
+* Find thread struct from pid
 ***********************************/
 THREAD_INFO * thread_findPid(int pid)
 {
@@ -744,3 +800,7 @@ THREAD_INFO * thread_findPid(int pid)
         return NULL;
 }
 
+THREAD_INFO * thread_self(void)
+{
+    return threadCurrent;
+}

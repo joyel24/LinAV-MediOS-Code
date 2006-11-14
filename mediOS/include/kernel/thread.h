@@ -29,7 +29,22 @@
 #define THREAD_USE_OTHER_STACK 0
 
 #define MEM_RESSOURCE 0
+/* Number of managed ressource */
 #define THREAD_NB_RES 1
+
+/* prio level is measure in number of allowed idle Tick */
+#define PRIO_HIGH  1
+#define PRIO_MED   3
+#define PRIO_LOW   5
+/* to be set to max val (ie lowest prio) */
+#define THREAD_MAX_PRIO 5
+
+#define COMPUTE_SCORE(THREAD_PTR) (THREAD_PTR->idleCnt-THREAD_PTR->priority)
+
+/* basic function accessed from thread */
+#define THREAD_DISABLE() {if(threadCurrent) { __cli(); threadCurrent->enable=0; __sti(); }}
+#define THREAD_ENABLE()  {if(threadCurrent) { __cli(); threadCurrent->enable=1; __sti(); }}
+#define THREAD_SELF() (threadCurrent)
 
 typedef struct thread_list {
     struct thread_list * nxt;
@@ -55,18 +70,21 @@ typedef struct thread_info {
     /* thread info */
     char name[THREAD_NAME_SIZE];
     int pid;
-    
+    int tickCnt;
+    int idleCnt;
+    int priority;
+
     /* flags */
     int enable;
     int useSysStack;
-    
+
     /* linkage */
     struct thread_info * nxt;
     struct thread_info * prev;
-    
+
     /* ressource */
     THREAD_RES ressources[THREAD_NB_RES];
-    
+
 } THREAD_INFO;
 
 extern THREAD_INFO * threadCurrent;
@@ -94,19 +112,20 @@ void thread_nxt(void);
 
 MED_RET_T thread_enable(int pid);
 MED_RET_T thread_disable(int pid);
+MED_RET_T thread_nice(THREAD_INFO * ptr,int prio);
 
 unsigned long yield(void);
 
 void thread_startMed(void * entry_fct,void * code_malloc,void * iram_top,char * name,int argc,char ** argv);
-int thread_startFct(THREAD_INFO ** ret_thread,void * entry_fct,char * name,int enable);
+int thread_startFct(THREAD_INFO ** ret_thread,void * entry_fct,char * name,int enable,int prio);
 
 int thread_create(THREAD_INFO ** ret_thread,void * entry_fct,void * exit_fct,
     void * code_malloc,void * stack_top,unsigned stack_size,int useSysStack,
-    void * stack_bottom,char * name,unsigned long arg1,unsigned long arg2);
+    void * stack_bottom,int prio,char * name,unsigned long arg1,unsigned long arg2);
 MED_RET_T thread_insert(THREAD_INFO * thread);
 MED_RET_T thread_remove(THREAD_INFO * thread);
 MED_RET_T thread_kill(int pid);
-void thread_doKill(THREAD_INFO * thread);
+int thread_doKill(THREAD_INFO * thread);
 THREAD_INFO * thread_findPid(int pid);
 void thread_medExit(void);
 

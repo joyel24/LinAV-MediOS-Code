@@ -24,11 +24,12 @@ void* kmalloc      (unsigned int size);
 
 void* realloc      (void *buffer, unsigned int newsize);
 void* krealloc     (void *buffer, unsigned int newsize);
-           
+
 void  free         (void *buf);
 void  kfree        (void * buf);
 
 void mem_stat      (unsigned int *curalloc,unsigned int *totfree,unsigned int *maxfree);
+void mem_printShortStat(void);
 void mem_printStat (void);
 void mem_freeList  (void);
 
