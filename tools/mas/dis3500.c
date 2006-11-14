@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "code\D0_800_684.h"
+#include "code\D1_800_435.h"
 
 char FLAGS[32][6]={"FALSE","TRUE","CC","CS","P","N","GE","LT","GT","LE","AC","AS","BC","BS","MC","MS","SC","SS","PSC","PSS","GC","GS","XC","XS","YC","YS","RC","RS","QC","QS","NE","EQ"};
 char SHIFTS[4][9]={"","<<1",">>1","!ERROR!"};
@@ -167,8 +167,6 @@ void SolveJMP(long int Code)
  }               
 } 
  
-/* MOV instructions */
-
 void MOV00xx(long int Code)
 {
  long int Type,MA,AC,P,S,I,L;
@@ -256,12 +254,11 @@ void MOV1100(long int Code)
 
 void MOV1101(long int Code)
 {
- long int Type,AC,I;
- int M;
+ long int Type,AC,I,M;
  Type=Code&0xFFFF;
  AC=(Type>>11)&7;
  I=(Type>>10)&1;
- M=((Type&0x3ff)-512)&0xffff;
+ M=(Type&0x3ff);
  printf("CH%ld=$%04X (D%ld)",AC,M,I);
 }  
 
@@ -279,11 +276,10 @@ void MOV111x(long int Code)
  printf("Z%ld%ld",M,P);
  if (IS) printf("[%ld]",I);
  printf("=YC%ld",AC);
- printf(" %s",SHIFTS[S]);
+ printf(" %s",SHIFTS[IS]);
  if (L) printf(" (L)");
 }  
 
-/* MOV main */
 
 void SolveMOV(long int Code)
 {
@@ -317,12 +313,10 @@ void SolveMOV(long int Code)
  }               
 } 
 
-/* ALU instructions */
-
 void ALU00(long int Code)
 {
  long int Type,ALU,AC,P[2],IS[2],I,CM;
- Type=Code&0xFFFF;
+ Type=Code&0x3FFFF;
  P[0]=(Type>>8)&3;P[1]=Type&3;
  IS[0]=(Type>>10)&1;IS[1]=(Type>>2)&1;
  I=(Type>>3)&7;
@@ -343,8 +337,10 @@ void ALU00(long int Code)
 void ALU01(long int Code)
 {
  long int Type,ALU,AC,AS,I;
- Type=Code&0xFFFF;
- I=(Type&63)-32;
+ char S[2]={0,0};
+ Type=Code&0x3FFFF;
+ I=Type&0x3F;
+ if (I&32) {I=(I^0x3F)+1;S[0]='-';} // 2 Complement
  AC=(Type>>11)&7;
  AS=(Type>>8)&7;
  ALU=(Type>>14)&15;
@@ -352,14 +348,14 @@ void ALU01(long int Code)
  if (OPERANDS[ALU]==3) printf("AC%ld ",AS);
  printf("%s ",OPERATORS[ALU]);
  if (OPERANDS[ALU]==1) printf("AC%ld ",AS);
-                  else printf("%ld",I);
+                  else printf("%s%ld",S,I);
 } 
 
 
 void ALU10(long int Code)
 {
  long int Type,ALU,BS,P,IS,I,AC;
- Type=Code&0xFFFF;
+ Type=Code&0x3FFFF;
  I=(Type>>3)&7;
  AC=(Type>>11)&7;
  BS=Type&7;
@@ -383,7 +379,7 @@ void ALU10(long int Code)
 void ALU11(long int Code)
 {
  long int Type,ALU,AC,AS,BS;
- Type=Code&0xFFFF;
+ Type=Code&0x3FFFF;
  BS=Type&7;
  AS=(Type>>8)&7;
  AC=(Type>>11)&7; 
@@ -395,7 +391,6 @@ void ALU11(long int Code)
                   else printf("AC%ld",BS);
 } 
 
-/* ALU main */ 
 
 void SolveALU(long int Code)
 {
@@ -413,8 +408,6 @@ void SolveALU(long int Code)
  }               
 } 
 
-/* MAC instructions */
-
 void MAC0000(long int Code)
 {
  long int Type,AC,CHK;
@@ -428,7 +421,7 @@ void MAC0000(long int Code)
 void MAC0001(long int Code)
 {
  long int Type,AC,BS,P,MD,M;
- Type=Code&0xFFFF;
+ Type=Code&0x3FFFF;
  BS=Type&7;
  P=(Type>>8)&3;
  MD=(Type>>10)&1;
@@ -450,7 +443,7 @@ void MAC0001(long int Code)
 void MAC0010(long int Code)
 {
  long int Type,AC,AS,P,MD,M;
- Type=Code&0xFFFF;
+ Type=Code&0x3FFFF;
  P=Type&3;
  AS=(Type>>8)&7;
  MD=(Type>>2)&1;
@@ -472,7 +465,7 @@ void MAC0010(long int Code)
 void MAC0011(long int Code)
 {
  long int Type,AC,BS,S,P,MD,M;
- Type=Code&0xFFFF;
+ Type=Code&0x3FFFF;
  BS=Type&7;
  S=(Type>>6)&3;
  P=(Type>>8)&3;
@@ -495,7 +488,7 @@ void MAC0011(long int Code)
 void MAC0100(long int Code)
 {
  long int Type,AC,BS,AS,M,MD;
- Type=Code&0xFFFF;
+ Type=Code&0x3FFFF;
  BS=Type&7;
  AS=(Type>>8)&7;
  MD=(Type>>6)&3;
@@ -517,7 +510,7 @@ void MAC0100(long int Code)
 void MAC0101(long int Code)
 {
  long int Type,AC,BS,S,MD,P,M;
- Type=Code&0xFFFF;
+ Type=Code&0x3FFFF;
  P=Type&3;
  BS=(Type>>8)&7;
  S=(Type>>6)&3;
@@ -540,7 +533,7 @@ void MAC0101(long int Code)
 void MAC0110(long int Code)
 {
  long int Type,AC,AS,S,MD,P,M;
- Type=Code&0xFFFF;
+ Type=Code&0x3FFFF;
  P=Type&3;
  AS=(Type>>8)&7;
  S=(Type>>6)&3;
@@ -563,7 +556,7 @@ void MAC0110(long int Code)
 void MAC0111(long int Code)
 {
  long int Type,AC,BS,S,MD,P,M;
- Type=Code&0xFFFF;
+ Type=Code&0x3FFFF;
  P=Type&3;
  BS=(Type>>8)&7;
  S=(Type>>6)&3;
@@ -586,7 +579,7 @@ void MAC0111(long int Code)
 void MAC1xxx(long int Code)
 {
  long int Type,AC,I,P[2],S[2],M;
- Type=Code&0xFFFF;
+ Type=Code&0x3FFFF;
  P[0]=(Type>>8)&3;S[0]=(Type>>10)&1;
  P[1]=Type&3;S[1]=(Type>>2)&1;
  I=(Type>>3)&31;
@@ -603,8 +596,6 @@ void MAC1xxx(long int Code)
  printf("*Z1%ld",P[1]);
  if (S[1]) printf("[%ld]",I);
 } 
-
-/* MAC main */
 
 void SolveMAC(long int Code)
 {
@@ -676,9 +667,9 @@ int main(int argc, char *argv[])
             printf(" -p: display memory position\n");
        }     
   if (!(T&257)) 
-   for(i=0;i<0x684;i++)
+   for(i=0;i<0x435;i++)
    {
-    Code=D0_800_684_buffer[i];
+    Code=D1_800_435_buffer[i];
     Type=(Code&0xC0000)>>18;
     if (T&4) printf("%04X:",0x800+i);
     if (T&2) printf("(%06X):",Code);

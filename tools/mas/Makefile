@@ -7,8 +7,7 @@ GCC = gcc
 all:  $(TARGET)
 
 $(TARGET) : $(OBJS)
-	$(GCC) $@.o -o $@  -lm
-
+	$(GCC) $@.o -o $@  -I./
 clean:
 	@echo "**** Cleaning..."
 	@rm -f *.o *.bak *~  $(TARGET)
