@@ -1,4 +1,4 @@
-function mkArch {
+function mkArchCvs {
 echo "Processing $1"
 echo ""
 echo "going into local cvs source + update"
@@ -22,7 +22,34 @@ echo "calling mvFtp"
 echo "back to where we were"
     cd ../
 }
+
+function mkArchSvn {
+echo "Processing $1"
+echo ""
+echo "going into local cvs source + update"
+    cd $1
+    svn update
+echo "cpy the folder to tmp for CVS folder removale"
+    cd ..
+    cp -Rf $1/ tmp
+    cd tmp/$1
+echo "launch CVS folder removal script"
+    rmSVN_folder
+    cd ../
+echo "tar+gz & zip"
+    tar -c $1 | gzip -c9 > $1.tar.gz
+    zip -rq $1.zip $1
+echo "clean tmp"
+    rm -Rf $1
+echo "calling mvFtp"
+    mvFtp $1.tar.gz $1.zip
+    rm -f $1.tar.gz $1.zip
+echo "back to where we were"
+    cd ../
+}
+
 cd ~/archopen_src
-mkArch mediOS
-mkArch avlo
-mkArch emu2
+mkArchCvs mediOS
+mkArchCvs avlo
+#mkArchCvs emu2
+mkArchSvn aoMulator
