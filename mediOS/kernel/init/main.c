@@ -195,8 +195,8 @@ void kernel_thread(void)
         THREAD_INFO * ptr_thread1;
         THREAD_INFO * ptr_thread2;
         
-        thread_startFct(&ptr_thread1,testThread1,"Thread 1",THREAD_DISABLE);
-        thread_startFct(&ptr_thread2,testThread2,"Thread 2",THREAD_DISABLE);
+        thread_startFct(&ptr_thread1,testThread1,"Thread 1",THREAD_DISABLE_STATE);
+        thread_startFct(&ptr_thread2,testThread2,"Thread 2",THREAD_DISABLE_STATE);
 #endif
     
 #ifdef BUILD_LIB
