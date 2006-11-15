@@ -86,16 +86,17 @@ void print_boot_info(void)
 void kernel_thread(void);
 
 extern THREAD_INFO * threadCurrent;
+
 /*
 void testThread1()
 {
-    malloc(0x100);    
+    while(1);    
     printk("About to exit th1\n");
 }
 
 void testThread2()
 {
-    kmalloc(0x100);    
+    while(1);       
     printk("About to exit th2\n");
 }
 */
@@ -191,12 +192,12 @@ void kernel_thread(void)
     printk("[SYS thread] starting\n");
     print_boot_info();
         
-#if 0    
+#if 0   
         THREAD_INFO * ptr_thread1;
         THREAD_INFO * ptr_thread2;
         
-        thread_startFct(&ptr_thread1,testThread1,"Thread 1",THREAD_DISABLE_STATE);
-        thread_startFct(&ptr_thread2,testThread2,"Thread 2",THREAD_DISABLE_STATE);
+        thread_startFct(&ptr_thread1,testThread1,"Thread 1",THREAD_DISABLE_STATE,PRIO_MED);
+        thread_startFct(&ptr_thread2,testThread2,"Thread 2",THREAD_DISABLE_STATE,PRIO_LOW);
 #endif
     
 #ifdef BUILD_LIB

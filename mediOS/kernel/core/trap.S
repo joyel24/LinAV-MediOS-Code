@@ -132,7 +132,7 @@ trap_irq:
     mrs    r2, spsr 
     sub    r1, lr, #4            @ save where we came from
     @ switch to SYS mode in order to save thread regs
-    msr    cpsr_c, #0xDF
+    msr    cpsr_c, #0x9F
        
     ldr    r0, threadCurrent
     add    r0, r0, #68
@@ -203,16 +203,16 @@ __exit_irq_loop:
 thread_loadContext:
 @ going to SVC mode without INT
     
-    msr    cpsr_c, #0xD3
+    msr    cpsr_c, #0x93
     ldr    r0, threadCurrent
     ldmia  r0!,{r1}
     msr    spsr, r1    @ put back spsr to correct value
     add    lr, r0, #60
     @ moving to SYS without INT
-    msr    cpsr_c, #0xDF     
+    msr    cpsr_c, #0x9F     
     ldmia  r0, {r0 - lr}          @ load r0 - lr
     @ going back to SVC without INT
-    msr    cpsr_c, #0xD3
+    msr    cpsr_c, #0x93
     ldmia  lr,{pc}^
     
 

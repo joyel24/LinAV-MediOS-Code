@@ -28,7 +28,7 @@
 struct vfs_node;
 
 struct vfs_mountPoint {
-    int drive;
+    int disk;
     int partition_num;
     struct vfs_node * root_node;
     struct vfs_node * dirty_list;
@@ -36,9 +36,9 @@ struct vfs_mountPoint {
     struct vfs_mountPoint * next,*prev;
 };
 
-MED_RET_T vfs_mount(char * mount_path,int drive, int partition_num);
-MED_RET_T vfs_umount(int drive,int partition_num);
-struct vfs_mountPoint * vfs_isMounted(int drive,int partition_num);
+MED_RET_T vfs_mount(char * mount_path,int disk, int partition_num);
+MED_RET_T vfs_umount(int disk,int partition_num);
+struct vfs_mountPoint * vfs_isMounted(int disk,int partition_num);
 
 void vfs_init(void);
 

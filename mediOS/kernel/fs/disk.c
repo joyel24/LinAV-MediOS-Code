@@ -50,80 +50,64 @@
           (array[pos] | (array[pos+1] << 8 ) | \
           (array[pos+2] << 16 ) | (array[pos+3] << 24 ))
 
-struct hd_info_s * drive_info[NB_DRIVE];
+struct hd_info_s * disk_info[NB_DISK];
 
 char * fatStr[]={"zero", "FAT12", "FAT16<32MB", "ExtMSDOS", "FAT16>32MB", "FAT32<2048GB", "FAT32-LBA",
                     "FAT16>32MB-LBA", "ExtMSDOS-LBA"};
 int fatId[]={0x00, 0x01, 0x04, 0x05, 0x06, 0x0B, 0x0C, 0x0E, 0x0F};
 
-char * drive_name[] = { "Main HD", "CF card"};
+char * disk_name[] = { "Main HD", "CF card"};
 
 extern int hd_sleep_state;
 
 void dd_swapChar(char * txt,int size);
 void dd_findEnd(char * txt,int size);
 
-/* drive 0 will be mounted first */
-struct disk_mountInfo drive_Info[] = {
-{
-    mount_path    : "/",
-    drive         : HD_DRIVE,
-    partition_num : DISK_PART_0
-},
-#ifdef HAVE_EXT_MODULE 
-{
-    mount_path    : "/CF",
-    drive         : CF_DRIVE,
-    partition_num : DISK_PART_0
-}
-#endif
-};
-
 MED_RET_T disk_rmAll(void)
 {
 #ifdef HAVE_EXT_MODULE    
-        MED_RET_T ret_val;
+    MED_RET_T ret_val;
     if(CF_IS_CONNECTED)
     {
-        ret_val=disk_rm(CF_DRIVE);
+        ret_val=disk_rm(CF_DISK);
         if(ret_val != MED_OK)
             return ret_val;
     }
 #endif
-    return disk_rm(HD_DRIVE);
+    return disk_rm(HD_DISK);
 }
 
 
 
-MED_RET_T disk_rm(int drive)
+MED_RET_T disk_rm(int disk)
 {
     int i;
     int ret_val;
-    if(drive_info[drive])
+    if(disk_info[disk])
     {
         for(i=0;i<4;i++)
         {
-            ret_val=vfs_umount(drive,i);
+            ret_val=vfs_umount(disk,i);
             if(ret_val!=MED_OK)
                 return ret_val;
         }
         /* now we can remove disk info */
-        free(&drive_info[drive]->partition_list);
-        free(drive_info[drive]);
-        drive_info[drive]=NULL;
+        free(&disk_info[disk]->partition_list);
+        free(disk_info[disk]);
+        disk_info[disk]=NULL;
     }
     else
     {
-        printk("No info on %s\n",drive_name[drive]);
+        printk("No info on %s\n",disk_name[disk]);
         return -MED_EINVAL;
     }
     return MED_OK;
 }
 
-MED_RET_T disk_add(int drive)
+MED_RET_T disk_add(int disk)
 {
-    drive_info[drive]=disk_setup(drive);
-    if(!drive_info[drive])
+    disk_info[disk]=disk_setup(disk);
+    if(!disk_info[disk])
         return -MED_ERROR; 
     return MED_OK;   
 }
@@ -132,13 +116,13 @@ MED_RET_T disk_addAll(void)
 {
     MED_RET_T ret_val;
     
-    ret_val=disk_add(HD_DRIVE);
+    ret_val=disk_add(HD_DISK);
     if(ret_val != MED_OK)
     {
         printk("Error init main disk\n");
         return ret_val;
     }
-    vfs_mount(MOUNT_DISK_PARAM(HD_DRIVE));
+    vfs_mount("/",HD_DISK,DISK_PART_0);
     
 #ifdef HAVE_EXT_MODULE    
     if(CF_IS_CONNECTED)
@@ -153,26 +137,28 @@ MED_RET_T disk_addAll(void)
 void disk_init(void)
 {
     int i;
-    for(i=0;i<NB_DRIVE;i++) drive_info[i]=NULL;
+    for(i=0;i<NB_DISK;i++) disk_info[i]=NULL;
     
     /* we should always have a HDD, let's add it */
-    if(disk_add(HD_DRIVE)!=MED_OK)
+    if(disk_add(HD_DISK)!=MED_OK)
     {
         printk("Error init main disk\n");
         return;
     }
     
 #warning quick hack for partition less HDD
-    if(!drive_info[HD_DRIVE]->partition_list[0].active)
+    if(!disk_info[HD_DISK]->partition_list[0].active)
     {
         printk("No active partition => load 0\n");
-        drive_info[HD_DRIVE]->partition_list[0].active=1;
-        drive_info[HD_DRIVE]->partition_list[0].start=0;
+        disk_info[HD_DISK]->partition_list[0].active=1;
+        disk_info[HD_DISK]->partition_list[0].start=0;
     } 
     
     /* mount root partition */
-    vfs_mount(MOUNT_DISK_PARAM(HD_DRIVE));
+    vfs_mount("/",HD_DISK,DISK_PART_0);
 
+    
+    
     /* let's see if we have CF too */
 #ifdef HAVE_EXT_MODULE    
     if(CF_IS_CONNECTED)
@@ -187,13 +173,13 @@ void disk_init(void)
 
 void disk_addCF(void)
 {
-    if(disk_add(CF_DRIVE)!=MED_OK)
+    if(disk_add(CF_DISK)!=MED_OK)
         printk("Error init CF disk\n");   
     else
-        vfs_mount(MOUNT_DISK_PARAM(CF_DRIVE));
+        vfs_mount("/cf",CF_DISK,DISK_PART_0);
 }
 
-struct hd_info_s * disk_setup(int drive)
+struct hd_info_s * disk_setup(int disk)
 {
     int i,j;
     unsigned char * sector=(unsigned char *)kmalloc(sizeof(unsigned char)*SECTOR_SIZE);
@@ -211,7 +197,7 @@ struct hd_info_s * disk_setup(int drive)
     disk_info->partition_list=part_info;
     
     /* identify disk */
-    if(ata_rwData(drive,0,sector,1,ATA_DO_IDENT,ATA_WITH_DMA)<0)
+    if(ata_rwData(disk,0,sector,1,ATA_DO_IDENT,ATA_WITH_DMA)<0)
         goto main_exit;        
    
     strncpy(disk_info->serial, &sector[20], 20);
@@ -227,13 +213,13 @@ struct hd_info_s * disk_setup(int drive)
     disk_info->partition_list=NULL;
     
     printk("[DISK] reading %s info\n     %s\n     %s|%s\n     %d sectors per ata request\n",
-                drive_name[drive],
+                disk_name[disk],
                 disk_info->model,
                 disk_info->firmware,disk_info->serial,disk_info->multi_sector);
                 
     
     /* Read MBR */
-    if(ata_rwData(drive,0,sector,1,ATA_DO_READ,ATA_WITH_DMA)<0) /* read 1 sector at LBA 0 */
+    if(ata_rwData(disk,0,sector,1,ATA_DO_READ,ATA_WITH_DMA)<0) /* read 1 sector at LBA 0 */
         goto main_exit;
 
         
@@ -251,6 +237,7 @@ struct hd_info_s * disk_setup(int drive)
         part_info[i].start = BYTES2INT32(ptr, 8);
         part_info[i].size  = BYTES2INT32(ptr, 12);
         part_info[i].active = 0;
+        part_info[i].mounted = 0;
         j=0;
         while(j<9 && fatId[j]!=part_info[i].type) j++;
 
@@ -288,7 +275,7 @@ exit_error1:
 
 char * disk_getName(int id)
 {
-    return drive_name[id];
+    return disk_name[id];
 }
 
 void dd_swapChar(char * txt,int size)

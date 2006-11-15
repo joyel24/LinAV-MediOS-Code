@@ -53,8 +53,8 @@ int hd_sleep_state=0;
 
 #define CALC_BASE(ADDR)     (((unsigned int)(ADDR))-SDRAM_START)
 
-#define ATA_SELECT_DRIVE(DRIVE)   ({ \
-    if(DRIVE==HD_DRIVE)         \
+#define ATA_SELECT_DISK(DISK)   ({ \
+    if(DISK==HD_DISK)         \
     {                           \
         ata_stopping = 0;       \
         ata_selectHD();         \
@@ -68,7 +68,7 @@ int hd_sleep_state=0;
     }                           \
     })
 
-int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_dma)
+int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_dma)
 {
     int i,j;
     bool unaligned=((unsigned long)data)&0x03;
@@ -80,8 +80,8 @@ int ata_rwData(int drive,unsigned int lba,void * data,int count,int cmd,int use_
         buffer=ata_sectorBuffer;
     }
 
-    /* select the right drive */
-    ATA_SELECT_DRIVE(drive);
+    /* select the right disk */
+    ATA_SELECT_DISK(disk);
 
     /* wait drive ready */
     if(ata_waitForReady()<0)

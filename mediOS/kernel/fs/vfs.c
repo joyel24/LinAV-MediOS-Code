@@ -41,7 +41,7 @@ void vfs_init(void)
     printk("[VFS init] done\n");
 }
 
-MED_RET_T vfs_mount(char * mount_path,int drive, int partition_num)
+MED_RET_T vfs_mount(char * mount_path,int disk, int partition_num)
 {
     int ret_val;
     struct vfs_node * root_node;
@@ -107,8 +107,8 @@ MED_RET_T vfs_mount(char * mount_path,int drive, int partition_num)
         }
     }
     
-    ret_val = fat_mount(drive,
-        drive_info[drive]->partition_list[partition_num].start,
+    ret_val = fat_mount(disk,
+        disk_info[disk]->partition_list[partition_num].start,
         &root_node);
     
     if(ret_val!=MED_OK)
@@ -127,7 +127,7 @@ MED_RET_T vfs_mount(char * mount_path,int drive, int partition_num)
     
     mountPoint->root_node=root_node;
     mountPoint->root_node->mount_point=mountPoint;
-    mountPoint->drive=drive;
+    mountPoint->disk=disk;
     mountPoint->partition_num=partition_num;
     mountPoint->dirty_list=NULL;
     mountPoint->opened_node=NULL;
@@ -161,21 +161,21 @@ MED_RET_T vfs_mount(char * mount_path,int drive, int partition_num)
     return MED_OK;
 }
 
-struct vfs_mountPoint * vfs_isMounted(int drive,int partition_num)
+struct vfs_mountPoint * vfs_isMounted(int disk,int partition_num)
 {
     struct vfs_mountPoint * mPoint;
     int nb_mPoint;
     LIST_FOREACH(mountPoint_list,mPoint,nb_mPoint)
     {
-        if(mPoint->drive==drive && mPoint->partition_num==partition_num)
+        if(mPoint->disk==disk && mPoint->partition_num==partition_num)
             return mPoint;
     }
     return NULL;
 }
 
-MED_RET_T vfs_umount(int drive,int partition_num)
+MED_RET_T vfs_umount(int disk,int partition_num)
 {
-    struct vfs_mountPoint * mPoint=vfs_isMounted(drive,partition_num);
+    struct vfs_mountPoint * mPoint=vfs_isMounted(disk,partition_num);
     int ret_val;
     
     if(mPoint)
@@ -185,11 +185,11 @@ MED_RET_T vfs_umount(int drive,int partition_num)
             return ret_val;
         LIST_DELETE(mountPoint_list,mPoint);
         free(mPoint);
-        printk("[vfs_umount] %s-$%d done\n",disk_getName(drive),partition_num);
+        printk("[vfs_umount] %s-$%d done\n",disk_getName(disk),partition_num);
     }
     else
     {
-        printk("[vfs_umount] %s-$%d not mounted\n",disk_getName(drive),partition_num);
+        printk("[vfs_umount] %s-$%d not mounted\n",disk_getName(disk),partition_num);
     }
     return MED_OK;
 }

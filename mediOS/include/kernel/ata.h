@@ -44,7 +44,7 @@
 
 #define SECTOR_SIZE      512
 
-int  ata_rwData           (int drive,unsigned int lba,void * data,int count,int xfer_dir,int use_dma);
+int  ata_rwData           (int disk,unsigned int lba,void * data,int count,int xfer_dir,int use_dma);
 
 int  ata_waitForXfer      (void);
 int  ata_waitForReady     (void);

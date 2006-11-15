@@ -15,7 +15,7 @@
 #include <kernel/gio.h>
 #include <kernel/cpld.h>
 
-int lcd_bright=0;
+int lcd_bright=10;
 
 void arch_lcd_init(){
 }
@@ -31,6 +31,7 @@ void arch_lcd_disable(){
 }
 
 void arch_lcd_setBrigthness(int br){
-    lcd_bright=br*10;
+#warning need something for lcd brightness on AV3
+    //lcd_bright=br/10;
 }
 

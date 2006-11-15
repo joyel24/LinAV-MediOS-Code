@@ -20,8 +20,8 @@
 #include <sys_def/types.h>
 #include <kernel/errors.h>
 
-#define HD_DRIVE      0
-#define CF_DRIVE      1
+#define HD_DISK      0
+#define CF_DISK      1
 
 #define DISK_PART_0   0
 #define DISK_PART_1   1
@@ -32,9 +32,9 @@
 #define NOFLUSH       0
 
 #ifdef HAVE_EXT_MODULE
-#define NB_DRIVE      2
+#define NB_DISK      2
 #else
-#define NB_DRIVE      1
+#define NB_DISK      1
 #endif
 
 struct partition_info {
@@ -43,6 +43,7 @@ struct partition_info {
     int type;
     char strType[20];
     int active;
+    int mounted;
 };
 
 struct hd_info_s {
@@ -54,22 +55,12 @@ struct hd_info_s {
         struct partition_info * partition_list;
 };
 
-struct disk_mountInfo {
-    char * mount_path;
-    int drive;
-    int partition_num;
-};
-
-#define MOUNT_DISK_PARAM(INFO) drive_Info[INFO].mount_path,\
-    drive_Info[INFO].drive, \
-    drive_Info[INFO].partition_num
-
-extern struct hd_info_s * drive_info[NB_DRIVE];
+extern struct hd_info_s * disk_info[NB_DISK];
 
 void disk_init(void);
 
-MED_RET_T disk_add(int drive);
-MED_RET_T disk_rm(int drive);
+MED_RET_T disk_add(int disk);
+MED_RET_T disk_rm(int disk);
 MED_RET_T disk_rmAll(void);
 MED_RET_T disk_addAll(void);
 /* simple system for no */
@@ -79,6 +70,6 @@ char * disk_getName(int id);
 
 void disk_reInit(void);
 
-struct hd_info_s * disk_setup(int drive);
+struct hd_info_s * disk_setup(int disk);
 
 #endif
