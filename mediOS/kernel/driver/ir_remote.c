@@ -124,7 +124,7 @@ void processCode(int code)
                 if(repeat_code >= 2)
                 {
                     struct evt_t _evt;
-                    if(lcd_get_state()==0)
+                    if(lcd_enabled()==0)
                     {
                         /* the lcd is off => turn on and discard the event */
                         lcd_keyPress();

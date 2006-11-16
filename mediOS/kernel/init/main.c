@@ -171,7 +171,11 @@ void kernel_start (void)
 #endif
     ata_init();
     vfs_init();
-    disk_init();
+    if(disk_init()!=MED_OK)
+    {
+        printk("[init] ------ Halting\n");
+        for(;;);
+    }
     
     sound_init();
     printk("[init] ------------ drivers done\n");

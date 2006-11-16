@@ -24,7 +24,7 @@ struct evt_t cf_evt;
 void cf_connected(void)
 {
     /* mounting */
-    disk_addCF();
+    disk_add(CF_DISK);
     /* send evt */
     cf_evt.evt=EVT_CF_IN;
     cf_evt.evt_class=CONNECT_CLASS;
@@ -35,7 +35,7 @@ void cf_connected(void)
 void cf_disconnected(void)
 {
     /* umounting */
-    disk_rm(CF_DRIVE);
+    disk_rm(CF_DISK);
     /* send evt */
     cf_evt.evt=EVT_CF_OUT;
     cf_evt.evt_class=CONNECT_CLASS;

@@ -55,6 +55,7 @@ struct hd_info_s * disk_info[NB_DISK];
 char * fatStr[]={"zero", "FAT12", "FAT16<32MB", "ExtMSDOS", "FAT16>32MB", "FAT32<2048GB", "FAT32-LBA",
                     "FAT16>32MB-LBA", "ExtMSDOS-LBA"};
 int fatId[]={0x00, 0x01, 0x04, 0x05, 0x06, 0x0B, 0x0C, 0x0E, 0x0F};
+int fatSupported[]={0, 1, 1, 1, 1, 1, 1, 1, 1};
 
 char * disk_name[] = { "Main HD", "CF card"};
 
@@ -63,21 +64,74 @@ extern int hd_sleep_state;
 void dd_swapChar(char * txt,int size);
 void dd_findEnd(char * txt,int size);
 
-MED_RET_T disk_rmAll(void)
+
+MED_RET_T disk_add(int disk)
 {
-#ifdef HAVE_EXT_MODULE    
+    int part_num=0;
     MED_RET_T ret_val;
-    if(CF_IS_CONNECTED)
+    int lastPartition=4;
+    char * name=(disk==HD_DISK?"/HD_X":"/CF_X");
+    
+    /* is the system sane */
+    if(disk_info[disk])
     {
-        ret_val=disk_rm(CF_DISK);
-        if(ret_val != MED_OK)
-            return ret_val;
+        printk("[Disk-add] Warning: info on %s already exists => doing disk_rm()\n",disk_name[disk]);
+        disk_rm(disk);
     }
-#endif
-    return disk_rm(HD_DISK);
+    
+    /* getting info on disk */
+    disk_info[disk]=disk_readInfo(disk);
+    if(!disk_info[disk])
+    {
+        printk("[Disk-add] Error: can't setup disk %s\n",disk_name[disk]);
+        return -MED_ERROR;
+    }
+    
+    /* checking for partition less disk */
+    if(!disk_info[HD_DISK]->partition_list[0].active)
+    {
+        printk("[Disk-add] Info: No active partition => start sector = 0\n");
+        disk_info[HD_DISK]->partition_list[0].active=1;
+        disk_info[HD_DISK]->partition_list[0].start=0;
+        lastPartition=1;
+    }
+        
+    /* main disk => mount PART0 on root folder */
+    if(disk==HD_DISK)
+    {
+        ret_val=vfs_mount("/",HD_DISK,DISK_PART_0);
+        if(ret_val!=MED_OK)
+        {
+            printk("[Disk-add] Error: can't mount root (error=%d)\n",-ret_val);
+            return -MED_ERROR;
+        }
+        disk_info[HD_DISK]->partition_list[0].mounted=1;
+        part_num=1;     
+    }
+    
+    /* mounting all parts */
+    for(;part_num<lastPartition;part_num++)
+    {
+        if(disk_info[disk]->partition_list[part_num].active==1)
+        {
+            /* changing part num in name */
+            name[4]='0'+part_num;
+            ret_val=vfs_mount(name,disk,part_num);
+            if(ret_val!=MED_OK)
+            {
+                printk("[Disk-add] Error: can't mount %s part %d (error=%d)\n",disk_name[disk],part_num,-ret_val);
+                return -MED_ERROR;
+            }        
+            disk_info[disk]->partition_list[part_num].mounted=1;
+        }
+        else
+        {
+            printk("[Disk-add] Info: won't mount %s part %d: not active\n",disk_name[disk],part_num);
+        }
+    }
+            
+    return MED_OK;   
 }
-
-
 
 MED_RET_T disk_rm(int disk)
 {
@@ -85,101 +139,71 @@ MED_RET_T disk_rm(int disk)
     int ret_val;
     if(disk_info[disk])
     {
-        for(i=0;i<4;i++)
+        for(i=3;i>=0;i--)
         {
-            ret_val=vfs_umount(disk,i);
-            if(ret_val!=MED_OK)
-                return ret_val;
+            if(disk_info[disk]->partition_list[i].mounted)
+            {
+                ret_val=vfs_umount(disk,i);
+                if(ret_val!=MED_OK)
+                {
+                    printk("[Disk-rm] Error: can't umount %s part %d (error=%d)\n",disk_name[disk],i,-ret_val);
+                    return -MED_ERROR;
+                }
+            }
         }
         /* now we can remove disk info */
         free(&disk_info[disk]->partition_list);
         free(disk_info[disk]);
         disk_info[disk]=NULL;
     }
-    else
-    {
-        printk("No info on %s\n",disk_name[disk]);
-        return -MED_EINVAL;
-    }
     return MED_OK;
-}
-
-MED_RET_T disk_add(int disk)
-{
-    disk_info[disk]=disk_setup(disk);
-    if(!disk_info[disk])
-        return -MED_ERROR; 
-    return MED_OK;   
 }
 
 MED_RET_T disk_addAll(void)
 {
-    MED_RET_T ret_val;
-    
-    ret_val=disk_add(HD_DISK);
-    if(ret_val != MED_OK)
+    if(disk_add(HD_DISK) != MED_OK)
     {
-        printk("Error init main disk\n");
-        return ret_val;
-    }
-    vfs_mount("/",HD_DISK,DISK_PART_0);
-    
+        printk("[Disk-addAll] Error: can't add main HD\n");
+        return -MED_ERROR;
+    }    
 #ifdef HAVE_EXT_MODULE    
     if(CF_IS_CONNECTED)
     {
-        disk_addCF();
+        disk_add(CF_DISK);
+        /* no error returned */
     }
-#endif
-    
+#endif    
     return MED_OK;
 }
 
-void disk_init(void)
+MED_RET_T disk_rmAll(void)
 {
-    int i;
-    for(i=0;i<NB_DISK;i++) disk_info[i]=NULL;
-    
-    /* we should always have a HDD, let's add it */
-    if(disk_add(HD_DISK)!=MED_OK)
-    {
-        printk("Error init main disk\n");
-        return;
-    }
-    
-#warning quick hack for partition less HDD
-    if(!disk_info[HD_DISK]->partition_list[0].active)
-    {
-        printk("No active partition => load 0\n");
-        disk_info[HD_DISK]->partition_list[0].active=1;
-        disk_info[HD_DISK]->partition_list[0].start=0;
-    } 
-    
-    /* mount root partition */
-    vfs_mount("/",HD_DISK,DISK_PART_0);
-
-    
-    
-    /* let's see if we have CF too */
 #ifdef HAVE_EXT_MODULE    
     if(CF_IS_CONNECTED)
     {
-        disk_addCF();
+        if(disk_rm(CF_DISK)!=MED_OK)
+            return -MED_ERROR;
     }
 #endif
-        
-    printk("[DISK] init done\n");
+    return disk_rm(HD_DISK);
 }
 
-
-void disk_addCF(void)
+MED_RET_T disk_init(void)
 {
-    if(disk_add(CF_DISK)!=MED_OK)
-        printk("Error init CF disk\n");   
+    int i;
+    MED_RET_T ret_val;
+    for(i=0;i<NB_DISK;i++) disk_info[i]=NULL;
+    
+    /* we should always have a HDD, let's add it */
+    ret_val=disk_addAll();
+    if(ret_val==MED_OK)
+        printk("[DISK-init] done\n");
     else
-        vfs_mount("/cf",CF_DISK,DISK_PART_0);
+        printk("[DISK-init] ERROR\n");
+    return ret_val;
 }
 
-struct hd_info_s * disk_setup(int disk)
+struct hd_info_s * disk_readInfo(int disk)
 {
     int i,j;
     unsigned char * sector=(unsigned char *)kmalloc(sizeof(unsigned char)*SECTOR_SIZE);
@@ -243,7 +267,10 @@ struct hd_info_s * disk_setup(int disk)
 
         if(j<9)
         {
-            part_info[i].active = 1;
+            if(fatSupported[j])
+            {
+                part_info[i].active = 1;
+            }
             strcpy(part_info[i].strType,fatStr[j]);
             printk("\tPart%d: start=%08x, size=%08x, type:%s (%02x)\n",i,
                 part_info[i].start,part_info[i].size,

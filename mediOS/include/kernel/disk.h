@@ -57,19 +57,16 @@ struct hd_info_s {
 
 extern struct hd_info_s * disk_info[NB_DISK];
 
-void disk_init(void);
+MED_RET_T disk_init(void);
 
 MED_RET_T disk_add(int disk);
 MED_RET_T disk_rm(int disk);
+
 MED_RET_T disk_rmAll(void);
 MED_RET_T disk_addAll(void);
-/* simple system for no */
-void disk_addCF(void);
 
 char * disk_getName(int id);
 
-void disk_reInit(void);
-
-struct hd_info_s * disk_setup(int disk);
+struct hd_info_s * disk_readInfo(int disk);
 
 #endif
