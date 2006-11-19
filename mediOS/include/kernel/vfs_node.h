@@ -28,6 +28,8 @@ typedef struct vfs_node DIR;
 #define FILE_APPEND(FLAG) ((FLAG) & (O_APPEND))
 
 #define CHK_FD(FD) { \
+    if((int)FD<0) \
+        return -MED_EINVAL;      \
     if(!FD->opened)   \
         return -MED_EINVAL;      \
 }

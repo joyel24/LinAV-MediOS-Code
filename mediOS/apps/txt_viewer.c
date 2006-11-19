@@ -661,7 +661,10 @@ static int viewer_init(char* file)
 
     fd = open(file, O_RDONLY);
     if (fd<0)
+    {
+        printf("Error, can't open file\n");
         return 0;
+    }
 
     lseek(fd, 0, SEEK_END);
     file_size = lseek(fd, 0, SEEK_CUR);
@@ -695,6 +698,8 @@ void font_set(int font){
 
 static void viewer_exit(void)
 {
+    if(fd<0)
+        return;
     close(fd);
 }
 
@@ -769,7 +774,7 @@ void menu_execute(int evt_handler){
     font_set(font_ids[font]);
 }
 
-void app_main(int argc,char * * argv)
+void app_main(int argc,char ** argv)
 {
     char *file;
     int ok;
@@ -778,7 +783,7 @@ void app_main(int argc,char * * argv)
 	int stop=0;
 	int i = 0;
 	int evt_handler = evt_getHandler(BTN_CLASS);
-
+    
     if(argc<2)
         return ; // Quit
     else
@@ -799,7 +804,7 @@ void app_main(int argc,char * * argv)
     ok = viewer_init(file);
 
     if (!ok)
-	 {
+    {
         viewer_exit();
         return ;
     }

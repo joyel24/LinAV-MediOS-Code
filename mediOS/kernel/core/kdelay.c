@@ -16,11 +16,15 @@
 
 void mdelay(unsigned long msecs)
 {
+#if 1
     if(irq_globalEnabled()){
         unsigned int end=tmr_getMicroTick()+msecs*100;
 
         while (tmr_getMicroTick()<end) /*nothing*/;
-    }else{ // irqs are disabled, so no tick timer, use udelay() as a fallback
+    }else{  // irqs are disabled, so no tick timer, use udelay() as a fallback
         while (msecs--) udelay(1000);
     }
+#else
+while (msecs--) udelay(1000);
+#endif
 }

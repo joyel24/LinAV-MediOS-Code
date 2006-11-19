@@ -74,7 +74,7 @@ ICON icon_load(char * filename)
         goto err1;
     }
     len=(int)buff[0];
-    name=(char*)malloc(sizeof(char)*(len+1));    
+    name=(char*)kmalloc(sizeof(char)*(len+1));    
     if(!name)
     {
         printk("[icon_load] not enough memory for name in icon structure\n"); 
@@ -108,13 +108,13 @@ ICON icon_load(char * filename)
         if(!strcmp(ptr->name,name))
         {
             printk("[icon_load] there is already an icon with that name\n");
-            free(name);        
+            kfree(name);        
             goto out;
         }
     }
     
     /* create new icon struct*/
-    ptr=(ICON)malloc(sizeof(struct icon_elem));
+    ptr=(ICON)kmalloc(sizeof(struct icon_elem));
     if(!ptr)
     {
         printk("[icon_load] not enough memory for icon structure\n"); 
@@ -139,7 +139,7 @@ ICON icon_load(char * filename)
     ptr->bmap_data.height=(int)buff[0];
     
     /* create space for bmap data */
-    ptr->data=(unsigned char *)malloc(sizeof(unsigned char)*ptr->bmap_data.width*ptr->bmap_data.height);
+    ptr->data=(unsigned char *)kmalloc(sizeof(unsigned char)*ptr->bmap_data.width*ptr->bmap_data.height);
     if(!ptr->data)
     {
         printk("[icon_load] not enough memory for data in icon structure (w=%d,h=%d)\n",ptr->bmap_data.width,ptr->bmap_data.height); 
@@ -193,11 +193,11 @@ out:
     return ptr;
     
 err4:
-    free(ptr->data);
+    kfree(ptr->data);
 err3:
-    free(ptr);    
+    kfree(ptr);    
 err2:
-    free(name);        
+    kfree(name);        
 err1:
     close(infile);
     free(tmpF);
@@ -220,7 +220,7 @@ ICON icon_add(char * name,unsigned char * data,int w,int h)
     }
     printk("- not defined ");
     /* create new icon struct*/
-    ptr=(ICON)malloc(sizeof(struct icon_elem));
+    ptr=(ICON)kmalloc(sizeof(struct icon_elem));
     if(!ptr)
     {
         printk("[icon_load] not enough memory for icon structure\n");

@@ -89,6 +89,7 @@ MED_RET_T med_load(char * file_name)
 MED_RET_T med_loadParam(int argc,char**argv)
 {
     int fd,ret,i,j,k,res,res2,res1;
+    char ** cpy_argv;
     
     MED_RET_T ret_val=MED_OK;
     
@@ -420,11 +421,34 @@ MED_RET_T med_loadParam(int argc,char**argv)
     free(sections_name);
     free(section_list);
     
-    thread_startMed((void*)entry,sdram_start,(void*)iram_ptr,strrchr(argv[0],'/')+1,argc,argv);
+    /* creating tmp argv struct */
+    if(argc)
+    {
+        int len;
+        cpy_argv = (char**)malloc(argc*sizeof(char*));
+        for(i=0;i<argc;i++)
+        {
+            len=strlen(argv[i])+1;
+            cpy_argv[i] = (char*)malloc(len*sizeof(char));
+            strncpy(cpy_argv[i],argv[i],len);
+        }
+    }
+    else
+        cpy_argv = NULL;
+    
+    thread_startMed((void*)entry,sdram_start,(void*)iram_ptr,strrchr(argv[0],'/')+1,argc,cpy_argv);
     
     //free(sdram_start);
         
     printk("back from med\n");
+    
+    /* need to clean args */
+    if(argc)
+    {
+        for(i=0;i<argc;i++)
+            free(cpy_argv[i]);
+        free(cpy_argv);
+    }
     
     return ret_val;
 

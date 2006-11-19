@@ -135,7 +135,7 @@ static bool intCmd_doUsbMode(char * param){
         {
 
             msgBox_show("MediOS - USB mode","Switching to USB mode",MSGBOX_TYPE_INFO,MSGBOX_ICON_INFORMATION,-1);
-
+            
             if(disk_rmAll()!=MED_OK)
             {
                 printk("can't umount\n");
@@ -143,13 +143,19 @@ static bool intCmd_doUsbMode(char * param){
                 evt_freeHandler(eh);
                 return false;
             }
-
+            
             enableUsbFw();
             usbMode=1;
             mdelay(10);
+            msgBox_show("MediOS - USB mode","Press F3 or unplug cable to exit",MSGBOX_TYPE_INFO,
+                MSGBOX_ICON_INFORMATION,-1);
 
-            msgBox_show("MediOS - USB mode","Press F3 or unplug cable to exit",MSGBOX_TYPE_INFO,MSGBOX_ICON_INFORMATION,-1);
-
+            /* wait for key unpress */
+            do{
+                evt=evt_getStatus(eh);
+            }while(evt==BTN_F3);
+            
+            /* wait for repress */            
             do{
                 evt=evt_getStatus(eh);
             }while(evt!=BTN_F3 && evt!=EVT_USB_OUT);

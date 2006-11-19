@@ -184,7 +184,7 @@ MED_RET_T vfs_umount(int disk,int partition_num)
         if(ret_val!=MED_OK)
             return ret_val;
         LIST_DELETE(mountPoint_list,mPoint);
-        free(mPoint);
+        kfree(mPoint);
         printk("[vfs_umount] %s-$%d done\n",disk_getName(disk),partition_num);
     }
     else

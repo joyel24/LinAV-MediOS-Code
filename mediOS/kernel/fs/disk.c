@@ -152,8 +152,11 @@ MED_RET_T disk_rm(int disk)
             }
         }
         /* now we can remove disk info */
-        free(&disk_info[disk]->partition_list);
-        free(disk_info[disk]);
+        printk("free part list\n");
+        kfree(disk_info[disk]->partition_list);
+        printk("free disk info\n");
+        kfree(disk_info[disk]);
+        printk("end\n");
         disk_info[disk]=NULL;
     }
     return MED_OK;
@@ -218,12 +221,11 @@ struct hd_info_s * disk_readInfo(int disk)
     struct partition_info * part_info = (struct partition_info *)kmalloc(4*sizeof(struct partition_info));
     if(!part_info)
         goto exit_error2;
-    disk_info->partition_list=part_info;
+    //disk_info->partition_list=part_info;
     
     /* identify disk */
     if(ata_rwData(disk,0,sector,1,ATA_DO_IDENT,ATA_WITH_DMA)<0)
         goto main_exit;        
-   
     strncpy(disk_info->serial, &sector[20], 20);
     dd_swapChar(disk_info->serial,20);
     dd_findEnd(disk_info->serial,20);
@@ -288,15 +290,15 @@ struct hd_info_s * disk_readInfo(int disk)
     /* adding part_info to disk structure */
     disk_info->partition_list=part_info;
     
-    free(sector);
+    kfree(sector);
     return disk_info;
 /* if something goes wrong exit here freeing what should be free*/    
 main_exit:
-    free(part_info);
+    kfree(part_info);
 exit_error2:    
-    free(disk_info);
+    kfree(disk_info);
 exit_error1:
-    free(sector);
+    kfree(sector);
     return NULL;
 }
 

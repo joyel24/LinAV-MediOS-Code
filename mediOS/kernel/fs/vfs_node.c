@@ -295,10 +295,10 @@ MED_RET_T vfs_nodeDestroy(struct vfs_node * node)
 {
     if(node)
     {
-        free(node->name.str);
+        kfree(node->name.str);
         if(node->custom_data)
-            free(node->custom_data);
-        free(node);
+            kfree(node->custom_data);
+        kfree(node);
     }
     return MED_OK;
 }

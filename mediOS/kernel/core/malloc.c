@@ -21,6 +21,7 @@
 
 #define MemSize     int
 #define SizeQuant   4
+#define MAGIC_MALLOC   0x4d454f53
 
 #define BH(p)   ((struct bhead *) (p))
 
@@ -64,8 +65,9 @@ void * internalMalloc(unsigned int  requested_size,int isKernel)
                 /* buffer big enough to split */
                 struct bhead *b_alloc;
                 b_alloc = BH(((char *) b) + (b->size - size));
-                b->size -= size;
+                b->size -= size;                
                 b_alloc->size=-size;
+                b_alloc->magic_val=MAGIC_MALLOC;
                 b_alloc->blist.nxt=b->blist.nxt;
                 if(b_alloc->blist.nxt)
                     b_alloc->blist.nxt->blist.prev=b_alloc;
@@ -99,7 +101,7 @@ void * internalMalloc(unsigned int  requested_size,int isKernel)
                 /*nothing to be done for std linkage*/
                 totalloc += b->size;
                 b->size = -b->size;
-
+                b->magic_val=MAGIC_MALLOC;
                 thread_listAdd(THREAD_PTR_2_LIST(b),MEM_RESSOURCE,isKernel);
 
                 buf =  (void *) ((((char *) b) + sizeof(struct bhead)));
@@ -228,10 +230,14 @@ insert AFTER START block */
     }                          \
 }
 
+#define TEST_NULL(BUFF) {if(BUFF==NULL) {printk("[FREE] NULL buffer\n"); return;}}
+#define TEST_MAGIC(PTR) {if(PTR->magic_val!=MAGIC_MALLOC) {printk("[FREE] not a malloc buffer\n"); return;}}
 /*  free  --  Release a buffer.  */
 void free(void *buf)
 {
+    TEST_NULL(buf)
     struct bhead * b = BH(((char *) buf) - sizeof(struct bhead));
+    TEST_MAGIC(b) ;
     if(thread_listRm(THREAD_PTR_2_LIST(b),MEM_RESSOURCE,THREAD_NO_FORCE)==MED_OK)
     /* doing real free only if allowed to */
         internalFree(b);
@@ -239,7 +245,9 @@ void free(void *buf)
 
 void kfree(void * buf)
 {
+    TEST_NULL(buf)
     struct bhead * b = BH(((char *) buf) - sizeof(struct bhead));
+    TEST_MAGIC(b) ;
     thread_listRm(THREAD_PTR_2_LIST(b),MEM_RESSOURCE,THREAD_FORCE);
     /* forcing and we don't care of the result */
     internalFree(b);

@@ -87,9 +87,9 @@ int fat_mount(int drive,unsigned int startsector,struct vfs_node ** mounted_root
     return MED_OK;
 
 gen_err:
-    free(root_node);
+    kfree(root_node);
 root_node_err:
-    free(fat_bpb);
+    kfree(fat_bpb);
 alloc_bpb_err:
     return ret_val;
 }
@@ -121,7 +121,7 @@ MED_RET_T fat_unmount(struct vfs_node * root, int flush)
 
         ret_val = MED_OK;
     }
-    free(fat_bpb);
+    kfree(fat_bpb);
     return ret_val;
 }
 
@@ -887,6 +887,7 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
     struct vfs_node * new_node;
     struct fat_entry * new_entry;
     struct fat_direntry * entry;
+    struct  vfs_pathname cur_name;
     int ret_val;
     current_dir->entryN=0;
     
@@ -905,7 +906,7 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
         if(!new_entry)
         {
             printk("[fat_loadDir] Error malloc for new_entry\n");
-            free(new_node);
+            kfree(new_node);
             return -MED_ENOMEM;
         }
 
@@ -920,15 +921,15 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
         if(ret_val != MED_OK && ret_val != -MED_ENOENT)
         {
             printk("[fat_loadDir] Error during readdir\n");
-            free(new_entry);
-            free(new_node);
+            kfree(new_entry);
+            kfree(new_node);
             return ret_val;
         }
 
         if(entry->name[0]=='\0')
         {
-            free(new_entry);
-            free(new_node);
+            kfree(new_entry);
+            kfree(new_node);
             break;
         }
 
@@ -942,11 +943,17 @@ MED_RET_T fat_loadDir(struct vfs_node * parent_node)
         new_entry->dirEntryNum = current_dir->entryN-1;
         new_entry->nbDirEntries= current_dir->entryCount;
 
-        vfs_nodeInitChild(parent_node->mount_point,parent_node,NULL,new_node,
+       
+        cur_name.str=entry->name;
+        cur_name.length=strlen(cur_name.str);
+        
+        vfs_nodeInitChild(parent_node->mount_point,parent_node,&cur_name,new_node,
             entry->attr&FAT_ATTR_DIRECTORY?VFS_TYPE_DIR:VFS_TYPE_FILE);
 
+        /*[BUG] this will cause a bug when removing the node as name
+        was not really malloc => free won't work
         new_node->name.str = entry->name;
-        new_node->name.length = strlen(new_node->name.str);
+        new_node->name.length = strlen(new_node->name.str);*/
 
         new_entry->cache = NULL;
 
@@ -1443,7 +1450,7 @@ MED_RET_T fat_createDir(struct vfs_pathname *  name,DIR * dir)
     if(!new_dir)
     {
         printk("[fat_createDir] no mem left to create node\n");
-        free(new_dir);
+        kfree(new_dir);
         return -MED_ENOMEM;
     }
     memset(new_node,0,sizeof(struct vfs_node));
@@ -1478,7 +1485,7 @@ MED_RET_T fat_createDir(struct vfs_pathname *  name,DIR * dir)
     {
         printk("[fat_createDir] no mem left to create node\n");
         ret_val = -MED_ENOMEM;
-        free(dot_node);
+        kfree(dot_node);
         goto error_exit;
     }
     dot_name.length = 2;
@@ -1638,7 +1645,7 @@ MED_RET_T fat_mvFileDir(struct vfs_node * opened_file,struct vfs_node * dir,stru
     {
         printk("[fat_mvFileDir] error in fat_addDirEntry : %d\n",-ret_val);
         vfs_nodeDestroy(new_node);
-        free(new_entry);
+        kfree(new_entry);
         return ret_val;
     }
     
@@ -1648,7 +1655,7 @@ MED_RET_T fat_mvFileDir(struct vfs_node * opened_file,struct vfs_node * dir,stru
     {
         printk("[fat_mvFileDir] error in fat_updateShortEntry : %d\n",-ret_val);
         vfs_nodeDestroy(new_node);
-        free(new_entry);
+        kfree(new_entry);
         return ret_val;
     }
 

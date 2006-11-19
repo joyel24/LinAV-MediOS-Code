@@ -74,6 +74,8 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
     bool unaligned=((unsigned long)data)&0x03;
     void * buffer=data;
 
+    //printk("RW (cmd=%d) disk %d, lba=%x,bufer @%x, nb=%x\n",cmd,disk,lba,data,count);
+    
     /* use a temporary buffer for unaligned read or writes */
     if (unaligned)
     {

@@ -103,7 +103,7 @@ int open(char * name,int flags)
             if(ret_val!=MED_OK)
             {
                 printk("Error in initChild (err=%d)\n",-ret_val);
-                free(new_node);
+                kfree(new_node);
                 return ret_val;
             }
 
@@ -173,6 +173,7 @@ int open(char * name,int flags)
 
 MED_RET_T fsync(int fdesc)
 {
+    
     FILE * fd = (FILE *)fdesc;
     MED_RET_T ret_val=MED_OK;
     CHK_FD(fd)
@@ -207,6 +208,7 @@ MED_RET_T fsync(int fdesc)
 
 MED_RET_T close(int fdesc)
 {
+    
     FILE * fd = (FILE *)fdesc;
     MED_RET_T ret_val=MED_OK;
 
@@ -229,6 +231,7 @@ MED_RET_T close(int fdesc)
 
 MED_RET_T truncate(int fdesc, unsigned int size)
 {
+    
     FILE * fd = (FILE *)fdesc;
     CHK_FD(fd);
     if(FILE_WRITE(fd->flags))
@@ -239,6 +242,7 @@ MED_RET_T truncate(int fdesc, unsigned int size)
 int write(int fdesc, const void* buf, unsigned int count)
 {
     FILE * fd = (FILE *)fdesc;
+    
     CHK_FD(fd);
     if (!FILE_WRITE(fd->flags))
         return -MED_EINVAL;

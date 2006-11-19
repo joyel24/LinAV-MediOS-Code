@@ -43,11 +43,11 @@ struct qlinks {
 
 /* Header in allocated and free buffers */
 struct bhead {
-    int size;
+    int size; 
+    int magic_val;   
     struct qlinks blist;
     struct qlinks free_list;
     THREAD_LINKS
-    //THREAD_LIST __thread_list;int __thread_pid;
 };
 
 void mem_printItem (struct bhead * ptr);
