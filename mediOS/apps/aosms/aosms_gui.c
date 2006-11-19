@@ -21,6 +21,9 @@ void menu_onClick(MENU m, WIDGETMENU_ITEM mi){
     char * s=malloc(100);
     int f;
 
+    // no oc during hdd access
+    clk_overclock(false);
+
     //build state file name
     sprintf(fn,SAVES_PATH"%s",strrchr(romname,'/')+1);
     *strrchr(fn,'.')='\0';
@@ -60,6 +63,8 @@ void menu_onClick(MENU m, WIDGETMENU_ITEM mi){
 
         gui_wantExit=true;
     }
+
+    clk_overclock(true);
 
     free(fn);
     free(s);
@@ -127,13 +132,13 @@ void gui_init(){
     mih->chooser->index=0;
     standardMenu->addItem(standardMenu,mih);
 
-    #if defined(AV4XX)
+#ifdef AV4XX
     mic=widgetMenuCheckbox_create();
-    mic->caption="Int Speacker";
+    mic->caption="Int Speaker";
     mic->cfgStored=false;
     mic->checkbox->caption="Enabled";
     standardMenu->addItem(standardMenu,mic);
-		#endif    
+#endif
 
     mi=widgetMenuItem_create();
     mi->caption="Buttons:";
@@ -404,21 +409,21 @@ void gui_welcomeScreen(){
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  D-Pad:  Move");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Square: Button 1");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Cross:  Button 2");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  On:     SMS pause/GG ptart");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  On:     SMS pause/GG start");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F1:     Open menu");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F2:     Reset");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F3:     Customizable button");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off:    Go to browser");
 #endif
 
-#if defined(AV4XX)
+#ifdef AV4XX
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=18,   "Ingame keys:");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  D-Pad:  Move");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Lcd sw: Square");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  On:     Cross");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Lcd sw: Button 1");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  On:     Button 2");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F1:     Open menu");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F2:     Reset");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F3:     SMS pause/GG ptart");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F3:     SMS pause/GG start");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off:    Go to browser");
 #endif
 

@@ -344,118 +344,122 @@ bool rom_load(char *romname){
     return cnt>0;
 }
 
+bool emu_processKeys(){
+    int bt;
+
+    bt=btn_readState();
+
+    input.pad[0]=bt&0xf; // directions
+    
+    if(swapButtons){
+        if(bt&SMS_BTN_1) input.pad[0]|=INPUT_BUTTON2;
+        if(bt&SMS_BTN_2) input.pad[0]|=INPUT_BUTTON1;
+    }else{
+        if(bt&SMS_BTN_1) input.pad[0]|=INPUT_BUTTON1;
+        if(bt&SMS_BTN_2) input.pad[0]|=INPUT_BUTTON2;
+    }
+    
+    input.system=0;
+    
+    if (bt&SMS_BTN_START){
+        if (cart.type==TYPE_SMS){
+            input.system|=INPUT_PAUSE;
+        }else{
+            input.system|=INPUT_START;
+        }
+    }
+    
+    if (bt&SMS_BTN_INGAME_MENU){
+        dspCom->psgEnabled=0;
+    
+        gui_execute();
+        gui_applySettings();
+    
+        dspCom->psgEnabled=1;
+    }
+    
+    if (bt&SMS_BTN_QUIT){
+        dspCom->psgEnabled=0;
+    
+        if(gui_confirmQuit()) return true;
+
+        dspCom->psgEnabled=1;
+    }
+    
+    if (bt&SMS_BTN_RESET){
+        dspCom->psgEnabled=0;
+        system_reset();
+    
+    }
+    
+    if(bt & SMS_BTN_MOD_12){
+        switch(f3Use){
+            case 0: //1+2
+                input.pad[0]|=INPUT_BUTTON1|INPUT_BUTTON2;
+                break;
+            case 1: //Sticky 1
+                if (!prevModPressed){ // only on F3 button state change
+                    sticky1Pressed=!sticky1Pressed;
+                }
+                break;
+            case 2: //Sticky 2
+                if (!prevModPressed){ // only on F3 button state change
+                    sticky2Pressed=!sticky2Pressed;
+                }
+                break;
+        }
+        prevModPressed=true;
+    }else{
+        prevModPressed=false;
+    }
+    
+    if (sticky1Pressed){
+    	if (input.pad[0]&INPUT_BUTTON1){
+    	    input.pad[0]&=~INPUT_BUTTON1;
+    	}
+    	else{
+    	    input.pad[0]|=INPUT_BUTTON1;
+    	}
+    }
+    
+    if (sticky2Pressed){
+    	if (input.pad[0]&INPUT_BUTTON2){
+    	    input.pad[0]&=~INPUT_BUTTON2;
+    	}
+    	else{
+    	    input.pad[0]|=INPUT_BUTTON2;
+    	}
+    }
+    
+    return false;
+}
+
 void emu_loop(){
     int i,prevTick;
     int frameTickDelta,frameTick,frameLen;
-    int bt;
     int page;
 
     page=0;
-    input.pad[1]=0;
     fpsStart=prevTick=tmr_getMicroTick();
     fpsCount=0;
-    
+
     sticky1Pressed=false;
     sticky2Pressed=false;
     prevModPressed=false;
-    
+
     for(;;){
-
-        // input handling
-        bt=btn_readState();
-    
-        input.pad[0]=bt&0xf; // directions
-    
-        if(swapButtons){
-            if(bt&SMS_BTN_1) input.pad[0]|=INPUT_BUTTON2;
-            if(bt&SMS_BTN_2) input.pad[0]|=INPUT_BUTTON1;
-        }else{
-            if(bt&SMS_BTN_1) input.pad[0]|=INPUT_BUTTON1;
-            if(bt&SMS_BTN_2) input.pad[0]|=INPUT_BUTTON2;
-        }
-    
-        input.system=0;
-    
-        if (bt&SMS_BTN_START){
-            if (cart.type==TYPE_SMS){
-                input.system|=INPUT_PAUSE;
-            }else{
-                input.system|=INPUT_START;
-            }
-        }
-    
-        if (bt&SMS_BTN_INGAME_MENU){
-            dspCom->psgEnabled=0;
-    
-            gui_execute();
-            gui_applySettings();
-    
-            dspCom->psgEnabled=1;
-        }
-    
-        if (bt&SMS_BTN_QUIT){
-            dspCom->psgEnabled=0;
-    
-            if(gui_confirmQuit()) break;
-    
-            dspCom->psgEnabled=1;
-        }
-    
-        if (bt&SMS_BTN_RESET){
-            dspCom->psgEnabled=0;
-            system_reset();
-
-        }
-    
-        if(bt & SMS_BTN_MOD_12){
-            switch(f3Use){
-                case 0: //1+2
-                    input.pad[0]|=INPUT_BUTTON1|INPUT_BUTTON2;
-                    break;
-                case 1: //Sticky 1
-                    if (!prevModPressed){ // only on F3 button state change
-                        sticky1Pressed=!sticky1Pressed;
-                    }
-                    break;
-                case 2: //Sticky 2
-                    if (!prevModPressed){ // only on F3 button state change
-                        sticky2Pressed=!sticky2Pressed;
-                    }
-                    break;
-            }
-            prevModPressed=true;
-        }else{
-            prevModPressed=false;
-        }
-    
-        if (sticky1Pressed){
-        	if (input.pad[0]&INPUT_BUTTON1){
-        	    input.pad[0]&=~INPUT_BUTTON1;
-        	}
-        	else{
-        	    input.pad[0]|=INPUT_BUTTON1;
-        	}
-        }
-
-        if (sticky2Pressed){
-        	if (input.pad[0]&INPUT_BUTTON2){
-        	    input.pad[0]&=~INPUT_BUTTON2;
-        	}
-        	else{
-        	    input.pad[0]|=INPUT_BUTTON2;
-        	}
-        }
-    
         // get prev values
         prevVblankNun=vblankNum;
         prevTick=tmr_getMicroTick();
 
         // frame skip
         for(i=0;i<frameSkip;++i){
+            if (emu_processKeys()) break;
             sms_frame(1);
         }
 
         // rendering
+        if (emu_processKeys()) break;
         sms_frame(0);
 
         // frame sync
@@ -493,7 +497,7 @@ void emu_loop(){
             fpsCount=0;
             fpsStart=prevTick;
         }
-    };
+    }
 }
 
 
@@ -549,8 +553,6 @@ int app_main(){
     gui_welcomeScreen();
 
     for(;;){
-
-        clk_overclock(false);
         gui_showGuiPlane();
 
         if (!gui_browse()) break;
@@ -568,6 +570,8 @@ int app_main(){
         emu_loop();
 
         dspCom->psgEnabled=0;
+
+        clk_overclock(false);
 
         if(sms.save) sram_loadSave(true);
     }

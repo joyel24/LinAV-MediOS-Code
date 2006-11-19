@@ -1,7 +1,7 @@
 ; Code Composer Project File, Version 2.0 (do not modify or remove this line)
 
 [Project Settings]
-ProjectDir="c:\cygwin\home\GliGli\mediOS\apps\aones\dspcode\"
+ProjectDir="Z:\apps\aones\dspcode\"
 ProjectType=Executable
 CPUFamily=TMS320C54XX
 Tool="Compiler"
@@ -11,10 +11,10 @@ Tool="Linker"
 Config="Release"
 
 [Source Files]
-Source="..\..\..\..\..\..\..\CCStudio_v3.1\C5400\cgtools\lib\rts.lib"
-Source="..\..\..\..\..\..\..\CCStudio_v3.1\C5400\csl\lib\csl5409.lib"
 Source="..\..\..\kernel\libdsp\libdsp.lib"
 Source="aones_dsp.c"
+Source="C:\CCStudio_v3.1\C5400\cgtools\lib\rts.lib"
+Source="C:\CCStudio_v3.1\C5400\csl\lib\csl5409.lib"
 Source="nes_apu.c"
 Source="vectors.asm"
 Source="lnk.cmd"

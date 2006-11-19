@@ -49,6 +49,7 @@ typedef struct {
 typedef volatile struct {
   // init
   uint16 armInitFinished;
+  uint16 dspInitFinished;
   uint16 chipNum;
 
   // video buffers addresses ans status

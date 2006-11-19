@@ -393,6 +393,20 @@ void gui_welcomeScreen(){
     while(!btn_readState());
 }
 
+bool gui_confirmQuit(){
+    int bt;
+
+    gui_showText("Really quit? (OFF=yes, any other=no)");
+
+    while(btn_readState());
+    while(!(bt=btn_readState()));
+    while(btn_readState());
+
+    gui_showEmuPlane();
+
+    return bt==NES_BTN_HALT;
+}
+
 void gui_showGuiPlane(){
     gfx_planeHide(VID1);
     gfx_setPlane(BMAP1);

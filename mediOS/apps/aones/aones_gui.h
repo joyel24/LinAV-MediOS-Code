@@ -14,6 +14,7 @@ void gui_execute();
 void gui_applySettings();
 bool gui_browse();
 void gui_welcomeScreen();
+bool gui_confirmQuit();
 void gui_showGuiPlane();
 void gui_showEmuPlane();
 void gui_showText(char * text);

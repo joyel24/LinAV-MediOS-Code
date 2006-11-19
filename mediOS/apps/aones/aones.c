@@ -174,13 +174,15 @@ void dsp_init(){
 
     dsp_run();
 
-    while(!(*DSP_COM)); // wait for the dsp to finish init
+    while(!(*DSP_COM)); // wait for the dsp to init communication
 
     dspCom = (tDspCom *) DSP_RAM(*DSP_COM);
 
     dspCom->chipNum=dsp_getChipNum();
 
     dspCom->armInitFinished=1;
+
+    while(!dspCom->dspInitFinished); // wait for the dsp to finish init
 };
 
 __IRAM_CODE void osd_interrupt(int irq,struct pt_regs * regs){
@@ -566,7 +568,15 @@ int emu_processIngameKeys()
 
   if (bt & NES_BTN_HALT)
   {
-     return 1;
+     int ret;
+
+     snd_pause();
+
+     ret=gui_confirmQuit();
+
+     snd_unPause();
+     
+     return ret;
   }
 
   return 0;

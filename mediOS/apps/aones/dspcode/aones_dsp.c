@@ -71,6 +71,8 @@ void main(){
 
 	debug("DSP START");
 
+	dspCom->dspInitFinished=1;
+
 	// the main prog handles video, sound is done with dma+irq
 	for(;;){
 		if(dspCom->inBufReady){
