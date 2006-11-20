@@ -350,13 +350,10 @@ void gui_applySettings(){
     armFrequency=advancedMenu->getTrackbar(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"CPU frequency(Mhz)"))->value;
 
 #ifdef AV4XX
-	  if(standardMenu->getCheckbox(standardMenu,standardMenu->indexFromCaption(standardMenu,"Int Speacker"))->checked)
-    {
+    if(standardMenu->getCheckbox(standardMenu,standardMenu->indexFromCaption(standardMenu,"Int Speaker"))->checked){
         printk("Enable spkr\n");
         SPCKR_ON();
-    }
-    else
-    {
+    }else{
         printk("Disable spkr\n");
         SPCKR_OFF();
     }
