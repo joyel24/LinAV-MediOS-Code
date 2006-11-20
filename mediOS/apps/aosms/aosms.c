@@ -438,53 +438,55 @@ void emu_loop(){
     int i,prevTick;
     int frameTickDelta,frameTick,frameLen;
     int page;
+    bool quit;
 
     page=0;
     fpsStart=prevTick=tmr_getMicroTick();
     fpsCount=0;
+    quit=false;
 
     sticky1Pressed=false;
     sticky2Pressed=false;
     prevModPressed=false;
 
-    for(;;){
+    do{
         // get prev values
         prevVblankNun=vblankNum;
         prevTick=tmr_getMicroTick();
 
         // frame skip
         for(i=0;i<frameSkip;++i){
-            if (emu_processKeys()) break;
+            quit|=emu_processKeys();
             sms_frame(1);
         }
 
         // rendering
-        if (emu_processKeys()) break;
+        quit|=emu_processKeys();
         sms_frame(0);
 
         // frame sync
         frameTick=tmr_getMicroTick()-prevTick;
         frameLen=(frameSkip+1)*TICKS_PER_FRAME;
         frameTickDelta=frameLen-frameTick;
-    
+
         if (tvOut==0 || tvOut==3){
             //we use the vblank interrupt to get sync
             if (frameTick<frameLen){
                 while((vblankNum-prevVblankNun)<(frameSkip+1)) /* nothing */;
             }
         }else{
-    
+
             while(frameTick<frameLen){
                 frameTick=tmr_getMicroTick()-prevTick;
             }
         }
-    
+
         if (autoFrameSkip){
           if (frameTickDelta>2*TICKS_PER_FRAME/3) --frameSkip; // let's assume rendering is done in 2/3 the time of a frame
           if (frameTickDelta<-TICKS_PER_FRAME/20) ++frameSkip; // we tolerate 5% error
           frameSkip=MAX(frameSkip,0);
         };
-    
+
         // resize
         if(useResize || tvOut){
             resize_execute();
@@ -497,7 +499,7 @@ void emu_loop(){
             fpsCount=0;
             fpsStart=prevTick;
         }
-    }
+    }while(!quit);
 }
 
 
