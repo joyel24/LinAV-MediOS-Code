@@ -1,5 +1,6 @@
 #include "shared.h"
 #include "aosms_gui.h"
+#include "intro_gmini4.h"
 
 struct browser_data * browser;
 
@@ -386,6 +387,7 @@ bool gui_browse(){
 }
 
 void gui_welcomeScreen(){
+#ifdef AV4XX
     int sw,sh;
     int y=0;
 
@@ -395,25 +397,12 @@ void gui_welcomeScreen(){
     gfx_fontSet(STD6X9);
 
     gfx_clearScreen(COLOR_WHITE);
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y,       "aoSMS v0.0");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y,       "aoSMS v0.1");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "==========");
 
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "Port of Charles Mc Donald's SMS Plus.");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "Uses Reezy's DRZ80 ASM CPU core.");
 
-#if defined(GMINI402) || defined(GMINI4XX)
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=18,   "Ingame keys:");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  D-Pad:  Move");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Square: Button 1");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Cross:  Button 2");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  On:     SMS pause/GG start");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F1:     Open menu");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F2:     Reset");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F3:     Customizable button");
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off:    Go to browser");
-#endif
-
-#ifdef AV4XX
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=18,   "Ingame keys:");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  D-Pad:  Move");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Lcd sw: Button 1");
@@ -422,12 +411,32 @@ void gui_welcomeScreen(){
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F2:     Reset");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  F3:     SMS pause/GG start");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off:    Go to browser");
-#endif
 
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,sh-10,     "Press a key to continue...");
+#endif
+
+#if defined(GMINI402) || defined(GMINI4XX)
+    unsigned long *ip,*op;
+    int i;
+
+    gfx_planeHide(VID1);
+    gfx_planeHide(BMAP1);
+    gfx_setPlane(VID2);
+
+    ip=intro_gmini4_data;
+    op=gfx_planeGetBufferOffset(VID2);
+    for(i=0;i<intro_gmini4_X*intro_gmini4_Y;++i){
+        *(op++)=(*ip)|((*ip>>8)<<24);
+        ip++;
+    }
+
+    gfx_planeShow(VID2);
+#endif
 
     while(btn_readState());
     while(!btn_readState());
+
+    gfx_planeHide(VID2);
 }
 
 bool gui_confirmQuit(){

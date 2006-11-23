@@ -187,12 +187,21 @@ void kernel_start (void)
     for(;;);
 }
 
+#include "kernel/videnc.h"
+
+void tst(){
+    int addr;
+
+    asm("mrc p15,0,%0,c1,c0,0":"=r" (addr));
+
+    printk("cfg=%0.8x\n",addr);
+};
 void kernel_thread(void)
-{  
+{
 #ifdef BUILD_LIB
     char * stdalone="STDALONE";
 #endif
-  
+
     printk("[SYS thread] starting\n");
     print_boot_info();
         
@@ -203,12 +212,18 @@ void kernel_thread(void)
         thread_startFct(&ptr_thread1,testThread1,"Thread 1",THREAD_DISABLE_STATE,PRIO_MED);
         thread_startFct(&ptr_thread2,testThread2,"Thread 2",THREAD_DISABLE_STATE,PRIO_LOW);
 #endif
-    
+
+#ifdef GMINI4XX
+    videnc_setup(VIDENC_MODE_NTSC,false);
+#endif
+
 #ifdef BUILD_LIB
     app_main(1,&stdalone);
     reload_firmware();
 #endif
-    
+
+    tst();
+
     shell_main();
 
     /* should we launch HALT */

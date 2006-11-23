@@ -2,6 +2,7 @@
 #include "aones.h"
 #include "aones_gui.h"
 #include "unes.h"
+#include "intro_gmini4.h"
 
 int gui_eventHandler=0;
 bool gui_wantExit=false;
@@ -365,6 +366,8 @@ bool gui_browse(){
 }
 
 void gui_welcomeScreen(){
+
+#if 0
     int y=0;
 
     gfx_planeHide(VID1);
@@ -372,7 +375,7 @@ void gui_welcomeScreen(){
     gfx_planeShow(BMAP1);
 
     gfx_clearScreen(COLOR_WHITE);
-    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y,       "aoNES v0.2");
+    gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y,       "aoNES v0.3");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "==========");
 
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "Port of LittleJohnGP by yoyo.");
@@ -388,9 +391,28 @@ void gui_welcomeScreen(){
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off:    Go to browser");
 
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,166,     "Press a key to continue...");
+#else
+    unsigned long *ip,*op;
+    int i;
+
+    gfx_planeHide(VID1);
+    gfx_planeHide(BMAP1);
+    gfx_setPlane(VID2);
+
+    ip=intro_gmini4_data;
+    op=gfx_planeGetBufferOffset(VID2);
+    for(i=0;i<intro_gmini4_X*intro_gmini4_Y;++i){
+        *(op++)=(*ip)|((*ip>>8)<<24);
+        ip++;
+    }
+
+    gfx_planeShow(VID2);
+#endif
 
     while(btn_readState());
     while(!btn_readState());
+
+    gfx_planeHide(VID2);
 }
 
 bool gui_confirmQuit(){
