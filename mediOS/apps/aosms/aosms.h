@@ -44,9 +44,9 @@
     #define SMS_BTN_RESET         BTMASK_F2
     #define SMS_BTN_QUIT          BTMASK_OFF
 
-    #define GG_WIDTH_DELTA        0
+    #define GG_WIDTH_DELTA        4
     #define GG_HEIGHT_DELTA       0
-    #define LCD_GG_X              -8
+    #define LCD_GG_X              8
     #define LCD_GG_Y              -1
     #define LCD_GG_WIDTH_DELTA    0
     #define LCD_GG_HEIGHT_DELTA   2
