@@ -44,6 +44,14 @@
 /* basic function accessed from thread */
 #define THREAD_DISABLE() {if(threadCurrent) { __cli(); threadCurrent->enable=0; __sti(); }}
 #define THREAD_ENABLE()  {if(threadCurrent) { __cli(); threadCurrent->enable=1; __sti(); }}
+#define THREAD_PAUSE() {\
+    if(threadCurrent) {\
+        __cli(); \
+        threadCurrent->enable=0; \
+        __sti(); \
+        yield(); \
+    }\
+}
 #define THREAD_SELF() (threadCurrent)
 
 typedef struct thread_list {
@@ -109,6 +117,8 @@ MED_RET_T thread_init(void(*)(void));
 void thread_loadContext(void);
 
 void thread_nxt(void);
+
+
 
 MED_RET_T thread_enable(int pid);
 MED_RET_T thread_disable(int pid);

@@ -39,9 +39,16 @@ void do_kill (unsigned char ** params);
 void do_ThreadState (unsigned char ** params);
 void do_ThreadInfo (unsigned char ** params);
 void do_ThreadNice (unsigned char ** params);
+void do_gioDir (unsigned char ** params);
+void do_gioSetState (unsigned char ** params);
+void do_gioGetState (unsigned char ** params);
+void do_diskInfo (unsigned char ** params);
+void do_cpldRead (unsigned char ** params);
+void do_cpldWrite (unsigned char ** params);
 
 void init_cmd_line(void);
 
-void process_cmd(struct pt_regs * regs);
+void cmd_line_thread(void);
+void process_cmd(void);
 
 #endif

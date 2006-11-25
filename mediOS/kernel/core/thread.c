@@ -107,6 +107,11 @@ void thread_startMed(void * entry_fct,void * code_malloc,void * iram_top,char * 
     THREAD_INFO * med_thread;
     int pid=thread_create(&med_thread,entry_fct,(void*)thread_exit,code_malloc,NULL,0,THREAD_USE_SYS_STACK,
         iram_top,PRIO_HIGH,name,(unsigned long)argc,(unsigned long)argv);
+    if(pid<0)
+    {
+        printk("Error starting med, threadStart return: %d\n",-pid);
+        kfree(code_malloc);
+    }
     __cli();
     sysThread->enable=0;
     med_thread->enable=1;

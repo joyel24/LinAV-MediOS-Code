@@ -13,125 +13,19 @@
 #include <sys_def/string.h>
 
 #include <kernel/kernel.h>
-#include <kernel/io.h>
 #include <kernel/uart.h>
-
 #include <kernel/irq.h>
-#include <kernel/timer.h>
-
-#include <kernel/bflat.h>
 #include <kernel/malloc.h>
 
 #include <kernel/cmd_line.h>
-#include <kernel/thread.h>
-#include <kernel/exit.h>
+
 
 #define MAX_CMD_LEN     100
 #define MAX_ARGS        10
 
 #define MEDIOS_PROMPT "mediOS> "
 
-struct pt_regs * cur_regs;
-
-struct cmd_line_s cmd_tab[] = {
-    {
-        cmd        : "help",
-        help_str   : "This is help",
-        cmd_action : do_help,
-        nb_args    : 0
-    },
-    {
-        cmd        : "mem",
-        help_str   : "shows free memory",
-        cmd_action : do_mem,
-        nb_args    : 0
-    },
-    {
-        cmd        : "run",
-        help_str   : "runs specified file",
-        cmd_action : do_run,
-        nb_args    : 1
-    },
-    {
-        cmd        : "handlerInfo",
-        help_str   : "Prints IRQ, timer, HW chk handler",
-        cmd_action : print_handler_info,
-        nb_args    : 0
-    },
-    {
-        cmd        : "dump",
-        help_str   : "Dumps memory from given address, usage: dump address size",
-        cmd_action : do_memory_dump,
-        nb_args    : 2
-    },
-    {
-        cmd        : "reg",
-        help_str   : "Print current regs value",
-        cmd_action : do_reg_print,
-        nb_args    : 0
-    },
-    {
-        cmd        : "halt",
-        help_str   : "Halts the device",
-        cmd_action : do_halt,
-        nb_args    : 0
-    },
-    {
-        cmd        : "reload",
-        help_str   : "Reloads the firmware",
-        cmd_action : do_reload,
-        nb_args    : 0
-    },
-    {
-        cmd        : "in",
-        help_str   : "Reads a value from memory, usage: in address size",
-        cmd_action : do_in,
-        nb_args    : 2
-    },
-    {
-        cmd        : "out",
-        help_str   : "Writes a value to memory, usage: out address size value",
-        cmd_action : do_out,
-        nb_args    : 3
-    },
-    {
-        cmd        : "ps",
-        help_str   : "List threads",
-        cmd_action : do_ps,
-        nb_args    : 0
-    },
-    {
-        cmd        : "kill",
-        help_str   : "kill thread with given pid",
-        cmd_action : do_kill,
-        nb_args    : 1
-    },
-    {
-        cmd        : "threadState",
-        help_str   : "Enable/Disable a thread with given pid",
-        cmd_action : do_ThreadState,
-        nb_args    : 2
-    },
-    {
-        cmd        : "threadInfo",
-        help_str   : "Prints info on a thread with given pid",
-        cmd_action : do_ThreadInfo,
-        nb_args    : 1
-    },
-    {
-        cmd        : "threadNice",
-        help_str   : "Set thread priority for given pid",
-        cmd_action : do_ThreadNice,
-        nb_args    : 2
-    },
-    /* this has to be the last entry */
-    {
-        cmd        : NULL,
-        help_str   : NULL,
-        cmd_action : NULL,
-        nb_args    : 0
-    }
-};
+extern struct cmd_line_s cmd_tab[];
 
 #define RM_HEAD_SPC(ptr)      ({while(*ptr && *ptr==' ') ptr++;})
 #define FIND_NXT_TOKEN(ptr)   ({char * __v=ptr; while(*__v && *__v!=' ') __v++; __v;})
@@ -149,85 +43,95 @@ int cur_pos;
 
 unsigned char ** arg_list;
 
+THREAD_INFO * cmdLineThread;
+
 void cmd_line_INT(int irq_num,struct pt_regs * regs)
 {
+    if(!cmdLineThread->enable)
+        cmdLineThread->enable=1;    
+}
+
+void cmd_line_thread(void)
+{
     unsigned char c;
-    int uart = irq_num - IRQ_UART0;
-
-    while(uart_in(&c,uart))
+    
+    
+    while(1)
     {
-        if(c=='\n' || c=='\r')               /* end of line => add \0 to end the line */
+        while(uart_in(&c,CMD_LINE_UART))
         {
-            cur_cmd[cur_pos++]='\0';
-            printk("\n"); /* local echo */
-            process_cmd(regs);
-            continue;
-        }
-
-        if(c>=0x20 && c<0xFF && c!=0x7F)
-        {
-                cur_cmd[cur_pos++]=c;               /* we have a char => add it in the cmd string */
-                printk("%c",c); /* local echo */
-        }
-        else
-        {                                       /* special chars */
-            switch(c)
+            if(c=='\n' || c=='\r')               /* end of line => add \0 to end the line */
             {
-                case 0x1B:                      /* ESC */
-                    if(uart_in(&c,uart))
-                    {
-                        if(c=='[')
+                cur_cmd[cur_pos++]='\0';
+                printk("\n"); /* local echo */
+                process_cmd();
+                continue;
+            }
+    
+            if(c>=0x20 && c<0xFF && c!=0x7F)
+            {
+                    cur_cmd[cur_pos++]=c;               /* we have a char => add it in the cmd string */
+                    printk("%c",c); /* local echo */
+            }
+            else
+            {                                       /* special chars */
+                switch(c)
+                {
+                    case 0x1B:                      /* ESC */
+                        if(uart_in(&c,CMD_LINE_UART))
                         {
-                            if(uart_in(&c,uart))
+                            if(c=='[')
                             {
-                                /*switch(c)
+                                if(uart_in(&c,CMD_LINE_UART))
                                 {
-                                    case 0x41:
-                                        printk("\nUP\n");
-                                        break;
-                                    case 0x42:
-                                        printk("\nDOWN\n");
-                                        break;
-                                    case 0x43:
-                                        printk("\nRIGHT\n");
-                                        break;
-                                    case 0x44:
-                                        printk("\nLEFT\n");
-                                        break;
-                                }*/
+                                    /*switch(c)
+                                    {
+                                        case 0x41:
+                                            printk("\nUP\n");
+                                            break;
+                                        case 0x42:
+                                            printk("\nDOWN\n");
+                                            break;
+                                        case 0x43:
+                                            printk("\nRIGHT\n");
+                                            break;
+                                        case 0x44:
+                                            printk("\nLEFT\n");
+                                            break;
+                                    }*/
+                                }
                             }
                         }
-                    }
-                    break;
-                case 0x08:                      /* bckspc */
-                case 0x7F:                      /* del */
-                    if(cur_pos>0)
-                    {
-                        cur_pos--;
-                        cur_cmd[cur_pos]='\0';
-                        printk("\n"MEDIOS_PROMPT"%s",cur_cmd);
-                    }
-                    break;
-                default:
-                    break;
+                        break;
+                    case 0x08:                      /* bckspc */
+                    case 0x7F:                      /* del */
+                        if(cur_pos>0)
+                        {
+                            cur_pos--;
+                            cur_cmd[cur_pos]='\0';
+                            printk("\n"MEDIOS_PROMPT"%s",cur_cmd);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+    
+            if(cur_pos>MAX_CMD_LEN)            /* can't add more chars => reset everything */
+            {
+                cur_cmd[0]='\0';
+                cur_pos=0;
             }
         }
-
-        if(cur_pos>MAX_CMD_LEN)            /* can't add more chars => reset everything */
-        {
-            cur_cmd[0]='\0';
-            cur_pos=0;
-        }
+        THREAD_PAUSE();
     }
 }
 
-void process_cmd(struct pt_regs * regs)
+void process_cmd(void)
 {
     int nb_args=0;
     struct cmd_line_s * cmd_line;
     unsigned  char * ptr;
-
-    cur_regs = regs;
 
     if(cur_pos==1)
     {
@@ -304,220 +208,42 @@ void process_cmd(struct pt_regs * regs)
 void init_cmd_line(void)
 {
     char c;
+    int pid;
     cur_pos=0;
 
     arg_list = (unsigned char**)kmalloc(sizeof(unsigned char*)*MAX_ARGS);
+    
+    if(!arg_list)
+    {
+        printk("[init] cmd line, can't allocate memory for args\n");
+        return;
+    }
+    
     cur_cmd = (unsigned char*)kmalloc(sizeof(unsigned char)*MAX_CMD_LEN);
-
+    if(!cur_cmd)
+    {
+        kfree(cur_cmd);
+        printk("[init] cmd line, can't allocate memory for args\n");
+        return;
+    }
+    
+    
     cur_cmd[0]='\0';
 
     uart_need(CMD_LINE_UART);
 
     irq_changeHandler(CMD_LINE_UART==UART_0?IRQ_UART0:IRQ_UART1,cmd_line_INT);
         /* clear uart1 buffer in */
-    while(uart_in(&c,UART_1)) /*nothing*/;
+    while(uart_in(&c,CMD_LINE_UART)) /*nothing*/;
 
-    if(!arg_list)
+    pid=thread_startFct(&cmdLineThread,cmd_line_thread,"cmd line",THREAD_DISABLE_STATE,PRIO_HIGH);
+    
+    if(pid<0)
     {
-        printk("[init] cmd line, can't allocate memory for args\n");
+        printk("Error creating cmd line thread: %d\n",-pid);
         return;
     }
-
-    printk("[init] cmd line\n");
+    
+    printk("[init] cmd line (thread pid:%d)\n",pid);
 }
 
-void do_help(unsigned char ** params)
-{
-    int i;
-    printk("Available cmd:\n");
-    for(i=0;cmd_tab[i].cmd!=NULL;i++)
-        printk("%s: %s\n",cmd_tab[i].cmd,cmd_tab[i].help_str);
-}
-
-void do_mem (unsigned char ** params)
-{
-    mem_printStat();
-}
-
-void do_run (unsigned char ** params)
-{
-    load_bflat (params[0]);
-}
-
-void do_halt (unsigned char ** params)
-{
-    halt_device();
-}
-
-void do_reload (unsigned char ** params)
-{
-    reload_firmware();
-}
-
-void print_handler_info (unsigned char ** params)
-{
-    irq_print();
-    tmr_print();
-}
-
-void do_reg_print (unsigned char ** params)
-{
-    int i=0,j=0;
-
-    for(i=0;i<13;i++)
-    {
-         printk("R%02d=0x%08x ",i,cur_regs->uregs[i]);
-         j++;
-         if(j==4)
-         {
-            j=0;
-            printk("\n");
-         }
-    }
-    printk("\n");
-
-    printk("sp_SVC=0x%08x lr_SVC=0x%08x pc=0x%08x\n",cur_regs->uregs[13],cur_regs->uregs[14],cur_regs->uregs[15]);
-    printk("cpsr=0x%08x old_ro==0x%08x\n",cur_regs->uregs[16],cur_regs->uregs[17]);
-}
-
-void do_memory_dump (unsigned char ** params)
-{
-    int Address = atoi (params[0]);
-    int Size = atoi (params[1]);
-
-    printk("Memory dump from %i (0x%0.8x), %d bytes:\n", Address, Address, Size);
-
-    unsigned char* Memory = (unsigned char*)Address;
-
-    print_data(Memory,Size);
-}
-
-void do_in (unsigned char ** params)
-{
-    int Address = atoi (params[0]);
-    int Size = atoi (params[1]);
-    int Value=0;
-
-    switch (Size){
-        case 1:
-            Value=inb(Address);
-            printk("0x%0.8x=%d (0x%0.2x)\n",Address,Value,Value);
-            return;
-        case 2:
-            Value=inw(Address);
-            printk("0x%0.8x=%d (0x%0.4x)\n",Address,Value,Value);
-            return;
-        case 4:
-            Value=inl(Address);
-            printk("0x%0.8x=%d (0x%0.8x)\n",Address,Value,Value);
-            return;
-        default:
-            printk("Size should be 1, 2 or 4\n");
-            return;
-    }
-}
-
-void do_out (unsigned char ** params)
-{
-    int Address = atoi (params[0]);
-    int Size = atoi (params[1]);
-    int Value = atoi (params[2]);
-
-    switch (Size){
-        case 1:
-            outb(Value,Address);
-            Value=inb(Address);
-            printk("0x%0.8x=%d (0x%0.2x)\n",Address,Value,Value);
-            return;
-        case 2:
-            outw(Value,Address);
-            Value=inw(Address);
-            printk("0x%0.8x=%d (0x%0.4x)\n",Address,Value,Value);
-            return;
-        case 4:
-            outl(Value,Address);
-            Value=inl(Address);
-            printk("0x%0.8x=%d (0x%0.8x)\n",Address,Value,Value);
-            return;
-        default:
-            printk("Size should be 1, 2 or 4\n");
-            return;
-    }
-}
-
-void do_ps (unsigned char ** params)
-{
-    thread_ps();
-}
-
-void do_kill (unsigned char ** params)
-{
-    int pid = atoi (params[0]);
-    MED_RET_T ret_val;
-    printk("Killing pid %d\n",pid);
-    ret_val=thread_kill(pid);
-    if(ret_val!=MED_OK)
-        printk("Error killing %d : %d\n",pid,-ret_val);
-}
-
-void do_ThreadState (unsigned char ** params)
-{
-    int pid = atoi (params[0]);
-    int state = atoi (params[1]);
-    if(state)
-    {
-        printk("Enable thread %d\n",pid);
-        thread_enable(pid);
-    }
-    else
-    {
-        printk("Disable thread %d\n",pid);
-        thread_disable(pid);
-    }
-}
-
-void do_ThreadInfo (unsigned char ** params)
-{
-    int pid = atoi (params[0]);
-    int i;
-    THREAD_INFO * ptr=thread_findPid(pid);
-    if(!ptr)
-    {
-        printk("thread with pid %d not found\n",pid);
-    }
-    else
-    {
-        thread_printInfo(ptr);
-        if(pid!=0)
-        {
-            for(i=0;i<THREAD_NB_RES;i++)
-            {
-                printk("Res %d\n",i);
-                thread_listPrintPtr(i,ptr);
-            }
-        }
-    }
-}
-void do_ThreadNice (unsigned char ** params)
-{
-    int pid = atoi (params[0]);
-    int prio = atoi (params[0]);
-
-    THREAD_INFO * ptr=thread_findPid(pid);
-    if(!ptr)
-    {
-        printk("thread with pid %d not found\n",pid);
-    }
-    else
-    {
-        thread_printInfo(ptr);
-        if(thread_nice(ptr,prio)==MED_OK)
-        {
-            printk("Priority %d set for PID=%d\n",prio,pid);
-        }
-        else
-        {
-            printk("Bad priority %d\n",prio);
-        }
-    }
-}

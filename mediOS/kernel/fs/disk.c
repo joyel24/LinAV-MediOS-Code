@@ -80,7 +80,7 @@ MED_RET_T disk_add(int disk)
     }
     
     /* getting info on disk */
-    disk_info[disk]=disk_readInfo(disk);
+    disk_info[disk]=disk_readInfo(disk,0);
     if(!disk_info[disk])
     {
         printk("[Disk-add] Error: can't setup disk %s\n",disk_name[disk]);
@@ -206,14 +206,12 @@ MED_RET_T disk_init(void)
     return ret_val;
 }
 
-struct hd_info_s * disk_readInfo(int disk)
+struct hd_info_s * disk_readInfo(int disk,int just_print)
 {
     int i,j;
     unsigned char * sector=(unsigned char *)kmalloc(sizeof(unsigned char)*SECTOR_SIZE);
-    
     if(!sector)
         return NULL;
-    
     struct hd_info_s * disk_info = (struct hd_info_s *)kmalloc(sizeof(struct hd_info_s));
     if(!disk_info)
         goto exit_error1;
@@ -222,7 +220,6 @@ struct hd_info_s * disk_readInfo(int disk)
     if(!part_info)
         goto exit_error2;
     //disk_info->partition_list=part_info;
-    
     /* identify disk */
     if(ata_rwData(disk,0,sector,1,ATA_DO_IDENT,ATA_WITH_DMA)<0)
         goto main_exit;        
@@ -291,7 +288,15 @@ struct hd_info_s * disk_readInfo(int disk)
     disk_info->partition_list=part_info;
     
     kfree(sector);
-    return disk_info;
+    
+    if(just_print)
+    {
+        kfree(part_info);
+        kfree(disk_info);
+        return NULL;
+    }
+    else    
+        return disk_info;
 /* if something goes wrong exit here freeing what should be free*/    
 main_exit:
     kfree(part_info);

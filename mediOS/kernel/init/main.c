@@ -101,6 +101,25 @@ void testThread2()
 }
 */
 
+/*
+void test_fct(void)
+{
+    int fd,cnt;
+    
+    
+    fd=open("/sd.bin",O_RDWR|O_CREAT);
+    if(fd<0)
+    {
+        printk("Error opening file\n");
+        return;
+    }
+    cnt=write(fd,(void*)(SDRAM_START), SDRAM_END-SDRAM_START);
+    printk("Wrote %d\n",cnt);
+    close(fd);
+    
+}
+*/
+
 void kernel_start (void)
 {
    /* sanity init */

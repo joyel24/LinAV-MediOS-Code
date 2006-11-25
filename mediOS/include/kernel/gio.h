@@ -48,8 +48,12 @@
 #define GIO_SET(gio_num)                               {outw(0x1<<GIO_BIT_NUMBER(gio_num),GIO_BITSET_ADDR(gio_num));}
 #define GIO_CLEAR(gio_num)                             {outw(0x1<<GIO_BIT_NUMBER(gio_num),GIO_BITCLEAR_ADDR(gio_num));}
 #define GIO_IRQ_ENABLE(gio_num,enable)                 GIO_OUT_VAL(enable,gio_num,GIO_ENABLE_IRQ)
-#define GIO_IS_SET(gio_num)                            ((inw(GIO_BITSET_ADDR(gio_num)) & (0x1 << GIO_BIT_NUMBER(gio_num))) != 0)
-#define GIO_RAW(data,bank,mask)                        { outw(data&mask,GIO_BANK_SEL(bank,GIO_BITSET0,GIO_BITSET1,GIO_BITSET2);\
-                                                       outw(data ^ mask,GIO_BANK_SEL(bank,GIO_BITSET0,GIO_BITSET1,GIO_BITSET2));}
+#define GIO_IS_SET(gio_num)                            ((inw(GIO_BITSET_ADDR(gio_num)) & \
+        (0x1 <<        GIO_BIT_NUMBER(gio_num))) != 0)
+#define GIO_GET_DIR(gio_num)    ((inw(GIO_DIRECTION_ADDR(gio_num)) & \
+        (0x1 <<        GIO_BIT_NUMBER(gio_num))) != 0)
+#define GIO_RAW(data,bank,mask)                        { \
+          outw(data&mask,GIO_BANK_SEL(bank,GIO_BITSET0,GIO_BITSET1,GIO_BITSET2);\
+          outw(data ^ mask,GIO_BANK_SEL(bank,GIO_BITSET0,GIO_BITSET1,GIO_BITSET2));}
 
 #endif

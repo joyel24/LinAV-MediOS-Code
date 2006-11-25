@@ -67,6 +67,6 @@ MED_RET_T disk_addAll(void);
 
 char * disk_getName(int id);
 
-struct hd_info_s * disk_readInfo(int disk);
+struct hd_info_s * disk_readInfo(int disk,int just_print);
 
 #endif

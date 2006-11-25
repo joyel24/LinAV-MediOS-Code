@@ -46,6 +46,8 @@ extern struct tmr_s hd_timer;
 int ata_stopping = 0;
 struct tmr_s ataStop_tmr;
 
+int cur_disk = HD_DISK;
+
 #ifndef CHK_BAT_POWER
 #define hd_launchTimer()
 int hd_sleep_state=0;
@@ -84,11 +86,9 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
 
     /* select the right disk */
     ATA_SELECT_DISK(disk);
-
     /* wait drive ready */
     if(ata_waitForReady()<0)
         return -1;
-
     /* send read/write cmd */
     switch(cmd)
     {
@@ -110,7 +110,6 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
             outb(av_cmd_array[cmd],IDE_COMMAND);
             break;
     }
-
     //outb(av_cmd_array[ata_cmd->xfer_dir],IDE_COMMAND);
 
 #ifdef NO_DMA
@@ -123,7 +122,6 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
         //printk("Destination buffer not in SDRAM => no DMA\n");
         use_dma=ATA_NO_DMA;
     }
-
     for(i=0;i<count;i++)
     {
         if (unaligned)
@@ -131,10 +129,8 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
             /* copy data to the temp buffer if unaligned and we're writing*/
             if(cmd == ATA_DO_WRITE) memcpy(buffer,data+i*SECTOR_SIZE,SECTOR_SIZE);
         }
-
         if(ata_waitForXfer()<0)
             return 0;
-
         if(use_dma==ATA_WITH_DMA)
         {
             if( DMA_RUNNING )
@@ -163,7 +159,6 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
                 DMA_SET_SIZE(SECTOR_SIZE);
                 DMA_SET_DEV(DMA_SDRAM,DMA_ATA)
             }
-
             DMA_START_TRANSFER;
 
             while(DMA_RUNNING) /*nothing*/;
@@ -201,7 +196,6 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
             buffer+=SECTOR_SIZE;
         }
     }
-
     return 0;
 }
 
@@ -313,11 +307,13 @@ void ata_powerDownHD(void)
 
 void ata_selectHD(void)
 {
+    cur_disk=HD_DISK;
     arch_ata_selectHD();
 }
 
 void ata_selectCF(void)
 {
+    cur_disk=CF_DISK;
     arch_ata_selectCF();
 }
 
@@ -345,6 +341,7 @@ void ata_stopTmrFct(void)
 void ata_init(void)
 {
     ata_stopping = 0;
+    cur_disk = HD_DISK;
 
     tmr_setup(&ataStop_tmr,"ata Stop");
     ataStop_tmr.action   = ata_stopTmrFct;

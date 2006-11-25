@@ -44,6 +44,17 @@
 
 #define SECTOR_SIZE      512
 
+#define IDE_DATA                          (cur_disk==HD_DISK?HD_DATA:CF_DATA)
+#define IDE_ERROR                         (cur_disk==HD_DISK?HD_ERROR:CF_ERROR)
+#define IDE_NSECTOR                       (cur_disk==HD_DISK?HD_NSECTOR:CF_NSECTOR)
+#define IDE_SECTOR                        (cur_disk==HD_DISK?HD_SECTOR:CF_SECTOR)
+#define IDE_LCYL                          (cur_disk==HD_DISK?HD_LCYL:CF_LCYL)
+#define IDE_HCYL                          (cur_disk==HD_DISK?HD_HCYL:CF_HCYL)
+#define IDE_SELECT                        (cur_disk==HD_DISK?HD_SELECT:CF_SELECT)
+#define IDE_CONTROL                       (cur_disk==HD_DISK?HD_CONTROL:CF_CONTROL)
+#define IDE_STATUS                        (cur_disk==HD_DISK?HD_STATUS:CF_STATUS)
+#define IDE_COMMAND                       (cur_disk==HD_DISK?HD_COMMAND:CF_COMMAND)
+
 int  ata_rwData           (int disk,unsigned int lba,void * data,int count,int xfer_dir,int use_dma);
 
 int  ata_waitForXfer      (void);

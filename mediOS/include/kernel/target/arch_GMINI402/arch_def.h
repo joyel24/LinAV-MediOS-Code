@@ -92,18 +92,30 @@
 #define WDT_EXTRST_ARM_RESET              0x0001
 
 /* ide interface */
-#define IDE_BASE                          0x50000000
+#define HD_BASE                          0x50000000
+#define CF_BASE                          0x50000000
 
-#define IDE_DATA                          (IDE_BASE+0xa0)
-#define IDE_ERROR                         (IDE_BASE+0xa2)
-#define IDE_NSECTOR                       (IDE_BASE+0x24)
-#define IDE_SECTOR                        (IDE_BASE+0x26)
-#define IDE_LCYL                          (IDE_BASE+0x28)
-#define IDE_HCYL                          (IDE_BASE+0x2a)
-#define IDE_SELECT                        (IDE_BASE+0x2c)
-#define IDE_CONTROL                       (IDE_BASE+0x9c)
-#define IDE_STATUS                        (IDE_BASE+0xae)
-#define IDE_COMMAND                       (IDE_BASE+0x2e)
+#define HD_DATA                          (HD_BASE+0xa0)
+#define HD_ERROR                         (HD_BASE+0xa2)
+#define HD_NSECTOR                       (HD_BASE+0x24)
+#define HD_SECTOR                        (HD_BASE+0x26)
+#define HD_LCYL                          (HD_BASE+0x28)
+#define HD_HCYL                          (HD_BASE+0x2a)
+#define HD_SELECT                        (HD_BASE+0x2c)
+#define HD_CONTROL                       (HD_BASE+0x9c)
+#define HD_STATUS                        (HD_BASE+0xae)
+#define HD_COMMAND                       (HD_BASE+0x2e)
+
+#define CF_DATA                          (CF_BASE+0xa0)
+#define CF_ERROR                         (CF_BASE+0xa2)
+#define CF_NSECTOR                       (CF_BASE+0x24)
+#define CF_SECTOR                        (CF_BASE+0x26)
+#define CF_LCYL                          (CF_BASE+0x28)
+#define CF_HCYL                          (CF_BASE+0x2a)
+#define CF_SELECT                        (CF_BASE+0x2c)
+#define CF_CONTROL                       (CF_BASE+0x9c)
+#define CF_STATUS                        (CF_BASE+0xae)
+#define CF_COMMAND                       (CF_BASE+0x2e)
 
 /* DMA          */
 
