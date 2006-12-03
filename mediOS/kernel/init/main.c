@@ -176,7 +176,9 @@ void kernel_start (void)
 #ifdef CHK_BAT_POWER
     init_power();
 #endif
+#ifndef PMA
     init_rtc();
+#endif
 #ifdef CHK_USB_FW
     init_usb_fw();
 #endif
@@ -195,8 +197,9 @@ void kernel_start (void)
         printk("[init] ------ Halting\n");
         for(;;);
     }
-    
+#ifndef PMA    
     sound_init();
+#endif
     printk("[init] ------------ drivers done\n");
     
     /*Load kernel thread to enable irq*/
