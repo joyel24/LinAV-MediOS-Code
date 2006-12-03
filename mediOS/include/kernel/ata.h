@@ -54,6 +54,7 @@
 #define IDE_CONTROL                       (cur_disk==HD_DISK?HD_CONTROL:CF_CONTROL)
 #define IDE_STATUS                        (cur_disk==HD_DISK?HD_STATUS:CF_STATUS)
 #define IDE_COMMAND                       (cur_disk==HD_DISK?HD_COMMAND:CF_COMMAND)
+#define IDE_ALTSTATUS                     (cur_disk==HD_DISK?HD_ALTSTATUS:CF_ALTSTATUS)
 
 int  ata_rwData           (int disk,unsigned int lba,void * data,int count,int xfer_dir,int use_dma);
 

@@ -103,6 +103,7 @@
 #define HD_HCYL                          (HD_BASE+0x2a)
 #define HD_SELECT                        (HD_BASE+0x2c)
 #define HD_CONTROL                       (HD_BASE+0x9c)
+#define HD_ALTSTATUS                     (HD_BASE+0x9c)
 #define HD_STATUS                        (HD_BASE+0xae)
 #define HD_COMMAND                       (HD_BASE+0x2e)
 
@@ -114,6 +115,7 @@
 #define CF_HCYL                          (CF_BASE+0x2a)
 #define CF_SELECT                        (CF_BASE+0x2c)
 #define CF_CONTROL                       (CF_BASE+0x9c)
+#define CF_ALTSTATUS                     (CF_BASE+0x9c)
 #define CF_STATUS                        (CF_BASE+0xae)
 #define CF_COMMAND                       (CF_BASE+0x2e)
 

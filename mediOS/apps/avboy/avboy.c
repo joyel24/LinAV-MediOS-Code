@@ -54,7 +54,7 @@
 #define Y_OFFSET 0x09
 #endif
 
-#if defined(AV3XX) || defined(AV4XX)
+#if defined(AV3XX) || defined(AV4XX) || define(PMA)
 #define LCD_WIDTH 320
 #define LCD_HEIGHT 240
 #define X_OFFSET 0x14
@@ -80,7 +80,7 @@ int bt_SELECT = BTMASK_F3;
 int bt_MENU = BTMASK_OFF;
 #endif
 
-#if defined(AV4XX)
+#if defined(AV4XX) || define(PMA)
 int bt_UP = BTMASK_UP;
 int bt_DOWN = BTMASK_DOWN;
 int bt_LEFT = BTMASK_LEFT;
@@ -261,7 +261,7 @@ int doevents(void)
         if(pressed & BTMASK_F3)  pad_press(PAD_SELECT);
         if(pressed & BTMASK_F1) {if (do_user_menu() == USER_MENU_QUIT)
 #endif
-#if defined(AV3XX) || defined(AV4XX)
+#if defined(AV3XX) || defined(AV4XX) || define(PMA)
         if(pressed & bt_UP)     pad_press(PAD_UP);
         if(pressed & bt_DOWN)   pad_press(PAD_DOWN);
         if(pressed & bt_LEFT)   pad_press(PAD_LEFT);
@@ -301,7 +301,7 @@ int doevents(void)
         if(released & BTMASK_BTN3)  pad_release(PAD_SELECT);
 #endif
 
-#if defined(AV3XX) || defined(AV4XX)
+#if defined(AV3XX) || defined(AV4XX) || define(PMA)
         if(released & bt_UP)     pad_release(PAD_UP);
         if(released & bt_DOWN)   pad_release(PAD_DOWN);
         if(released & bt_LEFT)   pad_release(PAD_LEFT);

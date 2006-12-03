@@ -133,7 +133,7 @@ void gui_init(){
     mih->chooser->index=0;
     standardMenu->addItem(standardMenu,mih);
 
-#ifdef AV4XX
+#if define(AV4XX) || define(PMA)
     mic=widgetMenuCheckbox_create();
     mic->caption="Int Speaker";
     mic->cfgStored=false;
@@ -350,7 +350,7 @@ void gui_applySettings(){
     overclocking=advancedMenu->getCheckbox(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"Enable OC"))->checked;
     armFrequency=advancedMenu->getTrackbar(advancedMenu,advancedMenu->indexFromCaption(advancedMenu,"CPU frequency(Mhz)"))->value;
 
-#ifdef AV4XX
+#if define(AV4XX) || define(PMA)
     if(standardMenu->getCheckbox(standardMenu,standardMenu->indexFromCaption(standardMenu,"Int Speaker"))->checked){
         printk("Enable spkr\n");
         SPCKR_ON();
@@ -387,7 +387,7 @@ bool gui_browse(){
 }
 
 void gui_welcomeScreen(){
-#ifdef AV4XX
+#if define(AV4XX) || define(PMA)
     int sw,sh;
     int y=0;
 

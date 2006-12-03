@@ -29,6 +29,11 @@
     #define WIDGET_BACK_BTN BTN_OFF
 #endif
 
+#ifdef PMA
+    #define WIDGET_ACTION_BTN BTN_ON
+    #define WIDGET_BACK_BTN BTN_OFF
+#endif
+
 #ifdef AV3XX
     #define WIDGET_ACTION_BTN BTN_ON
     #define WIDGET_BACK_BTN BTN_OFF

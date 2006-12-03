@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.16  2006/10/29 14:50:16  sfxgligli
+// doom: bugfix
+//
 // Revision 1.15  2006/10/29 13:40:20  sfxgligli
 // -doom: buttons chages
 //
@@ -126,7 +129,7 @@ char button_to_key[2][NB_DOOM_BUTTONS]=
   DOOM_KEY_MENUOK,DOOM_KEY_NONE,
   DOOM_KEY_MENUOK,DOOM_KEY_DOOMMENU}};
 #endif
-#ifdef AV4XX
+#if define(AV4XX) || define(PMA)
   char button_to_key[2][NB_DOOM_BUTTONS]=
   // ingame
 {{DOOM_KEY_UP,DOOM_KEY_DOWN,DOOM_KEY_LEFT,DOOM_KEY_RIGHT,
@@ -234,7 +237,7 @@ void display_getRealSize(){
             realscreenwidth=224;
             realscreenheight=176;
 #endif
-#if defined(AV3XX) || defined(AV4XX)
+#if defined(AV3XX) || defined(AV4XX) || define(PMA)
             realscreenwidth=320;
             realscreenheight=200;
 #endif
@@ -394,7 +397,7 @@ void I_FinishUpdate (void)
     memcpy(offset2,offset1,SCREENWIDTH*SCREENHEIGHT);
   }
 #endif
-#if defined(AV3XX) || defined(AV4XX)
+#if defined(AV3XX) || defined(AV4XX) || define(PMA)
     memcpy(offset2,offset1,SCREENWIDTH*realscreenheight);
 #endif
 }

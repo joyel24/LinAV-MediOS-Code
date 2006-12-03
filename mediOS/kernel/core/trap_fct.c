@@ -45,3 +45,8 @@ void print_wdt(void)
 {
     uart_outString("[INT] WDT HALTING !!\n",DEBUG_UART);
 }
+
+void do_trap_fiq(void)
+{
+    uart_outString("[INT] FIQ !!\n",DEBUG_UART);
+}

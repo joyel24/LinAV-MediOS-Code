@@ -1,4 +1,4 @@
-/* 
+/*
 *   include/sys_def/arch.h
 *
 *   MediOS project
@@ -21,4 +21,5 @@
 #define JBMM_ARCH       3
 #define GMINI402_ARCH   4
 #define AV4XX_ARCH      5
+#define PMA_ARCH        6
 #endif

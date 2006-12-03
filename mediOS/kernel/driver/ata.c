@@ -169,6 +169,10 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
             {
                 for(j=0;j<SECTOR_SIZE;j+=2)
                 {
+#ifdef PMA
+                    outb(OMAP_READ_REQUEST,OMAP_REFRESH_BASE);
+                    while(inb(OMAP_REFRESH_BASE));
+#endif
                     outw(inw(IDE_DATA),buffer+j);
                 }
             }
@@ -180,6 +184,10 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
                     outw(inw(buffer+j),0x50000020);
 #else
                     outw(inw(buffer+j),IDE_DATA);
+#endif
+#ifdef PMA
+                    outb(OMAP_WRITE_REQUEST,OMAP_REFRESH_BASE);
+                    while(inb(OMAP_REFRESH_BASE));
 #endif
                 }
             }
@@ -261,7 +269,7 @@ int ata_waitForXfer(void)
     t=tmr_getTick();
     do
     {
-        val=inb(IDE_CONTROL);
+        val=inb(IDE_ALTSTATUS);
         if((val & IDE_STATUS_BSY)==0 && (val & IDE_STATUS_DRQ)!=0)
             return 0;
     }
@@ -276,7 +284,7 @@ int ata_waitForReady(void)
     t=tmr_getTick();
     do
     {
-        val=inb(IDE_CONTROL);
+        val=inb(IDE_ALTSTATUS);
         if((val & IDE_STATUS_BSY)==0 && (val & IDE_STATUS_RDY)!=0)
             return 0;
     }
@@ -287,7 +295,7 @@ int ata_waitForReady(void)
 
 int ata_status(void)
 {
-    return inb(IDE_CONTROL);
+    return inb(IDE_ALTSTATUS);
 }
 
 void ata_resetHD(void)

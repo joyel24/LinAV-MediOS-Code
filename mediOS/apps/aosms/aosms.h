@@ -59,7 +59,7 @@
     #define LCD_SMS_HEIGHT_DELTA  4
 #endif
 
-#ifdef AV4XX
+#if define(AV4XX) || define(PMA)
 
     #define ENABLE_OVERCLOCKING
 
