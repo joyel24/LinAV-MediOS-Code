@@ -61,7 +61,7 @@
     
 #endif
 
-#if define(AV4XX) || define(PMA)
+#if defined(AV4XX) || defined(PMA)
     //#define GMINI_OVERCLOCKING
 
     #define SCREEN_USE_DSP

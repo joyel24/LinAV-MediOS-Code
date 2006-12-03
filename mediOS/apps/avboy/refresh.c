@@ -25,14 +25,14 @@
 #include "asm.h"
 #endif
 
-#if defined(AV3XX) || defined(AV4XX) || define(PMA)
+#if defined(AV3XX) || defined(AV4XX) || defined(PMA)
 extern int RotScreen;
 #endif
 
 #ifndef ASM_REFRESH_1
 __IRAM_CODE void refresh_1(byte *dest, byte *src, byte *pal, int cnt)
 {
-#if defined(AV3XX) || defined(AV4XX) || define(PMA)
+#if defined(AV3XX) || defined(AV4XX) || defined(PMA)
 	if(RotScreen==2) {
            dest+=143;
            while(cnt--) {*dest = pal[*(src++)]; dest+=160;}
@@ -44,7 +44,7 @@ __IRAM_CODE void refresh_1(byte *dest, byte *src, byte *pal, int cnt)
         else {
 #endif
            while(cnt--) *(dest++) = pal[*(src++)];
-#if defined(AV3XX) || defined(AV4XX) || define(PMA)
+#if defined(AV3XX) || defined(AV4XX) || defined(PMA)
         }
 #endif
 }

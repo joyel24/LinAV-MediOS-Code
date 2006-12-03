@@ -92,7 +92,7 @@ void gui_init(){
 #if defined(GMINI4XX) || defined(GMINI402)
     menu->setRect(menu,0,0,220,176);
 #endif
-#if defined(AV4XX) || defined(AV3XX) || define(PMA)
+#if defined(AV4XX) || defined(AV3XX) || defined(PMA)
     menu->setRect(menu,0,0,320,200);
 #endif
     menu->ownItems=true; // the menu will handle items destroy
@@ -129,7 +129,7 @@ void gui_init(){
     mih->chooser->itemCount=3;
     mih->chooser->index=0;
     menu->addItem(menu,mih);
-#if defined(AV4XX) || define(PMA)
+#if defined(AV4XX) || defined(PMA)
     mic=widgetMenuCheckbox_create();
     mic->caption="Int Speacker";
     mic->cfgStored=false;
@@ -250,7 +250,7 @@ void gui_applySettings(){
     overclocking=menu->getCheckbox(menu,menu->indexFromCaption(menu,"Enable OC"))->checked;
     armFrequency=menu->getTrackbar(menu,menu->indexFromCaption(menu,"CPU frequency(Mhz)"))->value;
     
-#if define(AV4XX) || define(PMA)
+#if defined(AV4XX) || defined(PMA)
     if(menu->getCheckbox(menu,menu->indexFromCaption(menu,"Int Speacker"))->checked)
     {
         printk("Enable spkr\n");
@@ -299,7 +299,7 @@ void gui_welcomeScreen(){
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  Off:      Doom menu");
 #endif
 
-#if defined(AV4XX) || define(PMA)
+#if defined(AV4XX) || defined(PMA)
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=18,   "Keys:");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  D-Pad:  Move");
     gfx_putS(COLOR_BLACK,COLOR_WHITE,0,y+=9,    "  LCD/TV: Shoot");

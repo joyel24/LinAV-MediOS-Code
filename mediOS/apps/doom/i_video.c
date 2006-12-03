@@ -15,6 +15,9 @@
 // for more details.
 //
 // $Log$
+// Revision 1.17  2006/12/03 20:15:24  cjnr11
+// - Adding PMA arch   - IDE_ALTSTATUS for reading and IDE_CONTROL for writing instead of IDE_CONTROL for both
+//
 // Revision 1.16  2006/10/29 14:50:16  sfxgligli
 // doom: bugfix
 //
@@ -129,7 +132,7 @@ char button_to_key[2][NB_DOOM_BUTTONS]=
   DOOM_KEY_MENUOK,DOOM_KEY_NONE,
   DOOM_KEY_MENUOK,DOOM_KEY_DOOMMENU}};
 #endif
-#if define(AV4XX) || define(PMA)
+#if defined(AV4XX) || defined(PMA)
   char button_to_key[2][NB_DOOM_BUTTONS]=
   // ingame
 {{DOOM_KEY_UP,DOOM_KEY_DOWN,DOOM_KEY_LEFT,DOOM_KEY_RIGHT,
@@ -237,7 +240,7 @@ void display_getRealSize(){
             realscreenwidth=224;
             realscreenheight=176;
 #endif
-#if defined(AV3XX) || defined(AV4XX) || define(PMA)
+#if defined(AV3XX) || defined(AV4XX) || defined(PMA)
             realscreenwidth=320;
             realscreenheight=200;
 #endif
@@ -397,7 +400,7 @@ void I_FinishUpdate (void)
     memcpy(offset2,offset1,SCREENWIDTH*SCREENHEIGHT);
   }
 #endif
-#if defined(AV3XX) || defined(AV4XX) || define(PMA)
+#if defined(AV3XX) || defined(AV4XX) || defined(PMA)
     memcpy(offset2,offset1,SCREENWIDTH*realscreenheight);
 #endif
 }
