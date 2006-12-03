@@ -182,6 +182,7 @@ if [ $CONFIGURE_TARGET_DEVICE == "7" ]; then
             CONFIGURE_HAVE_FM_REMOTE="0"
             CONFIGURE_CHIP_TYPE="DM270"
 	    TARGET_OK=1
+            CONFIGURE_FM_REMOTE_VERSION="v2"
 fi
 
 if [ $TARGET_OK == 0 ]; then
