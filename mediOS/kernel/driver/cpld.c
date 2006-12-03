@@ -38,13 +38,19 @@ int CPLD_VER;
 
 void cpld_init(void)
 {
+    int i;
     
-
+    printk("CPLD %d = %x\n",0,cpld_read(CPLD0));
     cpld_doSelect();
-
+    printk("CPLD %d = %x",1,cpld_read(CPLD1));    
     outw(cpld_portState[CPLD1],CPLD_PORT1);
+    printk(" => %x\n",cpld_read(CPLD1));
+    printk("CPLD %d = %x",2,cpld_read(CPLD2));
     outw(cpld_portState[CPLD2],CPLD_PORT2);
+    printk(" => %x\n",cpld_read(CPLD2));
+    printk("CPLD %d = %x",3,cpld_read(CPLD3));
     outw(cpld_portState[CPLD3],CPLD_PORT3);
+    printk(" => %x\n",cpld_read(CPLD3));
 
     CPLD_VER=cpld_getVersion();
 
@@ -97,7 +103,7 @@ void cpld_doSelect(void)
 {
     int res,res2;
     //int cnt;
-    printk("changing cpld select : %d\n",cpld_portState[CPLD0]);
+    printk("changing cpld select : %x\n",cpld_portState[CPLD0]);
     outw(cpld_portState[CPLD0],CPLD_PORT0);
     outw(cpld_portState[CPLD0],CPLD_PORT0);
     outw(cpld_portState[CPLD0],CPLD_PORT0);

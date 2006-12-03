@@ -26,15 +26,11 @@ void arch_uart_need(int uart_num)
     }
 }
 
+extern int uart_clockSpeed;
+
 void arch_uart_init()
 {
-    int brsr;
-
     // set ref clock to 27Mhz (EXT_CLK)
     outw(inw(CLKC_SOURCE_SELECT)|CLKC_SRC_UART0_27M|CLKC_SRC_UART1_27M,CLKC_SOURCE_SELECT);
-
-    // set bitrate do 115200bps
-    brsr=((float)CONFIG_EXT_CLK/(16*115200))-1+0.5; // round to nearest integer
-    outw(brsr,uart_addr[0]+UART_BRSR);
-    outw(brsr,uart_addr[1]+UART_BRSR);
+    uart_clockSpeed=CONFIG_EXT_CLK;
 }

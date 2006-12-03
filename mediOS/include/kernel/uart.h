@@ -28,6 +28,9 @@
 #define UART_LCR      0x0000000a
 #define UART_SR       0x0000000c
 
+#define UART_REG(NUM) (NUM==UART_0?UART0_BASE:UART1_BASE)
+#define UART_IRQ_NUM(NUM) (NUM==UART_0?IRQ_UART0:IRQ_UART1)
+
 void uart_intAction(int irq,struct pt_regs * regs);
 
 int  uart_in         (unsigned char * data,int uartNum);
@@ -37,8 +40,10 @@ void uart_outString  (unsigned char * data,int uartNum);
 void uart_init       (void);
 
 void uart_need       (int uart_num);
+void uart_changeSpeed(int speed,int uart_num);
+void uart_restoreIrqHandler(int uartNum);
 
 void arch_uart_need  (int uart_num);
 void arch_uart_init  ();
-
+int  arch_uart_getBrsr(int speed);
 #endif

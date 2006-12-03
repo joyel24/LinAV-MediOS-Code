@@ -26,13 +26,16 @@
 //int vsnprintf (char * buf, size_t size, const char * fmt, va_list args);
 static char debugmembuf[255];
 
+int printk_on_uart=0;
+
 void printk(char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
     vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
     va_end(ap);
-    uart_outString(debugmembuf,DEBUG_UART);
+    if(printk_on_uart)
+        uart_outString(debugmembuf,DEBUG_UART);
 #ifdef HAVE_CONSOLE
     con_write(debugmembuf,COLOR_ROM_GREEN);
 #endif
@@ -45,7 +48,8 @@ int printf(__const char * fmt, ...)
     va_start(ap, fmt);
     res = vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, ap);
     va_end(ap);
-    uart_outString(debugmembuf,DEBUG_UART);
+    if(printk_on_uart)
+        uart_outString(debugmembuf,DEBUG_UART);
 #ifdef HAVE_CONSOLE
     con_write(debugmembuf,COLOR_ROM_WHITE);
 #endif
@@ -56,7 +60,8 @@ int vprintf(__const char * fmt, va_list args)
 {
   int res;
     res = vsnprintf(debugmembuf, sizeof(debugmembuf), fmt, args);
-    uart_outString(debugmembuf,DEBUG_UART);
+    if(printk_on_uart)
+        uart_outString(debugmembuf,DEBUG_UART);
 #ifdef HAVE_CONSOLE
     con_write(debugmembuf,COLOR_ROM_WHITE);
 #endif
@@ -101,4 +106,22 @@ void print_data(char * data,int length)
     printk(" ] ");
     print_nonhexa(str);
     printk("\n");
+}
+
+void printk_init(void)
+{
+    printk_on_uart = 0;
+    printk_uartEnable();
+}
+
+void printk_uartEnable(void)
+{
+    uart_need(DEBUG_UART);
+    uart_changeSpeed(115200,DEBUG_UART);    
+    printk_on_uart = 1;
+}
+
+void printk_uartDisable(void)
+{
+    printk_on_uart = 0;
 }

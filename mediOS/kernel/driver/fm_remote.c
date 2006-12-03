@@ -12,12 +12,6 @@
 
 #include <sys_def/string.h>
 
-#include <kernel/io.h>
-#include <kernel/irqs.h>
-#include <kernel/irq.h>
-#include <kernel/hardware.h>
-#include <kernel/cpld.h>
-#include <kernel/gio.h>
 #include <kernel/buttons.h>
 #include <kernel/bat_power.h>
 #include <kernel/uart.h>
@@ -26,19 +20,9 @@
 #include <kernel/evt.h>
 
 #include <kernel/fm_remote.h>
-#include <kernel/timer.h>
 
 
 #define INI_TXT       "--mediOS--"
-
-int FM_connected=0;
-int nbPingSend=0;
-int nbNonGet=0;
-int nbPongGet=0,minPongGet=0xFFFF;
-char cmd=0;
-char radio_param[5];
-int radio_index;
-int getPong=0,firstPong=0,pingSend=0;
 
 int inHold=0;
 
@@ -81,104 +65,8 @@ int key_evt_array[NB_KEY][2] = {
     { BTN_ON       , 0x02 }  /* PRESS */
 };
 
-struct tmr_s fmRemote_tmr;
 
-void fm_remote_INT(int irq_num,struct pt_regs * reg)
-{
-    char c;
-    int count;
-    while(uart_in(&c,UART_1))
-    {
-        if(FM_connected)
-        {
-            switch(c)
-            {
-                case 0xf8:
-                    FM_connected=0;                    
-                    nbPingSend=0;
-                    if(fmRemote_tmr.trigger==1)
-                    {
-                        tmr_stop(&fmRemote_tmr);
-                    }
-                    break;
-                case 'V':
-                    cmd=3;
-                    nbPingSend=0;
-                    break;
-                case 'K':
-                    cmd=1;
-                    radio_index=0;
-                    break;
-                case 'R':
-                    cmd=2;
-                default:
-                    switch(cmd)
-                    {
-                        case 0:
-                            printk("[FM Remote] get unknown cmd: %x\n",c);
-                            break;
-                        case 1:
-                            if(c!=0)
-                            {
-                                //printk("[FM Remote] get key cmd: %x\n",c);
-                                processKey(c);
-                            }
-                            cmd=0;
-                            break;
-                        case 2:
-                            radio_param[radio_index++]=c;
-                            if(radio_index==5)
-                            {
-                                printk("[FM Remote] get radio cmd: %x%x%x%x%x\n",radio_param[0],radio_param[1]
-                                    ,radio_param[2],radio_param[3],radio_param[4]);
-                                cmd=0;
-                            }
-                            break;
-                        case 3:
-                            //printk("[FM Remote] get pong cmd: %x\n",c);
-                            cmd=0;                                    
-                        default:
-                            cmd=0;
-                            break;
-                    }
-                    break;
-            }
-            
-        }
-        else
-        {
-            irq_disable(IRQ_UART1);
-            switch(c)
-            {
-                case 0xf8:
-                    while(1)
-                    {
-                        count=0;
-                        while(!uart_in(&c,UART_1) && count<4200) count++;
-                        if(count >=4200)
-                        {
-                            uart_out('v',UART_1);
-                            printk("is this a pause?\n");
-                            break;
-                        }
-                    }
-                    break;
-                 case 'V':
-                    FM_connected=1;
-                    nbPingSend=0;
-                    inHold=0;
-                    FM_do_ini_call();
-                    tmr_start(&fmRemote_tmr);
-                    printk("[FM Remote] connected\n");
-                    break;
-                 default:
-                    printk("don't know what to do with %c %02x\n",c,c);
-            }
-            irq_enable(IRQ_UART1);
-        }
-    }
-        
-}
+
 
 void processKey(int key)
 {
@@ -188,7 +76,10 @@ void processKey(int key)
     if(key & 0x80 && key_evt_array[1][0]==-1)
     {
         inHold=~inHold;
-        
+        if(inHold)
+            FM_HOLD_light_on;
+        else
+            FM_HOLD_light_off;
         printk("[FM key] hold %s\n",inHold?"enable":"disable");
         return;
     }
@@ -198,7 +89,7 @@ void processKey(int key)
         if(key_evt_array[i][0]!=-1 && (key & key_evt_array[i][1]) )
         {     
             struct evt_t _evt;           
-            if(lcd_get_state()==0)
+            if(lcd_enabled()==0)
             {
                 /* the lcd is off => turn on and discard the event */
                 lcd_keyPress();
@@ -248,10 +139,7 @@ void test_icons(void)
     }    
 }
 
-int FM_is_connected(void)
-{
-    return FM_connected;
-}
+
 
 void FM_lightsOFF(void)
 {
@@ -297,8 +185,8 @@ void FM_setLight(int type,int direction)
 
 void FM_do_setLight(void)
 {
-    uart_out('P',UART_1);
-    uart_out(light_state&0xFF,UART_1);
+    uart_out('P',FM_REMOTE_UART);
+    uart_out(light_state&0xFF,FM_REMOTE_UART);
 }
 
 int FM_getLight(int type)
@@ -341,6 +229,7 @@ void FM_putText(char * str)
 void FM_putTmpText(char * str,int iter)
 {
     printk("[FM] get tmp txt:%s (iter=%d)\n",str,iter);
+    #warning need something for tmp txt and scroll
     FM_savText(str,TMP_TXT);
     tmp_iter=iter;
     cur_txt=TMP_TXT;
@@ -397,8 +286,8 @@ void FM_do_putText(void)
 void FM_setContrast(int val)
 {
     contrast=val;
-    uart_out('C',UART_1);
-    uart_out(contrast&0xFF,UART_1);
+    uart_out('C',FM_REMOTE_UART);
+    uart_out(contrast&0xFF,FM_REMOTE_UART);
 }
 
 int FM_getContrast(void)
@@ -590,63 +479,21 @@ void FM_do_ini_call(void)
 void FM_send_data(char cmd,char * data,int size)
 {
     int i;
-    uart_out(cmd,UART_1);
+    uart_out(cmd,FM_REMOTE_UART);
     for(i=0;i<size;i++)
-        uart_out(data[i]&0xFF,UART_1);
+        uart_out(data[i]&0xFF,FM_REMOTE_UART);
 }
 
-void fmRemote_chk(void)
-{
-        nbPingSend++;
-        if(nbPingSend>MAX_PING)
-        {
-            FM_connected=0;
-            nbPingSend=0;
-            inHold=0;
-            if(fmRemote_tmr.trigger==1)
-            {
-                tmr_stop(&fmRemote_tmr);
-            }
-            printk("[FM Remote] disconnected\n");
-        }
-        uart_out('v',UART_1);
-}
 
-void init_fm_remote(void)
+
+void FM_init(void)
 {
-    char c;
-    /* setting the gio and cpld */
-    GIO_DIRECTION(GIO_SPDIF,GIO_OUT);
-    GIO_DIRECTION(GIO_VID_OUT,GIO_OUT);
-    GIO_SET(GIO_SPDIF);
-    GIO_SET(GIO_VID_OUT);
-    CPLD_SET_PORT3(CPLD_FM);
-    
-    /*setting up the UART1 port */
-    outw(0x015F,UART1_BASE+UART_BRSR); /* 9600 BAUD */
-    //outw(0x8000,UART1_BASE+UART_MSR);
-    //outw(0x0000,UART1_BASE+UART_RFCR);
-    //outw(0x0300,UART1_BASE+UART_TFCR);
-    
-    /* initiale state */
-    
     inHold=0;
-    FM_connected=0;
+    
+    FM_versionInit();
     
     light_state=0x1;
     FM_put_iniTxt();    
     contrast=0x00;
-
-    irq_changeHandler(IRQ_UART1,fm_remote_INT);
-    /* clear uart1 buffer in */
-    while(uart_in(&c,UART_1)) /*nothing*/;
-    
-    /* launch fm remote tmr */
-    tmr_setup(&fmRemote_tmr,"FM remote remove chk");
-    fmRemote_tmr.action = fmRemote_chk;
-    fmRemote_tmr.freeRun = 1;
-    fmRemote_tmr.stdDelay=HZ>>2; /* 0.5s period */
-    
     printk("[init] fm remote\n");
 }
-

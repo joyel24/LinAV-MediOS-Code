@@ -28,6 +28,10 @@ void getResolution(int * width,int * height);
 
 unsigned int get_sp(void);
 
+void printk_init(void);
+void printk_uartEnable(void);
+void printk_uartDisable(void);
+
 extern unsigned long tick;
 
 extern unsigned int _end_kernel;

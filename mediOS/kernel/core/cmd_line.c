@@ -45,6 +45,8 @@ unsigned char ** arg_list;
 
 THREAD_INFO * cmdLineThread;
 
+int cmd_line_init_ok;
+
 void cmd_line_INT(int irq_num,struct pt_regs * regs)
 {
     if(!cmdLineThread->enable)
@@ -207,10 +209,9 @@ void process_cmd(void)
 
 void init_cmd_line(void)
 {
-    char c;
     int pid;
     cur_pos=0;
-
+    cmd_line_init_ok=0;
     arg_list = (unsigned char**)kmalloc(sizeof(unsigned char*)*MAX_ARGS);
     
     if(!arg_list)
@@ -222,7 +223,7 @@ void init_cmd_line(void)
     cur_cmd = (unsigned char*)kmalloc(sizeof(unsigned char)*MAX_CMD_LEN);
     if(!cur_cmd)
     {
-        kfree(cur_cmd);
+        kfree(arg_list);
         printk("[init] cmd line, can't allocate memory for args\n");
         return;
     }
@@ -230,20 +231,44 @@ void init_cmd_line(void)
     
     cur_cmd[0]='\0';
 
-    uart_need(CMD_LINE_UART);
-
-    irq_changeHandler(CMD_LINE_UART==UART_0?IRQ_UART0:IRQ_UART1,cmd_line_INT);
-        /* clear uart1 buffer in */
-    while(uart_in(&c,CMD_LINE_UART)) /*nothing*/;
-
+    
     pid=thread_startFct(&cmdLineThread,cmd_line_thread,"cmd line",THREAD_DISABLE_STATE,PRIO_HIGH);
     
     if(pid<0)
     {
         printk("Error creating cmd line thread: %d\n",-pid);
+        
+        kfree(cur_cmd);
+        kfree(arg_list);
         return;
     }
+    cmd_line_init_ok=1;
+    cmd_line_enable();
+    printk("[init] cmd line (thread pid:%d)\n",pid);    
+}
+
+void cmd_line_enable(void)
+{
+    char c;
     
-    printk("[init] cmd line (thread pid:%d)\n",pid);
+    if(cmd_line_init_ok)
+    {
+        uart_need(CMD_LINE_UART);
+        uart_changeSpeed(115200,CMD_LINE_UART);
+    
+        irq_changeHandler(UART_IRQ_NUM(CMD_LINE_UART),cmd_line_INT);
+            /* clear uart1 buffer in */
+        while(uart_in(&c,CMD_LINE_UART)) /*nothing*/;
+        irq_enable(UART_IRQ_NUM(CMD_LINE_UART));
+    }
+}
+
+void cmd_line_disable(void)
+{
+    if(cmd_line_init_ok)
+    {
+        uart_restoreIrqHandler(UART_IRQ_NUM(CMD_LINE_UART));
+        irq_disable(UART_IRQ_NUM(CMD_LINE_UART));
+    }
 }
 

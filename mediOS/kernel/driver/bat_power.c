@@ -150,10 +150,8 @@ void lcd_timer_action(void)
     if(lcd_timer_used[num])
     {
         lcd_disable();
-#ifdef HAVE_FM_REMOTE
         if(FM_is_connected())
             FM_lightsOFF();
-#endif
     }
 }
 
@@ -180,10 +178,8 @@ void halt_timer_action(void)
 void lcd_keyPress(void)
 {
     lcd_enable();
-#ifdef HAVE_FM_REMOTE
     if(FM_is_connected())
         FM_lightsON();
-#endif
     lcd_launchTimer();
 }
 

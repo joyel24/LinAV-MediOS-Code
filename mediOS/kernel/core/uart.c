@@ -23,10 +23,7 @@ struct pipe UART_PIPES[2];
 struct pipe * UART_0_Pipe;
 struct pipe * UART_1_Pipe;
 
-unsigned int uart_addr[2]={
-    UART0_BASE,
-    UART1_BASE
-};
+int uart_clockSpeed;
 
 void uart_intAction(int irq,struct pt_regs * regs)
 {
@@ -36,18 +33,18 @@ void uart_intAction(int irq,struct pt_regs * regs)
     printk("[int] uart %d\n",uart);
     
 //    if(inw(uart_addr[uart]+UART_SR)&0x0004)
-    while(inw(uart_addr[uart]+UART_SR)&0x0004)
+    while(inw(UART_REG(uart)+UART_SR)&0x0004)
     {
-        c=(unsigned char)(inw(uart_addr[uart]+UART_DTRR)&0xFF);
+        c=(unsigned char)(inw(UART_REG(uart)+UART_DTRR)&0xFF);
         pipeWrite (&UART_PIPES[uart], &c, 1);
     }
 }
 
 int uart_in(unsigned char * data,int uartNum)
 {
-    if(inw(uart_addr[uartNum]+UART_SR)&0x0004) /* check if something is in the reception buffer */
+    if(inw(UART_REG(uartNum)+UART_SR)&0x0004) /* check if something is in the reception buffer */
     {
-        *data=(unsigned char)(inw(uart_addr[uartNum]+UART_DTRR)&0xFF);
+        *data=(unsigned char)(inw(UART_REG(uartNum)+UART_DTRR)&0xFF);
         return 1;
     }
     else
@@ -56,8 +53,8 @@ int uart_in(unsigned char * data,int uartNum)
 
 void uart_out(unsigned char data,int uartNum)
 {
-    while(!(inw(uart_addr[uartNum]+UART_SR)&0x400)) /* Nothing */; /* using transmission buffer level */
-    outw(data,uart_addr[uartNum]+UART_DTRR);
+    while(!(inw(UART_REG(uartNum)+UART_SR)&0x400)) /* Nothing */; /* using transmission buffer level */
+    outw(data,UART_REG(uartNum)+UART_DTRR);
 }
 
 void uart_outString(unsigned char * data,int uartNum)
@@ -72,7 +69,7 @@ void uart_outString(unsigned char * data,int uartNum)
 
 void uart_restoreIrqHandler(int uartNum)
 {
-    irq_changeHandler(uartNum == 0?IRQ_UART0:IRQ_UART1,uart_intAction);
+    irq_changeHandler(UART_IRQ_NUM(uartNum),uart_intAction);
 }
 
 void uart_need(int uart_num)
@@ -80,24 +77,19 @@ void uart_need(int uart_num)
     arch_uart_need(uart_num);
 }
 
+void uart_changeSpeed(int speed,int uart_num)
+{
+    int brsr = ((float)uart_clockSpeed/(16*speed))-1+0.5;
+    outw(brsr,UART_REG(uart_num)+UART_BRSR);
+}
+
 void uart_init(void)
 {
-    /*int i;
-    for(i=0;i<7;i++)
-        printk("%d:%x\n",i,inw(uart_addr[1]+i*2));*/
-    
-    uart_need(DEBUG_UART);
-        
     UART_0_Pipe=&UART_PIPES[0];
     UART_1_Pipe=&UART_PIPES[1];
 
     UART_0_Pipe->nOUT = UART_0_Pipe->nIN = 0;
     UART_1_Pipe->nOUT = UART_1_Pipe->nIN = 0;  
 
-    irq_enable(IRQ_UART0);
-    irq_enable(IRQ_UART1);
-
     arch_uart_init();
-    
-    printk("[init] uart\n");
 }

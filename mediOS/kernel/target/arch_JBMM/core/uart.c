@@ -25,7 +25,9 @@ void arch_uart_need(int uart_num)
     }
 }
 
+extern int uart_clockSpeed;
+
 void arch_uart_init()
 {
-
+    uart_clockSpeed = CONFIG_ARM_CLK;
 }

@@ -50,11 +50,7 @@ int nb_pressed[NB_BUTTONS];
 int press_step[NB_BUTTONS];
 
 
-
-
-#ifdef HAVE_FM_REMOTE
 extern int inHold;
-#endif
 
 extern int btn_mask[NB_BUTTONS];
 
@@ -138,10 +134,8 @@ void btn_processPress(int val)
             
             if(nb_pressed[btn]==0)
             {
-#ifdef HAVE_FM_REMOTE
                 if(!inHold)
                 {
-#endif
                     switch(press_step[btn])
                     {
                         case 0:
@@ -208,19 +202,23 @@ void btn_processPress(int val)
                             case BTN_DOWN:
                                 con_screenScroll(1);
                                 break;
+                            default:
+                             /* other keys : post the event */
+                                evt.evt=btn+1;
+                                evt.evt_class=BTN_CLASS;
+                                evt.data=(void*)mx_press[btn];
+                                evt_send(&evt);
                         }
                     }
 #endif
 
                    //printk("BTN %d pressed\n",btn);
-#ifdef HAVE_FM_REMOTE
                 }
                 else
                 {
-                    //FM_putTmpText("** HOLD **",30);
+                    FM_putTmpText("** HOLD **",30);
                     printk("** HOLD **\n");
                 }
-#endif
             }
             else
                 nb_pressed[btn]--;

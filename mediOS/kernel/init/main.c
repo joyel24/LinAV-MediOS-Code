@@ -42,10 +42,7 @@
 #include <kernel/buttons.h>
 #include <kernel/disk.h>
 #include <kernel/ata.h>
-
-#ifdef HAVE_FM_REMOTE
 #include <kernel/fm_remote.h>
-#endif
 
 #ifdef HAVE_EXT_MODULE
 #include <kernel/ext_module.h>
@@ -85,49 +82,54 @@ void print_boot_info(void)
 
 void kernel_thread(void);
 
-extern THREAD_INFO * threadCurrent;
-
-/*
-void testThread1()
-{
-    while(1);    
-    printk("About to exit th1\n");
-}
-
-void testThread2()
-{
-    while(1);       
-    printk("About to exit th2\n");
-}
-*/
-
-/*
 void test_fct(void)
 {
-    int fd,cnt;
+    int evtHand;
+    int evt;
+
+
+    int stop = 0;
     
+
+       
+    evtHand=evt_getHandler(BTN_CLASS);
     
-    fd=open("/sd.bin",O_RDWR|O_CREAT);
-    if(fd<0)
+    while(!stop)
     {
-        printk("Error opening file\n");
-        return;
+        evt = evt_getStatus(evtHand);
+               
+        if(evt==NO_EVENT)
+            continue;
+            
+        switch(evt)
+        {
+            case BTN_F1:
+                FM_enable();              
+                break;
+            case BTN_F2:
+                FM_disable();              
+                break;
+            case BTN_OFF:
+                stop=1;
+                break;
+        }
     }
-    cnt=write(fd,(void*)(SDRAM_START), SDRAM_END-SDRAM_START);
-    printk("Wrote %d\n",cnt);
-    close(fd);
     
 }
-*/
+
 
 void kernel_start (void)
 {
    /* sanity init */
     threadCurrent=NULL;
-   /* malloc of max space in SDRAM */
-   
+    
+   /* need uart ok for printk init */   
+    uart_init();
+    printk_init();
+    
+    /* malloc of max space in SDRAM */
     mem_init((void*)MALLOC_START,MALLOC_SIZE);
-
+    
     gfx_init();
 
 #ifdef HAVE_CONSOLE
@@ -161,14 +163,12 @@ void kernel_start (void)
     tmr_init();
 
     /* driver init */
-    uart_init();
     cpld_init();
     
     lcd_init();
 
-#ifdef HAVE_CMD_LINE
     init_cmd_line();
-#endif
+
 #ifdef HAVE_EVT
     evt_init();
 #endif
@@ -176,15 +176,13 @@ void kernel_start (void)
 #ifdef CHK_BAT_POWER
     init_power();
 #endif
-#ifndef PMA
     init_rtc();
-#endif
 #ifdef CHK_USB_FW
     init_usb_fw();
 #endif
-#ifdef HAVE_FM_REMOTE
-    init_fm_remote();
-#endif
+
+    FM_init();
+
 #ifdef HAVE_EXT_MODULE
     init_ext_module();
     init_dvr_module();
@@ -197,9 +195,8 @@ void kernel_start (void)
         printk("[init] ------ Halting\n");
         for(;;);
     }
-#ifndef PMA
+    
     sound_init();
-#endif
     printk("[init] ------------ drivers done\n");
     
     /*Load kernel thread to enable irq*/
@@ -218,19 +215,13 @@ void kernel_thread(void)
     printk("[SYS thread] starting\n");
     print_boot_info();
         
-#if 0   
-        THREAD_INFO * ptr_thread1;
-        THREAD_INFO * ptr_thread2;
-        
-        thread_startFct(&ptr_thread1,testThread1,"Thread 1",THREAD_DISABLE_STATE,PRIO_MED);
-        thread_startFct(&ptr_thread2,testThread2,"Thread 2",THREAD_DISABLE_STATE,PRIO_LOW);
-#endif
-    
 #ifdef BUILD_LIB
     app_main(1,&stdalone);
     reload_firmware();
 #endif
+
     
+    //FM_enable();
     shell_main();
 
     /* should we launch HALT */

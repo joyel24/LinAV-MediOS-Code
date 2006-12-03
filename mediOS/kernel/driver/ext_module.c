@@ -68,12 +68,7 @@ struct tmr_s extModule_tmr;
 
 void process_ext_mod_chg(int res)
 {
-    if( 1 
-#ifdef HAVE_FM_REMOTE   
-    && !FM_is_connected()
-#endif
-     && !kFWIsConnected()
-    )
+    if( !FM_is_connected() && !kFWIsConnected())
     {
             if(res==AV_MODULE_NONE)
                 do_mod_disconnect(connected_module);
@@ -160,12 +155,7 @@ void init_ext_module(void)
     for(i=0;i<NB_EXT_MODULES;i++)
         actions_array[i]=NULL;
         
-    if( 1 
-#ifdef HAVE_FM_REMOTE   
-    && !FM_is_connected()
-#endif
-     && !kFWIsConnected()
-    )
+    if( !FM_is_connected() && !kFWIsConnected() )
     {
         connected_module=get_module();        
     }

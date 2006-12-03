@@ -38,6 +38,7 @@
 /* DEBUG */
 #define DEBUG_UART              UART_1
 #define CMD_LINE_UART           UART_1
+#define FM_REMOTE_UART          UART_1
 
 /* Interrupts */
 
