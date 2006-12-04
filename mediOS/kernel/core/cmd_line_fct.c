@@ -23,6 +23,7 @@
 #include <kernel/disk.h>
 #include <kernel/gio.h>
 #include <kernel/cpld.h>
+#include <kernel/fm_remote.h>
 
 struct cmd_line_s cmd_tab[] = {
     {
@@ -384,3 +385,4 @@ void do_cpldWrite (unsigned char ** params)
     cpld_write(portNum,val);
     printk("wrote %x in cpld_%d\n",val,portNum);    
 }
+

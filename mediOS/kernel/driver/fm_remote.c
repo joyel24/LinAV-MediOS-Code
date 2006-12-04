@@ -20,7 +20,9 @@
 #include <kernel/evt.h>
 
 #include <kernel/fm_remote.h>
-
+#include <kernel/lcd.h>
+#include <kernel/timer.h>
+#include <kernel/cmd_line.h>
 
 #define INI_TXT       "--mediOS--"
 
@@ -45,6 +47,7 @@ struct txt_data txt[2];
 int cur_txt=NORMAL_TXT;
 int txt_scroll_count=0;
 int tmp_iter=0;
+int tmp_cnt;
 
 int txt_scroll_ctrl=1;
 
@@ -65,8 +68,15 @@ int key_evt_array[NB_KEY][2] = {
     { BTN_ON       , 0x02 }  /* PRESS */
 };
 
+struct tmr_s fmRemote_tmr;
 
+int FM_connected=0;
+int nbPingSend=0;
+char radio_param[5];
+int keepTmr;
 
+char cmd=0;
+int fm_index;
 
 void processKey(int key)
 {
@@ -76,10 +86,7 @@ void processKey(int key)
     if(key & 0x80 && key_evt_array[1][0]==-1)
     {
         inHold=~inHold;
-        if(inHold)
-            FM_HOLD_light_on;
-        else
-            FM_HOLD_light_off;
+        
         printk("[FM key] hold %s\n",inHold?"enable":"disable");
         return;
     }
@@ -232,6 +239,7 @@ void FM_putTmpText(char * str,int iter)
     #warning need something for tmp txt and scroll
     FM_savText(str,TMP_TXT);
     tmp_iter=iter;
+    tmp_cnt=0;
     cur_txt=TMP_TXT;
     FM_do_putText();
 }
@@ -474,6 +482,7 @@ void FM_do_ini_call(void)
     FM_do_setLight();
     FM_do_putText();
     FM_setContrast(contrast);
+    FM_do_setIcon();
 }
 
 void FM_send_data(char cmd,char * data,int size)
@@ -484,14 +493,180 @@ void FM_send_data(char cmd,char * data,int size)
         uart_out(data[i]&0xFF,FM_REMOTE_UART);
 }
 
+int FM_is_connected(void)
+{
+    return FM_connected;
+}
 
+void fm_remote_INT(int irq_num,struct pt_regs * reg)
+{
+    unsigned char c;
+    while(uart_in(&c,FM_REMOTE_UART))
+    {
+        if(FM_connected)
+        {
+            switch(c)
+            {        
+                case 'V':
+                    cmd=3;
+                    fm_index=0;
+                    break;
+                case 'K':
+                    cmd=1;
+                    fm_index=0;
+                    break;
+                case 'R':
+                    cmd=2;
+                    fm_index=0;
+                    break;
+                default:
+                    switch(cmd)
+                    {
+                        case 1:                            
+                            if(c!=0)
+                            {
+                                //printk("[fm remote] get key : %x\n",c);
+                                processKey(c);
+                            }
+                            cmd=0;
+                            break;
+                        case 2:
+                            radio_param[fm_index++]=c;
+                            if(fm_index==5)
+                            {
+                                printk("[FM Remote] get radio cmd: %x%x%x%x%x\n",radio_param[0],radio_param[1]
+                                    ,radio_param[2],radio_param[3],radio_param[4]);
+                                cmd=0;
+                            }
+                            break;
+                        case 3: /* get pong */
+                            nbPingSend=0;
+                            cmd=0;
+                            break;
+                        default:
+                            if(c!=0)
+                            {
+                                printk("UNK char : %x\n",c);
+                            }
+                            cmd=0;
+                            break;
+                    }
+                    break;
+            }
+        }
+        else
+        {
+            switch(c)
+            {
+                case 'V':
+                    cmd=0;
+                    fm_index=0;
+                    FM_connected=1;
+                    nbPingSend=0;
+                    inHold=0;
+                    FM_do_ini_call();
+                    printk("[FM Remote] connected\n");
+                    break;
+                default:
+                    break;
+            }
+        }
+    }        
+}
+
+void fmRemote_chk(void)
+{
+    if(FM_connected)
+    {
+        if(cur_txt==TMP_TXT)
+        { 
+            tmp_iter--;
+            if(tmp_iter<0)
+            {
+                cur_txt=NORMAL_TXT;
+                FM_do_putText();
+            }
+            else
+            {
+                if(tmp_cnt)
+                {
+                    tmp_cnt=0;
+                    FM_do_putText();
+                }
+                else
+                {
+                    tmp_cnt=1;
+                    FM_send_data('T',"           ",11);
+                }
+            }            
+        }
+        nbPingSend++;
+        if(nbPingSend>MAX_PING)
+        {
+            FM_connected=0;
+            nbPingSend=0;
+            inHold=0;
+            printk("[FM Remote] disconnected\n");
+        }
+     }
+     uart_out('v',FM_REMOTE_UART);
+}
+
+void FM_enable(void)
+{
+    char c;
+    
+    if(FM_REMOTE_UART==CMD_LINE_UART || FM_REMOTE_UART== DEBUG_UART)
+    {
+        cmd_line_disable();
+        printk_uartDisable();
+    }
+    
+    uart_changeSpeed(9600,FM_REMOTE_UART);
+    
+    /* initiale state */
+    
+    FM_connected=0;
+    
+    irq_changeHandler(UART_IRQ_NUM(FM_REMOTE_UART),fm_remote_INT);
+    /* clear uart buffer in */
+    while(uart_in(&c,FM_REMOTE_UART)) /*nothing*/;
+    irq_enable(UART_IRQ_NUM(FM_REMOTE_UART));
+    
+    /* launch fm remote tmr */
+    tmr_start(&fmRemote_tmr);
+}
+
+void FM_disable(void)
+{
+    if(fmRemote_tmr.trigger==1)
+        tmr_stop(&fmRemote_tmr);
+    uart_restoreIrqHandler(UART_IRQ_NUM(FM_REMOTE_UART));
+    irq_disable(UART_IRQ_NUM(FM_REMOTE_UART));
+    if(FM_REMOTE_UART==CMD_LINE_UART || FM_REMOTE_UART== DEBUG_UART)
+    {
+        cmd_line_enable();
+        printk_uartEnable();
+    }
+}
 
 void FM_init(void)
 {
     inHold=0;
     
-    FM_versionInit();
+    fm_index=0;
+    FM_connected=0;
+    keepTmr = 0;
     
+    tmr_setup(&fmRemote_tmr,"FM remote remove chk");
+    fmRemote_tmr.action = fmRemote_chk;
+    fmRemote_tmr.freeRun = 1;
+    fmRemote_tmr.stdDelay=HZ>>2; /* 0.5s period */
+    
+#if FM_VER==1
+        CPLD_SET_PORT3(CPLD_FM);
+#endif
+
     light_state=0x1;
     FM_put_iniTxt();    
     contrast=0x00;

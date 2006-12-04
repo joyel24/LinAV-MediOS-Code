@@ -40,6 +40,8 @@
 #define CMD_LINE_UART           UART_1
 #define FM_REMOTE_UART          UART_1
 
+#define FM_VER                  1
+
 /* Interrupts */
 
 #define INTC_BASE                         0x00030580

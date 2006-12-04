@@ -223,8 +223,8 @@ void kernel_thread(void)
     reload_firmware();
 #endif
 
-    
     //FM_enable();
+    
     shell_main();
 
     /* should we launch HALT */

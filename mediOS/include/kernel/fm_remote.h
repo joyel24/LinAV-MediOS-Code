@@ -15,7 +15,6 @@
 
 
 #include <kernel/uart.h>
-#define FM_UART 1
 
 #define MAX_PING      3
 #define MAX_NON_GET   5
@@ -39,9 +38,7 @@
 #define FM_REC_light_on      FM_setLight(0x1,0x1)
 #define FM_REC_light_off     FM_setLight(0x1,0x0)
 #define FM_REC_light_is_on   FM_getLight(0x1)
-#define FM_HOLD_light_on      FM_setLight(0x2,0x1)
-#define FM_HOLD_light_off     FM_setLight(0x2,0x0)
-#define FM_HOLD_light_is_on   FM_getLight(0x2)
+
 void FM_lightsOFF(void);
 void FM_lightsON(void);
 int  FM_lightsState(void);
@@ -133,8 +130,12 @@ void FM_do_setRadio(void);
 void FM_send_data(char cmd,char * data,int size);
 void FM_do_ini_call(void);
 
-void Fm_init(void);
-void FM_versionInit(void);
+void FM_INT_wait_conn(unsigned char c);
+
+void FM_init(void);
+void FM_verInit(void);
+void FM_enable(void);
+void FM_disable(void);
 /************************************** end private functions */
 
 #endif

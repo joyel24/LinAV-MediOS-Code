@@ -38,8 +38,6 @@ int CPLD_VER;
 
 void cpld_init(void)
 {
-    int i;
-    
     printk("CPLD %d = %x\n",0,cpld_read(CPLD0));
     cpld_doSelect();
     printk("CPLD %d = %x",1,cpld_read(CPLD1));    

@@ -1,7 +1,7 @@
 include $(MEDIOS_SRC_PATH)/Makefile.conf
 
 SRC =  ata.c cpld.c i2c.c rtc.c buttons.c usb_fw.c bat_power.c clkc.c cache.c lcd.c \
-    fm_remote_$(FM_REMOTE_VERSION).c fm_remote.c
+    fm_remote.c
 
 ifeq ("$(CHIP_TYPE)","DM270")
 	SRC += clkc_DM270.c

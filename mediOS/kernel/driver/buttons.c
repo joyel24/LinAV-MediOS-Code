@@ -21,10 +21,9 @@
 #include <kernel/gio.h>
 #include <kernel/evt.h>
 
-//#include <kernel/hw_chk.h>
 #include <kernel/bat_power.h>
 #include <kernel/lcd.h>
-
+#include <kernel/fm_remote.h>
 #include <kernel/buttons.h>
 
 #ifdef HAVE_CONSOLE
@@ -216,7 +215,7 @@ void btn_processPress(int val)
                 }
                 else
                 {
-                    FM_putTmpText("** HOLD **",30);
+                    FM_putTmpText("** HOLD **",10);
                     printk("** HOLD **\n");
                 }
             }

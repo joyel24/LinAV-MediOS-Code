@@ -35,6 +35,7 @@
 #define CMD_LINE_UART           UART_0
 #define FM_REMOTE_UART          UART_1
 
+#define FM_VER                  1
 
 #define BUS_ECR                           0x30900
 #define BUS_EBYTER                        0x30902
