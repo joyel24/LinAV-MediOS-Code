@@ -126,9 +126,12 @@
 /* Needed for ATA through OMAP       */
 
 #define HD_RESET_OFFSET                   0x18BFFCC
-#define OMAP_REFRESH_BASE                 0x18BFFC8
+#define OMAP_REQUEST_BASE                 0x18BFFC8
 #define OMAP_READ_REQUEST                 0x1
 #define OMAP_WRITE_REQUEST                0x2
+#define OMAP_STATUS_REQUEST               0x3
+#define OMAP_ALTS_ERR_REQUEST             0x4
+#define OMAP_CMD_REQUEST                  0x5
 
 /* DMA          */
 

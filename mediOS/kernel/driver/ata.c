@@ -110,6 +110,10 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
             outb(av_cmd_array[cmd],IDE_COMMAND);
             break;
     }
+#ifdef PMA
+    outb(OMAP_CMD_REQUEST,OMAP_REQUEST_BASE);
+    while(inb(OMAP_REQUEST_BASE));
+#endif
     //outb(av_cmd_array[ata_cmd->xfer_dir],IDE_COMMAND);
 
 #ifdef NO_DMA
@@ -170,8 +174,8 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
                 for(j=0;j<SECTOR_SIZE;j+=2)
                 {
 #ifdef PMA
-                    outb(OMAP_READ_REQUEST,OMAP_REFRESH_BASE);
-                    while(inb(OMAP_REFRESH_BASE));
+                    outb(OMAP_READ_REQUEST,OMAP_REQUEST_BASE);
+                    while(inb(OMAP_REQUEST_BASE));
 #endif
                     outw(inw(IDE_DATA),buffer+j);
                 }
@@ -186,8 +190,8 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
                     outw(inw(buffer+j),IDE_DATA);
 #endif
 #ifdef PMA
-                    outb(OMAP_WRITE_REQUEST,OMAP_REFRESH_BASE);
-                    while(inb(OMAP_REFRESH_BASE));
+                    outb(OMAP_WRITE_REQUEST,OMAP_REQUEST_BASE);
+                    while(inb(OMAP_REQUEST_BASE));
 #endif
                 }
             }
@@ -213,6 +217,10 @@ int ata_sleep(void)
         return -1;
     outb(0,IDE_SELECT);
     outb(IDE_CMD_SLEEP,IDE_COMMAND);
+#ifdef PMA
+    outb(OMAP_CMD_REQUEST,OMAP_REQUEST_BASE);
+    while(inb(OMAP_REQUEST_BASE));
+#endif
     return 0;
 }
 
@@ -261,6 +269,10 @@ void ata_stopHDEnd(void)
 void ata_sofReset(void)
 {
     outb(0xa,IDE_CONTROL);
+#ifdef PMA
+    outb(OMAP_CMD_REQUEST,OMAP_REQUEST_BASE);
+    while(inb(OMAP_REQUEST_BASE));
+#endif
 }
 
 int ata_waitForXfer(void)
@@ -269,6 +281,10 @@ int ata_waitForXfer(void)
     t=tmr_getTick();
     do
     {
+#ifdef PMA
+        outb(OMAP_ALTS_ERR_REQUEST,OMAP_REQUEST_BASE);
+        while(inb(OMAP_REQUEST_BASE));
+#endif
         val=inb(IDE_ALTSTATUS);
         if((val & IDE_STATUS_BSY)==0 && (val & IDE_STATUS_DRQ)!=0)
             return 0;
@@ -284,6 +300,10 @@ int ata_waitForReady(void)
     t=tmr_getTick();
     do
     {
+#ifdef PMA
+        outb(OMAP_ALTS_ERR_REQUEST,OMAP_REQUEST_BASE);
+        while(inb(OMAP_REQUEST_BASE));
+#endif
         val=inb(IDE_ALTSTATUS);
         if((val & IDE_STATUS_BSY)==0 && (val & IDE_STATUS_RDY)!=0)
             return 0;
@@ -295,6 +315,10 @@ int ata_waitForReady(void)
 
 int ata_status(void)
 {
+#ifdef PMA
+    outb(OMAP_ALTS_ERR_REQUEST,OMAP_REQUEST_BASE);
+    while(inb(OMAP_REQUEST_BASE));
+#endif
     return inb(IDE_ALTSTATUS);
 }
 
