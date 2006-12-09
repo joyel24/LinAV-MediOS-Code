@@ -111,7 +111,7 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
             break;
     }
 #ifdef PMA
-    outb(OMAP_CMD_REQUEST,OMAP_REQUEST_BASE);
+    outb(OMAP_HD_CMD_REQUEST,OMAP_REQUEST_BASE);
     while(inb(OMAP_REQUEST_BASE));
 #endif
     //outb(av_cmd_array[ata_cmd->xfer_dir],IDE_COMMAND);
@@ -174,7 +174,7 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
                 for(j=0;j<SECTOR_SIZE;j+=2)
                 {
 #ifdef PMA
-                    outb(OMAP_READ_REQUEST,OMAP_REQUEST_BASE);
+                    outb(OMAP_HD_READ_REQUEST,OMAP_REQUEST_BASE);
                     while(inb(OMAP_REQUEST_BASE));
 #endif
                     outw(inw(IDE_DATA),buffer+j);
@@ -190,7 +190,7 @@ int ata_rwData(int disk,unsigned int lba,void * data,int count,int cmd,int use_d
                     outw(inw(buffer+j),IDE_DATA);
 #endif
 #ifdef PMA
-                    outb(OMAP_WRITE_REQUEST,OMAP_REQUEST_BASE);
+                    outb(OMAP_HD_WRITE_REQUEST,OMAP_REQUEST_BASE);
                     while(inb(OMAP_REQUEST_BASE));
 #endif
                 }
@@ -218,7 +218,7 @@ int ata_sleep(void)
     outb(0,IDE_SELECT);
     outb(IDE_CMD_SLEEP,IDE_COMMAND);
 #ifdef PMA
-    outb(OMAP_CMD_REQUEST,OMAP_REQUEST_BASE);
+    outb(OMAP_HD_CMD_REQUEST,OMAP_REQUEST_BASE);
     while(inb(OMAP_REQUEST_BASE));
 #endif
     return 0;
@@ -270,7 +270,7 @@ void ata_sofReset(void)
 {
     outb(0xa,IDE_CONTROL);
 #ifdef PMA
-    outb(OMAP_CMD_REQUEST,OMAP_REQUEST_BASE);
+    outb(OMAP_HD_CMD_REQUEST,OMAP_REQUEST_BASE);
     while(inb(OMAP_REQUEST_BASE));
 #endif
 }
@@ -282,7 +282,7 @@ int ata_waitForXfer(void)
     do
     {
 #ifdef PMA
-        outb(OMAP_ALTS_ERR_REQUEST,OMAP_REQUEST_BASE);
+        outb(OMAP_HD_ALTS_ERR_REQUEST,OMAP_REQUEST_BASE);
         while(inb(OMAP_REQUEST_BASE));
 #endif
         val=inb(IDE_ALTSTATUS);
@@ -301,7 +301,7 @@ int ata_waitForReady(void)
     do
     {
 #ifdef PMA
-        outb(OMAP_ALTS_ERR_REQUEST,OMAP_REQUEST_BASE);
+        outb(OMAP_HD_ALTS_ERR_REQUEST,OMAP_REQUEST_BASE);
         while(inb(OMAP_REQUEST_BASE));
 #endif
         val=inb(IDE_ALTSTATUS);
@@ -316,7 +316,7 @@ int ata_waitForReady(void)
 int ata_status(void)
 {
 #ifdef PMA
-    outb(OMAP_ALTS_ERR_REQUEST,OMAP_REQUEST_BASE);
+    outb(OMAP_HD_ALTS_ERR_REQUEST,OMAP_REQUEST_BASE);
     while(inb(OMAP_REQUEST_BASE));
 #endif
     return inb(IDE_ALTSTATUS);

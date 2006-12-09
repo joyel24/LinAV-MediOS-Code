@@ -54,11 +54,18 @@
 #define Y_OFFSET 0x09
 #endif
 
-#if defined(AV3XX) || defined(AV4XX) || defined(PMA)
+#if defined(AV3XX) || defined(AV4XX)
 #define LCD_WIDTH 320
 #define LCD_HEIGHT 240
 #define X_OFFSET 0x14
 #define Y_OFFSET 0x12
+#endif
+
+#if defined(PMA)
+#define LCD_WIDTH 320
+#define LCD_HEIGHT 240
+#define X_OFFSET 0x9B
+#define Y_OFFSET 0x2A
 #endif
 
 #define OSD_BITMAP1_WIDTH 160
@@ -80,7 +87,7 @@ int bt_SELECT = BTMASK_F3;
 int bt_MENU = BTMASK_OFF;
 #endif
 
-#if defined(AV4XX) || defined(PMA)
+#if defined(AV4XX)
 int bt_UP = BTMASK_UP;
 int bt_DOWN = BTMASK_DOWN;
 int bt_LEFT = BTMASK_LEFT;
@@ -88,6 +95,18 @@ int bt_RIGHT = BTMASK_RIGHT;
 int bt_A = BTMASK_BTN1;
 int bt_B = BTMASK_ON;
 int bt_START = BTMASK_F1;
+int bt_SELECT = BTMASK_OFF;
+int bt_MENU = BTMASK_F2;
+#endif
+
+#if defined(PMA)
+int bt_UP = BTMASK_UP;
+int bt_DOWN = BTMASK_DOWN;
+int bt_LEFT = BTMASK_LEFT;
+int bt_RIGHT = BTMASK_RIGHT;
+int bt_A = BTMASK_F1;
+int bt_B = BTMASK_ON;
+int bt_START = BTMASK_F3;
 int bt_SELECT = BTMASK_OFF;
 int bt_MENU = BTMASK_F2;
 #endif

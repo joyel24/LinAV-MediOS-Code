@@ -197,9 +197,8 @@ void kernel_start (void)
         printk("[init] ------ Halting\n");
         for(;;);
     }
-#ifndef PMA    
     sound_init();
-#endif
+
     printk("[init] ------------ drivers done\n");
     
     /*Load kernel thread to enable irq*/

@@ -46,11 +46,18 @@
 #define Y_OFFSET 0
 #endif
 
-#if defined(AV3XX) || defined(AV4XX) || defined(PMA)
+#if defined(AV3XX) || defined(AV4XX)
 #define LCD_WIDTH 320
 #define LCD_HEIGHT 240
 #define X_OFFSET 0x14
 #define Y_OFFSET 0x12
+#endif
+
+#if defined(PMA)
+#define LCD_WIDTH 320
+#define LCD_HEIGHT 240
+#define X_OFFSET 0x9B
+#define Y_OFFSET 0x2A
 #endif
 
 extern int frameskip;
@@ -170,7 +177,7 @@ typedef enum {
 static const char *opt2_menu[] = {
  // "Zoom X+1        ",
  // "Zoom Normal     ",
-#ifdef AV3XX
+#if defined (AV3XX) || defined(AV4XX) || defined(PMA)
   "Zoom X          ",
   "Rotate Scr.     ",
 #endif

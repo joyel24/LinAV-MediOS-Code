@@ -20,7 +20,8 @@
 
 void arch_ata_resetHD(void)
 {
-     outb(0x1,HD_RESET_OFFSET);
+     outb(OMAP_HD_RESET_REQUEST,OMAP_REQUEST_BASE);
+     while(inb(OMAP_REQUEST_BASE));
      //printk("Reset done!\n");
 }
 
