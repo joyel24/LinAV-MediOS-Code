@@ -216,7 +216,9 @@ void drawGui(void)
     gfx_putS(lineData.ver_color,lineData.bg_color,lineData.ver_x,lineData.ver_y,medios_ver);
 
     /* and time, and battery */
+#ifndef PMA
     drawTime();
+#endif
     drawBat();
     drawStatus();
     drawLogo();
@@ -230,7 +232,9 @@ void statusLine_handleEvent(int evt)
             drawGui();
             break;
         case EVT_TIMER:
+#ifndef PMA
             drawTime();
+#endif
             if(batteryRefresh == 0)
                 drawBat();
             if(batteryRefresh < batteryRefreshValue)

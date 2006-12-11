@@ -132,6 +132,7 @@
 #define OMAP_HD_ALTS_ERR_REQUEST          0x4
 #define OMAP_HD_CMD_REQUEST               0x5
 #define OMAP_HD_RESET_REQUEST             0x6
+#define OMAP_RESTART_REQUEST              0x7
 
 /* DMA          */
 

@@ -299,7 +299,7 @@ int doevents(void)
 #ifdef STDALONE
             reload_firmware();
 #endif
-#ifdef AV3XX
+#if defined(AV3XX) || defined(AV4XX) || defined(PMA)
            return 0;
 #endif
         }

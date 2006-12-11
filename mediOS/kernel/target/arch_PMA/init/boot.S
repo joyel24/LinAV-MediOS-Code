@@ -9,17 +9,37 @@
 .global entry_code
 entry_code:
 
-   /* av4 init */ 
+   /* av4 init */
     mov r7,pc
     sub r7,r7,#8
 
     /* copy everything to the sdram start */
     msr cpsr_c, #0xDF /* Disable IRQ+FIQ and set SYS mode */
 
+    /* save IARM data */
+    /* ldr r1,=0x18C0000 
+    mov r1,#0
+    mov r2,#1
+    add r1, r1, r2, lsl #24
+    mov r2,#8
+    add r1, r1, r2, lsl #20
+    mov r2,#0xc
+    add r1, r1, r2, lsl #16
+    mov r2,#0
+    mov r0,#8
+    add r2, r2, r0, lsl #12
+    mov r0,#0
+
+    backup_loop:
+        ldmia r0!,{r4,r5,r6,r8,r9,r10,r11,r12}
+        stmia r1!,{r4,r5,r6,r8,r9,r10,r11,r12}
+        subs r2, r2, #32
+        bhi backup_loop  */
+
     /* set UART0 to 115200 bauds */
     mov r5,#0
     mov r1,#3
-    add r5,r5, r1, lsl #16
+    add r5, r5, r1, lsl #16
     add r5, r5, r1, lsl #8
     
     mov r1,#0x36
