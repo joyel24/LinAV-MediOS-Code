@@ -92,7 +92,7 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
         printf("Destination buffer not in SDRAM => no DMA\n");
         ata_cmd->use_dma=ATA_NO_DMA;
     }
-
+#warning need to have a config for DMA
     ata_cmd->use_dma=ATA_NO_DMA;
 
     for(i=0;i<ata_cmd->count;i++)
@@ -135,6 +135,7 @@ int ata_process_cmd(ata_cmd_s * ata_cmd)
         }
         else
         {
+            //printf("No DMA\n");
             if(ata_cmd->xfer_dir==ATA_DO_READ)
                 for(j=0;j<SECTOR_SIZE;j+=2)
                 {

@@ -26,7 +26,7 @@ int read_btn(void){
     if(gio_is_set(GIO_ON_BTN))  val |= (0x1<<8);
     if(gio_is_set(GIO_OFF_BTN)) val |= (0x1<<9);
     val = (~val)&0x3FF;
-
+        
     return val;
 }
 

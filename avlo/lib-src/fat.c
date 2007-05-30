@@ -424,7 +424,8 @@ int fat_mount(int volume, int drive, int startsector)
 }
 
 int getClusterSize(int volume)
-{    struct bpb* fat_bpb = &fat_bpbs[volume];
+{
+    struct bpb* fat_bpb = &fat_bpbs[volume];
     return fat_bpb->bpb_bytspersec*fat_bpb->bpb_secperclus;
 }
 

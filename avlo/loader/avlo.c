@@ -120,7 +120,9 @@ loopErr:
     
     HD_init_string();
     init_disk();
-
+       
+    /**************************/
+    
     printIniLevel(1);
 
     ptr_cfg = &default_cfg;
@@ -234,7 +236,18 @@ loopErr:
                     moveCursor(-1);
                 }
             }
-
+/*            
+            if ((key&BTMASK_MENU1)) {
+                gio_dir(0x1,GIO_OUT);
+                gio_set(0x1);
+            }
+            
+            if ((key&BTMASK_MENU2)) {
+                int * p=(int*)0x30782
+                gio_dir(0x1,GIO_OUT);
+                gio_clear(0x1);
+            }
+*/
             if (((key&BTMASK_ON)||(key&BTMASK_RIGHT)||(key&BTMASK_OK)) && !usbenable)
             {
                 // let's find out the file extension

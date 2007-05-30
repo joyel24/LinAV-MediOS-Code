@@ -5,7 +5,7 @@ ASFLAGS  += -I../include
 GCCFLAGS += -I../include
 
 TARGET=libav.a
-DEST=../build/lib
+DEST=../build/lib/
 
 
 OBJS = ata.o ctype.o disk.o file.o graphics_32.o graphics.o string.o uart.o cpld.o dir.o fat.o i2c.o

@@ -38,4 +38,6 @@ extern unsigned int _iram_end;
 #define SWAB16(x) (x)
 #define SWAB32(x) (x)
 
+#define VERSION "V4.4"
+
 #endif

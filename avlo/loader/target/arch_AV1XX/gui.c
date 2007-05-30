@@ -25,6 +25,7 @@ extern struct avlo_cfg * ptr_cfg;
 void printIniLevel(int level)
 {
     char * str="";
+    int w,h;
     switch(level)
     {
         case 0:
@@ -42,7 +43,9 @@ void printIniLevel(int level)
     }
     printf("%s\n",str);
     setFont(TXT_FONT);
+    getStringS(str,&w,&h);
     putS(COLOR_TXT,COLOR_TSP,0,0,str);
+    putS(COLOR_TXT,COLOR_TSP,0,h+2,VERSION);
 }
 
 void HD_init_string(void)

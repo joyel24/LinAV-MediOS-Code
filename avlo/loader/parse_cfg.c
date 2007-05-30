@@ -31,6 +31,7 @@ int file_open(char *name)
     	printf("error reading config file %s\n",name);
 	return -1;
     }
+    printf("file %s opened\n",name);
     line_num = 1;
     feof_reached=0;
     back = 0;
