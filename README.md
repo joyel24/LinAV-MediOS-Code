@@ -14,7 +14,7 @@ Posted by OxYgen77 2005-12-16
 GnuBoy for the AV available
 The first stable version of the GameBoy emulator is now available for the av :)
 This emu is based on bnuboy
-http://sourceforge.net/project/showfiles.php?group_id=108103&package_id=171957&release_id=376647
+https://github.com/joyel24/LinAV-MediOS-Code/tree/master/files/AvBoy/AvBoy-1.0
 <br>Posted by OxYgen77 2005-12-08
 
 - New program: Gravity
