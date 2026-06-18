@@ -1,0 +1,22 @@
+********************** Gui2 fo Av3xx ********************
+**
+** http://linav.sf.net
+** mail: oxygen77.free.fr
+** irc: server= freenode - chan: #linav
+** yahoo group: linav
+**
+** related projects: http://avos.sf.net , irc #avos
+
+This readme will help you install the new Gui from linav project. This Gui is really beta, this mean some things
+won't work all the time. But it can't do anything to your av.
+
+All you need to do to install it is to copy all files from the package to the root folder of av's hard disk.
+Install a bootloader like avlo (you can find a package in linav sf web page: www.sf.net/projects/linav). 
+Launch the file called linux.bin from the bootloader.
+
+Be sure to have linux.bin and myinit in the root folder of the hard disk and also the avwm folder.
+
+At the end of linux boot the gui will automatically be stated. You'll see a menu with some plugins.
+To view, text, images and hear mp3, use the browser. Menu can be called from plugins using F3 key.
+
+Press the joystick to see the action of each button
