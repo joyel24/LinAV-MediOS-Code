@@ -9,3 +9,7 @@ Next steps should be some cleanup in the kernel, a new sound driver and a new fr
 Of course help would be cool for the kernel or for coding apps using nano-x gui. Avlo also needs some more work so it includes more options in the config file."
 <br>2004-08-07 https://sourceforge.net/p/linav/news/
 
+
+-First release
+This is the first patch release, the patch contains ide support, you'll need to download th uclinux source tree from linav.sf.net and the rom file.
+<br>Posted by OxYgen77 2004-07-05 
