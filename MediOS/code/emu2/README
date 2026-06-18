@@ -1,0 +1,104 @@
+Contact
+
+    * http://linav.sf.net
+    * http://archopen.org
+    * mail: oxygen77@archopen.org
+    * irc: server= freenode - chan: #archopen 
+
+
+Introduction
+This utility provides basic Archos Hardware Emulation
+for more information please visit http://archopen.org
+
+Basic Compilation Instrustions:
+
+Summary
+The steps to get emu2 compiled are
+
+    * Summary
+    * Login to the Project CVS
+    * Download Emu2 source from CVS
+    * Get the other required sources and tools
+    * Set paths
+    * Make
+    * Using Emu2 
+
+
+
+Login to the Project CVS
+
+    * If you are running linux you will likely have a CVS client already installed...
+    * if you need one, take a look at http://sourceforge.net/docs/B01/#cvs_client
+    * using the cvs commandline utility in a bash shell:
+          o first cd to a folder where you want the sourcecode to be downloaded to, then: 
+
+$ cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/linav login
+
+
+    * just hit
+      ENTER
+      when prompted for a password 
+
+Download Emu2 source from CVS
+
+$ cvs checkout emu2
+
+
+Get the other required sources and tools
+You will need the following tools and source files installed
+
+    * G++ (and dependancies)
+    * make (and dependancies)
+    * libx11-dev (and dependancies)
+    * libreadline5-dev (and dependancies) 
+
+Set paths
+You will also need to set the paths so that the make command will know where to find the development sources:
+
+$ PATH=$PATH:/usr/X11R6
+$ PATH=$PATH:/usr/local/bin
+$ export PATH
+
+
+Make
+cd to the folder you upacked the Emu2 source to. if you ls, you should see a file named makefile
+you can now
+
+$ make
+
+
+emu2 Setup:
+------------------------------------
+
+to use emu2 you have to get it from the sourceforge cvs. Next you have to compile emu2. After you get Emu2 compiled, get the source for gdoom(it is part of the medios module on sf) and compile it. Copy 'medios.bin' to the emu2 folder. now you need to make a hard drive image for the emulator. Use dd to create a blank 50MB file called HD.bin
+
+$ dd if=/dev/zero of=HD.bin seek=100 count=1 bs=1M
+
+
+now format this file so that it has the structure of a formated hard drive.
+
+$ /sbin/mkfs.vfat HD.bin
+
+
+create a folder as a mountpoint for your HD.bin
+
+$ sudo mkdir /mnt/archos
+
+
+USAGE EXAMPLE:
+--------------------------
+now mount the HD.bin and copy over the .wads for doom.
+
+$ sudo mount -o loop HD.bin /mnt/archos
+
+
+to run emu2 type the following.
+
+$ ./emu -f medios.bin
+
+GETTING HELP:
+-----------------
+type help to see command list
+type exit to exit emulator
+
+

@@ -1,0 +1,30 @@
+# script to send archive via ftp
+
+ip=$AO_FTP_SERVER
+user=$AO_FTP_USER
+pass=$AO_FTP_PASS
+rdir=$AO_FTP_R_DIR
+if [ -n "$1" ]; then
+fname="$*"
+else
+echo "Error no file to send"
+exit
+fi
+
+# create data to be provided to ftp
+echo "creating ftp data fname=${fname}"
+
+echo "open ${ip}" > ftp.in
+echo "user ${user} ${pass}" >> ftp.in
+echo "bin" >> ftp.in
+echo "prompt" >> ftp.in
+echo "cd ${rdir}" >> ftp.in
+for file in ${fname}; do
+echo "dele $file" >> ftp.in
+echo "put $file" >> ftp.in
+done
+echo "bye" >> ftp.in
+
+echo "sending files by ftp"
+cat ftp.in | ftp -in
+rm ftp.in

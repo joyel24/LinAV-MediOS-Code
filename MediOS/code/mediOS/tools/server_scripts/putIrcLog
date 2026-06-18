@@ -1,0 +1,13 @@
+# sending today irc log
+
+yestDate=`date --date="1 day ago" +"%Y%m%d"`
+
+cd ~/eggdrop/logs/
+
+fname=archopen.${yestDate}.log
+
+if [ -e $fname ]; then
+mvFtp $fname
+else
+echo "$fname not present"
+fi

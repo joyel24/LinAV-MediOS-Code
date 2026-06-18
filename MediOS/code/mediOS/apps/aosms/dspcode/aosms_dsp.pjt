@@ -1,0 +1,30 @@
+; Code Composer Project File, Version 2.0 (do not modify or remove this line)
+
+[Project Settings]
+ProjectDir="Z:\apps\aosms\dspcode\"
+ProjectType=Executable
+CPUFamily=TMS320C54XX
+Tool="Compiler"
+Tool="CustomBuilder"
+Tool="DspBiosBuilder"
+Tool="Linker"
+Config="Release"
+
+[Source Files]
+Source="..\..\..\kernel\libdsp\libdsp.lib"
+Source="aosms_dsp.c"
+Source="C:\CCStudio_v3.1\C5400\cgtools\lib\rts.lib"
+Source="C:\CCStudio_v3.1\C5400\csl\lib\csl5409.lib"
+Source="sn76496.c"
+Source="vectors.asm"
+Source="lnk.cmd"
+
+["Compiler" Settings: "Release"]
+Options=-o2 -fr"$(Proj_dir)\Release" -i"../../../kernel/libdsp/" -d"CHIP_5409" -d"DSPCODE"
+
+["Linker" Settings: "Release"]
+Options=-c -m".\Release\test.map" -o".\Release\test.out" -w -x
+
+["lnk.cmd" Settings: "Release"]
+LinkOrder=1
+

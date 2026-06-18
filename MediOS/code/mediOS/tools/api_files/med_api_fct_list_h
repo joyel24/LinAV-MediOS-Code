@@ -1,0 +1,5 @@
+
+struct user_fct_t fct_array[] = {
+    { "_ctype",
+      (unsigned int)&_ctype
+    },

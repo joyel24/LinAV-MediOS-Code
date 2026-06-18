@@ -1,0 +1,61 @@
+# lds file creation
+
+function conv_hexa {
+	cur_txt=`echo $1 | awk '{ printf("0x%x",$1)}'`
+}
+
+function get_data {
+	cur_txt=`cat $include_file | grep -m1 $1 | awk '{print $3}'`
+}
+
+echo "Creating lds : $1"
+
+dest_file="medios.lds"
+map_file="medios.map"
+include_file="include/kernel/target/arch/arch_def.h"
+template="tools/lds_files/lds_template"
+
+if [ -f $dest_file ]; then
+	rm -f $dest_file
+fi
+
+get_data SDRAM_START
+dram_start=$cur_txt
+
+get_data SDRAM_END
+dram_end=$cur_txt
+
+
+
+get_data SDRAM_START
+
+code_start=$cur_txt
+
+dram_len=$(($dram_end-$dram_start))
+conv_hexa $dram_len
+dram_len=$cur_txt
+
+iram_start=0x00000004
+get_data IRAM_SIZE
+real_iram_len=$cur_txt
+
+if [ $1 = "init" ]; then
+end_dram_size=0x400
+else
+end_dram_size=`grep ^\\\.sdend ${map_file} | awk '{print $3}'`;
+fi
+
+stack_size=0x00000400
+
+iram_len=$(($real_iram_len-$stack_size))
+conv_hexa $iram_len
+iram_len=$cur_txt
+
+cat ${template} | sed > $dest_file \
+ -e "s,@DRAM_START@,${dram_start},g" \
+ -e "s,@CODE_START@,${code_start},g" \
+ -e "s,@DRAM_LEN@,${dram_len},g" \
+ -e "s,@IRAM_START@,${iram_start},g" \
+ -e "s,@IRAM_LEN@,${iram_len},g" \
+ -e "s,@END_DRAM_SIZE@,${end_dram_size},g" \
+

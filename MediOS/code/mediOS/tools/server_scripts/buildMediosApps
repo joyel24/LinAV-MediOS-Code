@@ -1,0 +1,52 @@
+#building mediOS apps
+
+curDate=`date +"%Y%m%d"`
+curTime=`date +"%H:%M"`
+
+phpReport=$1
+savPath=$2
+
+cd ~/archopen_src/build/mediOS
+cp -f ../av3xx.conf ./Makefile.conf
+make incdir
+make mk_api_file
+#disarding messages from make clean
+make clean 2>&1 > /dev/null
+make 2>&1 > /dev/null
+cd apps
+
+zipFile="apps_medios_${curDate}.zip"
+makeResult="apps_makeMedios_${curDate}.log"
+reportFile="apps_reportMedios_${curDate}.log"
+appsReportFile="apps_build_${curDate}.log"
+
+buildAndReport  ${makeResult} ${reportFile} ${phpReport} "apps" "all_med"
+
+echo "##########################################################################" >> ${appsReportFile}
+echo "# Apps build log:"  >> ${appsReportFile}
+echo "# File : ${appsReportFile} - generated:${curDate} at ${curTime}" >> ${appsReportFile}
+echo "##########################################################################" >> ${appsReportFile}
+echo "" >> ${appsReportFile}
+
+nb=0
+tot=0
+
+for file in *.c; do
+fname=`basename $file .c`
+echo -n "$fname :" >> ${appsReportFile}
+tot=$(($tot+1))
+if [ -e ${fname}.med ]; then
+    nb=$(($nb+1))
+    echo "success" >> ${appsReportFile}
+else
+    echo "failed" >> ${appsReportFile}
+fi
+done
+
+echo "\$nb_build[\"${curDate}\"][\"apps\"]=$nb;" >> ${phpReport}
+echo "\$nb_src[\"${curDate}\"][\"apps\"]=$tot;" >> ${phpReport}
+
+zip ${zipFile} *.med
+
+mvFtp $reportFile $makeResult $zipFile ${appsReportFile}
+cp -f ${reportFile} ${makeResult} ${zipFile} ${appsReportFile} ${savPath}

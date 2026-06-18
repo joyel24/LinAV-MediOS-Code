@@ -1,0 +1,45 @@
+; Code Composer Project File, Version 2.0 (do not modify or remove this line)
+
+[Project Settings]
+ProjectDir="C:\cygwin\home\GliGli\mediOS\kernel\libdsp\"
+ProjectType=Library
+CPUFamily=TMS320C54XX
+Tool="Archiver"
+Tool="Compiler"
+Tool="CustomBuilder"
+Tool="DspBiosBuilder"
+Config="Release"
+
+[Source Files]
+Source="aic23.c"
+Source="aic23.h"
+Source="armint.c"
+Source="armint.h"
+Source="hpidma.c"
+Source="hpidma.h"
+Source="ibdma.c"
+Source="ibdma.h"
+Source="libdsp.c"
+Source="libdsp.h"
+
+["Archiver" Settings: "Release"]
+Options=-r -o.\libdsp.lib
+
+["Compiler" Settings: "Release"]
+Options=-o2 -fr"$(Proj_dir)\Release" -d"CHIP_5409" -v549
+
+["aic23.h" Settings: "Release"]
+ExcludeFromBuild=true
+
+["armint.h" Settings: "Release"]
+ExcludeFromBuild=true
+
+["hpidma.h" Settings: "Release"]
+ExcludeFromBuild=true
+
+["ibdma.h" Settings: "Release"]
+ExcludeFromBuild=true
+
+["libdsp.h" Settings: "Release"]
+ExcludeFromBuild=true
+
