@@ -10,6 +10,6 @@ Of course help would be cool for the kernel or for coding apps using nano-x gui.
 <br>2004-08-07 https://sourceforge.net/p/linav/news/
 
 
--First release
+- First release
 This is the first patch release, the patch contains ide support, you'll need to download th uclinux source tree from linav.sf.net and the rom file.
 <br>Posted by OxYgen77 2004-07-05 
