@@ -1,5 +1,0 @@
-
-/* init fct needed to get the others functions */
-void ini_api(void);
-
-/* api fct ptr declaration */

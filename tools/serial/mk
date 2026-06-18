@@ -1,4 +1,0 @@
-nasm -f elf ser.asm
-gcc ser.o -nostartfiles -L/usr/lib
-mv a.out ser
-rm *.o

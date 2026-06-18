@@ -1,1 +1,0 @@
-all: bmp2medios
