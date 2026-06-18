@@ -9,6 +9,11 @@ Next steps should be some cleanup in the kernel, a new sound driver and a new fr
 Of course help would be cool for the kernel or for coding apps using nano-x gui. Avlo also needs some more work so it includes more options in the config file."
 <br>2004-08-07 https://sourceforge.net/p/linav/news/
 
+- 2 versions of linav released
+<br>First release of the 2 version of linav:
+<br>serial console => you'll need a serial cable to see something
+<br>frame buffer => you'll see the boot process on av's screen, but you'll need a serial keyboard to have full access to the console
+<br>Posted by OxYgen77 2004-07-22 
 
 - First release
 <br>This is the first patch release, the patch contains ide support, you'll need to download th uclinux source tree from linav.sf.net and the rom file.
