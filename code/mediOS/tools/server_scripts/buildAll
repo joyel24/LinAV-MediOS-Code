@@ -1,0 +1,35 @@
+# build everything
+
+curDate=`date +"%Y%m%d"`
+phpReportFile="phpReport_${curDate}.log"
+phpReportPath="/home/thomas/archopen_src/tmp/"
+savPath="/home/thomas/archopen_src/sav_report"
+
+echo "<?" > ${phpReportPath}${phpReportFile}
+echo "/* report for php */" >> ${phpReportPath}${phpReportFile}
+echo "" >> ${phpReportPath}${phpReportFile}
+
+
+# mediOS
+mediOS_arch="jbmm av1xx av3xx g4xx g402 av4xx"
+
+echo "Cpy mediOS folder"
+cd ~/archopen_src
+cp -Rf mediOS build/
+
+for arch in $mediOS_arch; do
+buildMediOS $arch ${phpReportPath}${phpReportFile} ${savPath}
+done
+
+# apps in mediOS
+
+buildMediosApps ${phpReportPath}${phpReportFile} ${savPath}
+
+echo "removing mediOS folder"
+rm -Rf ~/archopen_src/build/mediOS
+
+echo "?>" >> ${phpReportPath}${phpReportFile}
+
+cd ${phpReportPath}
+mvFtp ${phpReportFile}
+#rm -f ${phpReportFile}

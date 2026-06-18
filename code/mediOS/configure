@@ -1,0 +1,246 @@
+#! /bin/bash
+
+# simple configure script
+# writen by wireddd
+# You can use it, but you can't sell it.
+
+# this is the function that asks the yes or no questions
+function CONFIG_QUERY_YN {
+CONFIGURE_OPTION=$1
+if [ $CONFIGURE_OPTION = -1 ]
+	then
+		USERSELECTION=""
+		while [ $CONFIGURE_OPTION == -1 ]; do
+			echo ""
+			echo "-----------------------------------------"
+			echo ""
+			if [ ! $USERSELECTION = "" ]; then
+				echo -n "'$USERSELECTION' is not a valid selection. "
+			fi
+			echo $2
+			echo -n "Choose y or n [$3]: "
+			read -e USERSELECTION
+			if [ "$USERSELECTION" == "" ]; then
+				if [ $3 == "y" ]; then
+					CONFIGURE_OPTION="1"
+				fi
+				if [ $3 == "n" ]; then
+					CONFIGURE_OPTION="0"
+				fi
+			else
+				if [ $USERSELECTION == "y" ]; then
+					CONFIGURE_OPTION="1"
+				fi
+				if [ $USERSELECTION == "n" ]; then
+					CONFIGURE_OPTION="0"
+				fi
+			fi
+		done
+fi
+return $CONFIGURE_OPTION
+}
+
+function CONFIG_QUERY_MULTI {
+CONFIGURE_OPTION=$1
+CONFIGURE_CHOICE_LIST=$2
+if [ $CONFIGURE_OPTION = -1 ]
+	then
+		USERSELECTION=""
+		while [ $CONFIGURE_OPTION == -1 ]; do
+			echo "-----------------------------------------"
+			echo ""
+			if [ ! $USERSELECTION == "" ]; then
+				echo -n "'$USERSELECTION' is not a valid selection. "
+			fi
+			echo "$3"
+			STR_ITEM="Choose"
+			I=1
+			for item in $CONFIGURE_CHOICE_LIST; do
+				echo "$I: $item"
+				STR_ITEM="$STR_ITEM $I"
+				I=$(($I+1))
+			done
+			echo -n $STR_ITEM "[$4]: "
+			read -e USERSELECTION
+						
+			if [ "$USERSELECTION" == "" ]; then
+				CONFIGURE_OPTION=$4
+			else
+				CONFIGURE_OPTION=$USERSELECTION				
+			fi
+		done
+fi
+return $CONFIGURE_OPTION
+}
+
+
+# check if the file this script generates exists so we don't overwrite something
+if [ -f "./Makefile.conf" ]
+	then
+		echo -n "Makefile.conf exists, replace? y/n (n):"
+		read -e USERSELECTION
+		if [ "$USERSELECTION" == "" ]; then
+			exit
+		else
+			if [ $USERSELECTION == "n" ]; then
+				exit
+			fi
+			if [ $USERSELECTION == "y" ]; then
+				mv Makefile.conf Makefile.conf.bak
+				echo "Makefile.conf has been moved to Makefile.conf.bak"
+			fi
+		fi
+		HAVE_CONFIG_FILE=1
+	else
+		HAVE_CONFIG_FILE=0
+fi
+
+#init the variables that we are going to ask the user to set
+CONFIGURE_TARGET_DEVICE=-1
+CONFIGURE_CHK_BAT_POWER=-1
+CONFIGURE_CHK_USB_FW=-1
+CONFIGURE_HAVE_EXT_MODULE=-1
+CONFIGURE_HAVE_MAS_SOUND=-1
+CONFIGURE_HAVE_AIC23_SOUND=-1
+CONFIGURE_HAVE_EVT=-1
+CONFIGURE_HAVE_CONSOLE=-1
+CONFIGURE_HAVE_DBUG=-1
+
+# this is the first configuration question, AV3XX, GMINI4XX, AV1XX or JBMM
+
+CONFIG_QUERY_MULTI $CONFIGURE_TARGET_DEVICE "AV3XX GMINI4XX AV1XX JBMM GMINI402 AV4XX PMA" "Please pick a target device" "1"
+CONFIGURE_TARGET_DEVICE=$?
+
+TARGET_OK=0
+
+if [ $CONFIGURE_TARGET_DEVICE == "1" ]; then
+	    CONFIGURE_TARGET_DEVICE="AV3XX"
+            CONFIGURE_HAVE_MAS_SOUND="1"
+            CONFIGURE_HAVE_AIC23_SOUND="0" 
+            CONFIGURE_CHIP_TYPE="DSC25"
+            CONFIGURE_HAVE_DBUG="1"
+	    TARGET_OK=1
+            CONFIGURE_FM_REMOTE_VERSION="v1"
+fi
+
+if [ $CONFIGURE_TARGET_DEVICE == "2" ]; then
+            CONFIGURE_TARGET_DEVICE="GMINI4XX"
+	    CONFIGURE_HAVE_MAS_SOUND="0"
+            CONFIGURE_HAVE_AIC23_SOUND="1"     
+            CONFIGURE_HAVE_EXT_MODULE="0"
+            CONFIGURE_CHIP_TYPE="DM270"
+	    TARGET_OK=1
+            CONFIGURE_FM_REMOTE_VERSION="v2"
+fi
+
+if [ $CONFIGURE_TARGET_DEVICE == "3" ]; then
+            CONFIGURE_TARGET_DEVICE="AV1XX"
+	    CONFIGURE_HAVE_MAS_SOUND="1"
+            CONFIGURE_HAVE_AIC23_SOUND="0" 
+            CONFIGURE_CHIP_TYPE="DSC25"    
+            CONFIGURE_HAVE_DBUG="1"
+	    TARGET_OK=1
+            CONFIGURE_FM_REMOTE_VERSION="v1"
+fi
+
+if [ $CONFIGURE_TARGET_DEVICE == "4" ]; then
+            CONFIGURE_TARGET_DEVICE="JBMM"
+	    CONFIGURE_HAVE_MAS_SOUND="0"
+            CONFIGURE_HAVE_AIC23_SOUND="0"
+            CONFIGURE_CHIP_TYPE="DSC21"
+            CONFIGURE_HAVE_CONSOLE="0"
+            CONFIGURE_HAVE_DBUG="1"
+	    TARGET_OK=1
+            CONFIGURE_FM_REMOTE_VERSION="v1"
+fi
+
+if [ $CONFIGURE_TARGET_DEVICE == "5" ]; then
+            CONFIGURE_TARGET_DEVICE="GMINI402"
+	    CONFIGURE_HAVE_MAS_SOUND="0"
+            CONFIGURE_HAVE_AIC23_SOUND="1"     
+            CONFIGURE_HAVE_EXT_MODULE="0"
+            CONFIGURE_CHIP_TYPE="DM320"
+	    TARGET_OK=1
+            CONFIGURE_FM_REMOTE_VERSION="v2"
+fi
+
+if [ $CONFIGURE_TARGET_DEVICE == "6" ]; then
+            CONFIGURE_TARGET_DEVICE="AV4XX"
+	    CONFIGURE_HAVE_MAS_SOUND="0"
+            CONFIGURE_HAVE_AIC23_SOUND="1"     
+            CONFIGURE_HAVE_EXT_MODULE="0"
+            CONFIGURE_CHIP_TYPE="DM270"
+	    TARGET_OK=1
+            CONFIGURE_FM_REMOTE_VERSION="v2"
+fi
+
+if [ $CONFIGURE_TARGET_DEVICE == "7" ]; then
+            CONFIGURE_TARGET_DEVICE="PMA"
+	    CONFIGURE_HAVE_MAS_SOUND="0"
+            CONFIGURE_HAVE_AIC23_SOUND="0"     
+            CONFIGURE_HAVE_EXT_MODULE="0"
+            CONFIGURE_HAVE_FM_REMOTE="0"
+            CONFIGURE_CHIP_TYPE="DM270"
+	    TARGET_OK=1
+            CONFIGURE_FM_REMOTE_VERSION="v2"
+fi
+
+if [ $TARGET_OK == 0 ]; then
+	echo ""
+	echo "Bad value for target"
+	exit
+fi
+
+echo "Configuring for $CONFIGURE_TARGET_DEVICE"
+
+# this section of the script asks all of the yes or no querys, they are of the following format:
+# CONFIG_QUERY_YN $variable_to_set "question to ask" "default answer"
+# variable_to_set=$?
+
+CONFIG_QUERY_YN $CONFIGURE_HAVE_DBUG "Build with emu2 breakpoints support? (disable this on Gmini402)" "n"
+CONFIGURE_HAVE_DBUG=$?
+
+CONFIG_QUERY_YN $CONFIGURE_CHK_BAT_POWER "CHK_BAT_POWER? note: this must be yes atm, it is used to turn off lcd, HD and device" "y"
+CONFIGURE_CHK_BAT_POWER=$?
+
+CONFIG_QUERY_YN $CONFIGURE_CHK_USB_FW "CHK_USB_FW? note: if you choose no, HD timer might mess with USB when USB is plugged and enable" "y"
+CONFIGURE_CHK_USB_FW=$?
+
+CONFIG_QUERY_YN $CONFIGURE_HAVE_EXT_MODULE "HAVE_EXT_MODULE? (AV1xx/AV3xx/JBMM only)" "n"
+CONFIGURE_HAVE_EXT_MODULE=$?
+
+CONFIG_QUERY_YN $CONFIGURE_HAVE_EVT "HAVE_EVT?" "y"
+CONFIGURE_HAVE_EVT=$?
+
+CONFIG_QUERY_YN $CONFIGURE_HAVE_CONSOLE "HAVE_CONSOLE?" "y"
+CONFIGURE_HAVE_CONSOLE=$?
+
+echo ""
+echo "-----------------------------------------"
+echo ""
+
+#we have all of our user input lets generate Makefile.conf
+echo -n "Generating './Makefile.conf' ... "
+
+cat ./Makefile.conf.template | sed > ./Makefile.conf \
+ -e "s,%CONFIGURE_TARGET_DEVICE%,${CONFIGURE_TARGET_DEVICE},g" \
+ -e "s,%CONFIGURE_CHK_BAT_POWER%,${CONFIGURE_CHK_BAT_POWER},g" \
+ -e "s,%CONFIGURE_CHK_USB_FW%,${CONFIGURE_CHK_USB_FW},g" \
+ -e "s,%CONFIGURE_HAVE_EXT_MODULE%,${CONFIGURE_HAVE_EXT_MODULE},g" \
+ -e "s,%CONFIGURE_HAVE_MAS_SOUND%,${CONFIGURE_HAVE_MAS_SOUND},g" \
+ -e "s,%CONFIGURE_HAVE_AIC23_SOUND%,${CONFIGURE_HAVE_AIC23_SOUND},g" \
+ -e "s,%CONFIGURE_HAVE_EVT%,${CONFIGURE_HAVE_EVT},g" \
+ -e "s,%CONFIGURE_HAVE_DVR%,${CONFIGURE_HAVE_DVR},g" \
+ -e "s,%CONFIGURE_HAVE_CONSOLE%,${CONFIGURE_HAVE_CONSOLE},g" \
+ -e "s,%CONFIGURE_CHIP_TYPE%,${CONFIGURE_CHIP_TYPE},g" \
+ -e "s,%CONFIGURE_FM_REMOTE_VERSION%,${CONFIGURE_FM_REMOTE_VERSION},g" \
+ -e "s,%CONFIGURE_HAVE_DBUG%,${CONFIGURE_HAVE_DBUG},g"
+
+#did everything work?
+if [ -f "./Makefile.conf" ]; then
+	echo "Done"
+else
+	echo "Error"
+fi
+
+exit

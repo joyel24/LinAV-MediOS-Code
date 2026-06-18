@@ -1,0 +1,17 @@
+if [ -n "$1" ]; then
+        cd $1
+#	echo "in $1"
+        for file in *; do
+                if [ -d "$file" ] && [ "$file" == "CVS" ]; then
+                        rm -Rf $file;
+#			echo "doing rm on $file"
+                fi
+                if [ -d "$file" ]; then
+                        $0 $file;
+                fi
+        done
+        cd ..
+else
+        $0 ./;
+fi
+

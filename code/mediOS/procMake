@@ -1,0 +1,56 @@
+DEV_WARN=0
+
+if [ -n "$1" ]; then
+if [ "$1" = "clean" ]; then
+make clean
+else
+if [ "$1" = "-w" ]; then
+DEV_WARN=1
+fi
+fi
+fi
+
+if [ -n "$2" ]; then
+if [ "$2" = "clean" ]; then
+make clean
+else
+if [ "$2" = "-w" ]; then
+DEV_WARN=1
+fi
+fi
+fi
+
+make 2>&1 | cat -b | tee make.out
+
+cError=`grep -c "error:" make.out`
+cWarn=`grep -c "warning:" make.out`
+cDevWarn=`grep -c "warning: #warning" make.out`
+
+cWarn=$(($cWarn-$cDevWarn))
+
+echo ""
+echo "$cError errors, $cWarn warnings, $cDevWarn dev warnings"
+
+if [ $cError -gt 0 ]; then
+echo ""
+echo "Errors:"
+grep "error:" make.out
+fi
+
+if [ $cWarn -gt 0 ]; then
+echo ""
+echo "Warnings:"
+grep "warning:" make.out | sed -e '/#warning/d'
+echo ""
+fi
+
+if [ $cDevWarn -gt 0 ] && [ $DEV_WARN -eq 1 ]; then
+echo ""
+echo "Dev Warnings:"
+grep "warning: #warning" make.out 
+echo ""
+fi
+
+if [ $cError -gt 0 ] || [ $cWarn -gt 0 ]; then
+echo "$cError errors, $cWarn warnings, $cDevWarn dev warnings"
+fi

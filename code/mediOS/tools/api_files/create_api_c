@@ -1,0 +1,9 @@
+# create files
+
+awk 'BEGIN{FS="[\t ]*#[\t ]*"} \
+NF==0{next} \
+{if ($2!="api_inc" && $2!="k_inc") \
+{print "    " $2 "=(" $1 "(*)(" $3 "))api_getFctPtr(\"" $2 "\");"}}' $1 > api_c.tmp
+
+cat head_api_c api_c.tmp tail_api_c > $2
+rm -f api_c.tmp

@@ -1,0 +1,117 @@
+OBJS  = $(patsubst %.c,%.o,$(filter %.c,$(SRC)) )
+OBJS += $(patsubst %.S,%.o,$(filter %.S,$(SRC)) )
+DEPS = $(patsubst %.c,%.d,$(filter %.c,$(SRC)) )
+CLEAN_FILTER = *.o *.bak *~ *.a *.elf *.elf2flt *.grv *.med *.gdb *.wav *.map *.avi *.tpl *.d *.bin
+SUBDIRS_CLEAN_OBJS=$(foreach filter,$(CLEAN_FILTER),$(SUBDIRS_CLEAN:%=%/$(filter)))
+
+do_build: subdirs $(DEPS) $(OBJS)
+	@-cp -f *.o $(BUILD_DIR)
+               
+.PHONY: subdirs $(SUBDIRS)
+
+subdirs: $(SUBDIRS)
+
+$(SUBDIRS): FOLDER_NAME = $(shell pwd)
+$(SUBDIRS):
+	@echo '-----   building' $(FOLDER_NAME)/$@
+	@make -C $@ --no-print-directory -s all
+	@echo '-----   end     ' $(FOLDER_NAME)/$@
+       
+clean-subdirs:
+	@@for p in $(SUBDIRS); do \
+		make -C $$p --no-print-directory -s clean; \
+	done
+	@-rm -f $(SUBDIRS_CLEAN_OBJS)
+
+do_build_app : do_build_app_bin
+	@make -C ./ --no-print-directory -s  $(APP_NAME).wav
+	@make -C ./ --no-print-directory -s $(APP_NAME).avi
+                                
+do_build_app_bin : incdir mk_api_file
+	@make -C kernel/ --no-print-directory -s all DO_STDALONE_APP=1
+	@make -C apps/$(APP_NAME) --no-print-directory -s stdalone
+	@chmod 777 ./tools/lds_files/create_lds
+	@./tools/lds_files/create_lds init
+	@$(LD) -N -Tmedios.lds -o $(APP_NAME).elf \
+            -b binary $(LD_BIN_INC) -b elf32-littlearm \
+            $(KERNEL_OBJS) apps/$(APP_NAME)/build/*.o $(LDFLAGS) -Map medios.map
+	@./tools/lds_files/create_lds final
+	@$(LD) -N -Tmedios.lds -o $(APP_NAME).elf \
+            -b binary $(LD_BIN_INC) -b elf32-littlearm \
+            $(KERNEL_OBJS) apps/$(APP_NAME)/build/*.o $(LDFLAGS) -Map medios.map
+	@$(OBJCOPY) -O binary $(APP_NAME).elf $(APP_NAME).bin
+
+do_build_simple_app : do_build_simple_app_bin
+	@make -C ./ --no-print-directory -s $(APP_NAME).wav
+	@make -C ./ --no-print-directory -s $(APP_NAME).avi
+        
+do_build_simple_app_bin: incdir mk_api_file
+	@make -C apps/ --no-print-directory -s $(APP_NAME).o
+	@make -C kernel/ --no-print-directory -s all DO_STDALONE_APP=1
+	@chmod 777 ./tools/lds_files/create_lds
+	@./tools/lds_files/create_lds init
+	@$(LD) -N -Tmedios.lds -o $(APP_NAME).elf \
+            -b binary $(LD_BIN_INC) -b elf32-littlearm \
+            $(KERNEL_OBJS) apps/$(APP_NAME).o $(LDFLAGS) -Map medios.map
+	@./tools/lds_files/create_lds final
+	@$(LD) -N -Tmedios.lds -o $(APP_NAME).elf \
+            -b binary $(LD_BIN_INC) -b elf32-littlearm \
+            $(KERNEL_OBJS) apps/$(APP_NAME).o $(LDFLAGS) -Map medios.map
+	@$(OBJCOPY) -O binary $(APP_NAME).elf $(APP_NAME).bin
+                           
+%.o: %.c
+	@echo "[$@]"
+	@$(GCC) $(GCCFLAGS) -c -o $@ $<
+        
+%.o: %.cpp
+	@echo "[$@]"
+	@$(GCC) $(GCCFLAGS) -c -o $@ $<
+        
+%.o: %.S
+	@echo "[$@]"
+	@$(AS) $(ASFLAGS) -o $@ $<
+
+%.d: %.c
+	@$(GCC) -M $(GCCFLAGS) $< > $@
+                      
+ifeq ("$(TARGET_DEVICE)","GMINI4XX")        
+%.wav: %.bin
+	@make -C tools/bin2exploit/ -s 400fw2110wav.tpl
+	@echo "[$@]"
+	@cp tools/bin2exploit/400fw2110wav.tpl $@
+	@dd if=$< of=$@ bs=39936 seek=1 conv=notrunc 2> /dev/null
+else
+%.wav:
+	@echo "END"
+endif
+
+ifeq ("$(TARGET_DEVICE)","GMINI402")        
+%.avi: %.bin
+	@make -C tools/bin2exploit/ -s 402fw1311avi.tpl
+	@echo "[$@]"
+	@cp tools/bin2exploit/402fw1311avi.tpl $@
+	@dd if=$< of=$@ bs=2399744 seek=1 conv=notrunc 2> /dev/null
+else
+ifeq ("$(TARGET_DEVICE)","AV4XX")
+%.avi: %.bin
+	@make -C tools/bin2exploit/ -s av400avi.tpl
+	@echo "[$@]"
+	@cp tools/bin2exploit/av400avi.tpl $@
+#	@dd if=$< of=$@ bs=2882560 seek=1 conv=notrunc 2> /dev/null
+#	@dd if=$< of=$@ bs=801792 seek=1 conv=notrunc 2> /dev/null
+	@dd if=$< of=$@ bs=4004864 seek=1 conv=notrunc 2> /dev/null
+else
+%.avi:
+	@echo "END"
+endif
+endif
+
+clean:  clean-subdirs
+	@echo '-----   cleaning $(CUR_DIR)'
+	@rm -f $(CLEAN_FILTER)
+
+depend: $(DEPS)
+    
+ifneq ($(DEPS),)
+-include $(DEPS)
+endif

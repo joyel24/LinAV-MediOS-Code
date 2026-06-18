@@ -1,0 +1,10 @@
+# create files
+awk 'BEGIN{FS="[\t ]*#[\t ]*"} NF==0{next} {if ($2=="k_inc") {print "#include <" $3 ">" }}' $1 > api_fct_listinc_h.tmp
+awk 'BEGIN{FS="[\t ]*#[\t ]*"} \
+NF==0{next} \
+{if ($2!="api_inc" && $2!="k_inc") \
+{print "    { \"" $2 "\",\n      (unsigned int)" $2 "\n    },"}}' \
+$1 > api_fct_list_h.tmp
+
+cat head_api_fct_list_h api_fct_listinc_h.tmp med_api_fct_list_h api_fct_list_h.tmp tail_api_fct_list_h > $2
+rm -f api_fct_list_h.tmp api_fct_listinc_h.tmp

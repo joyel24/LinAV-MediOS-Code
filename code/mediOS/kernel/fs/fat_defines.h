@@ -1,0 +1,262 @@
+/*
+*   kernel/fs/fat_defines.h
+*
+*   MediOS project
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*
+* Part of this code is from Rockbox project
+* Copyright (C) 2002 by Linus Nielsen Feltzing
+*
+*/
+
+#ifndef __FAT_DEFINES_H
+#define __FAT_DEFINES_H
+
+#define BYTES2INT16(array,pos) \
+          (array[pos] | (array[pos+1] << 8 ))
+#define BYTES2INT32(array,pos) \
+          (array[pos] | (array[pos+1] << 8 ) | \
+          (array[pos+2] << 16 ) | (array[pos+3] << 24 ))
+
+#define FATTYPE_FAT12       0
+#define FATTYPE_FAT16       1
+#define FATTYPE_FAT32       2
+
+/* BPB offsets; generic */
+#define BS_JMPBOOT          0
+#define BS_OEMNAME          3
+#define BPB_BYTSPERSEC      11
+#define BPB_SECPERCLUS      13
+#define BPB_RSVDSECCNT      14
+#define BPB_NUMFATS         16
+#define BPB_ROOTENTCNT      17
+#define BPB_TOTSEC16        19
+#define BPB_MEDIA           21
+#define BPB_FATSZ16         22
+#define BPB_SECPERTRK       24
+#define BPB_NUMHEADS        26
+#define BPB_HIDDSEC         28
+#define BPB_TOTSEC32        32
+
+/* fat12/16 */
+#define BS_DRVNUM           36
+#define BS_RESERVED1        37
+#define BS_BOOTSIG          38
+#define BS_VOLID            39
+#define BS_VOLLAB           43
+#define BS_FILSYSTYPE       54
+
+/* fat32 */
+#define BPB_FATSZ32         36
+#define BPB_EXTFLAGS        40
+#define BPB_FSVER           42
+#define BPB_ROOTCLUS        44
+#define BPB_FSINFO          48
+#define BPB_BKBOOTSEC       50
+#define BS_32_DRVNUM        64
+#define BS_32_BOOTSIG       66
+#define BS_32_VOLID         67
+#define BS_32_VOLLAB        71
+#define BS_32_FILSYSTYPE    82
+
+#define BPB_LAST_WORD       510
+
+
+/* attributes */
+#define FAT_ATTR_LONG_NAME   (FAT_ATTR_READ_ONLY | FAT_ATTR_HIDDEN | \
+                              FAT_ATTR_SYSTEM | FAT_ATTR_VOLUME_ID)
+#define FAT_ATTR_LONG_NAME_MASK (FAT_ATTR_READ_ONLY | FAT_ATTR_HIDDEN | \
+                                 FAT_ATTR_SYSTEM | FAT_ATTR_VOLUME_ID | \
+                                 FAT_ATTR_DIRECTORY | FAT_ATTR_ARCHIVE )
+
+#define FATDIR_NAME          0
+#define FATDIR_ATTR          11
+#define FATDIR_NTRES         12
+#define FATDIR_CRTTIMETENTH  13
+#define FATDIR_CRTTIME       14
+#define FATDIR_CRTDATE       16
+#define FATDIR_LSTACCDATE    18
+#define FATDIR_FSTCLUSHI     20
+#define FATDIR_WRTTIME       22
+#define FATDIR_WRTDATE       24
+#define FATDIR_FSTCLUSLO     26
+#define FATDIR_FILESIZE      28
+
+#define FATLONG_ORDER        0
+#define FATLONG_TYPE         12
+#define FATLONG_CHKSUM       13
+
+#define CLUSTERS_PER_FAT_SECTOR (SECTOR_SIZE / 4)
+#define CLUSTERS_PER_FAT16_SECTOR (SECTOR_SIZE / 2)
+#define DIR_ENTRIES_PER_SECTOR  (SECTOR_SIZE / DIR_ENTRY_SIZE)
+#define DIR_ENTRY_SIZE       32
+#define NAME_BYTES_PER_ENTRY 13
+#define FAT_BAD_MARK         0x0ffffff7
+#define FAT_EOF_MARK         0x0ffffff8
+
+/* filename charset conversion table */
+static const unsigned char unicode2iso8859_2[] = {
+    0x00, 0x00, 0xc3, 0xe3, 0xa1, 0xb1, 0xc6, 0xe6,  /* 0x0100 */
+    0x00, 0x00, 0x00, 0x00, 0xc8, 0xe8, 0xcf, 0xef,  /* 0x0108 */
+    0xd0, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0110 */
+    0xca, 0xea, 0xcc, 0xec, 0x00, 0x00, 0x00, 0x00,  /* 0x0118 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0120 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0128 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0130 */
+    0x00, 0xc5, 0xe5, 0x00, 0x00, 0xa5, 0xb5, 0x00,  /* 0x0138 */
+    0x00, 0xa3, 0xb3, 0xd1, 0xf1, 0x00, 0x00, 0xd2,  /* 0x0140 */
+    0xf2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0148 */
+    0xd5, 0xf5, 0x00, 0x00, 0xc0, 0xe0, 0x00, 0x00,  /* 0x0150 */
+    0xd8, 0xf8, 0xa6, 0xb6, 0x00, 0x00, 0xaa, 0xba,  /* 0x0158 */
+    0xa9, 0xb9, 0xde, 0xfe, 0xab, 0xbb, 0x00, 0x00,  /* 0x0160 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xd9, 0xf9,  /* 0x0168 */
+    0xdb, 0xfb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0170 */
+    0x00, 0xac, 0xbc, 0xaf, 0xbf, 0xae, 0xbe, 0x00,  /* 0x0178 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0180 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0188 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0190 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0198 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x01a0 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x01a8 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x01b0 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x01b8 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x01c0 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x01c8 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x01d0 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x01d8 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x01e0 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x01e8 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x01f0 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x01f8 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0200 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0208 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0210 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0218 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0220 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0228 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0230 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0238 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0240 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0248 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0250 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0258 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0260 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0268 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0270 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0278 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0280 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0288 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0290 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x0298 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x02a0 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x02a8 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x02b0 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x02b8 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xb7,  /* 0x02c0 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x02c8 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x02d0 */
+    0xa2, 0xff, 0x00, 0xb2, 0x00, 0xbd, 0x00, 0x00,  /* 0x02d8 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x02e0 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x02e8 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 0x02f0 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00   /* 0x02f8 */
+};
+
+struct fsinfo {
+    unsigned int freecount; /* last known free cluster count */
+    unsigned int nextfree;  /* first cluster to start looking for free
+                               clusters, or 0xffffffff for no hint */
+};
+/* fsinfo offsets */
+#define FSINFO_FREECOUNT 488
+#define FSINFO_NEXTFREE  492
+
+struct bpb
+{
+    int bpb_bytspersec;  /* Bytes per sector, typically 512 */
+    unsigned int bpb_secperclus;  /* Sectors per cluster */
+    int bpb_rsvdseccnt;  /* Number of reserved sectors */
+    int bpb_numfats;     /* Number of FAT structures, typically 2 */
+    int bpb_totsec16;    /* Number of sectors on the volume (old 16-bit) */
+    int bpb_media;       /* Media type (typically 0xf0 or 0xf8) */
+    int bpb_fatsz16;     /* Number of used sectors per FAT structure */
+    unsigned int bpb_totsec32;    /* Number of sectors on the volume
+                                     (new 32-bit) */
+    int last_word;       /* 0xAA55 */
+
+    /**** FAT32 specific *****/
+    int bpb_fatsz32;
+    int bpb_rootclus;
+    int bpb_fsinfo;
+
+    /* variables for internal use */
+    unsigned int fatsize;
+    unsigned int totalsectors;
+    unsigned int rootdirsector;
+    unsigned int firstdatasector;
+    unsigned int startsector;
+    unsigned int dataclusters;
+    struct fsinfo fsinfo;
+
+    /**** FAT16 *****/
+    int bpb_rootentcnt;  /* Number of dir entries in the root */
+    /* internals for FAT16 support */
+    int is_fat16; /* true if we mounted a FAT16 partition, false if FAT32 */
+    unsigned int rootdiroffset; /* sector offset of root dir relative to start
+                                 * of first pseudo cluster */
+    int drive;
+};
+
+#define FS2BPB(FS)   ((struct bpb*)(FS->fs_data))
+
+#define FAT_CACHE_SIZE 0x20
+#define FAT_CACHE_MASK (FAT_CACHE_SIZE-1)
+
+struct fat_cache_entry
+{
+    int secnum;
+    int inuse;
+    int dirty;
+    struct bpb* fat_vol ; /* shared cache for all volumes */
+};
+
+/* from fat.c */
+int fat_writeLongName(struct fat_entry * file,unsigned int firstentry,unsigned int numentries,
+               const unsigned char* name,const unsigned char* shortname,int is_directory);
+
+MED_RET_T fat_addDirEntry(struct vfs_node * dir_node,struct vfs_node * file_node,
+    const char* name,int is_directory,int dotdir);
+MED_RET_T fat_updateShortEntry(struct vfs_node * file, int size, int attr);
+void fat_truncate(struct fat_entry * entry);
+MED_RET_T fat_closeWrite(struct vfs_node * opened_file,int size,int attr);
+int fat_readWrite( struct fat_entry * entry, int sectorcount,void* buf, int write );
+MED_RET_T fat_seek(struct fat_entry * entry, unsigned int seeksector );
+MED_RET_T fat_readdir(struct fat_entry * dir,struct fat_direntry * entry);
+int fat_fileReadWrite(struct vfs_node * opened_file, void* buf, int count, bool write);
+
+/* from fat_lowLevel.c */    
+unsigned int fat_cluster2Sec(struct bpb* fat_bpb, int cluster);
+MED_RET_T fat_initDevice(struct bpb* fat_bpb,int drive,unsigned int startsector);
+void fat_recalcFree(struct bpb* fat_bpb);
+MED_RET_T fat_bpbIsSane(struct bpb* fat_bpb);
+void fat_flushFatSector(struct fat_cache_entry *fce,unsigned char *sectorbuf);
+void * fat_cacheFatSector(struct bpb* fat_bpb,int fatsector, int dirty);
+unsigned int fat_findFreeCluster(struct bpb* fat_bpb, unsigned int startcluster);
+MED_RET_T fat_updateFsInfo(struct bpb* fat_bpb);
+int fat_updateFatEntry(struct bpb* fat_bpb, unsigned int entry, unsigned int val);
+int fat_readFatEntry(struct bpb* fat_bpb, unsigned int entry);
+int fat_getNextCluster(struct bpb* fat_bpb, int cluster);
+MED_RET_T fat_flushFat(struct bpb* fat_bpb);
+void fat_time(unsigned short* date,unsigned short* time,unsigned short* tenth );
+unsigned char fat_char2Dos(unsigned char c);
+void fat_createDosName(const unsigned char *name, unsigned char *newname);
+void fat_parseDirEntry(struct fat_direntry *de, const unsigned char *buf);
+int fat_nextWriteCluster(struct fat_entry * entry,int oldcluster,int* newsector);
+int fat_transfer(struct bpb* fat_bpb, unsigned int start, int count, char* buf, int write );
+void fat_unicode2Iso(const unsigned char* unicode, unsigned char* iso,int count);
+#endif

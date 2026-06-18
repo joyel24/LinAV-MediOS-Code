@@ -1,0 +1,35 @@
+--- Makefile	2004-02-16 08:28:06.000000000 +0100
++++ Makefile2	2004-05-05 19:22:21.220539808 +0200
+@@ -28,8 +28,8 @@
+ 
+ 
+ # What sortof target system shall we compile this for?
+-ARCH:=i386
+-#ARCH:=arm
++#ARCH:=i386
++ARCH:=arm
+ #ARCH:=mips
+ #ARCH:=mipsel
+ #ARCH:=powerpc
+@@ -44,10 +44,10 @@
+ # Enable this to use the uClibc daily snapshot instead of a released
+ # version.  Daily snapshots may contain new features and bugfixes. Or
+ # they may not even compile at all, depending on what Erik is doing...
+-USE_UCLIBC_SNAPSHOT:=true
++USE_UCLIBC_SNAPSHOT:=true
+ 
+ # Enable large file (files > 2 GB) support
+-BUILD_WITH_LARGEFILE:=true
++BUILD_WITH_LARGEFILE:=false
+ 
+ # Command used to download source code
+ WGET:=wget --passive-ftp
+@@ -71,7 +71,7 @@
+ #      as a convenience, since you shouldn't link hard and soft float
+ #      together.  In fact, arm won't even let you.
+ # (Un)comment the appropriate line below.
+-SOFT_FLOAT:=false
++SOFT_FLOAT:=true
+ 
+ TARGET_OPTIMIZATION=-Os
+ TARGET_DEBUGGING= #-g

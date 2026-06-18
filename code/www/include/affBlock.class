@@ -1,0 +1,41 @@
+<?
+if(!isset($affBlock_INC))
+{
+	$affBlock_INC=-1;
+
+	class affBlock
+	{
+		function affBlock($titre,$taille=0)
+		{
+			$id="BlAf" . rand();
+			if($taille==-1)
+			{
+				$addOnTD="width='100%'";
+				$taille=0;
+			}
+
+			echo "<table border='0' cellspacing='0' cellpadding='0' $addOnTD><tr><td>";
+			echo "<div class='blockTitle' id='".$id."_div'>\n";
+			echo "<img src='/images/affBlock/title_nav.gif' align='middle'>\n";
+			echo "$titre&nbsp;&nbsp;";
+			echo "</div>\n";
+			echo "</td></tr></table>";
+
+			if($taille!=0)
+			{
+				echo "<script type='text/javascript'>\n";
+				echo "document.getElementById('".$id."_div').style.width='$taille';\n";
+				echo "</script>\n";
+			}
+			echo "<div class='blockContent'><table cellspacing='0' width=100%>\n";
+			echo "<tr><td>\n";
+		}
+
+		function fin()
+		{
+			echo "</td></tr>\n";
+			echo "</table></div>\n";
+		}
+	}
+}
+?>

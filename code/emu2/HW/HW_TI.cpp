@@ -1,0 +1,107 @@
+/*
+*   HW_TI.cpp
+*
+*   AV3XX emulator
+*   Copyright (c) 2005 by Christophe THOMAS (oxygen77 at free.fr)
+*
+* All files in this archive are subject to the GNU General Public License.
+* See the file COPYING in the source tree root for full license agreement.
+* This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+* KIND, either express of implied.
+*/
+#include <stdlib.h>
+#include <stdio.h>
+
+#include <HW_TI.h>
+#include <HW_null.h>
+
+#include <HW_mem.h>
+
+#include <HW_uart.h>
+#include <HW_clock.h>
+#include <HW_gpio.h>
+#include <HW_timer.h>
+#include <HW_wdt.h>
+#include <i2c_gpio.h>
+
+
+#include <HW_30a24.h>
+#include <HW_cpld.h>
+#include <HW_ata.h>
+#include <HW_TI_ver.h>
+#include <HW_ECR.h>
+#include <HW_MemCfg.h>
+#include <HW_OSD.h>
+#include <HW_IRQ.h>
+#include <HW_dsp.h>
+#include <HW_access.h>
+
+HW_TI::HW_TI(mem_space * memSpace,HW_mem * mem,HW_cpld * hw_cpld,
+    HW_ata * hw_ata):HW_node(TI_REG_START,TI_REG_END,4,"DSC25")
+{
+    exit_on_not_match = false;
+    
+    this->memSpace=memSpace;
+    
+    osd = new HW_OSD(mem);
+    
+    memSpace->set_OSD(osd);
+    
+    add_item(osd);
+    
+    uart_list[0]=new HW_uart(0,"UART0");
+    add_item(uart_list[0]);
+
+    uart_list[1]=new HW_uart(1,"UART1");
+    add_item(uart_list[1]);
+
+    add_item(new HW_clock());
+    gpio = new HW_gpio();
+    add_item(gpio);
+#ifdef HAS_HW_30A24
+    hw_30a24 = new HW_30a24();
+    add_item(hw_30a24);  
+#endif
+
+    hw_dma = new HW_dma(mem,hw_ata);      
+    add_item(hw_dma);
+    
+    HW_irq = new HW_IRQ();
+
+    add_item(HW_irq);
+    
+    for(int i=0;i<4;i++)
+    {
+        timer_list[i]=new HW_timer(i,HW_irq);
+        add_item(timer_list[i]);
+    }
+    
+    hw_wdt=new HW_wdt(HW_irq);
+    add_item(hw_wdt);
+    
+    add_item(new HW_TI_ver());
+    add_item(new HW_ECR());
+
+    add_item(new HW_MemCfg());
+    
+    //add_item(new HW_null(0x30700,0x30800,"UKN-0x30700"));
+    
+    add_item(new HW_null(CCD_START,CCD_END,"CCD"));
+    add_item(new HW_null(PREVIEW_START,PREVIEW_END,"Preview"));
+    add_item(new HW_null(PAL_NTSC_ENC_START,PAL_NTSC_ENC_END,"NTSC_PAL Encoder"));
+#ifdef HAS_30A1A
+    add_item(new HW_null(0x30a1a,0x30a1a+0x2,"Internal WDT",0));
+#endif
+
+    add_item(new HW_dsp());
+
+    new i2c_master(gpio);
+    
+    
+}
+
+HW_TI::~HW_TI()
+{
+    
+}
+

@@ -1,0 +1,66 @@
+# compilation script for mediOS
+
+curDate=`date +"%Y%m%d"`
+
+if [ "$1" == "dummy" ]; then
+arch=$2
+phpReport="/home/thomas/tmp/dummyReport.log"
+savPath="/home/thomas/tmp"
+else
+arch=$1
+phpReport=$2
+savPath=$3
+fi
+
+reportFile="report_medios_${arch}_${curDate}.log"
+
+
+if [ "$arch" == "av3xx" ] || [ "$arch" == "av1xx" ] || [ "$arch" == "jbmm" ]; then
+ext="bin"
+else
+if [ "$arch" == "g4xx" ]; then
+ext="wav"
+else
+if [ "$arch" == "g402" ]; then
+ext="avi"
+else
+if [ "$arch" == "av4xx" ]; then
+ext="avi"
+else
+echo "Error unsupported arch: $arch"
+exit
+fi
+fi
+fi
+fi
+
+echo "Building mediOS for $arch"
+
+zipFile="${arch}_medios_${curDate}.zip"
+makeResult="${arch}_makeMedios_${curDate}.log"
+reportFile="${arch}_reportMedios_${curDate}.log"
+
+cd ~/archopen_src/build/mediOS
+
+cp -f ../${arch}.conf ./Makefile.conf
+
+make incdir
+make mk_api_file
+#disarding messages from make clean
+make clean 2>&1 > /dev/null
+
+buildAndReport ${makeResult} ${reportFile} ${phpReport} ${arch}
+
+#zipping bin
+zip -9 ${zipFile} medios.${ext} medios.bin
+#if [ "$arch" == "g402" ]; then
+#zip -9 cc_${zipFile} cc_medios.${ext} medios.bin
+#fi
+
+# ok everything is ready we can send
+mvFtp $reportFile $makeResult $zipFile
+cp -f $reportFile $makeResult $zipFile $savPath
+#if [ "$arch" == "g402" ]; then
+#mvFtp cc_$zipFile
+#cp -f cc_$zipFile $savPath
+#fi
