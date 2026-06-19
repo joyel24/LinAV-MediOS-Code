@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel=stylesheet href="style.css" type="text/css">
+<title>LibAvos HOWTO, By William Bland</title>
+</head>
+
+<body>
+
+<p class=title>LibAvos HOWTO,
+  By <a href="http://www.abstractnonsense.com/">William Bland</a></p>
+
+<p>
+This document is copyright 2004, by William Bland.  You may copy and
+reproduce it in any form, so long as this copyright notice is preserved.
+</p> 
+
+<p>
+Archos is a registered trademark.
+</p>
+
+<p>
+LibAvos is a library of functions that can be used in C programs, to write
+stand-alone applications for the Archos JBMM (JukeBox MultiMedia) and the
+Archos AV3x0 platforms.  This document talks you through the process of
+setting up a cross-compilation environment that will allow you to use
+LibAvos in your programs.  If you follow the steps outlined here, it should
+be very easy to get yourself set up.  This document assumes that you are
+running some form of Unix system that supports the GNU tool-chain.
+</p>
+
+<p>
+The first step is to download and install
+<a href="ftp://ftp.gnu.org/gnu/binutils/">binutils</a>.
+When you have downloaded the tar.gz, unpack it by typing
+</p>
+
+<p class=transcript>
+tar -xzf binutils-*.tar.gz
+<p>
+
+<p>
+Now move into the binutils directory and build and install binutils with
+</p>
+
+<p class=transcript>
+./configure --target=arm-elf<br>
+make<br>
+su <span style="font-weight: bold; color: #ff0099;"># go root</span><br>
+make install<br>
+exit <span style="font-weight: bold; color: #ff0099;"># return from root</span>
+</p>
+
+<p>
+Next, download and unpack
+<a href="ftp://ftp.gnu.org/gnu/gcc/">gcc</a>.  Move into the gcc directory and
+build and install gcc by typing
+</p>
+
+<p class=transcript>
+./configure --target=arm-elf --disable-threads --enable-languages=c<br>
+make<br>
+su <span style="font-weight: bold; color: #ff0099;"># go root</span><br>
+make install<br>
+exit <span style="font-weight: bold; color: #ff0099;"># return from root</span>
+</p>
+
+<p>
+Now get LibAvos from <a href="http://avos.sf.net/">avos.sf.net</a>.  Move into
+the libavos directory and create a symbolic link from hardware.S to one of
+jbmm.S or av300.S.  For example, if you have an Archos AV340, type
+</p>
+
+<p class=transcript>
+ln -s av300.S hardware.S
+</p>
+
+<p>
+Now you can build LibAvos by typing
+</p>
+
+<p class=transcript>
+make clean<br>
+make<br>
+su <span style="font-weight: bold; color: #ff0099;"># go root</span><br>
+make install<br>
+exit <span style="font-weight: bold; color: #ff0099;"># return from root</span>
+</p>
+
+<p>
+You will then most likely want to build the example "Hello World" program,
+which you can do by typing
+</p>
+
+<p class=transcript>
+make hello
+</p>
+
+<p>
+You will, if all has gone well, be left with a hello.bin file, that you can
+pack up (using the packer that comes with RockBox) and put on your Archos.
+To write your own C programs you will need to include libavos.h and link
+against /usr/local/lib/libavos (consult the Makefile for details of how
+this is done).  As well as the "Hello World" program, we have included a
+palette program which you can compile easily by modifying the Makefile
+(good practice for when you want to do Makefiles for your own programs!).
+</p>
+
+<p>
+The following functions are included in the current version of LibAvos:
+</p>
+
+<p class=transcript>
+void ataGetStatusT();<br>
+void ataIdentifyT( char* buffer );<br>
+void ataInitT();<br>
+void ataReadLBAT( char* buffer, u32 lba, u32 n );<br>
+void ataWaitForBSYT();<br>
+void ataWaitForRDYT();<br>
+void ataWaitForStartOfXferT();<br>
+void batteryIsDCT();<br>
+void buttonsGetStatusT();<br>
+u32  colorPackYCbCrT( u32 Y, u32 Cr, u32 Cb );<br>
+void fatInitT( u32 lba );<br>
+void fatReadCT( u32 cluster, char* buffer );<br>
+void fatTraceCCT( u32 cluster );<br>
+void hex2T( char* dest, u32 value );<br>
+void hex4T( char* dest, u32 value );<br>
+void hex8T( char* dest, u32 value );<br>
+void i2cAckT();<br>
+void i2cInitT();<br>
+void i2cStartT();<br>
+void i2cStopT();<br>
+u32  lcdGetPixelT( u32 x, u32 y );<br>
+void lcdInitT();<br>
+void lcdPlotT( u32 x, u32 y, u32 c );<br>
+void lcdPutchT( u32 x, u32 y, u32 character, u32 color );<br>
+void lcdPutsT( u32 x, u32 y, char* string, u32 color );<br>
+void lcdRectfST( u32 x, u32 y, u32 width, u32 height, u32 color );<br>
+void lcdScrollUpT( u32 lines, u32 color );<br>
+void lcdSpriteT( u32 x, u32 y, u32 width, u32 height, char* data );<br>
+void osdSetBack2ConfigT( u32 byte_width, u32 config );<br>
+void osdSetBack2OffsetT( u32 offset );<br>
+void osdSetBack2PositionT( u32 x, u32 y );<br>
+void osdSetBack2SizeT( u32 width, u32 height );<br>
+void osdSetBackConfigT( u32 byte_width, u32 config );<br>
+void osdSetBackOffsetT( u32 offset );<br>
+void osdSetBackPositionT( u32 x, u32 y );<br>
+void osdSetBackSizeT( u32 width, u32 height );<br>
+void osdSetCursor2PositionT( u32 x, u32 y );<br>
+void osdSetCursorPositionT( u32 x, u32 y );<br>
+void osdSetCursorSizeT( u32 width, u32 height );<br>
+void osdSetMain2ConfigT( u32 byte_width, u32 config );<br>
+void osdSetMain2OffsetT( u32 offset );<br>
+void osdSetMain2PositionT( u32 x, u32 y );<br>
+void osdSetMain2SizeT( u32 width, u32 height );<br>
+void osdSetMainConfigT( u32 byte_width, u32 config );<br>
+void osdSetMainOffsetT( u32 offset );<br>
+void osdSetMainPositionT( u32 x, u32 y );<br>
+void osdSetMainSizeT( u32 width, u32 height );<br>
+void osdSetScreenConfigT( u32 config );<br>
+void osdSetScreenPositionT( u32 x, u32 y );<br>
+void terminalPutchT( u32 chr );<br>
+void terminalPutsCT( char* string, u32 color );<br>
+void terminalPutsT( char* string );<br>
+void terminalSetColorFT( u32 color );<br>
+void terminalSetPosT( u32 x, u32 y );<br>
+u32  uartGetchT();<br>
+void uartOutchT( u32 c );<br>
+void uartOutsT( char* string );<br>
+u32  usbIsConnectedT();<br>
+u32  visorConvertToAscii( u32 scan_code );<br>
+</p>
+
+<p>
+For news and updated versions of this document, please see
+<a href="http://avos.sf.net/">avos.sf.net</a>.
+</p>
+
+</body>
+</html>

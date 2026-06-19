@@ -1,0 +1,8 @@
+make clean
+make spotless
+make depend
+make
+
+TODO:
+Make plugins dir make from main stuff
+Fix rgb plugin so it builds :)

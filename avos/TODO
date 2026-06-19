@@ -1,0 +1,9 @@
+* Get malloc working
+* Finish fat routines. Add support for FAT12/FAT16.
+* Look at the uclinux kernel etc
+* Work out MAS
+* Work out line in, line out
+* Work out Video out
+* Work out other modules (cam, dvr)
+* Work out dsp stuff
+* Get a CF Ethernet card working with tcp/ip stack

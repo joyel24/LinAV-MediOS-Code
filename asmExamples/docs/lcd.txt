@@ -1,0 +1,131 @@
+The av300 OSD                                         (c)2004 Jimmy Moore/DoGgEr
+=============                                         --------------------------
+
+The dsc25 has an integrated on screen display system (OSD). This document shows
+how to make the most of it...
+
+Overview
+--------
+    The dsc25 has the following segments:
+    * background color
+    * 2 video planes. These carry YCbCr data - 32 bit per pixel.
+    * 2 bitmap planes. These carry CLUT indexes (16 bit per pixel).
+    * 2 cursors.
+
+The dsc25 can blend these segments together, or can say 'it's color 0 so I'll
+show whats behind it'. The order is not changable. They display in the order
+given above.
+All SDRAM offsets are given relative to 0x3000000, and shifted right 5 places.
+That means your video buffers must be aligned to a 32 byte boundary.
+
+See breakout game... The background image is on video plane 1. The bricks and
+text is on bitmap 1, the ball is on bitmap 2, and the paddle is a cursor.
+This means the ball and paddle are just moved by setting the position!
+
+
+Reg     Info
+
+30680   0-7 Border color
+        9 - funny coloured bars
+        14 - scales image y
+        15 - swaps red and blue components  (RGB vs BGR)
+
+        control regs
+        0 - enable
+        1 - Makes it half height?
+        2 - 1=color0 is transparent, 0=merge with background
+        3-5 - Level of transparency
+        
+        6-7
+        8-9 - Pixel height
+        10-11 - Pixel width
+        12 - ROM/RAM CLUT
+        13 - ?
+
+30682   BACK/BACK2 control reg
+30684   MAIN control reg
+30686   MAIN2 control reg
+30688   CURSOR control reg      0-enable
+                                1-3 height of border
+                                4-6 width of border
+                                7-ROM/RAM CLUT
+                                8-15 Color value
+3068a   CURSOR2 control reg     0-enable
+                                8-9 Height zoom
+                                10-11 Width zoom
+                                12-13 flash speed
+                                14-flashing enable
+                                15-makes it long and moves it?
+                                flashing, long, etc
+
+3068c   *Controls back width <<4 = #pixels / line (0x14 = 320pixels)
+3068e   *Controls back2 width
+30690   *Controls main width
+30692   *Controls main2 width
+
+30694   back2 off HI | back off HI
+30696   back off LO
+30698   back2 off LO
+3069a   main2 off HI | main off HI
+3069c   main off LO
+3069e   main2 off LO
+
+306a0   Horizontal shift everything
+306a2   Vertical shift everything
+
+306a4   X offset of back
+306a6   Y offset of back
+306a8   Width of back
+306aa   Height of back
+
+306ac   X offset of back2
+306ae   Y offset of back2
+306b0   Width of back2
+306b2   Height of back2
+
+306b4   X offset of main
+306b6   Y offset of main
+306b8   Width of main
+306ba   Height of main
+
+306bc   X offset of main2
+306be   Y offset of main2
+306c0   Width of main2
+306c2   Height of main2
+
+306c4   X offset of cursor
+306c6   Y offset of cursor
+306c8   Width of cursor
+306ca   Height of cursor
+
+306cc   X offset of cursor2
+306ce   Y offset of cursor2
+
+306d0   Cursor colors
+306d2   "
+306d4   "
+306d6   "
+306d8   "
+306da   "
+306dc   "
+306de   "
+
+306e0   Cursor color1, 2
+306e2   Cursor color3, 4
+306e4   Cursor color5, 6
+306e6   7,8
+306e8   9,10
+306ea   11,12
+306ec   13,14
+306ee   15,16
+
+306f0
+306f2
+306f4   *Messes with back
+306f6
+306f8
+306fa
+306fc
+306fe
+
+30800

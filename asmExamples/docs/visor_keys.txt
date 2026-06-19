@@ -1,0 +1,76 @@
+5           00
+6           01
+7           02
+8           03
+g           04
+h           05
+i           06
+j           07
+Date        08
+Phone       09
+ToDo        0a
+Memo        0b
+
+9           10
+0           11
+a           12
+b           13
+s           14
+t           15
+u           16
+v           17
+ctrl        18
+fn          19
+shiftR      1a
+shiftL      1a
+alt         1b
+
+o           20
+p           21
+q           22
+r           23
+w           24
+x           25
+y           26
+z           27
+Up          28
+Down        29
+Right       2a
+Left        2b
+
+-           30
+=           31
+[           32
+]           33
+/           34
+tab         35
+caps lock   36
+cmd         37
+Done        38
+Del         39
+backspace   3a
+enter       3b
+
+c           40
+d           41
+e           42
+f           43
+'           44
+~           45
+spaceLeft   46
+spaceRight  46
+Space       47
+
+1           50
+2           51
+3           52
+4           53
+k           54
+l           55
+m           56
+n           57
+|           58
+;           59
+,           5a
+.           5b
+

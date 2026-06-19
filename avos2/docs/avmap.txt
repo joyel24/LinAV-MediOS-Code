@@ -1,0 +1,937 @@
+                    The av300 Hardware reference manual
+                    ===================================
+                    
+                                                                       rev. 0.01
+                                                                       By Dogger
+                                                                       
+The Archos AV300 uses a Texas Instruments TMS320DSC25 DSP as its core processor.
+This DSP includes an ARM7 core CPU, and many extra useful components.
+
+The next main chip in the AV300 is the MAS chip. This is a general DSP, and
+includes an mp3 decoder and encoder in rom. It is used for audio playback and
+recording.
+
+There is also a CPLD chip, which is a custom chip used to tie everything
+together, and to handle nonstandard hardware such as the plugin modules.
+
+  ++----------------------------------------------------------------------------
+ // Timers
+|| The DSC25 has 4 general purpose timers. These are generaly used to generate
+|| Interupts either a given time period, or periodically. This can be used to
+|| say send the mp3 decoder more data periodically, or update the screen, or
+|| timeout and switch the display off, etc etc. Really very useful.
+|| The timers have 2 modes of operation.
+||  One shot:   This counts up to the given maximum value, and generates IRQ.
+||  Free run:   This counts up to the given maximum, generates IRQ, resets,
+||              counts up, IRQ, reset, etc etc
+++------------------------------------------------------------------------------
+30000   Timer #0 mode
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+                                    | |
+                                    +-+- Timer mode
+                                         00 Stop
+                                         01 One shot mode
+                                         10 Free run mode
+                                         11 Reserved
+30002   Timer #0 clock select
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+                                      |
+                                      +- 0 Current ARM clock
+                                         1 External or SYSCLK input
+
+30004   Timer #0 prescalar divide value
+30006   Timer #0 maximum counter value
+30008   Timer #0 trigger
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+                                      |
+                                      +- 1 If in one shot mode, this will start
+                                           the timer.
+3000a   Timer #0 current count value
+
+30080   Timer #1 mode
+30082   Timer #1 clock select
+30084   Timer #1 prescalar divide value
+30086   Timer #1 maximum counter value
+30088   Timer #1 trigger
+3008a   Timer #1 current count value
+
+30100   Timer #2 mode
+30102   Timer #2 clock select
+30104   Timer #2 prescalar divide value
+30106   Timer #2 maximum counter value
+30108   Timer #2 trigger
+3010a   Timer #2 current count value
+
+30180   Timer #3 mode
+30182   Timer #3 clock select
+30184   Timer #3 prescalar divide value
+30186   Timer #3 maximum counter value
+30188   Timer #3 trigger
+3018a   Timer #3 current count value
+
+  ++----------------------------------------------------------------------------
+ // Serial
+|| The DSC25 has 2 serial ports (Not to be confused with UARTs).
+|| They don't however seem to be used in the AV300.
+++------------------------------------------------------------------------------
+
+30200   0-ff    Serial #0 xmit data?
+30202           Serial #0 rcv data?
+30204   0-1     Serial #0 Serial output enable
+30206   0-7ff   Serial #0 Serial output mode
+30208           Serial #0 
+3020a   0-7fff  Serial #0 
+3020c   0-ffff  Serial #0 
+3020e   0-7ff   Serial #0 
+
+30284   0-1     Serial #1 
+30286   0-7ff   Serial #1 
+3028a   0-7fff  Serial #1 
+3028c   0-ffff  Serial #1 
+3028e   0-7ff   Serial #1
+
+  ++----------------------------------------------------------------------------
+ // uart
+|| There are 2 general purpose UARTs (Serial ports). Uart #0 is exposed at the
+|| bottom of the AV300 as a 3.5mm stereo jack socket, which may be used to hook
+|| the unit up to a computer, or connect a keyboard or other devices.
+|| UART1 is used on the AV300, possibly as a factory debug channel. Not sure
+|| yet. Could also be the FM remote.
+++------------------------------------------------------------------------------
+30300   Uart #0 DTTR
+30302   Uart #0 BRSR
+30304   Uart #0 MSR
+30306   Uart #0 RFCR
+30308   Uart #0 TFCR
+3030a   Uart #0 LCR
+3030c   Uart #0 SR
+
+30380   Uart #1 DTTR
+30382   Uart #1 BRSR
+30384   Uart #1 MSR
+30386   Uart #1 RFCR
+30388   Uart #1 TFCR
+3038a   Uart #1 LCR
+3038c   Uart #1 SR
+
+  ++----------------------------------------------------------------------------
+ // USB? (Not used on AV300)?
+++------------------------------------------------------------------------------
+30400   ?
+30404   0-3ff
+30406   ?
+TODO
+
+30480   0-7ff
+30482   0-ff
+30484   0-705
+30486   0-1ff
+TODO
+
+  ++----------------------------------------------------------------------------
+ // Interrupt handler
+|| This controls how interrupts are handled. It is also used to reset things
+|| after an interrupt has occurred, and used to determine why an IRQ occurred.
+||
+|| IRQ0  00000001 Timer0
+|| IRQ1  00000002 Timer1
+|| IRQ2  00000004 Timer2
+|| IRQ3  00000008 Timer3
+|| IRQ4  00000010
+|| IRQ5  00000020
+|| IRQ6  00000040
+|| IRQ7  00000080
+|| IRQ8  00000100
+|| IRQ9  00000200
+|| IRQ10 00000400
+|| IRQ11 00000800 HDI?
+|| IRQ12 00001000 UART0
+|| IRQ13 00002000 UART1?
+|| IRQ14 00004000
+|| IRQ15 00008000
+|| IRQ18 00040000 GIO0 ON button
+|| IRQ22 00400000 GIO4 MAS Data request
+|| IRQ24 01000000 GIO6 IR data
+||
+++------------------------------------------------------------------------------
+30500   Interrupt causes2 HI
+30502   Interrupt causes2 LO
+30504   Interrupt causes HI
+30506   Interrupt causes LO
+
+30520   Interrupt mask2 HI
+30522   Interrupt mask2 LO
+30524   Interrupt mask HI
+30526   Interrupt mask LO
+
+30528   0-3
+
+
+  ++----------------------------------------------------------------------------
+ // 
+++------------------------------------------------------------------------------
+30530   0-ffff
+30532   0-1fff
+
+  ++----------------------------------------------------------------------------
+ // 
+++------------------------------------------------------------------------------
+30540   0-1fff
+30542
+30544
+30546
+30548
+3054a
+3054c
+3054e
+30550
+30552
+30554
+30556
+30558
+3055a
+
+  ++----------------------------------------------------------------------------
+ // gio - General Purpose Input/Output
+|| The DSC25 sports a very useful 32 general purpose input/output lines for
+|| communicating with hardware. Each line can be configured either as an input
+|| or an output, can have its input value inverted, and if an output can be
+|| set to either 0 or 1.
+|| GIO lines 0-7 can additionaly be used as sources for IRQ. With the inversion,
+|| Interrupts can occur either on a rising signal, or on a falling signal.
+||
+|| n Mask     dir  description
+|| ---------------------------
+|| 0 00000001 I  - On button
+|| 1 00000002
+|| 2 00000004
+|| 3 00000008
+|| 4 00000010 I  - MAS EOD
+|| 5 00000020
+|| 6 00000040 I  - DATA Input from IR remote control
+|| 7 00000080
+||
+|| 8 00000100 IO - MAS D0
+|| 9 00000200 IO - MAS D1
+|| a 00000400 IO - MAS D2
+|| b 00000800 IO - MAS D3
+|| c 00001000 IO - MAS D4
+|| d 00002000 IO - MAS D5
+|| e 00004000 IO - MAS D6
+|| f 00008000 IO - MAS D7
+||10 00010000 O  - MAS power
+||11 00020000
+||12 00040000 IO - I2C bus data
+||13 00080000 IO - I2C bus clock
+||14 00100000
+||15 00200000 I  - CPLD Module sense?
+||16 00400000 I  - CPLD signal?
+||17 00800000 O  - Backlight power
+||18 01000000
+||19 02000000
+||1a 04000000
+||1b 08000000
+||1c 10000000 I  - Off button
+||1d 20000000 O  - Ext video enable
+||1e 40000000    - MAS RTR
+||1f 80000000    - MAS PR
+++------------------------------------------------------------------------------
+30580   Direction gio0-15
+30582   Direction gio16-31
+30584   Inverts gio0-15
+30586   Inverts gio16-31
+30588   BitSet gio0-15  Write: sets the output to 1. Read: gets input value
+                                    // 40 - remote?
+3058a   BitSet gio16-31
+3058c   BitClear gio0-15  Write: sets the output to 0.
+3058e   BitClear gio16-31
+30590   Bits 0-7: 1=enable IRQ for this gio input.
+
+30592   0-ffff
+30594   0-ffff      // Video module turns this from 0020 to 0000
+30596   0-ffff
+30598   0-ffff
+
+
+--------------------------------------------------------------------------------
+
+30600   Writing here changes output at 30602
+30602
+
+  ++----------------------------------------------------------------------------
+ // osd - On Screen Display
+|| The DSC25 Includes a sophisticated on screen display unit. This is used to
+|| output graphics.
+|| The osd has the following features:
+|| * 2 Video planes can be used, with YCbCr color
+|| * 2 Bitmap planes can be used, with 2,4,16 or 256 colors chosen from a
+||   pallette of YCbCr colors.
+|| * A hardware bitmap cursor may be used (16color)
+|| * A hardware box cursor may be used
+|| * The background/border color can be set
+|| * There is a ROM pallette, but also a user configurable RAM pallette
+|| * All components can be moved around, resized, and some can be scaled
+++------------------------------------------------------------------------------
+
+30680   OSD Main config and border color
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+        |     | | |   | | | | | | | | |
+        |     | | |   | +-+-+-+-+-+-+-+- Border color
+        |     | | |   +----------------- 1 = use RAM pallette for border
+        |     | | +--------------------- 1 = Scale video X unknown ratio
+        |     | +----------------------- 1 = Scale video Y unknown ratio
+        |     +------------------------- 1 = Scale video better quality
+        +------------------------------- 1 = Swap red and blue output
+
+30682   Video0 and video1 config
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+            | | | | | |     | | | | | |
+            | | | | | |     | | | | | +- 1 = V0 enable
+            | | | | | |     | | | | +--- 1 = V0 halfheight
+            | | | | | |     | | +-+----- 00 V0 Zoom y normal
+            | | | | | |     | |          01 V0 Zoom y x2
+            | | | | | |     | |          10 V0 Zoom y x4
+            | | | | | |     +-+--------- 00 V0 Zoom x normal
+            | | | | | |                  01 V0 Zoom x x2
+            | | | | | |                  10 V0 Zoom x x4
+            | | | | | +----------------- 1 = V1 enable
+            | | | | +------------------- 1 = V1 halfheight
+            | | +-+--------------------- 00 V1 Zoom y normal
+            | |                          01 V1 Zoom y x2
+            | |                          10 V1 Zoom y x4
+            +-+------------------------- 00 V1 Zoom x normal
+                                         01 V1 Zoom x x2
+                                         10 V1 Zoom x x4
+30684   Bitmap0 config
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+              | | | | | | | | | | | | |
+              | | | | | | | | | | | | +- 1 = B0 enable
+              | | | | | | | | | | | +--- 1 = B0 halfheight
+              | | | | | | | | | | +----- 0 = Merge with video planes
+              | | | | | | | | | |        1 = color0=transparent
+              | | | | | | | +-+-+------- Transparency value
+              | | | | | +-+------------- 00 = 2 color map
+              | | | | |                  01 = 4 color map
+              | | | | |                  10 = 16 color map
+              | | | | |                  11 = 256 color map
+              | | | +-+----------------- 00 Zoom y normal
+              | | |                      01 Zoom y x2
+              | | |                      10 Zoom y x4
+              | +-+--------------------- 00 Zoom x normal
+              |                          01 Zoom x x2
+              |                          10 Zoom x x4
+              +------------------------- 1 = use RAM pallette instead of rom
+
+30686   Bitmap1 config
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+              | | | | | | | | | | | | |
+              | | | | | | | | | | | | +- 1 = B1 enable
+              | | | | | | | | | | | +--- 1 = B1 halfheight
+              | | | | | | | | | | +----- 0 = Merge with video planes
+              | | | | | | | | | |        1 = color0=transparent
+              | | | | | | | +-+-+------- Transparency value
+              | | | | | +-+------------- 00 = 2 color map
+              | | | | |                  01 = 4 color map
+              | | | | |                  10 = 16 color map
+              | | | | |                  11 = 256 color map
+              | | | +-+----------------- 00 Zoom y normal
+              | | |                      01 Zoom y x2
+              | | |                      10 Zoom y x4
+              | +-+--------------------- 00 Zoom x normal
+              |                          01 Zoom x x2
+              |                          10 Zoom x x4
+              +------------------------- 1 = use RAM pallette instead of rom
+
+30688   Cursor0 config
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+        | | | | | | | |   | | | | | | |
+        | | | | | | | |   | | | | | | +- 1 = Cursor0 enable
+        | | | | | | | |   | | | +-+-+--- height
+        | | | | | | | |   +-+-+--------- width
+        +-+-+-+-+-+-+-+----------------- color
+
+3068a   Cursor1 config
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+          | | | | | | |   | | | | | | +- 1 = Cursor1 enable
+          | | | | | | |   | | | | | +--- 1 = Cursor1 halfheight
+          | | | | | | |   | | | | +----- 1 = use RAM pallette
+          | | | | | | |   | | | +------- 0 = 16color bank 0
+          | | | | | | |   | | |          1 = 16color bank 1
+          | | | | | | |   +-+-+--------- Transparency value
+          | | | | | +-+----------------- 00 Zoom y normal
+          | | | | |                      01 Zoom y x2
+          | | | | |                      10 Zoom y x4
+          | | | +-+--------------------- 00 Zoom x normal
+          | | |                          01 Zoom x x2
+          | | |                          10 Zoom x x4
+          | +-+------------------------- Flash speed
+          +----------------------------- 1 = Flash enable
+
+3068c   Video0 buffer width
+3068e   Video1 buffer width
+30690   Bitmap0 buffer width
+30692   Bitmap1 buffer width
+
+30694   SDRAM offset HI Video0 | Video1
+30696   SDRAM offset video0
+30698   SDRAM offset video1
+3069a   SDRAM offset HI Bitmap0 | Bitmap1
+3069c   SDRAM offset Bitmap0
+3069e   SDRAM offset Bitmap1
+
+306a0   Main shift horizontal
+306a2   Main shift vertical
+
+306a4   Video0 X
+306a6   Video0 Y
+306a8   Video0 width
+306aa   Video0 height
+
+306ac   Video1 X
+306ae   Video1 Y
+306b0   Video1 width
+306b2   Video1 height
+
+306b4   Bitmap0 X
+306b6   Bitmap0 Y
+306b8   Bitmap0 width
+306ba   Bitmap0 height
+
+306bc   Bitmap1 X
+306be   Bitmap1 Y
+306c0   Bitmap1 width
+306c2   Bitmap1 height
+
+306c4   Cursor0 X
+306c6   Cursor0 Y
+306c8   Cursor0 width
+306ca   Cursor0 height
+
+306cc   Cursor1 X
+306ce   Cursor1 Y
+
+306d0   16c bank1 pallette #0 | #1
+306d2   16c bank1 pallette #2 | #3
+306d4   16c bank1 pallette #4 | #5
+306d6   16c bank1 pallette #6 | #7
+306d8   16c bank1 pallette #8 | #9
+306da   16c bank1 pallette #a | #b
+306dc   16c bank1 pallette #c | #d
+306de   16c bank1 pallette #e | #f
+306e0   16c bank2 pallette #0 | #1
+306e2   16c bank2 pallette #2 | #3
+306e4   16c bank2 pallette #4 | #5
+306e6   16c bank2 pallette #6 | #7
+306e8   16c bank2 pallette #8 | #9
+306ea   16c bank2 pallette #a | #b
+306ec   16c bank2 pallette #c | #d
+306ee   16c bank2 pallette #e | #f
+
+306f0   ? Unknown
+306f2   Cursor2 data
+306f4   Pallette access status | cursor2 address/latch
+306f6   Pallette data write
+306f8   Pallette index write
+306fc   Alternative video sdram offset LO
+306fe   Alternative video sdram offset HI
+
+  ++----------------------------------------------------------------------------
+ // 
+++------------------------------------------------------------------------------
+30700   0-3
+30702   0-ffff
+30704   0-fff
+30706   0-fff
+30708   0-ffff
+3070a   0-ffff
+3070c   0-fff
+3070e   0-fff
+30710   0-fff
+30712   0-fff
+30714   0-fff
+30716   0-ffff
+30718   0-ff
+3071a   0-7ff
+3071c   0-3f    sdram hi?
+3071e   0-ffff  sdram lo?
+30720   0-7fff
+30722   0-fff
+30724   0-ffff
+30726   0-ffff
+30728   0-ffff
+3072a   0-1fff
+3072c   0-7ff
+3072e   0-3ff
+30730   0-fff
+30732   0-fff
+30734   0-1
+30736   0-83ff
+30738   0-33
+3073a   0-3
+
+  ++----------------------------------------------------------------------------
+ // 
+++------------------------------------------------------------------------------
+30780   0-1
+30782   0-1f
+
+30784   0-3f        // SDRAM HI?
+30786   0-ffff      // LO
+
+30788   0-3f        // SDRAM HI?        // Either video in, or DSP stuff
+3078a   0-ffff      // LO
+
+3078c   0-fff
+3078e   0-fff
+30790   0-fff
+30792   0-fff
+30794   0-f7ff
+30796   0-13
+30798   0-3ff
+3079a   0-ffff
+3079c   0-ffff
+3079e   0-ffff
+307a0   0-ffff
+307a2   0-ffff
+307a4   0-ffff
+307a6   0-3ff
+307a8   0-3ff
+307aa   0-7ff
+307ac   0-7ff
+307ae   0-7ff
+307b0   0-7ff
+307b2   0-7ff
+307b4   0-7ff
+307b6   0-7ff
+307b8   0-7ff
+307ba   0-8003
+307bc   0-3ff
+307be   0-3ff
+307c0   0-ffff
+307c2   0-ff00
+307c4   0-ffff
+307c6   0-ffff
+307c8   0-ffff
+307ca   0-ffff
+307cc   0-ff00
+307ce   0-3ff
+307d0   0-3ff
+307d2   0-3ff
+307d4   0-f
+307d6   0-ffff
+307d8   0-ffff
+307da   0-ffff
+307dc   0-ffff
+307de   0-ff00
+307e0   0-3ff
+307e2   0-ffff
+307e4   0-ffff
+307e6   0-1
+307e8   0-ffff
+307ea   0-ffff
+307ec   0-ffff
+
+  ++----------------------------------------------------------------------------
+ // Video 
+++------------------------------------------------------------------------------
+30800   Video mode config
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+        | |                  
+        | +----------------------------- 1 = Noninterlaced
+        +------------------------------- 1 = PAL, 0 = NTSC
+
+30802   0-ffff Seems to change brightness a tiny bit?
+30804   Bit 15 - LCD enable
+        0000 - flickery, odd colors
+        0100 - fine
+        0200 - flickery, odd colors
+        0300 - fine
+        0400 - odd colors/output format
+        0500 - fine
+        0600 - odd colors/output format
+
+30806   40 - changes colors, and makes it a bit flickery
+        Changes width again (0x4c0f)
+        1/3/5/7/9/b/d/f - normal
+        4 - width8
+        6 - width8.5
+        8 - width9
+        a - width9.5
+        c - width10
+        e - width10.2
+        10 - width10.3
+        11 - width9
+        12 - width8.9
+        13 - width8.1
+30808   Changes width etc (0xaaaa)
+3080a   0-ffff
+3080c   0-ffff
+3080e   0-ffff
+30810   0-3ff
+30812   0-3ff
+30814   0-3ff
+30816   0-3ff
+30818   0-ffff
+3081a   0-fff
+3081c   Horizontal start output (0x85)
+3081e   Total width of output (0x280)
+30820   0-fff
+30822   Vertical start output (0x13)
+30824   Total height of output (0xf0)
+30826   0-fff
+30828   0-fff
+3082a   0-ffff
+3082c   0-ffff
+3082e   0-ffff
+30830   Low 8 bits = brightness, High 8 bits = contrast
+30832   0-ff
+30834   0-ff
+30836   0-ff
+30838   Bit0 messes with output
+3083a   0-7
+
+  ++----------------------------------------------------------------------------
+ // Clock control/distribution 
+++------------------------------------------------------------------------------
+30880   Controls ??? clock frequency
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+        |             | | | | | | | | |
+        |             | | | | | | | +-+- Value of N
+        |             | | | | | +-+----- Reserved?
+        |             +-+-+-+-+--------- Value of M
+        +------------------------------- Read: Lock monitor
+
+30882   Controls DSP clock frequency
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+        |             | | | | | | | | |
+        |             | | | | | | | +-+- Value of N
+        |             | | | | | +-+----- Reserved?
+        |             +-+-+-+-+--------- Value of M
+        +------------------------------- Read: Lock monitor
+        
+        8072 = Standard         n=2     m=7     m/n = 3.5  
+        80b3 = Overclock        n=3     m=b     m/n = 3.66666
+        8041 = Red overclock    n=1     m=4     m/n = 4.0
+
+30884   Controls ??? clock frequency
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+        |             | | | | | | | | |
+        |             | | | | | | | +-+- Value of N
+        |             | | | | | +-+----- Reserved?
+        |             +-+-+-+-+--------- Value of M
+        +------------------------------- Read: Lock monitor
+
+30886   default 1 (mask 001f)?
+        3 - Does funny things to video output.
+        5 - Powers down
+30888   1 - messes up UART
+        2 - messes up UART and powers down
+      100 - Powers down
+      200 - Powers down
+      ffff - Makes screen funny! OSD clock?
+
+3088a
+3088c
+3088e   0-7
+30890
+TODO
+      
+  ++----------------------------------------------------------------------------
+ // ECR - Endianness conversion register
+|| This is a hardware endianness conversion. With it, we can perform either a
+|| byte swapping operation, or a bit swapping operating extremely quickly.
+++------------------------------------------------------------------------------
+30900   ECR input value
+30902   ECR output with bytes swapped
+30904   ECR output with bits swapped
+
+  ++----------------------------------------------------------------------------
+ // DSC25 Device revision
+++------------------------------------------------------------------------------
+30906   bits0-7 = Device revision number.
+        0x10 = Silicon version 1.0
+        0x20 = Silicon version 2.0 etc
+
+  ++----------------------------------------------------------------------------
+ // 
+++------------------------------------------------------------------------------
+30920   hangs?
+30922
+30940
+TODO
+
+  ++----------------------------------------------------------------------------
+ // 
+++------------------------------------------------------------------------------
+30980   0-1
+30982   0-ffff
+30984   0-ffff
+30986   0-ffff
+30988   0-ffff
+3098a   0-ffff
+3098c   0-ffff
+3098e   0-ffff
+30990   0-ffff
+30992   0-ffff
+30994   0-ffff
+30996   0-ffff
+30998   0-ffff
+3099a   0-ffff
+3099c   0-ffff
+3099e   0-ffff
+309a0   0-13f
+309a2   0-ffff
+
+309a6               - 1901 - Normal screen
+                    - 1101 - Some strange interleave on screen and hangs!
+                             Seems to jump to odd code. IRQ?
+                    - 0901 - Nothing on screen!
+309a8   0-11ff      - blanked screen!!! right-corrupt screen then off
+309aa   0-1ff
+
+309ac           (80)
+309ae           (40)
+309b0           (20)
+309b2           (10)
+309b4   0-1ff   (8)
+309b6   0-1ff   (4)
+309b8   0-1ff   (2)
+309ba   0-1ff   (1)
+309bc   0-1
+
+  ++----------------------------------------------------------------------------
+ // 
+++------------------------------------------------------------------------------
+30a00
+30a02
+30a04
+30a06
+30a08
+30a0a
+30a0c
+30a0e
+30a10
+30a12
+30a14
+30a16   0-33
+30a18
+30a1a   oscilates from 0-1?
+30a1c   0-11
+30a1e
+30a20   0-3f
+30a24   General purpose input
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+                          | |       |
+                          | |       +--- 1 = HDD has powered up ok
+                          | +----------- 1 = Power adapter connected
+                          +------------- 1 = USB lead connected
+
+30a26   0-3
+30a28
+30a2a
+30a2c
+30a2e
+
+30a32   0-1
+30a34   0-77
+30a36   0-?
+
+  ++----------------------------------------------------------------------------
+ // DMA - Direct memory access
+|| The DMA system means that we can transfer things to and from memory without
+|| involving the CPU at all. That leaves it free to do other things.
+|| There are 2 DMA devices we can use.
+|| 1. SDRAM
+|| 2. ATA
+|| That means we can send data, or recieve data from the hard disk using DMA,
+|| but aditionally by setting both the source and destination devices to SDRAM,
+|| we can move things around in SDRAM extremely quickly.
+++------------------------------------------------------------------------------
+30a38   DMA source address HI
+30a3a   DMA source address LO
+30a3c   DMA destination address HI
+30a3e   DMA destination address LO
+30a40   DMA data size (In 32bit words)
+30a42   DMA device select. Low nibble = destination, High nibble = source.
+        5=SDRAM, 1=ATA
+30a44   DMA start. Bit 0 - Write: Start DMA xfer. Read: Is DMA running/finished?
+        0x100 = endian_2301
+        0x200 = endian_0123
+30a46   0-7f
+30a48   0-ffff
+
+  ++----------------------------------------------------------------------------
+ // 
+++------------------------------------------------------------------------------
+30a80   0-7ff   Changes 30a92,30ab6,30ab8
+30a82   0-1ff   100 makes 30ab2 cycle?  xx=limit of cycle
+30a84
+30a86
+30a88   0-fff
+30a8a   0-ff
+30a8c   0-ffff
+30a8e   0-fff
+30a90   0-ffff
+30a94   0-ffff
+30a96   0-ffff
+30a98   0-ffff
+30a9a   0-ffff
+30a9c   0-ffff
+30a9e   0-ffff
+30aa0   0-ffff
+30aa2   0-ffff
+30aa4   0-ffff
+30aa6   0-ffff
+30aa8   0-ffff
+30aaa   0-ffff
+30aac   0-ffff
+30aae   0-ff
+30ab0   0-ff
+30ab2   0-ff
+30ab4   Some count value (see 30a82)    Watchdog timer or something?
+30ab6   0-ff
+30ab8   0-?
+30aba   0-fff
+30abc   ?  // Clears 30abe sometimes if written to?
+30abe   0-7fff
+30ac0   0-ffff
+30ac2   0-7ff
+
+30ac8   0-ffff   Sets value of X?
+
+30aca   All these seem to return X?
+30acc
+30ace
+30ad0
+30ad2
+30ad4
+30ad6
+30ad8
+
+30ada
+30adc
+30ade
+30ae0
+30ae2
+30ae4
+30ae6
+30ae8
+
+30aea
+30aec
+30aee
+30af0
+30af2
+30af4
+30af6
+30af8
+
+30afa
+30afc
+30afe
+
+  ++----------------------------------------------------------------------------
+ // 
+++------------------------------------------------------------------------------
+30b00   0-ffff
+30b02   0-1 (Changes 30b00)
+30b04   ? (Seemed to change when 30b00 was set)
+
+30b08   0-7f
+
+30b10   0-ff?
+30b14   ?
+30b18   0-3
+
+30b20   ?
+30b24   Writes here seemed to change 30b2c
+30b28   0-ff
+
+  ++----------------------------------------------------------------------------
+ // ATA - Hard disk/CF memory card reader access
+|| This is used to communicate with the ATA system. This is done via the CPLD
+|| chip.
+++------------------------------------------------------------------------------
+02400000    ATA data
+02400080    ATA error
+02400100    ATA NSector
+02400180    ATA Sector
+02400200    ATA LCyl
+02400280    ATA HCyl
+02400300    ATA Select
+02400340    ATA Status
+02400380    ATA Command
+
+  ++----------------------------------------------------------------------------
+ // CPLD
+|| The CPLD chip is a programmable custom chip which controls non standard
+|| hardware. It's main purpose is to interface with the various add on modules,
+|| and to interface with the ATA chip.
+++------------------------------------------------------------------------------
+02600000    CPLD mode
+            0 = HDD access
+            1 = Compact flash card access
+            4 = video imput?
+            8 = Smart media reader
+            9 = multimedia card reader
+  Read  f e d c b a 9 8 7 6 5 4 3 2 1 0
+                                +-----+- CPLD ID Code 0x0f = none
+                                                      0x0c = CFC ALT
+                                                      0x0b = camera
+                                                      0x0a = video (dvr)
+                                                      0x08 = CFC
+                                                      0x07 = SSFDC ALT
+                                                      0x05 = MMC ALT
+                                                      0x03 = SSFDC
+                                                      0x01 = MMC
+
+02600100    Misc cpld stuff
+        f e d c b a 9 8 7 6 5 4 3 2 1 0
+                                    | |
+                                    | +- Enable USB host
+                                    +--- ? 52017 | 52027 {76ce}
+
+02600200    Misc cpld stuff
+  Write f e d c b a 9 8 7 6 5 4 3 2 1 0
+                                  | | |
+                                  | | +- IDE Reset? 52047 | 52037
+                                  | +--- ? 52067 | 52057
+                                  +----- 1 = Enable backlight stuff
+  Read  f e d c b a 9 8 7 6 5 4 3 2 1 0
+                                +-----+- CPLD version LOW
+
+02600300    Misc cpld stuff
+  Write f e d c b a 9 8 7 6 5 4 3 2 1 0
+                                | | | |
+                                | | | +- ? 51f15 | 51f05    // See 5779
+                                | | +--- ? 51fb5 | 51fa5
+                                | +----- ? 52007 | 51ff7
+                                +------- 1 = Power up HDD
+  Read  f e d c b a 9 8 7 6 5 4 3 2 1 0
+                                | +---+- CPLD version HIGH
+                                +------- Firewire connected?
+
+  ++----------------------------------------------------------------------------
+ // Buttons
+|| This is again done via the CPLD chip. 
+++------------------------------------------------------------------------------
+02600680    Buttons
+                        7 6 5 4 3 2 1 0
+                                    | |
+                                    | +- 0 = up
+                                    +--- 0 = left
+
+02600700    Buttons
+                        7 6 5 4 3 2 1 0
+                                  | | |
+                                  | | +- 0 = right
+                                  | +--- 0 = down
+                                  +----- 0 = menu3 pressed
+
+02600780    Buttons
+                        7 6 5 4 3 2 1 0
+                                  | | |
+                                  | | +- 0 = menu1 pressed
+                                  | +--- 0 = menu2 pressed
+                                  +----- 0 = joystick pressed / fast direction
+

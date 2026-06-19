@@ -1,0 +1,12 @@
+README                                                                   DoGgEr
+======
+
+make libavos
+This will create a libavos that you can use from c. Of course all the libs have
+individual .h files, so you can easily use them one by one if you want.
+
+make examples
+This will make any .c files in the src/examples directory.
+
+make boot
+Makes the bootloader
